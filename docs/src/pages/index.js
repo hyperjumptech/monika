@@ -169,7 +169,7 @@ const Home = ({ sponsors }) => {
                 className="p-4 border-gray-400 border-2 rounded"
                 title="Copy Command to Clipboard"
               >
-                <span>npm i -g monika</span>
+                <span>npm i -g @hyperjumptech/monika</span>
               </code>
             </div>
           </div>
