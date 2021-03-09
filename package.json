@@ -1,0 +1,90 @@
+{
+  "name": "@hyperjumptech/monika",
+  "description": "Synthetic monitoring made easy",
+  "version": "0.0.0",
+  "license": "UNLICENSED",
+  "author": "@hyperjumptech",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "bin": {
+    "monika": "./bin/run"
+  },
+  "oclif": {
+    "bin": "monika"
+  },
+  "keywords": [
+    "monika",
+    "cli",
+    "monitoring"
+  ],
+  "scripts": {
+    "pretest": "npm run check-format",
+    "posttest": "eslint . --ext .ts --config .eslintrc",
+    "prepack": "rm -rf lib && tsc -b && oclif-dev readme",
+    "test": "nyc --extension .ts mocha --forbid-only \"test/**/*.test.ts\"",
+    "version": "oclif-dev readme && git add README.md",
+    "format": "prettier --write .",
+    "check-format": "prettier --check ."
+  },
+  "dependencies": {
+    "@oclif/command": "^1.8.0",
+    "@oclif/config": "^1.17.0",
+    "@oclif/plugin-help": "^3.2.2",
+    "@sendgrid/mail": "^7.4.2",
+    "@types/chai-spies": "^1.0.3",
+    "axios": "^0.21.1",
+    "mailgun-js": "^0.22.0",
+    "nodemailer": "^6.5.0",
+    "smtp-server": "^3.8.0",
+    "tslib": "^1.14.1"
+  },
+  "devDependencies": {
+    "@oclif/dev-cli": "^1.26.0",
+    "@oclif/test": "^1.2.8",
+    "@types/chai": "^4.2.15",
+    "@types/mailgun-js": "^0.22.11",
+    "@types/mocha": "^5.2.7",
+    "@types/node": "^10.17.54",
+    "@types/nodemailer": "^6.4.0",
+    "@types/smtp-server": "^3.5.6",
+    "chai": "^4.3.0",
+    "chai-spies": "^1.0.0",
+    "eslint": "^5.16.0",
+    "eslint-config-oclif": "^3.1.0",
+    "eslint-config-oclif-typescript": "^0.1.0",
+    "eslint-config-prettier": "^8.1.0",
+    "husky": "^4.3.8",
+    "lint-staged": "^10.5.4",
+    "mocha": "^5.2.0",
+    "nodemailer-mock": "^1.5.4",
+    "nyc": "^14.1.1",
+    "prettier": "2.2.1",
+    "ts-node": "^8.10.2",
+    "typescript": "^3.9.9"
+  },
+  "prettier": {
+    "trailingComma": "es5",
+    "tabWidth": 2,
+    "semi": false,
+    "singleQuote": true
+  },
+  "engines": {
+    "node": ">=8.0.0"
+  },
+  "files": [
+    "/bin",
+    "/lib"
+  ],
+  "homepage": "https://github.com/https://github.com/hyperjumptech/monika",
+  "bugs": "https://github.com/https://github.com/hyperjumptech/monika/issues",
+  "repository": "https://github.com/hyperjumptech/monika",
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.js": "eslint --cache --fix",
+    "*.{js,css,md}": "prettier --write"
+  }
+}

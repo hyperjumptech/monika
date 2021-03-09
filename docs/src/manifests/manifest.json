@@ -1,0 +1,46 @@
+{
+  "routes": [
+    {
+      "title": "Getting Started",
+      "heading": true,
+      "routes": [
+        {
+          "title": "Overview",
+          "path": "/overview",
+          "editUrl": "/overview.md"
+        },
+        {
+          "title": "Installation",
+          "path": "/installation",
+          "editUrl": "/installation.md"
+        },
+        {
+          "title": "Quick Start",
+          "path": "/quick-start",
+          "editUrl": "/quick-start.md"
+        }
+      ]
+    },
+    {
+      "title": "Guides",
+      "heading": true,
+      "routes": [
+        {
+          "title": "Probes",
+          "path": "/guides/probes",
+          "editUrl": "/guides/probes.md"
+        },
+        {
+          "title": "Notifications",
+          "path": "/guides/notifications",
+          "editUrl": "/guides/notifications.md"
+        },
+        {
+          "title": "Alerts",
+          "path": "/guides/alerts",
+          "editUrl": "/guides/alerts.md"
+        }
+      ]
+    }
+  ]
+}

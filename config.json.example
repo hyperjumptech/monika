@@ -1,0 +1,63 @@
+{
+  "interval": 0,
+  "notifications": [
+    {
+      "id": "unique-id",
+      "type": "mailgun",
+      "data": {
+        "recipients": ["mantap@jiwa.com"],
+        "apiKey": "YOUR_API_KEY",
+        "domain": "YOUR_DOMAIN"
+      }
+    },
+    {
+      "id": "unique-id",
+      "type": "sendgrid",
+      "data": {
+        "recipients": ["mantap@jiwa.com"],
+        "apiKey": "YOUR_API_KEY"
+      }
+    },
+    {
+      "id": "unique-id",
+      "type": "smtp",
+      "recipients": ["a@a.com"],
+      "data": {
+        "recipients": ["mantap@jiwa.com"],
+        "hostname": "https://www.dennypradipta.com",
+        "port": 8080,
+        "username": "dennypradipta",
+        "password": "bismillah"
+      }
+    },
+    {
+      "id": "unique-id-webhook",
+      "type": "webhook",
+      "data": {
+        "recipients": ["mantap@jiwa.com"],
+        "method": "POST",
+        "url": "https://examplewebhookurl.com/webhook"
+      }
+    }
+  ],
+  "probes": [
+    {
+      "id": "1",
+      "name": "Example",
+      "description": "Probe",
+      "request": {
+        "method": "POST",
+        "url": "https://something/login",
+        "timeout": 7000,
+        "headers": {
+          "Authorization": ""
+        },
+        "body": {
+          "username": "someusername",
+          "password": "somepassword"
+        }
+      },
+      "alerts": ["status-not-2xx", "response-time-greater-than-200-ms"]
+    }
+  ]
+}

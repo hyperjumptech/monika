@@ -1,0 +1,22 @@
+{
+  "interval": 0,
+  "probes": [
+    {
+      "id": "1",
+      "name": "something",
+      "description": "some description",
+      "request": {
+        "method": "POST",
+        "url": "https://something/login",
+        "headers": {
+          "Authorization": ""
+        },
+        "body": {
+          "username": "someusername",
+          "password": "somepassword"
+        }
+      },
+      "alerts": ["status-not-2xx", "response-time-greater-than-200-ms"]
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+    "extends": ["oclif", "oclif-typescript", "prettier"],
+    "rules": {
+        "no-warning-comments": "off",
+    },
+    "overrides": [
+        {
+            "files": ["docs/**/*.js"],
+            "rules": {
+                "unicorn/filename-case": "off"
+            }
+        }
+    ]
+}

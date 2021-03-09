@@ -1,0 +1,32 @@
+{
+  "interval": 0,
+  "notifications": [
+    {
+      "id": "unique-id",
+      "type": "sendgrid",
+      "data": {
+        "recipients": ["a@a.com"],
+        "apiKey": "adfsafdsadfdsafsafds"
+      }
+    }
+  ],
+  "probes": [
+    {
+      "id": "1",
+      "name": "Example",
+      "description": "Probe",
+      "request": {
+        "method": "POST",
+        "url": "https://something/login",
+        "headers": {
+          "Authorization": ""
+        },
+        "body": {
+          "username": "someusername",
+          "password": "somepassword"
+        }
+      },
+      "alerts": ["status-not-2xx", "response-time-greater-than-200-ms"]
+    }
+  ]
+}

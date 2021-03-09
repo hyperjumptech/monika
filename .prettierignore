@@ -1,0 +1,10 @@
+build
+coverage
+.nyc_output
+package-lock.json
+.eslintrc 
+.github
+docs/out
+docs/.next
+docs/.cache
+docs/node_modules

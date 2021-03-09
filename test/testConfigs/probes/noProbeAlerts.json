@@ -1,0 +1,30 @@
+{
+  "notifications": [
+    {
+      "id": "unique-id",
+      "type": "webhook",
+      "data": {
+        "url": "http://www.dennypradipta.com",
+        "method": "GET"
+      }
+    }
+  ],
+  "probes": [
+    {
+      "id": "1",
+      "name": "Example",
+      "description": "Probe",
+      "request": {
+        "method": "POST",
+        "url": "https://something/login",
+        "headers": {
+          "Authorization": ""
+        },
+        "body": {
+          "username": "someusername",
+          "password": "somepassword"
+        }
+      }
+    }
+  ]
+}
