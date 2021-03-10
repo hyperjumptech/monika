@@ -63,9 +63,9 @@ Alerts are the condition which will trigger an alert, and the subsequent notific
 
 ## Execution order
 
-In a configuration with multiple probes, `Monika` will perform the requests in the order that they are written down.
+In a configuration with multiple probes, `Monika` will perform the requests in sequence in the order that they are written down, one after another. 
 
-On completion, `Monika` will sleep until the next interval to repeat the sequence again.
+On completion, `Monika` will sleep until the next interval to start again. At the top of the `config.json` file there is an `interval` setting. The execution will be restarted after every `interval`. If interval is shorter than the amount of time to dispatch all the request, then then monika will immediately repeat after the last probe response and notification alerts sent.
 
 ## Further reading
 

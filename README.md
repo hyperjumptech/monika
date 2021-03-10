@@ -10,7 +10,7 @@ Just install from the npm package manager
 npm i -g @hyperjumptech/monika
 ```
 
-You can also use `Monika` from source. TJust clone the repository, pull dependencies.
+You can also use `Monika` from source. Just clone the repository, pull dependencies.
 
 ```bash
 git clone git@github.com:hyperjumptech/monika.git
