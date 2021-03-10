@@ -37,7 +37,7 @@ export const Footer = (props) => {
                 <ul className="mt-4">
                   <li className="mt-4">
                     <a
-                      href="http://stackoverflow.com/questions/tagged/react-query"
+                      href="https://github.com/hyperjumptech/monika/discussions"
                       className="text-base leading-6 text-gray-500 hover:text-gray-900"
                     >
                       Discussions
@@ -45,7 +45,7 @@ export const Footer = (props) => {
                   </li>
                   <li className="mt-4">
                     <a
-                      href="https://github.com/hyperjumptech/http-probe/releases"
+                      href="https://github.com/hyperjumptech/monika/releases"
                       className="text-base leading-6 text-gray-500 hover:text-gray-900"
                     >
                       Releases
@@ -54,12 +54,12 @@ export const Footer = (props) => {
                   <li className="mt-4">
                     <a
                       className="github-button"
-                      href="https://github.com/hyperjumptech/http-probe"
+                      href="https://github.com/hyperjumptech/monika"
                       data-color-scheme="no-preference: light; light: light; dark: dark;"
                       data-icon="octicon-star"
                       data-size="large"
                       data-show-count="true"
-                      aria-label="Star hyperjumptech/http-probe on GitHub"
+                      aria-label="Star hyperjumptech/monika on GitHub"
                     >
                       Star
                     </a>
@@ -70,13 +70,15 @@ export const Footer = (props) => {
           </div>
           <div className="mt-8 xl:mt-0">
             <h4 className="text-sm leading-5 font-semibold tracking-wider text-gray-400 uppercase">
-              Subscribe to our newsletter
+              Hyperjump Technology
             </h4>
             <p className="mt-4 text-gray-500 text-base leading-6 mb-4">
-              The latest Hyperjump news, articles, and resources, sent to your
-              inbox.
+              Hyperjump is an open-source-first company providing engineering
+              excellence service. We aim to build and commercialize open-source
+              tools to help companies streamline, simplify, and secure the most
+              important aspects of its modern DevOps practices.
             </p>
-            <form
+            {/* <form
               action="https://app.convertkit.com/forms/1513638/subscriptions"
               className=""
               method="post"
@@ -119,20 +121,20 @@ export const Footer = (props) => {
                   Unsubscribe at <em>any</em> time.
                 </p>
               </div>
-            </form>
+            </form> */}
           </div>
         </div>
         <div className="mt-8 border-t border-gray-200 pt-8 md:flex md:items-center md:justify-between">
           <div className="flex md:order-2">
             <a
-              href="https://github.com/tannerlinsley"
+              href="https://medium.com/hyperjump-tech"
               className="ml-6 text-gray-400 hover:text-gray-500 "
             >
               <span className="sr-only">Medium</span>
               <FontAwesomeIcon icon={faMedium} className="w-5 mr-2" />
             </a>
             <a
-              href="https://twitter.com/tannerlinsley"
+              href="https://twitter.com/hyperjump_tech"
               className="ml-6 text-gray-400 hover:text-gray-500"
             >
               <span className="sr-only">Twitter</span>
@@ -141,7 +143,7 @@ export const Footer = (props) => {
               </svg>
             </a>
             <a
-              href="https://github.com/tannerlinsley"
+              href="https://github.com/hyperjumptech/monika"
               className="ml-6 text-gray-400 hover:text-gray-500"
             >
               <span className="sr-only">GitHub</span>
