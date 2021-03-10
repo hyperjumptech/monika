@@ -76,5 +76,9 @@ To start monitoring URLs, you'll need a configuration file (JSON file) like an e
 When you have created the configuration file, you can run monika as follows
 
 ```
+// Automatically loads config file (config.json) in current working directory
+monika
+
+// Loads config file on specific file path
 monika -c <path_to_your_configuration.json>
 ```
