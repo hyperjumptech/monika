@@ -44,8 +44,8 @@
       "name": "Example",
       "description": "Probe",
       "request": {
-        "method": "POST",
-        "url": "https://something/login",
+        "method": "GET",
+        "url": "https://worldtimeapi.org/api/ip",
         "timeout": 7000,
         "headers": {
           "Authorization": ""
