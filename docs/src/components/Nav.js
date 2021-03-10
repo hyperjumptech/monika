@@ -17,9 +17,9 @@ export const Nav = () => (
           </Link>
         </div>
 
-        <div className="flex-grow hidden lg:block ml-8">
+        {/* <div className="flex-grow hidden lg:block ml-8">
           <Search />
-        </div>
+        </div> */}
 
         <div className="flex flex-grow items-center justify-between w-3/4 md:w-auto md:justify-end space-x-4 md:space-x-8 h-16">
           <div className="flex space-x-4 md:space-x-8 text-sm md:text-base">
@@ -28,14 +28,14 @@ export const Nav = () => (
                 <a className="leading-6 font-medium">Docs</a>
               </Link>
             </div>
-            <div>
+            {/* <div>
               <Link href="/examples/simple">
                 <a className="leading-6 font-medium">Examples</a>
               </Link>
-            </div>
+            </div> */}
             <div>
               <a
-                href="https://learn.tanstack.com/p/react-query-essentials"
+                href="https://github.com/hyperjumptech/monika/discussions"
                 target="_blank"
                 className="leading-6 font-medium"
               >

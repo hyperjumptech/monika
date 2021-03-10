@@ -1,12 +1,64 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="2552px" height="498px" viewBox="0 0 2552 498" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <title>Artboard</title>
-    <g id="Artboard" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" fill-opacity="0.668323864" font-weight="normal">
-        <text id="🏃‍♂️" font-family="AppleColorEmoji, Apple Color Emoji" font-size="280" fill="#612424">
-            <tspan x="138" y="341">🏃‍♂️</tspan>
+    <g id="Artboard" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <text id="MONIKA" font-family="SairaStencilOne-Regular, Saira Stencil One" font-size="323" font-weight="normal" fill-opacity="0.668323864">
+            <tspan x="813" y="367" fill="#000000">MONI</tspan>
+            <tspan x="1662.167" y="367" fill="#D40000">KA</tspan>
         </text>
-        <text id="monika" font-family="Menlo-Regular, Menlo" font-size="323" fill="#000000">
-            <tspan x="525" y="361">monika</tspan>
-        </text>
+        <g id="Group-8" transform="translate(447.000000, 104.000000)">
+            <g id="Group-6" transform="translate(47.000000, 94.000000)">
+                <g id="Group">
+                    <g id="server1" transform="translate(40.809013, 0.000000)">
+                        <rect id="Rectangle" fill="#555555" x="0" y="0" width="105.083207" height="30" rx="15"></rect>
+                        <ellipse id="Oval" fill="#FFFFFF" cx="15.8134924" cy="15" rx="5.95131434" ry="6.03448276"></ellipse>
+                        <ellipse id="Oval" fill="#FFFFFF" cx="32.1370974" cy="15" rx="5.95131434" ry="6.03448276"></ellipse>
+                        <rect id="Rectangle" stroke="#979797" fill="#D8D8D8" x="61.3734438" y="9.46551724" width="35.7281114" height="11.0689655" rx="5.53448276"></rect>
+                    </g>
+                    <g id="success1">
+                        <ellipse id="Oval" fill="#009510" cx="14.7932671" cy="15" rx="14.7932671" ry="15"></ellipse>
+                        <g id="Group-2" transform="translate(6.461427, 9.655172)" fill="#FFFFFF" stroke="#FFFFFF" stroke-linecap="round" stroke-width="5">
+                            <line x1="0.170037553" y1="6.03448276" x2="6.97153966" y2="13.6206897" id="Line"></line>
+                            <line x1="6.8015021" y1="0" x2="16.4936426" y2="13.6206897" id="Line" transform="translate(11.732591, 6.896552) scale(-1, 1) translate(-11.732591, -6.896552) "></line>
+                        </g>
+                    </g>
+                </g>
+                <g id="Group-3" transform="translate(0.000000, 35.000000)">
+                    <g id="success2">
+                        <ellipse id="Oval" fill="#009510" cx="14.7932671" cy="15" rx="14.7932671" ry="15"></ellipse>
+                        <g id="Group-2" transform="translate(6.461427, 9.655172)" fill="#FFFFFF" stroke="#FFFFFF" stroke-linecap="round" stroke-width="5">
+                            <line x1="0.170037553" y1="6.03448276" x2="6.97153966" y2="13.6206897" id="Line"></line>
+                            <line x1="6.8015021" y1="0" x2="16.4936426" y2="13.6206897" id="Line" transform="translate(11.732591, 6.896552) scale(-1, 1) translate(-11.732591, -6.896552) "></line>
+                        </g>
+                    </g>
+                    <g id="server2" transform="translate(40.809013, 0.000000)">
+                        <rect id="Rectangle" fill="#555555" x="0" y="0" width="105.083207" height="30" rx="15"></rect>
+                        <ellipse id="Oval" fill="#FFFFFF" cx="15.8134924" cy="15" rx="5.95131434" ry="6.03448276"></ellipse>
+                        <ellipse id="Oval" fill="#FFFFFF" cx="32.1370974" cy="15" rx="5.95131434" ry="6.03448276"></ellipse>
+                        <rect id="Rectangle" stroke="#979797" fill="#D8D8D8" x="61.3734438" y="9.46551724" width="35.7281114" height="11.0689655" rx="5.53448276"></rect>
+                    </g>
+                </g>
+                <g id="Group-5" transform="translate(0.000000, 69.000000)">
+                    <g id="warning">
+                        <ellipse id="Oval" fill="#E35555" cx="14.7932671" cy="15" rx="14.7932671" ry="15"></ellipse>
+                        <g id="Group-4" transform="translate(12.582779, 7.241379)">
+                            <line x1="2.21048818" y1="0.172413793" x2="2.21048818" y2="9.13793103" id="Line-2" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"></line>
+                            <ellipse id="Oval" fill="#FFFFFF" cx="2.04045063" cy="15.862069" rx="2.04045063" ry="2.06896552"></ellipse>
+                        </g>
+                    </g>
+                    <g id="server3" transform="translate(40.809013, 0.000000)">
+                        <rect id="Rectangle" fill="#555555" x="0" y="0" width="105.083207" height="30" rx="15"></rect>
+                        <ellipse id="Oval" fill="#FFFFFF" cx="15.8134924" cy="15" rx="5.95131434" ry="6.03448276"></ellipse>
+                        <ellipse id="Oval" fill="#FFFFFF" cx="32.1370974" cy="15" rx="5.95131434" ry="6.03448276"></ellipse>
+                        <rect id="Rectangle" stroke="#979797" fill="#D8D8D8" x="61.3734438" y="9.46551724" width="35.7281114" height="11.0689655" rx="5.53448276"></rect>
+                    </g>
+                </g>
+            </g>
+            <g id="Group-7">
+                <path d="M99.875341,24.5103135 C43.1511647,34.285373 0,83.6834907 0,143.151567 C0,201.967294 42.2096451,250.932781 98.0135352,261.456866 M139.883629,262 C197.218253,252.736479 241,203.052579 241,143.151567 C241,82.5625925 196.206815,32.4267662 137.902853,24" id="Shape" stroke="#555555" stroke-width="24" stroke-linecap="round"></path>
+                <polygon id="Triangle" fill="#555555" transform="translate(106.700567, 23.635914) rotate(81.000000) translate(-106.700567, -23.635914) " points="106.694047 4.25502419 127.157943 43.0168043 86.2431904 43.0099292"></polygon>
+                <polygon id="Triangle" fill="#555555" transform="translate(131.071289, 262.364482) scale(-1, 1) rotate(98.000000) translate(-131.071289, -262.364482) " points="131.077104 242.983885 151.528779 281.738946 110.613799 281.745078"></polygon>
+            </g>
+        </g>
     </g>
 </svg>
