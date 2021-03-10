@@ -31,8 +31,8 @@ const Home = ({ sponsors }) => {
         <div className="relative bg-white overflow-hidden">
           <div className="py-24 mx-auto container px-4 sm:mt-12  relative">
             <img
-              src={require('images/emblem-light.png')}
-              className="absolute transform right-0 top-1/2 h-0 lg:h-full scale-150 translate-x-10 xl:translate-x-1/5 -translate-y-1/2 z-0"
+              src={require('images/emblem-light.svg')}
+              className="absolute transform right-0 top-1/2 h-0 lg:h-full scale-150 translate-x-1/2 xl:translate-x-1/5 -translate-y-1/2"
               alt="HTTPProbe Emblem"
             />
             <div className="grid grid-cols-12 lg:gap-8">
@@ -83,8 +83,8 @@ const Home = ({ sponsors }) => {
                       Multiple Paths or URLs
                     </h3>
                     <p className="mt-2 lg:mt-4 text-base xl:text-lg lg:leading-normal leading-6 text-gray-600">
-                      Don't just check if your domain is up. With http-probe,
-                      you can monitor every paths of your web app.
+                      Don't just check if your domain is up. With monika, you
+                      can monitor every paths of your web app.
                     </p>
                   </div>
                 </div>
@@ -94,9 +94,8 @@ const Home = ({ sponsors }) => {
                       Status Code & Response Time
                     </h3>
                     <p className="mt-2  lg:mt-4 text-base xl:text-lg lg:leading-normal leading-6 text-gray-600">
-                      Using http-probe, you can be alerted not only when your
-                      web app is down, but also when it takes too long to
-                      respond.
+                      Using monika, you can be alerted not only when your web
+                      app is down, but also when it takes too long to respond.
                     </p>
                   </div>
                 </div>
@@ -107,9 +106,9 @@ const Home = ({ sponsors }) => {
                     </h3>
                     <p className="mt-2  lg:mt-4 text-base xl:text-lg lg:leading-normal leading-6 text-gray-600">
                       Get notified of the incidents through your favourite tools
-                      including by e-mail via SMTP or mailgun, or through web
-                      hook. More notification channels are coming including
-                      Slack and Microsoft Teams!
+                      including by e-mail via SMTP, mailgun, and sendgrid, or
+                      through web hook. More notification channels are coming
+                      including Slack and Microsoft Teams!
                     </p>
                   </div>
                 </div>
@@ -117,7 +116,7 @@ const Home = ({ sponsors }) => {
             </div>
           </div>
         </div>
-        <div className="bg-gray-900 text-white">
+        {/* <div className="bg-gray-900 text-white">
           <div className="py-32">
             <div className="mx-auto container text-center">
               <div className="text-xl">COMING SOON</div>
@@ -153,12 +152,12 @@ const Home = ({ sponsors }) => {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
 
         <div className="bg-gray-100 relative py-24 border-t border-gray-200 ">
           <div className="px-4 sm:px-6 lg:px-8  mx-auto container max-w-3xl sm:text-center">
             <h3 className="text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl sm:leading-10 lg:leading-none mt-2">
-              Know your downtime <em>before</em> <br />
+              Know when your web app is down <em>before</em> <br />
               your users do
             </h3>
             <p className="my-8 text-xl leading-7  text-gray-600">
@@ -170,7 +169,7 @@ const Home = ({ sponsors }) => {
                 className="p-4 border-gray-400 border-2 rounded"
                 title="Copy Command to Clipboard"
               >
-                <span>npm i -g http-probe</span>
+                <span>npm i -g @hyperjumptech/monika</span>
               </code>
             </div>
           </div>
@@ -233,7 +232,7 @@ const Home = ({ sponsors }) => {
               Have feature ideas? Found bugs?
             </h3>
             <a
-              href="https://discord.gg/WrRKjPJ"
+              href="https://github.com/hyperjumptech/monika/discussions"
               target="_blank"
               className="inline-block bg-gray-800 p-5 text-2xl mx-auto leading-tight font-extrabold tracking-tight text-white mt-12 rounded-full"
             >
