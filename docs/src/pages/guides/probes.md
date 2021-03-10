@@ -21,7 +21,7 @@ Probes are the heart of the monitoring requests. Probes are just arrays of reque
   ]
 ```
 
-Monica goes through each probe object, sends it out, and determines whether an alert or notification need to be sent out.
+Monika goes through each probe object, sends it out, and determines whether an alert or notification need to be sent out.
 
 ## Request Anatomy
 
