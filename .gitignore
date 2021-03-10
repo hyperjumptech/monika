@@ -219,3 +219,7 @@ $RECYCLE.BIN/
 /yarn.lock
 config.json
 docs/out
+
+#ignore personal configs
+config.json
+
