@@ -5,7 +5,7 @@ title: Quick Start
 
 To start monitoring URLs, you'll need a configuration file (JSON file) like an example below
 
-> The configuration file contains the [probes](/guides/probes), [alerts](/guides/alerts), and [notification](/guides/notifications) configurations.
+> The configuration file contains the [probes](/monika/guides/probes), [alerts](/monika/guides/alerts), and [notification](/monika/guides/notifications) configurations.
 
 ```
 // config.json
