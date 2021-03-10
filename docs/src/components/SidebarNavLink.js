@@ -18,7 +18,10 @@ export function SidebarNavLink({
       {
         // NOTE: use just anchor element for triggering `hashchange` event
         onlyHashChange ? (
-          <a className={selected ? 'selected' : ''} href={pathname}>
+          <a
+            className={selected ? 'selected' : ''}
+            href={`${router.basePath}${pathname}`}
+          >
             {title}
           </a>
         ) : (
