@@ -15,13 +15,11 @@ const Home = ({ sponsors }) => {
   return (
     <>
       <Seo
-        title="HTTPProbe"
+        title="Monika"
         description="Free and Open Source Synthetic Monitoring Tool"
       />
       <Head>
-        <title>
-          HTTPProbe - Free and Open Source Synthetic Monitoring Tool
-        </title>
+        <title>Monika - Free and Open Source Synthetic Monitoring Tool</title>
       </Head>
       <div className="bg-gray-50 h-full min-h-full">
         <Banner />
@@ -33,7 +31,7 @@ const Home = ({ sponsors }) => {
             <img
               src={require('images/emblem-light.svg')}
               className="absolute transform right-0 top-1/2 h-0 lg:h-full scale-150 translate-x-1/2 xl:translate-x-1/5 -translate-y-1/2"
-              alt="HTTPProbe Emblem"
+              alt="Monika Emblem"
             />
             <div className="grid grid-cols-12 lg:gap-8">
               <div className="col-span-12 lg:col-span-6 ">
