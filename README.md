@@ -4,13 +4,13 @@ Monika is a command line application for synthetic monitoring. The name Monika s
 
 ## Installation
 
-Just install from the npm package manager
+Install from the npm package manager (you need to install Node.js first)
 
 ```bash
 npm i -g @hyperjumptech/monika
 ```
 
-You can also use `Monika` from source. Just clone the repository, pull dependencies.
+You can also use `Monika` from source. Clone this repository then install the dependencies.
 
 ```bash
 git clone git@github.com:hyperjumptech/monika.git
@@ -27,18 +27,18 @@ When you have created the configuration file, you can run `monika` as follows
 monika -c <path_to_your_configuration.json>
 ```
 
-Options and parameters can be seen by entering `monika -h` or `bin/run -h`
+Options and parameters can be seen by running `monika -h`. Or if you cloned this repository, you need to run `bin/run -h`.
 
 ## How it works
 
-Monika operates by reading everything from the config file. From the configurations it will build and send http requests. After each requests it checks against any alerts and notifications it needs to perform.
+Monika operates by reading everything from the config file. From the configurations it will build and send the http requests. After each requests it sends any alerts if needed using the configured notifications (smtp, mailgun, sendgrid, webhook).
 
-For more information, please refer to the detailed documenntations below.
+For more information, please refer to the detailed documentations below.
 
 | Topic                                                    |                    Description                     |
 | :------------------------------------------------------- | :------------------------------------------------: |
 | [Probes](./docs/src/pages/guides/probes.md)              |       How requests are set up and dispatched       |
-| [Alerts](./docs/src/pages/guides/alrts.md)               | How alerts are triggered and how to setup an alert |
+| [Alerts](./docs/src/pages/guides/alerts.md)              | How alerts are triggered and how to setup an alert |
 | [Notifcations](./docs/src/pages/guides/notifications.md) |  Receive notifications when alerts are triggered   |
 
 ## Discussions
