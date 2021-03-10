@@ -10,7 +10,7 @@ export const Seo = withRouter(
       {/* DEFAULT */}
 
       {title != undefined && (
-        <title key="title">{title} | HTTPProbe | TanStack</title>
+        <title key="title">{title} | Monika | Hyperjump Technology</title>
       )}
       {description != undefined && (
         <meta name="description" key="description" content={description} />
