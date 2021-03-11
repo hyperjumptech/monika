@@ -21,7 +21,7 @@ export const Seo = withRouter(
       <meta
         property="og:url"
         key="og:url"
-        content={`https://github.com/hyperjumptech/monika${router.pathname}`}
+        content={`https://github.com/hyperjumptech${router.pathname}`}
       />
       {title != undefined && (
         <meta property="og:title" content={title} key="og:title" />
@@ -37,7 +37,7 @@ export const Seo = withRouter(
         <meta
           property="og:image"
           key="og:image"
-          content={`https://github.com/hyperjumptech/monika${image}`}
+          content={`https://github.com/hyperjumptech${image}`}
         />
       )}
 
@@ -67,66 +67,85 @@ export const Seo = withRouter(
         <meta
           name="twitter:image"
           key="twitter:image"
-          content={`https://github.com/hyperjumptech/monika${image}`}
+          content={`https://github.com/hyperjumptech${image}`}
         />
       )}
 
-      <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png" />
-      <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png" />
-      <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png" />
-      <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png" />
+      <link
+        rel="apple-touch-icon"
+        sizes="57x57"
+        href={`${router.basePath}/apple-icon-57x57.png`}
+      />
+      <link
+        rel="apple-touch-icon"
+        sizes="60x60"
+        href={`${router.basePath}/apple-icon-60x60.png`}
+      />
+      <link
+        rel="apple-touch-icon"
+        sizes="72x72"
+        href={`${router.basePath}/apple-icon-72x72.png`}
+      />
+      <link
+        rel="apple-touch-icon"
+        sizes="76x76"
+        href={`${router.basePath}/apple-icon-76x76.png`}
+      />
       <link
         rel="apple-touch-icon"
         sizes="114x114"
-        href="/apple-icon-114x114.png"
+        href={`${router.basePath}/apple-icon-114x114.png`}
       />
       <link
         rel="apple-touch-icon"
         sizes="120x120"
-        href="/apple-icon-120x120.png"
+        href={`${router.basePath}/apple-icon-120x120.png`}
       />
       <link
         rel="apple-touch-icon"
         sizes="144x144"
-        href="/apple-icon-144x144.png"
+        href={`${router.basePath}/apple-icon-144x144.png`}
       />
       <link
         rel="apple-touch-icon"
         sizes="152x152"
-        href="/apple-icon-152x152.png"
+        href={`${router.basePath}/apple-icon-152x152.png`}
       />
       <link
         rel="apple-touch-icon"
         sizes="180x180"
-        href="/apple-icon-180x180.png"
+        href={`${router.basePath}/apple-icon-180x180.png`}
       />
       <link
         rel="icon"
         type="image/png"
         sizes="192x192"
-        href="/android-icon-192x192.png"
+        href={`${router.basePath}/android-icon-192x192.png`}
       />
       <link
         rel="icon"
         type="image/png"
         sizes="32x32"
-        href="/favicon-32x32.png"
+        href={`${router.basePath}/favicon-32x32.png`}
       />
       <link
         rel="icon"
         type="image/png"
         sizes="96x96"
-        href="/favicon-96x96.png"
+        href={`${router.basePath}/favicon-96x96.png`}
       />
       <link
         rel="icon"
         type="image/png"
         sizes="16x16"
-        href="/favicon-16x16.png"
+        href={`${router.basePath}/favicon-16x16.png`}
       />
-      <link rel="manifest" href="/monika/manifest.json" />
+      <link rel="manifest" href={`${router.basePath}/manifest.json`} />
       <meta name="msapplication-TileColor" content="#ffffff" />
-      <meta name="msapplication-TileImage" content="/ms-icon-144x144.png" />
+      <meta
+        name="msapplication-TileImage"
+        content={`${router.basePath}/ms-icon-144x144.png`}
+      />
       <meta name="theme-color" content="#ffffff" />
 
       {children}
