@@ -12,7 +12,7 @@ export const Nav = () => (
           <Link href="/" as="/">
             <a>
               <span className="sr-only">Home</span>
-              <img src={logoSrc} alt="HTTPProbe" />
+              <img src={logoSrc} alt="Monika" />
             </a>
           </Link>
         </div>
