@@ -1,31 +1,73 @@
----
-id: important-defaults
-title: Important Defaults
----
+# Probes
 
-Out of the box, HTTPProbe is configured with **aggressive but sane** defaults. **Sometimes these defaults can catch new users off guard or make learning/debugging difficult if they are unknown by the user.** Keep them in mind as you continue to learn and use HTTPProbe:
+Probes are the heart of the monitoring requests. Probes are just arrays of request objects defined in the config file `config.json` like so.
 
-- Query instances via `useQuery` or `useInfiniteQuery` by default **consider cached data as stale**.
+```json
+  "probes": [
+    {
+      "id": "1",
+      "name": "Name of the probe",
+      "description": "Probe to check GET time",
+      "request": { },
+      "alerts": []
+    },
+    {
+      "id": "2",
+      "name": "Name of the probe 2",
+      "description": "Probe to check GET health",
+      "request": { },
+      "alerts": []
+    }
+  ]
+```
 
-> To change this behavior, you can configure your queries both globally and per-query using the `staleTime` option. Specifying a longer `staleTime` means queries will not refetch their data as often
+Monika goes through each probe object, sends it out, and determines whether an alert or notification need to be sent out.
 
-- Stale queries are refetched automatically in the background when:
-  - New instances of the query mount
-  - The window is refocused
-  - The network is reconnected.
-  - The query is optionally configured with a refetch interval.
+## Request Anatomy
 
-> To change this functionality, you can use options like `refetchOnMount`, `refetchOnWindowFocus`, `refetchOnReconnect` and `refetchInterval`.
+An actual probe request may be something like below.
 
-- Query results that have no more active instances of `useQuery`, `useInfiniteQuery` or query observers are labeled as "inactive" and remain in the cache in case they are used again at a later time.
-- By default, "inactive" queries are garbage collected after **5 minutes**.
+```json
+  "probes": [
+    {
+      "id": "1",
+      "name": "Example: get Time",
+      "description": "Probe",
+      "request": {
+        "method": "POST",
+        "url": "https://mybackend.org/user/login",
+        "timeout": 7000,
+        "headers": {
+          "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkhlbGxvIGZyb20gSHlwZXJqdW1wIiwiaWF0IjoxNTE2MjM5MDIyfQ.T2SbP1G39CMD4MMfkOZYGFgNIQgNkyi0sPdiFi_DfVA"
+        },
+        "body": {
+          "username": "someusername",
+          "password": "somepassword"
+        }
+      },
+      "alerts": ["status-not-2xx", "response-time-greater-than-200-ms"]
+    },
+  ]
+```
 
-> To change this, you can alter the default `cacheTime` for queries to something other than `1000 * 60 * 5` milliseconds.
+| Topic   | Description                                            |
+| :------ | ------------------------------------------------------ |
+| method  | Http method such as GET, POST, PUT, DELETE             |
+| url     | This is the url endpoint to dispatch the request to    |
+| timeout | Request timeout, after which time, will assume timeout |
+| headers | Your http header                                       |
+| body    | Any http body if your method requires it               |
+|         |                                                        |
 
-- Queries that fail are **silently retried 3 times, with exponential backoff delay** before capturing and displaying an error to the UI.
+Alerts are the condition which will trigger an alert, and the subsequent notification method to send out the alert. See below for further details on alerts and notifications.
 
-> To change this, you can alter the default `retry` and `retryDelay` options for queries to something other than `3` and the default exponential backoff function.
+## Execution order
 
-- Query results by default are **structurally shared to detect if data has actually changed** and if not, **the data reference remains unchanged** to better help with value stabilization with regards to useMemo and useCallback. If this concept sounds foreign, then don't worry about it! 99.9% of the time you will not need to disable this and it makes your app more performant at zero cost to you.
+In a configuration with multiple probes, `Monika` will perform the requests in sequence in the order that they are written down, one after another.
 
-> Structural sharing only works with JSON-compatible values, any other value types will always be considered as changed. If you are seeing performance issues because of large responses for example, you can disable this feature with the `config.structuralSharing` flag. If you are dealing with non-JSON compatible values in your query responses and still want to detect if data has changed or not, you can define a data compare function with `config.isDataEqual`.
+On completion, `Monika` will sleep until the next interval to start again. At the top of the `config.json` file there is an `interval` setting. The execution will be restarted after every `interval`. If interval is shorter than the amount of time to dispatch all the requests, then then `monika` will immediately repeat after the last probe response and any notification alerts sent.
+
+## Further reading
+
+1. [Alerts](./alerts.md)
+2. [Notifications](./notifications.md)

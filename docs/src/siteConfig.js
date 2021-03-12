@@ -1,13 +1,12 @@
 // List of projects/orgs using your project for the users page.
 export const siteConfig = {
-  editUrl:
-    'https://github.com/hyperjumptech/http-probe/edit/master/docs/src/pages',
-  copyright: `Copyright © ${new Date().getFullYear()} Tanner Linsley. All Rights Reserved.`,
-  repoUrl: 'https://github.com/hyperjumptech/http-probe',
+  editUrl: 'https://github.com/hyperjumptech/monika/edit/master/docs/src/pages',
+  copyright: `Copyright © ${new Date().getFullYear()} Hyperjump Tech. All Rights Reserved.`,
+  repoUrl: 'https://github.com/hyperjumptech/monika',
   algolia: {
-    appId: 'BH4D9OD16A',
-    apiKey: 'c97369bb0f67e99c8acf34bfd732cca7',
-    indexName: 'tanstack_react-query', // algoliaOptions: {
+    appId: '',
+    apiKey: '',
+    indexName: '', // algoliaOptions: {
     //   facetFilters: ['version:VERSION'],
     // },
   },
