@@ -23,7 +23,7 @@ const remarkPlugins = [
   require('remark-images'),
   [
     require('remark-github'),
-    { repository: 'https://github.com/hyperjumptech/http-probe' },
+    { repository: 'https://github.com/hyperjumptech/monika' },
   ],
   require('remark-unwrap-images'),
   [
@@ -37,8 +37,8 @@ const remarkPlugins = [
 
 module.exports = optimizedImages({
   pageExtensions: ['jsx', 'js', 'mdx', 'md'],
-  basePath: isProd ? '/http-probe' : '', // change this when deploying to production
-  assetPrefix: isProd ? '/http-probe/' : '', // change this when deploying to production
+  basePath: isProd ? '/monika' : '', // change this when deploying to production
+  assetPrefix: isProd ? '/monika/' : '', // change this when deploying to production
   env: {
     NEXT_PUBLIC_GA_TRACKING_ID: process.env.GA_TRACKING_ID || '',
     SENTRY_RELEASE: process.env.VERCEL_GITHUB_COMMIT_SHA || '',

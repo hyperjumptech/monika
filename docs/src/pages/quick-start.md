@@ -3,72 +3,82 @@ id: quick-start
 title: Quick Start
 ---
 
-This example very briefly illustrates the 3 core concepts of HTTPProbe:
+To start monitoring URLs, you'll need a configuration file (JSON file) like an example below
 
-- [Queries](./guides/queries)
-- [Mutations](./guides/mutations)
-- [Query Invalidation](./guides/query-invalidation)
+> The configuration file contains the [probes](/monika/guides/probes), [alerts](/monika/guides/alerts), and [notification](/monika/guides/notifications) configurations.
 
-```js
-import {
-  useQuery,
-  useMutation,
-  useQueryClient,
-  QueryClient,
-  QueryClientProvider,
-} from 'react-query'
-import { getTodos, postTodo } from '../my-api'
+```
+// config.json
 
-// Create a client
-const queryClient = new QueryClient()
-
-function App() {
-  return (
-    // Provide the client to your App
-    <QueryClientProvider client={queryClient}>
-      <Todos />
-    </QueryClientProvider>
-  )
-}
-
-function Todos() {
-  // Access the client
-  const queryClient = useQueryClient()
-
-  // Queries
-  const query = useQuery('todos', getTodos)
-
-  // Mutations
-  const mutation = useMutation(postTodo, {
-    onSuccess: () => {
-      // Invalidate and refetch
-      queryClient.invalidateQueries('todos')
+{
+  "interval": 0,
+  "notifications": [
+    {
+      "id": "unique-id-mailgun",
+      "type": "mailgun",
+      "data": {
+        "recipients": ["recipient1@mailgun.com"],
+        "apiKey": "YOUR_API_KEY",
+        "domain": "YOUR_DOMAIN"
+      }
     },
-  })
-
-  return (
-    <div>
-      <ul>
-        {query.data.map((todo) => (
-          <li key={todo.id}>{todo.title}</li>
-        ))}
-      </ul>
-
-      <button
-        onClick={() => {
-          mutation.mutate({
-            id: Date.now(),
-            title: 'Do Laundry',
-          })
-        }}
-      >
-        Add Todo
-      </button>
-    </div>
-  )
+    {
+      "id": "unique-id-sendgrid",
+      "type": "sendgrid",
+      "data": {
+        "recipients": ["recipient1@sendgrid.com"],
+        "apiKey": "YOUR_API_KEY"
+      }
+    },
+    {
+      "id": "unique-id-smtp",
+      "type": "smtp",
+      "data": {
+        "recipients": ["recipient1@smtp.com"],
+        "hostname": "https://www.smtphostname.com",
+        "port": 8080,
+        "username": "smtpusername",
+        "password": "smtppassword"
+      }
+    },
+    {
+      "id": "unique-id-webhook",
+      "type": "webhook",
+      "data": {
+        "method": "POST",
+        "url": "https://examplewebhookurl.com/webhook"
+      }
+    }
+  ],
+  "probes": [
+    {
+      "id": "1",
+      "name": "Example",
+      "description": "Probe",
+      "request": {
+        "method": "POST",
+        "url": "https://something/login",
+        "timeout": 7000,
+        "headers": {
+          "Authorization": ""
+        },
+        "body": {
+          "username": "someusername",
+          "password": "somepassword"
+        }
+      },
+      "alerts": ["status-not-2xx", "response-time-greater-than-200-ms"]
+    }
+  ]
 }
-
-render(<App />, document.getElementById('root'))
 ```
 
-These three concepts make up most of the core functionality of HTTPProbe. The next sections of the documentation will go over each of these core concepts in great detail.
+When you have created the configuration file, you can run monika as follows
+
+```
+// Automatically loads config file (config.json) in current working directory
+monika
+
+// Loads config file on specific file path
+monika -c <path_to_your_configuration.json>
+```

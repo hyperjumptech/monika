@@ -7,7 +7,7 @@ describe('http-probe', () => {
   // General Test
   test
     .stdout()
-    .do(() => cmd.run(['--config', resolve('./config.json.example')]))
+    .do(() => cmd.run(['--config', resolve('./config.example.json')]))
     .it('runs with normal config', (ctx) => {
       expect(ctx.stdout).to.contain('Parsed configuration')
     })
