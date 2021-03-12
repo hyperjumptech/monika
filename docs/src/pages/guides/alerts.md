@@ -15,26 +15,28 @@ Alerts are the types of condition that will trigger Monika to send notification.
 
 ## Alerts types
 
-Now there is 2 supported types of alerts. Static and dynamic:
+Now there are 2 supported types of alerts conditions:
 
-### Static value
+### 1. HTTP Code
 
+To measure returned HTTP code.
 
-| Value   | Description                                            |
-| :------ | ------------------------------------------------------      |
-| status-not-2xx  | Condition met if the returned http code from the probes is less than 200 or greater than 299 |
+| Value          | Description                                                                                   |
+| :------------- | --------------------------------------------------------------------------------------------- |
+| status-not-2xx | Condition met if the returned http code from the probes is less than 200 or greater than 299. |
 
-### Dynamic value
+### 2. Response Time
 
-| Value   | Description                                            |
-| :------ | ------------------------------------------------------      |
-| response-time-greater-than-`200`-`ms`     | Condition met if the returned response time from the probes is greater than 200 milliseconds |
+To measure response time. The time value and unit can be changed.
 
-- The time value can be changed to any positif integer value. In above example, the value is 200
-- The time unit can be changed to `s` second. In above example, the unit is `ms` for milliseconds
+| Value                                 | Description                                                                                   |
+| :------------------------------------ | --------------------------------------------------------------------------------------------- |
+| response-time-greater-than-`200`-`ms` | Condition met if the returned response time from the probes is greater than 200 milliseconds. |
+
+- The time value can be changed to any positif integer value. In above example, the value is `200`.
+- The time unit can be changed to `s` second. In above example, the unit is `ms` for milliseconds.
 
 ## Further reading
 
-1. [Alerts](./alerts)
+1. [Probes](./probes)
 2. [Notifications](./notifications)
-
