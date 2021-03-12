@@ -21,7 +21,14 @@ async function doProbes(config: Config) {
         url: item.request.url ?? '',
       })
     } catch (error) {
-      log('id:', item.id, '- status: ERROR for:', item.request.url, ':', error.message)
+      log(
+        'id:',
+        item.id,
+        '- status: ERROR for:',
+        item.request.url,
+        ':',
+        error.message
+      )
     }
   })
 }
