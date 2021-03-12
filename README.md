@@ -19,7 +19,7 @@ npm ci
 
 ## Getting Started
 
-To start monitoring URLs, you need to create a configuration file (JSON file). The configuration file contains the probes, alerts, and notification configurations. You can check the sample configuration file in [config.json.example](https://github.com/hyperjumptech/monika/blob/main/config.json.example) or from our [docs](https://github.com/hyperjumptech/monika/quick-start).
+To start monitoring URLs, you need to create a configuration file (JSON file). The configuration file contains the probes, alerts, and notification configurations. You can check the sample configuration file in [config.example.json](https://github.com/hyperjumptech/monika/blob/main/config.example.json) or from our [docs](https://github.com/hyperjumptech/monika/quick-start).
 
 When you have created the configuration file, you can run `monika` as follows
 
