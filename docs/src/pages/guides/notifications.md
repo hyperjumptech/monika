@@ -1,94 +1,189 @@
 ---
-id: queries
-title: Queries
+id: notifications
+title: Notifications
 ---
 
-## Query Basics
+## Notification Types
 
-A query is a declarative dependency on an asynchronous source of data that is tied to a **unique key**. A query can be used with any Promise based method (including GET and POST methods) to fetch data from a server. If your method modifies data on the server, we recommend using [Mutations](https://react-query.tanstack.com/docs/guides/mutations) instead.
+In Monika, currently we provided multiple notifications type. We are implementing email notifications through sendgrid, mailgun, smtp and webhook.
 
-To subscribe to a query in your components or custom hooks, call the `useQuery` hook with at least:
+## Configurations
 
-- A **unique key for the query**
-- A function that returns a promise that:
-  - Resolves the data, or
-  - Throws an error
+Notifications can be send through multiple processes and mail accounts, define through configurations as in the config.json.example.
 
-```js
-import { useQuery } from 'react-query'
+```json
+"notifications": [
+    {
+      "id": "unique-id",
+      "type": "mailgun",
+      "data": {
+        "recipients": ["mantap@jiwa.com"],
+        "apiKey": "YOUR_API_KEY",
+        "domain": "YOUR_DOMAIN"
+      }
+    },
+    {
+      "id": "unique-id",
+      "type": "sendgrid",
+      "data": {
+        "recipients": ["mantap@jiwa.com"],
+        "apiKey": "YOUR_API_KEY"
+      }
+    },
+    {
+      "id": "unique-id",
+      "type": "smtp",
+      "recipients": ["a@a.com"],
+      "data": {
+        "recipients": ["mantap@jiwa.com"],
+        "hostname": "https://www.dennypradipta.com",
+        "port": 8080,
+        "username": "dennypradipta",
+        "password": "bismillah"
+      }
+    },
+    {
+      "id": "unique-id-webhook",
+      "type": "webhook",
+      "data": {
+        "recipients": ["mantap@jiwa.com"],
+        "method": "POST",
+        "url": "https://examplewebhookurl.com/webhook"
+      }
+    }
+  ],
+```
 
-function App() {
-  const info = useQuery('todos', fetchTodoList)
+## Mailgun
+
+Mailgun is the notification send through a mailgun email service. For this you need to have a mailgun account first, using your mailgun's API_KEY and DOMAIN you can send notifications to the recipient's mail.
+
+```json
+{
+  "id": "unique-id",
+  "type": "mailgun",
+  "data": {
+    "recipients": ["mantap@jiwa.com"],
+    "apiKey": "YOUR_API_KEY",
+    "domain": "YOUR_DOMAIN"
+  }
 }
 ```
 
-The **unique key** you provide is used internally for refetching, caching, and sharing your queries throughout your application.
-
-The query results returned by `useQuery` contains all of the information about the query that you'll need for templating and any other usage of the data:
+Monika is filtering the notification type for mailgun and breaking down the data config. Setting a mailgun service and then send through the data using mailgun-js lib.
 
 ```js
-const result = useQuery('todos', fetchTodoList)
+const mg = mailgun({ apiKey: API_KEY, domain: DOMAIN })
+const data = {
+  from: `${sender.name} <${sender.email}>`,
+  to: recipients,
+  subject: subject,
+  text: body,
+}
+return mg.messages().send(data)
 ```
 
-The `result` object contains a few very important states you'll need to be aware of to be productive. A query can only be in one of the following states at any given moment:
+## Sendgrid
 
-- `isLoading` or `status === 'loading'` - The query has no data and is currently fetching
-- `isError` or `status === 'error'` - The query encountered an error
-- `isSuccess` or `status === 'success'` - The query was successful and data is available
-- `isIdle` or `status === 'idle'` - The query is currently disabled (you'll learn more about this in a bit)
+As in the mailgun, sendgrid is also an email delivery service. You need to have a sendgrid account before you can send an email through this method. For sending a notification through sendgrid all you need to set is the API_KEY and recipient email addresses.
 
-Beyond those primary states, more information is available depending on the state of the query:
-
-- `error` - If the query is in an `isError` state, the error is available via the `error` property.
-- `data` - If the query is in a `success` state, the data is available via the `data` property.
-- `isFetching` - In any state, if the query is fetching at any time (including background refetching) `isFetching` will be `true`.
-
-For **most** queries, it's usually sufficient to check for the `isLoading` state, then the `isError` state, then finally, assume that the data is available and render the successful state:
-
-```js
-function Todos() {
-  const { isLoading, isError, data, error } = useQuery('todos', fetchTodoList)
-
-  if (isLoading) {
-    return <span>Loading...</span>
+```json
+{
+  "id": "unique-id",
+  "type": "sendgrid",
+  "data": {
+    "recipients": ["mantap@jiwa.com"],
+    "apiKey": "YOUR_API_KEY"
   }
-
-  if (isError) {
-    return <span>Error: {error.message}</span>
-  }
-
-  // We can assume by this point that `isSuccess === true`
-  return (
-    <ul>
-      {data.map((todo) => (
-        <li key={todo.id}>{todo.title}</li>
-      ))}
-    </ul>
-  )
 }
 ```
 
-If booleans aren't your thing, you can always use the `status` state as well:
+Monika is using @sendgrid/mail library for sending the sendgrid type notification. Monika will breakdown the configuration set the sengrid type API_KEY settings and send the message using the library.
 
 ```js
-function Todos() {
-  const { status, data, error } = useQuery('todos', fetchTodoList)
-
-  if (status === 'loading') {
-    return <span>Loading...</span>
-  }
-
-  if (status === 'error') {
-    return <span>Error: {error.message}</span>
-  }
-
-  // also status === 'success', but "else" logic works, too
-  return (
-    <ul>
-      {data.map((todo) => (
-        <li key={todo.id}>{todo.title}</li>
-      ))}
-    </ul>
-  )
+sgMail.setApiKey(API_KEY)
+const msg = {
+  to: recipients,
+  from: sender.email,
+  subject,
+  text: body,
 }
+
+sgMail.send(msg)
+```
+
+## SMTP
+
+SMTP (Simple Mail Transfer Protocol) is an email service send by using TCP/IP protocol. For this you need to have an active email account to be used as transporter, a middle service that relay the email sending process.
+
+```json
+{
+  "id": "unique-id",
+  "type": "smtp",
+  "recipients": ["a@a.com"],
+  "data": {
+    "recipients": ["mantap@jiwa.com"],
+    "hostname": "smtp.mail.com",
+    "port": 222,
+    "username": "dennypradipta",
+    "password": "bismillah"
+  }
+}
+```
+
+Monika is using the sendmailer library to breakdown the configuration with type smtp, registering the username and password to the mail host with certain port and create a transporter.
+
+```js
+export const transporter = nodemailer.createTransport({
+  host: cfg.hostname,
+  port: cfg.port,
+  auth: { user: cfg.username, pass: cfg.password },
+})
+```
+
+Using the transporter, Monika then send the email with its sender, recipients, subject and message in html format.
+
+```js
+export const sendSmtpMail = async (transporter: Mail, opt: Mail.Options) => {
+  return transporter.sendMail({
+    from: opt.from,
+    to: opt.to,
+    subject: opt.subject,
+    html: opt.html,
+  })
+}
+```
+
+## Webhook
+
+Besides the email notifications, monika also provide weebhook service using rest api calls and POST methods.
+
+```json
+{
+  "id": "unique-id-webhook",
+  "type": "webhook",
+  "data": {
+    "recipients": ["mantap@jiwa.com"],
+    "method": "POST",
+    "url": "https://examplewebhookurl.com/webhook"
+  }
+}
+```
+
+Using the webhook type configuration, Monika will send a post request and data through its body using axios library. The data for notification will be sent as this object :
+
+```js
+body: {
+  url: string
+  time: string
+  alert: string
+}
+```
+
+```js
+const res = await axios({
+  url: data.url,
+  data: data.body,
+  method: data.method,
+})
 ```

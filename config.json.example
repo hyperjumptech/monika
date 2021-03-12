@@ -24,8 +24,8 @@
       "recipients": ["a@a.com"],
       "data": {
         "recipients": ["mantap@jiwa.com"],
-        "hostname": "https://www.dennypradipta.com",
-        "port": 8080,
+        "hostname": "smtp.mail.com",
+        "port": 222,
         "username": "dennypradipta",
         "password": "bismillah"
       }
