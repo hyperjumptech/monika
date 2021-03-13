@@ -5,11 +5,11 @@ title: Notifications
 
 ## Notification Types
 
-In Monika, currently we provided multiple notifications type. We are implementing email notifications through sendgrid, mailgun, smtp and webhook.
+In `Monika`, we provide multiple notification channels. Notifications are available through sendgrid, mailgun, smtp and webhook.
 
 ## Configurations
 
-Notifications can be send through multiple processes and mail accounts, define through configurations as in the config.json.example.
+Notifications can be sent through multiple channels and mail accounts, each are defined through configuration such as in the file `config.json.example` below.
 
 ```json
 "notifications": [
@@ -56,7 +56,7 @@ Notifications can be send through multiple processes and mail accounts, define t
 
 ## Mailgun
 
-Mailgun is the notification send through a mailgun email service. For this you need to have a mailgun account first, using your mailgun's API_KEY and DOMAIN you can send notifications to the recipient's mail.
+Mailgun is the notification channel through the mailgun email service. For this you need to have a mailgun account first, using your mailgun's API_KEY and DOMAIN you can send notifications to the recipient's mail.
 
 ```json
 {
@@ -70,7 +70,7 @@ Mailgun is the notification send through a mailgun email service. For this you n
 }
 ```
 
-Monika is filtering the notification type for mailgun and breaking down the data config. Setting a mailgun service and then send through the data using mailgun-js lib.
+`Monika` filters the notification types for mailgun and breaks down the data configuration, setting up a mailgun service and then sending through the data using mailgun-js lib.
 
 ```js
 const mg = mailgun({ apiKey: API_KEY, domain: DOMAIN })
@@ -85,7 +85,7 @@ return mg.messages().send(data)
 
 ## Sendgrid
 
-As in the mailgun, sendgrid is also an email delivery service. You need to have a sendgrid account before you can send an email through this method. For sending a notification through sendgrid all you need to set is the API_KEY and recipient email addresses.
+Similar to mailgun, sendgrid is also an email delivery service. You need to have a sendgrid account before you can send an email through this method. For sending a notification through sendgrid all you need to set is the API_KEY and recipient email addresses.
 
 ```json
 {
@@ -98,7 +98,7 @@ As in the mailgun, sendgrid is also an email delivery service. You need to have 
 }
 ```
 
-Monika is using @sendgrid/mail library for sending the sendgrid type notification. Monika will breakdown the configuration set the sengrid type API_KEY settings and send the message using the library.
+`Monika` is using @sendgrid/mail library for sending the sendgrid type notification. `Monika` will breakdown the configuration set the sengrid type API_KEY settings and send the message using the library.
 
 ```js
 sgMail.setApiKey(API_KEY)
@@ -114,7 +114,7 @@ sgMail.send(msg)
 
 ## SMTP
 
-SMTP (Simple Mail Transfer Protocol) is an email service send by using TCP/IP protocol. For this you need to have an active email account to be used as transporter, a middle service that relay the email sending process.
+SMTP (Simple Mail Transfer Protocol) is an email service using the TCP/IP protocol. For this you need to have an active email account to be used as transporter, a middle service that relays the email sending process.
 
 ```json
 {
@@ -131,7 +131,7 @@ SMTP (Simple Mail Transfer Protocol) is an email service send by using TCP/IP pr
 }
 ```
 
-Monika is using the sendmailer library to breakdown the configuration with type smtp, registering the username and password to the mail host with certain port and create a transporter.
+`Monika` is using the sendmailer library to breakdown the configuration with type smtp, registering the username and password to the mail host with certain port and create a transporter.
 
 ```js
 export const transporter = nodemailer.createTransport({
@@ -141,7 +141,7 @@ export const transporter = nodemailer.createTransport({
 })
 ```
 
-Using the transporter, Monika then send the email with its sender, recipients, subject and message in html format.
+Using the transporter, `Monika` then sends the email with its sender, recipient, subject and message in html format.
 
 ```js
 export const sendSmtpMail = async (transporter: Mail, opt: Mail.Options) => {
@@ -156,7 +156,7 @@ export const sendSmtpMail = async (transporter: Mail, opt: Mail.Options) => {
 
 ## Webhook
 
-Besides the email notifications, monika also provide weebhook service using rest api calls and POST methods.
+Besides the email notifications, `Monika` also provide webhook service using REST API calls and POST methods.
 
 ```json
 {
@@ -170,7 +170,7 @@ Besides the email notifications, monika also provide weebhook service using rest
 }
 ```
 
-Using the webhook type configuration, Monika will send a post request and data through its body using axios library. The data for notification will be sent as this object :
+Using the webhook type configuration, `Monika` will send a post request and data through its body using the axios library. The data for notification will be sent as this object :
 
 ```js
 body: {
@@ -187,3 +187,5 @@ const res = await axios({
   method: data.method,
 })
 ```
+
+Keep watch on these pages, new notification methods are being developed.
