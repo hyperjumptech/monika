@@ -1,6 +1,6 @@
 # Probes
 
-Probes are the heart of the monitoring requests. Probes are just arrays of request objects defined in the config file `config.json` like so.
+Probes are the heart of the monitoring requests. Probes are arrays of request objects defined in the config file `config.json` like so.
 
 ```json
   "probes": [
@@ -50,11 +50,13 @@ An actual probe request may be something like below.
   ]
 ```
 
+Details of the field are give in the table below.
+
 | Topic   | Description                                            |
 | :------ | ------------------------------------------------------ |
 | method  | Http method such as GET, POST, PUT, DELETE             |
 | url     | This is the url endpoint to dispatch the request to    |
-| timeout | Request timeout, after which time, will assume timeout |
+| timeout | Request timeout, after which time, `Monika`will assume timeout |
 | headers | Your http header                                       |
 | body    | Any http body if your method requires it               |
 |         |                                                        |
@@ -63,9 +65,9 @@ Alerts are the condition which will trigger an alert, and the subsequent notific
 
 ## Execution order
 
-In a configuration with multiple probes, `Monika` will perform the requests in sequence in the order that they are written down, one after another.
+In a configuration with multiple probes, `Monika` will perform the requests in sequence in the order that they are entered, one after another.
 
-On completion, `Monika` will sleep until the next interval to start again. At the top of the `config.json` file there is an `interval` setting. The execution will be restarted after every `interval`. If interval is shorter than the amount of time to dispatch all the requests, then then `monika` will immediately repeat after the last probe response and any notification alerts sent.
+On completion, `Monika` will sleep until the next interval to start again. At the top of the `config.json` file there is an `interval` setting. The execution will be restarted after every `interval`. If interval is shorter than the amount of time to dispatch all the requests, then `Monika` will immediately repeat after the last probe response and any notification alerts sent.
 
 ## Further reading
 
