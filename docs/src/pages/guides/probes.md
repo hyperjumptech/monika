@@ -52,14 +52,14 @@ An actual probe request may be something like below.
 
 Details of the field are give in the table below.
 
-| Topic   | Description                                            |
-| :------ | ------------------------------------------------------ |
-| method  | Http method such as GET, POST, PUT, DELETE             |
-| url     | This is the url endpoint to dispatch the request to    |
+| Topic   | Description                                                    |
+| :------ | -------------------------------------------------------------- |
+| method  | Http method such as GET, POST, PUT, DELETE                     |
+| url     | This is the url endpoint to dispatch the request to            |
 | timeout | Request timeout, after which time, `Monika`will assume timeout |
-| headers | Your http header                                       |
-| body    | Any http body if your method requires it               |
-|         |                                                        |
+| headers | Your http header                                               |
+| body    | Any http body if your method requires it                       |
+|         |                                                                |
 
 Alerts are the condition which will trigger an alert, and the subsequent notification method to send out the alert. See below for further details on alerts and notifications.
 
