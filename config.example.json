@@ -23,8 +23,8 @@
       "type": "smtp",
       "data": {
         "recipients": ["recipient1@smtp.com"],
-        "hostname": "https://www.smtphostname.com",
-        "port": 8080,
+        "hostname": "smtp.mail.com",
+        "port": 222,
         "username": "smtpusername",
         "password": "smtppassword"
       }
