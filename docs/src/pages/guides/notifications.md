@@ -9,7 +9,7 @@ In `Monika`, we provide multiple notification channels. Notifications are availa
 
 ## Configurations
 
-Notifications can be sent through multiple channels and mail accounts, each are defined through configuration such as in the file `config.json.example` below.
+Notifications can be sent through multiple channels and mail accounts, each are defined through configuration such as in the file `config.json.example` below. All you need for having a notification is set these configurations.
 
 ```json
 "notifications": [
@@ -70,18 +70,25 @@ Mailgun is the notification channel through the mailgun email service. For this 
 }
 ```
 
-`Monika` filters the notification types for mailgun and breaks down the data configuration, setting up a mailgun service and then sending through the data using mailgun-js lib.
+**ID**
+Notification ID, to identify the notification number.
 
-```js
-const mg = mailgun({ apiKey: API_KEY, domain: DOMAIN })
-const data = {
-  from: `${sender.name} <${sender.email}>`,
-  to: recipients,
-  subject: subject,
-  text: body,
-}
-return mg.messages().send(data)
-```
+**Type**
+Type of Notification in this case it would be set as `mailgun`.
+
+**Data**
+The detail settings needed to send a mailgun.
+
+**Recipients**
+Email addresses that will accept the mail sent from your mailgun account, the recipients address is set in array making it able to send to multiple addresses. `["monika@testmail.com", "symon@testmail.com"]`
+
+**Api Key**
+Mailgun's account api key, mailgun's registered key to identify your account. ex. `70e34aba-0ea908325`
+
+**Domain**
+A domain that you have set in mailgun. ex. `sandboxmail.mailgun.com`
+
+`Monika` filters the notification types for mailgun and breaks down the data configuration, setting up a mailgun service and then sending through the data using mailgun-js lib.
 
 ## Sendgrid
 
@@ -98,19 +105,22 @@ Similar to mailgun, sendgrid is also an email delivery service. You need to have
 }
 ```
 
+**ID**
+Notification ID, to identify the notification number.
+
+**Type**
+Type of Notification in this case it would be set as `sendgrid`.
+
+**Data**
+The detail settings needed for sending email through sendgrid.
+
+**Recipients**
+Recipient email addresses, set as an array for sending to multiple addresses. ex. `["monika@testmail.com", "symon@testmail.com"]`
+
+**Api Key**
+The api key that sendgrid gives for your account.
+
 `Monika` is using @sendgrid/mail library for sending the sendgrid type notification. `Monika` will breakdown the configuration set the sengrid type API_KEY settings and send the message using the library.
-
-```js
-sgMail.setApiKey(API_KEY)
-const msg = {
-  to: recipients,
-  from: sender.email,
-  subject,
-  text: body,
-}
-
-sgMail.send(msg)
-```
 
 ## SMTP
 
@@ -131,28 +141,31 @@ SMTP (Simple Mail Transfer Protocol) is an email service using the TCP/IP protoc
 }
 ```
 
-`Monika` is using the sendmailer library to breakdown the configuration with type smtp, registering the username and password to the mail host with certain port and create a transporter.
+**ID**
+Notification ID, to identify the notification number.
 
-```js
-export const transporter = nodemailer.createTransport({
-  host: cfg.hostname,
-  port: cfg.port,
-  auth: { user: cfg.username, pass: cfg.password },
-})
-```
+**Type**
+Type of Notification in this case it would be set as `smtp`.
 
-Using the transporter, `Monika` then sends the email with its sender, recipient, subject and message in html format.
+**Data**
+The detail settings needed for sending email through smtp.
 
-```js
-export const sendSmtpMail = async (transporter: Mail, opt: Mail.Options) => {
-  return transporter.sendMail({
-    from: opt.from,
-    to: opt.to,
-    subject: opt.subject,
-    html: opt.html,
-  })
-}
-```
+**Recipients**
+Recipient email addresses, set as an array for sending to multiple addresses. ex. `["monika@testmail.com", "symon@testmail.com"]`
+
+**Hostname**
+The smtp host that you will be using for sending the email. ex. `smtp.gmail.com`
+
+**Port**
+The port that has been allowed to be used for sending mail in your host. ex. `587`
+
+**Username**
+The username that has been registered on your smtp server. ex. `yourusername@gmail.com`
+
+**Password**
+The password set for your username. ex. `thepasswordforyourusername`
+
+`Monika` will breakdown the configuration with type `smtp`, registering the username and password to the mail host with certain port and create a transporter to send to your recipient addresses.
 
 ## Webhook
 
@@ -170,7 +183,25 @@ Besides the email notifications, `Monika` also provide webhook service using RES
 }
 ```
 
-Using the webhook type configuration, `Monika` will send a post request and data through its body using the axios library. The data for notification will be sent as this object :
+**ID**
+Notification ID, to identify the notification number.
+
+**Type**
+Type of Notification in this case it would be set as `webhook`.
+
+**Data**
+The detail settings needed for sending email through smtp.
+
+**Recipients**
+Recipient email addresses, set as an array for sending to multiple addresses. ex. `["monika@testmail.com", "symon@testmail.com"]`
+
+**Method**
+The method will be used in webhook. ex. `POST`
+
+**Url**
+The url that you will send notifications to. ex. `https://yourwebsite.com/webhook`
+
+Using the webhook type configuration, `Monika` will send a post request and data through its body. The data for notification will be sent as set in this object :
 
 ```js
 body: {
@@ -178,14 +209,6 @@ body: {
   time: string
   alert: string
 }
-```
-
-```js
-const res = await axios({
-  url: data.url,
-  data: data.body,
-  method: data.method,
-})
 ```
 
 Keep watch on these pages, new notification methods are being developed.
