@@ -20,7 +20,6 @@ export interface SMTPData extends MailData {
 
 export interface WebhookData {
   url: string
-  method: 'POST'
   body: WebhookDataBody
 }
 

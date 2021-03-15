@@ -6,7 +6,8 @@ import { AxiosResponseWithExtraData } from '../interfaces/request'
 import getIp from './ip'
 import { sendMailgun } from './mailgun'
 import { createSmtpTransport, sendSmtpMail } from './smtp'
-import { sendWebhook } from './webhook'
+import { sendWebhook } from './notifications/webhook'
+import { sendSlack } from './notifications/slack'
 
 type CheckResponseFn = (response: AxiosResponseWithExtraData) => boolean
 type ValidateResponseStatus = { alert: string; status: boolean }
@@ -146,6 +147,20 @@ export const sendAlerts = async ({
                 },
               } as WebhookData).then(() => ({
                 notification: 'webhook',
+                alert: val.alert,
+                url,
+              }))
+            }
+            case 'slack': {
+              return sendSlack({
+                ...notification.data,
+                body: {
+                  url,
+                  alert: val.alert,
+                  time: new Date().toLocaleString(),
+                },
+              } as WebhookData).then(() => ({
+                notification: 'slack',
                 alert: val.alert,
                 url,
               }))
