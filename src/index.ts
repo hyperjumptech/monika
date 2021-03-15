@@ -75,6 +75,9 @@ class Monika extends Command {
           case 'webhook':
             this.log(`URL: ${(item.data as WebhookData).url}`)
             break
+          case 'slack':
+            this.log(`URL: ${(item.data as WebhookData).url}`)
+            break
         }
       })
       // Loop through all probes
