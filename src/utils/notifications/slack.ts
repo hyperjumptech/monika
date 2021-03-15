@@ -10,7 +10,7 @@ export const sendSlack = async (data: WebhookData) => {
       method: 'POST',
       url: data.url,
       data: {
-        text: `*${data.body.alert}*\n\n*URL*: ${data.body.url}\n*TIME*: ${data.body.url}\n`,
+        text: `*${data.body.alert}*\n\n*URL*: ${data.body.url}\n*TIME*: ${data.body.time}\n`,
       },
     })
 
