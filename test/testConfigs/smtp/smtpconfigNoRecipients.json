@@ -5,7 +5,7 @@
       "id": "unique-id",
       "type": "smtp",
       "data": {
-        "hostname": "https://www.dennypradipta.com",
+        "hostname": "https://www.example.com",
         "port": 8080,
         "username": "dennypradipta",
         "password": "bismillah"

@@ -5,7 +5,7 @@
       "id": "unique-id-mailgun",
       "type": "mailgun",
       "data": {
-        "recipients": ["recipient1@mailgun.com"],
+        "recipients": ["recipient1@example.com"],
         "apiKey": "YOUR_API_KEY",
         "domain": "YOUR_DOMAIN"
       }
@@ -14,7 +14,7 @@
       "id": "unique-id-sendgrid",
       "type": "sendgrid",
       "data": {
-        "recipients": ["recipient1@sendgrid.com"],
+        "recipients": ["recipient1@example.com"],
         "apiKey": "YOUR_API_KEY"
       }
     },
@@ -22,8 +22,8 @@
       "id": "unique-id-smtp",
       "type": "smtp",
       "data": {
-        "recipients": ["recipient1@smtp.com"],
-        "hostname": "smtp.mail.com",
+        "recipients": ["recipient1@example.com"],
+        "hostname": "smtp.example.com",
         "port": 222,
         "username": "smtpusername",
         "password": "smtppassword"
@@ -33,14 +33,14 @@
       "id": "unique-id-webhook",
       "type": "webhook",
       "data": {
-        "url": "https://examplewebhookurl.com/webhook"
+        "url": "https://example.com/webhook"
       }
     },
     {
       "id": "unique-id-slack",
       "type": "slack",
       "data": {
-        "url": "https://exampleslackurl.com/webhook"
+        "url": "https://example.com/webhook"
       }
     }
   ],

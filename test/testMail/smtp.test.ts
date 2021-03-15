@@ -10,8 +10,8 @@ const transport: Mail = mailMock.createTransport({
   port: 2323,
 })
 const opt: Mail.Options = {
-  from: 'me@mail.com',
-  to: 'symontest@mailinator.com',
+  from: 'me@example.com',
+  to: 'symontest@example.com',
   subject: 'unit test',
   html: '<p>A unit test</p>',
 }
@@ -24,7 +24,7 @@ describe('Smtp test', () => {
         port: 587,
         username: 'me@symon.org',
         password: 'symonPass',
-        recipients: ['symon@mailinator.com'],
+        recipients: ['symon@example.com'],
       }
 
       const res = createSmtpTransport(mockCfg)
@@ -37,7 +37,7 @@ describe('Smtp test', () => {
         port: 587,
         username: 'me@symon.org',
         password: 'symonPass',
-        recipients: ['symon@mailinator.com'],
+        recipients: ['symon@example.com'],
       }
 
       expect(() => createSmtpTransport(mockCfg)).to.throw(
@@ -51,7 +51,7 @@ describe('Smtp test', () => {
         port: 0,
         username: 'me@symon.org',
         password: 'symonPass',
-        recipients: ['symon@mailinator.com'],
+        recipients: ['symon@example.com'],
       }
 
       expect(() => createSmtpTransport(mockCfg)).to.throw(
@@ -65,7 +65,7 @@ describe('Smtp test', () => {
         port: 587,
         username: '',
         password: 'symonPass',
-        recipients: ['symon@mailinator.com'],
+        recipients: ['symon@example.com'],
       }
 
       expect(() => createSmtpTransport(mockCfg)).to.throw(
@@ -79,7 +79,7 @@ describe('Smtp test', () => {
         port: 587,
         username: 'me@symon.org',
         password: '',
-        recipients: ['symon@mailinator.com'],
+        recipients: ['symon@example.com'],
       }
 
       expect(() => createSmtpTransport(mockCfg)).to.throw(
@@ -97,8 +97,8 @@ describe('Smtp test', () => {
       })
 
       const res = await sendSmtpMail(transport, {
-        from: 'me@mail.com',
-        to: 'symontest@mailinator.com',
+        from: 'me@example.com',
+        to: 'symontest@example.com',
         subject: 'unit test',
         html: '<p>A unit test</p>',
       })

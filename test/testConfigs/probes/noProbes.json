@@ -5,7 +5,7 @@
       "id": "unique-id",
       "type": "webhook",
       "data": {
-        "url": "http://www.dennypradipta.com",
+        "url": "http://www.example.com",
         "method": "GET"
       }
     }
