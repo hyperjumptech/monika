@@ -77,7 +77,7 @@ would need a mailgun account to obtain your API_KEY and DOMAIN. Please consult [
 | Type       | Notification types                                                           | `mailgun`                                       |
 | Recipients | An array of email addresses that will receive the e-mail from Monika         | `["monika@testmail.com", "symon@testmail.com"]` |
 | Api Key    | Mailgun's account api key, mailgun's registered key to identify your account | `70e34aba-0ea908325`                            |
-| Domain     | Domain registered in mailgun                                                 | `sandbox.monika.com`                            |
+| Domain     | The domain to set in Mailgun                                                 | `sandboxmail.mailgun.com`                       |
 
 ## Sendgrid
 
