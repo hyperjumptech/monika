@@ -103,10 +103,6 @@ const WEBHOOK_NO_URL = {
   valid: false,
   message: 'URL not found',
 }
-const WEBHOOK_NO_METHOD = {
-  valid: false,
-  message: 'Method not found',
-}
 
 export const validateConfig = async (configuration: Config) => {
   const data = configuration
@@ -151,10 +147,13 @@ export const validateConfig = async (configuration: Config) => {
         break
       case 'webhook':
         if (!(data as WebhookData).url) return WEBHOOK_NO_URL
+        break
 
-        if (!(data as WebhookData).method) return WEBHOOK_NO_METHOD
+      case 'slack':
+        if (!(data as WebhookData).url) return WEBHOOK_NO_URL
 
         break
+
       default:
         return NOTIFICATION_INVALID_TYPE
     }
