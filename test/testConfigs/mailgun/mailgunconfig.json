@@ -5,7 +5,7 @@
       "id": "unique-id",
       "type": "mailgun",
       "data": {
-        "recipients": ["a@a.com"],
+        "recipients": ["a@example.com"],
         "apiKey": "adfsafdsadfdsafsafds",
         "domain": "api.mailgun.net"
       }
