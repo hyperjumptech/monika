@@ -13,7 +13,8 @@ import {
   validateResponse,
 } from '../../src/utils/alert'
 import * as mailgun from '../../src/utils/mailgun'
-import * as webhook from '../../src/utils/webhook'
+import * as webhook from '../../src/utils/notifications/webhook'
+import * as slack from '../../src/utils/notifications/slack'
 import * as smtp from '../../src/utils/smtp'
 
 describe('check response status', () => {
@@ -289,8 +290,10 @@ describe('send alerts', () => {
     expect(mailgun.sendMailgun).to.have.been.called()
     expect(sent).to.have.length(1)
   })
-  it('should send webhook notification', async () => {
+  it('should send webhook & slack notifications', async () => {
     chai.spy.on(webhook, 'sendWebhook', () => Promise.resolve())
+    chai.spy.on(slack, 'sendSlack', () => Promise.resolve())
+
     const sent = await sendAlerts({
       validations: [
         {
@@ -304,15 +307,24 @@ describe('send alerts', () => {
           type: 'webhook',
           data: {
             url: 'xx',
-            method: 'POST',
+          } as WebhookData,
+        },
+        {
+          id: 'one',
+          type: 'slack',
+          data: {
+            url: 'xx',
           } as WebhookData,
         },
       ],
       url: 'https://hyperjump.tech',
     })
+
     expect(webhook.sendWebhook).to.have.been.called()
-    expect(sent).to.have.length(1)
+    expect(slack.sendSlack).to.have.been.called()
+    expect(sent).to.have.length(2)
   })
+
   it('should send SMTP notification', async () => {
     chai.spy.on(smtp, 'sendSmtpMail', () => Promise.resolve())
     const sent = await sendAlerts({
@@ -340,8 +352,11 @@ describe('send alerts', () => {
     expect(smtp.sendSmtpMail).to.have.been.called()
     expect(sent).to.have.length(1)
   })
+
   it('should send both alerts', async () => {
     chai.spy.on(webhook, 'sendWebhook', () => Promise.resolve())
+    chai.spy.on(slack, 'sendSlack', () => Promise.resolve())
+
     const sent = await sendAlerts({
       validations: [
         {
@@ -359,9 +374,20 @@ describe('send alerts', () => {
           type: 'webhook',
           data: {
             url: 'xx',
-            method: 'POST',
             body: {
               url: 'https://webhook/webhook',
+              time: '123',
+              alert: 'alert',
+            },
+          },
+        },
+        {
+          id: 'one',
+          type: 'slack',
+          data: {
+            url: 'xx',
+            body: {
+              url: 'https://slack/slack',
               time: '123',
               alert: 'alert',
             },
@@ -370,7 +396,9 @@ describe('send alerts', () => {
       ],
       url: 'https://hyperjump.tech',
     })
+
     expect(webhook.sendWebhook).to.have.been.called()
-    expect(sent).to.have.length(2)
+    expect(slack.sendSlack).to.have.been.called()
+    expect(sent).to.have.length(4)
   })
 })
