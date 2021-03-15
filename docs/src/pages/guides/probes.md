@@ -71,5 +71,5 @@ On completion, `Monika` will sleep until the next interval to start again. At th
 
 ## Further reading
 
-1. [Alerts](./alerts.md)
-2. [Notifications](./notifications.md)
+1. [Alerts](./alerts)
+2. [Notifications](./notifications)
