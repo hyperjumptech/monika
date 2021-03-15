@@ -33,8 +33,14 @@
       "id": "unique-id-webhook",
       "type": "webhook",
       "data": {
-        "method": "POST",
         "url": "https://examplewebhookurl.com/webhook"
+      }
+    },
+    {
+      "id": "unique-id-slack",
+      "type": "slack",
+      "data": {
+        "url": "https://exampleslackurl.com/webhook"
       }
     }
   ],
