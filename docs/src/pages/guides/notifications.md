@@ -9,7 +9,7 @@ In `Monika`, we provide multiple notification channels. Notifications are availa
 
 ## Configurations
 
-Notifications can be sent through multiple channels and mail accounts, each are defined through configuration such as in the file `config.json.example` below. All you need for having a notification is set these configurations.
+Notifications can be sent through multiple channels and mail accounts, each are defined through configuration such as in the file `config.json.example` below.
 
 ```json
 "notifications": [
@@ -56,7 +56,7 @@ Notifications can be sent through multiple channels and mail accounts, each are 
 
 ## Mailgun
 
-Mailgun is the notification channel through the mailgun email service. For this you need to have a mailgun account first, using your mailgun's API_KEY and DOMAIN you can send notifications to the recipient's mail.
+Mailgun is the notification channel through the mailgun email service. First, you need to have a mailgun account, then get the API key and DOMAIN. Please check out the [documentation in mailgun](https://documentation.mailgun.com/en/latest/quickstart.html). Put the API key and the DOMAIN in the monika's configuration as follows.
 
 ```json
 {
@@ -80,19 +80,14 @@ Type of Notification in this case it would be set as `mailgun`.
 The detail settings needed to send a mailgun.
 
 **Recipients**
-Email addresses that will accept the mail sent from your mailgun account, the recipients address is set in array making it able to send to multiple addresses. `["monika@testmail.com", "symon@testmail.com"]`
+An array of email addresses that will receive the e-mail from Monika. ex. `["monika@testmail.com", "symon@testmail.com"]`
 
 **Api Key**
 Mailgun's account api key, mailgun's registered key to identify your account. ex. `70e34aba-0ea908325`
 
-**Domain**
-A domain that you have set in mailgun. ex. `sandboxmail.mailgun.com`
-
-`Monika` filters the notification types for mailgun and breaks down the data configuration, setting up a mailgun service and then sending through the data using mailgun-js lib.
-
 ## Sendgrid
 
-Similar to mailgun, sendgrid is also an email delivery service. You need to have a sendgrid account before you can send an email through this method. For sending a notification through sendgrid all you need to set is the API_KEY and recipient email addresses.
+Similar to mailgun, sendgrid is also an email delivery service. First, sign up for an account in sendgrid and get the API key. Please check [sendgrid's documentation](https://sendgrid.com/docs/api-reference/). Then put the API key in Monika's configuration as follows.
 
 ```json
 {
@@ -115,7 +110,7 @@ Type of Notification in this case it would be set as `sendgrid`.
 The detail settings needed for sending email through sendgrid.
 
 **Recipients**
-Recipient email addresses, set as an array for sending to multiple addresses. ex. `["monika@testmail.com", "symon@testmail.com"]`
+An array of email addresses that will receive the e-mail from Monika. ex. `["monika@testmail.com", "symon@testmail.com"]`
 
 **Api Key**
 The api key that sendgrid gives for your account.
@@ -151,7 +146,7 @@ Type of Notification in this case it would be set as `smtp`.
 The detail settings needed for sending email through smtp.
 
 **Recipients**
-Recipient email addresses, set as an array for sending to multiple addresses. ex. `["monika@testmail.com", "symon@testmail.com"]`
+An array of email addresses that will receive the e-mail from Monika. ex. `["monika@testmail.com", "symon@testmail.com"]`
 
 **Hostname**
 The smtp host that you will be using for sending the email. ex. `smtp.gmail.com`
@@ -190,18 +185,18 @@ Notification ID, to identify the notification number.
 Type of Notification in this case it would be set as `webhook`.
 
 **Data**
-The detail settings needed for sending email through smtp.
+The detail settings needed for sending alerts through webhook.
 
 **Recipients**
-Recipient email addresses, set as an array for sending to multiple addresses. ex. `["monika@testmail.com", "symon@testmail.com"]`
+An array of email addresses that will receive the e-mail from Monika. ex. `["monika@testmail.com", "symon@testmail.com"]`
 
 **Method**
-The method will be used in webhook. ex. `POST`
+HTTP method POST or PUT. ex. `POST`
 
 **Url**
-The url that you will send notifications to. ex. `https://yourwebsite.com/webhook`
+The URL of the server that will receive the webhook notification.. ex. `https://yourwebsite.com/webhook`
 
-Using the webhook type configuration, `Monika` will send a post request and data through its body. The data for notification will be sent as set in this object :
+Using the webhook type configuration, `Monika` will send a request with the following body:
 
 ```js
 body: {
