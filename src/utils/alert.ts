@@ -155,7 +155,7 @@ export const sendAlerts = async ({
                 notification.data as SMTPData
               )
               return sendSmtpMail(transporter, {
-                from: 'http-probe@hyperjump.tech',
+                from: 'monika@hyperjump.tech',
                 to: (notification?.data as SMTPData)?.recipients?.join(','),
                 subject: message.subject,
                 html: message.body,
