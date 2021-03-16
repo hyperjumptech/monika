@@ -1,7 +1,8 @@
 import { Config } from '../interfaces/config'
 import console, { log } from 'console'
 import { probing } from '../utils/probing'
-import { validateResponse, sendAlerts } from './alert'
+import { validateResponse } from './alert'
+import { getServerStatus } from './get-server-status'
 
 const MILLISECONDS = 1000
 
@@ -13,12 +14,15 @@ async function doProbes(config: Config) {
       const probRes = await probing(item)
       const validatedResp = validateResponse(item.alerts, probRes)
 
-      log('id:', item.id, '- status:', probRes.status, 'for:', item.request.url)
+      log(
+        `id: ${item.id} - status: ${probRes.status} for: ${item.request.url} -- ${probRes.config.extraData?.responseTime}`
+      )
 
-      await sendAlerts({
-        validations: validatedResp,
-        notifications: config.notifications,
-        url: item.request.url ?? '',
+      await getServerStatus({
+        config,
+        probe: item,
+        validatedResp,
+        threshold: item.threshold,
       })
     } catch (error) {
       log(
