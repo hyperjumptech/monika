@@ -36,6 +36,7 @@
     "mailgun-js": "^0.22.0",
     "nodemailer": "^6.5.0",
     "smtp-server": "^3.8.0",
+    "sqlite3": "^5.0.2",
     "tslib": "^1.14.1"
   },
   "devDependencies": {
