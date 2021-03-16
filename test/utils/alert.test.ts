@@ -242,14 +242,13 @@ describe('send alerts', () => {
   afterEach(() => {
     chai.spy.restore()
   })
-  it('should not send any alert', async () => {
+  it('should send UP alert', async () => {
+    chai.spy.on(mailgun, 'sendMailgun', () => Promise.resolve())
     const sent = await sendAlerts({
-      validations: [
-        {
-          alert: 'status-not-2xx',
-          status: false,
-        },
-      ],
+      validation: {
+        alert: 'status-not-2xx',
+        status: false,
+      },
       notifications: [
         {
           id: 'one',
@@ -262,18 +261,42 @@ describe('send alerts', () => {
         },
       ],
       url: 'https://hyperjump.tech',
+      status: 'UP',
     })
-    expect(sent).to.have.length(0)
+    expect(sent).to.have.length(1)
   })
+
+  it('should send DOWN alert', async () => {
+    chai.spy.on(mailgun, 'sendMailgun', () => Promise.resolve())
+    const sent = await sendAlerts({
+      validation: {
+        alert: 'status-not-2xx',
+        status: true,
+      },
+      notifications: [
+        {
+          id: 'one',
+          type: 'mailgun',
+          data: {
+            recipients: ['xx@xx'],
+            apiKey: 'xx',
+            domain: 'xxx',
+          } as MailgunData,
+        },
+      ],
+      url: 'https://hyperjump.tech',
+      status: 'DOWN',
+    })
+    expect(sent).to.have.length(1)
+  })
+
   it('should send mailgun notification', async () => {
     chai.spy.on(mailgun, 'sendMailgun', () => Promise.resolve())
     const sent = await sendAlerts({
-      validations: [
-        {
-          alert: 'status-not-2xx',
-          status: true,
-        },
-      ],
+      validation: {
+        alert: 'status-not-2xx',
+        status: true,
+      },
       notifications: [
         {
           id: 'one',
@@ -286,6 +309,7 @@ describe('send alerts', () => {
         },
       ],
       url: 'https://hyperjump.tech',
+      status: 'DOWN',
     })
     expect(mailgun.sendMailgun).to.have.been.called()
     expect(sent).to.have.length(1)
@@ -295,12 +319,10 @@ describe('send alerts', () => {
     chai.spy.on(slack, 'sendSlack', () => Promise.resolve())
 
     const sent = await sendAlerts({
-      validations: [
-        {
-          alert: 'status-not-2xx',
-          status: true,
-        },
-      ],
+      validation: {
+        alert: 'status-not-2xx',
+        status: true,
+      },
       notifications: [
         {
           id: 'one',
@@ -318,6 +340,7 @@ describe('send alerts', () => {
         },
       ],
       url: 'https://hyperjump.tech',
+      status: 'DOWN',
     })
 
     expect(webhook.sendWebhook).to.have.been.called()
@@ -328,12 +351,10 @@ describe('send alerts', () => {
   it('should send SMTP notification', async () => {
     chai.spy.on(smtp, 'sendSmtpMail', () => Promise.resolve())
     const sent = await sendAlerts({
-      validations: [
-        {
-          alert: 'status-not-2xx',
-          status: true,
-        },
-      ],
+      validation: {
+        alert: 'status-not-2xx',
+        status: true,
+      },
       notifications: [
         {
           id: 'one',
@@ -348,57 +369,9 @@ describe('send alerts', () => {
         },
       ],
       url: 'https://hyperjump.tech',
+      status: 'DOWN',
     })
     expect(smtp.sendSmtpMail).to.have.been.called()
     expect(sent).to.have.length(1)
-  })
-
-  it('should send both alerts', async () => {
-    chai.spy.on(webhook, 'sendWebhook', () => Promise.resolve())
-    chai.spy.on(slack, 'sendSlack', () => Promise.resolve())
-
-    const sent = await sendAlerts({
-      validations: [
-        {
-          alert: 'status-not-2xx',
-          status: true,
-        },
-        {
-          alert: 'response-time-greater-than-200-ms',
-          status: true,
-        },
-      ],
-      notifications: [
-        {
-          id: 'one',
-          type: 'webhook',
-          data: {
-            url: 'xx',
-            body: {
-              url: 'https://webhook/webhook',
-              time: '123',
-              alert: 'alert',
-            },
-          },
-        },
-        {
-          id: 'one',
-          type: 'slack',
-          data: {
-            url: 'xx',
-            body: {
-              url: 'https://slack/slack',
-              time: '123',
-              alert: 'alert',
-            },
-          },
-        },
-      ],
-      url: 'https://hyperjump.tech',
-    })
-
-    expect(webhook.sendWebhook).to.have.been.called()
-    expect(slack.sendSlack).to.have.been.called()
-    expect(sent).to.have.length(4)
   })
 })

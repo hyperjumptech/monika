@@ -24,6 +24,7 @@ const calculateSuccessFailure = async ({
   request: Probe['request']
   threshold: number
 }) => {
+  log(`Checking for ${errorName} in probe...`)
   if (probeStatus.isDown === false) {
     // If current probe is UP and trigger equals true
     if (validation.status) {
