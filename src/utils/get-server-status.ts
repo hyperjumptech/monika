@@ -25,6 +25,7 @@ const calculateSuccessFailure = ({
       // If current probe is UP and trigger equals true
       if (validation.status) {
         // Add failure count
+        probeStatus.shouldSendNotification = false
         probeStatus.consecutiveSuccesses = 0
         probeStatus.totalFailures += 1
         probeStatus.consecutiveFailures += 1
@@ -55,6 +56,7 @@ const calculateSuccessFailure = ({
         probeStatus.totalFailures += 1
       } else {
         // Add success count
+        probeStatus.shouldSendNotification = false
         probeStatus.consecutiveFailures = 0
         probeStatus.totalSuccesses += 1
         probeStatus.consecutiveSuccesses += 1
