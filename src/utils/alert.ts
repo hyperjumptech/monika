@@ -138,7 +138,7 @@ export const sendAlerts = async ({
               subject: message.subject,
               body: message.body,
               sender: {
-                // TODO: Change this before release
+                // TODO: Read from ENV Variables
                 name: 'Monika',
                 email: 'Monika@hyperjump.tech',
               },
@@ -184,6 +184,7 @@ export const sendAlerts = async ({
         case 'smtp': {
           const transporter = createSmtpTransport(notification.data as SMTPData)
           return sendSmtpMail(transporter, {
+            // TODO: Read from ENV Variables
             from: 'http-probe@hyperjump.tech',
             to: (notification?.data as SMTPData)?.recipients?.join(','),
             subject: message.subject,
