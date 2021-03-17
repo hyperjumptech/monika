@@ -3,11 +3,11 @@ export interface ServerStatus {
   name: string
   requests: number
 
-  isStatusCodeError: StatusCount
-  isResponseTimeError: StatusCount
+  statusCodeError: Status
+  responseTimeError: Status
 }
 
-export interface StatusCount {
+export interface Status {
   isDown: boolean
   totalSuccesses: number
   totalFailures: number

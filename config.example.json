@@ -61,7 +61,7 @@
           "password": "somepassword"
         }
       },
-      "threshold": 3,
+      "triggerThreshold": 3,
       "alerts": ["status-not-2xx", "response-time-greater-than-200-ms"]
     }
   ]

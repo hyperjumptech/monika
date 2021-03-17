@@ -5,6 +5,6 @@ export interface Probe {
   name: string
   description?: string
   request: RequestConfig
-  threshold: number
+  triggerThreshold: number
   alerts: string[]
 }

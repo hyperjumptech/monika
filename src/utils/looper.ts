@@ -22,7 +22,7 @@ async function doProbes(config: Config) {
         config,
         probe: item,
         validatedResp,
-        threshold: item.threshold,
+        threshold: item.triggerThreshold,
       })
     } catch (error) {
       log(
