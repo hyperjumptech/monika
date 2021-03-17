@@ -1,7 +1,7 @@
 import { Config } from '../interfaces/config'
 import console, { log } from 'console'
 import { probing } from '../utils/probing'
-import { validateResponse } from './alert'
+import { validateResponse, sendAlerts } from './alert'
 import { getServerStatus } from './get-server-status'
 
 const MILLISECONDS = 1000
@@ -17,12 +17,23 @@ async function doProbes(config: Config) {
       log(
         `id: ${item.id} - status: ${probRes.status} for: ${item.request.url} -- ${probRes.config.extraData?.responseTime}`
       )
-
-      await getServerStatus({
+      const serverStatuses = getServerStatus({
         config,
         probe: item,
         validatedResp,
         threshold: item.triggerThreshold,
+      })
+
+      serverStatuses.forEach(async (status, index) => {
+        if (status.shouldSendNotification) {
+          log(`Sending a "${item.alerts[index]}" notification`)
+          await sendAlerts({
+            validation: validatedResp[index],
+            notifications: config.notifications,
+            url: item.request.url ?? '',
+            status: status.isDown ? 'DOWN' : 'UP',
+          })
+        }
       })
     } catch (error) {
       log(

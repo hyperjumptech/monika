@@ -1,6 +1,5 @@
 import { Config } from './../interfaces/config'
-import { sendAlerts } from './alert'
-import { ServerStatus, StatusCount } from './../interfaces/server-status'
+import { ServerStatus, Status } from './../interfaces/server-status'
 import { Probe } from '../interfaces/probe'
 import { ValidateResponseStatus } from './alert'
 import console, { log } from 'console'
@@ -9,79 +8,73 @@ const SERVER_STATUSES: ServerStatus[] = []
 
 // Function to calculate successes and failures, either total or consecutives.
 // If consecutive success/failure equals to threshold, it will send notifications
-const calculateSuccessFailure = async ({
+const calculateSuccessFailure = ({
   errorName,
   probeStatus,
   validation,
-  config,
-  request,
   threshold,
 }: {
   errorName: string
-  probeStatus: StatusCount
+  probeStatus: Status
   validation: ValidateResponseStatus
-  config: Config
-  request: Probe['request']
   threshold: number
 }) => {
   log(`Checking for ${errorName} in probe...`)
-  if (probeStatus.isDown === false) {
-    // If current probe is UP and trigger equals true
-    if (validation.status) {
-      // Add failure count
-      probeStatus.consecutiveSuccesses = 0
-      probeStatus.totalFailures += 1
-      probeStatus.consecutiveFailures += 1
+  switch (probeStatus.isDown) {
+    case false:
+      // If current probe is UP and trigger equals true
+      if (validation.status) {
+        // Add failure count
+        probeStatus.consecutiveSuccesses = 0
+        probeStatus.totalFailures += 1
+        probeStatus.consecutiveFailures += 1
 
-      // If count is larger or equal than threshold...
-      // Set status to down, and reset consecutive failure
-      if (probeStatus.consecutiveFailures === threshold) {
-        log(`Sending error notification for "${errorName}"\n`)
-        await sendAlerts({
-          validation,
-          notifications: config.notifications,
-          url: request.url ?? '',
-          status: 'DOWN',
-        })
-        probeStatus.isDown = true
+        // If count is larger or equal than threshold...
+        // Set status to down, and reset consecutive failure
+        if (probeStatus.consecutiveFailures === threshold) {
+          log(`Send error for ${errorName}`)
+          probeStatus.shouldSendNotification = true
+          probeStatus.isDown = true
+        }
+      } else {
+        // Server is doing fine
+        probeStatus.shouldSendNotification = false
+        probeStatus.consecutiveFailures = 0
+        probeStatus.consecutiveSuccesses += 1
+        probeStatus.totalSuccesses += 1
       }
-    } else {
-      // Server is doing fine
-      probeStatus.consecutiveFailures = 0
-      probeStatus.consecutiveSuccesses += 1
-      probeStatus.totalSuccesses += 1
-    }
-  } else if (probeStatus.isDown === true) {
-    // If current probe is DOWN and trigger equals true
-    if (validation.status) {
-      // Server is not doing fine
-      probeStatus.consecutiveSuccesses = 0
-      probeStatus.consecutiveFailures += 1
-      probeStatus.totalFailures += 1
-    } else {
-      // Add success count
-      probeStatus.consecutiveFailures = 0
-      probeStatus.totalSuccesses += 1
-      probeStatus.consecutiveSuccesses += 1
 
-      // If count is larger or equal than threshold...
-      // Set status to down, and reset consecutive failure
-      if (probeStatus.consecutiveSuccesses === threshold) {
-        log(`Sending resolved notification for "${errorName}"\n`)
-        await sendAlerts({
-          validation,
-          notifications: config.notifications,
-          url: request.url ?? '',
-          status: 'UP',
-        })
-        probeStatus.isDown = false
+      return probeStatus
+    case true:
+      // If current probe is DOWN and trigger equals true
+      if (validation.status) {
+        // Server is not doing fine
+        probeStatus.shouldSendNotification = false
+        probeStatus.consecutiveSuccesses = 0
+        probeStatus.consecutiveFailures += 1
+        probeStatus.totalFailures += 1
+      } else {
+        // Add success count
+        probeStatus.consecutiveFailures = 0
+        probeStatus.totalSuccesses += 1
+        probeStatus.consecutiveSuccesses += 1
+
+        // If count is larger or equal than threshold...
+        // Set status to down, and reset consecutive failure
+        if (probeStatus.consecutiveSuccesses === threshold) {
+          log(`Send resolved for ${errorName}`)
+          probeStatus.shouldSendNotification = true
+          probeStatus.isDown = false
+        }
       }
-    }
+
+      return probeStatus
+    default:
+      return probeStatus
   }
 }
 
-export const getServerStatus = async ({
-  config,
+export const getServerStatus = ({
   probe,
   validatedResp,
   threshold,
@@ -93,7 +86,8 @@ export const getServerStatus = async ({
 }) => {
   try {
     // Get Probe ID and Name
-    const { id, name, request } = probe
+    const { id, name } = probe
+    const results: Array<Status> = []
 
     // Initialize server status
     // This checks if there are no item in SERVER_STATUSES
@@ -103,15 +97,17 @@ export const getServerStatus = async ({
         id,
         name,
         requests: 0,
-        isResponseTimeError: {
+        responseTimeError: {
           isDown: false,
+          shouldSendNotification: false,
           totalSuccesses: 0,
           totalFailures: 0,
           consecutiveSuccesses: 0,
           consecutiveFailures: 0,
         },
-        isStatusCodeError: {
+        statusCodeError: {
           isDown: false,
+          shouldSendNotification: false,
           totalSuccesses: 0,
           totalFailures: 0,
           consecutiveSuccesses: 0,
@@ -137,15 +133,15 @@ export const getServerStatus = async ({
 
         // Handle is status code error
         if (alert.includes('status-not')) {
-          const probeStatus = currentProbe.isStatusCodeError
-          calculateSuccessFailure({
+          const probeStatus = currentProbe.statusCodeError
+          const result = calculateSuccessFailure({
             errorName: 'Status code not xxx',
             probeStatus,
             validation,
-            config,
-            request,
             threshold,
           })
+
+          results.push(result)
 
           log(`Is Down? ${probeStatus.isDown}`)
           log(`Total Successes ${probeStatus.totalSuccesses}`)
@@ -156,15 +152,15 @@ export const getServerStatus = async ({
 
         // Handle is response time error
         if (alert.includes('response-time-greater')) {
-          const probeStatus = currentProbe.isResponseTimeError
-          calculateSuccessFailure({
+          const probeStatus = currentProbe.responseTimeError
+          const result = calculateSuccessFailure({
             errorName: 'Response time greater than xxx (m)s',
             probeStatus,
             validation,
-            config,
-            request,
             threshold,
           })
+
+          results.push(result)
 
           log(`Is Down? ${probeStatus.isDown}`)
           log(`Total Successes ${probeStatus.totalSuccesses}`)
@@ -174,7 +170,10 @@ export const getServerStatus = async ({
         }
       })
     }
+
+    return results
   } catch (error) {
     console.error(error.message)
+    return []
   }
 }

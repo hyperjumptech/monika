@@ -9,6 +9,7 @@ export interface ServerStatus {
 
 export interface Status {
   isDown: boolean
+  shouldSendNotification: boolean
   totalSuccesses: number
   totalFailures: number
   consecutiveSuccesses: number
