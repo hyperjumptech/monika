@@ -30,7 +30,7 @@ const calculateSuccessFailure = ({
         probeStatus.consecutiveFailures += 1
 
         // If count is larger or equal than threshold...
-        // Set status to down, and reset consecutive failure
+        // Set status to down
         if (probeStatus.consecutiveFailures === threshold) {
           log(`Send error for ${errorName}`)
           probeStatus.shouldSendNotification = true
@@ -60,7 +60,7 @@ const calculateSuccessFailure = ({
         probeStatus.consecutiveSuccesses += 1
 
         // If count is larger or equal than threshold...
-        // Set status to down, and reset consecutive failure
+        // Set status to UP
         if (probeStatus.consecutiveSuccesses === threshold) {
           log(`Send resolved for ${errorName}`)
           probeStatus.shouldSendNotification = true
