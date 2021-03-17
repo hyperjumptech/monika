@@ -73,11 +73,6 @@ class Monika extends Command {
     if (isConfigValid.valid) {
       // If config is valid, print the configuration
       this.log('Parsed configuration\n====================')
-      this.log(
-        `Interval: ${
-          config.interval ? `${config.interval} seconds\n` : 'Not specified\n'
-        }`
-      )
       this.log(`Notifications: `)
       config.notifications.forEach((item) => {
         this.log(`Notification ID: ${item.id}`)
