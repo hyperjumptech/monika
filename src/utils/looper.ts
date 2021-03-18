@@ -1,8 +1,8 @@
+import { processProbeStatus } from './process-server-status'
 import { Config } from '../interfaces/config'
 import console, { log } from 'console'
 import { probing } from '../utils/probing'
 import { validateResponse, sendAlerts } from './alert'
-import { getServerStatus } from './get-server-status'
 
 const MILLISECONDS = 1000
 
@@ -17,11 +17,12 @@ async function doProbes(config: Config) {
       log(
         `id: ${item.id} - status: ${probRes.status} for: ${item.request.url} -- ${probRes.config.extraData?.responseTime}`
       )
-      const serverStatuses = getServerStatus({
-        config,
+
+      const serverStatuses = processProbeStatus({
         probe: item,
         validatedResp,
-        threshold: item.triggerThreshold,
+        successThreshold: item.successThreshold,
+        failedThreshold: item.failedThreshold,
       })
 
       serverStatuses.forEach(async (status, index) => {
