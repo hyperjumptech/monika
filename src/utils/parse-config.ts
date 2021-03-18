@@ -13,7 +13,7 @@ export const parseConfig = async (configPath: string) => {
     return output
   } catch (error) {
     throw new Error(
-      'Config file not found! Copy example config from https://github.com/hyperjumptech/monika/blob/main/config.example.json'
+      'Config file not found! Copy example config from https://raw.githubusercontent.com/hyperjumptech/monika/main/config.example.json'
     )
   }
 }
