@@ -2,7 +2,6 @@ import { SMTPData, WebhookData, MailgunData } from '../interfaces/data'
 import { Notification } from '../interfaces/notification'
 import { Probe } from '../interfaces/probe'
 import { AxiosResponseWithExtraData } from '../interfaces/request'
-
 import getIp from './ip'
 import { sendMailgun } from './mailgun'
 import { createSmtpTransport, sendSmtpMail } from './smtp'
@@ -127,7 +126,6 @@ export const sendAlerts = async ({
   }>
 > => {
   const ipAddress = getIp()
-
   const message = getMessageForAlert(validation.alert, url, ipAddress, status)
   const sent = await Promise.all<any>(
     notifications.map((notification) => {
