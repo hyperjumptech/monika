@@ -12,23 +12,32 @@ import { looper } from './utils/looper'
 import { parseConfig } from './utils/parse-config'
 import { validateConfig } from './utils/validate-config'
 
+import { closeLog, openLogfile } from './utils/history'
+
 class Monika extends Command {
-  static description = 'describe the command here'
+  static description = 'Monika command line monitoring tool'
 
   static flags = {
     // add --version flag to show CLI version
     version: flags.version({ char: 'v' }),
     help: flags.help({ char: 'h' }),
     // flag with a value (-n, --name=VALUE)
+
     config: flags.string({
       char: 'c',
       description:
-        "JSON configuration file path e.g './config.json' (default './config.json')",
-      required: true,
+        'JSON configuration filename. If none is supplied, will look for default in current path.',
       default: './config.json',
     }),
-    // flag with no value (-f, --force)
-    force: flags.boolean({ char: 'f' }),
+
+    logs: flags.boolean({
+      char: 'l',
+      description: 'print all logs',
+    }),
+
+    flush: flags.boolean({
+      description: 'flush logs',
+    }),
   }
 
   async run() {
@@ -38,6 +47,7 @@ class Monika extends Command {
     const config: Config = await parseConfig(file)
     // Check if config is valid
     const isConfigValid: Validation = await validateConfig(config)
+    openLogfile()
 
     if (isConfigValid.valid) {
       // If config is valid, print the configuration
@@ -83,6 +93,7 @@ class Monika extends Command {
       // Loop through all probes
       looper(config)
     } else {
+      closeLog()
       // If config is invalid, throw error
       this.error(isConfigValid.message, { exit: 100 })
     }
