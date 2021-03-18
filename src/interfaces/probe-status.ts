@@ -9,16 +9,16 @@ export interface StatusDetails {
   alert: string
   state:
     | 'INIT'
-    | 'UP_FAIL_BELOW_THRESHOLD'
-    | 'UP_FAIL_EQUALS_THRESHOLD'
-    | 'UP_SUCCESS'
-    | 'DOWN_SUCCESS_BELOW_THRESHOLD'
-    | 'DOWN_SUCCESS_EQUALS_THRESHOLD'
-    | 'DOWN_FAIL'
+    | 'UP_TRUE_EQUALS_THRESHOLD'
+    | 'UP_TRUE_BELOW_THRESHOLD'
+    | 'UP_FALSE'
+    | 'DOWN_FALSE_EQUALS_THRESHOLD'
+    | 'DOWN_FALSE_BELOW_THRESHOLD'
+    | 'DOWN_TRUE'
   isDown: boolean
   shouldSendNotification: boolean
-  totalSuccesses: number
-  totalFailures: number
-  consecutiveSuccesses: number
-  consecutiveFailures: number
+  totalTrue: number
+  totalFalse: number
+  consecutiveTrue: number
+  consecutiveFalse: number
 }

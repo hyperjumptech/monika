@@ -9,19 +9,19 @@ const INIT_PROBE_STATUS_DETAILS: StatusDetails = {
   state: 'INIT',
   isDown: false,
   shouldSendNotification: false,
-  totalSuccesses: 0,
-  totalFailures: 0,
-  consecutiveSuccesses: 0,
-  consecutiveFailures: 0,
+  totalTrue: 0,
+  totalFalse: 0,
+  consecutiveTrue: 0,
+  consecutiveFalse: 0,
 }
 enum PROBE_STATE {
   INIT = 'INIT',
-  UP_FAIL_BELOW_THRESHOLD = 'UP_FAIL_BELOW_THRESHOLD',
-  UP_FAIL_EQUALS_THRESHOLD = 'UP_FAIL_EQUALS_THRESHOLD',
-  UP_SUCCESS = 'UP_SUCCESS',
-  DOWN_SUCCESS_BELOW_THRESHOLD = 'DOWN_SUCCESS_BELOW_THRESHOLD',
-  DOWN_SUCCESS_EQUALS_THRESHOLD = 'DOWN_SUCCESS_EQUALS_THRESHOLD',
-  DOWN_FAIL = 'DOWN_FAIL',
+  UP_TRUE_EQUALS_THRESHOLD = 'UP_TRUE_EQUALS_THRESHOLD',
+  UP_TRUE_BELOW_THRESHOLD = 'UP_TRUE_BELOW_THRESHOLD',
+  UP_FALSE = 'UP_FALSE',
+  DOWN_FALSE_EQUALS_THRESHOLD = 'DOWN_FALSE_EQUALS_THRESHOLD',
+  DOWN_FALSE_BELOW_THRESHOLD = 'DOWN_FALSE_BELOW_THRESHOLD',
+  DOWN_TRUE = 'DOWN_TRUE',
 }
 
 // Function to determine probe state
@@ -37,25 +37,25 @@ const determineProbeState = ({
   trueThreshold: number
   falseThreshold: number
 }) => {
-  const { isDown, consecutiveSuccesses, consecutiveFailures } = probeStatus
+  const { isDown, consecutiveTrue, consecutiveFalse } = probeStatus
   const { status } = validation
 
-  if (!isDown && status && consecutiveFailures === falseThreshold - 1)
-    return PROBE_STATE.UP_FAIL_EQUALS_THRESHOLD
+  if (!isDown && status && consecutiveTrue === trueThreshold - 1)
+    return PROBE_STATE.UP_TRUE_EQUALS_THRESHOLD
 
-  if (!isDown && status && consecutiveFailures < falseThreshold - 1) {
-    return PROBE_STATE.UP_FAIL_BELOW_THRESHOLD
+  if (!isDown && status && consecutiveTrue < trueThreshold - 1) {
+    return PROBE_STATE.UP_TRUE_BELOW_THRESHOLD
   }
 
-  if (!isDown && !status) return PROBE_STATE.UP_SUCCESS
+  if (!isDown && !status) return PROBE_STATE.UP_FALSE
 
-  if (isDown && !status && consecutiveSuccesses === trueThreshold - 1)
-    return PROBE_STATE.DOWN_SUCCESS_EQUALS_THRESHOLD
+  if (isDown && !status && consecutiveFalse === falseThreshold - 1)
+    return PROBE_STATE.DOWN_FALSE_EQUALS_THRESHOLD
 
-  if (isDown && !status && consecutiveSuccesses < trueThreshold - 1)
-    return PROBE_STATE.DOWN_SUCCESS_BELOW_THRESHOLD
+  if (isDown && !status && consecutiveFalse < falseThreshold - 1)
+    return PROBE_STATE.DOWN_FALSE_BELOW_THRESHOLD
 
-  if (isDown && status) return PROBE_STATE.DOWN_FAIL
+  if (isDown && status) return PROBE_STATE.DOWN_TRUE
 
   return PROBE_STATE.INIT
 }
@@ -66,66 +66,66 @@ const updateProbeStatus = (
   state: PROBE_STATE
 ) => {
   switch (state) {
-    case 'UP_SUCCESS':
+    case 'UP_FALSE':
       statusDetails = {
         ...statusDetails,
-        state: 'UP_SUCCESS',
+        state: 'UP_FALSE',
         shouldSendNotification: false,
-        consecutiveFailures: 0,
-        consecutiveSuccesses: statusDetails.consecutiveSuccesses + 1,
-        totalSuccesses: statusDetails.totalSuccesses + 1,
+        consecutiveTrue: 0,
+        consecutiveFalse: statusDetails.consecutiveFalse + 1,
+        totalFalse: statusDetails.totalFalse + 1,
       }
       return statusDetails
-    case 'UP_FAIL_BELOW_THRESHOLD':
+    case 'UP_TRUE_BELOW_THRESHOLD':
       statusDetails = {
         ...statusDetails,
-        state: 'UP_FAIL_BELOW_THRESHOLD',
+        state: 'UP_TRUE_BELOW_THRESHOLD',
         shouldSendNotification: false,
-        consecutiveSuccesses: 0,
-        totalFailures: statusDetails.totalFailures + 1,
-        consecutiveFailures: statusDetails.consecutiveFailures + 1,
+        consecutiveFalse: 0,
+        totalTrue: statusDetails.totalTrue + 1,
+        consecutiveTrue: statusDetails.consecutiveTrue + 1,
       }
       return statusDetails
-    case 'UP_FAIL_EQUALS_THRESHOLD':
+    case 'UP_TRUE_EQUALS_THRESHOLD':
       statusDetails = {
         ...statusDetails,
-        state: 'UP_FAIL_EQUALS_THRESHOLD',
+        state: 'UP_TRUE_EQUALS_THRESHOLD',
         shouldSendNotification: true,
         isDown: true,
-        consecutiveSuccesses: 0,
-        totalFailures: statusDetails.totalFailures + 1,
-        consecutiveFailures: statusDetails.consecutiveFailures + 1,
+        consecutiveFalse: 0,
+        totalTrue: statusDetails.totalTrue + 1,
+        consecutiveTrue: statusDetails.consecutiveTrue + 1,
       }
       return statusDetails
-    case 'DOWN_FAIL':
+    case 'DOWN_TRUE':
       statusDetails = {
         ...statusDetails,
-        state: 'DOWN_FAIL',
+        state: 'DOWN_TRUE',
         shouldSendNotification: false,
-        consecutiveSuccesses: 0,
-        consecutiveFailures: statusDetails.consecutiveFailures + 1,
-        totalFailures: statusDetails.totalFailures + 1,
+        consecutiveFalse: 0,
+        consecutiveTrue: statusDetails.consecutiveTrue + 1,
+        totalTrue: statusDetails.totalTrue + 1,
       }
       return statusDetails
-    case 'DOWN_SUCCESS_BELOW_THRESHOLD':
+    case 'DOWN_FALSE_BELOW_THRESHOLD':
       statusDetails = {
         ...statusDetails,
-        state: 'DOWN_SUCCESS_BELOW_THRESHOLD',
+        state: 'DOWN_FALSE_BELOW_THRESHOLD',
         shouldSendNotification: false,
-        consecutiveFailures: 0,
-        totalSuccesses: statusDetails.totalSuccesses + 1,
-        consecutiveSuccesses: statusDetails.consecutiveSuccesses + 1,
+        consecutiveTrue: 0,
+        totalFalse: statusDetails.totalFalse + 1,
+        consecutiveFalse: statusDetails.consecutiveFalse + 1,
       }
       return statusDetails
-    case 'DOWN_SUCCESS_EQUALS_THRESHOLD':
+    case 'DOWN_FALSE_EQUALS_THRESHOLD':
       statusDetails = {
         ...statusDetails,
-        state: 'DOWN_SUCCESS_EQUALS_THRESHOLD',
+        state: 'DOWN_FALSE_EQUALS_THRESHOLD',
         shouldSendNotification: true,
         isDown: false,
-        consecutiveFailures: 0,
-        totalSuccesses: statusDetails.totalSuccesses + 1,
-        consecutiveSuccesses: statusDetails.consecutiveSuccesses + 1,
+        consecutiveTrue: 0,
+        totalFalse: statusDetails.totalFalse + 1,
+        consecutiveFalse: statusDetails.consecutiveFalse + 1,
       }
       return statusDetails
     default:
@@ -204,12 +204,11 @@ export const processProbeStatus = ({
           results.push(updatedStatus)
 
           log(`Alert ${updatedStatus.alert}`)
-          log(`State ${updatedStatus.state}`)
           log(`Is Down? ${updatedStatus.isDown}`)
-          log(`Total Successes ${updatedStatus.totalSuccesses}`)
-          log(`Total Failures ${updatedStatus.totalFailures}`)
-          log(`Consecutive Successes ${updatedStatus.consecutiveSuccesses}`)
-          log(`Consecutive Failures ${updatedStatus.consecutiveFailures}\n\n`)
+          log(`Total True ${updatedStatus.totalTrue}`)
+          log(`Total False ${updatedStatus.totalFalse}`)
+          log(`Consecutive True ${updatedStatus.consecutiveTrue}`)
+          log(`Consecutive False ${updatedStatus.consecutiveFalse}\n\n`)
         }
 
         // Handle is response time error
@@ -232,13 +231,15 @@ export const processProbeStatus = ({
 
           results.push(updatedStatus)
 
+          log(updatedStatus.consecutiveTrue)
+
           log(`Alert ${updatedStatus.alert}`)
           log(`State ${updatedStatus.state}`)
           log(`Is Down? ${updatedStatus.isDown}`)
-          log(`Total Successes ${updatedStatus.totalSuccesses}`)
-          log(`Total Failures ${updatedStatus.totalFailures}`)
-          log(`Consecutive Successes ${updatedStatus.consecutiveSuccesses}`)
-          log(`Consecutive Failures ${updatedStatus.consecutiveFailures}\n\n`)
+          log(`Total True ${updatedStatus.totalTrue}`)
+          log(`Total False ${updatedStatus.totalFalse}`)
+          log(`Consecutive True ${updatedStatus.consecutiveTrue}`)
+          log(`Consecutive False ${updatedStatus.consecutiveFalse}\n\n`)
         }
       })
     }
