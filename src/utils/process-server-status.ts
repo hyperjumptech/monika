@@ -92,6 +92,8 @@ const updateProbeStatus = (
         state: 'UP_FAIL_EQUALS_THRESHOLD',
         shouldSendNotification: true,
         isDown: true,
+        consecutiveSuccesses: 0,
+        totalFailures: statusDetails.totalFailures + 1,
         consecutiveFailures: statusDetails.consecutiveFailures + 1,
       }
       return statusDetails
@@ -121,6 +123,8 @@ const updateProbeStatus = (
         state: 'DOWN_SUCCESS_EQUALS_THRESHOLD',
         shouldSendNotification: true,
         isDown: false,
+        consecutiveFailures: 0,
+        totalSuccesses: statusDetails.totalSuccesses + 1,
         consecutiveSuccesses: statusDetails.consecutiveSuccesses + 1,
       }
       return statusDetails
