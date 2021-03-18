@@ -63,6 +63,10 @@ const PROBE_ALERT_INVALID = {
   message:
     "Probe alert should be 'status-not-2xx' or 'response-time-greater-than-<number>-(m)s",
 }
+const PROBE_DUPLICATE_ID = {
+  valid: false,
+  message: 'Probe should have unique id',
+}
 
 // SMTP
 const SMTP_NO_HOSTNAME = {
@@ -185,6 +189,11 @@ export const validateConfig = async (configuration: Config) => {
       }
     }
   }
+
+  // Check duplicate probe id
+  const probeIds = data.probes.map((probe) => probe.id)
+  const uniqueProbeIds = new Set(probeIds)
+  if (uniqueProbeIds.size !== data.probes.length) return PROBE_DUPLICATE_ID
 
   return VALID_CONFIG
 }
