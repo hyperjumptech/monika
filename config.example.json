@@ -61,7 +61,9 @@
           "password": "somepassword"
         }
       },
-      "alerts": ["status-not-2xx", "response-time-greater-than-200-ms"]
+      "trueThreshold": 3,
+      "falseThreshold": 3,
+      "alerts": ["status-not-2xx", "response-time-greater-than-400-ms"]
     }
   ]
 }
