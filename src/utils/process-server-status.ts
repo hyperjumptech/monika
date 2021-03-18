@@ -92,6 +92,7 @@ const updateProbeStatus = (
         state: 'UP_FAIL_EQUALS_THRESHOLD',
         shouldSendNotification: true,
         isDown: true,
+        consecutiveFailures: statusDetails.consecutiveFailures + 1,
       }
       return statusDetails
     case 'DOWN_FAIL':
@@ -120,6 +121,7 @@ const updateProbeStatus = (
         state: 'DOWN_SUCCESS_EQUALS_THRESHOLD',
         shouldSendNotification: true,
         isDown: false,
+        consecutiveSuccesses: statusDetails.consecutiveSuccesses + 1,
       }
       return statusDetails
     default:

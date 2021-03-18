@@ -54,15 +54,15 @@ An actual probe request may be something like below.
 
 Details of the field are give in the table below.
 
-| Topic            | Description                                                                                                        |
-| :--------------- | ------------------------------------------------------------------------------------------------------------------ |
-| method           | Http method such as GET, POST, PUT, DELETE                                                                         |
-| url              | This is the url endpoint to dispatch the request to                                                                |
-| timeout          | Request timeout, after which time, `Monika`will assume timeout                                                     |
-| headers          | Your http header                                                                                                   |
-| body             | Any http body if your method requires it                                                                           |
-| successThreshold | How many times should a probe trigger send notifications and change the server to 'UP' if current server is 'DOWN' |
-| failedThreshold  | How many times should a probe trigger send notifications and change the server to 'DOWN' if current server is 'UP' |
+| Topic                       | Description                                                                                                                    |
+| :-------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| method                      | Http method such as GET, POST, PUT, DELETE                                                                                     |
+| url                         | This is the url endpoint to dispatch the request to                                                                            |
+| timeout                     | Request timeout, after which time, `Monika`will assume timeout                                                                 |
+| headers                     | Your http header                                                                                                               |
+| body                        | Any http body if your method requires it                                                                                       |
+| successThreshold (optional) | How many times should a probe trigger send notifications and change the server to 'UP' if current server is 'DOWN' (default 5) |
+| failedThreshold (optional)  | How many times should a probe trigger send notifications and change the server to 'DOWN' if current server is 'UP' (default 5) |
 
 Alerts are the condition which will trigger an alert, and the subsequent notification method to send out the alert. See below for further details on alerts and notifications.
 
