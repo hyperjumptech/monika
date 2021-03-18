@@ -26,6 +26,7 @@ class Monika extends Command {
         "JSON configuration file path e.g './config.json' (default './config.json')",
       required: true,
       default: './config.json',
+      env: 'MONIKA_JSON_CONFIG',
     }),
     // flag with no value (-f, --force)
     force: flags.boolean({ char: 'f' }),
