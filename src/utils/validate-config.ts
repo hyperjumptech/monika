@@ -63,6 +63,14 @@ const PROBE_ALERT_INVALID = {
   message:
     "Probe alert should be 'status-not-2xx' or 'response-time-greater-than-<number>-(m)s",
 }
+const PROBE_NO_SUCCESS_THRESHOLD = {
+  valid: false,
+  message: 'Probe success threshold should be a number!',
+}
+const PROBE_NO_FAILED_THRESHOLD = {
+  valid: false,
+  message: 'Probe failed threshold should be a number!',
+}
 
 // SMTP
 const SMTP_NO_HOSTNAME = {
@@ -161,13 +169,23 @@ export const validateConfig = async (configuration: Config) => {
 
   // Check probes properties
   for (const probe of data.probes) {
-    const { alerts, name, request } = probe as Probe
+    const {
+      alerts,
+      name,
+      request,
+      successThreshold,
+      failedThreshold,
+    } = probe as Probe
 
     if (!name) return PROBE_NO_NAME
 
     if (!request) return PROBE_NO_REQUEST
 
     if ((alerts?.length ?? 0) === 0) return PROBE_NO_ALERT
+
+    if (!successThreshold) return PROBE_NO_SUCCESS_THRESHOLD
+
+    if (!failedThreshold) return PROBE_NO_FAILED_THRESHOLD
 
     // Check probe request properties
     const { url, method } = request as RequestConfig

@@ -45,6 +45,8 @@ An actual probe request may be something like below.
           "password": "somepassword"
         }
       },
+      "successThreshold": 3,
+      "failedThreshold": 3,
       "alerts": ["status-not-2xx", "response-time-greater-than-200-ms"]
     },
   ]
@@ -52,14 +54,15 @@ An actual probe request may be something like below.
 
 Details of the field are give in the table below.
 
-| Topic   | Description                                                    |
-| :------ | -------------------------------------------------------------- |
-| method  | Http method such as GET, POST, PUT, DELETE                     |
-| url     | This is the url endpoint to dispatch the request to            |
-| timeout | Request timeout, after which time, `Monika`will assume timeout |
-| headers | Your http header                                               |
-| body    | Any http body if your method requires it                       |
-|         |                                                                |
+| Topic            | Description                                                                                                        |
+| :--------------- | ------------------------------------------------------------------------------------------------------------------ |
+| method           | Http method such as GET, POST, PUT, DELETE                                                                         |
+| url              | This is the url endpoint to dispatch the request to                                                                |
+| timeout          | Request timeout, after which time, `Monika`will assume timeout                                                     |
+| headers          | Your http header                                                                                                   |
+| body             | Any http body if your method requires it                                                                           |
+| successThreshold | How many times should a probe trigger send notifications and change the server to 'UP' if current server is 'DOWN' |
+| failedThreshold  | How many times should a probe trigger send notifications and change the server to 'DOWN' if current server is 'UP' |
 
 Alerts are the condition which will trigger an alert, and the subsequent notification method to send out the alert. See below for further details on alerts and notifications.
 
