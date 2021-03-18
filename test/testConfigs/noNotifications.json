@@ -16,6 +16,8 @@
           "password": "somepassword"
         }
       },
+      "successThreshold": 2,
+      "failedThreshold": 2,
       "alerts": ["status-not-2xx", "response-time-greater-than-200-ms"]
     }
   ]
