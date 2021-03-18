@@ -28,31 +28,31 @@ enum PROBE_STATE {
 const determineProbeState = ({
   probeStatus,
   validation,
-  successThreshold,
-  failedThreshold,
+  trueThreshold,
+  falseThreshold,
 }: {
   errorName: string
   probeStatus: StatusDetails
   validation: ValidateResponseStatus
-  successThreshold: number
-  failedThreshold: number
+  trueThreshold: number
+  falseThreshold: number
 }) => {
   const { isDown, consecutiveSuccesses, consecutiveFailures } = probeStatus
   const { status } = validation
 
-  if (!isDown && status && consecutiveFailures === failedThreshold - 1)
+  if (!isDown && status && consecutiveFailures === falseThreshold - 1)
     return PROBE_STATE.UP_FAIL_EQUALS_THRESHOLD
 
-  if (!isDown && status && consecutiveFailures < failedThreshold - 1) {
+  if (!isDown && status && consecutiveFailures < falseThreshold - 1) {
     return PROBE_STATE.UP_FAIL_BELOW_THRESHOLD
   }
 
   if (!isDown && !status) return PROBE_STATE.UP_SUCCESS
 
-  if (isDown && !status && consecutiveSuccesses === successThreshold - 1)
+  if (isDown && !status && consecutiveSuccesses === trueThreshold - 1)
     return PROBE_STATE.DOWN_SUCCESS_EQUALS_THRESHOLD
 
-  if (isDown && !status && consecutiveSuccesses < successThreshold - 1)
+  if (isDown && !status && consecutiveSuccesses < trueThreshold - 1)
     return PROBE_STATE.DOWN_SUCCESS_BELOW_THRESHOLD
 
   if (isDown && status) return PROBE_STATE.DOWN_FAIL
@@ -137,13 +137,13 @@ const updateProbeStatus = (
 export const processProbeStatus = ({
   probe,
   validatedResp,
-  successThreshold,
-  failedThreshold,
+  trueThreshold,
+  falseThreshold,
 }: {
   probe: Probe
   validatedResp: ValidateResponseStatus[]
-  successThreshold: number
-  failedThreshold: number
+  trueThreshold: number
+  falseThreshold: number
 }) => {
   try {
     // Get Probe ID and Name
@@ -192,8 +192,8 @@ export const processProbeStatus = ({
             errorName: alert,
             probeStatus: PROBE_STATUSES[foundStatus].details,
             validation,
-            successThreshold,
-            failedThreshold,
+            trueThreshold,
+            falseThreshold,
           })
           const updatedStatus = updateProbeStatus(
             PROBE_STATUSES[foundStatus].details,
@@ -221,8 +221,8 @@ export const processProbeStatus = ({
             errorName: alert,
             probeStatus: PROBE_STATUSES[foundStatus].details,
             validation,
-            successThreshold,
-            failedThreshold,
+            trueThreshold,
+            falseThreshold,
           })
           const updatedStatus = updateProbeStatus(
             PROBE_STATUSES[foundStatus].details,

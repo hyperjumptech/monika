@@ -18,16 +18,16 @@ async function doProbes(config: Config) {
         `id: ${item.id} - status: ${probRes.status} for: ${item.request.url} -- ${probRes.config.extraData?.responseTime}`
       )
 
-      if (!item.successThreshold)
+      if (!item.trueThreshold)
         log(`No success threshold defined. Using the default threshold: 5`)
-      if (!item.failedThreshold)
+      if (!item.falseThreshold)
         log(`No failed threshold defined. Using the default threshold: 5`)
 
       const serverStatuses = processProbeStatus({
         probe: item,
         validatedResp,
-        successThreshold: item.successThreshold || 5,
-        failedThreshold: item.failedThreshold || 5,
+        trueThreshold: item.trueThreshold || 5,
+        falseThreshold: item.falseThreshold || 5,
       })
 
       serverStatuses.forEach(async (status, index) => {

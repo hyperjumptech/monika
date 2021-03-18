@@ -5,7 +5,7 @@ export interface Probe {
   name: string
   description?: string
   request: RequestConfig
-  successThreshold: number
-  failedThreshold: number
+  trueThreshold: number
+  falseThreshold: number
   alerts: string[]
 }
