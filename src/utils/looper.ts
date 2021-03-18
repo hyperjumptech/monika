@@ -1,3 +1,4 @@
+import { processProbeStatus } from './process-server-status'
 import { Config } from '../interfaces/config'
 import console, { log } from 'console'
 import { probing } from '../utils/probing'
@@ -13,12 +14,32 @@ async function doProbes(config: Config) {
       const probRes = await probing(item)
       const validatedResp = validateResponse(item.alerts, probRes)
 
-      log('id:', item.id, '- status:', probRes.status, 'for:', item.request.url)
+      log(
+        `id: ${item.id} - status: ${probRes.status} for: ${item.request.url} -- ${probRes.config.extraData?.responseTime}`
+      )
 
-      await sendAlerts({
-        validations: validatedResp,
-        notifications: config.notifications,
-        url: item.request.url ?? '',
+      if (!item.trueThreshold)
+        log(`No success threshold defined. Using the default threshold: 5`)
+      if (!item.falseThreshold)
+        log(`No failed threshold defined. Using the default threshold: 5`)
+
+      const serverStatuses = processProbeStatus({
+        probe: item,
+        validatedResp,
+        trueThreshold: item.trueThreshold || 5,
+        falseThreshold: item.falseThreshold || 5,
+      })
+
+      serverStatuses.forEach(async (status, index) => {
+        if (status.shouldSendNotification) {
+          log(`Sending a "${item.alerts[index]}" notification`)
+          await sendAlerts({
+            validation: validatedResp[index],
+            notifications: config.notifications,
+            url: item.request.url ?? '',
+            status: status.isDown ? 'DOWN' : 'UP',
+          })
+        }
       })
     } catch (error) {
       log(
