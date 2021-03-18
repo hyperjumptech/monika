@@ -231,10 +231,7 @@ export const processProbeStatus = ({
 
           results.push(updatedStatus)
 
-          log(updatedStatus.consecutiveTrue)
-
           log(`Alert ${updatedStatus.alert}`)
-          log(`State ${updatedStatus.state}`)
           log(`Is Down? ${updatedStatus.isDown}`)
           log(`Total True ${updatedStatus.totalTrue}`)
           log(`Total False ${updatedStatus.totalFalse}`)
