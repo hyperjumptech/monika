@@ -32,8 +32,8 @@ class Monika extends Command {
     }),
 
     logs: flags.boolean({
-      char: 'l',
-      description: 'print all logs',
+      char: 'l', // l shorthand for logs 
+      description: 'print all logs.',
     }),
 
     flush: flags.boolean({
