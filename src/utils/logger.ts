@@ -67,7 +67,9 @@ export async function printAllLogs() {
       { hAlign: 'center', content: data.probe_id },
       {
         hAlign: 'center',
-        content: chalk.keyword(getStatusColor(data.status_code))(data.status_code),
+        content: chalk.keyword(getStatusColor(data.status_code))(
+          data.status_code
+        ),
       },
       data.probe_url,
       { hAlign: 'center', content: data.response_time },

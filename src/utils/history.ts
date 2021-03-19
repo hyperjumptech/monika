@@ -54,14 +54,14 @@ export const getAllLogs = (): Promise<HistoryLogType[]> => {
   const readRowsSQL =
     'SELECT rowid AS id, probe_id, status_code, probe_url, response_time FROM history'
 
-  const res : Promise<HistoryLogType[]> = new Promise((resolve, reject) => {
+  const res: Promise<HistoryLogType[]> = new Promise((resolve, reject) => {
     db.all(readRowsSQL, (err: Error, data: HistoryLogType[]) => {
       if (err) return reject(err)
 
       return resolve(data)
     })
   })
-  return res 
+  return res
 }
 
 /**
