@@ -25,11 +25,6 @@ async function doProbe(config: Config) {
 
       probeLog(item, probRes, '')
 
-      if (!item.trueThreshold)
-        log(`No success threshold defined. Using the default threshold: 5`)
-      if (!item.falseThreshold)
-        log(`No failed threshold defined. Using the default threshold: 5`)
-
       const serverStatuses = processProbeStatus({
         probe: item,
         validatedResp,

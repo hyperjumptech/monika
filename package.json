@@ -18,6 +18,7 @@
     "monitoring"
   ],
   "scripts": {
+    "preinstall": "node scripts/preinstall.js",
     "pretest": "npm run check-format",
     "posttest": "eslint . --ext .ts --config .eslintrc",
     "prepack": "rm -rf lib && tsc -b && oclif-dev readme",
