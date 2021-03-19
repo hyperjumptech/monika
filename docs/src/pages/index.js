@@ -170,6 +170,13 @@ const Home = ({ sponsors }) => {
                 <span>npm i -g @hyperjumptech/monika</span>
               </code>
             </div>
+            <p className="my-8 text-xl leading-7  text-gray-600">
+              Now you can start monitoring your server! 🎉 Follow our{' '}
+              <Link href="/quick-start">
+                <a className=" text-coral underline">Quick Start</a>
+              </Link>{' '}
+              guide.
+            </p>
           </div>
         </div>
 
