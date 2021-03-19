@@ -2,10 +2,16 @@ import { AxiosResponseWithExtraData } from '../interfaces/request'
 import { Probe } from '../interfaces/probe'
 import { log } from 'console'
 import path from 'path'
-import chalk from 'chalk'
-import Table from 'cli-table3'
 
 const sqlite3 = require('sqlite3').verbose()
+
+export type HistoryLogType = {
+  id: number
+  probeID: string
+  statusCode: number
+  probeURL: string
+  responseTime: number
+}
 
 let db: any
 
@@ -44,54 +50,18 @@ export async function openLogfile() {
   )
 }
 
-/**
- * prints all content of history table
- */
-export async function printAllLogs() {
+export const getAllLogs = (): Promise<HistoryLogType[]> => {
   const readRowsSQL =
     'SELECT rowid AS id, probe_id, status_code, probe_url, response_time FROM history'
 
-  const table = new Table({
-    style: { head: ['green'] },
-    head: ['#', 'probe_id', 'status_code', 'probe_url', 'response_time'],
-    wordWrap: true,
-  })
+  const res : Promise<HistoryLogType[]> = new Promise((resolve, reject) => {
+    db.all(readRowsSQL, (err: Error, data: HistoryLogType[]) => {
+      if (err) return reject(err)
 
-  let statusColor: string
-
-  await db.all(readRowsSQL, function (err: Error, data: any) {
-    if (err) {
-      log('warning: cannot read logfile. error:', err.message)
-    }
-    data.forEach((data: any) => {
-      // colorize the statuscode
-      switch (Math.trunc(data.status_code / 100)) {
-        case 2:
-          statusColor = 'green'
-          break
-        case 4:
-          statusColor = 'orange'
-          break
-        case 5:
-          statusColor = 'red'
-          break
-        default:
-          statusColor = 'white'
-      }
-
-      table.push([
-        data.id,
-        { hAlign: 'center', content: data.probe_id },
-        {
-          hAlign: 'center',
-          content: chalk.keyword(statusColor)(data.status_code),
-        },
-        data.probe_url,
-        { hAlign: 'center', content: data.response_time },
-      ])
+      return resolve(data)
     })
-    log(table.toString())
   })
+  return res 
 }
 
 /**
@@ -116,9 +86,14 @@ export async function saveLog(
   probeRes: AxiosResponseWithExtraData,
   errorResp: string
 ) {
-  const insertSQL = `INSERT into history (probe_id, status_code, probe_name, probe_url, response_time, error_resp) VALUES(?, ?, ?, ?, ?, ?);`
+  const insertSQL = `INSERT into history (probe_id, created_at, status_code, probe_name, probe_url, response_time, error_resp) 
+  VALUES(?, ?, ?, ?, ?, ?, ?);`
+
+  const created = new Date()
+
   const params = [
     probe.id,
+    created,
     probeRes.status,
     probe.name,
     probe.request.url,
@@ -126,7 +101,7 @@ export async function saveLog(
     errorResp,
   ]
 
-  db.run(insertSQL, params, (err: Error) => {
+  await db.run(insertSQL, params, (err: Error) => {
     if (err) {
       return log('error, cannot insert data into history.db', err)
     }

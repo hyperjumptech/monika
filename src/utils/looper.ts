@@ -15,9 +15,10 @@ const MILLISECONDS = 1000
 async function doProbe(config: Config) {
   // probe each url
   log('\nProbing....')
-  let probRes: AxiosResponseWithExtraData
 
   config.probes.forEach(async (item) => {
+    let probRes: AxiosResponseWithExtraData = {} as AxiosResponseWithExtraData
+
     try {
       probRes = await probing(item)
       const validatedResp = validateResponse(item.alerts, probRes)
@@ -48,9 +49,7 @@ async function doProbe(config: Config) {
         }
       })
     } catch (error) {
-      if (error) {
-        probeLog(item, probRes, error)
-      }
+      probeLog(item, probRes, error)
     }
   })
 }

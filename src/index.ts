@@ -12,13 +12,9 @@ import { Validation } from './interfaces/validation'
 import { looper } from './utils/looper'
 import { parseConfig } from './utils/parse-config'
 import { validateConfig } from './utils/validate-config'
+import { printAllLogs } from './utils/logger'
 
-import {
-  closeLog,
-  openLogfile,
-  printAllLogs,
-  flushAllLogs,
-} from './utils/history'
+import { closeLog, openLogfile, flushAllLogs } from './utils/history'
 
 class Monika extends Command {
   static description = 'Monika command line monitoring tool'
