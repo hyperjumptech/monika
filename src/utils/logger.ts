@@ -40,6 +40,8 @@ export async function probeLog(
     chalk.keyword(statusColor)(probRes.status.toString()),
     'for:',
     probe.request.url,
+    'response:',
+    probRes.config.extraData?.responseTime ?? 'n/a',
     chalk.red(err)
   )
 
