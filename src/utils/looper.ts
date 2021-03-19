@@ -64,12 +64,12 @@ export function looper(config: Config) {
     log(`Probe Request Body: ${JSON.stringify(probe.request.body)}`)
     log(`Probe Alerts: ${probe.alerts.toString()}\n`)
 
-    if ((probe?.interval ?? 0) > 0) {
-      setInterval(
-        () => doProbe(probe, config.notifications),
-        probe.interval! * MILLISECONDS,
-        config
-      )
+    const probeInterval = setInterval(async () => {
+      return doProbe(probe, config.notifications)
+    }, (probe.interval ?? 10) * MILLISECONDS)
+
+    if (process.env.CI) {
+      clearInterval(probeInterval)
     }
   })
 }
