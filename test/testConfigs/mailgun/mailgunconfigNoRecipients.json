@@ -1,5 +1,4 @@
 {
-  "interval": 0,
   "notifications": [
     {
       "id": "unique-id",
@@ -15,6 +14,7 @@
       "id": "1",
       "name": "Example",
       "description": "Probe",
+      "interval": 0,
       "request": {
         "method": "POST",
         "url": "https://something/login",
