@@ -28,4 +28,4 @@ docker-rm: docker-stop
 	-docker rm $(IMAGE_NAME)
 
 docker-run: docker-rm docker
-	docker run --name $(IMAGE_NAME) -e "MONIKA_JSON_CONFIG=/config/config.json" -v /mnt/c/Users/User/Laboratory/testmonika:/config --detach $(IMAGE_NAMESPACE)/$(IMAGE_NAME):latest
+	docker run --name $(IMAGE_NAME) -v $(PWD)/config.example.json:/config/config.json --detach $(IMAGE_NAMESPACE)/$(IMAGE_NAME):latest
