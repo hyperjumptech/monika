@@ -24,11 +24,13 @@ async function doProbe(probe: Probe, notifications: Notification[]) {
 
     probeLog(probe, probRes, '')
 
+    const defaultThreshold = 5
+
     const serverStatuses = processProbeStatus({
       probe,
       validatedResp,
-      trueThreshold: probe.trueThreshold || 5,
-      falseThreshold: probe.falseThreshold || 5,
+      trueThreshold: probe.trueThreshold ?? defaultThreshold,
+      falseThreshold: probe.falseThreshold ?? defaultThreshold,
     })
 
     serverStatuses.forEach(async (status, index) => {
