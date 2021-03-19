@@ -1,10 +1,7 @@
-FROM node:10-alpine
+FROM node:14-alpine
 
 RUN mkdir /config
-COPY . /app
-WORKDIR /app
 
-RUN npm ci
-RUN npm link
+RUN npm i -g @hyperjumptech/monika
 
 CMD [ "monika", "-c", "/config/config.json" ]
