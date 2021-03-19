@@ -1,4 +1,5 @@
 import { Command, flags } from '@oclif/command'
+import cli from 'cli-ux'
 import { Config } from './interfaces/config'
 import {
   MailData,
@@ -12,7 +13,12 @@ import { looper } from './utils/looper'
 import { parseConfig } from './utils/parse-config'
 import { validateConfig } from './utils/validate-config'
 
-import { closeLog, openLogfile } from './utils/history'
+import {
+  closeLog,
+  openLogfile,
+  printAllLogs,
+  flushAllLogs,
+} from './utils/history'
 
 class Monika extends Command {
   static description = 'Monika command line monitoring tool'
@@ -21,7 +27,6 @@ class Monika extends Command {
     // add --version flag to show CLI version
     version: flags.version({ char: 'v' }),
     help: flags.help({ char: 'h' }),
-    // flag with a value (-n, --name=VALUE)
 
     config: flags.string({
       char: 'c',
@@ -42,13 +47,33 @@ class Monika extends Command {
 
   async run() {
     const { flags } = this.parse(Monika)
+    openLogfile()
+
+    if (flags.logs) {
+      printAllLogs()
+      closeLog()
+      return
+    }
+
+    if (flags.flush) {
+      const ans = await cli.prompt(
+        'Are you sure you want to flush all logs in history.db (Y/n)?'
+      )
+      if (ans === 'Y') {
+        flushAllLogs()
+        this.log('Records flushed, thank you.')
+      } else {
+        this.log('Cancelled. Thank you.')
+      }
+      closeLog()
+      return
+    }
+
     // Read the config
     const file = flags.config
     const config: Config = await parseConfig(file)
     // Check if config is valid
     const isConfigValid: Validation = await validateConfig(config)
-    openLogfile()
-
     if (isConfigValid.valid) {
       // If config is valid, print the configuration
       this.log('Parsed configuration\n====================')

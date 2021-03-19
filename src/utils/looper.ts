@@ -2,7 +2,8 @@ import { Config } from '../interfaces/config'
 import console, { log } from 'console'
 import { probing } from './probing'
 import { validateResponse, sendAlerts } from './alert'
-import { insertData } from './history'
+import { probeLog } from './logger'
+import { AxiosResponseWithExtraData } from '../interfaces/request'
 
 const MILLISECONDS = 1000
 
@@ -13,20 +14,14 @@ const MILLISECONDS = 1000
 async function doProbe(config: Config) {
   // probe each url
   log('\nProbing....')
+  let probRes: AxiosResponseWithExtraData
+
   config.probes.forEach(async (item) => {
     try {
-      const probRes = await probing(item)
+      probRes = await probing(item)
       const validatedResp = validateResponse(item.alerts, probRes)
 
-      log('id:', item.id, '- status:', probRes.status, 'for:', item.request.url)
-      insertData(
-        item.id,
-        probRes.status,
-        item.name,
-        item.request.url ?? '',
-        probRes.config.extraData?.responseTime ?? 0,
-        ''
-      )
+      probeLog(item, probRes, '')
 
       await sendAlerts({
         validations: validatedResp,
@@ -35,15 +30,7 @@ async function doProbe(config: Config) {
       })
     } catch (error) {
       if (error) {
-        log(
-          'id:',
-          item.id,
-          '- status: ERROR for:',
-          item.request.url,
-          ':',
-          error.message
-        )
-        insertData(item.id, 0, item.name, item.request.url ?? '', 0, error)
+        probeLog(item, probRes, error)
       }
     }
   })
