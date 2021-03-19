@@ -1,11 +1,8 @@
-GOPATH=$(shell go env GOPATH)
 IMAGE_REGISTRY=dockerhub
 IMAGE_NAMESPACE ?= hyperjump
 IMAGE_NAME ?= monika
-CURRENT_PATH=$(shell pwd)
 COMMIT_ID ?= $(shell git rev-parse --short HEAD)
 VERSION=v1.1.0
-GO111MODULE=on
 
 
 docker:
