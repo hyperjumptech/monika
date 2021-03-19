@@ -19,7 +19,7 @@ let db: any
  * createTable will create the history table if it does not exist
  */
 async function createTable() {
-  const createTablSQL = `CREATE TABLE IF NOT EXISTS history (
+  const createTableSQL = `CREATE TABLE IF NOT EXISTS history (
     id INTEGER PRIMARY KEY,
     created_at TEXT,
     probe_id TEXT,
@@ -29,7 +29,7 @@ async function createTable() {
     response_time INTEGER,
     error_resp TEXT
 );`
-  await db.run(createTablSQL)
+  await db.run(createTableSQL)
 }
 
 /**
