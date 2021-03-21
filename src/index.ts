@@ -48,7 +48,7 @@ class Monika extends Command {
         }`
       )
       this.log(`Notifications: `)
-      config.notifications.forEach((item) => {
+      config.notifications?.forEach((item) => {
         this.log(`Notification ID: ${item.id}`)
         this.log(`Notification Type: ${item.type}`)
         // Only show recipients if type is mailgun, smtp, or sendgrid

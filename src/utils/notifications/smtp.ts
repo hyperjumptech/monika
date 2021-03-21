@@ -1,5 +1,5 @@
 import * as nodemailer from 'nodemailer'
-import { SMTPData } from '../interfaces/data'
+import { SMTPData } from '../../interfaces/data'
 import Mail from 'nodemailer/lib/mailer'
 
 export const createSmtpTransport = (cfg: SMTPData) => {
@@ -20,6 +20,6 @@ export const sendSmtpMail = async (transporter: Mail, opt: Mail.Options) => {
     from: opt.from,
     to: opt.to,
     subject: opt.subject,
-    html: opt.html,
+    text: opt.text,
   })
 }

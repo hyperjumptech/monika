@@ -3,6 +3,6 @@ import { Probe } from './probe'
 
 export interface Config {
   interval?: number
-  notifications: Notification[]
+  notifications?: Notification[]
   probes: Probe[]
 }
