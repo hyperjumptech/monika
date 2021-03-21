@@ -1,22 +1,29 @@
 import { processProbeStatus } from './process-server-status'
 import { Config } from '../interfaces/config'
 import console, { log } from 'console'
-import { probing } from '../utils/probing'
+import { probing } from './probing'
 import { validateResponse, sendAlerts } from './alert'
+import { probeLog } from './logger'
+import { AxiosResponseWithExtraData } from '../interfaces/request'
 
 const MILLISECONDS = 1000
 
-async function doProbes(config: Config) {
+/**
+ * doProbe sends out the http request
+ * @param {object} config contains all the configs
+ */
+async function doProbe(config: Config) {
   // probe each url
   log('\nProbing....')
+
   config.probes.forEach(async (item) => {
+    let probRes: AxiosResponseWithExtraData = {} as AxiosResponseWithExtraData
+
     try {
-      const probRes = await probing(item)
+      probRes = await probing(item)
       const validatedResp = validateResponse(item.alerts, probRes)
 
-      log(
-        `id: ${item.id} - status: ${probRes.status} for: ${item.request.url} -- ${probRes.config.extraData?.responseTime}`
-      )
+      probeLog(item, probRes, '')
 
       const serverStatuses = processProbeStatus({
         probe: item,
@@ -37,18 +44,15 @@ async function doProbes(config: Config) {
         }
       })
     } catch (error) {
-      log(
-        'id:',
-        item.id,
-        '- status: ERROR for:',
-        item.request.url,
-        ':',
-        error.message
-      )
+      probeLog(item, probRes, error)
     }
   })
 }
 
+/**
+ * looper does all the looping
+ * @param {object} config is an object that contains all the configs
+ */
 export function looper(config: Config) {
   const interval = config.interval ?? 0
 
@@ -64,8 +68,8 @@ export function looper(config: Config) {
     log(`Probe Alerts: ${item.alerts.toString()}\n`)
   })
 
-  doProbes(config).catch((error) => console.error(error.message))
+  doProbe(config).catch((error) => console.error(error.message))
   if (interval > 0) {
-    setInterval(doProbes, interval * MILLISECONDS, config)
+    setInterval(doProbe, interval * MILLISECONDS, config)
   }
 }
