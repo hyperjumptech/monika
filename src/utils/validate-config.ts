@@ -13,6 +13,8 @@ import { Config } from '../interfaces/config'
 import { Probe } from '../interfaces/probe'
 import { RequestConfig } from './../interfaces/request'
 import { isValidURL } from './is-valid-url'
+import chalk from 'chalk'
+import boxen from 'boxen'
 
 // Validations messages
 const VALID_CONFIG = {
@@ -112,6 +114,10 @@ const WEBHOOK_NO_URL = {
 export const validateConfig = async (configuration: Config) => {
   const data = configuration
 
+  // Validate Notifications
+  if (!data.notifications || (data?.notifications?.length ?? 0) === 0) {
+    warn(boxen(chalk.red(NO_NOTIFICATIONS.message), {padding: 1, margin: 1, borderStyle: 'bold', borderColor: 'red'}))
+  }
 
   // Validate probes
   if ((data?.probes?.length ?? 0) === 0) return NO_PROBES
