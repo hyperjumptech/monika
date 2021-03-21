@@ -25,18 +25,6 @@ describe('http-probe', () => {
   test
     .stderr()
     .do(() =>
-      cmd.run(['--config', resolve('./test/testConfigs/noNotifications.json')])
-    )
-    .catch((error) => {
-      expect(error.message).to.contain(
-        'Notifications object does not exists or has length lower than 1!'
-      )
-    })
-    .it('runs with config without notifications')
-
-  test
-    .stderr()
-    .do(() =>
       cmd.run([
         '--config',
         resolve('./test/testConfigs/invalidNotificationType.json'),

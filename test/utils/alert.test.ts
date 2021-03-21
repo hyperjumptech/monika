@@ -12,10 +12,12 @@ import {
   statusNot2xx,
   validateResponse,
 } from '../../src/utils/alert'
-import * as mailgun from '../../src/utils/mailgun'
+import * as mailgun from '../../src/utils/notifications/mailgun'
 import * as webhook from '../../src/utils/notifications/webhook'
 import * as slack from '../../src/utils/notifications/slack'
-import * as smtp from '../../src/utils/smtp'
+import * as smtp from '../../src/utils/notifications/smtp'
+import * as notifier from 'node-notifier'
+import NotificationCenter from 'node-notifier/notifiers/notificationcenter'
 
 describe('check response status', () => {
   it('should trigger alert when response is within 4xx status', () => {
@@ -372,6 +374,20 @@ describe('send alerts', () => {
       status: 'DOWN',
     })
     expect(smtp.sendSmtpMail).to.have.been.called()
+    expect(sent).to.have.length(1)
+  })
+
+  it('should send default notification', async () => {
+    chai.spy.on(notifier, 'notify', () => NotificationCenter)
+    const sent = await sendAlerts({
+      validation: {
+        alert: 'status-not-2xx',
+        status: true,
+      },
+      url: 'https://hyperjump.tech',
+      status: 'DOWN',
+    })
+    expect(notifier.notify).to.have.been.called()
     expect(sent).to.have.length(1)
   })
 })

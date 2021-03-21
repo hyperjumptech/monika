@@ -1,10 +1,11 @@
+import * as notifier from 'node-notifier'
 import { SMTPData, WebhookData, MailgunData } from '../interfaces/data'
 import { Notification } from '../interfaces/notification'
 import { Probe } from '../interfaces/probe'
 import { AxiosResponseWithExtraData } from '../interfaces/request'
 import getIp from './ip'
-import { sendMailgun } from './mailgun'
-import { createSmtpTransport, sendSmtpMail } from './smtp'
+import { sendMailgun } from './notifications/mailgun'
+import { createSmtpTransport, sendSmtpMail } from './notifications/smtp'
 import { sendWebhook } from './notifications/webhook'
 import { sendSlack } from './notifications/slack'
 
@@ -115,7 +116,7 @@ export const sendAlerts = async ({
   status,
 }: {
   validation: ValidateResponseStatus
-  notifications: Notification[]
+  notifications?: Notification[]
   url: string
   status: string
 }): Promise<
@@ -127,6 +128,21 @@ export const sendAlerts = async ({
 > => {
   const ipAddress = getIp()
   const message = getMessageForAlert(validation.alert, url, ipAddress, status)
+  if (!notifications || notifications.length === 0) {
+    notifier.notify({
+      title: message.subject,
+      message: validation.alert,
+    })
+
+    return Promise.resolve([
+      {
+        notification: '',
+        alert: validation.alert,
+        url,
+      },
+    ])
+  }
+
   const sent = await Promise.all<any>(
     notifications.map((notification) => {
       switch (notification.type) {
@@ -186,15 +202,20 @@ export const sendAlerts = async ({
             from: 'http-probe@hyperjump.tech',
             to: (notification?.data as SMTPData)?.recipients?.join(','),
             subject: message.subject,
-            html: message.body,
-          })
+            text: message.body,
+          }).then(() => ({
+            notification: 'smtp',
+            alert: validation.alert,
+            url,
+          }))
         }
-        default:
+        default: {
           return Promise.resolve({
             notification: '',
             alert: validation.alert,
             url,
           })
+        }
       }
     })
   )

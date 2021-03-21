@@ -1,5 +1,8 @@
 import { expect } from '@oclif/test'
-import { createSmtpTransport, sendSmtpMail } from '../../src/utils/smtp'
+import {
+  createSmtpTransport,
+  sendSmtpMail,
+} from '../../src/utils/notifications/smtp'
 import Mail from 'nodemailer/lib/mailer'
 import { SMTPData } from '../../src/interfaces/data'
 
