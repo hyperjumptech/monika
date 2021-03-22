@@ -1,12 +1,12 @@
 import { processProbeStatus } from './process-server-status'
 import { Config } from '../interfaces/config'
-import { log } from 'console'
 import { probing } from '../utils/probing'
 import { validateResponse, sendAlerts } from './alert'
 import { Probe } from '../interfaces/probe'
 import { Notification } from '../interfaces/notification'
 import { probeLog } from './logger'
 import { AxiosResponseWithExtraData } from '../interfaces/request'
+import { log } from '../utils/log'
 
 const MILLISECONDS = 1000
 
@@ -35,7 +35,7 @@ async function doProbe(probe: Probe, notifications: Notification[]) {
 
     serverStatuses.forEach(async (status, index) => {
       if (status.shouldSendNotification) {
-        log(`Sending a "${probe.alerts[index]}" notification`)
+        log.info(`Sending a "${probe.alerts[index]}" notification`)
         await sendAlerts({
           validation: validatedResp[index],
           notifications: notifications,
@@ -54,17 +54,17 @@ async function doProbe(probe: Probe, notifications: Notification[]) {
  * @param {object} config is an object that contains all the configs
  */
 export function looper(config: Config) {
-  log('Probes:')
+  log.info('Probes:')
   config.probes.forEach(async (probe) => {
-    log(`Probe ID: ${probe.id}`)
-    log(`Probe Name: ${probe.name}`)
-    log(`Probe Description: ${probe.description}`)
-    log(`Probe Interval: ${probe.interval}`)
-    log(`Probe Request Method: ${probe.request.method}`)
-    log(`Probe Request URL: ${probe.request.url}`)
-    log(`Probe Request Headers: ${JSON.stringify(probe.request.headers)}`)
-    log(`Probe Request Body: ${JSON.stringify(probe.request.body)}`)
-    log(`Probe Alerts: ${probe.alerts.toString()}\n`)
+    log.info(`Probe ID: ${probe.id}`)
+    log.info(`Probe Name: ${probe.name}`)
+    log.info(`Probe Description: ${probe.description}`)
+    log.info(`Probe Interval: ${probe.interval}`)
+    log.info(`Probe Request Method: ${probe.request.method}`)
+    log.info(`Probe Request URL: ${probe.request.url}`)
+    log.info(`Probe Request Headers: ${JSON.stringify(probe.request.headers)}`)
+    log.info(`Probe Request Body: ${JSON.stringify(probe.request.body)}`)
+    log.info(`Probe Alerts: ${probe.alerts.toString()}\n`)
 
     const probeInterval = setInterval(async () => {
       return doProbe(probe, config.notifications)
