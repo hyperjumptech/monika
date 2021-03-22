@@ -5,6 +5,7 @@ import { probing } from '../utils/probing'
 import { validateResponse, sendAlerts } from './alert'
 
 const MILLISECONDS = 1000
+let REQUESTS = 1
 
 async function doProbes(config: Config) {
   // probe each url
@@ -69,8 +70,15 @@ export function looper(config: Config) {
     log(`Probe Alerts: ${item.alerts.toString()}\n`)
   })
 
+  log(`\nRequest ${REQUESTS}`)
   doProbes(config).catch((error) => console.error(error.message))
+  REQUESTS++
+
   if (interval > 0) {
-    setInterval(doProbes, interval * MILLISECONDS, config)
+    setInterval(() => {
+      log(`\nRequest ${REQUESTS}`)
+      doProbes(config)
+      REQUESTS++
+    }, interval * MILLISECONDS)
   }
 }
