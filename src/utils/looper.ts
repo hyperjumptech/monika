@@ -33,7 +33,9 @@ async function doProbes(config: Config) {
 
       serverStatuses.forEach(async (status, index) => {
         if (status.shouldSendNotification) {
-          log(`Sending a "${item.alerts[index]}" notification`)
+          log(
+            `Sending a "${item.alerts[index]}" notification for probe ${item.id}\n`
+          )
           await sendAlerts({
             validation: validatedResp[index],
             notifications: config.notifications,

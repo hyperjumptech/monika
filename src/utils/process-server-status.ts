@@ -157,87 +157,74 @@ export const processProbeStatus = ({
       (item) => item.id === id
     )
     if (isAlreadyInProbeStatus.length === 0) {
-      alerts.forEach((alert) => {
-        PROBE_STATUSES.push({
-          id,
-          name,
-          requests: 0,
-          details: { ...INIT_PROBE_STATUS_DETAILS, alert },
-        })
+      const initProbeStatuses = alerts.map((alert) => ({
+        ...INIT_PROBE_STATUS_DETAILS,
+        alert,
+      }))
+
+      PROBE_STATUSES.push({
+        id,
+        name,
+        details: initProbeStatuses,
       })
     }
 
     // Check if there is any alert that is triggered
     // If the alert is being triggered <threshold> times, send alert and
     // change the server status respectively.
-    const probeIndex = PROBE_STATUSES.findIndex(
+    const currentProbe = PROBE_STATUSES.findIndex(
       (probeStatus) => probeStatus.id === id
     )
-    const currentProbe = PROBE_STATUSES[probeIndex]
-
-    // Add request count
-    currentProbe.requests += 1
-    log(`\nRequest ${currentProbe.requests}\n`)
 
     // Calculate the count for successes and failures
     if (validatedResp.length > 0) {
       validatedResp.forEach(async (validation) => {
         const { alert } = validation
+        let updatedStatus: StatusDetails = INIT_PROBE_STATUS_DETAILS
 
-        if (alert.includes('status-not')) {
-          const foundStatus = PROBE_STATUSES.findIndex((item) => {
-            return item.details.alert === alert
-          })
+        const probeStatusDetail = PROBE_STATUSES[currentProbe].details.find(
+          (detail) => detail.alert === alert
+        )
+
+        if (probeStatusDetail?.alert.includes('status-not')) {
           const state = determineProbeState({
             errorName: alert,
-            probeStatus: PROBE_STATUSES[foundStatus].details,
+            probeStatus: probeStatusDetail,
             validation,
             trueThreshold,
             falseThreshold,
           })
-          const updatedStatus = updateProbeStatus(
-            PROBE_STATUSES[foundStatus].details,
-            state
-          )
-          PROBE_STATUSES[foundStatus].details = updatedStatus
-
-          results.push(updatedStatus)
-
-          log(`Alert ${updatedStatus.alert}`)
-          log(`Is Down? ${updatedStatus.isDown}`)
-          log(`Total True ${updatedStatus.totalTrue}`)
-          log(`Total False ${updatedStatus.totalFalse}`)
-          log(`Consecutive True ${updatedStatus.consecutiveTrue}`)
-          log(`Consecutive False ${updatedStatus.consecutiveFalse}\n\n`)
+          updatedStatus = updateProbeStatus(probeStatusDetail, state)
         }
 
         // Handle is response time error
-        if (alert.includes('response-time-greater')) {
-          const foundStatus = PROBE_STATUSES.findIndex((item) => {
-            return item.details.alert === alert
-          })
+        if (probeStatusDetail?.alert.includes('response-time-greater')) {
           const state = determineProbeState({
             errorName: alert,
-            probeStatus: PROBE_STATUSES[foundStatus].details,
+            probeStatus: probeStatusDetail,
             validation,
             trueThreshold,
             falseThreshold,
           })
-          const updatedStatus = updateProbeStatus(
-            PROBE_STATUSES[foundStatus].details,
-            state
-          )
-          PROBE_STATUSES[foundStatus].details = updatedStatus
-
-          results.push(updatedStatus)
-
-          log(`Alert ${updatedStatus.alert}`)
-          log(`Is Down? ${updatedStatus.isDown}`)
-          log(`Total True ${updatedStatus.totalTrue}`)
-          log(`Total False ${updatedStatus.totalFalse}`)
-          log(`Consecutive True ${updatedStatus.consecutiveTrue}`)
-          log(`Consecutive False ${updatedStatus.consecutiveFalse}\n\n`)
+          updatedStatus = updateProbeStatus(probeStatusDetail, state)
         }
+
+        // Update the Probe Status
+        const filteredProbeStatus = PROBE_STATUSES[currentProbe].details.filter(
+          (item) => item.alert !== alert
+        )
+        PROBE_STATUSES[currentProbe].details = [
+          ...filteredProbeStatus,
+          updatedStatus,
+        ]
+        results.push(updatedStatus)
+
+        log(`Alert ${updatedStatus.alert}`)
+        log(`Is Down? ${updatedStatus.isDown}`)
+        log(`Total True ${updatedStatus.totalTrue}`)
+        log(`Total False ${updatedStatus.totalFalse}`)
+        log(`Consecutive True ${updatedStatus.consecutiveTrue}`)
+        log(`Consecutive False ${updatedStatus.consecutiveFalse}\n`)
       })
     }
 
