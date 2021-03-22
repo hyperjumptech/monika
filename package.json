@@ -77,7 +77,8 @@
   },
   "files": [
     "/bin",
-    "/lib"
+    "/lib",
+    "/scripts"
   ],
   "homepage": "https://github.com/https://github.com/hyperjumptech/monika",
   "bugs": "https://github.com/https://github.com/hyperjumptech/monika/issues",
