@@ -1,10 +1,10 @@
 {
-  "interval": 0,
   "probes": [
     {
       "id": "1",
       "name": "something",
       "description": "some description",
+      "interval": 0,
       "request": {
         "method": "POST",
         "url": "https://something/login",
@@ -16,6 +16,8 @@
           "password": "somepassword"
         }
       },
+      "trueThreshold": 2,
+      "falseThreshold": 2,
       "alerts": ["status-not-2xx", "response-time-greater-than-200-ms"]
     }
   ]

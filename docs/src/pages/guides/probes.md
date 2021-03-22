@@ -8,6 +8,7 @@ Probes are the heart of the monitoring requests. Probes are arrays of request ob
       "id": "1",
       "name": "Name of the probe",
       "description": "Probe to check GET time",
+      "interval": 10,
       "request": { },
       "alerts": []
     },
@@ -15,6 +16,7 @@ Probes are the heart of the monitoring requests. Probes are arrays of request ob
       "id": "2",
       "name": "Name of the probe 2",
       "description": "Probe to check GET health",
+      "interval": 10,
       "request": { },
       "alerts": []
     }
@@ -33,6 +35,7 @@ An actual probe request may be something like below.
       "id": "1",
       "name": "Example: get Time",
       "description": "Probe",
+      "interval": 10,
       "request": {
         "method": "POST",
         "url": "https://mybackend.org/user/login",
@@ -45,6 +48,8 @@ An actual probe request may be something like below.
           "password": "somepassword"
         }
       },
+      "trueThreshold": 3,
+      "falseThreshold": 3,
       "alerts": ["status-not-2xx", "response-time-greater-than-200-ms"]
     },
   ]
@@ -52,14 +57,16 @@ An actual probe request may be something like below.
 
 Details of the field are give in the table below.
 
-| Topic   | Description                                                    |
-| :------ | -------------------------------------------------------------- |
-| method  | Http method such as GET, POST, PUT, DELETE                     |
-| url     | This is the url endpoint to dispatch the request to            |
-| timeout | Request timeout, after which time, `Monika`will assume timeout |
-| headers | Your http header                                               |
-| body    | Any http body if your method requires it                       |
-|         |                                                                |
+| Topic                     | Description                                                                                                                                                                                                                                                                                                                                           |
+| :------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| method                    | Http method such as GET, POST, PUT, DELETE                                                                                                                                                                                                                                                                                                            |
+| url                       | This is the url endpoint to dispatch the request to                                                                                                                                                                                                                                                                                                   |
+| timeout                   | Request timeout, after which time, `Monika`will assume timeout                                                                                                                                                                                                                                                                                        |
+| headers                   | Your http header                                                                                                                                                                                                                                                                                                                                      |
+| body                      | Any http body if your method requires it                                                                                                                                                                                                                                                                                                              |
+| interval (optional)       | Number of probe's interval (in seconds). Default value is 10 seconds.                                                                                                                                                                                                                                                                                 |
+| trueThreshold (optional)  | Number of times an alert should return true before Monika sends notifications. For example, when trueThreshold is 3, Monika will only send notifications when the probed URL returns non-2xx status 3 times in a row. After sending the notifications, Monika will not send notifications anymore until the alert status changes. Default value is 5. |
+| falseThreshold (optional) | Number of times an alert should return false before Monika sends notifications. For example, when falseThreshold is 3, Monika will only send notifications when the probed URL returns status 2xx 3 times in a row. After sending the notifications, Monika will not send notifications anymore until the alert status changes. Default value is 5.   |
 
 Alerts are the condition which will trigger an alert, and the subsequent notification method to send out the alert. See below for further details on alerts and notifications.
 

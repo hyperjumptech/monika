@@ -1,5 +1,4 @@
 {
-  "interval": 0,
   "notifications": [
     {
       "id": "unique-id-mailgun",
@@ -49,9 +48,10 @@
       "id": "1",
       "name": "Example",
       "description": "Probe",
+      "interval": 10,
       "request": {
         "method": "GET",
-        "url": "https://worldtimeapi.org/api/ip",
+        "url": "https://github.com",
         "timeout": 7000,
         "headers": {
           "Authorization": ""
@@ -61,7 +61,9 @@
           "password": "somepassword"
         }
       },
-      "alerts": ["status-not-2xx", "response-time-greater-than-200-ms"]
+      "trueThreshold": 3,
+      "falseThreshold": 3,
+      "alerts": ["status-not-2xx", "response-time-greater-than-400-ms"]
     }
   ]
 }

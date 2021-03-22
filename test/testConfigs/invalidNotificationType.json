@@ -11,6 +11,7 @@
       "id": "1",
       "name": "Example",
       "description": "Probe",
+      "interval": 0,
       "request": {
         "method": "POST",
         "url": "https://something/login",
@@ -22,6 +23,8 @@
           "password": "somepassword"
         }
       },
+      "trueThreshold": 2,
+      "falseThreshold": 2,
       "alerts": ["status-not-2xx", "response-time-greater-than-200-ms"]
     }
   ]
