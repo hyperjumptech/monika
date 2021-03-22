@@ -1,4 +1,4 @@
-import { SMTPData, WebhookData, MailgunData } from '../interfaces/data'
+import { SMTPData, WebhookData, MailgunData, WhatsappData } from '../interfaces/data'
 import { Notification } from '../interfaces/notification'
 import { Probe } from '../interfaces/probe'
 import { AxiosResponseWithExtraData } from '../interfaces/request'
@@ -7,6 +7,7 @@ import { sendMailgun } from './mailgun'
 import { createSmtpTransport, sendSmtpMail } from './smtp'
 import { sendWebhook } from './notifications/webhook'
 import { sendSlack } from './notifications/slack'
+import { loginUser, sendTextMessage } from './whatsapp'
 
 type CheckResponseFn = (response: AxiosResponseWithExtraData) => boolean
 export type ValidateResponseStatus = { alert: string; status: boolean }
@@ -128,10 +129,10 @@ export const sendAlerts = async ({
   const ipAddress = getIp()
   const message = getMessageForAlert(validation.alert, url, ipAddress, status)
   const sent = await Promise.all<any>(
-    notifications.map((notification) => {
+    notifications.map(async (notification) => {
       switch (notification.type) {
         case 'mailgun': {
-          return sendMailgun(
+          await sendMailgun(
             {
               subject: message.subject,
               body: message.body,
@@ -145,39 +146,42 @@ export const sendAlerts = async ({
               ),
             },
             notification
-          ).then(() => ({
+          )
+          return ({
             notification: 'mailgun',
             alert: validation.alert,
             url,
-          }))
+          })
         }
         case 'webhook': {
-          return sendWebhook({
+          await sendWebhook({
             ...notification.data,
             body: {
               url,
               alert: validation.alert,
               time: new Date().toLocaleString(),
             },
-          } as WebhookData).then(() => ({
+          } as WebhookData)
+          return ({
             notification: 'webhook',
             alert: validation.alert,
             url,
-          }))
+          })
         }
         case 'slack': {
-          return sendSlack({
+          await sendSlack({
             ...notification.data,
             body: {
               url,
               alert: validation.alert,
               time: new Date().toLocaleString(),
             },
-          } as WebhookData).then(() => ({
+          } as WebhookData)
+          return ({
             notification: 'slack',
             alert: validation.alert,
             url,
-          }))
+          })
         }
         case 'smtp': {
           const transporter = createSmtpTransport(notification.data as SMTPData)
@@ -187,7 +191,26 @@ export const sendAlerts = async ({
             to: (notification?.data as SMTPData)?.recipients?.join(','),
             subject: message.subject,
             html: message.body,
-          })
+          }).then(() => Promise.resolve({
+            notification: 'smtp',
+            alert: validation.alert,
+            url,
+          }))
+        }
+        case 'whatsapp': {
+          const data = notification.data as WhatsappData
+          const token = await loginUser(data)
+          if (token) {
+            Promise.all(data.recipients.map(recipient =>
+              sendTextMessage({recipient, token, baseUrl: data.url, message: validation.alert})
+            ))   
+          }
+
+          return {
+            notification: 'whatsapp',
+            alert: validation.alert,
+            url,
+          }
         }
         default:
           return Promise.resolve({

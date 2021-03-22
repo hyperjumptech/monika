@@ -1,9 +1,3 @@
-import { AxiosBasicCredentials } from "axios";
-
-export interface LoginBody extends AxiosBasicCredentials {
-    authType: string
-}
-
 export interface CheckContactBody {
     blocking: string;
     constact: string[];
@@ -17,4 +11,19 @@ export interface SendMessageBody {
     text: {
         body: string
     }
+}
+
+export interface User {
+    token: string
+    expires_after: string
+}
+
+export interface Meta {
+    version: string
+    api_status: string
+}
+
+export interface LoginUserSuccessResponse {
+    users: User[]
+    meta: Meta
 }
