@@ -1,7 +1,7 @@
 {
   "name": "@hyperjumptech/monika",
   "description": "Synthetic monitoring made easy",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "license": "MIT",
   "author": "@hyperjumptech",
   "main": "lib/index.js",
@@ -22,7 +22,7 @@
     "pretest": "npm run check-format",
     "posttest": "eslint . --ext .ts --config .eslintrc",
     "prepack": "rm -rf lib && tsc -b && oclif-dev readme",
-    "test": "nyc --extension .ts mocha --forbid-only \"test/**/*.test.ts\"",
+    "test": "cross-env NODE_ENV=test nyc --extension .ts mocha --forbid-only \"test/**/*.test.ts\"",
     "version": "oclif-dev readme && git add README.md",
     "format": "prettier --write .",
     "check-format": "prettier --check ."
@@ -54,6 +54,7 @@
     "@types/smtp-server": "^3.5.6",
     "chai": "^4.3.4",
     "chai-spies": "^1.0.0",
+    "cross-env": "^7.0.3",
     "eslint": "^5.16.0",
     "eslint-config-oclif": "^3.1.0",
     "eslint-config-oclif-typescript": "^0.1.0",
