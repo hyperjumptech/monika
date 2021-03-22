@@ -1,9 +1,9 @@
 import { AxiosResponseWithExtraData } from '../interfaces/request'
 import { Probe } from '../interfaces/probe'
 import chalk from 'chalk'
-import { log } from 'console'
 import { saveLog, getAllLogs } from './history'
 import Table from 'cli-table3'
+import { log } from '../utils/log'
 
 /**
  * getStatusColor colorizes differents tatusCode
@@ -35,7 +35,7 @@ export async function probeLog(
   probRes: AxiosResponseWithExtraData,
   err: string
 ) {
-  log(
+  log.info(
     'id:',
     probe.id,
     '- status:',
@@ -75,5 +75,5 @@ export async function printAllLogs() {
       { hAlign: 'center', content: data.response_time },
     ])
   })
-  log(table.toString())
+  log.info(table.toString())
 }

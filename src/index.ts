@@ -13,6 +13,7 @@ import { looper } from './utils/looper'
 import { parseConfig } from './utils/parse-config'
 import { validateConfig } from './utils/validate-config'
 import { printAllLogs } from './utils/logger'
+import { log } from './utils/log'
 
 import { closeLog, openLogfile, flushAllLogs } from './utils/history'
 
@@ -58,9 +59,9 @@ class Monika extends Command {
       )
       if (ans === 'Y') {
         flushAllLogs()
-        this.log('Records flushed, thank you.')
+        log.info('Records flushed, thank you.')
       } else {
-        this.log('Cancelled. Thank you.')
+        log.info('Cancelled. Thank you.')
       }
       closeLog()
       return
@@ -73,37 +74,37 @@ class Monika extends Command {
     const isConfigValid: Validation = await validateConfig(config)
     if (isConfigValid.valid) {
       // If config is valid, print the configuration
-      this.log('Parsed configuration\n====================')
-      this.log(`Notifications: `)
+      log.info('Parsed configuration\n====================')
+      log.info(`Notifications: `)
       config.notifications.forEach((item) => {
-        this.log(`Notification ID: ${item.id}`)
-        this.log(`Notification Type: ${item.type}`)
+        log.info(`Notification ID: ${item.id}`)
+        log.info(`Notification Type: ${item.type}`)
         // Only show recipients if type is mailgun, smtp, or sendgrid
         if (['mailgun', 'smtp', 'sendgrid'].indexOf(item.type) >= 0) {
-          this.log(
+          log.info(
             `Notification Recipients: ${(item.data as MailData).recipients.toString()}\n`
           )
         }
-        this.log(`Notifications Details:`)
+        log.info(`Notifications Details:`)
         switch (item.type) {
           case 'smtp':
-            this.log(`Hostname: ${(item.data as SMTPData).hostname}`)
-            this.log(`Port: ${(item.data as SMTPData).port}`)
-            this.log(`Username: ${(item.data as SMTPData).username}`)
-            this.log(`Password: ${(item.data as SMTPData).password}`)
+            log.info(`Hostname: ${(item.data as SMTPData).hostname}`)
+            log.info(`Port: ${(item.data as SMTPData).port}`)
+            log.info(`Username: ${(item.data as SMTPData).username}`)
+            log.info(`Password: ${(item.data as SMTPData).password}`)
             break
           case 'mailgun':
-            this.log(`API key: ${(item.data as MailgunData).apiKey}`)
-            this.log(`Domain: ${(item.data as MailgunData).domain}`)
+            log.info(`API key: ${(item.data as MailgunData).apiKey}`)
+            log.info(`Domain: ${(item.data as MailgunData).domain}`)
             break
           case 'sendgrid':
-            this.log(`API key: ${(item.data as SendgridData).apiKey}`)
+            log.info(`API key: ${(item.data as SendgridData).apiKey}`)
             break
           case 'webhook':
-            this.log(`URL: ${(item.data as WebhookData).url}`)
+            log.info(`URL: ${(item.data as WebhookData).url}`)
             break
           case 'slack':
-            this.log(`URL: ${(item.data as WebhookData).url}`)
+            log.info(`URL: ${(item.data as WebhookData).url}`)
             break
         }
       })
@@ -112,7 +113,8 @@ class Monika extends Command {
     } else {
       closeLog()
       // If config is invalid, throw error
-      this.error(isConfigValid.message, { exit: 100 })
+      log.error(isConfigValid.message.toString())
+      this.exit(100)
     }
   }
 }

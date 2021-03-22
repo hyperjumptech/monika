@@ -1,7 +1,7 @@
 import { ProbeStatus, StatusDetails } from '../interfaces/probe-status'
 import { Probe } from '../interfaces/probe'
 import { ValidateResponseStatus } from './alert'
-import console, { log } from 'console'
+import { log } from '../utils/log'
 
 const PROBE_STATUSES: ProbeStatus[] = []
 const INIT_PROBE_STATUS_DETAILS: StatusDetails = {
@@ -177,7 +177,7 @@ export const processProbeStatus = ({
 
     // Add request count
     currentProbe.requests += 1
-    log(`\nRequest ${currentProbe.requests}\n`)
+    log.info(`\nRequest ${currentProbe.requests}\n`)
 
     // Calculate the count for successes and failures
     if (validatedResp.length > 0) {
@@ -203,12 +203,12 @@ export const processProbeStatus = ({
 
           results.push(updatedStatus)
 
-          log(`Alert ${updatedStatus.alert}`)
-          log(`Is Down? ${updatedStatus.isDown}`)
-          log(`Total True ${updatedStatus.totalTrue}`)
-          log(`Total False ${updatedStatus.totalFalse}`)
-          log(`Consecutive True ${updatedStatus.consecutiveTrue}`)
-          log(`Consecutive False ${updatedStatus.consecutiveFalse}\n\n`)
+          log.info(`Alert ${updatedStatus.alert}`)
+          log.info(`Is Down? ${updatedStatus.isDown}`)
+          log.info(`Total True ${updatedStatus.totalTrue}`)
+          log.info(`Total False ${updatedStatus.totalFalse}`)
+          log.info(`Consecutive True ${updatedStatus.consecutiveTrue}`)
+          log.info(`Consecutive False ${updatedStatus.consecutiveFalse}\n\n`)
         }
 
         // Handle is response time error
@@ -231,19 +231,19 @@ export const processProbeStatus = ({
 
           results.push(updatedStatus)
 
-          log(`Alert ${updatedStatus.alert}`)
-          log(`Is Down? ${updatedStatus.isDown}`)
-          log(`Total True ${updatedStatus.totalTrue}`)
-          log(`Total False ${updatedStatus.totalFalse}`)
-          log(`Consecutive True ${updatedStatus.consecutiveTrue}`)
-          log(`Consecutive False ${updatedStatus.consecutiveFalse}\n\n`)
+          log.info(`Alert ${updatedStatus.alert}`)
+          log.info(`Is Down? ${updatedStatus.isDown}`)
+          log.info(`Total True ${updatedStatus.totalTrue}`)
+          log.info(`Total False ${updatedStatus.totalFalse}`)
+          log.info(`Consecutive True ${updatedStatus.consecutiveTrue}`)
+          log.info(`Consecutive False ${updatedStatus.consecutiveFalse}\n\n`)
         }
       })
     }
 
     return results
   } catch (error) {
-    console.error(error.message)
+    log.error(error.message)
     return []
   }
 }
