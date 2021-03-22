@@ -9,7 +9,6 @@ Follow the following steps to quickly monitor this Monica website and to get not
 
    ```json
    {
-     "interval": 10,
      "notifications": [
        {
          "id": "unique-id-smtp",
@@ -28,6 +27,7 @@ Follow the following steps to quickly monitor this Monica website and to get not
          "id": "1",
          "name": "Monika Landing Page",
          "description": "Landing page of awesome Monika",
+         "interval": 10,
          "request": {
            "url": "https://hyperjumptech.github.io/monika",
            "timeout": 7000
@@ -53,7 +53,6 @@ To start monitoring URLs, you'll need a configuration file (JSON file) as shown 
 // config.json
 
 {
-  "interval": 0,
   "notifications": [
     {
       "id": "unique-id-mailgun",
@@ -97,6 +96,7 @@ To start monitoring URLs, you'll need a configuration file (JSON file) as shown 
       "id": "1",
       "name": "Example",
       "description": "Probe",
+      "interval": 0,
       "request": {
         "method": "POST",
         "url": "https://something/login",
