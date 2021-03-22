@@ -1,8 +1,7 @@
 export interface ProbeStatus {
   id: string
   name: string
-  requests: number
-  details: StatusDetails
+  details: StatusDetails[]
 }
 
 export interface StatusDetails {
