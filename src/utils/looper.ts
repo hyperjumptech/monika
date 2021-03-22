@@ -70,7 +70,7 @@ export function looper(config: Config) {
       return doProbe(probe, config.notifications)
     }, (probe.interval ?? 10) * MILLISECONDS)
 
-    if (process.env.CI) {
+    if (process.env.CI || process.env.NODE_ENV === 'test') {
       clearInterval(probeInterval)
     }
   })
