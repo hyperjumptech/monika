@@ -19,8 +19,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Configuration using JSON upon start
 - JSON configuration validation
 
-## [Planned]
-
 ### [1.1.0] - 2021-03-22
 
 #### Add
@@ -29,6 +27,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Flags to make sure notification only send once for a failure series or success series.
 - Record of events
 - Slack notification channel
+- Documentation improvements
+- Preinstall script to enforce npm version lower than 7
+- Probe persistent log
+
+#### Changed
+
+- Enhanced error message
+- Interval now per-probe instead of for all probe
+
+## [Planned]
 
 ### [1.2.0] - 2021-04-05
 
