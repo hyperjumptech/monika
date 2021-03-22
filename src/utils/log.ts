@@ -15,4 +15,4 @@ const transport = dev
     }
   : {}
 
-export const log = pino(transport)
+export const log = process.env.NODE_ENV === 'test' ? console : pino(transport)
