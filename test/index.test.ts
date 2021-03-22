@@ -3,7 +3,7 @@ import { resolve } from 'path'
 
 import cmd = require('../src')
 
-describe('http-probe', () => {
+describe('monika', () => {
   // General Test
   test
     .stdout()
@@ -19,7 +19,7 @@ describe('http-probe', () => {
     )
     .it('runs with config without interval', (ctx) => {
       expect(ctx.stdout).to.contain('Parsed configuration')
-      expect(ctx.stdout).to.contain('Interval: Not specified')
+      expect(ctx.stdout).to.contain('Probe Interval: undefined')
     })
 
   test

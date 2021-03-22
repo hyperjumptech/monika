@@ -222,4 +222,5 @@ docs/out
 
 #ignore personal configs
 config.json
-
+#ignore databasefile
+history.db
