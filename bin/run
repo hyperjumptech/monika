@@ -2,50 +2,8 @@
 
 const fs = require('fs')
 const path = require('path')
-const { exec } = require('child_process')
 const project = path.join(__dirname, '../tsconfig.json')
 const dev = fs.existsSync(project)
-
-
-exec("ls -al /config", (error, stdout, stderr) => {
-  console.log('Showing the content of /config')
-  if (error) {
-      console.log(`error: ${error.message}`);
-      return;
-  }
-  if (stderr) {
-      console.log(`stderr: ${stderr}`);
-      return;
-  }
-  console.log(`stdout: ${stdout}`);
-});
-
-exec("cat /config/config.json", (error, stdout, stderr) => {
-  console.log('Showing the content of /config/config.json')
-  if (error) {
-      console.log(`error: ${error.message}`);
-      return;
-  }
-  if (stderr) {
-      console.log(`stderr: ${stderr}`);
-      return;
-  }
-  console.log(`stdout: ${stdout}`);
-});
-
-exec("env", (error, stdout, stderr) => {
-  console.log('All environment variables')
-  if (error) {
-      console.log(`error: ${error.message}`);
-      return;
-  }
-  if (stderr) {
-      console.log(`stderr: ${stderr}`);
-      return;
-  }
-  console.log(`stdout: ${stdout}`);
-});
-
 
 if (dev) {
   require('ts-node').register({ project })
