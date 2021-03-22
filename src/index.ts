@@ -113,8 +113,7 @@ class Monika extends Command {
     } else {
       closeLog()
       // If config is invalid, throw error
-      log.error(isConfigValid.message.toString())
-      this.exit(100)
+      this.error(isConfigValid.message, { exit: 100 })
     }
   }
 }
