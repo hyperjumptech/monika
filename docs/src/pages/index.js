@@ -104,9 +104,10 @@ const Home = ({ sponsors }) => {
                     </h3>
                     <p className="mt-2  lg:mt-4 text-base xl:text-lg lg:leading-normal leading-6 text-gray-600">
                       Get notified of the incidents through your favourite tools
-                      including by e-mail via SMTP, mailgun, and sendgrid, or
-                      through web hook. More notification channels are coming
-                      including Slack and Microsoft Teams!
+                      including by e-mail via SMTP, mailgun, and sendgrid,
+                      webhook, or through slack incoming webhook. More
+                      notification channels are coming including Slack and
+                      Microsoft Teams!
                     </p>
                   </div>
                 </div>
