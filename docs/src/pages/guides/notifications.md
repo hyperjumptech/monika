@@ -173,7 +173,7 @@ body: {
 
 ## Slack Incoming Webhook
 
-Monika supports Slack Incoming Webhook. To enable notification via Slack, you must have a `Slack's Incoming Webhook URL`, which you can see in their own documentation to get that. Please see [Sending messages using Incoming Webhooks](https://api.slack.com/messaging/webhooks).
+Monika supports Slack Incoming Webhook. To enable notification via Slack, you must have a `Slack's Incoming Webhook URL`. Please consult [Sending messages using Incoming Webhooks](https://api.slack.com/messaging/webhooks) documentation.
 
 ```json
 {

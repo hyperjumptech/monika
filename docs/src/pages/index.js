@@ -106,8 +106,8 @@ const Home = ({ sponsors }) => {
                       Get notified of the incidents through your favourite tools
                       including by e-mail via SMTP, mailgun, and sendgrid,
                       webhook, or through slack incoming webhook. More
-                      notification channels are coming including Slack and
-                      Microsoft Teams!
+                      notification channels are coming including Microsoft
+                      Teams!
                     </p>
                   </div>
                 </div>
