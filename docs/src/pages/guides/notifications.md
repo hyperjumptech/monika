@@ -212,7 +212,7 @@ Monika supports Whatsapp notification. To enable notification via whatsapp, you 
 | ------------ | --------------------------------------------- | ----------------------------------- |
 | ID           | Notification identity number                  | `whatsapp12345`                     |
 | Type         | Notification types                            | `whatsapp`                          |
-| Recipients   | An array phone number registered for whatsapp | [`08123456790`, `0974583409345`]    |
+| Recipients   | An array phone number registered for whatsapp | `["08123456790", "0974583409345"]`  |
 | Url          | The URL of your whatsapp api server           | `https://yourwhatsappapiserver.com` |
 | Username     | Your whatsapp api user name                   | `username`                          |
 | Userpassword | Your whatsapp api user password               | `userpassword`                      |
