@@ -12,22 +12,29 @@ const MILLISECONDS = 1000
 
 /**
  * doProbe sends out the http request
+ * @param {number} checkOrder the order of probe being processed
  * @param {object} probe contains all the probes
  * @param {array} notifications contains all the notifications
  */
-async function doProbe(probe: Probe, notifications: Notification[]) {
-  let probRes: AxiosResponseWithExtraData = {} as AxiosResponseWithExtraData
+async function doProbe(
+  checkOrder: number,
+  probe: Probe,
+  notifications: Notification[]
+) {
+  let probeRes: AxiosResponseWithExtraData = {} as AxiosResponseWithExtraData
 
   try {
-    probRes = await probing(probe)
-    const validatedResp = validateResponse(probe.alerts, probRes)
+    probeRes = await probing(probe)
+    const validatedResp = validateResponse(probe.alerts, probeRes)
 
-    probeLog(probe, probRes, '')
+    probeLog(checkOrder, probe, probeRes, '')
 
     const defaultThreshold = 5
 
     const serverStatuses = processProbeStatus({
+      checkOrder,
       probe,
+      probeRes,
       validatedResp,
       trueThreshold: probe.trueThreshold ?? defaultThreshold,
       falseThreshold: probe.falseThreshold ?? defaultThreshold,
@@ -35,7 +42,16 @@ async function doProbe(probe: Probe, notifications: Notification[]) {
 
     serverStatuses.forEach(async (status, index) => {
       if (status.shouldSendNotification) {
-        log.info(`Sending a "${probe.alerts[index]}" notification`)
+        notifications.forEach((notification) => {
+          log.info({
+            type: 'NOTIFY-INCIDENT',
+            alertType: probe.alerts[index],
+            notificationType: notification.type,
+            notificationId: notification.id,
+            probeId: probe.id,
+            url: probe.request.url,
+          })
+        })
         await sendAlerts({
           validation: validatedResp[index],
           notifications: notifications,
@@ -45,7 +61,7 @@ async function doProbe(probe: Probe, notifications: Notification[]) {
       }
     })
   } catch (error) {
-    probeLog(probe, probRes, error)
+    probeLog(checkOrder, probe, probeRes, error)
   }
 }
 
@@ -55,7 +71,7 @@ async function doProbe(probe: Probe, notifications: Notification[]) {
  */
 export function looper(config: Config) {
   log.info('Probes:')
-  config.probes.forEach(async (probe) => {
+  config.probes.forEach(async (probe, index) => {
     log.info(`Probe ID: ${probe.id}`)
     log.info(`Probe Name: ${probe.name}`)
     log.info(`Probe Description: ${probe.description}`)
@@ -67,7 +83,7 @@ export function looper(config: Config) {
     log.info(`Probe Alerts: ${probe.alerts.toString()}\n`)
 
     const probeInterval = setInterval(async () => {
-      return doProbe(probe, config.notifications)
+      return doProbe(index + 1, probe, config.notifications)
     }, (probe.interval ?? 10) * MILLISECONDS)
 
     if (process.env.CI || process.env.NODE_ENV === 'test') {
