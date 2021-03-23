@@ -1,9 +1,24 @@
 import { expect, test } from '@oclif/test'
 import { resolve } from 'path'
+import chai from 'chai'
+import spies from 'chai-spies'
+import { log } from '../src/utils/log'
+import cmd from '../src'
 
-import cmd = require('../src')
+chai.use(spies)
 
 describe('monika', () => {
+  before(() => {
+    chai.spy.on(log, ['info', 'warn', 'error'], function (...args) {
+      // eslint-disable-next-line no-console
+      console.log(...args)
+    })
+  })
+
+  after(() => {
+    chai.spy.restore()
+  })
+
   // General Test
   test
     .stdout()
