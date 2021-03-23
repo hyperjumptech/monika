@@ -71,8 +71,8 @@ export const sendWhatsapp = async (data: WhatsappData, message: string) => {
   const token = await loginUser(data)
   if (token) {
     await Promise.all(
-      data.recipients.map(async (recipient) => {
-        await sendTextMessage({
+      data.recipients.map((recipient) => {
+        return sendTextMessage({
           recipient,
           token,
           baseUrl: data.url,

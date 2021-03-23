@@ -3,8 +3,8 @@ import { AxiosBasicCredentials } from 'axios'
 export const authBasic = (cred: AxiosBasicCredentials) => {
   if (!cred.username)
     throw new Error('Username should not be empty or undefined')
-  if (!cred.password)
-    throw new Error('Password should not be empty or undefined')
+  if (!cred.password || cred.password.length < 6)
+    throw new Error('Password should not be empty or less than 6 character')
 
   const creds = cred.username + ':' + cred.password
   const buff = Buffer.from(creds)
