@@ -26,7 +26,8 @@ jobs:
         with:
           node-version: 12
       - run: npm ci
-      - run: npm link
+      - run: npm pack
+      - run: npm install -g ./hyperjumptech-monika-*.tgz
       - run: monika -v
 
   publish-npm:
