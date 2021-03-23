@@ -46,10 +46,10 @@
       "id": "unique-id-whatsapp",
       "type": "whatsapp",
       "data": {
-        "recipients": ["08123456789"],
-        "url": "https://example.com/webhook",
-        "username": "someusername",
-        "password": "somepassword"
+        "recipients": ["08123456789"], 
+        "url": "https://example.com",
+        "username": "whatsappusername",
+        "password": "whatsapppassword"
       }
     }
   ],

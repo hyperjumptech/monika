@@ -191,4 +191,30 @@ Monika supports Slack Incoming Webhook. To enable notification via Slack, you mu
 | Type | Notification types                     | `slack`                            |
 | Url  | The URL of your slack incoming webhook | `https://slackwebhook.com/channel` |
 
+## Whatsapp
+
+Monika supports Whatsapp notification. To enable notification via whatsapp, you must have a registered user in whatsapp business api server. Please consult [WhatsApp Business API](https://developers.facebook.com/docs/whatsapp) documentation.
+
+```json
+{
+  "id": "unique-id-whatsapp",
+  "type": "whatsapp",
+  "data": {
+    "recipients": ["08123456789"],
+    "url": "https://yourwhatsappapiserver.com",
+    "username": "whatsappusername",
+    "password": "whatsapppassword"
+  }
+}
+```
+
+| Key          | Description                                   | Example                             |
+| ------------ | --------------------------------------------- | ----------------------------------- |
+| ID           | Notification identity number                  | `whatsapp12345`                     |
+| Type         | Notification types                            | `whatsapp`                          |
+| Recipients   | An array phone number registered for whatsapp | [`08123456790`, `0974583409345`]    |
+| Url          | The URL of your whatsapp api server           | `https://yourwhatsappapiserver.com` |
+| Username     | Your whatsapp api user name                   | `username`                          |
+| Userpassword | Your whatsapp api user password               | `userpassword`                      |
+
 Keep watch on these pages, new notification methods are being developed.
