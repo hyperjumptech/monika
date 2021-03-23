@@ -1,5 +1,6 @@
-import { getCheckResponseFn } from './alert'
 /* eslint-disable complexity */
+import { warn } from 'console'
+import { getCheckResponseFn } from './alert'
 import { Notification } from '../interfaces/notification'
 import {
   SMTPData,
@@ -193,13 +194,29 @@ export const validateConfig = async (configuration: Config) => {
 
   // Check probes properties
   for (const probe of data.probes) {
-    const { alerts, name, request } = probe as Probe
+    const {
+      id,
+      alerts,
+      name,
+      request,
+      trueThreshold,
+      falseThreshold,
+    } = probe as Probe
 
     if (!name) return PROBE_NO_NAME
 
     if (!request) return PROBE_NO_REQUEST
 
     if ((alerts?.length ?? 0) === 0) return PROBE_NO_ALERT
+
+    if (!trueThreshold)
+      warn(
+        `Warning: Probe ${id} has no trueThreshold configuration defined. Using the default threshold: 5`
+      )
+    if (!falseThreshold)
+      warn(
+        `Warning: Probe ${id} has no falseThreshold configuration defined. Using the default threshold: 5`
+      )
 
     // Check probe request properties
     const { url, method } = request as RequestConfig
