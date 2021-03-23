@@ -18,6 +18,18 @@ jobs:
       - run: npm ci
       - run: npm test
 
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12
+      - run: npm ci
+      - run: npm pack
+      - run: npm install -g ./hyperjumptech-monika-*.tgz
+      - run: monika -v
+
   publish-npm:
     needs: build
     runs-on: ubuntu-latest
