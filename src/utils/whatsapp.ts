@@ -24,7 +24,7 @@ export const loginUser = async (data: WhatsappData) => {
 
     if (loginResp.users?.length > 0) return loginResp.users[0].token
   } catch (error) {
-    log('Login Failed: ', error)
+    log('Something wrong with your whatsapp config please check again.')
   }
 }
 
@@ -60,6 +60,25 @@ export const sendTextMessage = async ({
       },
     })
   } catch (error) {
-    log('Fail sending text message: ', error)
+    log(
+      'Something wrong with your recipient no, Please check your country code: ',
+      recipient
+    )
+  }
+}
+
+export const sendWhatsapp = async (data: WhatsappData, message: string) => {
+  const token = await loginUser(data)
+  if (token) {
+    await Promise.all(
+      data.recipients.map(async (recipient) => {
+        await sendTextMessage({
+          recipient,
+          token,
+          baseUrl: data.url,
+          message,
+        })
+      })
+    )
   }
 }

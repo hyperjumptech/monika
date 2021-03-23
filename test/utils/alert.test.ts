@@ -381,8 +381,7 @@ describe('send alerts', () => {
   })
 
   it('should send whatsapp notifications', async () => {
-    chai.spy.on(whatsapp, 'loginUser', () => Promise.resolve('token'))
-    chai.spy.on(whatsapp, 'sendTextMessage', () => Promise.resolve())
+    chai.spy.on(whatsapp, 'sendWhatsapp', () => Promise.resolve())
 
     const sent = await sendAlerts({
       validation: {
@@ -405,8 +404,7 @@ describe('send alerts', () => {
       status: 'DOWN',
     })
 
-    expect(whatsapp.loginUser).to.have.been.called()
-    expect(whatsapp.sendTextMessage).to.have.been.called()
+    expect(whatsapp.sendWhatsapp).to.have.been.called()
     expect(sent).to.have.length(1)
   })
 })

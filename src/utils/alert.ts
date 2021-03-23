@@ -12,7 +12,7 @@ import { sendMailgun } from './mailgun'
 import { createSmtpTransport, sendSmtpMail } from './smtp'
 import { sendWebhook } from './notifications/webhook'
 import { sendSlack } from './notifications/slack'
-import { loginUser, sendTextMessage } from './whatsapp'
+import { sendWhatsapp } from './whatsapp'
 
 type CheckResponseFn = (response: AxiosResponseWithExtraData) => boolean
 export type ValidateResponseStatus = { alert: string; status: boolean }
@@ -134,10 +134,10 @@ export const sendAlerts = async ({
   const ipAddress = getIp()
   const message = getMessageForAlert(validation.alert, url, ipAddress, status)
   const sent = await Promise.all<any>(
-    notifications.map(async (notification) => {
+    notifications.map((notification) => {
       switch (notification.type) {
         case 'mailgun': {
-          await sendMailgun(
+          sendMailgun(
             {
               subject: message.subject,
               body: message.body,
@@ -159,7 +159,7 @@ export const sendAlerts = async ({
           }
         }
         case 'webhook': {
-          await sendWebhook({
+          sendWebhook({
             ...notification.data,
             body: {
               url,
@@ -174,7 +174,7 @@ export const sendAlerts = async ({
           }
         }
         case 'slack': {
-          await sendSlack({
+          sendSlack({
             ...notification.data,
             body: {
               url,
@@ -190,7 +190,7 @@ export const sendAlerts = async ({
         }
         case 'smtp': {
           const transporter = createSmtpTransport(notification.data as SMTPData)
-          await sendSmtpMail(transporter, {
+          sendSmtpMail(transporter, {
             // TODO: Read from ENV Variables
             from: 'http-probe@hyperjump.tech',
             to: (notification?.data as SMTPData)?.recipients?.join(','),
@@ -206,20 +206,7 @@ export const sendAlerts = async ({
         }
         case 'whatsapp': {
           const data = notification.data as WhatsappData
-          const token = await loginUser(data)
-
-          if (token) {
-            await Promise.all(
-              data.recipients.map(async (recipient) =>
-                sendTextMessage({
-                  recipient,
-                  token,
-                  baseUrl: data.url,
-                  message: validation.alert,
-                })
-              )
-            )
-          }
+          sendWhatsapp(data, validation.alert)
 
           return {
             notification: 'whatsapp',

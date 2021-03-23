@@ -200,7 +200,7 @@ Monika supports Whatsapp notification. To enable notification via whatsapp, you 
   "id": "unique-id-whatsapp",
   "type": "whatsapp",
   "data": {
-    "recipients": ["08123456789"],
+    "recipients": ["628123456789"],
     "url": "https://yourwhatsappapiserver.com",
     "username": "whatsappusername",
     "password": "whatsapppassword"
@@ -208,13 +208,13 @@ Monika supports Whatsapp notification. To enable notification via whatsapp, you 
 }
 ```
 
-| Key          | Description                                   | Example                             |
-| ------------ | --------------------------------------------- | ----------------------------------- |
-| ID           | Notification identity number                  | `whatsapp12345`                     |
-| Type         | Notification types                            | `whatsapp`                          |
-| Recipients   | An array phone number registered for whatsapp | `["08123456790", "0974583409345"]`  |
-| Url          | The URL of your whatsapp api server           | `https://yourwhatsappapiserver.com` |
-| Username     | Your whatsapp api user name                   | `username`                          |
-| Userpassword | Your whatsapp api user password               | `userpassword`                      |
+| Key          | Description                                                                               | Example                             |
+| ------------ | ----------------------------------------------------------------------------------------- | ----------------------------------- |
+| ID           | Notification identity number                                                              | `whatsapp12345`                     |
+| Type         | Notification types                                                                        | `whatsapp`                          |
+| Recipients   | An array phone number registered for whatsapp, should start with your country code number | `["628123456790", "629745834093"]`  |
+| Url          | The URL of your whatsapp api server                                                       | `https://yourwhatsappapiserver.com` |
+| Username     | Your whatsapp api user name                                                               | `username`                          |
+| Userpassword | Your whatsapp api user password                                                           | `userpassword`                      |
 
 Keep watch on these pages, new notification methods are being developed.
