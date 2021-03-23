@@ -26,27 +26,25 @@ export function getStatusColor(statusCode: number) {
 /**
  * probeLog just prints probe results for the user and to persistent log (through history.ts)
  *
+ * @param {number} checkOrder is the order of probe being processed
  * @param {Probe} probe is the probe that made the log
  * @param {AxiosResponseWithExtraData} probRes is result of the probing
  * @param {string} err if theres any error, catch it here
  */
 export async function probeLog(
+  checkOrder: number,
   probe: Probe,
   probRes: AxiosResponseWithExtraData,
   err: string
 ) {
-  log.info(
-    'id:',
-    probe.id,
-    '- status:',
-    chalk.keyword(getStatusColor(probRes.status))(probRes.status.toString()),
-    'for:',
-    probe.request.url,
-    'response:',
-    probRes.config.extraData?.responseTime ?? 'n/a',
-    ' ms',
-    chalk.red(err)
-  )
+  log.info({
+    type: 'PROBE',
+    checkOrder,
+    probeId: probe.id,
+    url: probe.request.url,
+    statusCode: probRes.status,
+    responseTime: probRes.config.extraData?.responseTime,
+  })
 
   await saveLog(probe, probRes, err)
 }

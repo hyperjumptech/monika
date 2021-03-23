@@ -2,6 +2,7 @@ import { ProbeStatus, StatusDetails } from '../interfaces/probe-status'
 import { Probe } from '../interfaces/probe'
 import { ValidateResponseStatus } from './alert'
 import { log } from '../utils/log'
+import { AxiosResponseWithExtraData } from '../interfaces/request'
 
 const PROBE_STATUSES: ProbeStatus[] = []
 const INIT_PROBE_STATUS_DETAILS: StatusDetails = {
@@ -135,12 +136,16 @@ const updateProbeStatus = (
 }
 
 export const processProbeStatus = ({
+  checkOrder,
   probe,
+  probeRes,
   validatedResp,
   trueThreshold,
   falseThreshold,
 }: {
+  checkOrder: number
   probe: Probe
+  probeRes: AxiosResponseWithExtraData
   validatedResp: ValidateResponseStatus[]
   trueThreshold: number
   falseThreshold: number
@@ -172,9 +177,9 @@ export const processProbeStatus = ({
     // Check if there is any alert that is triggered
     // If the alert is being triggered <threshold> times, send alert and
     // change the server status respectively.
-    const currentProbe = PROBE_STATUSES.findIndex(
+    const currentProbe = PROBE_STATUSES.find(
       (probeStatus) => probeStatus.id === id
-    )
+    )!
 
     // Calculate the count for successes and failures
     if (validatedResp.length > 0) {
@@ -182,7 +187,7 @@ export const processProbeStatus = ({
         const { alert } = validation
         let updatedStatus: StatusDetails = INIT_PROBE_STATUS_DETAILS
 
-        const probeStatusDetail = PROBE_STATUSES[currentProbe].details.find(
+        const probeStatusDetail = currentProbe.details.find(
           (detail) => detail.alert === alert
         )
 
@@ -210,21 +215,22 @@ export const processProbeStatus = ({
         }
 
         // Update the Probe Status
-        const filteredProbeStatus = PROBE_STATUSES[currentProbe].details.filter(
+        const filteredProbeStatus = currentProbe.details.filter(
           (item) => item.alert !== alert
         )
-        PROBE_STATUSES[currentProbe].details = [
-          ...filteredProbeStatus,
-          updatedStatus,
-        ]
+        currentProbe.details = [...filteredProbeStatus, updatedStatus]
         results.push(updatedStatus)
 
-        log.info(`Alert ${updatedStatus.alert}`)
-        log.info(`Is Down? ${updatedStatus.isDown}`)
-        log.info(`Total True ${updatedStatus.totalTrue}`)
-        log.info(`Total False ${updatedStatus.totalFalse}`)
-        log.info(`Consecutive True ${updatedStatus.consecutiveTrue}`)
-        log.info(`Consecutive False ${updatedStatus.consecutiveFalse}\n`)
+        log.info({
+          type: 'ALERT',
+          alertType: updatedStatus.alert,
+          consecutiveTrue: updatedStatus.consecutiveTrue,
+          probeId: probe.id,
+          checkOrder,
+          url: probe.request?.url,
+          statusCode: probeRes.status,
+          responseTime: probeRes.config.extraData?.responseTime,
+        })
       })
     }
 
