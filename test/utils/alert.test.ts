@@ -21,7 +21,6 @@ import * as webhook from '../../src/utils/notifications/webhook'
 import * as slack from '../../src/utils/notifications/slack'
 import * as smtp from '../../src/utils/smtp'
 import * as whatsapp from '../../src/utils/whatsapp'
-import { AxiosBasicCredentials } from 'axios'
 
 describe('check response status', () => {
   it('should trigger alert when response is within 4xx status', () => {
@@ -382,11 +381,7 @@ describe('send alerts', () => {
   })
 
   it('should send whatsapp notifications', async () => {
-    const data: AxiosBasicCredentials = {
-      username: 'someusername',
-      password: 'somepassword',
-    }
-    chai.spy.on(whatsapp, 'loginUser', (data) => Promise.resolve('token'))
+    chai.spy.on(whatsapp, 'loginUser', () => Promise.resolve('token'))
     chai.spy.on(whatsapp, 'sendTextMessage', () => Promise.resolve())
 
     const sent = await sendAlerts({
