@@ -50,7 +50,7 @@
         "recipients": ["08123456789"],
         "url": "https://example.com/webhook",
         "username": "someusername",
-        "password": "somepassword" 
+        "password": "somepassword"
       }
     }
   ],

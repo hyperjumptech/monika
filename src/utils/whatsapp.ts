@@ -1,4 +1,3 @@
-import * as path from 'path'
 import axios from 'axios'
 import { LoginUserSuccessResponse } from '../interfaces/whatsapp'
 import { authorize } from './authorization'
@@ -11,19 +10,19 @@ export const loginUser = async (data: WhatsappData) => {
       username: data.username,
       password: data.password,
     })
-    const url = path.join(data.url, `/v1/users/login`)
-    const resp = await axios({
+
+    const url = `${data.url}/v1/users/login`
+    const resp = await axios.request({
       method: 'POST',
       url: url,
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': auth,
+        Authorization: auth,
       },
     })
+    const loginResp: LoginUserSuccessResponse = resp?.data
 
-    const loginResp: LoginUserSuccessResponse = resp?.data;
-
-    if (loginResp.users?.length > 0) return loginResp.users[0].token;
+    if (loginResp.users?.length > 0) return loginResp.users[0].token
   } catch (error) {
     log('Login Failed: ', error)
   }
@@ -42,7 +41,7 @@ export const sendTextMessage = async ({
 }) => {
   try {
     const auth = authorize('bearer', token)
-    const url = path.join(baseUrl, `/v1/users/login`)
+    const url = `${baseUrl}/v1/messages`
 
     return axios.request({
       method: 'POST',
@@ -61,6 +60,6 @@ export const sendTextMessage = async ({
       },
     })
   } catch (error) {
-    log('Login Failed: ', error)
+    log('Fail sending text message: ', error)
   }
 }

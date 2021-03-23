@@ -1,4 +1,10 @@
-import { MailgunData, SMTPData, SendgridData, WebhookData, WhatsappData } from './data'
+import {
+  MailgunData,
+  SMTPData,
+  SendgridData,
+  WebhookData,
+  WhatsappData,
+} from './data'
 
 export interface Notification {
   id: string

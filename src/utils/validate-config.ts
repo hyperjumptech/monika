@@ -115,6 +115,18 @@ const WHATSAPP_NO_URL = {
   message: 'URL not found',
 }
 
+// Whatsapp
+const WHATSAPP_NO_USERNAME = {
+  valid: false,
+  message: 'Username not found',
+}
+
+// Whatsapp
+const WHATSAPP_NO_PASSWORD = {
+  valid: false,
+  message: 'Password not found',
+}
+
 export const validateConfig = async (configuration: Config) => {
   const data = configuration
 
@@ -164,9 +176,13 @@ export const validateConfig = async (configuration: Config) => {
         if (!(data as WebhookData).url) return WEBHOOK_NO_URL
 
         break
-      
+
       case 'whatsapp':
-        if (!(data as WhatsappData).url) return WEBHOOK_NO_URL
+        if (!(data as WhatsappData).url) return WHATSAPP_NO_URL
+
+        if (!(data as WhatsappData).username) return WHATSAPP_NO_USERNAME
+
+        if (!(data as WhatsappData).password) return WHATSAPP_NO_PASSWORD
 
         break
 
