@@ -2,7 +2,6 @@ import { expect, test } from '@oclif/test'
 import { resolve } from 'path'
 import chai from 'chai'
 import spies from 'chai-spies'
-// import { log } from '../src/utils/log'
 import cmd from '../src'
 
 chai.use(spies)
