@@ -126,7 +126,7 @@ export const getMessageForAlert = ({
   const message = {
     subject: getSubject(url, status),
     body: `
-      ${getBody(status)}\n
+      ${getBody(status)}\n\n
       Time: ${today.toUTCString()}\n
       Target URL: ${url}\n
       From server: ${ipAddress}
