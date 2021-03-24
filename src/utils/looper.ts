@@ -60,6 +60,7 @@ async function doProbe(
           notifications: notifications,
           url: probe.request.url ?? '',
           status: status.isDown ? 'DOWN' : 'UP',
+          trueThreshold: probe.trueThreshold,
         })
       }
     })
