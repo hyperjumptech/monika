@@ -1,4 +1,9 @@
-import { SMTPData, WebhookData, MailgunData } from '../interfaces/data'
+import {
+  SMTPData,
+  WebhookData,
+  MailgunData,
+  WhatsappData,
+} from '../interfaces/data'
 import { Notification } from '../interfaces/notification'
 import { Probe } from '../interfaces/probe'
 import { AxiosResponseWithExtraData } from '../interfaces/request'
@@ -7,6 +12,7 @@ import { sendMailgun } from './mailgun'
 import { createSmtpTransport, sendSmtpMail } from './smtp'
 import { sendWebhook } from './notifications/webhook'
 import { sendSlack } from './notifications/slack'
+import { sendWhatsapp } from './whatsapp'
 
 type CheckResponseFn = (response: AxiosResponseWithExtraData) => boolean
 export type ValidateResponseStatus = { alert: string; status: boolean }
@@ -187,7 +193,19 @@ export const sendAlerts = async ({
             to: (notification?.data as SMTPData)?.recipients?.join(','),
             subject: message.subject,
             html: message.body,
-          })
+          }).then(() => ({
+            notification: 'smtp',
+            alert: validation.alert,
+            url,
+          }))
+        }
+        case 'whatsapp': {
+          const data = notification.data as WhatsappData
+          return sendWhatsapp(data, validation.alert).then(() => ({
+            notification: 'whatsapp',
+            alert: validation.alert,
+            url,
+          }))
         }
         default:
           return Promise.resolve({
