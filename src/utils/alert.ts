@@ -72,34 +72,62 @@ export const validateResponse = (
   return checks
 }
 
-export const getMessageForAlert = (
-  alert: string,
-  url: string,
-  ipAddress: string,
+export const getMessageForAlert = ({
+  alert,
+  url,
+  ipAddress,
+  status,
+  trueThreshold,
+}:{
+  alert: string
+  url: string
+  ipAddress: string
   status: string
-): {
+  trueThreshold: number
+}): {
   subject: string
   body: string
 } => {
   const getSubject = (url: string, status: string) => {
-    if (status === 'UP') {
-      return `${alert} from probing ${url} has been resolved.`
+    if (alert === 'status-not-2xx') {
+      const statusAlert = `Target ${url} is not OK`
+      if (status === 'UP') {
+        return `[RECOVERY] ${statusAlert}`
+      }
+      return `[INCIDENT] ${statusAlert}`
     }
-    return `"${alert}" has been detected from probing ${url}`
+  
+    const responseAlert = `Target ${url} takes long to respond`
+    if (alert === 'response-time-greater-than-400-ms' && status == 'UP') {
+      return `[RECOVERY] ${responseAlert}`
+    }
+    return `[INCIDENT] ${responseAlert}`
   }
 
   const getBody = (status: string) => {
-    if (status === 'UP') {
-      return `We found that your "${alert}" alert has been resolved when probing "${url}".`
+    if (status === 'DOWN') {
+      if (alert === 'status-not-2xx') {
+        return `Target ${url} is not healthy. It has not been returning status code 2xx ${trueThreshold} times in a row.`
+      }
+  
+      if (alert === 'response-time-greater-than-400-ms') {
+        return `Target ${url} is not healthy. The response time has been greater than 400 ms ${trueThreshold} times in a row`
+      }
+
+      return `Target ${url} is not healthy.`
     }
-    return `New "${alert}" alert when probing "${url}".`
+
+    return `Target ${url} is back to healthy.`
   }
+
+  const now = Date.now()
+  const today = new Date(now);
 
   const message = {
     subject: getSubject(url, status),
     body: `
       ${getBody(status)}\n
-      Time: ${Date.now()}\n
+      Time: ${today.toUTCString()}\n
       Target URL: ${url}\n
       From server: ${ipAddress}
     `,
@@ -113,11 +141,13 @@ export const sendAlerts = async ({
   notifications,
   url,
   status,
+  trueThreshold,
 }: {
   validation: ValidateResponseStatus
   notifications: Notification[]
   url: string
   status: string
+  trueThreshold: number
 }): Promise<
   Array<{
     alert: string
@@ -126,7 +156,7 @@ export const sendAlerts = async ({
   }>
 > => {
   const ipAddress = getIp()
-  const message = getMessageForAlert(validation.alert, url, ipAddress, status)
+  const message = getMessageForAlert({alert: validation.alert, url, ipAddress, status, trueThreshold})
   const sent = await Promise.all<any>(
     notifications.map((notification) => {
       switch (notification.type) {
@@ -186,7 +216,7 @@ export const sendAlerts = async ({
             from: 'http-probe@hyperjump.tech',
             to: (notification?.data as SMTPData)?.recipients?.join(','),
             subject: message.subject,
-            html: message.body,
+            text: message.body,
           })
         }
         default:
