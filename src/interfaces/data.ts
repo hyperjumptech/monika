@@ -28,3 +28,9 @@ export interface WebhookDataBody {
   time: string
   alert: string
 }
+
+export interface WhatsappData extends MailData {
+  url: string
+  username: string
+  password: string
+}
