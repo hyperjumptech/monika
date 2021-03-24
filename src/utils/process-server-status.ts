@@ -221,16 +221,18 @@ export const processProbeStatus = ({
         currentProbe.details = [...filteredProbeStatus, updatedStatus]
         results.push(updatedStatus)
 
-        log.info({
-          type: 'ALERT',
-          alertType: updatedStatus.alert,
-          consecutiveTrue: updatedStatus.consecutiveTrue,
-          probeId: probe.id,
-          checkOrder,
-          url: probe.request?.url,
-          statusCode: probeRes.status,
-          responseTime: probeRes.config.extraData?.responseTime,
-        })
+        if (validation.status === true) {
+          log.info({
+            type: 'ALERT',
+            alertType: updatedStatus.alert,
+            consecutiveTrue: updatedStatus.consecutiveTrue,
+            probeId: probe.id,
+            checkOrder,
+            url: probe.request?.url,
+            statusCode: probeRes.status,
+            responseTime: probeRes.config.extraData?.responseTime,
+          })
+        }
       })
     }
 
