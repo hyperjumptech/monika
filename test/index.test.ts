@@ -2,29 +2,17 @@ import { expect, test } from '@oclif/test'
 import { resolve } from 'path'
 import chai from 'chai'
 import spies from 'chai-spies'
-import { log } from '../src/utils/log'
 import cmd from '../src'
 
 chai.use(spies)
 
 describe('monika', () => {
-  before(() => {
-    chai.spy.on(log, ['info', 'warn', 'error'], function (...args) {
-      // eslint-disable-next-line no-console
-      console.log(...args)
-    })
-  })
-
-  after(() => {
-    chai.spy.restore()
-  })
-
   // General Test
   test
     .stdout()
     .do(() => cmd.run(['--config', resolve('./config.example.json')]))
     .it('runs with normal config', (ctx) => {
-      expect(ctx.stdout).to.contain('Parsed configuration')
+      expect(ctx.stdout).to.contain('Starting Monika.')
     })
 
   test
@@ -33,8 +21,7 @@ describe('monika', () => {
       cmd.run(['--config', resolve('./test/testConfigs/noInterval.json')])
     )
     .it('runs with config without interval', (ctx) => {
-      expect(ctx.stdout).to.contain('Parsed configuration')
-      expect(ctx.stdout).to.contain('Probe Interval: undefined')
+      expect(ctx.stdout).to.contain('Starting Monika.')
     })
 
   test
@@ -181,11 +168,11 @@ describe('monika', () => {
       cmd.run([
         '--config',
         resolve('./test/testConfigs/mailgun/mailgunconfig.json'),
+        '--verbose',
       ])
     )
     .it('runs with mailgun config', (ctx) => {
-      expect(ctx.stdout).to.contain('Notification Type: mailgun')
-      expect(ctx.stdout).to.contain('API key:')
+      expect(ctx.stdout).to.contain('Type: mailgun')
       expect(ctx.stdout).to.contain('Domain:')
     })
 
@@ -211,11 +198,11 @@ describe('monika', () => {
       cmd.run([
         '--config',
         resolve('./test/testConfigs/sendgrid/sendgridconfig.json'),
+        '--verbose',
       ])
     )
     .it('runs with sendgrid config', (ctx) => {
-      expect(ctx.stdout).to.contain('Notification Type: sendgrid')
-      expect(ctx.stdout).to.contain('API key:')
+      expect(ctx.stdout).to.contain('Type: sendgrid')
     })
 
   test
@@ -237,14 +224,17 @@ describe('monika', () => {
   test
     .stdout()
     .do(() =>
-      cmd.run(['--config', resolve('./test/testConfigs/smtp/smtpconfig.json')])
+      cmd.run([
+        '--config',
+        resolve('./test/testConfigs/smtp/smtpconfig.json'),
+        '--verbose',
+      ])
     )
     .it('runs with SMTP config', (ctx) => {
-      expect(ctx.stdout).to.contain('Notification Type: smtp')
+      expect(ctx.stdout).to.contain('Type: smtp')
       expect(ctx.stdout).to.contain('Hostname:')
       expect(ctx.stdout).to.contain('Port:')
       expect(ctx.stdout).to.contain('Username:')
-      expect(ctx.stdout).to.contain('Password:')
     })
 
   test
@@ -269,6 +259,7 @@ describe('monika', () => {
       cmd.run([
         '--config',
         resolve('./test/testConfigs/webhook/webhookconfig.json'),
+        '--verbose',
       ])
     )
     .it('runs with Webhook config', (ctx) => {

@@ -44,7 +44,10 @@ async function doProbe(
       if (status.shouldSendNotification) {
         notifications.forEach((notification) => {
           log.info({
-            type: 'NOTIFY-INCIDENT',
+            type:
+              status.state === 'UP_TRUE_EQUALS_THRESHOLD'
+                ? 'NOTIFY-INCIDENT'
+                : 'NOTIFY-RECOVER',
             alertType: probe.alerts[index],
             notificationType: notification.type,
             notificationId: notification.id,
@@ -70,21 +73,16 @@ async function doProbe(
  * @param {object} config is an object that contains all the configs
  */
 export function looper(config: Config) {
-  log.info('Probes:')
-  config.probes.forEach(async (probe, index) => {
-    log.info(`Probe ID: ${probe.id}`)
-    log.info(`Probe Name: ${probe.name}`)
-    log.info(`Probe Description: ${probe.description}`)
-    log.info(`Probe Interval: ${probe.interval}`)
-    log.info(`Probe Request Method: ${probe.request.method}`)
-    log.info(`Probe Request URL: ${probe.request.url}`)
-    log.info(`Probe Request Headers: ${JSON.stringify(probe.request.headers)}`)
-    log.info(`Probe Request Body: ${JSON.stringify(probe.request.body)}`)
-    log.info(`Probe Alerts: ${probe.alerts.toString()}\n`)
-
-    const probeInterval = setInterval(async () => {
-      return doProbe(index + 1, probe, config.notifications)
-    }, (probe.interval ?? 10) * MILLISECONDS)
+  config.probes.forEach((probe) => {
+    const probeInterval = setInterval(
+      (() => {
+        let counter = 0
+        return () => {
+          return doProbe(++counter, probe, config.notifications)
+        }
+      })(),
+      (probe.interval ?? 10) * MILLISECONDS
+    )
 
     if (process.env.CI || process.env.NODE_ENV === 'test') {
       clearInterval(probeInterval)
