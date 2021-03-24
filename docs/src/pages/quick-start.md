@@ -147,7 +147,7 @@ By default Monika will run in the foreground. Like other Node.js applications, t
 
 ### Using `screen`
 
-- Run `screen`. If you haven't installed it yet, you need to install it first. On Linux, please run `sudo apt install screen`. 
+- Run `screen`. If you haven't installed it yet, you need to install it first. On Linux, please run `sudo apt install screen`.
 - Run `monika -c config.json`
 - Press Ctrl+a then D. This will cause Monika to run on a different screen in the background.
 - To go back to the screen, run `screen -ls` to list the running screens. You will get an output similar to the following.
