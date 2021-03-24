@@ -137,7 +137,7 @@ export const sendAlerts = async ({
     notifications.map((notification) => {
       switch (notification.type) {
         case 'mailgun': {
-          sendMailgun(
+          return sendMailgun(
             {
               subject: message.subject,
               body: message.body,
@@ -151,68 +151,61 @@ export const sendAlerts = async ({
               ),
             },
             notification
-          )
-          return {
-            notification: 'mailgun',
-            alert: validation.alert,
-            url,
-          }
+          ).then(() => ({
+              notification: 'mailgun',
+              alert: validation.alert,
+              url,
+          }))
         }
         case 'webhook': {
-          sendWebhook({
+          return sendWebhook({
             ...notification.data,
             body: {
               url,
               alert: validation.alert,
               time: new Date().toLocaleString(),
             },
-          } as WebhookData)
-          return {
+          } as WebhookData).then(() => ({
             notification: 'webhook',
             alert: validation.alert,
             url,
-          }
+          }))
         }
         case 'slack': {
-          sendSlack({
+          return sendSlack({
             ...notification.data,
             body: {
               url,
               alert: validation.alert,
               time: new Date().toLocaleString(),
             },
-          } as WebhookData)
-          return {
+          } as WebhookData).then(() => ({
             notification: 'slack',
             alert: validation.alert,
             url,
-          }
+          }))
         }
         case 'smtp': {
           const transporter = createSmtpTransport(notification.data as SMTPData)
-          sendSmtpMail(transporter, {
+          return sendSmtpMail(transporter, {
             // TODO: Read from ENV Variables
             from: 'http-probe@hyperjump.tech',
             to: (notification?.data as SMTPData)?.recipients?.join(','),
             subject: message.subject,
             html: message.body,
-          })
-
-          return Promise.resolve({
+          }).then(() => ({
             notification: 'smtp',
             alert: validation.alert,
             url,
-          })
+          }))
         }
         case 'whatsapp': {
           const data = notification.data as WhatsappData
-          sendWhatsapp(data, validation.alert)
-
-          return {
+          return sendWhatsapp(data, validation.alert).then(() => ({
             notification: 'whatsapp',
             alert: validation.alert,
             url,
-          }
+          }))
         }
         default:
           return Promise.resolve({
