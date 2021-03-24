@@ -78,7 +78,7 @@ export const getMessageForAlert = ({
   ipAddress,
   status,
   trueThreshold,
-}:{
+}: {
   alert: string
   url: string
   ipAddress: string
@@ -96,9 +96,9 @@ export const getMessageForAlert = ({
       }
       return `[INCIDENT] ${statusAlert}`
     }
-  
+
     const responseAlert = `Target ${url} takes long to respond`
-    if (alert === 'response-time-greater-than-400-ms' && status == 'UP') {
+    if (alert === 'response-time-greater-than-400-ms' && status === 'UP') {
       return `[RECOVERY] ${responseAlert}`
     }
     return `[INCIDENT] ${responseAlert}`
@@ -109,7 +109,7 @@ export const getMessageForAlert = ({
       if (alert === 'status-not-2xx') {
         return `Target ${url} is not healthy. It has not been returning status code 2xx ${trueThreshold} times in a row.`
       }
-  
+
       if (alert === 'response-time-greater-than-400-ms') {
         return `Target ${url} is not healthy. The response time has been greater than 400 ms ${trueThreshold} times in a row`
       }
@@ -121,7 +121,7 @@ export const getMessageForAlert = ({
   }
 
   const now = Date.now()
-  const today = new Date(now);
+  const today = new Date(now)
 
   const message = {
     subject: getSubject(url, status),
@@ -156,7 +156,13 @@ export const sendAlerts = async ({
   }>
 > => {
   const ipAddress = getIp()
-  const message = getMessageForAlert({alert: validation.alert, url, ipAddress, status, trueThreshold})
+  const message = getMessageForAlert({
+    alert: validation.alert,
+    url,
+    ipAddress,
+    status,
+    trueThreshold,
+  })
   const sent = await Promise.all<any>(
     notifications.map((notification) => {
       switch (notification.type) {
