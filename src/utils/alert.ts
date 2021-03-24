@@ -77,57 +77,49 @@ export const getMessageForAlert = ({
   url,
   ipAddress,
   status,
-  trueThreshold,
+  incidentThreshold,
 }: {
   alert: string
   url: string
   ipAddress: string
   status: string
-  trueThreshold: number
+  incidentThreshold: number
 }): {
   subject: string
   body: string
 } => {
   const getSubject = (url: string, status: string) => {
-    if (alert === 'status-not-2xx') {
-      const statusAlert = `Target ${url} is not OK`
-      if (status === 'UP') {
-        return `[RECOVERY] ${statusAlert}`
-      }
+    const statusAlert = `Target ${url} is not OK`
+    if (alert === 'status-not-2xx' && status === 'UP')
+      return `[RECOVERY] ${statusAlert}`
+    if (alert === 'status-not-2xx' && status === 'DOWN')
       return `[INCIDENT] ${statusAlert}`
-    }
 
     const responseAlert = `Target ${url} takes long to respond`
-    if (alert === 'response-time-greater-than-400-ms' && status === 'UP') {
+    if (alert.includes('response-time-greater-than-') && status === 'UP')
       return `[RECOVERY] ${responseAlert}`
-    }
+
     return `[INCIDENT] ${responseAlert}`
   }
 
   const getBody = (status: string) => {
-    if (status === 'DOWN') {
-      if (alert === 'status-not-2xx') {
-        return `Target ${url} is not healthy. It has not been returning status code 2xx ${trueThreshold} times in a row.`
-      }
+    if (alert === 'status-not-2xx' && status === 'DOWN')
+      return `Target ${url} is not healthy. It has not been returning status code 2xx ${incidentThreshold} times in a row.`
 
-      if (alert === 'response-time-greater-than-400-ms') {
-        return `Target ${url} is not healthy. The response time has been greater than 400 ms ${trueThreshold} times in a row`
-      }
-
-      return `Target ${url} is not healthy.`
+    if (alert.includes('response-time-greater-than-') && status === 'DOWN') {
+      const alertTime = parseAlertStringTime(alert)
+      return `Target ${url} is not healthy. The response time has been greater than ${alertTime} ${incidentThreshold} times in a row`
     }
 
     return `Target ${url} is back to healthy.`
   }
 
-  const now = Date.now()
-  const today = new Date(now)
-
+  const today = new Date().toUTCString()
   const message = {
     subject: getSubject(url, status),
     body: `
       ${getBody(status)}\n\n
-      Time: ${today.toUTCString()}\n
+      Time: ${today}\n
       Target URL: ${url}\n
       From server: ${ipAddress}
     `,
@@ -141,13 +133,13 @@ export const sendAlerts = async ({
   notifications,
   url,
   status,
-  trueThreshold,
+  incidentThreshold,
 }: {
   validation: ValidateResponseStatus
   notifications: Notification[]
   url: string
   status: string
-  trueThreshold: number
+  incidentThreshold: number
 }): Promise<
   Array<{
     alert: string
@@ -161,7 +153,7 @@ export const sendAlerts = async ({
     url,
     ipAddress,
     status,
-    trueThreshold,
+    incidentThreshold,
   })
   const sent = await Promise.all<any>(
     notifications.map((notification) => {
