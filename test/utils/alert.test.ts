@@ -262,6 +262,7 @@ describe('send alerts', () => {
       ],
       url: 'https://hyperjump.tech',
       status: 'UP',
+      trueThreshold: 3,
     })
     expect(sent).to.have.length(1)
   })
@@ -286,6 +287,7 @@ describe('send alerts', () => {
       ],
       url: 'https://hyperjump.tech',
       status: 'DOWN',
+      trueThreshold: 3,
     })
     expect(sent).to.have.length(1)
   })
@@ -310,6 +312,7 @@ describe('send alerts', () => {
       ],
       url: 'https://hyperjump.tech',
       status: 'DOWN',
+      trueThreshold: 3,
     })
     expect(mailgun.sendMailgun).to.have.been.called()
     expect(sent).to.have.length(1)
@@ -341,6 +344,7 @@ describe('send alerts', () => {
       ],
       url: 'https://hyperjump.tech',
       status: 'DOWN',
+      trueThreshold: 3,
     })
 
     expect(webhook.sendWebhook).to.have.been.called()
@@ -370,6 +374,7 @@ describe('send alerts', () => {
       ],
       url: 'https://hyperjump.tech',
       status: 'DOWN',
+      trueThreshold: 3,
     })
     expect(smtp.sendSmtpMail).to.have.been.called()
     expect(sent).to.have.length(1)
