@@ -1,13 +1,8 @@
+/* eslint-disable no-console */
 import { Command, flags } from '@oclif/command'
 import cli from 'cli-ux'
 import { Config } from './interfaces/config'
-import {
-  MailData,
-  MailgunData,
-  SendgridData,
-  SMTPData,
-  WebhookData,
-} from './interfaces/data'
+import { MailData, MailgunData, SMTPData, WebhookData } from './interfaces/data'
 import { Validation } from './interfaces/validation'
 import { looper } from './utils/looper'
 import { parseConfig } from './utils/parse-config'
@@ -41,6 +36,11 @@ class Monika extends Command {
     flush: flags.boolean({
       description: 'flush logs',
     }),
+
+    verbose: flags.boolean({
+      description: 'show verbose log messages',
+      default: false,
+    }),
   }
 
   async run() {
@@ -73,41 +73,57 @@ class Monika extends Command {
     // Check if config is valid
     const isConfigValid: Validation = await validateConfig(config)
     if (isConfigValid.valid) {
-      // If config is valid, print the configuration
-      log.info('Parsed configuration\n====================')
-      log.info(`Notifications: `)
-      config.notifications.forEach((item) => {
-        log.info(`Notification ID: ${item.id}`)
-        log.info(`Notification Type: ${item.type}`)
-        // Only show recipients if type is mailgun, smtp, or sendgrid
-        if (['mailgun', 'smtp', 'sendgrid'].indexOf(item.type) >= 0) {
-          log.info(
-            `Notification Recipients: ${(item.data as MailData).recipients.toString()}\n`
+      console.log(
+        `Starting Monika. Probes: ${config.probes.length}. Notifications: ${config.notifications.length}\n`
+      )
+      if (flags.verbose) {
+        console.log('Probes:')
+        config.probes.forEach(async (probe) => {
+          console.log(`- Probe ID: ${probe.id}`)
+          console.log(`    Name: ${probe.name}`)
+          console.log(`    Description: ${probe.description}`)
+          console.log(`    Interval: ${probe.interval}`)
+          console.log(`    Request Method: ${probe.request.method}`)
+          console.log(`    Request URL: ${probe.request.url}`)
+          console.log(
+            `    Request Headers: ${JSON.stringify(probe.request.headers)}`
           )
-        }
-        log.info(`Notifications Details:`)
-        switch (item.type) {
-          case 'smtp':
-            log.info(`Hostname: ${(item.data as SMTPData).hostname}`)
-            log.info(`Port: ${(item.data as SMTPData).port}`)
-            log.info(`Username: ${(item.data as SMTPData).username}`)
-            log.info(`Password: ${(item.data as SMTPData).password}`)
-            break
-          case 'mailgun':
-            log.info(`API key: ${(item.data as MailgunData).apiKey}`)
-            log.info(`Domain: ${(item.data as MailgunData).domain}`)
-            break
-          case 'sendgrid':
-            log.info(`API key: ${(item.data as SendgridData).apiKey}`)
-            break
-          case 'webhook':
-            log.info(`URL: ${(item.data as WebhookData).url}`)
-            break
-          case 'slack':
-            log.info(`URL: ${(item.data as WebhookData).url}`)
-            break
-        }
-      })
+          console.log(`    Request Body: ${JSON.stringify(probe.request.body)}`)
+          console.log(`    Alerts: ${probe.alerts.join(', ')}`)
+        })
+        console.log('')
+
+        console.log(`Notifications:`)
+        config.notifications.forEach((item) => {
+          console.log(`- Notification ID: ${item.id}`)
+          console.log(`    Type: ${item.type}`)
+          // Only show recipients if type is mailgun, smtp, or sendgrid
+          if (['mailgun', 'smtp', 'sendgrid'].indexOf(item.type) >= 0) {
+            console.log(
+              `    Recipients: ${(item.data as MailData).recipients.join(', ')}`
+            )
+          }
+          switch (item.type) {
+            case 'smtp':
+              console.log(`    Hostname: ${(item.data as SMTPData).hostname}`)
+              console.log(`    Port: ${(item.data as SMTPData).port}`)
+              console.log(`    Username: ${(item.data as SMTPData).username}`)
+              break
+            case 'mailgun':
+              console.log(`    Domain: ${(item.data as MailgunData).domain}`)
+              break
+            case 'sendgrid':
+              break
+            case 'webhook':
+              console.log(`    URL: ${(item.data as WebhookData).url}`)
+              break
+            case 'slack':
+              console.log(`    URL: ${(item.data as WebhookData).url}`)
+              break
+          }
+        })
+        console.log('')
+      }
       // Loop through all probes
       looper(config)
     } else {
