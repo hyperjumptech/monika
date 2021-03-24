@@ -152,9 +152,9 @@ export const sendAlerts = async ({
             },
             notification
           ).then(() => ({
-              notification: 'mailgun',
-              alert: validation.alert,
-              url,
+            notification: 'mailgun',
+            alert: validation.alert,
+            url,
           }))
         }
         case 'webhook': {
