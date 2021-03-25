@@ -24,7 +24,7 @@ const VALID_CONFIG = {
 }
 const NO_NOTIFICATIONS = {
   valid: false,
-  message: 'Notifications object does not exists or has length lower than 1!',
+  message: `Notifications config has not been set. We will not be able to notify you when INCIDENT happened!\nPlease refer to Monika documentation for setting the notifications config at https://hyperjumptech.github.io/monika/quick-start.`,
 }
 const NO_PROBES = {
   valid: false,
@@ -136,11 +136,12 @@ export const validateConfig = async (configuration: Config) => {
   // Validate Notifications
   if (!data.notifications || (data?.notifications?.length ?? 0) === 0) {
     warn(
-      boxen(chalk.red(NO_NOTIFICATIONS.message), {
+      boxen(chalk.yellow(NO_NOTIFICATIONS.message), {
         padding: 1,
         margin: 1,
         borderStyle: 'bold',
-        borderColor: 'red',
+        borderColor: 'yellow',
+        align: 'center',
       })
     )
   }
