@@ -36,8 +36,8 @@ async function doProbe(
       probe,
       probeRes,
       validatedResp,
-      trueThreshold: probe.trueThreshold ?? defaultThreshold,
-      falseThreshold: probe.falseThreshold ?? defaultThreshold,
+      incidentThreshold: probe.incidentThreshold ?? defaultThreshold,
+      recoveryThreshold: probe.recoveryThreshold ?? defaultThreshold,
     })
 
     serverStatuses.forEach(async (status, index) => {
@@ -60,6 +60,7 @@ async function doProbe(
           notifications: notifications,
           url: probe.request.url ?? '',
           status: status.isDown ? 'DOWN' : 'UP',
+          incidentThreshold: probe.incidentThreshold,
         })
       }
     })
