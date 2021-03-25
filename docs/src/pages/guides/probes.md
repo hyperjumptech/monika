@@ -92,8 +92,8 @@ Here is probes example with POST request to simulate HTML form submission
           "password": "somepassword"
         }
       },
-      "trueThreshold": 3,
-      "falseThreshold": 3,
+      "incidentThreshold": 3,
+      "recoveryThreshold": 3,
       "alerts": ["status-not-2xx", "response-time-greater-than-200-ms"]
     },
   ]
