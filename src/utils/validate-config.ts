@@ -8,6 +8,7 @@ import {
   SendgridData,
   WebhookData,
   MailData,
+  WhatsappData,
 } from './../interfaces/data'
 import { Config } from '../interfaces/config'
 import { Probe } from '../interfaces/probe'
@@ -111,6 +112,24 @@ const WEBHOOK_NO_URL = {
   message: 'URL not found',
 }
 
+// Whatsapp
+const WHATSAPP_NO_URL = {
+  valid: false,
+  message: 'URL not found',
+}
+
+// Whatsapp
+const WHATSAPP_NO_USERNAME = {
+  valid: false,
+  message: 'Username not found',
+}
+
+// Whatsapp
+const WHATSAPP_NO_PASSWORD = {
+  valid: false,
+  message: 'Password not found',
+}
+
 export const validateConfig = async (configuration: Config) => {
   const data = configuration
 
@@ -122,17 +141,17 @@ export const validateConfig = async (configuration: Config) => {
   // Validate probes
   if ((data?.probes?.length ?? 0) === 0) return NO_PROBES
 
-  // Check notifications properties
   if (data.notifications && data.notifications.length > 0) {
-    for (const notification of data.notifications) {
-      const { type, data } = notification as Notification
+    // Check notifications properties
+  for (const notification of data.notifications) {
+    const { type, data } = notification as Notification
 
-      // Check if type equals to mailgun, smtp, or sendgrid, and has no recipients
-      if (
-        ['mailgun', 'smtp', 'sendgrid'].indexOf(type) >= 0 &&
-        ((data as MailData)?.recipients?.length ?? 0) === 0
-      )
-        return NOTIFICATION_NO_RECIPIENTS
+    // Check if type equals to mailgun, smtp, or sendgrid, and has no recipients
+    if (
+      ['mailgun', 'smtp', 'sendgrid', 'whatsapp'].indexOf(type) >= 0 &&
+      ((data as MailData)?.recipients?.length ?? 0) === 0
+    )
+      return NOTIFICATION_NO_RECIPIENTS
 
       switch (type) {
         case 'smtp':
@@ -164,10 +183,19 @@ export const validateConfig = async (configuration: Config) => {
 
           break
 
-        default:
-          return NOTIFICATION_INVALID_TYPE
-      }
+      case 'whatsapp':
+        if (!(data as WhatsappData).url) return WHATSAPP_NO_URL
+
+        if (!(data as WhatsappData).username) return WHATSAPP_NO_USERNAME
+
+        if (!(data as WhatsappData).password) return WHATSAPP_NO_PASSWORD
+
+        break
+
+      default:
+        return NOTIFICATION_INVALID_TYPE
     }
+  }
   }
 
   // Check probes properties

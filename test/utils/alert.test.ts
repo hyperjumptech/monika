@@ -1,6 +1,10 @@
 import chai, { expect } from 'chai'
 import spies from 'chai-spies'
-import { MailgunData, WebhookData } from '../../src/interfaces/data'
+import {
+  MailgunData,
+  WebhookData,
+  WhatsappData,
+} from '../../src/interfaces/data'
 import { AxiosResponseWithExtraData } from '../../src/interfaces/request'
 
 chai.use(spies)
@@ -16,6 +20,7 @@ import * as mailgun from '../../src/utils/notifications/mailgun'
 import * as webhook from '../../src/utils/notifications/webhook'
 import * as slack from '../../src/utils/notifications/slack'
 import * as smtp from '../../src/utils/notifications/smtp'
+import * as whatsapp from '../../src/utils/whatsapp'
 import * as notifier from 'node-notifier'
 import NotificationCenter from 'node-notifier/notifiers/notificationcenter'
 
@@ -377,8 +382,37 @@ describe('send alerts', () => {
     expect(sent).to.have.length(1)
   })
 
+  it('should send whatsapp notifications', async () => {
+    chai.spy.on(whatsapp, 'sendWhatsapp', () => Promise.resolve())
+
+    const sent = await sendAlerts({
+      validation: {
+        alert: 'status-not-2xx',
+        status: true,
+      },
+      notifications: [
+        {
+          id: '1',
+          type: 'whatsapp',
+          data: {
+            recipients: ['0348959382457'],
+            url: 'xx',
+            username: 'someusername',
+            password: 'somepassword',
+          } as WhatsappData,
+        },
+      ],
+      url: 'https://hyperjump.tech',
+      status: 'DOWN',
+    })
+
+    expect(whatsapp.sendWhatsapp).to.have.been.called()
+    expect(sent).to.have.length(1)
+  })
+
   it('should send default notification', async () => {
-    chai.spy.on(notifier, 'notify', () => NotificationCenter)
+    chai.spy.on(notifier, 'notify', () => Promise.resolve())
+
     const sent = await sendAlerts({
       validation: {
         alert: 'status-not-2xx',
@@ -387,6 +421,7 @@ describe('send alerts', () => {
       url: 'https://hyperjump.tech',
       status: 'DOWN',
     })
+
     expect(notifier.notify).to.have.been.called()
     expect(sent).to.have.length(1)
   })
