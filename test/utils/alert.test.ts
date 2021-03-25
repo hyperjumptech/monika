@@ -21,7 +21,6 @@ import * as webhook from '../../src/utils/notifications/webhook'
 import * as slack from '../../src/utils/notifications/slack'
 import * as smtp from '../../src/utils/notifications/smtp'
 import * as whatsapp from '../../src/utils/whatsapp'
-import notifier = require('node-notifier')
 
 describe('check response status', () => {
   it('should trigger alert when response is within 4xx status', () => {
