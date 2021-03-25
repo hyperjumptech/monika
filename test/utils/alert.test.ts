@@ -407,6 +407,7 @@ describe('send alerts', () => {
       ],
       url: 'https://hyperjump.tech',
       status: 'DOWN',
+      incidentThreshold: 3,
     })
 
     expect(whatsapp.sendWhatsapp).to.have.been.called()
