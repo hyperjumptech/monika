@@ -20,6 +20,6 @@ export const sendSmtpMail = async (transporter: Mail, opt: Mail.Options) => {
     from: opt.from,
     to: opt.to,
     subject: opt.subject,
-    html: opt.html,
+    text: opt.text,
   })
 }

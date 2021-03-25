@@ -199,8 +199,8 @@ export const validateConfig = async (configuration: Config) => {
       alerts,
       name,
       request,
-      trueThreshold,
-      falseThreshold,
+      incidentThreshold,
+      recoveryThreshold,
     } = probe as Probe
 
     if (!name) return PROBE_NO_NAME
@@ -209,13 +209,13 @@ export const validateConfig = async (configuration: Config) => {
 
     if ((alerts?.length ?? 0) === 0) return PROBE_NO_ALERT
 
-    if (!trueThreshold)
+    if (!incidentThreshold)
       warn(
-        `Warning: Probe ${id} has no trueThreshold configuration defined. Using the default threshold: 5`
+        `Warning: Probe ${id} has no incidentThreshold configuration defined. Using the default threshold: 5`
       )
-    if (!falseThreshold)
+    if (!recoveryThreshold)
       warn(
-        `Warning: Probe ${id} has no falseThreshold configuration defined. Using the default threshold: 5`
+        `Warning: Probe ${id} has no recoveryThreshold configuration defined. Using the default threshold: 5`
       )
 
     // Check probe request properties
