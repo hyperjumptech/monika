@@ -37,11 +37,11 @@ Monika operates by reading everything from the config file. From the configurati
 
 For more information, please refer to the detailed documentations below.
 
-| Topic                                                    |                    Description                     |
-| :------------------------------------------------------- | :------------------------------------------------: |
-| [Probes](./docs/src/pages/guides/probes.md)              |       How requests are set up and dispatched       |
-| [Alerts](./docs/src/pages/guides/alerts.md)              | How alerts are triggered and how to setup an alert |
-| [Notifcations](./docs/src/pages/guides/notifications.md) |  Receive notifications when alerts are triggered   |
+| Topic                                                     | Description                                        |
+| --------------------------------------------------------- | -------------------------------------------------- |
+| [Probes](./docs/src/pages/guides/probes.md)               | How requests are set up and dispatched             |
+| [Alerts](./docs/src/pages/guides/alerts.md)               | How alerts are triggered and how to setup an alert |
+| [Notifications](./docs/src/pages/guides/notifications.md) | Receive notifications when alerts are triggered    |
 
 ## Run Monika using Docker
 
