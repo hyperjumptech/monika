@@ -19,7 +19,7 @@ const MILLISECONDS = 1000
 async function doProbe(
   checkOrder: number,
   probe: Probe,
-  notifications: Notification[]
+  notifications?: Notification[]
 ) {
   let probeRes: AxiosResponseWithExtraData = {} as AxiosResponseWithExtraData
 
@@ -42,7 +42,7 @@ async function doProbe(
 
     serverStatuses.forEach(async (status, index) => {
       if (status.shouldSendNotification) {
-        notifications.forEach((notification) => {
+        notifications?.forEach((notification) => {
           log.info({
             type:
               status.state === 'UP_TRUE_EQUALS_THRESHOLD'
