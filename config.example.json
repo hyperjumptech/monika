@@ -1,58 +1,5 @@
 {
-  "notifications": [
-    {
-      "id": "unique-id-mailgun",
-      "type": "mailgun",
-      "data": {
-        "recipients": ["recipient1@example.com"],
-        "apiKey": "YOUR_API_KEY",
-        "domain": "YOUR_DOMAIN"
-      }
-    },
-    {
-      "id": "unique-id-sendgrid",
-      "type": "sendgrid",
-      "data": {
-        "recipients": ["recipient1@example.com"],
-        "apiKey": "YOUR_API_KEY"
-      }
-    },
-    {
-      "id": "unique-id-smtp",
-      "type": "smtp",
-      "data": {
-        "recipients": ["recipient1@example.com"],
-        "hostname": "smtp.example.com",
-        "port": 222,
-        "username": "smtpusername",
-        "password": "smtppassword"
-      }
-    },
-    {
-      "id": "unique-id-webhook",
-      "type": "webhook",
-      "data": {
-        "url": "https://example.com/webhook"
-      }
-    },
-    {
-      "id": "unique-id-slack",
-      "type": "slack",
-      "data": {
-        "url": "https://example.com/webhook"
-      }
-    },
-    {
-      "id": "unique-id-whatsapp",
-      "type": "whatsapp",
-      "data": {
-        "recipients": ["628123456789"],
-        "url": "https://example.com",
-        "username": "whatsappusername",
-        "password": "whatsapppassword"
-      }
-    }
-  ],
+  "notifications": [],
   "probes": [
     {
       "id": "1",

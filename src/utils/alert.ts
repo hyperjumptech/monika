@@ -1,4 +1,3 @@
-import notifier = require('node-notifier')
 import {
   SMTPData,
   WebhookData,
@@ -143,7 +142,7 @@ export const sendAlerts = async ({
   incidentThreshold,
 }: {
   validation: ValidateResponseStatus
-  notifications?: Notification[]
+  notifications: Notification[]
   url: string
   status: string
   incidentThreshold: number
@@ -162,21 +161,6 @@ export const sendAlerts = async ({
     status,
     incidentThreshold,
   })
-  if (!notifications || notifications.length === 0) {
-    return Promise.resolve(() => {
-      return notifier.notify({
-        title: message.subject,
-        message: validation.alert,
-      })
-    }).then(() => [
-      {
-        notification: '',
-        alert: validation.alert,
-        url,
-      },
-    ])
-  }
-
   const sent = await Promise.all<any>(
     notifications.map((notification) => {
       switch (notification.type) {

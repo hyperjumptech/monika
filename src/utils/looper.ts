@@ -41,8 +41,12 @@ async function doProbe(
     })
 
     serverStatuses.forEach(async (status, index) => {
-      if (status.shouldSendNotification) {
-        notifications?.forEach((notification) => {
+      if (
+        status.shouldSendNotification &&
+        notifications &&
+        notifications.length > 0
+      ) {
+        notifications.forEach((notification) => {
           log.info({
             type:
               status.state === 'UP_TRUE_EQUALS_THRESHOLD'
