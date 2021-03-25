@@ -1,7 +1,7 @@
 import { AxiosResponseWithExtraData } from '../interfaces/request'
 import { Probe } from '../interfaces/probe'
-import { log } from 'console'
 import path from 'path'
+import { log } from '../utils/log'
 
 const sqlite3 = require('sqlite3').verbose()
 
@@ -43,7 +43,7 @@ export async function openLogfile() {
     sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE,
     async (err: Error) => {
       if (err) {
-        log('warning: cannot open logfile. error:', err.message)
+        log.info('warning: cannot open logfile. error:', err.message)
       }
       await createTable()
     }
@@ -103,7 +103,7 @@ export async function saveLog(
 
   await db.run(insertSQL, params, (err: Error) => {
     if (err) {
-      return log('error, cannot insert data into history.db', err)
+      return log.info('error, cannot insert data into history.db', err)
     }
   })
 }

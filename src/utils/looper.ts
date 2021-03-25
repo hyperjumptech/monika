@@ -1,52 +1,71 @@
 import { processProbeStatus } from './process-server-status'
 import { Config } from '../interfaces/config'
-import console, { log } from 'console'
-import { probing } from './probing'
+import { probing } from '../utils/probing'
 import { validateResponse, sendAlerts } from './alert'
+import { Probe } from '../interfaces/probe'
+import { Notification } from '../interfaces/notification'
 import { probeLog } from './logger'
 import { AxiosResponseWithExtraData } from '../interfaces/request'
+import { log } from '../utils/log'
 
 const MILLISECONDS = 1000
 
 /**
  * doProbe sends out the http request
- * @param {object} config contains all the configs
+ * @param {number} checkOrder the order of probe being processed
+ * @param {object} probe contains all the probes
+ * @param {array} notifications contains all the notifications
  */
-async function doProbe(config: Config) {
-  // probe each url
-  log('\nProbing....')
+async function doProbe(
+  checkOrder: number,
+  probe: Probe,
+  notifications: Notification[]
+) {
+  let probeRes: AxiosResponseWithExtraData = {} as AxiosResponseWithExtraData
 
-  config.probes.forEach(async (item) => {
-    let probRes: AxiosResponseWithExtraData = {} as AxiosResponseWithExtraData
+  try {
+    probeRes = await probing(probe)
+    const validatedResp = validateResponse(probe.alerts, probeRes)
 
-    try {
-      probRes = await probing(item)
-      const validatedResp = validateResponse(item.alerts, probRes)
+    probeLog(checkOrder, probe, probeRes, '')
 
-      probeLog(item, probRes, '')
+    const defaultThreshold = 5
 
-      const serverStatuses = processProbeStatus({
-        probe: item,
-        validatedResp,
-        trueThreshold: item.trueThreshold || 5,
-        falseThreshold: item.falseThreshold || 5,
-      })
+    const serverStatuses = processProbeStatus({
+      checkOrder,
+      probe,
+      probeRes,
+      validatedResp,
+      trueThreshold: probe.trueThreshold ?? defaultThreshold,
+      falseThreshold: probe.falseThreshold ?? defaultThreshold,
+    })
 
-      serverStatuses.forEach(async (status, index) => {
-        if (status.shouldSendNotification) {
-          log(`Sending a "${item.alerts[index]}" notification`)
-          await sendAlerts({
-            validation: validatedResp[index],
-            notifications: config.notifications,
-            url: item.request.url ?? '',
-            status: status.isDown ? 'DOWN' : 'UP',
+    serverStatuses.forEach(async (status, index) => {
+      if (status.shouldSendNotification) {
+        notifications.forEach((notification) => {
+          log.info({
+            type:
+              status.state === 'UP_TRUE_EQUALS_THRESHOLD'
+                ? 'NOTIFY-INCIDENT'
+                : 'NOTIFY-RECOVER',
+            alertType: probe.alerts[index],
+            notificationType: notification.type,
+            notificationId: notification.id,
+            probeId: probe.id,
+            url: probe.request.url,
           })
-        }
-      })
-    } catch (error) {
-      probeLog(item, probRes, error)
-    }
-  })
+        })
+        await sendAlerts({
+          validation: validatedResp[index],
+          notifications: notifications,
+          url: probe.request.url ?? '',
+          status: status.isDown ? 'DOWN' : 'UP',
+        })
+      }
+    })
+  } catch (error) {
+    probeLog(checkOrder, probe, probeRes, error)
+  }
 }
 
 /**
@@ -54,22 +73,19 @@ async function doProbe(config: Config) {
  * @param {object} config is an object that contains all the configs
  */
 export function looper(config: Config) {
-  const interval = config.interval ?? 0
+  config.probes.forEach((probe) => {
+    const probeInterval = setInterval(
+      (() => {
+        let counter = 0
+        return () => {
+          return doProbe(++counter, probe, config.notifications)
+        }
+      })(),
+      (probe.interval ?? 10) * MILLISECONDS
+    )
 
-  log('Probes:')
-  config.probes.forEach(async (item) => {
-    log(`Probe ID: ${item.id}`)
-    log(`Probe Name: ${item.name}`)
-    log(`Probe Description: ${item.description}`)
-    log(`Probe Request Method: ${item.request.method}`)
-    log(`Probe Request URL: ${item.request.url}`)
-    log(`Probe Request Headers: ${JSON.stringify(item.request.headers)}`)
-    log(`Probe Request Body: ${JSON.stringify(item.request.body)}`)
-    log(`Probe Alerts: ${item.alerts.toString()}\n`)
+    if (process.env.CI || process.env.NODE_ENV === 'test') {
+      clearInterval(probeInterval)
+    }
   })
-
-  doProbe(config).catch((error) => console.error(error.message))
-  if (interval > 0) {
-    setInterval(doProbe, interval * MILLISECONDS, config)
-  }
 }

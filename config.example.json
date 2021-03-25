@@ -1,5 +1,4 @@
 {
-  "interval": 0,
   "notifications": [
     {
       "id": "unique-id-mailgun",
@@ -42,6 +41,16 @@
       "data": {
         "url": "https://example.com/webhook"
       }
+    },
+    {
+      "id": "unique-id-whatsapp",
+      "type": "whatsapp",
+      "data": {
+        "recipients": ["628123456789"],
+        "url": "https://example.com",
+        "username": "whatsappusername",
+        "password": "whatsapppassword"
+      }
     }
   ],
   "probes": [
@@ -49,9 +58,10 @@
       "id": "1",
       "name": "Example",
       "description": "Probe",
+      "interval": 10,
       "request": {
         "method": "GET",
-        "url": "https://worldtimeapi.org/api/ip",
+        "url": "https://github.com",
         "timeout": 7000,
         "headers": {
           "Authorization": ""

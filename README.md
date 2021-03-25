@@ -43,6 +43,27 @@ For more information, please refer to the detailed documentations below.
 | [Alerts](./docs/src/pages/guides/alerts.md)              | How alerts are triggered and how to setup an alert |
 | [Notifcations](./docs/src/pages/guides/notifications.md) |  Receive notifications when alerts are triggered   |
 
+## Run Monika using Docker
+
+Obtain a copy of your configuration file `config.json` into the current directory.
+From the same directoy, you can run:
+
+```
+docker run --name monika -v ${PWD}/config.json:/config/config.json --detach hyperjump/monika:latest
+```
+
+Once your monika server is up, you can see its log using
+
+```
+docker logs monika
+```
+
+Or you can stop the container with
+
+```
+docker stop monika
+```
+
 ## Discussions
 
 If you need help, want to give feedback, or have a great idea to improve Monika, get involved! Let us know in the [Github discussions](https://github.com/hyperjumptech/monika/discussions).
