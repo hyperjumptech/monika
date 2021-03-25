@@ -1,4 +1,4 @@
-import * as notifier from 'node-notifier'
+import notifier = require('node-notifier')
 import {
   SMTPData,
   WebhookData,
@@ -14,6 +14,7 @@ import { createSmtpTransport, sendSmtpMail } from './notifications/smtp'
 import { sendWebhook } from './notifications/webhook'
 import { sendSlack } from './notifications/slack'
 import { sendWhatsapp } from './whatsapp'
+import { log } from 'console'
 
 type CheckResponseFn = (response: AxiosResponseWithExtraData) => boolean
 export type ValidateResponseStatus = { alert: string; status: boolean }
@@ -135,12 +136,12 @@ export const sendAlerts = async ({
   const ipAddress = getIp()
   const message = getMessageForAlert(validation.alert, url, ipAddress, status)
   if (!notifications || notifications.length === 0) {
-    notifier.notify({
-      title: message.subject,
-      message: validation.alert,
-    })
-
-    return Promise.resolve([
+    return Promise.resolve(() => {
+      return notifier.notify({
+        title: message.subject,
+        message: validation.alert,
+      })
+    }).then(() => [
       {
         notification: '',
         alert: validation.alert,
