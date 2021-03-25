@@ -67,8 +67,37 @@ Details of the field are give in the table below.
 | interval (optional)       | Number of probe's interval (in seconds). Default value is 10 seconds.                                                                                                                                                                                                                                                                                 |
 | trueThreshold (optional)  | Number of times an alert should return true before Monika sends notifications. For example, when trueThreshold is 3, Monika will only send notifications when the probed URL returns non-2xx status 3 times in a row. After sending the notifications, Monika will not send notifications anymore until the alert status changes. Default value is 5. |
 | falseThreshold (optional) | Number of times an alert should return false before Monika sends notifications. For example, when falseThreshold is 3, Monika will only send notifications when the probed URL returns status 2xx 3 times in a row. After sending the notifications, Monika will not send notifications anymore until the alert status changes. Default value is 5.   |
+| alerts                    | The condition which will trigger an alert, and the subsequent notification method to send out the alert. See below for further details on alerts and notifications.                                                                                                                                                                                   |
 
-Alerts are the condition which will trigger an alert, and the subsequent notification method to send out the alert. See below for further details on alerts and notifications.
+### HTML-form-submission Example
+
+Here is probes example with POST request to simulate HTML form submission
+
+```json
+  "probes": [
+    {
+      "id": "1",
+      "name": "HTML form submission",
+      "description": "simulate html form submission",
+      "interval": 10,
+      "request": {
+        "method": "POST",
+        "url": "http://www.foo.com/login.php",
+        "timeout": 7000,
+        "headers": {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        "body": {
+          "username": "someusername",
+          "password": "somepassword"
+        }
+      },
+      "trueThreshold": 3,
+      "falseThreshold": 3,
+      "alerts": ["status-not-2xx", "response-time-greater-than-200-ms"]
+    },
+  ]
+```
 
 ## Execution order
 
