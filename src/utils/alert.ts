@@ -14,7 +14,6 @@ import { createSmtpTransport, sendSmtpMail } from './notifications/smtp'
 import { sendWebhook } from './notifications/webhook'
 import { sendSlack } from './notifications/slack'
 import { sendWhatsapp } from './whatsapp'
-import { log } from 'console'
 
 type CheckResponseFn = (response: AxiosResponseWithExtraData) => boolean
 export type ValidateResponseStatus = { alert: string; status: boolean }
@@ -80,34 +79,54 @@ export const validateResponse = (
   return checks
 }
 
-export const getMessageForAlert = (
-  alert: string,
-  url: string,
-  ipAddress: string,
+export const getMessageForAlert = ({
+  alert,
+  url,
+  ipAddress,
+  status,
+  incidentThreshold,
+}: {
+  alert: string
+  url: string
+  ipAddress: string
   status: string
-): {
+  incidentThreshold: number
+}): {
   subject: string
   body: string
 } => {
   const getSubject = (url: string, status: string) => {
-    if (status === 'UP') {
-      return `${alert} from probing ${url} has been resolved.`
-    }
-    return `"${alert}" has been detected from probing ${url}`
+    const statusAlert = `Target ${url} is not OK`
+    if (alert === 'status-not-2xx' && status === 'UP')
+      return `[RECOVERY] ${statusAlert}`
+    if (alert === 'status-not-2xx' && status === 'DOWN')
+      return `[INCIDENT] ${statusAlert}`
+
+    const responseAlert = `Target ${url} takes long to respond`
+    if (alert.includes('response-time-greater-than-') && status === 'UP')
+      return `[RECOVERY] ${responseAlert}`
+
+    return `[INCIDENT] ${responseAlert}`
   }
 
   const getBody = (status: string) => {
-    if (status === 'UP') {
-      return `We found that your "${alert}" alert has been resolved when probing "${url}".`
+    if (alert === 'status-not-2xx' && status === 'DOWN')
+      return `Target ${url} is not healthy. It has not been returning status code 2xx ${incidentThreshold} times in a row.`
+
+    if (alert.includes('response-time-greater-than-') && status === 'DOWN') {
+      const alertTime = parseAlertStringTime(alert)
+      return `Target ${url} is not healthy. The response time has been greater than ${alertTime} ${incidentThreshold} times in a row`
     }
-    return `New "${alert}" alert when probing "${url}".`
+
+    return `Target ${url} is back to healthy.`
   }
 
+  const today = new Date().toUTCString()
   const message = {
     subject: getSubject(url, status),
     body: `
-      ${getBody(status)}\n
-      Time: ${Date.now()}\n
+      ${getBody(status)}\n\n
+      Time: ${today}\n
       Target URL: ${url}\n
       From server: ${ipAddress}
     `,
@@ -121,11 +140,13 @@ export const sendAlerts = async ({
   notifications,
   url,
   status,
+  incidentThreshold,
 }: {
   validation: ValidateResponseStatus
   notifications?: Notification[]
   url: string
   status: string
+  incidentThreshold: number
 }): Promise<
   Array<{
     alert: string
@@ -134,7 +155,13 @@ export const sendAlerts = async ({
   }>
 > => {
   const ipAddress = getIp()
-  const message = getMessageForAlert(validation.alert, url, ipAddress, status)
+  const message = getMessageForAlert({
+    alert: validation.alert,
+    url,
+    ipAddress,
+    status,
+    incidentThreshold,
+  })
   if (!notifications || notifications.length === 0) {
     return Promise.resolve(() => {
       return notifier.notify({
@@ -209,7 +236,7 @@ export const sendAlerts = async ({
             from: 'http-probe@hyperjump.tech',
             to: (notification?.data as SMTPData)?.recipients?.join(','),
             subject: message.subject,
-            html: message.body,
+            text: message.body,
           }).then(() => ({
             notification: 'smtp',
             alert: validation.alert,

@@ -268,6 +268,7 @@ describe('send alerts', () => {
       ],
       url: 'https://hyperjump.tech',
       status: 'UP',
+      incidentThreshold: 3,
     })
     expect(sent).to.have.length(1)
   })
@@ -292,6 +293,7 @@ describe('send alerts', () => {
       ],
       url: 'https://hyperjump.tech',
       status: 'DOWN',
+      incidentThreshold: 3,
     })
     expect(sent).to.have.length(1)
   })
@@ -316,6 +318,7 @@ describe('send alerts', () => {
       ],
       url: 'https://hyperjump.tech',
       status: 'DOWN',
+      incidentThreshold: 3,
     })
     expect(mailgun.sendMailgun).to.have.been.called()
     expect(sent).to.have.length(1)
@@ -347,6 +350,7 @@ describe('send alerts', () => {
       ],
       url: 'https://hyperjump.tech',
       status: 'DOWN',
+      incidentThreshold: 3,
     })
 
     expect(webhook.sendWebhook).to.have.been.called()
@@ -376,6 +380,7 @@ describe('send alerts', () => {
       ],
       url: 'https://hyperjump.tech',
       status: 'DOWN',
+      incidentThreshold: 3,
     })
     expect(smtp.sendSmtpMail).to.have.been.called()
     expect(sent).to.have.length(1)
@@ -403,26 +408,10 @@ describe('send alerts', () => {
       ],
       url: 'https://hyperjump.tech',
       status: 'DOWN',
+      incidentThreshold: 3,
     })
 
     expect(whatsapp.sendWhatsapp).to.have.been.called()
-    expect(sent).to.have.length(1)
-  })
-
-  it('should send default notification', async () => {
-    chai.spy.on(notifier, 'notify', () => Promise.resolve())
-
-    const sent = await sendAlerts({
-      validation: {
-        alert: 'status-not-2xx',
-        status: true,
-      },
-      notifications: [],
-      url: 'https://hyperjump.tech',
-      status: 'DOWN',
-    })
-
-    expect(notifier.notify).to.have.been.called()
     expect(sent).to.have.length(1)
   })
 })
