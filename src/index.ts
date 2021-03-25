@@ -11,6 +11,7 @@ import { printAllLogs } from './utils/logger'
 import { log } from './utils/log'
 
 import { closeLog, openLogfile, flushAllLogs } from './utils/history'
+import { notificationChecker } from './utils/notifications/checker'
 
 class Monika extends Command {
   static description = 'Monika command line monitoring tool'
@@ -73,6 +74,10 @@ class Monika extends Command {
     // Check if config is valid
     const isConfigValid: Validation = await validateConfig(config)
     if (isConfigValid.valid) {
+      await notificationChecker(config.notifications).catch((error) => {
+        this.error(error?.message, { exit: 100 })
+      })
+
       console.log(
         `Starting Monika. Probes: ${config.probes.length}. Notifications: ${config.notifications.length}\n`
       )

@@ -14,6 +14,6 @@ export const sendWebhook = async (data: WebhookData) => {
 
     return res
   } catch (error) {
-    throw new Error(error)
+    throw error
   }
 }
