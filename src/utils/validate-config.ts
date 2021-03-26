@@ -14,6 +14,8 @@ import { Config } from '../interfaces/config'
 import { Probe } from '../interfaces/probe'
 import { RequestConfig } from './../interfaces/request'
 import { isValidURL } from './is-valid-url'
+import chalk from 'chalk'
+import boxen from 'boxen'
 
 // Validations messages
 const VALID_CONFIG = {
@@ -22,7 +24,7 @@ const VALID_CONFIG = {
 }
 const NO_NOTIFICATIONS = {
   valid: false,
-  message: 'Notifications object does not exists or has length lower than 1!',
+  message: `Notifications config has not been set. We will not be able to notify you when INCIDENT happened!\nPlease refer to Monika documentation for setting the notifications config at https://hyperjumptech.github.io/monika/guides/notifications.`,
 }
 const NO_PROBES = {
   valid: false,
@@ -131,64 +133,76 @@ const WHATSAPP_NO_PASSWORD = {
 export const validateConfig = async (configuration: Config) => {
   const data = configuration
 
-  // Check if notifications object is exists
-  if ((data?.notifications?.length ?? 0) === 0) return NO_NOTIFICATIONS
+  // Validate Notifications
+  if (!data.notifications || (data?.notifications?.length ?? 0) === 0) {
+    warn(
+      boxen(chalk.yellow(NO_NOTIFICATIONS.message), {
+        padding: 1,
+        margin: 1,
+        borderStyle: 'bold',
+        borderColor: 'yellow',
+        align: 'center',
+      })
+    )
+  }
 
   // Validate probes
   if ((data?.probes?.length ?? 0) === 0) return NO_PROBES
 
-  // Check notifications properties
-  for (const notification of data.notifications) {
-    const { type, data } = notification as Notification
+  if (data.notifications && data.notifications.length > 0) {
+    // Check notifications properties
+    for (const notification of data.notifications) {
+      const { type, data } = notification as Notification
 
-    // Check if type equals to mailgun, smtp, or sendgrid, and has no recipients
-    if (
-      ['mailgun', 'smtp', 'sendgrid', 'whatsapp'].indexOf(type) >= 0 &&
-      ((data as MailData)?.recipients?.length ?? 0) === 0
-    )
-      return NOTIFICATION_NO_RECIPIENTS
+      // Check if type equals to mailgun, smtp, or sendgrid, and has no recipients
+      if (
+        ['mailgun', 'smtp', 'sendgrid', 'whatsapp'].indexOf(type) >= 0 &&
+        ((data as MailData)?.recipients?.length ?? 0) === 0
+      )
+        return NOTIFICATION_NO_RECIPIENTS
 
-    switch (type) {
-      case 'smtp':
-        if (!(data as SMTPData).hostname) return SMTP_NO_HOSTNAME
+      switch (type) {
+        case 'smtp':
+          if (!(data as SMTPData).hostname) return SMTP_NO_HOSTNAME
 
-        if (!(data as SMTPData).port) return SMTP_NO_PORT
+          if (!(data as SMTPData).port) return SMTP_NO_PORT
 
-        if (!(data as SMTPData).username) return SMTP_NO_USERNAME
+          if (!(data as SMTPData).username) return SMTP_NO_USERNAME
 
-        if (!(data as SMTPData).password) return SMTP_NO_PASSWORD
+          if (!(data as SMTPData).password) return SMTP_NO_PASSWORD
 
-        break
-      case 'mailgun':
-        if (!(data as MailgunData).apiKey) return MAILGUN_NO_APIKEY
+          break
+        case 'mailgun':
+          if (!(data as MailgunData).apiKey) return MAILGUN_NO_APIKEY
 
-        if (!(data as MailgunData).domain) return MAILGUN_NO_DOMAIN
+          if (!(data as MailgunData).domain) return MAILGUN_NO_DOMAIN
 
-        break
-      case 'sendgrid':
-        if (!(data as SendgridData).apiKey) return SENDGRID_NO_APIKEY
+          break
+        case 'sendgrid':
+          if (!(data as SendgridData).apiKey) return SENDGRID_NO_APIKEY
 
-        break
-      case 'webhook':
-        if (!(data as WebhookData).url) return WEBHOOK_NO_URL
-        break
+          break
+        case 'webhook':
+          if (!(data as WebhookData).url) return WEBHOOK_NO_URL
+          break
 
-      case 'slack':
-        if (!(data as WebhookData).url) return WEBHOOK_NO_URL
+        case 'slack':
+          if (!(data as WebhookData).url) return WEBHOOK_NO_URL
 
-        break
+          break
 
-      case 'whatsapp':
-        if (!(data as WhatsappData).url) return WHATSAPP_NO_URL
+        case 'whatsapp':
+          if (!(data as WhatsappData).url) return WHATSAPP_NO_URL
 
-        if (!(data as WhatsappData).username) return WHATSAPP_NO_USERNAME
+          if (!(data as WhatsappData).username) return WHATSAPP_NO_USERNAME
 
-        if (!(data as WhatsappData).password) return WHATSAPP_NO_PASSWORD
+          if (!(data as WhatsappData).password) return WHATSAPP_NO_PASSWORD
 
-        break
+          break
 
-      default:
-        return NOTIFICATION_INVALID_TYPE
+        default:
+          return NOTIFICATION_INVALID_TYPE
+      }
     }
   }
 
