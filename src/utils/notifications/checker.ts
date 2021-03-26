@@ -1,5 +1,3 @@
-import ip from 'ip'
-
 import {
   MailgunData,
   SendgridData,
@@ -7,6 +5,7 @@ import {
   WebhookData,
 } from '../../interfaces/data'
 import { Notification } from '../../interfaces/notification'
+import getIp from '../ip'
 import { sendMailgun } from './mailgun'
 import { sendSendgrid } from './sendgrid'
 import { sendSlack } from './slack'
@@ -14,7 +13,7 @@ import { createSmtpTransport, sendSmtpMail } from './smtp'
 import { sendWebhook } from './webhook'
 
 const subject = 'Monika is started'
-const body = `Monika is running on ${ip.address()}`
+const body = `Monika is running on ${getIp()}`
 
 const errorMessage = (
   notificationType: string,
