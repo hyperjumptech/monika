@@ -24,11 +24,8 @@ jobs:
               uses: actions/setup-node@v1
               with:
                   node-version: ${{ matrix.node-version }}
-            - run: npm ci
-            - run: npm run build --if-present
-            - run: npm test
             - name: Notify Teams
               uses: joelwmale/webhook-action@fd99bb3b8272237103e349e9bb4d9b0ead9a217c
               with:
-                url: ${{secrets.HYPERJUMP_TEAMS_SYMON_WEBHOOK}}
+                url: https://hyperjump.webhook.office.com/webhookb2/604ef4ce-d04b-4cc4-b65d-4b723b218ba7@9def1f60-dd5b-4bb2-ba50-ecbd7a895ce2/IncomingWebhook/ab51ac0ee3244d7aba2e07386bcf0c72/cc3e4e90-6e9b-403f-a5f9-5ebc600105c0
                 body: '{"sections": [{"activityTitle": "Monika NPM Release (hook test)", "activitySubtitle": "Version: x.y.z"}]}'
