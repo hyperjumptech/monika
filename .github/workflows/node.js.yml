@@ -27,3 +27,8 @@ jobs:
             - run: npm ci
             - run: npm run build --if-present
             - run: npm test
+            - name: Notify Teams
+              uses: joelwmale/webhook-action@fd99bb3b8272237103e349e9bb4d9b0ead9a217c
+              with:
+                url: ${{secrets.HYPERJUMP_TEAMS_SYMON_WEBHOOK}}
+                body: '{"sections": [{"activityTitle": "Monika NPM Release (hook test)", "activitySubtitle": "Version: x.y.z"}]}'
