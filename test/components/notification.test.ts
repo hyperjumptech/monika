@@ -4,11 +4,11 @@ import {
   WebhookData,
   WhatsappData,
 } from '../../src/interfaces/data'
-import * as mailgun from '../../src/utils/notifications/mailgun'
-import * as webhook from '../../src/utils/notifications/webhook'
-import * as slack from '../../src/utils/notifications/slack'
-import * as smtp from '../../src/utils/notifications/smtp'
-import * as whatsapp from '../../src/utils/whatsapp'
+import * as mailgun from '../../src/components/notification/channel/mailgun'
+import * as webhook from '../../src/components/notification/channel/webhook'
+import * as slack from '../../src/components/notification/channel/slack'
+import * as smtp from '../../src/components/notification/channel/smtp'
+import * as whatsapp from '../../src/components/notification/channel/whatsapp'
 import { sendAlerts } from '../../src/components/notification'
 
 describe('send alerts', () => {
@@ -182,5 +182,23 @@ describe('send alerts', () => {
 
     expect(whatsapp.sendWhatsapp).to.have.been.called()
     expect(sent).to.have.length(1)
+  })
+
+  it('should send whatsapp notifications', async () => {
+    chai.spy.on(whatsapp, 'loginUser', () => Promise.resolve('token'))
+    chai.spy.on(whatsapp, 'sendTextMessage', () => Promise.resolve())
+
+    await whatsapp.sendWhatsapp(
+      {
+        recipients: ['6254583425894'],
+        url: 'https://somewhere.com',
+        username: 'someusername',
+        password: 'somepassword',
+      },
+      'some alert message'
+    )
+
+    expect(whatsapp.loginUser).to.have.been.called()
+    expect(whatsapp.sendTextMessage).to.have.been.called()
   })
 })

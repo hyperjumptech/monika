@@ -6,15 +6,14 @@ import {
 } from '../../interfaces/data'
 import { Notification } from '../../interfaces/notification'
 import getIp from '../../utils/ip'
-import { sendMailgun } from '../../utils/notifications/mailgun'
-import {
-  createSmtpTransport,
-  sendSmtpMail,
-} from '../../utils/notifications/smtp'
-import { sendWebhook } from '../../utils/notifications/webhook'
-import { sendSlack } from '../../utils/notifications/slack'
-import { sendWhatsapp } from '../../utils/whatsapp'
-import { ValidateResponseStatus, getMessageForAlert } from '../../utils/alert'
+import { sendMailgun } from './channel/mailgun'
+import { createSmtpTransport, sendSmtpMail } from './channel/smtp'
+import { sendWebhook } from './channel/webhook'
+import { sendSlack } from './channel/slack'
+import { sendWhatsapp } from './channel/whatsapp'
+import { getMessageForAlert } from './alert-message'
+
+export type ValidateResponseStatus = { alert: string; status: boolean }
 
 export async function sendAlerts({
   validation,

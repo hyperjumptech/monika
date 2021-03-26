@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-import { WebhookData } from '../../interfaces/data'
+import { WebhookData } from '../../../interfaces/data'
 
 export const sendSlack = async (data: WebhookData) => {
   try {
