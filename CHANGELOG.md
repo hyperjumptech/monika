@@ -46,6 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Changed
 
+- Made Notifications optional in the configuration
 - Improved log output
 - Improved notification message
 
