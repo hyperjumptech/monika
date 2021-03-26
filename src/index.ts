@@ -11,6 +11,7 @@ import { printAllLogs } from './utils/logger'
 import { log } from './utils/log'
 
 import { closeLog, openLogfile, flushAllLogs } from './utils/history'
+import { notificationChecker } from './utils/notifications/checker'
 
 class Monika extends Command {
   static description = 'Monika command line monitoring tool'
@@ -73,6 +74,13 @@ class Monika extends Command {
     // Check if config is valid
     const isConfigValid: Validation = await validateConfig(config)
     if (isConfigValid.valid) {
+      if (process.env.NODE_ENV !== 'test') {
+        await notificationChecker(config.notifications ?? []).catch((error) => {
+          // Operation not permitted
+          this.error(error?.message, { exit: 1 })
+        })
+      }
+
       console.log(
         `Starting Monika. Probes: ${config.probes.length}. Notifications: ${config.notifications?.length}\n`
       )
@@ -129,7 +137,7 @@ class Monika extends Command {
     } else {
       closeLog()
       // If config is invalid, throw error
-      this.error(isConfigValid.message, { exit: 100 })
+      this.error(isConfigValid.message, { exit: 1 })
     }
   }
 }
