@@ -75,8 +75,9 @@ class Monika extends Command {
     const isConfigValid: Validation = await validateConfig(config)
     if (isConfigValid.valid) {
       if (process.env.NODE_ENV !== 'test') {
-        await notificationChecker(config.notifications).catch((error) => {
-          this.error(error?.message, { exit: 100 })
+        await notificationChecker(config.notifications ?? []).catch((error) => {
+          // Operation not permitted
+          this.error(error?.message, { exit: 1 })
         })
       }
 
@@ -136,7 +137,7 @@ class Monika extends Command {
     } else {
       closeLog()
       // If config is invalid, throw error
-      this.error(isConfigValid.message, { exit: 100 })
+      this.error(isConfigValid.message, { exit: 1 })
     }
   }
 }

@@ -7,17 +7,22 @@ import {
   WebhookData,
 } from '../../interfaces/data'
 import { Notification } from '../../interfaces/notification'
-import { sendMailgun } from '../mailgun'
-import { sendSendgrid } from '../sendgrid'
-import { createSmtpTransport, sendSmtpMail } from '../smtp'
+import { sendMailgun } from './mailgun'
+import { sendSendgrid } from './sendgrid'
 import { sendSlack } from './slack'
+import { createSmtpTransport, sendSmtpMail } from './smtp'
 import { sendWebhook } from './webhook'
 
 const subject = 'Monika is started'
 const body = `Monika is running on ${ip.address()}`
 
-const errorMessage = (context: string) => {
-  return `Failed to send message using ${context}, please check your ${context} notification config.`
+const errorMessage = (
+  notificationType: string,
+  originalErrorMessage?: string
+) => {
+  return new Error(
+    `Failed to send message using ${notificationType}, please check your ${notificationType} notification config.\nMessage: ${originalErrorMessage}`
+  )
 }
 
 const smtpNotificationInitialChecker = async (data: SMTPData) => {
@@ -31,7 +36,7 @@ const smtpNotificationInitialChecker = async (data: SMTPData) => {
       html: body,
     })
   } catch (error) {
-    throw new Error(errorMessage('SMTP'))
+    throw errorMessage('SMTP', error?.message)
   }
 }
 
@@ -50,7 +55,7 @@ const mailgunNotificationInitialChecker = async (data: MailgunData) => {
       { id: 'mailgun', type: 'mailgun', data }
     )
   } catch (error) {
-    throw new Error(errorMessage('Mailgun'))
+    throw errorMessage('Mailgun', error?.message)
   }
 }
 
@@ -69,7 +74,7 @@ const sendgridNotificationInitialChecker = async (data: SendgridData) => {
       { id: 'sendgrid', type: 'sendgrid', data }
     )
   } catch (error) {
-    throw new Error(errorMessage('Sendgrid'))
+    throw errorMessage('Sendgrid', error?.message)
   }
 }
 
@@ -84,7 +89,7 @@ const webhookNotificationInitialChecker = async (data: WebhookData) => {
       },
     })
   } catch (error) {
-    throw new Error(errorMessage('Webhook'))
+    throw errorMessage('Webhook', error?.message)
   }
 }
 
@@ -99,7 +104,7 @@ const slackNotificationInitialChecker = async (data: WebhookData) => {
       },
     })
   } catch (error) {
-    throw new Error(errorMessage('Slack'))
+    throw errorMessage('Slack', error?.message)
   }
 }
 
