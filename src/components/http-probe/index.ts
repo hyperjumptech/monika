@@ -16,7 +16,7 @@ import { log } from '../../utils/log'
 export async function doProbe(
   checkOrder: number,
   probe: Probe,
-  notifications: Notification[]
+  notifications?: Notification[]
 ) {
   let probeRes: AxiosResponseWithExtraData = {} as AxiosResponseWithExtraData
 
@@ -38,7 +38,11 @@ export async function doProbe(
     })
 
     serverStatuses.forEach(async (status, index) => {
-      if (status.shouldSendNotification) {
+      if (
+        status.shouldSendNotification &&
+        notifications &&
+        notifications.length > 0
+      ) {
         notifications.forEach((notification) => {
           log.info({
             type:
