@@ -74,7 +74,7 @@ class Monika extends Command {
     const isConfigValid: Validation = await validateConfig(config)
     if (isConfigValid.valid) {
       console.log(
-        `Starting Monika. Probes: ${config.probes.length}. Notifications: ${config.notifications.length}\n`
+        `Starting Monika. Probes: ${config.probes.length}. Notifications: ${config.notifications?.length}\n`
       )
       if (flags.verbose) {
         console.log('Probes:')
@@ -94,7 +94,7 @@ class Monika extends Command {
         console.log('')
 
         console.log(`Notifications:`)
-        config.notifications.forEach((item) => {
+        config.notifications?.forEach((item) => {
           console.log(`- Notification ID: ${item.id}`)
           console.log(`    Type: ${item.type}`)
           // Only show recipients if type is mailgun, smtp, or sendgrid

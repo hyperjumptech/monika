@@ -1,5 +1,5 @@
 import * as nodemailer from 'nodemailer'
-import { SMTPData } from '../interfaces/data'
+import { SMTPData } from '../../interfaces/data'
 import Mail from 'nodemailer/lib/mailer'
 
 export const createSmtpTransport = (cfg: SMTPData) => {
