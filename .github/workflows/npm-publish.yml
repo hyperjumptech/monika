@@ -43,7 +43,7 @@ jobs:
       - run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
-      - name: get-npm-version
+      - name: Get Package Version
         id: package-version
         uses: martinbeentjes/npm-get-version-action@master
       - name: Notify Teams
