@@ -24,7 +24,7 @@ const VALID_CONFIG = {
 }
 const NO_NOTIFICATIONS = {
   valid: false,
-  message: `Notifications config has not been set. We will not be able to notify you when INCIDENT happened!\nPlease refer to Monika documentation for setting the notifications config at https://hyperjumptech.github.io/monika/quick-start.`,
+  message: `Notifications config has not been set. We will not be able to notify you when INCIDENT happened!\nPlease refer to Monika documentation for setting the notifications config at https://hyperjumptech.github.io/monika/guides/notifications.`,
 }
 const NO_PROBES = {
   valid: false,
