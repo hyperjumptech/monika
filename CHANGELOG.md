@@ -21,7 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### [1.1.0] - 2021-03-22
 
-#### Add
+#### Added
 
 - Counter threshold to make sure false positives
 - Flags to make sure notification only send once for a failure series or success series.
@@ -35,6 +35,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Enhanced error message
 - Interval now per-probe instead of for all probe
+
+### [1.1.0] - 2021-03-26
+
+#### Added
+
+- Whatsapp Notification Channel
+- Docs: add example to simulate HTML form submission POST request
+- Docs: add instruction on how to run Monika in background
+
+#### Changed
+
+- Improved log output
+- Improved notification message
 
 ## [Planned]
 
