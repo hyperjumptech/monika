@@ -16,10 +16,10 @@ import {
   statusNot2xx,
   validateResponse,
 } from '../../src/utils/alert'
-import * as mailgun from '../../src/utils/mailgun'
+import * as mailgun from '../../src/utils/notifications/mailgun'
 import * as webhook from '../../src/utils/notifications/webhook'
 import * as slack from '../../src/utils/notifications/slack'
-import * as smtp from '../../src/utils/smtp'
+import * as smtp from '../../src/utils/notifications/smtp'
 import * as whatsapp from '../../src/utils/whatsapp'
 
 describe('check response status', () => {

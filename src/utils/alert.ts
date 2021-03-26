@@ -8,8 +8,8 @@ import { Notification } from '../interfaces/notification'
 import { Probe } from '../interfaces/probe'
 import { AxiosResponseWithExtraData } from '../interfaces/request'
 import getIp from './ip'
-import { sendMailgun } from './mailgun'
-import { createSmtpTransport, sendSmtpMail } from './smtp'
+import { sendMailgun } from './notifications/mailgun'
+import { createSmtpTransport, sendSmtpMail } from './notifications/smtp'
 import { sendWebhook } from './notifications/webhook'
 import { sendSlack } from './notifications/slack'
 import { sendWhatsapp } from './whatsapp'
@@ -235,12 +235,13 @@ export const sendAlerts = async ({
             url,
           }))
         }
-        default:
+        default: {
           return Promise.resolve({
             notification: '',
             alert: validation.alert,
             url,
           })
+        }
       }
     })
   )
