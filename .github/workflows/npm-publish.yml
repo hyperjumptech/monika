@@ -49,6 +49,6 @@ jobs:
       - name: Notify Teams
         uses: joelwmale/webhook-action@fd99bb3b8272237103e349e9bb4d9b0ead9a217c
         with:
-          url: ${{ secrets.HYPERJUMP_TEAMS_SYMON_WEBHOOK }}
-          body: '{"title": "Monika NPM Release", "Text": "Version: ${{ steps.package-version.outputs.current-version}}"}'
+          url: ${{secrets.HYPERJUMP_TEAMS_SYMON_WEBHOOK}}
+          body: '{"title": "Monika NPM Release", "Text": "Version: ${{steps.package-version.outputs.current-version}}"}'
       
