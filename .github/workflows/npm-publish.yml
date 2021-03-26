@@ -19,6 +19,7 @@ jobs:
       - run: npm test
 
   test:
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -31,7 +32,7 @@ jobs:
       - run: monika -v
 
   publish-npm:
-    needs: build
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
