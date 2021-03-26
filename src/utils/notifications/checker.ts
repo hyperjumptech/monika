@@ -104,40 +104,36 @@ const slackNotificationInitialChecker = async (data: WebhookData) => {
 }
 
 export const notificationChecker = async (notifications: Notification[]) => {
-  try {
-    const smtpNotification = notifications
-      .filter((notif) => notif.type === 'smtp')
-      .map((notif) => notif.data as SMTPData)
-      .map(smtpNotificationInitialChecker)
+  const smtpNotification = notifications
+    .filter((notif) => notif.type === 'smtp')
+    .map((notif) => notif.data as SMTPData)
+    .map(smtpNotificationInitialChecker)
 
-    const mailgunNotification = notifications
-      .filter((notif) => notif.type === 'mailgun')
-      .map((notif) => notif.data as MailgunData)
-      .map(mailgunNotificationInitialChecker)
+  const mailgunNotification = notifications
+    .filter((notif) => notif.type === 'mailgun')
+    .map((notif) => notif.data as MailgunData)
+    .map(mailgunNotificationInitialChecker)
 
-    const sendgridNotification = notifications
-      .filter((notif) => notif.type === 'sendgrid')
-      .map((notif) => notif.data as SendgridData)
-      .map(sendgridNotificationInitialChecker)
+  const sendgridNotification = notifications
+    .filter((notif) => notif.type === 'sendgrid')
+    .map((notif) => notif.data as SendgridData)
+    .map(sendgridNotificationInitialChecker)
 
-    const webhookNotification = notifications
-      .filter((notif) => notif.type === 'webhook')
-      .map((notif) => notif.data as WebhookData)
-      .map(webhookNotificationInitialChecker)
+  const webhookNotification = notifications
+    .filter((notif) => notif.type === 'webhook')
+    .map((notif) => notif.data as WebhookData)
+    .map(webhookNotificationInitialChecker)
 
-    const slackNotification = notifications
-      .filter((notif) => notif.type === 'slack')
-      .map((notif) => notif.data as WebhookData)
-      .map(slackNotificationInitialChecker)
+  const slackNotification = notifications
+    .filter((notif) => notif.type === 'slack')
+    .map((notif) => notif.data as WebhookData)
+    .map(slackNotificationInitialChecker)
 
-    return await Promise.all([
-      Promise.all(smtpNotification),
-      Promise.all(mailgunNotification),
-      Promise.all(sendgridNotification),
-      Promise.all(webhookNotification),
-      Promise.all(slackNotification),
-    ])
-  } catch (error) {
-    throw error
-  }
+  return Promise.all([
+    Promise.all(smtpNotification),
+    Promise.all(mailgunNotification),
+    Promise.all(sendgridNotification),
+    Promise.all(webhookNotification),
+    Promise.all(slackNotification),
+  ])
 }
