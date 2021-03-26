@@ -38,7 +38,11 @@ export async function doProbe(
     })
 
     serverStatuses.forEach(async (status, index) => {
-      if (status.shouldSendNotification && notifications && notifications.length > 0) {
+      if (
+        status.shouldSendNotification &&
+        notifications &&
+        notifications.length > 0
+      ) {
         notifications.forEach((notification) => {
           log.info({
             type:
