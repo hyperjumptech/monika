@@ -22,6 +22,7 @@ npm ci
 ## Getting Started
 
 To start monitoring URLs, you need to create a configuration file (JSON file). The configuration file contains the probes, alerts, and notification configurations. You can check the sample configuration file from our [docs](https://github.com/hyperjumptech/monika/quick-start) or copy from one of these files:
+
 - [config.smtp-gmail.example.json](https://github.com/hyperjumptech/monika/blob/main/config.smtp-gmail.example.json)
 - [config.mailgun.example.json](https://github.com/hyperjumptech/monika/blob/main/config.mailgun.example.json)
 - [config.sendgrid.example.json](https://github.com/hyperjumptech/monika/blob/main/config.sendgrid.example.json)
