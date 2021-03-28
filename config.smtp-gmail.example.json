@@ -1,0 +1,38 @@
+{
+  "notifications": [
+    {
+      "id": "unique-id-smtp",
+      "type": "smtp",
+      "data": {
+        "recipients": ["YOUR_EMAIL_ADDRESS_HERE"],
+        "hostname": "smtp.gmail.com",
+        "port": 587,
+        "username": "YOUR_GMAIL_ACCOUNT",
+        "password": "YOUR_GMAIL_PASSWORD_OR_APP_PASSWORD"
+      }
+    }
+  ],
+  "probes": [
+    {
+      "id": "1",
+      "name": "Example",
+      "description": "Probe",
+      "interval": 10,
+      "request": {
+        "method": "GET",
+        "url": "https://github.com",
+        "timeout": 7000,
+        "headers": {
+          "Authorization": ""
+        },
+        "body": {
+          "username": "someusername",
+          "password": "somepassword"
+        }
+      },
+      "incidentThreshold": 3,
+      "recoveryThreshold": 3,
+      "alerts": ["status-not-2xx", "response-time-greater-than-400-ms"]
+    }
+  ]
+}

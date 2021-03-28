@@ -1,0 +1,35 @@
+{
+  "notifications": [
+    {
+      "id": "unique-id-sendgrid",
+      "type": "sendgrid",
+      "data": {
+        "recipients": ["RECIPIENT_EMAIL_ADDRESS"],
+        "apiKey": "YOUR_API_KEY"
+      }
+    }  
+  ],
+  "probes": [
+    {
+      "id": "1",
+      "name": "Example",
+      "description": "Probe",
+      "interval": 10,
+      "request": {
+        "method": "GET",
+        "url": "https://github.com",
+        "timeout": 7000,
+        "headers": {
+          "Authorization": ""
+        },
+        "body": {
+          "username": "someusername",
+          "password": "somepassword"
+        }
+      },
+      "incidentThreshold": 3,
+      "recoveryThreshold": 3,
+      "alerts": ["status-not-2xx", "response-time-greater-than-400-ms"]
+    }
+  ]
+}
