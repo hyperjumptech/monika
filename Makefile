@@ -2,14 +2,12 @@ IMAGE_REGISTRY=dockerhub
 IMAGE_NAMESPACE ?= hyperjump
 IMAGE_NAME ?= monika
 COMMIT_ID ?= $(shell git rev-parse --short HEAD)
-VERSION=v1.1.0
 
 
 docker:
 	docker build -t $(IMAGE_NAMESPACE)/$(IMAGE_NAME):$(COMMIT_ID) -f ./Dockerfile .
 
 docker-tag: docker
-	docker tag $(IMAGE_NAMESPACE)/$(IMAGE_NAME):$(COMMIT_ID) $(IMAGE_NAMESPACE)/$(IMAGE_NAME):$(VERSION)
 	docker tag $(IMAGE_NAMESPACE)/$(IMAGE_NAME):$(COMMIT_ID) $(IMAGE_NAMESPACE)/$(IMAGE_NAME):latest
 
 docker-push: docker-tag
