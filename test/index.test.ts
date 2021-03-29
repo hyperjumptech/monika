@@ -34,8 +34,10 @@ describe('monika', () => {
   // General Test
   test
     .stdout()
-    .do(() => cmd.run(['--config', resolve('./config.example.json')]))
-    .it('runs with normal config', (ctx) => {
+    .do(() =>
+      cmd.run(['--config', resolve('./test/testConfigs/fullConfig.json')])
+    )
+    .it('runs with full config', (ctx) => {
       expect(ctx.stdout).to.contain('Starting Monika.')
     })
 

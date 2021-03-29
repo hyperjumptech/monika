@@ -275,12 +275,12 @@ export const validateConfig = async (configuration: Config) => {
         }
       }
     }
-
-    // Check duplicate probe id
-    const probeIds = data.probes.map((probe) => probe.id)
-    const uniqueProbeIds = new Set(probeIds)
-    if (uniqueProbeIds.size !== data.probes.length) return PROBE_DUPLICATE_ID
-
-    return VALID_CONFIG
   }
+
+  // Check duplicate probe id
+  const probeIds = data.probes.map((probe) => probe.id)
+  const uniqueProbeIds = new Set(probeIds)
+  if (uniqueProbeIds.size !== data.probes.length) return PROBE_DUPLICATE_ID
+
+  return VALID_CONFIG
 }
