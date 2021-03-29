@@ -165,7 +165,6 @@ export const validateConfig = async (configuration: Config) => {
         margin: 1,
         borderStyle: 'bold',
         borderColor: 'yellow',
-        align: 'center',
       })
     )
   }
