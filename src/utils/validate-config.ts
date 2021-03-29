@@ -41,15 +41,6 @@ const NOTIFICATION_INVALID_TYPE = {
   message: 'Notifications type is not allowed',
 }
 
-// Probe
-const PROBE_NO_ALERT = {
-  valid: false,
-  message: 'Alerts does not exists or has length lower than 1!',
-}
-const PROBE_NO_NAME = {
-  valid: false,
-  message: 'Probe name should not be empty',
-}
 const PROBE_NO_REQUEST = {
   valid: false,
   message: 'Probe request should not be empty',
@@ -206,22 +197,30 @@ export const validateConfig = async (configuration: Config) => {
     }
   }
 
+  let i = 1
   // Check probes properties
   for (const probe of data.probes) {
-    const {
-      id,
-      alerts,
-      name,
-      request,
-      incidentThreshold,
-      recoveryThreshold,
-    } = probe as Probe
+    const { request, incidentThreshold, recoveryThreshold } = probe as Probe
 
-    if (!name) return PROBE_NO_NAME
+    let { id, name, alerts } = probe as Probe
+
+    if (!id) id = `probe_${i++}`
+
+    if (!name) {
+      name = `monika_probe_${i++}`
+      warn(
+        `Warning: Probe ${id} has no name defined. Using the default name started by monika`
+      )
+    }
 
     if (!request) return PROBE_NO_REQUEST
 
-    if ((alerts?.length ?? 0) === 0) return PROBE_NO_ALERT
+    if ((alerts?.length ?? 0) === 0) {
+      alerts = ['status-not-2xx', 'response-time-greater-than-400-ms']
+      warn(
+        `Warning: Probe ${id} has no Alerts configuration defined. Using the default status-not-2xx and response-time-greater-than-400-ms`
+      )
+    }
 
     if (!incidentThreshold)
       warn(
@@ -233,12 +232,14 @@ export const validateConfig = async (configuration: Config) => {
       )
 
     // Check probe request properties
-    const { url, method } = request as RequestConfig
+    const { url } = request as RequestConfig
+    let { method } = request as RequestConfig
 
     if (url && !isValidURL(url)) return PROBE_REQUEST_INVALID_URL
 
-    if (method && ['GET', 'POST'].indexOf(method) < 0)
-      return PROBE_REQUEST_INVALID_METHOD
+    if (!method) method = 'GET'
+
+    if (['GET', 'POST'].indexOf(method) < 0) return PROBE_REQUEST_INVALID_METHOD
 
     // Check probe alert properties
     for (const alert of alerts) {

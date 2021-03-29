@@ -51,17 +51,16 @@ describe('monika', () => {
     .it('runs with config without probes')
 
   test
-    .stderr()
+    .stdout()
     .do(() =>
       cmd.run([
         '--config',
         resolve('./test/testConfigs/probes/noProbeName.json'),
       ])
     )
-    .catch((error) => {
-      expect(error.message).to.contain('Probe name should not be empty')
+    .it('runs with config without probe name', (ctx) => {
+      expect(ctx.stdout).to.contain('Starting Monika.')
     })
-    .it('runs with config without probe name')
 
   test
     .stderr()
@@ -77,19 +76,16 @@ describe('monika', () => {
     .it('runs with config without probe request')
 
   test
-    .stderr()
+    .stdout()
     .do(() =>
       cmd.run([
         '--config',
         resolve('./test/testConfigs/probes/noProbeAlerts.json'),
       ])
     )
-    .catch((error) => {
-      expect(error.message).to.contain(
-        'Alerts does not exists or has length lower than 1!'
-      )
+    .it('runs with config without probe alerts', (ctx) => {
+      expect(ctx.stdout).to.contain('Starting Monika.')
     })
-    .it('runs with config without probe alerts')
 
   test
     .stderr()
