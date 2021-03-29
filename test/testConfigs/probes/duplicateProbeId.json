@@ -14,34 +14,38 @@
       "id": "1",
       "name": "Example 1",
       "description": "Probe",
-      "request": {
-        "method": "GET",
-        "url": "http://www.example.com",
-        "headers": {
-          "Authorization": ""
-        },
-        "body": {
-          "username": "someusername",
-          "password": "somepassword"
+      "requests": [
+        {
+          "method": "GET",
+          "url": "http://www.example.com",
+          "headers": {
+            "Authorization": ""
+          },
+          "body": {
+            "username": "someusername",
+            "password": "somepassword"
+          }
         }
-      },
+      ],
       "alerts": ["status-not-2xx"]
     },
     {
       "id": "1",
       "name": "Example 2",
       "description": "Probe",
-      "request": {
-        "method": "GET",
-        "url": "http://www.example.com",
-        "headers": {
-          "Authorization": ""
-        },
-        "body": {
-          "username": "someusername",
-          "password": "somepassword"
+      "requests": [
+        {
+          "method": "GET",
+          "url": "http://www.example.com",
+          "headers": {
+            "Authorization": ""
+          },
+          "body": {
+            "username": "someusername",
+            "password": "somepassword"
+          }
         }
-      },
+      ],
       "alerts": ["status-not-2xx"]
     }
   ]

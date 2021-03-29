@@ -22,14 +22,14 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import { RequestConfig } from './../interfaces/request'
 import { request } from './request'
-import { Probe } from '../interfaces/probe'
 import { AxiosResponseWithExtraData } from '../interfaces/request'
 
-export async function probing(probe: Probe) {
+export async function probing(requestConfig: RequestConfig) {
   try {
     const res = await request({
-      ...probe.request,
+      ...requestConfig,
     })
     return res as AxiosResponseWithExtraData
   } catch (error) {
