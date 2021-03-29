@@ -55,22 +55,29 @@ export function getStatusColor(statusCode: number) {
  * @param {AxiosResponseWithExtraData} probRes is result of the probing
  * @param {string} err if theres any error, catch it here
  */
-export async function probeLog(
-  checkOrder: number,
-  probe: Probe,
-  probRes: AxiosResponseWithExtraData,
+export async function probeLog({
+  checkOrder,
+  probe,
+  probeRes,
+  requestIndex,
+  err,
+}: {
+  checkOrder: number
+  probe: Probe
+  probeRes: AxiosResponseWithExtraData
+  requestIndex: number
   err: string
-) {
+}) {
   log.info({
     type: 'PROBE',
     checkOrder,
     probeId: probe.id,
-    url: probe.request.url,
-    statusCode: probRes.status,
-    responseTime: probRes.config.extraData?.responseTime,
+    url: probe.requests[requestIndex].url,
+    statusCode: probeRes.status,
+    responseTime: probeRes.config.extraData?.responseTime,
   })
 
-  await saveLog(probe, probRes, err)
+  await saveLog(probe, probeRes, requestIndex, err)
 }
 
 export async function printAllLogs() {
