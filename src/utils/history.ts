@@ -103,11 +103,13 @@ export async function flushAllLogs() {
  *
  * @param {object} probe is the probe config
  * @param {object} probeRes this is the response time of the probe
+ * @param {number} requestIndex is the request index from a probe
  * @param {string} errorResp if there was an error, it will be stored here
  */
 export async function saveLog(
   probe: Probe,
   probeRes: AxiosResponseWithExtraData,
+  requestIndex: number,
   errorResp: string
 ) {
   const insertSQL = `INSERT into history (probe_id, created_at, status_code, probe_name, probe_url, response_time, error_resp) 
@@ -120,7 +122,7 @@ export async function saveLog(
     created,
     probeRes.status,
     probe.name,
-    probe.request.url,
+    probe.requests[requestIndex].url,
     probeRes.config.extraData?.responseTime,
     errorResp,
   ]

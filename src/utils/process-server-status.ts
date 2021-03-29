@@ -163,6 +163,7 @@ export const processProbeStatus = ({
   checkOrder,
   probe,
   probeRes,
+  requestIndex,
   validatedResp,
   incidentThreshold,
   recoveryThreshold,
@@ -170,6 +171,7 @@ export const processProbeStatus = ({
   checkOrder: number
   probe: Probe
   probeRes: AxiosResponseWithExtraData
+  requestIndex: number
   validatedResp: ValidateResponseStatus[]
   incidentThreshold: number
   recoveryThreshold: number
@@ -252,7 +254,7 @@ export const processProbeStatus = ({
             consecutiveTrue: updatedStatus.consecutiveTrue,
             probeId: probe.id,
             checkOrder,
-            url: probe.request?.url,
+            url: probe.requests[requestIndex].url,
             statusCode: probeRes.status,
             responseTime: probeRes.config.extraData?.responseTime,
           })

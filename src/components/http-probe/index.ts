@@ -22,6 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import { ValidateResponseStatus } from './../../utils/alert'
 import { processProbeStatus } from '../../utils/process-server-status'
 import { probing } from '../../utils/probing'
 import { validateResponse } from '../../utils/alert'
@@ -44,12 +45,20 @@ export async function doProbe(
   notifications?: Notification[]
 ) {
   let probeRes: AxiosResponseWithExtraData = {} as AxiosResponseWithExtraData
+  let validatedResp: ValidateResponseStatus[] = []
+  let requestIndex = 0
 
   try {
-    probeRes = await probing(probe)
-    const validatedResp = validateResponse(probe.alerts, probeRes)
+    for await (const request of probe.requests) {
+      probeRes = await probing(request)
+      validatedResp = validateResponse(probe.alerts, probeRes)
+      await probeLog({ checkOrder, probe, probeRes, requestIndex, err: '' })
 
-    probeLog(checkOrder, probe, probeRes, '')
+      // Exit the loop if there is any triggers triggered
+      if (validatedResp.filter((item) => item.status).length > 0) break
+
+      requestIndex += 1
+    }
 
     const defaultThreshold = 5
 
@@ -57,6 +66,7 @@ export async function doProbe(
       checkOrder,
       probe,
       probeRes,
+      requestIndex,
       validatedResp,
       incidentThreshold: probe.incidentThreshold ?? defaultThreshold,
       recoveryThreshold: probe.recoveryThreshold ?? defaultThreshold,
@@ -66,7 +76,7 @@ export async function doProbe(
       if (
         status.shouldSendNotification &&
         notifications &&
-        notifications.length > 0
+        notifications?.length > 0
       ) {
         notifications.forEach((notification) => {
           log.info({
@@ -78,19 +88,19 @@ export async function doProbe(
             notificationType: notification.type,
             notificationId: notification.id,
             probeId: probe.id,
-            url: probe.request.url,
+            url: probe.requests[requestIndex].url,
           })
         })
         await sendAlerts({
           validation: validatedResp[index],
           notifications: notifications,
-          url: probe.request.url ?? '',
+          url: probe.requests[requestIndex].url ?? '',
           status: status.isDown ? 'DOWN' : 'UP',
           incidentThreshold: probe.incidentThreshold,
         })
       }
     })
   } catch (error) {
-    probeLog(checkOrder, probe, probeRes, error)
+    probeLog({ checkOrder, probe, probeRes, requestIndex, err: error })
   }
 }
