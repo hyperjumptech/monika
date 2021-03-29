@@ -22,36 +22,26 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-/* eslint-disable no-process-exit */
-/* eslint-disable unicorn/no-process-exit */
-/* eslint-disable no-console */
-/* eslint-disable unicorn/no-hex-escape */
-/* eslint-disable unicorn/escape-case */
+import sgMail from '@sendgrid/mail'
+import { SendgridData } from '../../../interfaces/data'
+import { SendInput } from '../../../interfaces/mailgun'
+import { Notification } from '../../../interfaces/notification'
 
-/**
- * Using npm version 7 will create lockfile version 2.
- * This version is not widely used yet and most developers are on LTS version of node
- * which come with npm version 6.
- *
- * This script will exit `npm install` when the major npm version being used is greater than 6
- *
- * */
+export const sendSendgrid = async (
+  inputData: SendInput,
+  notifConfigItem: Notification
+) => {
+  const { subject, body, sender, recipients } = inputData
+  const { data: sendgridConfigData } = notifConfigItem
+  const API_KEY = (sendgridConfigData as SendgridData)?.apiKey
 
-const fs = require('fs')
-const path = require('path')
-const { execSync } = require('child_process')
-
-const project = path.join(__dirname, '../tsconfig.json')
-const dev = fs.existsSync(project)
-
-// this will only run in development
-if (dev) {
-  const npmVersion = execSync('npm -v', { encoding: 'utf-8' }).trim()
-  const [major] = npmVersion.split('.').map((n) => parseInt(n, 10))
-  if (major > 6) {
-    console.error(
-      `\x1b[31mYou are using npm version ${npmVersion}. Change to npm version 6 when working on monika!\x1b[0m`
-    )
-    process.exit(1)
+  sgMail.setApiKey(API_KEY)
+  const msg = {
+    to: recipients,
+    from: sender.email,
+    subject,
+    text: body,
   }
+
+  return sgMail.send(msg)
 }

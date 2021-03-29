@@ -22,36 +22,28 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-/* eslint-disable no-process-exit */
-/* eslint-disable unicorn/no-process-exit */
-/* eslint-disable no-console */
-/* eslint-disable unicorn/no-hex-escape */
-/* eslint-disable unicorn/escape-case */
+import * as nodemailer from 'nodemailer'
+import { SMTPData } from '../../../interfaces/data'
+import Mail from 'nodemailer/lib/mailer'
 
-/**
- * Using npm version 7 will create lockfile version 2.
- * This version is not widely used yet and most developers are on LTS version of node
- * which come with npm version 6.
- *
- * This script will exit `npm install` when the major npm version being used is greater than 6
- *
- * */
+export const createSmtpTransport = (cfg: SMTPData) => {
+  if (!cfg.hostname) throw new Error(`Smtp host is not provided!`)
+  if (!cfg.port) throw new Error(`Smtp port is not provided!`)
+  if (!cfg.username) throw new Error(`Smtp user is not provided!`)
+  if (!cfg.password) throw new Error(`Smtp password is not provided!`)
 
-const fs = require('fs')
-const path = require('path')
-const { execSync } = require('child_process')
+  return nodemailer.createTransport({
+    host: cfg.hostname,
+    port: cfg.port,
+    auth: { user: cfg.username, pass: cfg.password },
+  })
+}
 
-const project = path.join(__dirname, '../tsconfig.json')
-const dev = fs.existsSync(project)
-
-// this will only run in development
-if (dev) {
-  const npmVersion = execSync('npm -v', { encoding: 'utf-8' }).trim()
-  const [major] = npmVersion.split('.').map((n) => parseInt(n, 10))
-  if (major > 6) {
-    console.error(
-      `\x1b[31mYou are using npm version ${npmVersion}. Change to npm version 6 when working on monika!\x1b[0m`
-    )
-    process.exit(1)
-  }
+export const sendSmtpMail = async (transporter: Mail, opt: Mail.Options) => {
+  return transporter.sendMail({
+    from: opt.from,
+    to: opt.to,
+    subject: opt.subject,
+    text: opt.text,
+  })
 }

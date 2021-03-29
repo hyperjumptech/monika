@@ -22,36 +22,87 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-/* eslint-disable no-process-exit */
-/* eslint-disable unicorn/no-process-exit */
-/* eslint-disable no-console */
-/* eslint-disable unicorn/no-hex-escape */
-/* eslint-disable unicorn/escape-case */
+import axios from 'axios'
+import { LoginUserSuccessResponse } from '../../../interfaces/whatsapp'
+import { authorize } from '../../../utils/authorization'
+import { log } from 'console'
+import { WhatsappData } from '../../../interfaces/data'
 
-/**
- * Using npm version 7 will create lockfile version 2.
- * This version is not widely used yet and most developers are on LTS version of node
- * which come with npm version 6.
- *
- * This script will exit `npm install` when the major npm version being used is greater than 6
- *
- * */
+export const loginUser = async (data: WhatsappData) => {
+  try {
+    const auth = authorize('basic', {
+      username: data.username,
+      password: data.password,
+    })
 
-const fs = require('fs')
-const path = require('path')
-const { execSync } = require('child_process')
+    const url = `${data.url}/v1/users/login`
+    const resp = await axios.request({
+      method: 'POST',
+      url: url,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: auth,
+      },
+    })
+    const loginResp: LoginUserSuccessResponse = resp?.data
 
-const project = path.join(__dirname, '../tsconfig.json')
-const dev = fs.existsSync(project)
+    if (loginResp.users?.length > 0) return loginResp.users[0].token
+  } catch (error) {
+    log('Something wrong with your whatsapp config please check again.')
+  }
+}
 
-// this will only run in development
-if (dev) {
-  const npmVersion = execSync('npm -v', { encoding: 'utf-8' }).trim()
-  const [major] = npmVersion.split('.').map((n) => parseInt(n, 10))
-  if (major > 6) {
-    console.error(
-      `\x1b[31mYou are using npm version ${npmVersion}. Change to npm version 6 when working on monika!\x1b[0m`
+export const sendTextMessage = async ({
+  recipient,
+  message,
+  token,
+  baseUrl,
+}: {
+  recipient: string
+  message: string
+  token: string
+  baseUrl: string
+}) => {
+  try {
+    const auth = authorize('bearer', token)
+    const url = `${baseUrl}/v1/messages`
+
+    return axios.request({
+      method: 'POST',
+      url: url,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: auth,
+      },
+      data: {
+        to: recipient,
+        type: 'text',
+        recipient_type: 'individual',
+        text: {
+          body: message,
+        },
+      },
+    })
+  } catch (error) {
+    log(
+      'Something wrong with your recipient no, Please check your country code: ',
+      recipient
     )
-    process.exit(1)
+  }
+}
+
+export const sendWhatsapp = async (data: WhatsappData, message: string) => {
+  const token = await loginUser(data)
+  if (token) {
+    await Promise.all(
+      data.recipients.map((recipient) => {
+        return sendTextMessage({
+          recipient,
+          token,
+          baseUrl: data.url,
+          message,
+        })
+      })
+    )
   }
 }

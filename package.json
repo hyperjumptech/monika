@@ -97,7 +97,10 @@
     }
   },
   "lint-staged": {
-    "*.js": "eslint --cache --fix",
-    "*.{js,css,md}": "prettier --write"
+    "*.{ts,js}": [
+      "node scripts/add-license.js",
+      "eslint --cache --fix"
+    ],
+    "*.{ts,js,css,md}": "prettier --write"
   }
 }
