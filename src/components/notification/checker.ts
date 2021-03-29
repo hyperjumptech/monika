@@ -56,7 +56,7 @@ const smtpNotificationInitialChecker = async (data: SMTPData) => {
       from: 'Monika@hyperjump.tech',
       to: data?.recipients?.join(','),
       subject: subject,
-      html: body,
+      text: body,
     })
   } catch (error) {
     throw errorMessage('SMTP', error?.message)
