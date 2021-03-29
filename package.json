@@ -25,8 +25,7 @@
     "test": "cross-env NODE_ENV=test nyc --extension .ts mocha --forbid-only \"test/**/*.test.ts\"",
     "version": "oclif-dev readme && git add README.md",
     "format": "prettier --write .",
-    "check-format": "prettier --check .",
-    "add-license": "node scripts/add-license.js"
+    "check-format": "prettier --check ."
   },
   "dependencies": {
     "@oclif/command": "^1.8.0",
@@ -94,9 +93,7 @@
   "repository": "https://github.com/hyperjumptech/monika",
   "husky": {
     "hooks": {
-      "pre-commit": [
-        "lint-staged"
-      ]
+      "pre-commit": "lint-staged"
     }
   },
   "lint-staged": {
