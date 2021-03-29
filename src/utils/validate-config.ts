@@ -74,9 +74,9 @@ const PROBE_NO_NAME = {
   valid: false,
   message: 'Probe name should not be empty',
 }
-const PROBE_NO_REQUEST = {
+const PROBE_NO_REQUESTS = {
   valid: false,
-  message: 'Probe request should not be empty',
+  message: 'Probe requests does not exists or has length lower than 1!',
 }
 const PROBE_REQUEST_INVALID_URL = {
   valid: false,
@@ -165,7 +165,6 @@ export const validateConfig = async (configuration: Config) => {
         margin: 1,
         borderStyle: 'bold',
         borderColor: 'yellow',
-        align: 'center',
       })
     )
   }
@@ -236,14 +235,14 @@ export const validateConfig = async (configuration: Config) => {
       id,
       alerts,
       name,
-      request,
+      requests,
       incidentThreshold,
       recoveryThreshold,
     } = probe as Probe
 
     if (!name) return PROBE_NO_NAME
 
-    if (!request) return PROBE_NO_REQUEST
+    if ((requests?.length ?? 0) === 0) return PROBE_NO_REQUESTS
 
     if ((alerts?.length ?? 0) === 0) return PROBE_NO_ALERT
 
@@ -257,18 +256,20 @@ export const validateConfig = async (configuration: Config) => {
       )
 
     // Check probe request properties
-    const { url, method } = request as RequestConfig
+    for (const request of requests) {
+      const { url, method } = request as RequestConfig
 
-    if (url && !isValidURL(url)) return PROBE_REQUEST_INVALID_URL
+      if (url && !isValidURL(url)) return PROBE_REQUEST_INVALID_URL
 
-    if (method && ['GET', 'POST'].indexOf(method) < 0)
-      return PROBE_REQUEST_INVALID_METHOD
+      if (method && ['GET', 'POST'].indexOf(method) < 0)
+        return PROBE_REQUEST_INVALID_METHOD
 
-    // Check probe alert properties
-    for (const alert of alerts) {
-      const check = getCheckResponseFn(alert)
-      if (!check) {
-        return PROBE_ALERT_INVALID
+      // Check probe alert properties
+      for (const alert of alerts) {
+        const check = getCheckResponseFn(alert)
+        if (!check) {
+          return PROBE_ALERT_INVALID
+        }
       }
     }
   }

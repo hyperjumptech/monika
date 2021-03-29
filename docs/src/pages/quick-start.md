@@ -28,10 +28,12 @@ Follow the following steps to quickly monitor this Monica website and to get not
          "name": "Monika Landing Page",
          "description": "Landing page of awesome Monika",
          "interval": 10,
-         "request": {
-           "url": "https://hyperjumptech.github.io/monika",
-           "timeout": 7000
-         },
+         "requests": [
+           {
+             "url": "https://hyperjumptech.github.io/monika",
+             "timeout": 7000
+           }
+         ],
          "alerts": ["status-not-2xx"]
        }
      ]

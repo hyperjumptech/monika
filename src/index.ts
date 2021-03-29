@@ -115,12 +115,14 @@ class Monika extends Command {
           console.log(`    Name: ${probe.name}`)
           console.log(`    Description: ${probe.description}`)
           console.log(`    Interval: ${probe.interval}`)
-          console.log(`    Request Method: ${probe.request.method}`)
-          console.log(`    Request URL: ${probe.request.url}`)
-          console.log(
-            `    Request Headers: ${JSON.stringify(probe.request.headers)}`
-          )
-          console.log(`    Request Body: ${JSON.stringify(probe.request.body)}`)
+          probe.requests.forEach((request) => {
+            console.log(`    Request Method: ${request.method}`)
+            console.log(`    Request URL: ${request.url}`)
+            console.log(
+              `    Request Headers: ${JSON.stringify(request.headers)}`
+            )
+            console.log(`    Request Body: ${JSON.stringify(request.body)}`)
+          })
           console.log(`    Alerts: ${probe.alerts.join(', ')}`)
         })
         console.log('')

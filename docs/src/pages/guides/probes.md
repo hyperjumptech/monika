@@ -9,7 +9,7 @@ Probes are the heart of the monitoring requests. Probes are arrays of request ob
       "name": "Name of the probe",
       "description": "Probe to check GET time",
       "interval": 10,
-      "request": { },
+      "requests": [{ }],
       "alerts": []
     },
     {
@@ -17,7 +17,7 @@ Probes are the heart of the monitoring requests. Probes are arrays of request ob
       "name": "Name of the probe 2",
       "description": "Probe to check GET health",
       "interval": 10,
-      "request": { },
+      "requests": [{ }],
       "alerts": []
     }
   ]
@@ -36,7 +36,7 @@ An actual probe request may be something like below.
       "name": "Example: get Time",
       "description": "Probe",
       "interval": 10,
-      "request": {
+      "requests": [{
         "method": "POST",
         "url": "https://mybackend.org/user/login",
         "timeout": 7000,
@@ -47,7 +47,7 @@ An actual probe request may be something like below.
           "username": "someusername",
           "password": "somepassword"
         }
-      },
+      }],
       "incidentThreshold": 3,
       "recoveryThreshold": 3,
       "alerts": ["status-not-2xx", "response-time-greater-than-200-ms"]
@@ -80,7 +80,7 @@ Here is probes example with POST request to simulate HTML form submission
       "name": "HTML form submission",
       "description": "simulate html form submission",
       "interval": 10,
-      "request": {
+      "requests": [{
         "method": "POST",
         "url": "http://www.foo.com/login.php",
         "timeout": 7000,
@@ -91,7 +91,7 @@ Here is probes example with POST request to simulate HTML form submission
           "username": "someusername",
           "password": "somepassword"
         }
-      },
+      }],
       "incidentThreshold": 3,
       "recoveryThreshold": 3,
       "alerts": ["status-not-2xx", "response-time-greater-than-200-ms"]
