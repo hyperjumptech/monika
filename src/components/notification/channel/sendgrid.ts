@@ -1,7 +1,7 @@
 import sgMail from '@sendgrid/mail'
-import { SendgridData } from '../../interfaces/data'
-import { SendInput } from '../../interfaces/mailgun'
-import { Notification } from '../../interfaces/notification'
+import { SendgridData } from '../../../interfaces/data'
+import { SendInput } from '../../../interfaces/mailgun'
+import { Notification } from '../../../interfaces/notification'
 
 export const sendSendgrid = async (
   inputData: SendInput,
