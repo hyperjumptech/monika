@@ -1,12 +1,29 @@
-import { SMTPData, WebhookData, MailgunData } from '../interfaces/data'
-import { Notification } from '../interfaces/notification'
+/**********************************************************************************
+ * MIT License                                                                    *
+ *                                                                                *
+ * Copyright (c) 2021 Hyperjump Technology                                        *
+ *                                                                                *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy   *
+ * of this software and associated documentation files (the "Software"), to deal  *
+ * in the Software without restriction, including without limitation the rights   *
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell      *
+ * copies of the Software, and to permit persons to whom the Software is          *
+ * furnished to do so, subject to the following conditions:                       *
+ *                                                                                *
+ * The above copyright notice and this permission notice shall be included in all *
+ * copies or substantial portions of the Software.                                *
+ *                                                                                *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR     *
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,       *
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE    *
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER         *
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,  *
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  *
+ * SOFTWARE.                                                                      *
+ **********************************************************************************/
+
 import { Probe } from '../interfaces/probe'
 import { AxiosResponseWithExtraData } from '../interfaces/request'
-import getIp from './ip'
-import { sendMailgun } from './mailgun'
-import { createSmtpTransport, sendSmtpMail } from './smtp'
-import { sendWebhook } from './notifications/webhook'
-import { sendSlack } from './notifications/slack'
 
 type CheckResponseFn = (response: AxiosResponseWithExtraData) => boolean
 export type ValidateResponseStatus = { alert: string; status: boolean }
@@ -70,134 +87,4 @@ export const validateResponse = (
   }
 
   return checks
-}
-
-export const getMessageForAlert = (
-  alert: string,
-  url: string,
-  ipAddress: string,
-  status: string
-): {
-  subject: string
-  body: string
-} => {
-  const getSubject = (url: string, status: string) => {
-    if (status === 'UP') {
-      return `${alert} from probing ${url} has been resolved.`
-    }
-    return `"${alert}" has been detected from probing ${url}`
-  }
-
-  const getBody = (status: string) => {
-    if (status === 'UP') {
-      return `We found that your "${alert}" alert has been resolved when probing "${url}".`
-    }
-    return `New "${alert}" alert when probing "${url}".`
-  }
-
-  const message = {
-    subject: getSubject(url, status),
-    body: `
-      ${getBody(status)}\n
-      Time: ${Date.now()}\n
-      Target URL: ${url}\n
-      From server: ${ipAddress}
-    `,
-  }
-
-  return message
-}
-
-export const sendAlerts = async ({
-  validation,
-  notifications,
-  url,
-  status,
-}: {
-  validation: ValidateResponseStatus
-  notifications: Notification[]
-  url: string
-  status: string
-}): Promise<
-  Array<{
-    alert: string
-    notification: string
-    url: string
-  }>
-> => {
-  const ipAddress = getIp()
-  const message = getMessageForAlert(validation.alert, url, ipAddress, status)
-  const sent = await Promise.all<any>(
-    notifications.map((notification) => {
-      switch (notification.type) {
-        case 'mailgun': {
-          return sendMailgun(
-            {
-              subject: message.subject,
-              body: message.body,
-              sender: {
-                // TODO: Read from ENV Variables
-                name: 'Monika',
-                email: 'Monika@hyperjump.tech',
-              },
-              recipients: (notification?.data as MailgunData)?.recipients?.join(
-                ','
-              ),
-            },
-            notification
-          ).then(() => ({
-            notification: 'mailgun',
-            alert: validation.alert,
-            url,
-          }))
-        }
-        case 'webhook': {
-          return sendWebhook({
-            ...notification.data,
-            body: {
-              url,
-              alert: validation.alert,
-              time: new Date().toLocaleString(),
-            },
-          } as WebhookData).then(() => ({
-            notification: 'webhook',
-            alert: validation.alert,
-            url,
-          }))
-        }
-        case 'slack': {
-          return sendSlack({
-            ...notification.data,
-            body: {
-              url,
-              alert: validation.alert,
-              time: new Date().toLocaleString(),
-            },
-          } as WebhookData).then(() => ({
-            notification: 'slack',
-            alert: validation.alert,
-            url,
-          }))
-        }
-        case 'smtp': {
-          const transporter = createSmtpTransport(notification.data as SMTPData)
-          return sendSmtpMail(transporter, {
-            // TODO: Read from ENV Variables
-            from: 'http-probe@hyperjump.tech',
-            to: (notification?.data as SMTPData)?.recipients?.join(','),
-            subject: message.subject,
-            html: message.body,
-          })
-        }
-        default:
-          return Promise.resolve({
-            notification: '',
-            alert: validation.alert,
-            url,
-          })
-      }
-    })
-  )
-
-  return sent
 }

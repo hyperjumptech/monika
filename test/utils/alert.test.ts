@@ -1,6 +1,29 @@
+/**********************************************************************************
+ * MIT License                                                                    *
+ *                                                                                *
+ * Copyright (c) 2021 Hyperjump Technology                                        *
+ *                                                                                *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy   *
+ * of this software and associated documentation files (the "Software"), to deal  *
+ * in the Software without restriction, including without limitation the rights   *
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell      *
+ * copies of the Software, and to permit persons to whom the Software is          *
+ * furnished to do so, subject to the following conditions:                       *
+ *                                                                                *
+ * The above copyright notice and this permission notice shall be included in all *
+ * copies or substantial portions of the Software.                                *
+ *                                                                                *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR     *
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,       *
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE    *
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER         *
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,  *
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  *
+ * SOFTWARE.                                                                      *
+ **********************************************************************************/
+
 import chai, { expect } from 'chai'
 import spies from 'chai-spies'
-import { MailgunData, WebhookData } from '../../src/interfaces/data'
 import { AxiosResponseWithExtraData } from '../../src/interfaces/request'
 
 chai.use(spies)
@@ -8,14 +31,9 @@ chai.use(spies)
 import {
   parseAlertStringTime,
   responseTimeGreaterThan,
-  sendAlerts,
   statusNot2xx,
   validateResponse,
 } from '../../src/utils/alert'
-import * as mailgun from '../../src/utils/mailgun'
-import * as webhook from '../../src/utils/notifications/webhook'
-import * as slack from '../../src/utils/notifications/slack'
-import * as smtp from '../../src/utils/smtp'
 
 describe('check response status', () => {
   it('should trigger alert when response is within 4xx status', () => {
@@ -235,143 +253,5 @@ describe('check response against list of alerts', () => {
       } as AxiosResponseWithExtraData
     ).filter(({ status }) => status === true)
     expect(alerts).to.have.length(2)
-  })
-})
-
-describe('send alerts', () => {
-  afterEach(() => {
-    chai.spy.restore()
-  })
-  it('should send UP alert', async () => {
-    chai.spy.on(mailgun, 'sendMailgun', () => Promise.resolve())
-    const sent = await sendAlerts({
-      validation: {
-        alert: 'status-not-2xx',
-        status: false,
-      },
-      notifications: [
-        {
-          id: 'one',
-          type: 'mailgun',
-          data: {
-            recipients: ['xx@xx'],
-            apiKey: 'xx',
-            domain: 'xxx',
-          } as MailgunData,
-        },
-      ],
-      url: 'https://hyperjump.tech',
-      status: 'UP',
-    })
-    expect(sent).to.have.length(1)
-  })
-
-  it('should send DOWN alert', async () => {
-    chai.spy.on(mailgun, 'sendMailgun', () => Promise.resolve())
-    const sent = await sendAlerts({
-      validation: {
-        alert: 'status-not-2xx',
-        status: true,
-      },
-      notifications: [
-        {
-          id: 'one',
-          type: 'mailgun',
-          data: {
-            recipients: ['xx@xx'],
-            apiKey: 'xx',
-            domain: 'xxx',
-          } as MailgunData,
-        },
-      ],
-      url: 'https://hyperjump.tech',
-      status: 'DOWN',
-    })
-    expect(sent).to.have.length(1)
-  })
-
-  it('should send mailgun notification', async () => {
-    chai.spy.on(mailgun, 'sendMailgun', () => Promise.resolve())
-    const sent = await sendAlerts({
-      validation: {
-        alert: 'status-not-2xx',
-        status: true,
-      },
-      notifications: [
-        {
-          id: 'one',
-          type: 'mailgun',
-          data: {
-            recipients: ['xx@xx'],
-            apiKey: 'xx',
-            domain: 'xxx',
-          },
-        },
-      ],
-      url: 'https://hyperjump.tech',
-      status: 'DOWN',
-    })
-    expect(mailgun.sendMailgun).to.have.been.called()
-    expect(sent).to.have.length(1)
-  })
-  it('should send webhook & slack notifications', async () => {
-    chai.spy.on(webhook, 'sendWebhook', () => Promise.resolve())
-    chai.spy.on(slack, 'sendSlack', () => Promise.resolve())
-
-    const sent = await sendAlerts({
-      validation: {
-        alert: 'status-not-2xx',
-        status: true,
-      },
-      notifications: [
-        {
-          id: 'one',
-          type: 'webhook',
-          data: {
-            url: 'xx',
-          } as WebhookData,
-        },
-        {
-          id: 'one',
-          type: 'slack',
-          data: {
-            url: 'xx',
-          } as WebhookData,
-        },
-      ],
-      url: 'https://hyperjump.tech',
-      status: 'DOWN',
-    })
-
-    expect(webhook.sendWebhook).to.have.been.called()
-    expect(slack.sendSlack).to.have.been.called()
-    expect(sent).to.have.length(2)
-  })
-
-  it('should send SMTP notification', async () => {
-    chai.spy.on(smtp, 'sendSmtpMail', () => Promise.resolve())
-    const sent = await sendAlerts({
-      validation: {
-        alert: 'status-not-2xx',
-        status: true,
-      },
-      notifications: [
-        {
-          id: 'one',
-          type: 'smtp',
-          data: {
-            recipients: ['xx@xx'],
-            hostname: 'xx',
-            port: 100,
-            username: 'xxx',
-            password: 'xxxx',
-          },
-        },
-      ],
-      url: 'https://hyperjump.tech',
-      status: 'DOWN',
-    })
-    expect(smtp.sendSmtpMail).to.have.been.called()
-    expect(sent).to.have.length(1)
   })
 })

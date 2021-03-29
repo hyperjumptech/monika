@@ -1,9 +1,33 @@
+/**********************************************************************************
+ * MIT License                                                                    *
+ *                                                                                *
+ * Copyright (c) 2021 Hyperjump Technology                                        *
+ *                                                                                *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy   *
+ * of this software and associated documentation files (the "Software"), to deal  *
+ * in the Software without restriction, including without limitation the rights   *
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell      *
+ * copies of the Software, and to permit persons to whom the Software is          *
+ * furnished to do so, subject to the following conditions:                       *
+ *                                                                                *
+ * The above copyright notice and this permission notice shall be included in all *
+ * copies or substantial portions of the Software.                                *
+ *                                                                                *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR     *
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,       *
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE    *
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER         *
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,  *
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  *
+ * SOFTWARE.                                                                      *
+ **********************************************************************************/
+
 import { AxiosResponseWithExtraData } from '../interfaces/request'
 import { Probe } from '../interfaces/probe'
 import chalk from 'chalk'
-import { log } from 'console'
 import { saveLog, getAllLogs } from './history'
 import Table from 'cli-table3'
+import { log } from '../utils/log'
 
 /**
  * getStatusColor colorizes differents tatusCode
@@ -26,27 +50,25 @@ export function getStatusColor(statusCode: number) {
 /**
  * probeLog just prints probe results for the user and to persistent log (through history.ts)
  *
+ * @param {number} checkOrder is the order of probe being processed
  * @param {Probe} probe is the probe that made the log
  * @param {AxiosResponseWithExtraData} probRes is result of the probing
  * @param {string} err if theres any error, catch it here
  */
 export async function probeLog(
+  checkOrder: number,
   probe: Probe,
   probRes: AxiosResponseWithExtraData,
   err: string
 ) {
-  log(
-    'id:',
-    probe.id,
-    '- status:',
-    chalk.keyword(getStatusColor(probRes.status))(probRes.status.toString()),
-    'for:',
-    probe.request.url,
-    'response:',
-    probRes.config.extraData?.responseTime ?? 'n/a',
-    ' ms',
-    chalk.red(err)
-  )
+  log.info({
+    type: 'PROBE',
+    checkOrder,
+    probeId: probe.id,
+    url: probe.request.url,
+    statusCode: probRes.status,
+    responseTime: probRes.config.extraData?.responseTime,
+  })
 
   await saveLog(probe, probRes, err)
 }
@@ -75,5 +97,5 @@ export async function printAllLogs() {
       { hAlign: 'center', content: data.response_time },
     ])
   })
-  log(table.toString())
+  log.info(table.toString())
 }

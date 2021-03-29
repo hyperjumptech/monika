@@ -1,7 +1,32 @@
+/**********************************************************************************
+ * MIT License                                                                    *
+ *                                                                                *
+ * Copyright (c) 2021 Hyperjump Technology                                        *
+ *                                                                                *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy   *
+ * of this software and associated documentation files (the "Software"), to deal  *
+ * in the Software without restriction, including without limitation the rights   *
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell      *
+ * copies of the Software, and to permit persons to whom the Software is          *
+ * furnished to do so, subject to the following conditions:                       *
+ *                                                                                *
+ * The above copyright notice and this permission notice shall be included in all *
+ * copies or substantial portions of the Software.                                *
+ *                                                                                *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR     *
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,       *
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE    *
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER         *
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,  *
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  *
+ * SOFTWARE.                                                                      *
+ **********************************************************************************/
+
 import { ProbeStatus, StatusDetails } from '../interfaces/probe-status'
 import { Probe } from '../interfaces/probe'
 import { ValidateResponseStatus } from './alert'
-import console, { log } from 'console'
+import { log } from '../utils/log'
+import { AxiosResponseWithExtraData } from '../interfaces/request'
 
 const PROBE_STATUSES: ProbeStatus[] = []
 const INIT_PROBE_STATUS_DETAILS: StatusDetails = {
@@ -28,31 +53,31 @@ enum PROBE_STATE {
 const determineProbeState = ({
   probeStatus,
   validation,
-  trueThreshold,
-  falseThreshold,
+  incidentThreshold,
+  recoveryThreshold,
 }: {
   errorName: string
   probeStatus: StatusDetails
   validation: ValidateResponseStatus
-  trueThreshold: number
-  falseThreshold: number
+  incidentThreshold: number
+  recoveryThreshold: number
 }) => {
   const { isDown, consecutiveTrue, consecutiveFalse } = probeStatus
   const { status } = validation
 
-  if (!isDown && status && consecutiveTrue === trueThreshold - 1)
+  if (!isDown && status && consecutiveTrue === incidentThreshold - 1)
     return PROBE_STATE.UP_TRUE_EQUALS_THRESHOLD
 
-  if (!isDown && status && consecutiveTrue < trueThreshold - 1) {
+  if (!isDown && status && consecutiveTrue < incidentThreshold - 1) {
     return PROBE_STATE.UP_TRUE_BELOW_THRESHOLD
   }
 
   if (!isDown && !status) return PROBE_STATE.UP_FALSE
 
-  if (isDown && !status && consecutiveFalse === falseThreshold - 1)
+  if (isDown && !status && consecutiveFalse === recoveryThreshold - 1)
     return PROBE_STATE.DOWN_FALSE_EQUALS_THRESHOLD
 
-  if (isDown && !status && consecutiveFalse < falseThreshold - 1)
+  if (isDown && !status && consecutiveFalse < recoveryThreshold - 1)
     return PROBE_STATE.DOWN_FALSE_BELOW_THRESHOLD
 
   if (isDown && status) return PROBE_STATE.DOWN_TRUE
@@ -135,15 +160,19 @@ const updateProbeStatus = (
 }
 
 export const processProbeStatus = ({
+  checkOrder,
   probe,
+  probeRes,
   validatedResp,
-  trueThreshold,
-  falseThreshold,
+  incidentThreshold,
+  recoveryThreshold,
 }: {
+  checkOrder: number
   probe: Probe
+  probeRes: AxiosResponseWithExtraData
   validatedResp: ValidateResponseStatus[]
-  trueThreshold: number
-  falseThreshold: number
+  incidentThreshold: number
+  recoveryThreshold: number
 }) => {
   try {
     // Get Probe ID and Name
@@ -172,9 +201,9 @@ export const processProbeStatus = ({
     // Check if there is any alert that is triggered
     // If the alert is being triggered <threshold> times, send alert and
     // change the server status respectively.
-    const currentProbe = PROBE_STATUSES.findIndex(
+    const currentProbe = PROBE_STATUSES.find(
       (probeStatus) => probeStatus.id === id
-    )
+    )!
 
     // Calculate the count for successes and failures
     if (validatedResp.length > 0) {
@@ -182,7 +211,7 @@ export const processProbeStatus = ({
         const { alert } = validation
         let updatedStatus: StatusDetails = INIT_PROBE_STATUS_DETAILS
 
-        const probeStatusDetail = PROBE_STATUSES[currentProbe].details.find(
+        const probeStatusDetail = currentProbe.details.find(
           (detail) => detail.alert === alert
         )
 
@@ -191,8 +220,8 @@ export const processProbeStatus = ({
             errorName: alert,
             probeStatus: probeStatusDetail,
             validation,
-            trueThreshold,
-            falseThreshold,
+            incidentThreshold,
+            recoveryThreshold,
           })
           updatedStatus = updateProbeStatus(probeStatusDetail, state)
         }
@@ -203,34 +232,37 @@ export const processProbeStatus = ({
             errorName: alert,
             probeStatus: probeStatusDetail,
             validation,
-            trueThreshold,
-            falseThreshold,
+            incidentThreshold,
+            recoveryThreshold,
           })
           updatedStatus = updateProbeStatus(probeStatusDetail, state)
         }
 
         // Update the Probe Status
-        const filteredProbeStatus = PROBE_STATUSES[currentProbe].details.filter(
+        const filteredProbeStatus = currentProbe.details.filter(
           (item) => item.alert !== alert
         )
-        PROBE_STATUSES[currentProbe].details = [
-          ...filteredProbeStatus,
-          updatedStatus,
-        ]
+        currentProbe.details = [...filteredProbeStatus, updatedStatus]
         results.push(updatedStatus)
 
-        log(`Alert ${updatedStatus.alert}`)
-        log(`Is Down? ${updatedStatus.isDown}`)
-        log(`Total True ${updatedStatus.totalTrue}`)
-        log(`Total False ${updatedStatus.totalFalse}`)
-        log(`Consecutive True ${updatedStatus.consecutiveTrue}`)
-        log(`Consecutive False ${updatedStatus.consecutiveFalse}\n`)
+        if (validation.status === true) {
+          log.info({
+            type: 'ALERT',
+            alertType: updatedStatus.alert,
+            consecutiveTrue: updatedStatus.consecutiveTrue,
+            probeId: probe.id,
+            checkOrder,
+            url: probe.request?.url,
+            statusCode: probeRes.status,
+            responseTime: probeRes.config.extraData?.responseTime,
+          })
+        }
       })
     }
 
     return results
   } catch (error) {
-    console.error(error.message)
+    log.error(error.message)
     return []
   }
 }

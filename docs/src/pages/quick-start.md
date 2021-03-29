@@ -45,75 +45,23 @@ Follow the following steps to quickly monitor this Monica website and to get not
 
 ## Configuration file
 
-To start monitoring URLs, you'll need a configuration file (JSON file) as shown below.
-
-> The configuration file contains the [probes](/monika/guides/probes), [alerts](/monika/guides/alerts), and [notification](/monika/guides/notifications) configurations.
+> The configuration file contains the [notification](/monika/guides/notifications), [probes](/monika/guides/probes), and [alerts](/monika/guides/alerts) as shown below.
 
 ```
 // config.json
 
 {
-  "notifications": [
-    {
-      "id": "unique-id-mailgun",
-      "type": "mailgun",
-      "data": {
-        "recipients": ["RECIPIENT_EMAIL_ADDRESS"],
-        "apiKey": "YOUR_API_KEY",
-        "domain": "YOUR_DOMAIN"
-      }
-    },
-    {
-      "id": "unique-id-sendgrid",
-      "type": "sendgrid",
-      "data": {
-        "recipients": ["RECIPIENT_EMAIL_ADDRESS"],
-        "apiKey": "YOUR_API_KEY"
-      }
-    },
-    {
-      "id": "unique-id-smtp",
-      "type": "smtp",
-      "data": {
-        "recipients": ["RECIPIENT_EMAIL_ADDRESS"],
-        "hostname": "SMTP_HOSTNAME",
-        "port": SMTP_PORT,
-        "username": "SMTP_USERNAME",
-        "password": "SMTP_PASSWORD"
-      }
-    },
-    {
-      "id": "unique-id-webhook",
-      "type": "webhook",
-      "data": {
-        "method": "POST",
-        "url": "https://examplewebhookurl.com/webhook"
-      }
-    }
-  ],
+  "notifications": [...],
   "probes": [
     {
-      "id": "1",
-      "name": "Example",
-      "description": "Probe",
-      "interval": 0,
-      "request": {
-        "method": "POST",
-        "url": "https://something/login",
-        "timeout": 7000,
-        "headers": {
-          "Authorization": ""
-        },
-        "body": {
-          "username": "someusername",
-          "password": "somepassword"
-        }
-      },
-      "alerts": ["status-not-2xx", "response-time-greater-than-200-ms"]
+      ...
+      "alerts": [...]
     }
   ]
 }
 ```
+
+For more advanced configuration, you can find them on the sidebar menu.
 
 Monika by default reads a configuration file called `config.json` in the current working directory if it exists. You can specify a path to a JSON configuration file with `-c` flag as follows
 
@@ -126,3 +74,39 @@ Or if you haven't installed Monika globally, you can run it without installing f
 ```bash
 npx @hyperjumptech/monika -c <path_to_configuration_json_file>
 ```
+
+## Background run
+
+By default Monika will run in the foreground. Like other Node.js applications, there are several ways to run Monika in the background on Unix, Linux, and macOS.
+
+### Using `nohup`
+
+- On your terminal, run `nohup monika &`
+- You'll get an output similar to the following.
+
+  ```
+  [1] 93457
+  appending output to nohup.out
+  ```
+
+  In the above example, 93457 is the process ID (pid). And the output of Monika is written to `nohup.out` file.
+
+- To stop Monika, run `kill -9 <pid>`.
+
+### Using `screen`
+
+- Run `screen`. If you haven't installed it yet, you need to install it first. On Linux, please run `sudo apt install screen`.
+- Run `monika -c config.json`
+- Press Ctrl+a then D. This will cause Monika to run on a different screen in the background.
+- To go back to the screen, run `screen -ls` to list the running screens. You will get an output similar to the following.
+
+  ```
+  There is a screen on:
+    9049.pts-0.the-server	(03/23/21 08:34:38)	(Detached)
+    1 Socket in /run/screen/S-server.
+  ```
+
+  `9049.pts-0.the-server` is the name of the screen.
+
+- Then run `screen -r <name_of_the_screen>`.
+- To stop Monika, hit Ctrl+c then Ctrl+d.

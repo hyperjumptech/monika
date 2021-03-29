@@ -1,0 +1,19 @@
+{
+  "notifications": [
+    {
+      "id": "unique-id-sendgrid",
+      "type": "sendgrid",
+      "data": {
+        "recipients": ["RECIPIENT_EMAIL_ADDRESS"],
+        "apiKey": "YOUR_API_KEY"
+      }
+    }
+  ],
+  "probes": [
+    {
+      "request": {
+        "url": "https://github.com"
+      }
+    }
+  ]
+}

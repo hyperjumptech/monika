@@ -7,7 +7,16 @@ title: Notifications
 
 Monika will send notifications to you whenever [alerts](https://hyperjumptech.github.io/monika/guides/alerts) are triggered, e.g., when the response status of a probed URL is not [2xx success code](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#2xx_success) ([status-not-2xx](https://hyperjumptech.github.io/monika/guides/alerts#1-http-code)).
 
-At this moment, Monika supports 4 types of notifications—smtp, webhook, Mailgun, and Sendgrid. We are working on more notifications like Microsoft Teams, Telegram, and many more. You can help!
+At this moment, Monika support these channel of notifications (You can use just one or more):
+
+1. SMTP
+2. Webhook
+3. Mailgun
+4. Sendgrid
+5. Slack
+6. Whatsapp
+
+We are working on more notifications like Microsoft Teams, Telegram, and many more. You can help!
 
 ## Configurations
 
@@ -190,5 +199,31 @@ Monika supports Slack Incoming Webhook. To enable notification via Slack, you mu
 | ID   | Notification identity number           | `Slack12345`                       |
 | Type | Notification types                     | `slack`                            |
 | Url  | The URL of your slack incoming webhook | `https://slackwebhook.com/channel` |
+
+## Whatsapp
+
+Monika supports Whatsapp notification. To enable notification via whatsapp, you must have a registered user in whatsapp business api server. Please consult [WhatsApp Business API](https://developers.facebook.com/docs/whatsapp) documentation.
+
+```json
+{
+  "id": "unique-id-whatsapp",
+  "type": "whatsapp",
+  "data": {
+    "recipients": ["628123456789"],
+    "url": "https://yourwhatsappapiserver.com",
+    "username": "whatsappusername",
+    "password": "whatsapppassword"
+  }
+}
+```
+
+| Key          | Description                                                                               | Example                             |
+| ------------ | ----------------------------------------------------------------------------------------- | ----------------------------------- |
+| ID           | Notification identity number                                                              | `whatsapp12345`                     |
+| Type         | Notification types                                                                        | `whatsapp`                          |
+| Recipients   | An array phone number registered for whatsapp, should start with your country code number | `["628123456790", "629745834093"]`  |
+| Url          | The URL of your whatsapp api server                                                       | `https://yourwhatsappapiserver.com` |
+| Username     | Your whatsapp api user name                                                               | `username`                          |
+| Userpassword | Your whatsapp api user password                                                           | `userpassword`                      |
 
 Keep watch on these pages, new notification methods are being developed.

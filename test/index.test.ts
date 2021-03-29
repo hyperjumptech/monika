@@ -1,7 +1,34 @@
+/**********************************************************************************
+ * MIT License                                                                    *
+ *                                                                                *
+ * Copyright (c) 2021 Hyperjump Technology                                        *
+ *                                                                                *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy   *
+ * of this software and associated documentation files (the "Software"), to deal  *
+ * in the Software without restriction, including without limitation the rights   *
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell      *
+ * copies of the Software, and to permit persons to whom the Software is          *
+ * furnished to do so, subject to the following conditions:                       *
+ *                                                                                *
+ * The above copyright notice and this permission notice shall be included in all *
+ * copies or substantial portions of the Software.                                *
+ *                                                                                *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR     *
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,       *
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE    *
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER         *
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,  *
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  *
+ * SOFTWARE.                                                                      *
+ **********************************************************************************/
+
 import { expect, test } from '@oclif/test'
 import { resolve } from 'path'
+import chai from 'chai'
+import spies from 'chai-spies'
+import cmd from '../src'
 
-import cmd = require('../src')
+chai.use(spies)
 
 describe('monika', () => {
   // General Test
@@ -9,7 +36,7 @@ describe('monika', () => {
     .stdout()
     .do(() => cmd.run(['--config', resolve('./config.example.json')]))
     .it('runs with normal config', (ctx) => {
-      expect(ctx.stdout).to.contain('Parsed configuration')
+      expect(ctx.stdout).to.contain('Starting Monika.')
     })
 
   test
@@ -18,21 +45,8 @@ describe('monika', () => {
       cmd.run(['--config', resolve('./test/testConfigs/noInterval.json')])
     )
     .it('runs with config without interval', (ctx) => {
-      expect(ctx.stdout).to.contain('Parsed configuration')
-      expect(ctx.stdout).to.contain('Probe Interval: undefined')
+      expect(ctx.stdout).to.contain('Starting Monika.')
     })
-
-  test
-    .stderr()
-    .do(() =>
-      cmd.run(['--config', resolve('./test/testConfigs/noNotifications.json')])
-    )
-    .catch((error) => {
-      expect(error.message).to.contain(
-        'Notifications object does not exists or has length lower than 1!'
-      )
-    })
-    .it('runs with config without notifications')
 
   test
     .stderr()
@@ -166,11 +180,11 @@ describe('monika', () => {
       cmd.run([
         '--config',
         resolve('./test/testConfigs/mailgun/mailgunconfig.json'),
+        '--verbose',
       ])
     )
     .it('runs with mailgun config', (ctx) => {
-      expect(ctx.stdout).to.contain('Notification Type: mailgun')
-      expect(ctx.stdout).to.contain('API key:')
+      expect(ctx.stdout).to.contain('Type: mailgun')
       expect(ctx.stdout).to.contain('Domain:')
     })
 
@@ -196,11 +210,11 @@ describe('monika', () => {
       cmd.run([
         '--config',
         resolve('./test/testConfigs/sendgrid/sendgridconfig.json'),
+        '--verbose',
       ])
     )
     .it('runs with sendgrid config', (ctx) => {
-      expect(ctx.stdout).to.contain('Notification Type: sendgrid')
-      expect(ctx.stdout).to.contain('API key:')
+      expect(ctx.stdout).to.contain('Type: sendgrid')
     })
 
   test
@@ -222,14 +236,17 @@ describe('monika', () => {
   test
     .stdout()
     .do(() =>
-      cmd.run(['--config', resolve('./test/testConfigs/smtp/smtpconfig.json')])
+      cmd.run([
+        '--config',
+        resolve('./test/testConfigs/smtp/smtpconfig.json'),
+        '--verbose',
+      ])
     )
     .it('runs with SMTP config', (ctx) => {
-      expect(ctx.stdout).to.contain('Notification Type: smtp')
+      expect(ctx.stdout).to.contain('Type: smtp')
       expect(ctx.stdout).to.contain('Hostname:')
       expect(ctx.stdout).to.contain('Port:')
       expect(ctx.stdout).to.contain('Username:')
-      expect(ctx.stdout).to.contain('Password:')
     })
 
   test
@@ -254,6 +271,7 @@ describe('monika', () => {
       cmd.run([
         '--config',
         resolve('./test/testConfigs/webhook/webhookconfig.json'),
+        '--verbose',
       ])
     )
     .it('runs with Webhook config', (ctx) => {
