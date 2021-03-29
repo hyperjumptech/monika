@@ -96,7 +96,9 @@ describe('monika', () => {
       ])
     )
     .catch((error) => {
-      expect(error.message).to.contain('Probe request should not be empty')
+      expect(error.message).to.contain(
+        'Probe requests does not exists or has length lower than 1!'
+      )
     })
     .it('runs with config without probe request')
 
