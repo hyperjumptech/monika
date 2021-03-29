@@ -21,7 +21,15 @@ npm ci
 
 ## Getting Started
 
-To start monitoring URLs, you need to create a configuration file (JSON file). The configuration file contains the probes, alerts, and notification configurations. You can check the sample configuration file in [config.example.json](https://github.com/hyperjumptech/monika/blob/main/config.example.json) or from our [docs](https://github.com/hyperjumptech/monika/quick-start).
+To start monitoring URLs, you need to create a configuration file (JSON file). The configuration file contains the probes, alerts, and notification configurations. You can check the sample configuration file from our [docs](https://hyperjumptech.github.io/monika/quick-start) or copy from one of these files:
+
+- [config.smtp-gmail.example.json](https://github.com/hyperjumptech/monika/blob/main/config_sample/config.smtp-gmail.example.json)
+- [config.mailgun.example.json](https://github.com/hyperjumptech/monika/blob/main/config_sample/config.mailgun.example.json)
+- [config.sendgrid.example.json](https://github.com/hyperjumptech/monika/blob/main/config_sample/config.sendgrid.example.json)
+- [config.webhook.example.json](https://github.com/hyperjumptech/monika/blob/main/config_sample/config.webhook.example.json)
+- [config.slack.example.json](https://github.com/hyperjumptech/monika/blob/main/config_sample/config.slack.example.json)
+- [config.whatsapp.example.json](https://github.com/hyperjumptech/monika/blob/main/config_sample/config.whatsapp.example.json)
+- [config.example.json](https://github.com/hyperjumptech/monika/blob/main/config.example.json)
 
 When you have created the configuration file, you can run `monika` as follows
 
@@ -37,11 +45,11 @@ Monika operates by reading everything from the config file. From the configurati
 
 For more information, please refer to the detailed documentations below.
 
-| Topic                                                     | Description                                        |
-| --------------------------------------------------------- | -------------------------------------------------- |
-| [Probes](./docs/src/pages/guides/probes.md)               | How requests are set up and dispatched             |
-| [Alerts](./docs/src/pages/guides/alerts.md)               | How alerts are triggered and how to setup an alert |
-| [Notifications](./docs/src/pages/guides/notifications.md) | Receive notifications when alerts are triggered    |
+| Topic                                                                        | Description                                        |
+| ---------------------------------------------------------------------------- | -------------------------------------------------- |
+| [Probes](https://hyperjumptech.github.io/monika/guides/probes)               | How requests are set up and dispatched             |
+| [Alerts](https://hyperjumptech.github.io/monika/guides/alerts)               | How alerts are triggered and how to setup an alert |
+| [Notifications](https://hyperjumptech.github.io/monika/guides/notifications) | Receive notifications when alerts are triggered    |
 
 ## Run Monika using Docker
 
