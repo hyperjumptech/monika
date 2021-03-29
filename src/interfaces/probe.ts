@@ -29,7 +29,7 @@ export interface Probe {
   name: string
   description?: string
   interval?: number
-  request: RequestConfig
+  requests: RequestConfig[]
   incidentThreshold: number
   recoveryThreshold: number
   alerts: string[]
