@@ -1,3 +1,27 @@
+/**********************************************************************************
+ * MIT License                                                                    *
+ *                                                                                *
+ * Copyright (c) 2021 Hyperjump Technology                                        *
+ *                                                                                *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy   *
+ * of this software and associated documentation files (the "Software"), to deal  *
+ * in the Software without restriction, including without limitation the rights   *
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell      *
+ * copies of the Software, and to permit persons to whom the Software is          *
+ * furnished to do so, subject to the following conditions:                       *
+ *                                                                                *
+ * The above copyright notice and this permission notice shall be included in all *
+ * copies or substantial portions of the Software.                                *
+ *                                                                                *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR     *
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,       *
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE    *
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER         *
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,  *
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  *
+ * SOFTWARE.                                                                      *
+ **********************************************************************************/
+
 /* eslint-disable complexity */
 import { warn } from 'console'
 import { getCheckResponseFn } from './alert'
@@ -41,9 +65,9 @@ const NOTIFICATION_INVALID_TYPE = {
   message: 'Notifications type is not allowed',
 }
 
-const PROBE_NO_REQUEST = {
+const PROBE_NO_REQUESTS = {
   valid: false,
-  message: 'Probe request should not be empty',
+  message: 'Probe requests does not exists or has length lower than 1!',
 }
 const PROBE_REQUEST_INVALID_URL = {
   valid: false,
@@ -132,7 +156,6 @@ export const validateConfig = async (configuration: Config) => {
         margin: 1,
         borderStyle: 'bold',
         borderColor: 'yellow',
-        align: 'center',
       })
     )
   }
@@ -200,7 +223,7 @@ export const validateConfig = async (configuration: Config) => {
   let i = 1
   // Check probes properties
   for (const probe of data.probes) {
-    const { request, incidentThreshold, recoveryThreshold } = probe as Probe
+    const { requests, incidentThreshold, recoveryThreshold } = probe as Probe
 
     if (!probe.id) {
       probe.id = `probe_${i++}`
@@ -213,7 +236,7 @@ export const validateConfig = async (configuration: Config) => {
       )
     }
 
-    if (!request) return PROBE_NO_REQUEST
+    if ((requests?.length ?? 0) === 0) return PROBE_NO_REQUESTS
 
     if ((probe.alerts?.length ?? 0) === 0) {
       probe.alerts = ['status-not-2xx', 'response-time-greater-than-2-s']
@@ -232,30 +255,32 @@ export const validateConfig = async (configuration: Config) => {
       )
 
     // Check probe request properties
-    const { url } = request as RequestConfig
+    for (const request of requests) {
+      const { url } = request as RequestConfig
 
-    if (url && !isValidURL(url)) return PROBE_REQUEST_INVALID_URL
+      if (url && !isValidURL(url)) return PROBE_REQUEST_INVALID_URL
 
-    if (!request.method) {
-      request.method = 'GET'
-    }
+      if (!request.method) {
+        request.method = 'GET'
+      }
 
-    if (['GET', 'POST'].indexOf(request.method) < 0)
-      return PROBE_REQUEST_INVALID_METHOD
+      if (['GET', 'POST'].indexOf(request.method) < 0)
+        return PROBE_REQUEST_INVALID_METHOD
 
-    // Check probe alert properties
-    for (const alert of probe.alerts) {
-      const check = getCheckResponseFn(alert)
-      if (!check) {
-        return PROBE_ALERT_INVALID
+      // Check probe alert properties
+      for (const alert of probe.alerts) {
+        const check = getCheckResponseFn(alert)
+        if (!check) {
+          return PROBE_ALERT_INVALID
+        }
       }
     }
+
+    // Check duplicate probe id
+    const probeIds = data.probes.map((probe) => probe.id)
+    const uniqueProbeIds = new Set(probeIds)
+    if (uniqueProbeIds.size !== data.probes.length) return PROBE_DUPLICATE_ID
+
+    return VALID_CONFIG
   }
-
-  // Check duplicate probe id
-  const probeIds = data.probes.map((probe) => probe.id)
-  const uniqueProbeIds = new Set(probeIds)
-  if (uniqueProbeIds.size !== data.probes.length) return PROBE_DUPLICATE_ID
-
-  return VALID_CONFIG
 }

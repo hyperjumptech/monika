@@ -1,3 +1,27 @@
+/**********************************************************************************
+ * MIT License                                                                    *
+ *                                                                                *
+ * Copyright (c) 2021 Hyperjump Technology                                        *
+ *                                                                                *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy   *
+ * of this software and associated documentation files (the "Software"), to deal  *
+ * in the Software without restriction, including without limitation the rights   *
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell      *
+ * copies of the Software, and to permit persons to whom the Software is          *
+ * furnished to do so, subject to the following conditions:                       *
+ *                                                                                *
+ * The above copyright notice and this permission notice shall be included in all *
+ * copies or substantial portions of the Software.                                *
+ *                                                                                *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR     *
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,       *
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE    *
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER         *
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,  *
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  *
+ * SOFTWARE.                                                                      *
+ **********************************************************************************/
+
 /* eslint-disable no-console */
 import { Command, flags } from '@oclif/command'
 import cli from 'cli-ux'
@@ -91,12 +115,14 @@ class Monika extends Command {
           console.log(`    Name: ${probe.name}`)
           console.log(`    Description: ${probe.description}`)
           console.log(`    Interval: ${probe.interval}`)
-          console.log(`    Request Method: ${probe.request.method}`)
-          console.log(`    Request URL: ${probe.request.url}`)
-          console.log(
-            `    Request Headers: ${JSON.stringify(probe.request.headers)}`
-          )
-          console.log(`    Request Body: ${JSON.stringify(probe.request.body)}`)
+          probe.requests.forEach((request) => {
+            console.log(`    Request Method: ${request.method}`)
+            console.log(`    Request URL: ${request.url}`)
+            console.log(
+              `    Request Headers: ${JSON.stringify(request.headers)}`
+            )
+            console.log(`    Request Body: ${JSON.stringify(request.body)}`)
+          })
           console.log(`    Alerts: ${probe.alerts.join(', ')}`)
         })
         console.log('')
