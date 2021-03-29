@@ -202,47 +202,49 @@ export const validateConfig = async (configuration: Config) => {
   for (const probe of data.probes) {
     const { request, incidentThreshold, recoveryThreshold } = probe as Probe
 
-    let { id, name, alerts } = probe as Probe
+    if (!probe.id) {
+      probe.id = `probe_${i++}`
+    }
 
-    if (!id) id = `probe_${i++}`
-
-    if (!name) {
-      name = `monika_probe_${i++}`
+    if (!probe.name) {
+      probe.name = `monika_probe_${i++}`
       warn(
-        `Warning: Probe ${id} has no name defined. Using the default name started by monika`
+        `Warning: Probe ${probe.id} has no name defined. Using the default name started by monika`
       )
     }
 
     if (!request) return PROBE_NO_REQUEST
 
-    if ((alerts?.length ?? 0) === 0) {
-      alerts = ['status-not-2xx', 'response-time-greater-than-400-ms']
+    if ((probe.alerts?.length ?? 0) === 0) {
+      probe.alerts = ['status-not-2xx', 'response-time-greater-than-2-s']
       warn(
-        `Warning: Probe ${id} has no Alerts configuration defined. Using the default status-not-2xx and response-time-greater-than-400-ms`
+        `Warning: Probe ${probe.id} has no Alerts configuration defined. Using the default status-not-2xx and response-time-greater-than-2-s`
       )
     }
 
     if (!incidentThreshold)
       warn(
-        `Warning: Probe ${id} has no incidentThreshold configuration defined. Using the default threshold: 5`
+        `Warning: Probe ${probe.id} has no incidentThreshold configuration defined. Using the default threshold: 5`
       )
     if (!recoveryThreshold)
       warn(
-        `Warning: Probe ${id} has no recoveryThreshold configuration defined. Using the default threshold: 5`
+        `Warning: Probe ${probe.id} has no recoveryThreshold configuration defined. Using the default threshold: 5`
       )
 
     // Check probe request properties
     const { url } = request as RequestConfig
-    let { method } = request as RequestConfig
 
     if (url && !isValidURL(url)) return PROBE_REQUEST_INVALID_URL
 
-    if (!method) method = 'GET'
+    if (!request.method) {
+      request.method = 'GET'
+    }
 
-    if (['GET', 'POST'].indexOf(method) < 0) return PROBE_REQUEST_INVALID_METHOD
+    if (['GET', 'POST'].indexOf(request.method) < 0)
+      return PROBE_REQUEST_INVALID_METHOD
 
     // Check probe alert properties
-    for (const alert of alerts) {
+    for (const alert of probe.alerts) {
       const check = getCheckResponseFn(alert)
       if (!check) {
         return PROBE_ALERT_INVALID

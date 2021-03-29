@@ -62,7 +62,7 @@ export async function doProbe(
           notifications: notifications,
           url: probe.request.url ?? '',
           status: status.isDown ? 'DOWN' : 'UP',
-          incidentThreshold: probe.incidentThreshold,
+          incidentThreshold: probe.incidentThreshold ?? defaultThreshold,
         })
       }
     })
