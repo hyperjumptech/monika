@@ -5,12 +5,12 @@ import {
   WebhookData,
 } from '../../interfaces/data'
 import { Notification } from '../../interfaces/notification'
-import getIp from '../ip'
-import { sendMailgun } from './mailgun'
-import { sendSendgrid } from './sendgrid'
-import { sendSlack } from './slack'
-import { createSmtpTransport, sendSmtpMail } from './smtp'
-import { sendWebhook } from './webhook'
+import getIp from '../../utils/ip'
+import { sendMailgun } from './channel/mailgun'
+import { sendSendgrid } from './channel/sendgrid'
+import { sendSlack } from './channel/slack'
+import { createSmtpTransport, sendSmtpMail } from './channel/smtp'
+import { sendWebhook } from './channel/webhook'
 
 const subject = 'Monika is started'
 const body = `Monika is running on ${getIp()}`

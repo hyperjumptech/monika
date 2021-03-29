@@ -1,11 +1,12 @@
 import { processProbeStatus } from '../../utils/process-server-status'
 import { probing } from '../../utils/probing'
-import { validateResponse, sendAlerts } from '../../utils/alert'
+import { validateResponse } from '../../utils/alert'
 import { Probe } from '../../interfaces/probe'
 import { Notification } from '../../interfaces/notification'
 import { probeLog } from '../../utils/logger'
 import { AxiosResponseWithExtraData } from '../../interfaces/request'
 import { log } from '../../utils/log'
+import { sendAlerts } from '../notification'
 
 /**
  * doProbe sends out the http request

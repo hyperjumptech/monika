@@ -1,7 +1,7 @@
 import mailgun = require('mailgun-js')
-import { MailgunData } from '../../interfaces/data'
-import { SendInput } from '../../interfaces/mailgun'
-import { Notification } from '../../interfaces/notification'
+import { MailgunData } from '../../../interfaces/data'
+import { SendInput } from '../../../interfaces/mailgun'
+import { Notification } from '../../../interfaces/notification'
 
 export const sendMailgun = async (
   inputData: SendInput,

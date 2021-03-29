@@ -11,7 +11,7 @@ import { printAllLogs } from './utils/logger'
 import { log } from './utils/log'
 
 import { closeLog, openLogfile, flushAllLogs } from './utils/history'
-import { notificationChecker } from './utils/notifications/checker'
+import { notificationChecker } from './components/notification/checker'
 
 class Monika extends Command {
   static description = 'Monika command line monitoring tool'
