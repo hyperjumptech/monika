@@ -2,7 +2,7 @@ import { expect } from '@oclif/test'
 import {
   createSmtpTransport,
   sendSmtpMail,
-} from '../../src/utils/notifications/smtp'
+} from '../../src/components/notification/channel/smtp'
 import Mail from 'nodemailer/lib/mailer'
 import { SMTPData } from '../../src/interfaces/data'
 
