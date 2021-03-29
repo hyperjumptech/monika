@@ -7,7 +7,16 @@ title: Notifications
 
 Monika will send notifications to you whenever [alerts](https://hyperjumptech.github.io/monika/guides/alerts) are triggered, e.g., when the response status of a probed URL is not [2xx success code](https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#2xx_success) ([status-not-2xx](https://hyperjumptech.github.io/monika/guides/alerts#1-http-code)).
 
-At this moment, Monika supports 4 types of notifications—smtp, webhook, Mailgun, and Sendgrid. We are working on more notifications like Microsoft Teams, Telegram, and many more. You can help!
+At this moment, Monika support these channel of notifications (You can use just one or more):
+
+1. SMTP
+2. Webhook
+3. Mailgun
+4. Sendgrid
+5. Slack
+6. Whatsapp
+
+We are working on more notifications like Microsoft Teams, Telegram, and many more. You can help!
 
 ## Configurations
 

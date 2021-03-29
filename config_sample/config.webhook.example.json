@@ -1,0 +1,18 @@
+{
+  "notifications": [
+    {
+      "id": "unique-id-webhook",
+      "type": "webhook",
+      "data": {
+        "url": "https://YOUR_WEBHOOK_URL"
+      }
+    }
+  ],
+  "probes": [
+    {
+      "request": {
+        "url": "https://github.com"
+      }
+    }
+  ]
+}

@@ -45,75 +45,23 @@ Follow the following steps to quickly monitor this Monica website and to get not
 
 ## Configuration file
 
-To start monitoring URLs, you'll need a configuration file (JSON file) as shown below.
-
-> The configuration file contains the [probes](/monika/guides/probes), [alerts](/monika/guides/alerts), and [notification](/monika/guides/notifications) configurations.
+> The configuration file contains the [notification](/monika/guides/notifications), [probes](/monika/guides/probes), and [alerts](/monika/guides/alerts) as shown below.
 
 ```
 // config.json
 
 {
-  "notifications": [
-    {
-      "id": "unique-id-mailgun",
-      "type": "mailgun",
-      "data": {
-        "recipients": ["RECIPIENT_EMAIL_ADDRESS"],
-        "apiKey": "YOUR_API_KEY",
-        "domain": "YOUR_DOMAIN"
-      }
-    },
-    {
-      "id": "unique-id-sendgrid",
-      "type": "sendgrid",
-      "data": {
-        "recipients": ["RECIPIENT_EMAIL_ADDRESS"],
-        "apiKey": "YOUR_API_KEY"
-      }
-    },
-    {
-      "id": "unique-id-smtp",
-      "type": "smtp",
-      "data": {
-        "recipients": ["RECIPIENT_EMAIL_ADDRESS"],
-        "hostname": "SMTP_HOSTNAME",
-        "port": SMTP_PORT,
-        "username": "SMTP_USERNAME",
-        "password": "SMTP_PASSWORD"
-      }
-    },
-    {
-      "id": "unique-id-webhook",
-      "type": "webhook",
-      "data": {
-        "method": "POST",
-        "url": "https://examplewebhookurl.com/webhook"
-      }
-    }
-  ],
+  "notifications": [...],
   "probes": [
     {
-      "id": "1",
-      "name": "Example",
-      "description": "Probe",
-      "interval": 0,
-      "request": {
-        "method": "POST",
-        "url": "https://something/login",
-        "timeout": 7000,
-        "headers": {
-          "Authorization": ""
-        },
-        "body": {
-          "username": "someusername",
-          "password": "somepassword"
-        }
-      },
-      "alerts": ["status-not-2xx", "response-time-greater-than-200-ms"]
+      ...
+      "alerts": [...]
     }
   ]
 }
 ```
+
+For more advanced configuration, you can find them on the sidebar menu.
 
 Monika by default reads a configuration file called `config.json` in the current working directory if it exists. You can specify a path to a JSON configuration file with `-c` flag as follows
 
