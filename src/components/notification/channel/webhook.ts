@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-import { WebhookData } from '../../interfaces/data'
+import { WebhookData } from '../../../interfaces/data'
 
 export const sendWebhook = async (data: WebhookData) => {
   try {
@@ -14,6 +14,6 @@ export const sendWebhook = async (data: WebhookData) => {
 
     return res
   } catch (error) {
-    throw new Error(error)
+    throw error
   }
 }

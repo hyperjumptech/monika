@@ -19,6 +19,7 @@ jobs:
       - run: npm test
 
   test:
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -31,7 +32,7 @@ jobs:
       - run: monika -v
 
   publish-npm:
-    needs: build
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -43,3 +44,12 @@ jobs:
       - run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+      - name: Get Package Version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@master
+      - name: Notify Teams
+        uses: joelwmale/webhook-action@fd99bb3b8272237103e349e9bb4d9b0ead9a217c
+        with:
+          url: ${{secrets.HYPERJUMP_TEAMS_SYMON_WEBHOOK}}
+          body: '{"title": "Monika NPM Release", "Text": "Version: ${{steps.package-version.outputs.current-version}}"}'
+      

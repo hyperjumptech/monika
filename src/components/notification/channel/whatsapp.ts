@@ -1,8 +1,8 @@
 import axios from 'axios'
-import { LoginUserSuccessResponse } from '../interfaces/whatsapp'
-import { authorize } from './authorization'
+import { LoginUserSuccessResponse } from '../../../interfaces/whatsapp'
+import { authorize } from '../../../utils/authorization'
 import { log } from 'console'
-import { WhatsappData } from '../interfaces/data'
+import { WhatsappData } from '../../../interfaces/data'
 
 export const loginUser = async (data: WhatsappData) => {
   try {
