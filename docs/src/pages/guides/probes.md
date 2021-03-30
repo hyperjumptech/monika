@@ -99,6 +99,96 @@ Here is probes example with POST request to simulate HTML form submission
   ]
 ```
 
+### Multiple request
+
+Here is an example configuration with multiple requests:
+
+```json
+  "probes": [
+    {
+      "id": "1",
+      "name": "Probing Github",
+      "description": "simulate html form submission",
+      "interval": 10,
+      "requests": [{
+        "method": "GET",
+        "url": "https://github.com/",
+        "timeout": 7000,
+      },{
+        "method": "GET",
+        "url": "https://github.com/hyperjumptech",
+        "timeout": 7000,
+      }],
+      "incidentThreshold": 3,
+      "recoveryThreshold": 3,
+      "alerts": ["status-not-2xx", "response-time-greater-than-200-ms"]
+    },
+  ]
+```
+
+In the configuration above, "Probing Github" probe will execute a GET request to `https://github.com`. If there are no triggered alerts such as `status-not-2xx` or `response-time-greater-than-200-ms`, it will execute a GET request to `https://github.com/hyperjumptech`.
+
+If there is a case where executing GET request to `https://github.com` triggered an alert, the next request will not be executed.
+
+### Chaining Request
+
+Monika supports chaining request, which enables you to use previous request(s) response. For example, after executing a GET request to certain API, the next request could use the previous request(s) response into their path/query parameters.
+
+Here is an example configuration of chaining requests:
+
+```json
+  "probes": [
+    {
+      "id": "1",
+      "name": "Probing Github",
+      "description": "simulate html form submission",
+      "interval": 10,
+      "requests": [{
+        "method": "GET",
+        "url": "https://reqres.in/api/users",
+        "timeout": 7000,
+      },{
+        "method": "GET",
+        "url": "https://reqres.in/api/users/{{ responses.[0].data.data.[0].id }}",
+        "timeout": 7000,
+      },{
+        "method": "GET",
+        "url": "https://reqres.in/api/users/{{ responses.[0].data.data.[1].id }}",
+        "timeout": 7000,
+      }],
+      "incidentThreshold": 3,
+      "recoveryThreshold": 3,
+      "alerts": ["status-not-2xx", "response-time-greater-than-2000-ms"]
+    },
+  ]
+```
+
+In the configuration above, the process is explained below:
+
+- First request should fetch a list of users.
+- If there are no alerts triggered, in the next request, it will fetch the first user by ID that has been fetched from the first request response.
+- If there are no alerts triggered, in the next request, it will fetch the second user by ID that has been fetched from the first request response.
+
+#### Response Anatomy
+
+Monika uses [Axios](https://github.com/axios/axios) to do requests, so the response body is similar just like when you're using Axios. An actual response from a request may be something like below:
+
+```json
+{
+  "status": 200,
+  "statusText": "OK",
+  "headers": { ... },
+  "config": {
+    "url": "https://reqres.in/api/users",
+    "method": "GET",
+    ...
+  },
+  "headers": { ... },
+  "request": { ... },
+  "data": { ... }
+}
+```
+
 ## Execution order
 
 In a configuration with multiple probes, `Monika` will perform the requests in sequence in the order that they are entered, one after another.
