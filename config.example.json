@@ -1,9 +1,11 @@
 {
   "probes": [
     {
-      "request": {
-        "url": "https://github.com"
-      }
+      "requests": [
+        {
+          "url": "https://github.com"
+        }
+      ]
     }
   ]
 }
