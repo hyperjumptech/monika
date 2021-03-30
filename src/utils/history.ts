@@ -122,7 +122,7 @@ export async function saveLog(
     created,
     probeRes.status,
     probe.name,
-    probe.requests[requestIndex].url,
+    probeRes.config.url,
     probeRes.config.extraData?.responseTime,
     errorResp,
   ]
