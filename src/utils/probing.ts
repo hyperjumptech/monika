@@ -25,11 +25,20 @@
 import { RequestConfig } from './../interfaces/request'
 import { request } from './request'
 import { AxiosResponseWithExtraData } from '../interfaces/request'
+import * as Handlebars from 'handlebars'
 
-export async function probing(requestConfig: RequestConfig) {
+export async function probing(
+  requestConfig: RequestConfig,
+  responses: Array<AxiosResponseWithExtraData>
+) {
   try {
+    const requestURL = requestConfig.url
+    const template = Handlebars.compile(requestURL)
+    const renderedURL = template({ responses })
+
     const res = await request({
       ...requestConfig,
+      url: renderedURL,
     })
     return res as AxiosResponseWithExtraData
   } catch (error) {
