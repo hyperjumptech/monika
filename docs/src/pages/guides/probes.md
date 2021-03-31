@@ -134,7 +134,35 @@ If there is a case where executing GET request to `https://github.com` triggered
 
 Monika supports requests chaining, which enables you to do multiple request and use previous request(s) response for other request. For example, after executing a GET request to certain API, the next request could use the previous request(s) response into their path/query parameters or headers.
 
-#### Pass Response as Path/Query Parameters
+#### Response Anatomy
+
+Monika uses [Axios](https://github.com/axios/axios) to do requests, so the response body is similar just like when you're using Axios. An actual response from a request may be something like below:
+
+```json
+{
+  "status": 200,
+  "statusText": "OK",
+  "headers": { ... },
+  "config": {
+    "url": "https://reqres.in/api/users",
+    "method": "GET",
+    ...
+  },
+  "headers": { ... },
+  "request": { ... },
+  "data": { ... }
+}
+```
+
+Here is an example on how you could get previous request(s) response data into your next request:
+
+```
+{{ response.[0].status }} ==> Get status code from first request response
+{{ response.[1].data.token }} ==> Get token from second request response
+{{ response.[2].headers.SetCookie[0] }} ==> Get first cookie from third request response
+```
+
+#### Pass Response Data as Path/Query Parameters
 
 Here is an example of passing previous request(s) response into the path/query parameters:
 
@@ -161,7 +189,7 @@ Here is an example of passing previous request(s) response into the path/query p
   ]
 ```
 
-In the configuration above, the first request will execute fetch all users available. If there are no triggered alerts, the response returned from the first request is ready to be used by the second request using `{{ responses.[0].data }}`. An example of the first request response should be like this:
+In the configuration above, the first request will execute fetch all users available. If there are no triggered alerts, the response returned from the first request is ready to be used by the second request using values from `{{ responses.[0].data }}`. An example of the first request response should be like this:
 
 ```json
 {
@@ -183,7 +211,7 @@ In the configuration above, the first request will execute fetch all users avail
 
 So, in order to access the ID of the user, we need to define in the config.json as `{{ responses.[0].data.data.[0].id }}` to get the first user ID from the first response. What if we want to get the `page` data? Simply just define it as `{{ responses.[0].data.page }}`.
 
-#### Pass Response as Headers value
+#### Pass Response Data as Headers value
 
 Here is an example of passing previous request(s) response into the headers:
 
@@ -221,27 +249,7 @@ Here is an example of passing previous request(s) response into the headers:
   ]
 ```
 
-In example above, the first request will do the login process. After the first request returns the token, the token is being used for Authorization header in order to execute the second request.
-
-#### Response Anatomy
-
-Monika uses [Axios](https://github.com/axios/axios) to do requests, so the response body is similar just like when you're using Axios. An actual response from a request may be something like below:
-
-```json
-{
-  "status": 200,
-  "statusText": "OK",
-  "headers": { ... },
-  "config": {
-    "url": "https://reqres.in/api/users",
-    "method": "GET",
-    ...
-  },
-  "headers": { ... },
-  "request": { ... },
-  "data": { ... }
-}
-```
+In example above, the first request will do the login process. If there are no triggered alerts, the first request will return the token, and the token will be used for Authorization header in order to execute the second request.
 
 ## Execution order
 
