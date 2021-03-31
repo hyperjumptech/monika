@@ -80,7 +80,9 @@ const PROBE_ALERT_INVALID = setInvalidResponse(
 )
 const PROBE_DUPLICATE_ID = setInvalidResponse('Probe should have unique id')
 
-const PROBE_REQUEST_NO_URL = setInvalidResponse('Probe request URL does not exists')
+const PROBE_REQUEST_NO_URL = setInvalidResponse(
+  'Probe request URL does not exists'
+)
 
 // SMTP
 const SMTP_NO_HOSTNAME = setInvalidResponse('Hostname not found')
