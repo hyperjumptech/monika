@@ -72,7 +72,7 @@ export async function probeLog({
     type: 'PROBE',
     checkOrder,
     probeId: probe.id,
-    url: probe.requests[requestIndex].url,
+    url: probeRes.config.url,
     statusCode: probeRes.status,
     responseTime: probeRes.config.extraData?.responseTime,
   })

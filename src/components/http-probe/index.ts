@@ -49,8 +49,13 @@ export async function doProbe(
   let requestIndex = 0
 
   try {
+    const responses: Array<AxiosResponseWithExtraData> = []
     for await (const request of probe.requests) {
-      probeRes = await probing(request)
+      probeRes = await probing(request, responses)
+
+      // Add to an array to be accessed by another request
+      responses.push(probeRes)
+
       validatedResp = validateResponse(probe.alerts, probeRes)
       await probeLog({ checkOrder, probe, probeRes, requestIndex, err: '' })
 

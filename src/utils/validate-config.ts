@@ -78,6 +78,10 @@ const PROBE_NO_REQUESTS = {
   valid: false,
   message: 'Probe requests does not exists or has length lower than 1!',
 }
+const PROBE_REQUEST_NO_URL = {
+  valid: false,
+  message: 'Probe request URL does not exists',
+}
 const PROBE_REQUEST_INVALID_URL = {
   valid: false,
   message: 'Probe request URL should start with http:// or https://',
@@ -258,6 +262,8 @@ export const validateConfig = async (configuration: Config) => {
     // Check probe request properties
     for (const request of requests) {
       const { url, method } = request as RequestConfig
+
+      if (!url) return PROBE_REQUEST_NO_URL
 
       if (url && !isValidURL(url)) return PROBE_REQUEST_INVALID_URL
 
