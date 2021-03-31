@@ -60,16 +60,14 @@ export async function doProbe(
       requestIndex += 1
     }
 
-    const defaultThreshold = 5
-
     const serverStatuses = processProbeStatus({
       checkOrder,
       probe,
       probeRes,
       requestIndex,
       validatedResp,
-      incidentThreshold: probe.incidentThreshold ?? defaultThreshold,
-      recoveryThreshold: probe.recoveryThreshold ?? defaultThreshold,
+      incidentThreshold: probe.incidentThreshold,
+      recoveryThreshold: probe.recoveryThreshold,
     })
 
     serverStatuses.forEach(async (status, index) => {
@@ -96,7 +94,7 @@ export async function doProbe(
           notifications: notifications,
           url: probe.requests[requestIndex].url ?? '',
           status: status.isDown ? 'DOWN' : 'UP',
-          incidentThreshold: probe.incidentThreshold ?? defaultThreshold,
+          incidentThreshold: probe.incidentThreshold,
         })
       }
     })

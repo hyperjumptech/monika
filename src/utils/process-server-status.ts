@@ -188,7 +188,7 @@ export const processProbeStatus = ({
       (item) => item.id === id
     )
     if (isAlreadyInProbeStatus.length === 0) {
-      const initProbeStatuses = alerts.map((alert: any) => ({
+      const initProbeStatuses = alerts.map((alert) => ({
         ...INIT_PROBE_STATUS_DETAILS,
         alert,
       }))
