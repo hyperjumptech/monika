@@ -1,28 +1,11 @@
 {
-  "notifications": [],
   "probes": [
     {
-      "id": "1",
-      "name": "Example",
-      "description": "Probe",
-      "interval": 10,
       "requests": [
         {
-          "method": "GET",
-          "url": "https://github.com",
-          "timeout": 7000,
-          "headers": {
-            "Authorization": ""
-          },
-          "body": {
-            "username": "someusername",
-            "password": "somepassword"
-          }
+          "url": "https://github.com"
         }
-      ],
-      "incidentThreshold": 3,
-      "recoveryThreshold": 3,
-      "alerts": ["status-not-2xx", "response-time-greater-than-400-ms"]
+      ]
     }
   ]
 }
