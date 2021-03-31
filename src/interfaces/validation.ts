@@ -22,7 +22,10 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import { Config } from '../interfaces/config'
+
 export interface Validation {
   valid: boolean
   message: string | Error
+  config: Config
 }

@@ -159,7 +159,7 @@ class Monika extends Command {
         console.log('')
       }
       // Loop through all probes
-      looper(config)
+      looper(isConfigValid.config)
     } else {
       closeLog()
       // If config is invalid, throw error
