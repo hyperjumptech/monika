@@ -80,6 +80,8 @@ const PROBE_ALERT_INVALID = setInvalidResponse(
 )
 const PROBE_DUPLICATE_ID = setInvalidResponse('Probe should have unique id')
 
+const PROBE_REQUEST_NO_URL = setInvalidResponse('Probe request URL does not exists')
+
 // SMTP
 const SMTP_NO_HOSTNAME = setInvalidResponse('Hostname not found')
 const SMTP_NO_PORT = setInvalidResponse('Port not found')
@@ -296,6 +298,8 @@ export const validateConfig = async (configuration: Config) => {
     // Check probe request properties
     for (const request of requests) {
       const { url } = request as RequestConfig
+
+      if (!url) return PROBE_REQUEST_NO_URL
 
       if (url && !isValidURL(url)) return PROBE_REQUEST_INVALID_URL
 

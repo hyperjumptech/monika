@@ -173,6 +173,30 @@ describe('monika', () => {
     })
     .it('runs with config with duplicate probe id')
 
+  test
+    .stdout()
+    .do(() =>
+      cmd.run([
+        '--config',
+        resolve('./test/testConfigs/probes/multipleProbeRequests.json'),
+      ])
+    )
+    .it('runs with multiple probe requests config', (ctx) => {
+      expect(ctx.stdout).to.contain('Starting Monika.')
+    })
+
+  test
+    .stdout()
+    .do(() =>
+      cmd.run([
+        '--config',
+        resolve('./test/testConfigs/probes/chainingRequests.json'),
+      ])
+    )
+    .it('runs with chaining probe requests config', (ctx) => {
+      expect(ctx.stdout).to.contain('Starting Monika.')
+    })
+
   // Mailgun Tests
   test
     .stdout()

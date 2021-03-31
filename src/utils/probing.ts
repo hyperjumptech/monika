@@ -25,11 +25,44 @@
 import { RequestConfig } from './../interfaces/request'
 import { request } from './request'
 import { AxiosResponseWithExtraData } from '../interfaces/request'
+import * as Handlebars from 'handlebars'
 
-export async function probing(requestConfig: RequestConfig) {
+export async function probing(
+  requestConfig: RequestConfig,
+  responses: Array<AxiosResponseWithExtraData>
+) {
   try {
+    // Compile URL using handlebars to render URLs that uses previous responses data
+    const { url } = requestConfig
+    const requestURL = url
+    const renderURL = Handlebars.compile(requestURL)
+    const renderedURL = renderURL({ responses })
+
+    // Compile headers using handlebars to render URLs that uses previous responses data.
+    // In some case such as value is not string, it will be returned as is without being compiled.
+    // If the request does not have any headers, then it should skip this process.
+    let { headers } = requestConfig
+    if (headers) {
+      for await (const header of Object.keys(headers)) {
+        try {
+          const rawHeader = headers[header]
+          const renderHeader = Handlebars.compile(rawHeader)
+          const renderedHeader = renderHeader({ responses })
+
+          headers = {
+            ...headers,
+            [header]: renderedHeader,
+          }
+        } catch (_) {
+          headers = { ...headers }
+        }
+      }
+    }
+
+    // Do the request using compiled URL and compiled headers (if exists)
     const res = await request({
       ...requestConfig,
+      url: renderedURL,
     })
     return res as AxiosResponseWithExtraData
   } catch (error) {
