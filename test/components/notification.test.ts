@@ -25,6 +25,7 @@
 import chai, { expect } from 'chai'
 import {
   MailgunData,
+  TelegramData,
   WebhookData,
   WhatsappData,
 } from '../../src/interfaces/data'
@@ -33,6 +34,7 @@ import * as webhook from '../../src/components/notification/channel/webhook'
 import * as slack from '../../src/components/notification/channel/slack'
 import * as smtp from '../../src/components/notification/channel/smtp'
 import * as whatsapp from '../../src/components/notification/channel/whatsapp'
+import * as telegram from '../../src/components/notification/channel/telegram'
 import { sendAlerts } from '../../src/components/notification'
 
 describe('send alerts', () => {
@@ -224,5 +226,35 @@ describe('send alerts', () => {
 
     expect(whatsapp.loginUser).to.have.been.called()
     expect(whatsapp.sendTextMessage).to.have.been.called()
+  })
+
+  it('should send telegram notifications', async () => {
+    chai.spy.on(telegram, 'sendTelegram', () => Promise.resolve())
+
+    const sent = await sendAlerts({
+      validation: {
+        alert: 'status-not-2xx',
+        status: true,
+      },
+      notifications: [
+        {
+          id: 'one',
+          type: 'telegram',
+          data: {
+            group_id: '123',
+            bot_token: '123',
+            body: {
+              url: 'https://hyperjump.tech',
+            },
+          } as TelegramData,
+        },
+      ],
+      url: 'https://hyperjump.tech',
+      status: 'DOWN',
+      incidentThreshold: 3,
+    })
+
+    expect(telegram.sendTelegram).to.have.been.called()
+    expect(sent).to.have.length(1)
   })
 })
