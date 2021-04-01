@@ -28,10 +28,24 @@ import {
   SendgridData,
   WebhookData,
   WhatsappData,
+  TeamsData,
 } from './data'
 
 export interface Notification {
   id: string
-  type: 'smtp' | 'mailgun' | 'sendgrid' | 'webhook' | 'slack' | 'whatsapp'
-  data: MailgunData | SMTPData | SendgridData | WebhookData | WhatsappData
+  type:
+    | 'smtp'
+    | 'mailgun'
+    | 'sendgrid'
+    | 'webhook'
+    | 'slack'
+    | 'whatsapp'
+    | 'teams'
+  data:
+    | MailgunData
+    | SMTPData
+    | SendgridData
+    | WebhookData
+    | WhatsappData
+    | TeamsData
 }
