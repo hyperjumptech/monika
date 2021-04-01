@@ -3,6 +3,29 @@ id: quick-start
 title: Quick Start
 ---
 
+## Getting Started
+
+To start monitoring URLs, you need to create a configuration file (JSON file). The configuration file contains the probes, alerts, and notification configurations. You can check the sample configuration file from our [docs](https://hyperjumptech.github.io/monika/quick-start) or copy from one of these files:
+
+- [config.smtp-gmail.example.json](https://github.com/hyperjumptech/monika/blob/main/config_sample/config.smtp-gmail.example.json)
+- [config.mailgun.example.json](https://github.com/hyperjumptech/monika/blob/main/config_sample/config.mailgun.example.json)
+- [config.sendgrid.example.json](https://github.com/hyperjumptech/monika/blob/main/config_sample/config.sendgrid.example.json)
+- [config.webhook.example.json](https://github.com/hyperjumptech/monika/blob/main/config_sample/config.webhook.example.json)
+- [config.slack.example.json](https://github.com/hyperjumptech/monika/blob/main/config_sample/config.slack.example.json)
+- [config.whatsapp.example.json](https://github.com/hyperjumptech/monika/blob/main/config_sample/config.whatsapp.example.json)
+- [config.teams.example.json](https://github.com/hyperjumptech/monika/blob/main/config_sample/config.teams.example.json)
+- [config.example.json](https://github.com/hyperjumptech/monika/blob/main/config.example.json)
+
+When you have created the configuration file, you can run `monika` as follows
+
+```bash
+monika -c <path_to_your_configuration.json>
+```
+
+Options and parameters can be seen by running `monika -h`. Or if you cloned this repository, you need to run `bin/run -h`.
+
+## Quick Start
+
 Follow the following steps to quickly monitor this Monica website and to get notification when the website is down via email using Gmail.
 
 1. Create a `config.json` file and fill it out with the following
