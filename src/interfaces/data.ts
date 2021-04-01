@@ -56,6 +56,12 @@ export interface WebhookData {
   body: WebhookDataBody
 }
 
+export interface TelegramData {
+  group_id: string
+  bot_token: string
+  body: WebhookDataBody
+}
+
 export interface WebhookDataBody {
   url: string
   time: string

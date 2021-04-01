@@ -233,6 +233,15 @@ export const validateConfig = async (configuration: Config) => {
 
           break
         }
+        case 'telegram': {
+          resultNotif.push({
+            id: id,
+            type: type,
+            data: data as WebhookData,
+          } as Notification)
+
+          break
+        }
         case 'whatsapp': {
           if (!(data as WhatsappData).url) return WHATSAPP_NO_URL
 

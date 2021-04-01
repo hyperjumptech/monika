@@ -201,6 +201,28 @@ Monika supports Slack Incoming Webhook. To enable notification via Slack, you mu
 | Type | Notification types                     | `slack`                            |
 | Url  | The URL of your slack incoming webhook | `https://slackwebhook.com/channel` |
 
+## Telegram
+
+Monika supports Telegram. To enable notification via Telegram, you must have a Telegram bot. Please consult [Bots: An introduction for developers](https://core.telegram.org/bots).
+
+```json
+{
+  "id": "unique-id-telegram",
+  "type": "telegram",
+  "data": {
+    "group_id": "YOUR_GROUP_ID",
+    "bot_token": "YOUR_BOT_TOKEN"
+  }
+}
+```
+
+| Key       | Description                                            | Example                       |
+| --------- | ------------------------------------------------------ | ----------------------------- |
+| ID        | Notification identity number                           | `Telegram12345`               |
+| Type      | Notification types                                     | `telegram`                    |
+| Group ID  | The ID of group where the bot should send the messages | `-123456`                     |
+| Bot Token | The Token of your telegram bot                         | `abcdefg:hijklmnopqrstuvwxyz` |
+
 ## Whatsapp
 
 Monika supports Whatsapp notification. To enable notification via whatsapp, you must have a registered user in whatsapp business api server. Please consult [WhatsApp Business API](https://developers.facebook.com/docs/whatsapp) documentation.

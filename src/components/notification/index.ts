@@ -23,21 +23,23 @@
  **********************************************************************************/
 
 import {
-  SMTPData,
-  WebhookData,
   MailgunData,
-  WhatsappData,
+  SMTPData,
   TeamsData,
+  TelegramData,
+  WebhookData,
+  WhatsappData,
 } from '../../interfaces/data'
 import { Notification } from '../../interfaces/notification'
 import getIp from '../../utils/ip'
-import { sendMailgun } from './channel/mailgun'
-import { createSmtpTransport, sendSmtpMail } from './channel/smtp'
-import { sendWebhook } from './channel/webhook'
-import { sendSlack } from './channel/slack'
-import { sendTeams } from './channel/teams'
-import { sendWhatsapp } from './channel/whatsapp'
 import { getMessageForAlert } from './alert-message'
+import { sendMailgun } from './channel/mailgun'
+import { sendSlack } from './channel/slack'
+import { createSmtpTransport, sendSmtpMail } from './channel/smtp'
+import { sendTeams } from './channel/teams'
+import { sendTelegram } from './channel/telegram'
+import { sendWebhook } from './channel/webhook'
+import { sendWhatsapp } from './channel/whatsapp'
 
 export type ValidateResponseStatus = { alert: string; status: boolean }
 
@@ -116,6 +118,20 @@ export async function sendAlerts({
             },
           } as WebhookData).then(() => ({
             notification: 'slack',
+            alert: validation.alert,
+            url,
+          }))
+        }
+        case 'telegram': {
+          return sendTelegram({
+            ...notification.data,
+            body: {
+              url,
+              alert: validation.alert,
+              time: new Date().toLocaleString(),
+            },
+          } as TelegramData).then(() => ({
+            notification: 'telegram',
             alert: validation.alert,
             url,
           }))
