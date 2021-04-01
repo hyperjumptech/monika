@@ -24,6 +24,7 @@
 
 import axios from 'axios'
 import { TeamsData } from './../../../interfaces/data'
+import { AxiosResponseWithExtraData } from '../../../interfaces/request'
 
 export const sendTeams = async (data: TeamsData) => {
   try {
@@ -32,36 +33,55 @@ export const sendTeams = async (data: TeamsData) => {
     const notifType = data.body.status === 'UP' ? 'RECOVERY' : 'INCIDENT'
     const notifColor = data.body.status === 'UP' ? '8CC152' : 'DF202E'
 
-    const res = await axios({
-      method: 'POST',
-      url: data.url,
-      data: {
-        '@type': 'MessageCard',
-        themeColor: notifColor,
-        summary: `New ${notifType} notification from Monika`,
-        sections: [
-          {
-            activityTitle: `New ${notifType} notification from Monika`,
-            activitySubtitle: `${data.body.alert} for URL [${data.body.url}](${data.body.url}) at ${data.body.time}`,
-            facts: [
-              {
-                name: 'Alert',
-                value: data.body.alert,
-              },
-              {
-                name: 'URL',
-                value: `[${data.body.url}](${data.body.url})`,
-              },
-              {
-                name: 'Time',
-                value: data.body.time,
-              },
-            ],
-            markdown: true,
-          },
-        ],
-      },
-    })
+    let res: AxiosResponseWithExtraData
+    if (data.body.status === 'INIT') {
+      res = await axios({
+        method: 'POST',
+        url: data.url,
+        data: {
+          '@type': 'MessageCard',
+          themeColor: '3BAFDA',
+          summary: data.body.alert,
+          sections: [
+            {
+              activityTitle: data.body.alert,
+              markdown: true,
+            },
+          ],
+        },
+      })
+    } else {
+      res = await axios({
+        method: 'POST',
+        url: data.url,
+        data: {
+          '@type': 'MessageCard',
+          themeColor: notifColor,
+          summary: `New ${notifType} notification from Monika`,
+          sections: [
+            {
+              activityTitle: `New ${notifType} notification from Monika`,
+              activitySubtitle: `${data.body.alert} for URL [${data.body.url}](${data.body.url}) at ${data.body.time}`,
+              facts: [
+                {
+                  name: 'Alert',
+                  value: data.body.alert,
+                },
+                {
+                  name: 'URL',
+                  value: `[${data.body.url}](${data.body.url})`,
+                },
+                {
+                  name: 'Time',
+                  value: data.body.time,
+                },
+              ],
+              markdown: true,
+            },
+          ],
+        },
+      })
+    }
 
     return res
   } catch (error) {
