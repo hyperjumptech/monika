@@ -33,6 +33,7 @@ import {
   WebhookData,
   MailData,
   WhatsappData,
+  TeamsData,
 } from './../interfaces/data'
 import { Config } from '../interfaces/config'
 import { RequestConfig } from './../interfaces/request'
@@ -96,6 +97,9 @@ const MAILGUN_NO_DOMAIN = setInvalidResponse('Domain not found')
 
 // Sendgrid
 const SENDGRID_NO_APIKEY = setInvalidResponse('API key not found')
+
+// Teams
+const TEAMS_NO_URL = setInvalidResponse('Teams Webhook URL not found')
 
 // Webhook
 const WEBHOOK_NO_URL = setInvalidResponse('URL not found')
@@ -246,6 +250,20 @@ export const validateConfig = async (configuration: Config) => {
               username,
               password,
             } as WhatsappData,
+          } as Notification)
+
+          break
+        }
+        case 'teams': {
+          if (!(data as TeamsData).url) return TEAMS_NO_URL
+
+          const { url } = data as TeamsData
+          resultNotif.push({
+            id: id,
+            type: type,
+            data: {
+              url,
+            } as TeamsData,
           } as Notification)
 
           break

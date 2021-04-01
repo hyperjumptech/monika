@@ -1,0 +1,18 @@
+{
+  "notifications": [
+    {
+      "id": "unique-id-teams",
+      "type": "teams",
+      "data": {}
+    }
+  ],
+  "probes": [
+    {
+      "requests": [
+        {
+          "url": "https://github.com"
+        }
+      ]
+    }
+  ]
+}
