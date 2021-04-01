@@ -27,6 +27,7 @@ import {
   WebhookData,
   MailgunData,
   WhatsappData,
+  TeamsData,
 } from '../../interfaces/data'
 import { Notification } from '../../interfaces/notification'
 import getIp from '../../utils/ip'
@@ -34,6 +35,7 @@ import { sendMailgun } from './channel/mailgun'
 import { createSmtpTransport, sendSmtpMail } from './channel/smtp'
 import { sendWebhook } from './channel/webhook'
 import { sendSlack } from './channel/slack'
+import { sendTeams } from './channel/teams'
 import { sendWhatsapp } from './channel/whatsapp'
 import { getMessageForAlert } from './alert-message'
 
@@ -136,6 +138,21 @@ export async function sendAlerts({
           const data = notification.data as WhatsappData
           return sendWhatsapp(data, validation.alert).then(() => ({
             notification: 'whatsapp',
+            alert: validation.alert,
+            url,
+          }))
+        }
+        case 'teams': {
+          return sendTeams({
+            ...notification.data,
+            body: {
+              alert: validation.alert,
+              url,
+              time: new Date().toLocaleString(),
+              status,
+            },
+          } as TeamsData).then(() => ({
+            notification: 'teams',
             alert: validation.alert,
             url,
           }))
