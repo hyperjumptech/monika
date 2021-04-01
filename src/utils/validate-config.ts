@@ -149,6 +149,10 @@ function validateNotification(notifications: Notification[]): Validation {
         break
       }
 
+      case 'telegram': {
+        break
+      }
+
       case 'whatsapp': {
         if (!(data as WhatsappData).url) return WHATSAPP_NO_URL
         if (!(data as WhatsappData).username) return WHATSAPP_NO_USERNAME
