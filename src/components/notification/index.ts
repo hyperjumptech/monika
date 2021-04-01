@@ -23,19 +23,23 @@
  **********************************************************************************/
 
 import {
-  SMTPData,
-  WebhookData,
   MailgunData,
+  SMTPData,
+  TeamsData,
+  TelegramData,
+  WebhookData,
   WhatsappData,
 } from '../../interfaces/data'
 import { Notification } from '../../interfaces/notification'
 import getIp from '../../utils/ip'
-import { sendMailgun } from './channel/mailgun'
-import { createSmtpTransport, sendSmtpMail } from './channel/smtp'
-import { sendWebhook } from './channel/webhook'
-import { sendSlack } from './channel/slack'
-import { sendWhatsapp } from './channel/whatsapp'
 import { getMessageForAlert } from './alert-message'
+import { sendMailgun } from './channel/mailgun'
+import { sendSlack } from './channel/slack'
+import { createSmtpTransport, sendSmtpMail } from './channel/smtp'
+import { sendTeams } from './channel/teams'
+import { sendTelegram } from './channel/telegram'
+import { sendWebhook } from './channel/webhook'
+import { sendWhatsapp } from './channel/whatsapp'
 
 export type ValidateResponseStatus = { alert: string; status: boolean }
 
@@ -118,6 +122,20 @@ export async function sendAlerts({
             url,
           }))
         }
+        case 'telegram': {
+          return sendTelegram({
+            ...notification.data,
+            body: {
+              url,
+              alert: validation.alert,
+              time: new Date().toLocaleString(),
+            },
+          } as TelegramData).then(() => ({
+            notification: 'telegram',
+            alert: validation.alert,
+            url,
+          }))
+        }
         case 'smtp': {
           const transporter = createSmtpTransport(notification.data as SMTPData)
           return sendSmtpMail(transporter, {
@@ -136,6 +154,21 @@ export async function sendAlerts({
           const data = notification.data as WhatsappData
           return sendWhatsapp(data, validation.alert).then(() => ({
             notification: 'whatsapp',
+            alert: validation.alert,
+            url,
+          }))
+        }
+        case 'teams': {
+          return sendTeams({
+            ...notification.data,
+            body: {
+              alert: validation.alert,
+              url,
+              time: new Date().toLocaleString(),
+              status,
+            },
+          } as TeamsData).then(() => ({
+            notification: 'teams',
             alert: validation.alert,
             url,
           }))

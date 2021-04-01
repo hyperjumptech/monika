@@ -42,8 +42,23 @@ export interface SMTPData extends MailData {
   password: string
 }
 
+export interface TeamsData {
+  url: string
+  body: TeamsDataBody
+}
+
+export interface TeamsDataBody extends WebhookDataBody {
+  status: string
+}
+
 export interface WebhookData {
   url: string
+  body: WebhookDataBody
+}
+
+export interface TelegramData {
+  group_id: string
+  bot_token: string
   body: WebhookDataBody
 }
 

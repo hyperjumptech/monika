@@ -26,7 +26,9 @@ import {
   MailgunData,
   SendgridData,
   SMTPData,
+  TelegramData,
   WebhookData,
+  TeamsData,
 } from '../../interfaces/data'
 import { Notification } from '../../interfaces/notification'
 import getIp from '../../utils/ip'
@@ -34,7 +36,9 @@ import { sendMailgun } from './channel/mailgun'
 import { sendSendgrid } from './channel/sendgrid'
 import { sendSlack } from './channel/slack'
 import { createSmtpTransport, sendSmtpMail } from './channel/smtp'
+import { sendTelegram } from './channel/telegram'
 import { sendWebhook } from './channel/webhook'
+import { sendTeams } from './channel/teams'
 
 const subject = 'Monika is started'
 const body = `Monika is running on ${getIp()}`
@@ -131,6 +135,38 @@ const slackNotificationInitialChecker = async (data: WebhookData) => {
   }
 }
 
+const telegramNotificationInitialChecker = async (data: TelegramData) => {
+  try {
+    await sendTelegram({
+      group_id: data?.group_id,
+      bot_token: data?.bot_token,
+      body: {
+        url: '-',
+        alert: body,
+        time: new Date().toLocaleString(),
+      },
+    })
+  } catch (error) {
+    throw errorMessage('Telegram', error?.message)
+  }
+}
+
+const teamsNotificationInitialChecker = async (data: TeamsData) => {
+  try {
+    await sendTeams({
+      url: data?.url,
+      body: {
+        url: '-',
+        alert: body,
+        time: new Date().toLocaleString(),
+        status: 'INIT',
+      },
+    })
+  } catch (error) {
+    throw errorMessage('Teams', error?.message)
+  }
+}
+
 export const notificationChecker = async (notifications: Notification[]) => {
   const smtpNotification = notifications
     .filter((notif) => notif.type === 'smtp')
@@ -157,11 +193,22 @@ export const notificationChecker = async (notifications: Notification[]) => {
     .map((notif) => notif.data as WebhookData)
     .map(slackNotificationInitialChecker)
 
+  const teamsNotification = notifications
+    .filter((notif) => notif.type === 'teams')
+    .map((notif) => notif.data as TeamsData)
+    .map(teamsNotificationInitialChecker)
+  const telegramNotification = notifications
+    .filter((notif) => notif.type === 'telegram')
+    .map((notif) => notif.data as TelegramData)
+    .map(telegramNotificationInitialChecker)
+
   return Promise.all([
     Promise.all(smtpNotification),
     Promise.all(mailgunNotification),
     Promise.all(sendgridNotification),
     Promise.all(webhookNotification),
     Promise.all(slackNotification),
+    Promise.all(teamsNotification),
+    Promise.all(telegramNotification),
   ])
 }
