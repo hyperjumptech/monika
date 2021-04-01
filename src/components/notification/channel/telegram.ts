@@ -22,33 +22,24 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import {
-  MailgunData,
-  SendgridData,
-  SMTPData,
-  TelegramData,
-  WebhookData,
-  WhatsappData,
-  TeamsData,
-} from './data'
+import axios from 'axios'
 
-export interface Notification {
-  id: string
-  type:
-    | 'smtp'
-    | 'mailgun'
-    | 'sendgrid'
-    | 'webhook'
-    | 'slack'
-    | 'whatsapp'
-    | 'teams'
-    | 'telegram'
-  data:
-    | MailgunData
-    | SMTPData
-    | SendgridData
-    | WebhookData
-    | WhatsappData
-    | TeamsData
-    | TelegramData
+import { TelegramData } from '../../../interfaces/data'
+
+export const sendTelegram = async (data: TelegramData) => {
+  try {
+    if (!data.group_id) throw new Error(`Telegram group ID is not provided`)
+
+    if (!data.bot_token) throw new Error(`Telegram bot token is not provided`)
+
+    const text = `${data.body.alert}\n\nURL: ${data.body.url}\nTIME: ${data.body.time}\n`
+
+    const res = await axios({
+      url: `https://api.telegram.org/bot${data.bot_token}/sendMessage?chat_id=${data.group_id}&text=${text}`,
+    })
+
+    return res
+  } catch (error) {
+    throw error
+  }
 }
