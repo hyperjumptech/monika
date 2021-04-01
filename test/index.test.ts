@@ -302,4 +302,32 @@ describe('monika', () => {
       expect(ctx.stdout).to.contain('URL:')
       expect(ctx.stdout).to.contain('Method:')
     })
+
+  // Teams Tests
+  test
+    .stdout()
+    .do(() =>
+      cmd.run([
+        '--config',
+        resolve('./test/testConfigs/teams/teamsconfig.json'),
+        '--verbose',
+      ])
+    )
+    .it('runs with Teams config', (ctx) => {
+      expect(ctx.stdout).to.contain('URL:')
+      expect(ctx.stdout).to.contain('Method:')
+    })
+
+  test
+    .stderr()
+    .do(() =>
+      cmd.run([
+        '--config',
+        resolve('./test/testConfigs/teams/teamsconfigNoURL.json'),
+      ])
+    )
+    .catch((error) => {
+      expect(error.message).to.contain('Teams Webhook URL not found')
+    })
+    .it('runs with teams config but without webhook url')
 })
