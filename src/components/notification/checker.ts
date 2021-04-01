@@ -145,7 +145,7 @@ const teamsNotificationInitialChecker = async (data: TeamsData) => {
       },
     })
   } catch (error) {
-    throw errorMessage('Slack', error?.message)
+    throw errorMessage('Teams', error?.message)
   }
 }
 
