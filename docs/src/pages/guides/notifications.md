@@ -15,8 +15,9 @@ At this moment, Monika support these channel of notifications (You can use just 
 4. Sendgrid
 5. Slack
 6. Whatsapp
+7. Microsoft Teams
 
-We are working on more notifications like Microsoft Teams, Telegram, and many more. You can help!
+We are working on more notifications like Telegram, and many more. You can help!
 
 ## Configurations
 
@@ -225,5 +226,25 @@ Monika supports Whatsapp notification. To enable notification via whatsapp, you 
 | Url          | The URL of your whatsapp api server                                                       | `https://yourwhatsappapiserver.com` |
 | Username     | Your whatsapp api user name                                                               | `username`                          |
 | Userpassword | Your whatsapp api user password                                                           | `userpassword`                      |
+
+## Microsoft Teams
+
+Monika supports sending notifications via Microsoft Teams. In order to be able to send notifications via Microsoft Teams, you may need to add Connectors and webhooks to your channel. Please refer to [Microsoft Teams Documentation](https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/connectors-using) to enable connectors and webhooks.
+
+```json
+{
+  "id": "unique-id-teams",
+  "type": "teams",
+  "data": {
+    "url": "https://YOUR_TEAMS_WEBHOOK_URL"
+  }
+}
+```
+
+| Key  | Description                                                      | Example                                 |
+| ---- | ---------------------------------------------------------------- | --------------------------------------- |
+| ID   | Notification identity number                                     | `Webhook12345`                          |
+| Type | Notification types                                               | `webhook`                               |
+| Url  | The URL of the server that will receive the webhook notification | `https://<company>.webhook.office.com/` |
 
 Keep watch on these pages, new notification methods are being developed.
