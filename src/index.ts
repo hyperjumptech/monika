@@ -33,7 +33,7 @@ import { parseConfig } from './utils/parse-config'
 import { validateConfig } from './utils/validate-config'
 import { printAllLogs } from './utils/logger'
 import { log } from './utils/log'
-
+import { handshake } from './components/reporter'
 import { closeLog, openLogfile, flushAllLogs } from './utils/history'
 import { notificationChecker } from './components/notification/checker'
 
@@ -119,6 +119,10 @@ class Monika extends Command {
           // Operation not permitted
           this.error(error?.message, { exit: 1 })
         })
+      }
+
+      if (config.monikaHQ) {
+        await handshake(config)
       }
 
       console.log(

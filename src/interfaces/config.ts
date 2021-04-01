@@ -24,9 +24,11 @@
 
 import { Notification } from './notification'
 import { Probe } from './probe'
+import { HQConfig } from '../components/reporter'
 
 export interface Config {
   interval?: number
   notifications?: Notification[]
   probes: Probe[]
+  monikaHQ?: HQConfig
 }

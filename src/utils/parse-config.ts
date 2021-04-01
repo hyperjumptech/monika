@@ -26,18 +26,18 @@ import { Config } from './../interfaces/config'
 import { readFile } from 'fs'
 import { promisify } from 'util'
 
-export const parseConfig = async (configPath: string) => {
+export const parseConfig = async (configPath: string): Promise<Config> => {
   // Read file from configPath
   try {
     // Read file from configPath
     const readFileAsync = promisify(readFile)
-    const config: Buffer = await readFileAsync(configPath)
+    const configString = await readFileAsync(configPath, 'utf-8')
 
     // Parse the content
-    const configString: string = await config.toString()
-    const output: Config = await JSON.parse(configString)
+    const output = await JSON.parse(configString)
+    output.monikaHQ = output['monika-hq']
+    delete output['monika-hq']
 
-    // Return the output as string
     return output
   } catch (error) {
     if (error.code === 'ENOENT' && error.path === configPath) {
