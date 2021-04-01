@@ -22,30 +22,69 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import {
-  MailgunData,
-  SMTPData,
-  SendgridData,
-  WebhookData,
-  WhatsappData,
-  TeamsData,
-} from './data'
+import axios from 'axios'
+import { TeamsData } from './../../../interfaces/data'
+import { AxiosResponseWithExtraData } from '../../../interfaces/request'
 
-export interface Notification {
-  id: string
-  type:
-    | 'smtp'
-    | 'mailgun'
-    | 'sendgrid'
-    | 'webhook'
-    | 'slack'
-    | 'whatsapp'
-    | 'teams'
-  data:
-    | MailgunData
-    | SMTPData
-    | SendgridData
-    | WebhookData
-    | WhatsappData
-    | TeamsData
+export const sendTeams = async (data: TeamsData) => {
+  try {
+    if (!data.url) throw new Error(`Teams Webhook URL is not provided`)
+
+    const notifType = data.body.status === 'UP' ? 'RECOVERY' : 'INCIDENT'
+    const notifColor = data.body.status === 'UP' ? '8CC152' : 'DF202E'
+
+    let res: AxiosResponseWithExtraData
+    if (data.body.status === 'INIT') {
+      res = await axios({
+        method: 'POST',
+        url: data.url,
+        data: {
+          '@type': 'MessageCard',
+          themeColor: '3BAFDA',
+          summary: data.body.alert,
+          sections: [
+            {
+              activityTitle: data.body.alert,
+              markdown: true,
+            },
+          ],
+        },
+      })
+    } else {
+      res = await axios({
+        method: 'POST',
+        url: data.url,
+        data: {
+          '@type': 'MessageCard',
+          themeColor: notifColor,
+          summary: `New ${notifType} notification from Monika`,
+          sections: [
+            {
+              activityTitle: `New ${notifType} notification from Monika`,
+              activitySubtitle: `${data.body.alert} for URL [${data.body.url}](${data.body.url}) at ${data.body.time}`,
+              facts: [
+                {
+                  name: 'Alert',
+                  value: data.body.alert,
+                },
+                {
+                  name: 'URL',
+                  value: `[${data.body.url}](${data.body.url})`,
+                },
+                {
+                  name: 'Time',
+                  value: data.body.time,
+                },
+              ],
+              markdown: true,
+            },
+          ],
+        },
+      })
+    }
+
+    return res
+  } catch (error) {
+    throw error
+  }
 }
