@@ -62,7 +62,9 @@ export async function doProbe(
       // Exit the loop if there is any triggers triggered
       if (validatedResp.filter((item) => item.status).length > 0) break
 
-      requestIndex += 1
+      if (probe.requests.length > 1) {
+        requestIndex += 1
+      }
     }
 
     const serverStatuses = processProbeStatus({
