@@ -241,10 +241,10 @@ Monika supports sending notifications via Microsoft Teams. In order to be able t
 }
 ```
 
-| Key  | Description                                                      | Example                                 |
-| ---- | ---------------------------------------------------------------- | --------------------------------------- |
-| ID   | Notification identity number                                     | `Webhook12345`                          |
-| Type | Notification types                                               | `webhook`                               |
-| Url  | The URL of the server that will receive the webhook notification | `https://<company>.webhook.office.com/` |
+| Key  | Description                             | Example                                 |
+| ---- | --------------------------------------- | --------------------------------------- |
+| ID   | Notification identity number            | `Webhook12345`                          |
+| Type | Notification types                      | `webhook`                               |
+| Url  | The URL of your Microsoft Teams Webhook | `https://<company>.webhook.office.com/` |
 
 Keep watch on these pages, new notification methods are being developed.
