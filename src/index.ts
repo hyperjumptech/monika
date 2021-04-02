@@ -99,7 +99,7 @@ class Monika extends Command {
 
     // warn if config is empty
     if ((notifications?.length ?? 0) === 0) {
-      const NO_NOTIFICATIONS_MESSAGE = `Notifications config has not been set. We will not be able to notify you when INCIDENT happened!\nPlease refer to Monika documentation for setting the notifications config at https://hyperjumptech.github.io/monika/guides/notifications.`
+      const NO_NOTIFICATIONS_MESSAGE = `Notifications has not been set. We will not be able to notify you when an INCIDENT occurs!\nPlease refer to the Monika documentations on how to configure notifications at https://hyperjumptech.github.io/monika/guides/notifications.`
 
       log.warn(
         boxen(chalk.yellow(NO_NOTIFICATIONS_MESSAGE), {
