@@ -4,30 +4,35 @@
 
 Monika is a command line application for synthetic monitoring. The name Monika stands for "**Moni**toring Ber**ka**la", which means "periodic monitoring" in the Indonesian language.
 
-## Installation
+## Contributing
 
-Install from the npm package manager (you need to install Node.js first)
+You can install Monika from the npm package manager:
 
 ```bash
 npm i -g @hyperjumptech/monika
 ```
 
-You can also use `Monika` from source. Clone this repository then install the dependencies.
+Monika is basically a node.js application written in typescript built around the oclif framework.  
+It was developed on node the v14 LTS, and npm v6. You can run `npm version` for a complete version list.
+
+You can fetch and build `Monika` from source. Clone this repository then install the dependencies like below:
 
 ```bash
 git clone git@github.com:hyperjumptech/monika.git
 npm ci
 ```
 
-## Discussions
+Keep your codes formatted with the npm scripts and ensure eslint plugin is installed and allowed to make changes in the IDE.
 
-If you need help, want to give feedback, or have a great idea to improve Monika, get involved! Let us know in the [Github discussions](https://github.com/hyperjumptech/monika/discussions).
+```bash
+npm run format
+```
 
-Please abide by the [Contributor's Code of Conduct](CODE_OF_CONDUCTS.md)
+Finally you can also run `npm run test` to ensure changes do not break the code.
 
-## Development
+## Development References
 
-This project is a Node.js application written in TypeScript. The tools we use in this project are as follows.
+The tools and frameworks we used in this project are listed below.
 
 - [oclif](https://oclif.io/) to scaffold the CLI.
 - [Prettier](https://prettier.io/) to format the code.
@@ -35,6 +40,20 @@ This project is a Node.js application written in TypeScript. The tools we use in
 - [Mocha](https://mochajs.org/) for testing.
 - [Istanbul](https://istanbul.js.org/) for code coverage.
 
+## Discussions
+
+If you need help, want to give feedback, or have a great idea to improve Monika, get involved! Let us know in the [Github discussions](https://github.com/hyperjumptech/monika/discussions).
+
+Please abide by the [Contributor's Code of Conduct](CODE_OF_CONDUCTS.md)
+
+## Further information
+
+For detailed information, you can click on any of the specific docs below:
+
+- [Quick Start](https://github.com/hyperjumptech/monika/blob/main/docs/src/pages/quick-start.md)
+- [Installations](https://github.com/hyperjumptech/monika/blob/main/docs/src/pages/installation.md)
+- [How it works](https://github.com/hyperjumptech/monika/blob/main/docs/src/pages/guides/probes.md)
+
 ## License
 
-MIT License.
+[MIT](./LICENSE.txt) License.

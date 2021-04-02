@@ -26,7 +26,7 @@ Options and parameters can be seen by running `monika -h`. Or if you cloned this
 
 ## Quick Start
 
-Follow the following steps to quickly monitor this Monica website and to get notification when the website is down via email using Gmail.
+At the center of monica is a configuration file. Follow the following steps to quickly setup monitoring and get notification when the website is down via Gmail.
 
 1. Create a `config.json` file and fill it out with the following
 
@@ -86,7 +86,7 @@ Follow the following steps to quickly monitor this Monica website and to get not
 }
 ```
 
-For more advanced configuration, you can find them on the sidebar menu.
+For advanced configuration, you can find them on the sidebar menu.
 
 Monika by default reads a configuration file called `config.json` in the current working directory if it exists. You can specify a path to a JSON configuration file with `-c` flag as follows
 

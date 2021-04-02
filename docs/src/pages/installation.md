@@ -3,7 +3,9 @@ id: installation
 title: Installation
 ---
 
-You can install Monika with [NPM](https://npmjs.com) or [Yarn](https://yarnpkg.com).
+## Installation
+
+You can install Monika using [npm](https://npmjs.com) or [yarn](https://yarnpkg.com).
 
 ```bash
 $ npm i -g @hyperjumptech/monika
