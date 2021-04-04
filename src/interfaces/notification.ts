@@ -30,6 +30,7 @@ import {
   WebhookData,
   WhatsappData,
   TeamsData,
+  DiscordData,
 } from './data'
 
 export interface Notification {
@@ -43,6 +44,7 @@ export interface Notification {
     | 'whatsapp'
     | 'teams'
     | 'telegram'
+    | 'discordWebhook'
   data:
     | MailgunData
     | SMTPData
@@ -51,4 +53,5 @@ export interface Notification {
     | WhatsappData
     | TeamsData
     | TelegramData
+    | DiscordData
 }

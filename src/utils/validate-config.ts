@@ -34,6 +34,7 @@ import {
   MailData,
   WhatsappData,
   TeamsData,
+  DiscordData,
 } from './../interfaces/data'
 import { Config } from '../interfaces/config'
 import { RequestConfig } from './../interfaces/request'
@@ -103,6 +104,9 @@ const TEAMS_NO_URL = setInvalidResponse('Teams Webhook URL not found')
 
 // Webhook
 const WEBHOOK_NO_URL = setInvalidResponse('URL not found')
+
+// Discord Webhook
+const DISCORD_WEBHOOK_NO_URL = setInvalidResponse('Discord URL not found')
 
 // Whatsapp
 const WHATSAPP_NO_URL = setInvalidResponse('Whatsapp URL not found')
@@ -215,6 +219,20 @@ export const validateConfig = async (configuration: Config) => {
             data: {
               url,
             } as WebhookData,
+          } as Notification)
+
+          break
+        }
+        case 'discordWebhook': {
+          if (!(data as DiscordData).url) return DISCORD_WEBHOOK_NO_URL
+
+          const { url } = data as DiscordData
+          resultNotif.push({
+            id: id,
+            type: type,
+            data: {
+              url,
+            } as DiscordData,
           } as Notification)
 
           break

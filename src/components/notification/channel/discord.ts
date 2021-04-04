@@ -22,65 +22,30 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-export interface MailData {
-  recipients: string[]
-}
+import axios from 'axios'
 
-export interface MailgunData extends MailData {
-  apiKey: string
-  domain: string
-}
+import { DiscordData } from '../../../interfaces/data'
 
-export interface SendgridData extends MailData {
-  apiKey: string
-}
+export const sendDiscordWebhook = async (data: DiscordData) => {
+  try {
+    if (!data.url) throw new Error(`Webhook url is not provided`)
 
-export interface SMTPData extends MailData {
-  hostname: string
-  port: number
-  username: string
-  password: string
-}
+    const postData = {
+      content: `${data.body.url} : ${data.body.alert} at ${data.body.time}`,
+    }
 
-export interface TeamsData {
-  url: string
-  body: TeamsDataBody
-}
+    const res = await axios({
+      method: 'POST',
+      url: data.url,
+      headers: {
+        Accept: 'application/json',
+        'Content-type': 'application/json',
+      },
+      data: postData,
+    })
 
-export interface TeamsDataBody extends WebhookDataBody {
-  status: string
-}
-
-export interface WebhookData {
-  url: string
-  body: WebhookDataBody
-}
-
-export interface TelegramData {
-  group_id: string
-  bot_token: string
-  body: WebhookDataBody
-}
-
-export interface WebhookDataBody {
-  url: string
-  time: string
-  alert: string
-}
-
-export interface WhatsappData extends MailData {
-  url: string
-  username: string
-  password: string
-}
-
-export interface DiscordData {
-  url: string
-  body: WebhookDataBodyDiscord
-}
-
-export interface WebhookDataBodyDiscord {
-  url: string
-  time: string
-  alert: string
+    return res
+  } catch (error) {
+    throw error
+  }
 }

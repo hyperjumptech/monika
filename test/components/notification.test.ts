@@ -28,6 +28,7 @@ import {
   TelegramData,
   WebhookData,
   WhatsappData,
+  DiscordData,
 } from '../../src/interfaces/data'
 import * as mailgun from '../../src/components/notification/channel/mailgun'
 import * as webhook from '../../src/components/notification/channel/webhook'
@@ -35,6 +36,7 @@ import * as slack from '../../src/components/notification/channel/slack'
 import * as smtp from '../../src/components/notification/channel/smtp'
 import * as whatsapp from '../../src/components/notification/channel/whatsapp'
 import * as telegram from '../../src/components/notification/channel/telegram'
+import * as discord from '../../src/components/notification/channel/discord'
 import { sendAlerts } from '../../src/components/notification'
 
 describe('send alerts', () => {
@@ -255,6 +257,32 @@ describe('send alerts', () => {
     })
 
     expect(telegram.sendTelegram).to.have.been.called()
+    expect(sent).to.have.length(1)
+  })
+
+  it('should send webhook discord', async () => {
+    chai.spy.on(discord, 'sendDiscordWebhook', () => Promise.resolve())
+
+    const sent = await sendAlerts({
+      validation: {
+        alert: 'status-not-2xx',
+        status: true,
+      },
+      notifications: [
+        {
+          id: 'one',
+          type: 'discordWebhook',
+          data: {
+            url: 'xx',
+          } as DiscordData,
+        },
+      ],
+      url: 'https://hyperjump.tech',
+      status: 'DOWN',
+      incidentThreshold: 3,
+    })
+
+    expect(discord.sendDiscordWebhook).to.have.been.called()
     expect(sent).to.have.length(1)
   })
 })
