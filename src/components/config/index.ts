@@ -22,6 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import { warn } from 'console'
 import { Config } from '../../interfaces/config'
 import { parseConfig } from './parse'
 import { validateConfig } from './validate'
@@ -55,8 +56,8 @@ export const setupConfigFromFile = async (path: string) => {
       if (probes) parsed.probes = probes
       if (notifications) parsed.notifications = notifications
     } catch (error) {
-      throw new Error(
-        'Please check your monika-hq server. It does not return valid configuration. Or remove "monika-hq" from configuration file'
+      warn(
+        ` ›   Warning: Please check your monika-hq server, it does not return valid configuration. Monika will use configuration from ${path}.`
       )
     }
   }
