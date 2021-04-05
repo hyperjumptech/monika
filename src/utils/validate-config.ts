@@ -32,6 +32,7 @@ import {
   MailData,
   WhatsappData,
   TeamsData,
+  DiscordData,
 } from './../interfaces/data'
 import { Config } from '../interfaces/config'
 import { RequestConfig } from './../interfaces/request'
@@ -96,6 +97,9 @@ const TEAMS_NO_URL = setInvalidResponse('Teams Webhook URL not found')
 // Webhook
 const WEBHOOK_NO_URL = setInvalidResponse('URL not found')
 
+// Discord
+const DISCORD_NO_URL = setInvalidResponse('Discord URL not found')
+
 // Whatsapp
 const WHATSAPP_NO_URL = setInvalidResponse('Whatsapp URL not found')
 const WHATSAPP_NO_USERNAME = setInvalidResponse('Whatsapp Username not found')
@@ -139,6 +143,12 @@ function validateNotification(notifications: Notification[]): Validation {
 
       case 'webhook': {
         if (!(data as WebhookData).url) return WEBHOOK_NO_URL
+
+        break
+      }
+
+      case 'discord': {
+        if (!(data as DiscordData).url) return DISCORD_NO_URL
 
         break
       }

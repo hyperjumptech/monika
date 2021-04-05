@@ -76,10 +76,10 @@ export interface WhatsappData extends MailData {
 
 export interface DiscordData {
   url: string
-  body: WebhookDataBodyDiscord
+  body: DiscordDataBody
 }
 
-export interface WebhookDataBodyDiscord {
+export interface DiscordDataBody {
   url: string
   time: string
   alert: string

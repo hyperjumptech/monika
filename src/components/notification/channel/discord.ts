@@ -26,7 +26,7 @@ import axios from 'axios'
 
 import { DiscordData } from '../../../interfaces/data'
 
-export const sendDiscordWebhook = async (data: DiscordData) => {
+export const sendDiscord = async (data: DiscordData) => {
   try {
     if (!data.url) throw new Error(`Webhook url is not provided`)
 

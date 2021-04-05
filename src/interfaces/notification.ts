@@ -44,7 +44,7 @@ export interface Notification {
     | 'whatsapp'
     | 'teams'
     | 'telegram'
-    | 'discordWebhook'
+    | 'discord'
   data:
     | MailgunData
     | SMTPData

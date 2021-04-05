@@ -16,6 +16,7 @@ At this moment, Monika support these channel of notifications (You can use just 
 5. Slack
 6. Whatsapp
 7. Microsoft Teams
+8. Discord
 
 We are working on more notifications like Telegram, and many more. You can help!
 
@@ -268,5 +269,25 @@ Monika supports sending notifications via Microsoft Teams. In order to be able t
 | ID   | Notification identity number            | `Webhook12345`                          |
 | Type | Notification types                      | `webhook`                               |
 | Url  | The URL of your Microsoft Teams Webhook | `https://<company>.webhook.office.com/` |
+
+## Discord
+
+Monika supports Discord. To enable notification via Discord, you must create a discord webhook first. Please consult [Intro to Webhook](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks)
+
+```json
+{
+  "id": "unique-id-webhook",
+  "type": "discord",
+  "data": {
+    "url": "https://YOUR_DISCORD_URL"
+  }
+}
+```
+
+| Key  | Description                                                   | Example                                                        |
+| ---- | ------------------------------------------------------------- | -------------------------------------------------------------- |
+| ID   | Notification identity number                                  | `Discord12345`                                                 |
+| Type | Notification types                                            | `discord`                                                      |
+| Url  | The URL of the Discord Webhook that will receive notification | `https://discord.com/api/webhook/<webhook.id>/<webhook.token>` |
 
 Keep watch on these pages, new notification methods are being developed.

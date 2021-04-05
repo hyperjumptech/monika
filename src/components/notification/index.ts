@@ -41,7 +41,7 @@ import { sendTeams } from './channel/teams'
 import { sendTelegram } from './channel/telegram'
 import { sendWebhook } from './channel/webhook'
 import { sendWhatsapp } from './channel/whatsapp'
-import { sendDiscordWebhook } from './channel/discord'
+import { sendDiscord } from './channel/discord'
 
 export type ValidateResponseStatus = { alert: string; status: boolean }
 
@@ -110,8 +110,8 @@ export async function sendAlerts({
             url,
           }))
         }
-        case 'discordWebhook': {
-          return sendDiscordWebhook({
+        case 'discord': {
+          return sendDiscord({
             ...notification.data,
             body: {
               url,
@@ -119,7 +119,7 @@ export async function sendAlerts({
               time: new Date().toLocaleString(),
             },
           } as DiscordData).then(() => ({
-            notification: 'discordWebhook',
+            notification: 'discord',
             alert: validation.alert,
             url,
           }))

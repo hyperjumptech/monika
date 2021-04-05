@@ -261,7 +261,7 @@ describe('send alerts', () => {
   })
 
   it('should send webhook discord', async () => {
-    chai.spy.on(discord, 'sendDiscordWebhook', () => Promise.resolve())
+    chai.spy.on(discord, 'sendDiscord', () => Promise.resolve())
 
     const sent = await sendAlerts({
       validation: {
@@ -271,7 +271,7 @@ describe('send alerts', () => {
       notifications: [
         {
           id: 'one',
-          type: 'discordWebhook',
+          type: 'discord',
           data: {
             url: 'xx',
           } as DiscordData,
@@ -282,7 +282,7 @@ describe('send alerts', () => {
       incidentThreshold: 3,
     })
 
-    expect(discord.sendDiscordWebhook).to.have.been.called()
+    expect(discord.sendDiscord).to.have.been.called()
     expect(sent).to.have.length(1)
   })
 })

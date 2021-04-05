@@ -37,6 +37,13 @@
       }
     },
     {
+      "id": "unique-id",
+      "type": "discord",
+      "data": {
+        "url": "http://www.example.com"
+      }
+    },
+    {
       "id": "unique-id-whatsapp",
       "type": "whatsapp",
       "data": {
