@@ -161,19 +161,6 @@ describe('monika', () => {
     .it('runs with config with invalid probe request alert')
 
   test
-    .stderr()
-    .do(() =>
-      cmd.run([
-        '--config',
-        resolve('./test/testConfigs/probes/duplicateProbeId.json'),
-      ])
-    )
-    .catch((error) => {
-      expect(error.message).to.contain('Probe should have unique id')
-    })
-    .it('runs with config with duplicate probe id')
-
-  test
     .stdout()
     .do(() =>
       cmd.run([

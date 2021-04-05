@@ -25,9 +25,9 @@
 /* eslint-disable no-console */
 import { Command, flags } from '@oclif/command'
 import cli from 'cli-ux'
-import { Config } from './interfaces/config'
+import chalk from 'chalk'
+import boxen from 'boxen'
 import { MailData, MailgunData, SMTPData, WebhookData } from './interfaces/data'
-import { Validation } from './interfaces/validation'
 import { looper } from './utils/looper'
 import { parseConfig } from './utils/parse-config'
 import { validateConfig } from './utils/validate-config'
@@ -94,23 +94,41 @@ class Monika extends Command {
 
     // Read the config
     const file = flags.config
-    const config: Config = await parseConfig(file)
+    const config = await parseConfig(file)
+    const { notifications, probes } = config
+
+    // warn if config is empty
+    if ((notifications?.length ?? 0) === 0) {
+      const NO_NOTIFICATIONS_MESSAGE = `Notifications has not been set. We will not be able to notify you when an INCIDENT occurs!\nPlease refer to the Monika documentations on how to configure notifications at https://hyperjumptech.github.io/monika/guides/notifications.`
+
+      log.warn(
+        boxen(chalk.yellow(NO_NOTIFICATIONS_MESSAGE), {
+          padding: 1,
+          margin: 1,
+          borderStyle: 'bold',
+          borderColor: 'yellow',
+        })
+      )
+    }
+
     // Check if config is valid
-    const isConfigValid: Validation = await validateConfig(config)
+    const isConfigValid = validateConfig(config)
     if (isConfigValid.valid) {
       if (process.env.NODE_ENV !== 'test') {
-        await notificationChecker(config.notifications ?? []).catch((error) => {
+        await notificationChecker(notifications ?? []).catch((error) => {
           // Operation not permitted
           this.error(error?.message, { exit: 1 })
         })
       }
 
       console.log(
-        `Starting Monika. Probes: ${config.probes.length}. Notifications: ${config.notifications?.length}\n`
+        `Starting Monika. Probes: ${probes.length}. Notifications: ${
+          notifications?.length ?? 0
+        }\n`
       )
       if (flags.verbose) {
         console.log('Probes:')
-        config.probes.forEach(async (probe) => {
+        probes.forEach((probe) => {
           console.log(`- Probe ID: ${probe.id}`)
           console.log(`    Name: ${probe.name}`)
           console.log(`    Description: ${probe.description}`)
@@ -128,7 +146,7 @@ class Monika extends Command {
         console.log('')
 
         console.log(`Notifications:`)
-        config.notifications?.forEach((item) => {
+        notifications?.forEach((item) => {
           console.log(`- Notification ID: ${item.id}`)
           console.log(`    Type: ${item.type}`)
           // Only show recipients if type is mailgun, smtp, or sendgrid
@@ -159,7 +177,7 @@ class Monika extends Command {
         console.log('')
       }
       // Loop through all probes
-      looper(isConfigValid.config)
+      looper(config)
     } else {
       closeLog()
       // If config is invalid, throw error
