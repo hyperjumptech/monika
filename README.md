@@ -4,6 +4,10 @@
 
 Monika is a command line application for synthetic monitoring. The name Monika stands for "**Moni**toring Ber**ka**la", which means "periodic monitoring" in the Indonesian language.
 
+## How to Use
+
+Please see the [overview](https://hyperjumptech.github.io/monika/overview) to see documentations on how to install and how to use Monika.
+
 ## Contributing
 
 You can install Monika from the npm package manager:
@@ -50,9 +54,9 @@ Please abide by the [Contributor's Code of Conduct](CODE_OF_CONDUCTS.md)
 
 For detailed information, you can click on any of the specific docs below:
 
-- [Quick Start](https://github.com/hyperjumptech/monika/blob/main/docs/src/pages/quick-start.md)
-- [Installations](https://github.com/hyperjumptech/monika/blob/main/docs/src/pages/installation.md)
-- [How it works](https://github.com/hyperjumptech/monika/blob/main/docs/src/pages/guides/probes.md)
+- [Quick Start](https://hyperjumptech.github.io/monika/quick-start)
+- [Installations](https://hyperjumptech.github.io/monika/installation)
+- [How it works](https://hyperjumptech.github.io/monika/guides/probes)
 
 ## License
 
