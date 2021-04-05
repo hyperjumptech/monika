@@ -1,3 +1,27 @@
+/**********************************************************************************
+ * MIT License                                                                    *
+ *                                                                                *
+ * Copyright (c) 2021 Hyperjump Technology                                        *
+ *                                                                                *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy   *
+ * of this software and associated documentation files (the "Software"), to deal  *
+ * in the Software without restriction, including without limitation the rights   *
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell      *
+ * copies of the Software, and to permit persons to whom the Software is          *
+ * furnished to do so, subject to the following conditions:                       *
+ *                                                                                *
+ * The above copyright notice and this permission notice shall be included in all *
+ * copies or substantial portions of the Software.                                *
+ *                                                                                *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR     *
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,       *
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE    *
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER         *
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,  *
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  *
+ * SOFTWARE.                                                                      *
+ **********************************************************************************/
+
 import { expect, test } from '@oclif/test'
 import { resolve } from 'path'
 import chai from 'chai'
@@ -10,8 +34,10 @@ describe('monika', () => {
   // General Test
   test
     .stdout()
-    .do(() => cmd.run(['--config', resolve('./config.example.json')]))
-    .it('runs with normal config', (ctx) => {
+    .do(() =>
+      cmd.run(['--config', resolve('./test/testConfigs/fullConfig.json')])
+    )
+    .it('runs with full config', (ctx) => {
       expect(ctx.stdout).to.contain('Starting Monika.')
     })
 
@@ -51,17 +77,16 @@ describe('monika', () => {
     .it('runs with config without probes')
 
   test
-    .stderr()
+    .stdout()
     .do(() =>
       cmd.run([
         '--config',
         resolve('./test/testConfigs/probes/noProbeName.json'),
       ])
     )
-    .catch((error) => {
-      expect(error.message).to.contain('Probe name should not be empty')
+    .it('runs with config without probe name', (ctx) => {
+      expect(ctx.stdout).to.contain('Starting Monika.')
     })
-    .it('runs with config without probe name')
 
   test
     .stderr()
@@ -72,24 +97,23 @@ describe('monika', () => {
       ])
     )
     .catch((error) => {
-      expect(error.message).to.contain('Probe request should not be empty')
+      expect(error.message).to.contain(
+        'Probe requests does not exists or has length lower than 1!'
+      )
     })
     .it('runs with config without probe request')
 
   test
-    .stderr()
+    .stdout()
     .do(() =>
       cmd.run([
         '--config',
         resolve('./test/testConfigs/probes/noProbeAlerts.json'),
       ])
     )
-    .catch((error) => {
-      expect(error.message).to.contain(
-        'Alerts does not exists or has length lower than 1!'
-      )
+    .it('runs with config without probe alerts', (ctx) => {
+      expect(ctx.stdout).to.contain('Starting Monika.')
     })
-    .it('runs with config without probe alerts')
 
   test
     .stderr()
@@ -137,17 +161,28 @@ describe('monika', () => {
     .it('runs with config with invalid probe request alert')
 
   test
-    .stderr()
+    .stdout()
     .do(() =>
       cmd.run([
         '--config',
-        resolve('./test/testConfigs/probes/duplicateProbeId.json'),
+        resolve('./test/testConfigs/probes/multipleProbeRequests.json'),
       ])
     )
-    .catch((error) => {
-      expect(error.message).to.contain('Probe should have unique id')
+    .it('runs with multiple probe requests config', (ctx) => {
+      expect(ctx.stdout).to.contain('Starting Monika.')
     })
-    .it('runs with config with duplicate probe id')
+
+  test
+    .stdout()
+    .do(() =>
+      cmd.run([
+        '--config',
+        resolve('./test/testConfigs/probes/chainingRequests.json'),
+      ])
+    )
+    .it('runs with chaining probe requests config', (ctx) => {
+      expect(ctx.stdout).to.contain('Starting Monika.')
+    })
 
   // Mailgun Tests
   test
@@ -254,4 +289,32 @@ describe('monika', () => {
       expect(ctx.stdout).to.contain('URL:')
       expect(ctx.stdout).to.contain('Method:')
     })
+
+  // Teams Tests
+  test
+    .stdout()
+    .do(() =>
+      cmd.run([
+        '--config',
+        resolve('./test/testConfigs/teams/teamsconfig.json'),
+        '--verbose',
+      ])
+    )
+    .it('runs with Teams config', (ctx) => {
+      expect(ctx.stdout).to.contain('URL:')
+      expect(ctx.stdout).to.contain('Method:')
+    })
+
+  test
+    .stderr()
+    .do(() =>
+      cmd.run([
+        '--config',
+        resolve('./test/testConfigs/teams/teamsconfigNoURL.json'),
+      ])
+    )
+    .catch((error) => {
+      expect(error.message).to.contain('Teams Webhook URL not found')
+    })
+    .it('runs with teams config but without webhook url')
 })

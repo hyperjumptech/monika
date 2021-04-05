@@ -1,16 +1,44 @@
+/**********************************************************************************
+ * MIT License                                                                    *
+ *                                                                                *
+ * Copyright (c) 2021 Hyperjump Technology                                        *
+ *                                                                                *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy   *
+ * of this software and associated documentation files (the "Software"), to deal  *
+ * in the Software without restriction, including without limitation the rights   *
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell      *
+ * copies of the Software, and to permit persons to whom the Software is          *
+ * furnished to do so, subject to the following conditions:                       *
+ *                                                                                *
+ * The above copyright notice and this permission notice shall be included in all *
+ * copies or substantial portions of the Software.                                *
+ *                                                                                *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR     *
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,       *
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE    *
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER         *
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,  *
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  *
+ * SOFTWARE.                                                                      *
+ **********************************************************************************/
+
 import {
   MailgunData,
   SendgridData,
   SMTPData,
+  TelegramData,
   WebhookData,
+  TeamsData,
 } from '../../interfaces/data'
 import { Notification } from '../../interfaces/notification'
-import getIp from '../ip'
-import { sendMailgun } from './mailgun'
-import { sendSendgrid } from './sendgrid'
-import { sendSlack } from './slack'
-import { createSmtpTransport, sendSmtpMail } from './smtp'
-import { sendWebhook } from './webhook'
+import getIp from '../../utils/ip'
+import { sendMailgun } from './channel/mailgun'
+import { sendSendgrid } from './channel/sendgrid'
+import { sendSlack } from './channel/slack'
+import { createSmtpTransport, sendSmtpMail } from './channel/smtp'
+import { sendTelegram } from './channel/telegram'
+import { sendWebhook } from './channel/webhook'
+import { sendTeams } from './channel/teams'
 
 const subject = 'Monika is started'
 const body = `Monika is running on ${getIp()}`
@@ -32,7 +60,7 @@ const smtpNotificationInitialChecker = async (data: SMTPData) => {
       from: 'Monika@hyperjump.tech',
       to: data?.recipients?.join(','),
       subject: subject,
-      html: body,
+      text: body,
     })
   } catch (error) {
     throw errorMessage('SMTP', error?.message)
@@ -107,6 +135,38 @@ const slackNotificationInitialChecker = async (data: WebhookData) => {
   }
 }
 
+const telegramNotificationInitialChecker = async (data: TelegramData) => {
+  try {
+    await sendTelegram({
+      group_id: data?.group_id,
+      bot_token: data?.bot_token,
+      body: {
+        url: '-',
+        alert: body,
+        time: new Date().toLocaleString(),
+      },
+    })
+  } catch (error) {
+    throw errorMessage('Telegram', error?.message)
+  }
+}
+
+const teamsNotificationInitialChecker = async (data: TeamsData) => {
+  try {
+    await sendTeams({
+      url: data?.url,
+      body: {
+        url: '-',
+        alert: body,
+        time: new Date().toLocaleString(),
+        status: 'INIT',
+      },
+    })
+  } catch (error) {
+    throw errorMessage('Teams', error?.message)
+  }
+}
+
 export const notificationChecker = async (notifications: Notification[]) => {
   const smtpNotification = notifications
     .filter((notif) => notif.type === 'smtp')
@@ -133,11 +193,22 @@ export const notificationChecker = async (notifications: Notification[]) => {
     .map((notif) => notif.data as WebhookData)
     .map(slackNotificationInitialChecker)
 
+  const teamsNotification = notifications
+    .filter((notif) => notif.type === 'teams')
+    .map((notif) => notif.data as TeamsData)
+    .map(teamsNotificationInitialChecker)
+  const telegramNotification = notifications
+    .filter((notif) => notif.type === 'telegram')
+    .map((notif) => notif.data as TelegramData)
+    .map(telegramNotificationInitialChecker)
+
   return Promise.all([
     Promise.all(smtpNotification),
     Promise.all(mailgunNotification),
     Promise.all(sendgridNotification),
     Promise.all(webhookNotification),
     Promise.all(slackNotification),
+    Promise.all(teamsNotification),
+    Promise.all(telegramNotification),
   ])
 }

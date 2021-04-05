@@ -17,17 +17,19 @@
       "name": "Example",
       "description": "Probe",
       "interval": 0,
-      "request": {
-        "method": "POST",
-        "url": "https://something/login",
-        "headers": {
-          "Authorization": ""
-        },
-        "body": {
-          "username": "someusername",
-          "password": "somepassword"
+      "requests": [
+        {
+          "method": "POST",
+          "url": "https://something/login",
+          "headers": {
+            "Authorization": ""
+          },
+          "body": {
+            "username": "someusername",
+            "password": "somepassword"
+          }
         }
-      },
+      ],
       "alerts": ["status-not-2xx", "response-time-greater-than-200-ms"]
     }
   ]
