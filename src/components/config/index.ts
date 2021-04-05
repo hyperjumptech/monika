@@ -22,34 +22,50 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Config } from './../interfaces/config'
-import { readFile } from 'fs'
-import { promisify } from 'util'
+import { Config } from '../../interfaces/config'
+import { parseConfig } from './parse'
+import { validateConfig } from './validate'
+import { handshake } from '../reporter'
 
-export const parseConfig = async (configPath: string): Promise<Config> => {
-  // Read file from configPath
-  try {
-    // Read file from configPath
-    const readFileAsync = promisify(readFile)
-    const configString = await readFileAsync(configPath, 'utf-8')
+let cfg: Config
 
-    // Parse the content
-    const output = await JSON.parse(configString)
-    output.monikaHQ = output['monika-hq']
-    delete output['monika-hq']
+export const getConfig = () => {
+  if (!cfg) throw new Error('Configuration setup has not been run yet')
+  return cfg
+}
 
-    return output
-  } catch (error) {
-    if (error.code === 'ENOENT' && error.path === configPath) {
+export const updateConfig = (data: Config) => {
+  if (!cfg) {
+    cfg = {} as Config
+  }
+
+  cfg.version = data.version
+  if (data.probes) cfg.probes = data.probes
+  if (data.notifications) cfg.notifications = data.notifications
+}
+
+export const setupConfigFromFile = async (path: string) => {
+  const parsed = parseConfig(path)
+
+  if (parsed.monikaHQ && parsed.monikaHQ.url && parsed.monikaHQ.key) {
+    try {
+      const {
+        data: { probes, notifications },
+      } = await handshake(parsed)
+      if (probes) parsed.probes = probes
+      if (notifications) parsed.notifications = notifications
+    } catch (error) {
       throw new Error(
-        'JSON configuration file not found! Copy example config from https://raw.githubusercontent.com/hyperjumptech/monika/main/config.example.json'
+        'Please check your monika-hq server. It does not return valid configuration. Or remove "monika-hq" from configuration file'
       )
     }
+  }
 
-    if (error.name === 'SyntaxError') {
-      throw new Error('JSON configuration file is in invalid JSON format!')
-    }
+  const validated = validateConfig(parsed)
 
-    throw new Error(error.message)
+  if (validated.valid) {
+    updateConfig(parsed)
+  } else {
+    throw new Error(validated.message)
   }
 }

@@ -22,8 +22,9 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { getCheckResponseFn } from './alert'
-import { Notification } from '../interfaces/notification'
+/* eslint-disable complexity */
+import { getCheckResponseFn } from '../../utils/alert'
+import { Notification } from '../../interfaces/notification'
 import {
   SMTPData,
   MailgunData,
@@ -33,11 +34,11 @@ import {
   WhatsappData,
   TeamsData,
   DiscordData,
-} from './../interfaces/data'
-import { Config } from '../interfaces/config'
-import { RequestConfig } from './../interfaces/request'
-import { Validation } from '../interfaces/validation'
-import { isValidURL } from './is-valid-url'
+} from '../../interfaces/data'
+import { Config } from '../../interfaces/config'
+import { RequestConfig } from '../../interfaces/request'
+import { Validation } from '../../interfaces/validation'
+import { isValidURL } from '../../utils/is-valid-url'
 
 const setInvalidResponse = (message: string): Validation => ({
   valid: false,
@@ -105,7 +106,6 @@ const WHATSAPP_NO_URL = setInvalidResponse('Whatsapp URL not found')
 const WHATSAPP_NO_USERNAME = setInvalidResponse('Whatsapp Username not found')
 const WHATSAPP_NO_PASSWORD = setInvalidResponse('Whatsapp Password not found')
 
-/* eslint-disable complexity */
 function validateNotification(notifications: Notification[]): Validation {
   // Check notifications properties
   for (const notification of notifications) {

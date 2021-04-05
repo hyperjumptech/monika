@@ -31,4 +31,5 @@ export interface Config {
   notifications?: Notification[]
   probes: Probe[]
   monikaHQ?: HQConfig
+  version?: string
 }

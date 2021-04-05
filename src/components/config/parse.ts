@@ -22,80 +22,32 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios from 'axios'
-import { v4 as uuidv4 } from 'uuid'
-import FormData from 'form-data'
-
 import { Config } from '../../interfaces/config'
-import { Probe } from '../../interfaces/probe'
-import { Notification } from '../../interfaces/notification'
-import getIp from '../../utils/ip'
+import { readFileSync } from 'fs'
 
-export interface HQConfig {
-  url: string
-  key: string
-}
+export const parseConfig = (configPath: string): Config => {
+  // Read file from configPath
+  try {
+    // Read file from configPath
+    const configString = readFileSync(configPath, 'utf-8')
 
-export type HQResponse = {
-  result: string
-  data: {
-    version: string
-    probes?: Probe[]
-    notifications?: Notification[]
+    // Parse the content
+    const output = JSON.parse(configString)
+    output.monikaHQ = output['monika-hq']
+    delete output['monika-hq']
+
+    return output
+  } catch (error) {
+    if (error.code === 'ENOENT' && error.path === configPath) {
+      throw new Error(
+        'JSON configuration file not found! Copy example config from https://raw.githubusercontent.com/hyperjumptech/monika/main/config.example.json'
+      )
+    }
+
+    if (error.name === 'SyntaxError') {
+      throw new Error('JSON configuration file is in invalid JSON format!')
+    }
+
+    throw new Error(error.message)
   }
-}
-
-export const handshake = (config: Config): Promise<HQResponse> => {
-  return axios
-    .post(
-      `${config.monikaHQ!.url}/api/handshake`,
-      {
-        monika: {
-          id: uuidv4(),
-          ip_address: getIp(),
-        },
-        data: {
-          probes: config.probes,
-          notifications: config.notifications,
-        },
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${config.monikaHQ!.key}`,
-        },
-      }
-    )
-    .then((res) => ({
-      ...res.data,
-      data: { ...res.data.data, version: res.data.data['config-version'] },
-    }))
-}
-
-export const report = (
-  url: string,
-  key: string,
-  configVersion: string,
-  attachment: File
-): Promise<HQResponse> => {
-  const form = new FormData()
-  form.append(
-    'monika',
-    JSON.stringify({
-      id: uuidv4(),
-      ip_address: getIp(),
-      'config-version': configVersion,
-    })
-  )
-  form.append('attachment', attachment)
-
-  return axios
-    .post(`${url}/api/handshake`, form, {
-      headers: {
-        Authorization: `Bearer ${key}`,
-      },
-    })
-    .then((res) => ({
-      ...res.data,
-      data: { ...res.data.data, version: res.data.data['config-version'] },
-    }))
 }
