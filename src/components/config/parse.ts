@@ -22,14 +22,32 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Notification } from './notification'
-import { Probe } from './probe'
-import { HQConfig } from '../components/reporter'
+import { Config } from '../../interfaces/config'
+import { readFileSync } from 'fs'
 
-export interface Config {
-  interval?: number
-  notifications?: Notification[]
-  probes: Probe[]
-  monikaHQ?: HQConfig
-  version?: string
+export const parseConfig = (configPath: string): Config => {
+  // Read file from configPath
+  try {
+    // Read file from configPath
+    const configString = readFileSync(configPath, 'utf-8')
+
+    // Parse the content
+    const output = JSON.parse(configString)
+    output.monikaHQ = output['monika-hq']
+    delete output['monika-hq']
+
+    return output
+  } catch (error) {
+    if (error.code === 'ENOENT' && error.path === configPath) {
+      throw new Error(
+        'JSON configuration file not found! Copy example config from https://raw.githubusercontent.com/hyperjumptech/monika/main/config.example.json'
+      )
+    }
+
+    if (error.name === 'SyntaxError') {
+      throw new Error('JSON configuration file is in invalid JSON format!')
+    }
+
+    throw new Error(error.message)
+  }
 }

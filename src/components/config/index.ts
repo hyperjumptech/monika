@@ -22,34 +22,51 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Config } from './../interfaces/config'
-import { readFile } from 'fs'
-import { promisify } from 'util'
+import { warn } from 'console'
+import { Config } from '../../interfaces/config'
+import { parseConfig } from './parse'
+import { validateConfig } from './validate'
+import { handshake } from '../reporter'
 
-export const parseConfig = async (configPath: string) => {
-  // Read file from configPath
-  try {
-    // Read file from configPath
-    const readFileAsync = promisify(readFile)
-    const config: Buffer = await readFileAsync(configPath)
+let cfg: Config
 
-    // Parse the content
-    const configString: string = await config.toString()
-    const output: Config = await JSON.parse(configString)
+export const getConfig = () => {
+  if (!cfg) throw new Error('Configuration setup has not been run yet')
+  return cfg
+}
 
-    // Return the output as string
-    return output
-  } catch (error) {
-    if (error.code === 'ENOENT' && error.path === configPath) {
-      throw new Error(
-        'JSON configuration file not found! Copy example config from https://raw.githubusercontent.com/hyperjumptech/monika/main/config.example.json'
+export const updateConfig = (data: Config) => {
+  if (!cfg) {
+    cfg = {} as Config
+  }
+
+  cfg.version = data.version
+  if (data.probes) cfg.probes = data.probes
+  if (data.notifications) cfg.notifications = data.notifications
+}
+
+export const setupConfigFromFile = async (path: string) => {
+  const parsed = parseConfig(path)
+
+  if (parsed.monikaHQ && parsed.monikaHQ.url && parsed.monikaHQ.key) {
+    try {
+      const {
+        data: { probes, notifications },
+      } = await handshake(parsed)
+      if (probes) parsed.probes = probes
+      if (notifications) parsed.notifications = notifications
+    } catch (error) {
+      warn(
+        ` ›   Warning: Please check your monika-hq server, it does not return valid configuration. Monika will use configuration from ${path}.`
       )
     }
+  }
 
-    if (error.name === 'SyntaxError') {
-      throw new Error('JSON configuration file is in invalid JSON format!')
-    }
+  const validated = validateConfig(parsed)
 
-    throw new Error(error.message)
+  if (validated.valid) {
+    updateConfig(parsed)
+  } else {
+    throw new Error(validated.message)
   }
 }

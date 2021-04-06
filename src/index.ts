@@ -29,13 +29,11 @@ import chalk from 'chalk'
 import boxen from 'boxen'
 import { MailData, MailgunData, SMTPData, WebhookData } from './interfaces/data'
 import { looper } from './utils/looper'
-import { parseConfig } from './utils/parse-config'
-import { validateConfig } from './utils/validate-config'
 import { printAllLogs } from './utils/logger'
 import { log } from './utils/log'
-
 import { closeLog, openLogfile, flushAllLogs } from './utils/history'
 import { notificationChecker } from './components/notification/checker'
+import { getConfig, setupConfigFromFile } from './components/config'
 
 class Monika extends Command {
   static description = 'Monika command line monitoring tool'
@@ -94,31 +92,29 @@ class Monika extends Command {
 
     // Read the config
     const file = flags.config
-    const config = await parseConfig(file)
-    const { notifications, probes } = config
 
-    // warn if config is empty
-    if ((notifications?.length ?? 0) === 0) {
-      const NO_NOTIFICATIONS_MESSAGE = `Notifications has not been set. We will not be able to notify you when an INCIDENT occurs!\nPlease refer to the Monika documentations on how to configure notifications at https://hyperjumptech.github.io/monika/guides/notifications.`
+    try {
+      await setupConfigFromFile(file)
+      const config = getConfig()
 
-      log.warn(
-        boxen(chalk.yellow(NO_NOTIFICATIONS_MESSAGE), {
-          padding: 1,
-          margin: 1,
-          borderStyle: 'bold',
-          borderColor: 'yellow',
-        })
-      )
-    }
+      const { notifications, probes } = config
 
-    // Check if config is valid
-    const isConfigValid = validateConfig(config)
-    if (isConfigValid.valid) {
+      // warn if config is empty
+      if ((notifications?.length ?? 0) === 0) {
+        const NO_NOTIFICATIONS_MESSAGE = `Notifications has not been set. We will not be able to notify you when an INCIDENT occurs!\nPlease refer to the Monika documentations on how to configure notifications at https://hyperjumptech.github.io/monika/guides/notifications.`
+
+        log.warn(
+          boxen(chalk.yellow(NO_NOTIFICATIONS_MESSAGE), {
+            padding: 1,
+            margin: 1,
+            borderStyle: 'bold',
+            borderColor: 'yellow',
+          })
+        )
+      }
+
       if (process.env.NODE_ENV !== 'test') {
-        await notificationChecker(notifications ?? []).catch((error) => {
-          // Operation not permitted
-          this.error(error?.message, { exit: 1 })
-        })
+        await notificationChecker(notifications ?? [])
       }
 
       console.log(
@@ -178,10 +174,9 @@ class Monika extends Command {
       }
       // Loop through all probes
       looper(config)
-    } else {
+    } catch (error) {
       closeLog()
-      // If config is invalid, throw error
-      this.error(isConfigValid.message, { exit: 1 })
+      this.error(error?.message, { exit: 1 })
     }
   }
 }
