@@ -173,7 +173,7 @@ class Monika extends Command {
         console.log('')
       }
       // Loop through all probes
-      looper(config)
+      looper(getConfig)
     } catch (error) {
       closeLog()
       this.error(error?.message, { exit: 1 })

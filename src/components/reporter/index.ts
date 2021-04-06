@@ -89,7 +89,7 @@ export const report = (
   form.append('attachment', attachment)
 
   return axios
-    .post(`${url}/api/handshake`, form, {
+    .post(`${url}/api/report`, form, {
       headers: {
         Authorization: `Bearer ${key}`,
       },
