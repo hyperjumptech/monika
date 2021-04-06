@@ -22,14 +22,80 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Notification } from './notification'
-import { Probe } from './probe'
-import { HQConfig } from '../components/reporter'
+import axios from 'axios'
+import { v4 as uuidv4 } from 'uuid'
+import FormData from 'form-data'
 
-export interface Config {
-  interval?: number
-  notifications?: Notification[]
-  probes: Probe[]
-  monikaHQ?: HQConfig
-  version?: string
+import { Config } from '../../interfaces/config'
+import { Probe } from '../../interfaces/probe'
+import { Notification } from '../../interfaces/notification'
+import getIp from '../../utils/ip'
+
+export interface HQConfig {
+  url: string
+  key: string
+}
+
+export type HQResponse = {
+  result: string
+  data: {
+    version: string
+    probes?: Probe[]
+    notifications?: Notification[]
+  }
+}
+
+export const handshake = (config: Config): Promise<HQResponse> => {
+  return axios
+    .post(
+      `${config.monikaHQ!.url}/api/handshake`,
+      {
+        monika: {
+          id: uuidv4(),
+          ip_address: getIp(),
+        },
+        data: {
+          probes: config.probes,
+          notifications: config.notifications,
+        },
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${config.monikaHQ!.key}`,
+        },
+      }
+    )
+    .then((res) => ({
+      ...res.data,
+      data: { ...res.data.data, version: res.data.data['config-version'] },
+    }))
+}
+
+export const report = (
+  url: string,
+  key: string,
+  configVersion: string,
+  attachment: File
+): Promise<HQResponse> => {
+  const form = new FormData()
+  form.append(
+    'monika',
+    JSON.stringify({
+      id: uuidv4(),
+      ip_address: getIp(),
+      'config-version': configVersion,
+    })
+  )
+  form.append('attachment', attachment)
+
+  return axios
+    .post(`${url}/api/handshake`, form, {
+      headers: {
+        Authorization: `Bearer ${key}`,
+      },
+    })
+    .then((res) => ({
+      ...res.data,
+      data: { ...res.data.data, version: res.data.data['config-version'] },
+    }))
 }
