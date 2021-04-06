@@ -1,0 +1,23 @@
+{
+  "notifications": [
+    {
+      "id": "unique-id-whatsapp",
+      "type": "whatsapp",
+      "data": {
+        "recipients": ["628123456789"],
+        "url": "https://yourwhatsappapiserver.com",
+        "username": "whatsappusername",
+        "password": "whatsapppassword"
+      }
+    }
+  ],
+  "probes": [
+    {
+      "requests": [
+        {
+          "url": "https://github.com"
+        }
+      ]
+    }
+  ]
+}
