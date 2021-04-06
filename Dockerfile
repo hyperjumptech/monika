@@ -2,7 +2,7 @@ FROM node:14-alpine
 
 WORKDIR /monika
 
-COPY package*.json .
+COPY package*.json ./
 
 RUN npm ci
 
