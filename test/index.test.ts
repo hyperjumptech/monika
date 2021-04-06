@@ -290,6 +290,20 @@ describe('monika', () => {
       expect(ctx.stdout).to.contain('Method:')
     })
 
+  // Discord Tests
+  test
+    .stdout()
+    .do(() =>
+      cmd.run([
+        '--config',
+        resolve('./test/testConfigs/discord/discordconfig.json'),
+        '--verbose',
+      ])
+    )
+    .it('runs with Discord config', (ctx) => {
+      expect(ctx.stdout).to.contain('URL:')
+    })
+
   // Teams Tests
   test
     .stdout()
