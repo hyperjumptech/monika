@@ -29,6 +29,7 @@ import {
   TelegramData,
   WebhookData,
   WhatsappData,
+  DiscordData,
 } from '../../interfaces/data'
 import { Notification } from '../../interfaces/notification'
 import getIp from '../../utils/ip'
@@ -40,6 +41,7 @@ import { sendTeams } from './channel/teams'
 import { sendTelegram } from './channel/telegram'
 import { sendWebhook } from './channel/webhook'
 import { sendWhatsapp } from './channel/whatsapp'
+import { sendDiscord } from './channel/discord'
 
 export type ValidateResponseStatus = { alert: string; status: boolean }
 
@@ -104,6 +106,20 @@ export async function sendAlerts({
             },
           } as WebhookData).then(() => ({
             notification: 'webhook',
+            alert: validation.alert,
+            url,
+          }))
+        }
+        case 'discord': {
+          return sendDiscord({
+            ...notification.data,
+            body: {
+              url,
+              alert: validation.alert,
+              time: new Date().toLocaleString(),
+            },
+          } as DiscordData).then(() => ({
+            notification: 'discord',
             alert: validation.alert,
             url,
           }))
