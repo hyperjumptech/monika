@@ -29,6 +29,7 @@ import {
   TelegramData,
   WebhookData,
   TeamsData,
+  DiscordData,
 } from '../../interfaces/data'
 import { Notification } from '../../interfaces/notification'
 import getIp from '../../utils/ip'
@@ -39,6 +40,7 @@ import { createSmtpTransport, sendSmtpMail } from './channel/smtp'
 import { sendTelegram } from './channel/telegram'
 import { sendWebhook } from './channel/webhook'
 import { sendTeams } from './channel/teams'
+import { sendDiscord } from './channel/discord'
 
 const subject = 'Monika is started'
 const body = `Monika is running on ${getIp()}`
@@ -120,6 +122,21 @@ const webhookNotificationInitialChecker = async (data: WebhookData) => {
   }
 }
 
+const discordNotificationInitialChecker = async (data: WebhookData) => {
+  try {
+    await sendDiscord({
+      url: data?.url,
+      body: {
+        url: '-',
+        alert: body,
+        time: new Date().toLocaleString(),
+      },
+    })
+  } catch (error) {
+    throw errorMessage('discord', error?.message)
+  }
+}
+
 const slackNotificationInitialChecker = async (data: WebhookData) => {
   try {
     await sendSlack({
@@ -188,6 +205,11 @@ export const notificationChecker = async (notifications: Notification[]) => {
     .map((notif) => notif.data as WebhookData)
     .map(webhookNotificationInitialChecker)
 
+  const discordNotification = notifications
+    .filter((notif) => notif.type === 'discord')
+    .map((notif) => notif.data as DiscordData)
+    .map(discordNotificationInitialChecker)
+
   const slackNotification = notifications
     .filter((notif) => notif.type === 'slack')
     .map((notif) => notif.data as WebhookData)
@@ -210,5 +232,6 @@ export const notificationChecker = async (notifications: Notification[]) => {
     Promise.all(slackNotification),
     Promise.all(teamsNotification),
     Promise.all(telegramNotification),
+    Promise.all(discordNotification),
   ])
 }
