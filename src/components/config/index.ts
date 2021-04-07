@@ -22,11 +22,15 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import EventEmitter from 'events'
 import { warn } from 'console'
+import pEvent from 'p-event'
 import { Config } from '../../interfaces/config'
 import { parseConfig } from './parse'
 import { validateConfig } from './validate'
 import { handshake } from '../reporter'
+
+const emitter = new EventEmitter()
 
 let cfg: Config
 
@@ -35,14 +39,30 @@ export const getConfig = () => {
   return cfg
 }
 
+export async function* getConfigIterator() {
+  if (!cfg) throw new Error('Configuration setup has not been run yet')
+
+  yield cfg
+
+  if (!(process.env.CI || process.env.NODE_ENV === 'test')) {
+    yield* pEvent.iterator<string, Config>(emitter, 'configUpdated')
+  }
+}
+
 export const updateConfig = (data: Partial<Config>) => {
   if (!cfg) {
     cfg = {} as Config
   }
+  const lastVersion = cfg.version
+
   if (data.monikaHQ) cfg.monikaHQ = data.monikaHQ
   if (data.version) cfg.version = data.version
   if (data.probes) cfg.probes = data.probes
   if (data.notifications) cfg.notifications = data.notifications
+
+  if (cfg.version !== lastVersion) {
+    emitter.emit('configUpdated', cfg)
+  }
 }
 
 export const setupConfigFromFile = async (path: string) => {

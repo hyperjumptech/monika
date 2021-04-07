@@ -75,7 +75,7 @@ export const report = (
   url: string,
   key: string,
   configVersion: string,
-  attachment: File
+  attachment: Buffer
 ): Promise<HQResponse> => {
   const form = new FormData()
   form.append(
