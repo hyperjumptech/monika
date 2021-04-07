@@ -41,7 +41,7 @@ import {
 } from './components/config'
 import { report } from './components/reporter'
 
-const REPORT_INTERVAL = 18000 // 3 minutes
+const REPORT_INTERVAL = 180000 // 3 minutes
 
 class Monika extends Command {
   static description = 'Monika command line monitoring tool'

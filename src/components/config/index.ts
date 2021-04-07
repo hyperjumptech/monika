@@ -55,7 +55,6 @@ export const updateConfig = (data: Partial<Config>) => {
   }
   const lastVersion = cfg.version
 
-  if (data.monikaHQ) cfg.monikaHQ = data.monikaHQ
   if (data.version) cfg.version = data.version
   if (data.probes) cfg.probes = data.probes
   if (data.notifications) cfg.notifications = data.notifications
