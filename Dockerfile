@@ -8,6 +8,8 @@ RUN npm ci
 
 COPY . .
 
+RUN npm run prepack
+
 RUN npm pack
 
 RUN npm install -g --unsafe-perm ./hyperjumptech-monika-*.tgz
