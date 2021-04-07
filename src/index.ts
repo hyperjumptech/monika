@@ -101,24 +101,26 @@ class Monika extends Command {
     try {
       await setupConfigFromFile(flags.config)
 
-      setInterval(async () => {
-        const { monikaHQ, version } = getConfig()
+      if (!(process.env.CI || process.env.NODE_ENV === 'test')) {
+        setInterval(async () => {
+          const { monikaHQ, version } = getConfig()
 
-        // TODO: read from history.db and generate file as attachment
-        if (monikaHQ) {
-          const { url, key } = monikaHQ
+          // TODO: read from history.db and generate file as attachment
+          if (monikaHQ) {
+            const { url, key } = monikaHQ
 
-          try {
-            const { data } = await report(
-              url,
-              key,
-              version || '',
-              Buffer.alloc(10)
-            )
-            updateConfig(data)
-          } catch (error) {}
-        }
-      }, REPORT_INTERVAL)
+            try {
+              const { data } = await report(
+                url,
+                key,
+                version || '',
+                Buffer.alloc(10)
+              )
+              updateConfig(data)
+            } catch (error) {}
+          }
+        }, REPORT_INTERVAL)
+      }
 
       let abortCurrentLooper: (() => void) | undefined
 
