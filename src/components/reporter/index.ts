@@ -34,6 +34,7 @@ import getIp from '../../utils/ip'
 export interface HQConfig {
   url: string
   key: string
+  interval?: number
 }
 
 export type HQResponse = {

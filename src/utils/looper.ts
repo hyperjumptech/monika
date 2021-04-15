@@ -25,10 +25,13 @@
 import { Config } from '../interfaces/config'
 import { Probe } from '../interfaces/probe'
 import { doProbe } from '../components/http-probe'
+import { report } from '../components/reporter'
+import { updateConfig } from '../components/config'
 import { log } from '../utils/log'
 
 const MILLISECONDS = 1000
 const DEFAULT_THRESHOLD = 5
+const DEFAULT_REPORT_INTERVAL = 180000 // 3 minutes
 
 function sanitizeProbe(probe: Probe, index: number): Probe {
   const { name, incidentThreshold, recoveryThreshold, alerts } = probe
@@ -67,7 +70,7 @@ function sanitizeProbe(probe: Probe, index: number): Probe {
  * @param {object} config is an object that contains all the configs
  * @returns {function} - function to stop the looper
  */
-export function looper(config: Config) {
+export function loopProbes(config: Config) {
   let isAborted = false
 
   config.probes.forEach((probe, i) => {
@@ -91,4 +94,25 @@ export function looper(config: Config) {
   }
 
   return abort
+}
+
+export function loopReport(getConfig: () => Config) {
+  const config = getConfig()
+
+  const { monikaHQ } = config
+
+  if (monikaHQ) {
+    const { url, key, interval = DEFAULT_REPORT_INTERVAL } = monikaHQ
+
+    setInterval(async () => {
+      const { version } = getConfig()
+
+      // TODO: read from history.db and generate file as attachment
+
+      try {
+        const { data } = await report(url, key, version || '', Buffer.alloc(10))
+        updateConfig(data)
+      } catch (error) {}
+    }, interval)
+  }
 }

@@ -23,14 +23,16 @@
  **********************************************************************************/
 
 import EventEmitter from 'events'
-import { warn } from 'console'
 import pEvent from 'p-event'
 import { Config } from '../../interfaces/config'
 import { parseConfig } from './parse'
 import { validateConfig } from './validate'
 import { handshake } from '../reporter'
+import { log } from '../../utils/log'
 
 const emitter = new EventEmitter()
+
+const CONFIG_UPDATED = 'CONFIG_UPDATED_EVENT'
 
 let cfg: Config
 
@@ -45,14 +47,11 @@ export async function* getConfigIterator() {
   yield cfg
 
   if (!(process.env.CI || process.env.NODE_ENV === 'test')) {
-    yield* pEvent.iterator<string, Config>(emitter, 'configUpdated')
+    yield* pEvent.iterator<string, Config>(emitter, CONFIG_UPDATED)
   }
 }
 
 export const updateConfig = (data: Partial<Config>) => {
-  if (!cfg) {
-    cfg = {} as Config
-  }
   const lastVersion = cfg.version
 
   if (data.version) cfg.version = data.version
@@ -60,7 +59,7 @@ export const updateConfig = (data: Partial<Config>) => {
   if (data.notifications) cfg.notifications = data.notifications
 
   if (cfg.version !== lastVersion) {
-    emitter.emit('configUpdated', cfg)
+    emitter.emit(CONFIG_UPDATED, cfg)
   }
 }
 
@@ -75,16 +74,15 @@ export const setupConfigFromFile = async (path: string) => {
       if (probes) parsed.probes = probes
       if (notifications) parsed.notifications = notifications
     } catch (error) {
-      warn(
+      log.warn(
         ` ›   Warning: Please check your monika-hq server, it does not return valid configuration. Monika will use configuration from ${path}.`
       )
     }
   }
 
   const validated = validateConfig(parsed)
-
   if (validated.valid) {
-    updateConfig(parsed)
+    cfg = parsed
   } else {
     throw new Error(validated.message)
   }
