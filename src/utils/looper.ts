@@ -28,6 +28,7 @@ import { doProbe } from '../components/http-probe'
 import { report } from '../components/reporter'
 import { updateConfig } from '../components/config'
 import { log } from '../utils/log'
+import { getUnreportedLogs, setLogsAsReported } from './history'
 
 const MILLISECONDS = 1000
 const DEFAULT_THRESHOLD = 5
@@ -107,12 +108,22 @@ export function loopReport(getConfig: () => Config) {
     setInterval(async () => {
       const { version } = getConfig()
 
-      // TODO: read from history.db and generate file as attachment
-
       try {
-        const { data } = await report(url, key, version || '', Buffer.alloc(10))
+        const unreportedLogs = await getUnreportedLogs()
+
+        const { data } = await report(
+          url,
+          key,
+          version || '',
+          Buffer.from(JSON.stringify(unreportedLogs))
+        )
+
         updateConfig(data)
-      } catch (error) {}
+
+        await setLogsAsReported(unreportedLogs.map((log) => log.id))
+      } catch (error) {
+        log.error(error?.message)
+      }
     }, interval)
   }
 }

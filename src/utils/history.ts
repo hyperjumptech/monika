@@ -37,6 +37,17 @@ export type HistoryLogType = {
   responseTime: number
 }
 
+type HistoryReportLogType = HistoryLogType & {
+  id: number
+  created_at: string
+  probe_id: string
+  status_code: number
+  probe_name: string
+  probe_url: string
+  response_time: number
+  error_resp: string
+}
+
 let db: any
 
 /**
@@ -51,7 +62,8 @@ async function createTable() {
     probe_name TEXT,
     probe_url TEXT,
     response_time INTEGER,
-    error_resp TEXT
+    error_resp TEXT,
+    reported INTEGER DEFAULT 0
 );`
   await db.run(createTableSQL)
 }
@@ -88,6 +100,36 @@ export const getAllLogs = (): Promise<HistoryLogType[]> => {
   return res
 }
 
+export const getUnreportedLogs = () => {
+  const readRowsSQL =
+    'SELECT id, created_at, probe_id, status_code, probe_name, probe_url, response_time, error_resp FROM history WHERE reported = 0'
+
+  return new Promise<HistoryReportLogType[]>((resolve, reject) => {
+    db.all(readRowsSQL, (err: Error, data: HistoryReportLogType[]) => {
+      if (err) reject(err)
+      else resolve(data)
+    })
+  })
+}
+
+export const setLogsAsReported = (ids: number[]) => {
+  const updateRowsSQL = `UPDATE history SET reported = 1 WHERE id IN (${ids.join(
+    ', '
+  )})`
+
+  return new Promise<void>((resolve, reject) => {
+    db.run(updateRowsSQL, (err: Error) => {
+      if (err)
+        reject(
+          new Error(
+            'error, cannot mark logs as updated in history.db: ' + err?.message
+          )
+        )
+      else resolve()
+    })
+  })
+}
+
 /**
  * flushAllLogs drops the table and recreates it
  */
@@ -115,7 +157,7 @@ export async function saveLog(
   const insertSQL = `INSERT into history (probe_id, created_at, status_code, probe_name, probe_url, response_time, error_resp) 
   VALUES(?, ?, ?, ?, ?, ?, ?);`
 
-  const created = new Date()
+  const created = new Date().toISOString()
 
   const params = [
     probe.id,
