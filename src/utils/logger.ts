@@ -26,7 +26,6 @@ import { AxiosResponseWithExtraData } from '../interfaces/request'
 import { Probe } from '../interfaces/probe'
 import chalk from 'chalk'
 import { saveLog, getAllLogs } from './history'
-import Table from 'cli-table3'
 import { log } from '../utils/log'
 
 /**
@@ -77,32 +76,20 @@ export async function probeLog({
     responseTime: probeRes.config.extraData?.responseTime,
   })
 
-  await saveLog(probe, probeRes, requestIndex, err)
+  saveLog(probe, probeRes, requestIndex, err)
 }
 
 export async function printAllLogs() {
-  const table = new Table({
-    style: { head: ['green'] },
-    head: ['#', 'probe_id', 'status_code', 'probe_url', 'response_time'],
-    wordWrap: true,
-  })
-
   const data = await getAllLogs()
 
   data.forEach((data: any) => {
-    // colorize the statuscode
-    table.push([
+    /* eslint-disable no-debugger, no-console */
+    console.log(
       data.id,
-      { hAlign: 'center', content: data.probe_id },
-      {
-        hAlign: 'center',
-        content: chalk.keyword(getStatusColor(data.status_code))(
-          data.status_code
-        ),
-      },
+      data.probe_id,
+      chalk.keyword(getStatusColor(data.status_code))(data.status_code),
       data.probe_url,
-      { hAlign: 'center', content: data.response_time },
-    ])
+      data.response_time
+    )
   })
-  log.info(table.toString())
 }

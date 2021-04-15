@@ -51,14 +51,9 @@ class Monika extends Command {
       env: 'MONIKA_JSON_CONFIG',
     }),
 
-    print: flags.boolean({
-      char: 'p', // prints the logs
+    logs: flags.boolean({
+      char: 'l', // prints the logs
       description: 'print all logs.',
-    }),
-
-    log: flags.boolean({
-      char: 'l', // logs all transaction
-      description: 'save logs of transaction.',
     }),
 
     flush: flags.boolean({
@@ -75,7 +70,7 @@ class Monika extends Command {
     const { flags } = this.parse(Monika)
     openLogfile()
 
-    if (flags.print) {
+    if (flags.logs) {
       printAllLogs()
       closeLog()
       return
