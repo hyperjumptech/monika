@@ -40,7 +40,7 @@ export const parseConfig = (configPath: string): Config => {
   } catch (error) {
     if (error.code === 'ENOENT' && error.path === configPath) {
       throw new Error(
-        'JSON configuration file not found! Copy example config from https://raw.githubusercontent.com/hyperjumptech/monika/main/config.example.json'
+        'JSON configuration file not found! Copy example config from https://raw.githubusercontent.com/hyperjumptech/monika/main/monika.example.json'
       )
     }
 
