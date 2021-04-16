@@ -64,6 +64,7 @@ interface NotifyLogObject extends BaseLogObject {
 }
 
 interface PlainLogObject {
+  type: 'PLAIN' | ''
   msg?: string
 }
 
@@ -82,7 +83,7 @@ const isNotifyLogObject = (obj: any): obj is NotifyLogObject => {
 }
 
 const isPlainLog = (obj: any): obj is PlainLogObject => {
-  return obj
+  return obj?.type?.startsWith('PLAIN')
 }
 
 const prettyPrint = {

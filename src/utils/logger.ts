@@ -83,10 +83,11 @@ export async function printAllLogs() {
   const data = await getAllLogs()
 
   data.forEach((data: any) => {
-    log.info(
-      `${data.id} id: ${data.probe_id} status: ${chalk.keyword(
+    log.info({
+      type: 'PLAIN',
+      msg: `${data.id} id: ${data.probe_id} status: ${chalk.keyword(
         getStatusColor(data.status_code)
-      )(data.status_code)} - ${data.probe_url}, ${data.response_time}`
-    )
+      )(data.status_code)} - ${data.probe_url}, ${data.response_time}`,
+    })
   })
 }
