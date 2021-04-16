@@ -7,14 +7,15 @@ title: Quick Start
 
 To start monitoring URLs, you need to create a configuration file (JSON file). The configuration file contains the probes, alerts, and notification configurations. You can copy from one of these examples:
 
-- [config.smtp-gmail.example.json](https://github.com/hyperjumptech/monika/blob/main/config_sample/config.smtp-gmail.example.json)
-- [config.mailgun.example.json](https://github.com/hyperjumptech/monika/blob/main/config_sample/config.mailgun.example.json)
-- [config.sendgrid.example.json](https://github.com/hyperjumptech/monika/blob/main/config_sample/config.sendgrid.example.json)
-- [config.webhook.example.json](https://github.com/hyperjumptech/monika/blob/main/config_sample/config.webhook.example.json)
-- [config.slack.example.json](https://github.com/hyperjumptech/monika/blob/main/config_sample/config.slack.example.json)
-- [config.whatsapp.example.json](https://github.com/hyperjumptech/monika/blob/main/config_sample/config.whatsapp.example.json)
-- [config.teams.example.json](https://github.com/hyperjumptech/monika/blob/main/config_sample/config.teams.example.json)
-- [config.example.json](https://github.com/hyperjumptech/monika/blob/main/config.example.json)
+1. [SMTP Gmail](https://github.com/hyperjumptech/monika/blob/main/config_sample/config.smtp-gmail.example.json)
+2. [Mailgun](https://github.com/hyperjumptech/monika/blob/main/config_sample/config.mailgun.example.json)
+3. [Sendgrid](https://github.com/hyperjumptech/monika/blob/main/config_sample/config.sendgrid.example.json)
+4. [Webhook](https://github.com/hyperjumptech/monika/blob/main/config_sample/config.webhook.example.json)
+5. [Slack](https://github.com/hyperjumptech/monika/blob/main/config_sample/config.slack.example.json)
+6. [Telegram](https://github.com/hyperjumptech/monika/blob/main/config_sample/config.telegram.example.json)
+7. [Whatsapp](https://github.com/hyperjumptech/monika/blob/main/config_sample/config.whatsapp.example.json)
+8. [Microsoft Teams](https://github.com/hyperjumptech/monika/blob/main/config_sample/config.teams.example.json)
+9. [Defult](https://github.com/hyperjumptech/monika/blob/main/config.example.json)
 
 When you have created the configuration file, you can run `monika` as follows
 

@@ -9,14 +9,15 @@ Monika will send notifications to you whenever [alerts](https://hyperjumptech.gi
 
 At this moment, Monika support these channel of notifications (You can use just one or more):
 
-1. SMTP
-2. Webhook
-3. Mailgun
-4. Sendgrid
-5. Slack
-6. Whatsapp
-7. Microsoft Teams
-8. Discord
+1. [SMTP](https://hyperjumptech.github.io/monika/guides/notifications#smtp)
+2. [Mailgun](https://hyperjumptech.github.io/monika/guides/notifications#mailgun)
+3. [Sendgrid](https://hyperjumptech.github.io/monika/guides/notifications#mailgun)
+4. [Webhook](https://hyperjumptech.github.io/monika/guides/notifications#webhook)
+5. [Slack](https://hyperjumptech.github.io/monika/guides/notifications#slack-incoming-webhook)
+6. [Telegram](https://hyperjumptech.github.io/monika/guides/notifications#telegram)
+7. [Whatsapp](https://hyperjumptech.github.io/monika/guides/notifications#whatsapp)
+8. [Microsoft Teams](https://hyperjumptech.github.io/monika/guides/notifications#microsoft-teams)
+9. [Discord](https://hyperjumptech.github.io/monika/guides/notifications#discord)
 
 We are working on more notifications like Telegram, and many more. You can help!
 
