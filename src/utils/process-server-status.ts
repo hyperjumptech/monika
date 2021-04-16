@@ -25,7 +25,7 @@
 import { ProbeStatus, StatusDetails } from '../interfaces/probe-status'
 import { Probe } from '../interfaces/probe'
 import { ValidateResponseStatus } from './alert'
-import { log } from '../utils/log'
+import { log } from './pino'
 import { AxiosResponseWithExtraData } from '../interfaces/request'
 
 const PROBE_STATUSES: ProbeStatus[] = []
