@@ -1,6 +1,6 @@
 # Probes
 
-Probes are the heart of the monitoring requests. Probes are arrays of request objects defined in the config file `config.json` like so.
+Probes are the heart of the monitoring requests. Probes are arrays of request objects defined in the config file `monika.json` like so.
 
 ```json
   "probes": [
@@ -209,7 +209,7 @@ In the configuration above, the first request will execute fetch all users avail
   ]
 ```
 
-So, in order to access the ID of the user, we need to define in the config.json as `{{ responses.[0].data.data.[0].id }}` to get the first user ID from the first response. What if we want to get the `page` data? Simply just define it as `{{ responses.[0].data.page }}`.
+So, in order to access the ID of the user, we need to define in the monika.json as `{{ responses.[0].data.data.[0].id }}` to get the first user ID from the first response. What if we want to get the `page` data? Simply just define it as `{{ responses.[0].data.page }}`.
 
 #### Pass Response Data as Headers value
 
@@ -255,7 +255,7 @@ In example above, the first request will do the login process. If there are no t
 
 In a configuration with multiple probes, `Monika` will perform the requests in sequence in the order that they are entered, one after another.
 
-On completion, `Monika` will sleep until the next interval to start again. At the top of the `config.json` file there is an `interval` setting. The execution will be restarted after every `interval`. If interval is shorter than the amount of time to dispatch all the requests, then `Monika` will immediately repeat after the last probe response and any notification alerts sent.
+On completion, `Monika` will sleep until the next interval to start again. At the top of the `monika.json` file there is an `interval` setting. The execution will be restarted after every `interval`. If interval is shorter than the amount of time to dispatch all the requests, then `Monika` will immediately repeat after the last probe response and any notification alerts sent.
 
 ## Further reading
 

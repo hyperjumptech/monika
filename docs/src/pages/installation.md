@@ -15,11 +15,11 @@ $ yarn global add @hyperjumptech/monika
 
 ## Run Monika using Docker
 
-Monika is available as a docker image. Paste a copy of your configuration file `config.json` into the current directory.
+Monika is available as a docker image. Paste a copy of your configuration file `monika.json` into the current directory.
 From the same directoy, you can run:
 
 ```
-docker run --name monika -v ${PWD}/config.json:/config/config.json --detach hyperjump/monika:latest
+docker run --name monika -v ${PWD}/monika.json:/config/monika.json --detach hyperjump/monika:latest
 ```
 
 Once monika is up and running, you can see its log using
