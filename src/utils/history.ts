@@ -25,7 +25,7 @@
 import { AxiosResponseWithExtraData } from '../interfaces/request'
 import { Probe } from '../interfaces/probe'
 import path from 'path'
-import { log } from '../utils/log'
+import { log } from './pino'
 
 const sqlite3 = require('sqlite3').verbose()
 
@@ -53,7 +53,7 @@ async function createTable() {
     response_time INTEGER,
     error_resp TEXT
 );`
-  await db.run(createTableSQL)
+  db.run(createTableSQL)
 }
 
 /**
@@ -69,7 +69,7 @@ export async function openLogfile() {
       if (err) {
         log.info('warning: cannot open logfile. error:', err.message)
       }
-      await createTable()
+      createTable()
     }
   )
 }
@@ -95,7 +95,7 @@ export async function flushAllLogs() {
   const dropTableSQL = 'DROP TABLE IF EXISTS history'
 
   await db.run(dropTableSQL)
-  await createTable()
+  createTable()
 }
 
 /**

@@ -30,7 +30,7 @@ import { Probe } from '../../interfaces/probe'
 import { Notification } from '../../interfaces/notification'
 import { probeLog } from '../../utils/logger'
 import { AxiosResponseWithExtraData } from '../../interfaces/request'
-import { log } from '../../utils/log'
+import { log } from '../../utils/pino'
 import { sendAlerts } from '../notification'
 
 /**

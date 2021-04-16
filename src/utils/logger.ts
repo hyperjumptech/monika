@@ -26,8 +26,7 @@ import { AxiosResponseWithExtraData } from '../interfaces/request'
 import { Probe } from '../interfaces/probe'
 import chalk from 'chalk'
 import { saveLog, getAllLogs } from './history'
-import Table from 'cli-table3'
-import { log } from '../utils/log'
+import { log } from './pino'
 
 /**
  * getStatusColor colorizes differents tatusCode
@@ -37,7 +36,7 @@ import { log } from '../utils/log'
 export function getStatusColor(statusCode: number) {
   switch (Math.trunc(statusCode / 100)) {
     case 2:
-      return 'green'
+      return 'cyan'
     case 4:
       return 'orange'
     case 5:
@@ -77,32 +76,18 @@ export async function probeLog({
     responseTime: probeRes.config.extraData?.responseTime,
   })
 
-  await saveLog(probe, probeRes, requestIndex, err)
+  saveLog(probe, probeRes, requestIndex, err)
 }
 
 export async function printAllLogs() {
-  const table = new Table({
-    style: { head: ['green'] },
-    head: ['#', 'probe_id', 'status_code', 'probe_url', 'response_time'],
-    wordWrap: true,
-  })
-
   const data = await getAllLogs()
 
   data.forEach((data: any) => {
-    // colorize the statuscode
-    table.push([
-      data.id,
-      { hAlign: 'center', content: data.probe_id },
-      {
-        hAlign: 'center',
-        content: chalk.keyword(getStatusColor(data.status_code))(
-          data.status_code
-        ),
-      },
-      data.probe_url,
-      { hAlign: 'center', content: data.response_time },
-    ])
+    log.info({
+      type: 'PLAIN',
+      msg: `${data.id} id: ${data.probe_id} status: ${chalk.keyword(
+        getStatusColor(data.status_code)
+      )(data.status_code)} - ${data.probe_url}, ${data.response_time}`,
+    })
   })
-  log.info(table.toString())
 }
