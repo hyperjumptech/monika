@@ -26,7 +26,7 @@ import { AxiosResponseWithExtraData } from '../interfaces/request'
 import { Probe } from '../interfaces/probe'
 import chalk from 'chalk'
 import { saveLog, getAllLogs } from './history'
-import { log } from '../utils/log'
+import { log } from './pino'
 
 /**
  * getStatusColor colorizes differents tatusCode
@@ -36,7 +36,7 @@ import { log } from '../utils/log'
 export function getStatusColor(statusCode: number) {
   switch (Math.trunc(statusCode / 100)) {
     case 2:
-      return 'green'
+      return 'cyan'
     case 4:
       return 'orange'
     case 5:
@@ -83,13 +83,10 @@ export async function printAllLogs() {
   const data = await getAllLogs()
 
   data.forEach((data: any) => {
-    /* eslint-disable no-debugger, no-console */
-    console.log(
-      data.id,
-      data.probe_id,
-      chalk.keyword(getStatusColor(data.status_code))(data.status_code),
-      data.probe_url,
-      data.response_time
+    log.info(
+      `${data.id} id: ${data.probe_id} status: ${chalk.keyword(
+        getStatusColor(data.status_code)
+      )(data.status_code)} - ${data.probe_url}, ${data.response_time}`
     )
   })
 }

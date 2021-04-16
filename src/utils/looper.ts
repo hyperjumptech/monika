@@ -25,7 +25,7 @@
 import { Config } from '../interfaces/config'
 import { Probe } from '../interfaces/probe'
 import { doProbe } from '../components/http-probe'
-import { log } from '../utils/log'
+import { log } from './pino'
 
 const MILLISECONDS = 1000
 const DEFAULT_THRESHOLD = 5
