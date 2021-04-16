@@ -47,7 +47,7 @@ class Monika extends Command {
       char: 'c',
       description:
         'JSON configuration filename. If none is supplied, will look for default in current path.',
-      default: './config.json',
+      default: './monika.json',
       env: 'MONIKA_JSON_CONFIG',
     }),
 

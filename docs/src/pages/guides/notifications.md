@@ -23,7 +23,7 @@ We are working on more notifications like Telegram, and many more. You can help!
 
 ## Configurations
 
-To use one or more notifications, you need to define the settings in the config.json file as shown below.
+To use one or more notifications, you need to define the settings in the monika.json file as shown below.
 
 ```json
 "notifications": [
@@ -66,7 +66,7 @@ To use one or more notifications, you need to define the settings in the config.
   ],
 ```
 
-Note that every triggered alert will be sent to you through all the notifications you defined in the config.json, e.g., if you added `webhook` and `smtp` settings, you will receive the alert messages through both.
+Note that every triggered alert will be sent to you through all the notifications you defined in the monika.json, e.g., if you added `webhook` and `smtp` settings, you will receive the alert messages through both.
 
 ## SMTP
 

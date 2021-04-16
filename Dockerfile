@@ -18,4 +18,4 @@ WORKDIR /
 
 RUN mkdir /config
 
-CMD [ "monika", "-c", "/config/config.json" ]
+CMD [ "monika", "-c", "/config/monika.json" ]
