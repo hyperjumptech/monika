@@ -46,7 +46,7 @@ class Monika extends Command {
     config: flags.string({
       char: 'c',
       description:
-        'JSON configuration filename. If none is supplied, will look for default in current path.',
+        'JSON configuration filename. If none is supplied, will look for monika.json in the current directory.',
       default: './monika.json',
       env: 'MONIKA_JSON_CONFIG',
     }),
