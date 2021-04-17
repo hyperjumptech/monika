@@ -22,11 +22,11 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { AxiosResponseWithExtraData } from '../interfaces/request'
-import { Probe } from '../interfaces/probe'
+import { AxiosResponseWithExtraData } from '../../interfaces/request'
+import { Probe } from '../../interfaces/probe'
 import chalk from 'chalk'
-import { saveLog, getAllLogs } from './history'
-import { log } from './pino'
+import { saveLog, getAllLogs } from '../../utils/history'
+import { log } from '../../utils/pino'
 
 /**
  * getStatusColor colorizes differents tatusCode
