@@ -22,10 +22,10 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { AxiosResponseWithExtraData } from '../interfaces/request'
-import { Probe } from '../interfaces/probe'
+import { AxiosResponseWithExtraData } from '../../interfaces/request'
+import { Probe } from '../../interfaces/probe'
 import path from 'path'
-import { log } from './pino'
+import { log } from '../../utils/pino'
 
 const sqlite3 = require('sqlite3').verbose()
 
@@ -60,7 +60,7 @@ async function createTable() {
  * openLogfile will open the file history.db and if it doesnt exist, create it and sets up the table
  */
 export async function openLogfile() {
-  const dbPath = path.resolve(__dirname, 'history.db')
+  const dbPath = path.resolve(process.cwd(), 'history.db')
 
   db = new sqlite3.Database(
     dbPath,

@@ -22,9 +22,9 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { RequestConfig } from './../interfaces/request'
+import { RequestConfig } from '../../interfaces/request'
 import { request } from './request'
-import { AxiosResponseWithExtraData } from '../interfaces/request'
+import { AxiosResponseWithExtraData } from '../../interfaces/request'
 import * as Handlebars from 'handlebars'
 
 export async function probing(

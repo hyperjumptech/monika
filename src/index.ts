@@ -28,10 +28,14 @@ import cli from 'cli-ux'
 import chalk from 'chalk'
 import boxen from 'boxen'
 import { MailData, MailgunData, SMTPData, WebhookData } from './interfaces/data'
-import { looper } from './utils/looper'
+import { looper } from './components/looper'
 import { printAllLogs } from './components/logger'
 import { log } from './utils/pino'
-import { closeLog, openLogfile, flushAllLogs } from './utils/history'
+import {
+  closeLog,
+  openLogfile,
+  flushAllLogs,
+} from './components/logger/history'
 import { notificationChecker } from './components/notification/checker'
 import { getConfig, setupConfigFromFile } from './components/config'
 

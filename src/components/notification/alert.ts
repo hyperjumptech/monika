@@ -22,66 +22,69 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Config } from '../interfaces/config'
-import { Probe } from '../interfaces/probe'
-import { doProbe } from '../components/http-probe'
-import { log } from './pino'
+import { Probe } from '../../interfaces/probe'
+import { AxiosResponseWithExtraData } from '../../interfaces/request'
 
-const MILLISECONDS = 1000
-const DEFAULT_THRESHOLD = 5
+type CheckResponseFn = (response: AxiosResponseWithExtraData) => boolean
+export type ValidateResponseStatus = { alert: string; status: boolean }
 
-function sanitizeProbe(probe: Probe, index: number): Probe {
-  const { name, incidentThreshold, recoveryThreshold, alerts } = probe
-  probe.id = `${index}`
+// Check if response status is not 2xx
+export const statusNot2xx: CheckResponseFn = (response) =>
+  response.status < 200 || response.status >= 300
 
-  if (!name) {
-    probe.name = `monika_${probe.id}`
-    log.warn(
-      `Warning: Probe ${probe.id} has no name defined. Using the default name started by monika`
-    )
-  }
-  if (!incidentThreshold) {
-    probe.incidentThreshold = DEFAULT_THRESHOLD
-    log.warn(
-      `Warning: Probe ${probe.id} has no incidentThreshold configuration defined. Using the default threshold: 5`
-    )
-  }
-  if (!recoveryThreshold) {
-    probe.recoveryThreshold = DEFAULT_THRESHOLD
-    log.warn(
-      `Warning: Probe ${probe.id} has no recoveryThreshold configuration defined. Using the default threshold: 5`
-    )
-  }
-  if ((alerts?.length ?? 0) === 0) {
-    probe.alerts = ['status-not-2xx', 'response-time-greater-than-2-s']
-    log.warn(
-      `Warning: Probe ${probe.id} has no Alerts configuration defined. Using the default status-not-2xx and response-time-greater-than-2-s`
-    )
-  }
+// Check if response time is greater than specified value in milliseconds
+export const responseTimeGreaterThan: (
+  minimumTime: number
+) => CheckResponseFn = (minimumTime) => (
+  response: AxiosResponseWithExtraData
+): boolean => {
+  const respTimeNum = response.config.extraData?.responseTime ?? 0
 
-  return probe
+  return respTimeNum > minimumTime
 }
 
-/**
- * looper does all the looping
- * @param {object} config is an object that contains all the configs
- */
-export function looper(config: Config) {
-  config.probes.forEach((probe, i) => {
-    const probeInterval = setInterval(
-      (() => {
-        let counter = 0
-        return () => {
-          const sanitizedProbe = sanitizeProbe(probe, i)
+// parse string like "response-time-greater-than-200-ms" and return the time in ms
+export const parseAlertStringTime = (str: string): number => {
+  // match any string that ends with digits followed by unit 's' or 'ms'
+  const match = str.match(/(\d+)-(m?s)$/)
+  if (!match) {
+    throw new Error('alert string does not contain valid time number')
+  }
 
-          return doProbe(++counter, sanitizedProbe, config.notifications)
-        }
-      })(),
-      (probe.interval ?? 10) * MILLISECONDS
-    )
+  const number = Number(match[1])
+  const unit = match[2]
 
-    if (process.env.CI || process.env.NODE_ENV === 'test') {
-      clearInterval(probeInterval)
+  if (unit === 's') return number * 1000
+  return number
+}
+
+export const getCheckResponseFn = (
+  alert: string
+): CheckResponseFn | undefined => {
+  if (alert === 'status-not-2xx') {
+    return statusNot2xx
+  }
+  if (alert.startsWith('response-time-greater-than-')) {
+    const alertTime = parseAlertStringTime(alert)
+    return responseTimeGreaterThan(alertTime)
+  }
+}
+
+export const validateResponse = (
+  alerts: Probe['alerts'],
+  response: AxiosResponseWithExtraData
+): ValidateResponseStatus[] => {
+  const checks = []
+
+  for (const alert of alerts) {
+    const checkFn = getCheckResponseFn(alert.toLowerCase())
+    if (checkFn) {
+      checks.push({
+        alert,
+        status: checkFn(response),
+      })
     }
-  })
+  }
+
+  return checks
 }

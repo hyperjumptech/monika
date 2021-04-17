@@ -25,7 +25,7 @@
 import { AxiosResponseWithExtraData } from '../../interfaces/request'
 import { Probe } from '../../interfaces/probe'
 import chalk from 'chalk'
-import { saveLog, getAllLogs } from '../../utils/history'
+import { saveLog, getAllLogs } from './history'
 import { log } from '../../utils/pino'
 
 /**
