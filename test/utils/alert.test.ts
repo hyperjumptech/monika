@@ -33,7 +33,7 @@ import {
   responseTimeGreaterThan,
   statusNot2xx,
   validateResponse,
-} from '../../src/utils/alert'
+} from '../../src/components/notification/alert'
 
 describe('check response status', () => {
   it('should trigger alert when response is within 4xx status', () => {

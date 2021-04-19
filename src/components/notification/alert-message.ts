@@ -22,7 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { parseAlertStringTime } from '../../utils/alert'
+import { parseAlertStringTime } from './alert'
 
 export function getMessageForAlert({
   alert,
@@ -47,7 +47,7 @@ export function getMessageForAlert({
     if (alert === 'status-not-2xx' && status === 'DOWN')
       return `[INCIDENT] ${statusAlert}`
 
-    const responseAlert = `Target ${url} takes long to respond`
+    const responseAlert = `Target ${url} took too long to respond`
     if (alert.includes('response-time-greater-than-') && status === 'UP')
       return `[RECOVERY] ${responseAlert}`
 
