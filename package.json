@@ -22,6 +22,7 @@
     "pretest": "npm run check-format",
     "posttest": "eslint . --ext .ts --config .eslintrc",
     "prepack": "rm -rf lib && tsc -b && oclif-dev readme",
+    "start": "./bin/run",
     "test": "cross-env NODE_ENV=test nyc --extension .ts mocha --forbid-only \"test/**/*.test.ts\"",
     "version": "oclif-dev readme && git add README.md",
     "format": "prettier --write .",
