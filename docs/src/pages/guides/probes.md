@@ -81,23 +81,28 @@ Below is the default response when Probe has successfully requested the URL:
   "config": {
     "url": "https://reqres.in/api/users",
     "method": "GET",
-    ...
+    "data": "{'test':'test'}",
+    "headers": {
+      "Accept": "application/json, text/plain, */*",
+      "User-Agent": "axios/0.21.1"
+    },
+    "body": { "test": "test" },
   },
-  "request": { ... },
   "data": { ... }
 }
 ```
 
 Details of the field are give in the table below.
 
-| Topic      | Description                          |
-| :--------- | ------------------------------------ |
-| status     | HTTP Status Code (e.g 200, 403, 500) |
-| statusText | HTTP Status Code Explanation         |
-| config     | Request configuration                |
-| request    | Request body                         |
-| headers    | Response headers                     |
-| data       | Response body                        |
+| Topic      | Description                                                              |
+| :--------- | ------------------------------------------------------------------------ |
+| status     | HTTP Status Code (e.g 200, 403, 500)                                     |
+| statusText | HTTP Status Code Explanation (e.g OK, Forbidden, Internal Server Error)  |
+| config     | Request configuration (e.g URL, Method, Data, Headers, Body, etc.)       |
+| headers    | Response headers from the URL requested (e.g SetCookie, ETag, etc.)      |
+| data       | Response payload from the URL requested (e.g `token`, `results`, `data`) |
+
+Probe response data could be used for [Request Chaining](https://hyperjumptech.github.io/monika/guides/examples#requests-chaining).
 
 ## Execution order
 
