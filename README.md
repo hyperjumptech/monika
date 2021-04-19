@@ -19,11 +19,12 @@ npm i -g @hyperjumptech/monika
 Monika is basically a node.js application written in typescript built around the oclif framework.  
 It was developed on node the v14 LTS, and npm v6. You can run `npm version` for a complete version list.
 
-You can fetch and build `Monika` from source. Clone this repository then install the dependencies like below:
+You can fetch, build, and use `Monika` from source. Clone this repository then install the dependencies like below:
 
 ```bash
 git clone git@github.com:hyperjumptech/monika.git
 npm ci
+npm start
 ```
 
 Keep your codes formatted with the npm scripts and ensure eslint plugin is installed and allowed to make changes in the IDE.
