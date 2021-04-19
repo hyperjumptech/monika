@@ -64,29 +64,33 @@ If the probe above has been alerted 5 times, which is the default incident/recov
 Here is probe example with POST request to simulate HTML form submission
 
 ```json
+{
   "probes": [
     {
       "id": "1",
       "name": "HTML form submission",
       "description": "simulate html form submission",
       "interval": 10,
-      "requests": [{
-        "method": "POST",
-        "url": "http://www.foo.com/login.php",
-        "timeout": 7000,
-        "headers": {
-          "Content-Type": "application/x-www-form-urlencoded"
-        },
-        "body": {
-          "username": "someusername",
-          "password": "somepassword"
+      "requests": [
+        {
+          "method": "POST",
+          "url": "http://www.foo.com/login.php",
+          "timeout": 7000,
+          "headers": {
+            "Content-Type": "application/x-www-form-urlencoded"
+          },
+          "body": {
+            "username": "someusername",
+            "password": "somepassword"
+          }
         }
-      }],
+      ],
       "incidentThreshold": 3,
       "recoveryThreshold": 3,
       "alerts": ["status-not-2xx", "response-time-greater-than-200-ms"]
-    },
+    }
   ]
+}
 ```
 
 The probe above will do a POST request to do an HTML form submission, with the defined request body. If the probe above has been alerted 3 times, it will not be sending any notifications because there are no notifications channel defined in the configuration.
@@ -191,6 +195,7 @@ In the configuration above, the first request will execute fetch all users avail
     },
     ...
   ]
+}
 ```
 
 So, in order to access the ID of the user, we need to define in the config.json as `{{ responses.[0].data.data.[0].id }}` to get the first user ID from the first response. What if we want to get the `page` data? Simply just define it as `{{ responses.[0].data.page }}`.
@@ -200,37 +205,42 @@ So, in order to access the ID of the user, we need to define in the config.json 
 Here is an example of passing previous request(s) response into the headers:
 
 ```json
+{
   "probes": [
     {
       "id": "1",
       "name": "Probing Github",
       "description": "simulate html form submission",
       "interval": 10,
-      "requests": [{
-        "method": "POST",
-        "url": "https://reqres.in/api/login",
-        "timeout": 7000,
-        "body": {
-          "email": "eve.holt@reqres.in",
-          "password": "cityslicka"
-        }
-      },{
-        "method": "POST",
-        "url": "https://reqres.in/api/users/",
-        "timeout": 7000,
-        "body": {
+      "requests": [
+        {
+          "method": "POST",
+          "url": "https://reqres.in/api/login",
+          "timeout": 7000,
+          "body": {
+            "email": "eve.holt@reqres.in",
+            "password": "cityslicka"
+          }
+        },
+        {
+          "method": "POST",
+          "url": "https://reqres.in/api/users/",
+          "timeout": 7000,
+          "body": {
             "name": "morpheus",
             "job": "leader"
-        },
-        "headers": {
-          "Authorization": "Bearer {{ responses.[0].data.token }}"
+          },
+          "headers": {
+            "Authorization": "Bearer {{ responses.[0].data.token }}"
+          }
         }
-      }],
+      ],
       "incidentThreshold": 3,
       "recoveryThreshold": 3,
       "alerts": ["status-not-2xx", "response-time-greater-than-2000-ms"]
-    },
+    }
   ]
+}
 ```
 
 In example above, the first request will do the login process. If there are no triggered alerts, the first request will return the token, and the token will be used for Authorization header in order to execute the second request.
