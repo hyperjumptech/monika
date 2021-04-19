@@ -22,57 +22,66 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios from 'axios'
-import {
-  AxiosRequestConfigWithExtraData,
-  AxiosResponseWithExtraData,
-  RequestConfig,
-} from '../interfaces/request'
+import { Config } from '../interfaces/config'
+import { Probe } from '../interfaces/probe'
+import { doProbe } from './probe'
+import { log } from '../utils/pino'
 
-const responseInterceptor = (axiosResponse: AxiosResponseWithExtraData) => {
-  const start = axiosResponse?.config.extraData?.requestStartedAt!
-  const responseTime = new Date().getTime() - start
+const MILLISECONDS = 1000
+const DEFAULT_THRESHOLD = 5
 
-  const data = {
-    ...axiosResponse,
-    config: {
-      ...axiosResponse?.config,
-      extraData: {
-        ...axiosResponse?.config.extraData,
-        responseTime,
-      },
-    },
+function sanitizeProbe(probe: Probe, index: number): Probe {
+  const { name, incidentThreshold, recoveryThreshold, alerts } = probe
+  probe.id = `${index}`
+
+  if (!name) {
+    probe.name = `monika_${probe.id}`
+    log.warn(
+      `Warning: Probe ${probe.id} has no name defined. Using the default name started by monika`
+    )
+  }
+  if (!incidentThreshold) {
+    probe.incidentThreshold = DEFAULT_THRESHOLD
+    log.warn(
+      `Warning: Probe ${probe.id} has no incidentThreshold configuration defined. Using the default threshold: 5`
+    )
+  }
+  if (!recoveryThreshold) {
+    probe.recoveryThreshold = DEFAULT_THRESHOLD
+    log.warn(
+      `Warning: Probe ${probe.id} has no recoveryThreshold configuration defined. Using the default threshold: 5`
+    )
+  }
+  if ((alerts?.length ?? 0) === 0) {
+    probe.alerts = ['status-not-2xx', 'response-time-greater-than-2-s']
+    log.warn(
+      `Warning: Probe ${probe.id} has no Alerts configuration defined. Using the default status-not-2xx and response-time-greater-than-2-s`
+    )
   }
 
-  return data
+  return probe
 }
 
-export const request = async (config: RequestConfig) => {
-  const axiosInstance = axios.create()
-  axiosInstance.interceptors.request.use(
-    (axiosRequestConfig: AxiosRequestConfigWithExtraData) => {
-      const data = {
-        ...axiosRequestConfig,
-        extraData: {
-          ...axiosRequestConfig?.extraData,
-          requestStartedAt: new Date().getTime(),
-        },
-      }
-      return data
+/**
+ * looper does all the looping
+ * @param {object} config is an object that contains all the configs
+ */
+export function looper(config: Config) {
+  config.probes.forEach((probe, i) => {
+    const probeInterval = setInterval(
+      (() => {
+        let counter = 0
+        return () => {
+          const sanitizedProbe = sanitizeProbe(probe, i)
+
+          return doProbe(++counter, sanitizedProbe, config.notifications)
+        }
+      })(),
+      (probe.interval ?? 10) * MILLISECONDS
+    )
+
+    if (process.env.CI || process.env.NODE_ENV === 'test') {
+      clearInterval(probeInterval)
     }
-  )
-  axiosInstance.interceptors.response.use(
-    (axiosResponse: AxiosResponseWithExtraData) => {
-      const data = responseInterceptor(axiosResponse)
-      return data
-    },
-    (axiosResponse: AxiosResponseWithExtraData) => {
-      const data = responseInterceptor(axiosResponse)
-      throw data
-    }
-  )
-  return axiosInstance.request({
-    ...config,
-    data: config.body,
   })
 }
