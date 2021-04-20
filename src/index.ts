@@ -27,6 +27,7 @@ import { Command, flags } from '@oclif/command'
 import cli from 'cli-ux'
 import chalk from 'chalk'
 import boxen from 'boxen'
+import open from 'open'
 import { MailData, MailgunData, SMTPData, WebhookData } from './interfaces/data'
 import { looper } from './components/looper'
 import { printAllLogs } from './components/logger'
@@ -53,6 +54,10 @@ class Monika extends Command {
         'JSON configuration filename. If none is supplied, will look for monika.json in the current directory.',
       default: './monika.json',
       env: 'MONIKA_JSON_CONFIG',
+    }),
+
+    'create-config': flags.boolean({
+      description: 'open Monika Configuration Generator using default browser',
     }),
 
     logs: flags.boolean({
@@ -91,6 +96,14 @@ class Monika extends Command {
         log.info('Cancelled. Thank you.')
       }
       closeLog()
+      return
+    }
+
+    if (flags['create-config']) {
+      log.info(
+        'Opening Monika Configuration Generator in your default browser...'
+      )
+      await open('https://hyperjumptech.github.io/monika-config-generator/')
       return
     }
 
