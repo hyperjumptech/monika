@@ -2,7 +2,7 @@
 
 ## Minimal Configuration
 
-Here is probe example with GET request to hit github.com:
+Here is a probe example with GET request to hit github.com:
 
 ```json
 {
@@ -18,11 +18,11 @@ Here is probe example with GET request to hit github.com:
 }
 ```
 
-By default if you didn't define the method, it will be set as GET. Also, with this configuration you should be getting warnings for not defining notification channel and incident/recovery threshold.
+By default if you didn't define the method, it will be set as GET. Please note that with this configuration, you will not get any notifications when github.com is down since the notifications configuration is not defined.
 
 ## Enabling Notification
 
-Here is probe example with GET request to hit Monika Landing Page:
+Here is a probe example to monitor Monika landing page:
 
 ```json
 {
@@ -57,9 +57,9 @@ Here is probe example with GET request to hit Monika Landing Page:
 }
 ```
 
-If the probe above has been alerted 5 times, which is the default incident/recovery threshold number, it will be sending a notification using the SMTP configuration. For more information about available notification channels, refer to [https://hyperjumptech.github.io/monika/guides/notifications](https://hyperjumptech.github.io/monika/guides/notifications).
+Using the above configuration, Monika will check the landing page every 10 seconds and will send a notification by email when the landing page is down 5 times in a row. For more information about available notification channels, refer to [Notifications](https://hyperjumptech.github.io/monika/guides/notifications).
 
-## HTML-form-submission Example
+## HTML Form Submission Example
 
 Here is probe example with POST request to simulate HTML form submission
 
@@ -84,16 +84,13 @@ Here is probe example with POST request to simulate HTML form submission
             "password": "somepassword"
           }
         }
-      ],
-      "incidentThreshold": 3,
-      "recoveryThreshold": 3,
-      "alerts": ["status-not-2xx", "response-time-greater-than-200-ms"]
+      ]
     }
   ]
 }
 ```
 
-The probe above will do a POST request to do an HTML form submission, with the defined request body. If the probe above has been alerted 3 times, it will not be sending any notifications because there are no notifications channel defined in the configuration.
+Using the configuration above, Monika will send a POST request to http://www.foo.com/login.php with the defined request's body.
 
 ## Multiple request
 
@@ -127,7 +124,7 @@ Here is an example configuration with multiple requests:
 }
 ```
 
-In the configuration above, "Probing Github" probe will execute a GET request to `https://github.com`. If there are no triggered alerts such as `status-not-2xx` or `response-time-greater-than-200-ms`, it will execute a GET request to `https://github.com/hyperjumptech`.
+In the configuration above, Monika will first check `https://github.com/` then `https://github.com/hyperjumptech`. If the status code of `https://github.com/` is not 2xx (e.g., 200, 201), Monika **will not** check `https://github.com/hyperjumptech`.
 
 If there is a case where executing GET request to `https://github.com` triggered an alert, the next request will not be executed.
 
@@ -143,11 +140,15 @@ Here is an example on how you could get previous request(s) response data into y
 {{ response.[2].headers.SetCookie[0] }} ==> Get first cookie from third request response
 ```
 
+In the example above, `response.[0]` refers to the response from the first request in the probe, `response.[1]` refers to the response from the second request in the probe, and so on. Please note that you can only use the response from previous requests in the same probe.
+
 Please refer to [Probe Response Anatomy](https://hyperjumptech.github.io/monika/guides/probes#probe-response-anatomy) in order to know which value could be used from the response body for the next request(s).
+
+In the sections below, you can find several examples of configuration file which contains chaining requests.
 
 ### Pass Response Data as Path/Query Parameters
 
-Here is an example of passing previous request(s) response into the path/query parameters:
+Here is an example of using previous request's response in the path/query parameters:
 
 ```json
 {
@@ -177,7 +178,9 @@ Here is an example of passing previous request(s) response into the path/query p
 }
 ```
 
-In the configuration above, the first request will execute fetch all users available. If there are no triggered alerts, the response returned from the first request is ready to be used by the second request using values from `{{ responses.[0].data }}`. An example of the first request response should be like this:
+In the configuration above, the first request will fetch all users from `https://reqres.in/api/users`. Then in the second request, Monika will fetch the details of the first user from the first request. If there are no triggered alerts, the response returned from the first request is ready to be used by the second request using values from `{{ responses.[0].data }}`.
+
+Let's say the response from fetching all users in JSON format as follows:
 
 ```json
 {
@@ -198,11 +201,11 @@ In the configuration above, the first request will execute fetch all users avail
 }
 ```
 
-So, in order to access the ID of the user, we need to define in the config.json as `{{ responses.[0].data.data.[0].id }}` to get the first user ID from the first response. What if we want to get the `page` data? Simply just define it as `{{ responses.[0].data.page }}`.
+To use the user ID of the first user in the second request, we define the url of the second request as `{{ responses.[0].data.data.[0].id }}`.
 
 ### Pass Response Data as Headers value
 
-Here is an example of passing previous request(s) response into the headers:
+Here is an example of using previous request's response in the headers:
 
 ```json
 {
@@ -243,4 +246,4 @@ Here is an example of passing previous request(s) response into the headers:
 }
 ```
 
-In example above, the first request will do the login process. If there are no triggered alerts, the first request will return the token, and the token will be used for Authorization header in order to execute the second request.
+Using the above configuration, Monika will perform login request in the first request, then use the returned token in the Authorization header of the second request.
