@@ -18,7 +18,7 @@ Here is a probe example with GET request to hit github.com:
 }
 ```
 
-By default if you didn't define the method, it will be set as GET. Please note that with this configuration, you will not get any notifications when github.com is down since the notifications configuration is not defined.
+By default if you didn't define the method, it will be set as GET. Please note that with this configuration, you will not get any notifications when github.com is down since the notification configuration is not defined.
 
 ## Enabling Notification
 
@@ -126,11 +126,11 @@ Here is an example configuration with multiple requests:
 
 In the configuration above, Monika will first check `https://github.com/` then `https://github.com/hyperjumptech`. If the status code of `https://github.com/` is not 2xx (e.g., 200, 201), Monika **will not** check `https://github.com/hyperjumptech`.
 
-If there is a case where executing GET request to `https://github.com` triggered an alert, the next request will not be executed.
+If there is a case where executing GET request to `https://github.com` triggers an alert, the next request will not be executed.
 
 ## Requests Chaining
 
-Monika supports requests chaining, which enables you to do multiple request and use previous request(s) response for other request. For example, after executing a GET request to certain API, the next request could use the previous request(s) response into their path/query parameters or headers.
+Monika supports request chaining, which enables you to do multiple requests and the ability to use past responses from earlier requests. For example, after executing a GET request to certain API, the next request could use the previous request(s) response into their path/query parameters or headers.
 
 Here is an example on how you could get previous request(s) response data into your next request:
 
