@@ -41,6 +41,37 @@
           "editUrl": "/guides/alerts.md"
         }
       ]
+    },
+    {
+      "title": "Examples",
+      "heading": true,
+      "routes": [
+        {
+          "title": "Minimal Configuration",
+          "path": "/guides/examples#minimal-configuration",
+          "editUrl": "/guides/examples.md"
+        },
+        {
+          "title": "Enabling Notification",
+          "path": "/guides/examples#enabling-notification",
+          "editUrl": "/guides/examples.md"
+        },
+        {
+          "title": "HTML Form Submission",
+          "path": "/guides/examples#html-form-submission-example",
+          "editUrl": "/guides/examples.md"
+        },
+        {
+          "title": "Multiple Request",
+          "path": "/guides/examples#multiple-request",
+          "editUrl": "/guides/examples.md"
+        },
+        {
+          "title": "Requests Chaining",
+          "path": "/guides/examples#requests-chaining",
+          "editUrl": "/guides/examples.md"
+        }
+      ]
     }
   ]
 }
