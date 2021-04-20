@@ -71,7 +71,7 @@ Details of the field are give in the table below.
 
 ## Probe Response Anatomy
 
-Below is the default response when Probe has successfully requested the URL:
+The default shape of a response when Monika has successfully fetched a request is as the following.
 
 ```json
 {
@@ -92,15 +92,15 @@ Below is the default response when Probe has successfully requested the URL:
 }
 ```
 
-Details of the field are give in the table below.
+Details of the fields are shown in the table below.
 
-| Topic      | Description                                                              |
-| :--------- | ------------------------------------------------------------------------ |
-| status     | HTTP Status Code (e.g 200, 403, 500)                                     |
-| statusText | HTTP Status Code Explanation (e.g OK, Forbidden, Internal Server Error)  |
-| config     | Request configuration (e.g URL, Method, Data, Headers, Body, etc.)       |
-| headers    | Response headers from the URL requested (e.g SetCookie, ETag, etc.)      |
-| data       | Response payload from the URL requested (e.g `token`, `results`, `data`) |
+| Topic      | Description                                                             |
+| :--------- | ----------------------------------------------------------------------- |
+| status     | HTTP Status Code (e.g 200, 403, 500)                                    |
+| statusText | HTTP Status Code Explanation (e.g OK, Forbidden, Internal Server Error) |
+| config     | Request configuration (e.g URL, Method, Data, Headers, Body, etc.)      |
+| headers    | Response headers from the fetched request (e.g SetCookie, ETag, etc.).  |
+| data       | Response payload from the fetched request (e.g token, results, data).   |
 
 Probe response data could be used for [Request Chaining](https://hyperjumptech.github.io/monika/guides/examples#requests-chaining).
 
