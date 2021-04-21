@@ -11,11 +11,11 @@ Monika operates by reading everything from the config file. From the configurati
 
 For more information, please refer to the detailed documentations below.
 
-| Topic                                                                        | Description                                             |
-| ---------------------------------------------------------------------------- | ------------------------------------------------------- |
-| [Probes](https://hyperjumptech.github.io/monika/guides/probes)               | How requests are set up and dispatched                  |
-| [Alerts](https://hyperjumptech.github.io/monika/guides/alerts)               | How alerts are triggered and how to setup an alert      |
-| [Notifications](https://hyperjumptech.github.io/monika/guides/notifications) | How to receive notifications when alerts are triggered  |
+| Topic                                                                        | Description                                            |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------ |
+| [Probes](https://hyperjumptech.github.io/monika/guides/probes)               | How requests are set up and dispatched                 |
+| [Alerts](https://hyperjumptech.github.io/monika/guides/alerts)               | How alerts are triggered and how to setup an alert     |
+| [Notifications](https://hyperjumptech.github.io/monika/guides/notifications) | How to receive notifications when alerts are triggered |
 
 ## Motivation
 
