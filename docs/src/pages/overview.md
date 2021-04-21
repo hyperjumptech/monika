@@ -31,7 +31,7 @@ Besides, Monika is easy to deploy. You can deploy Monika to many servers in diff
 
 ## Open source
 
-Monika is open sourced. How many of you click the "Pricing" menu every time after reading the feature page of a new product? Because it's an open source, we are removing barrier for budget strapped team. Monika's source code is always open for inspection. Follow any updates or give feedbacks through our discussion forum [here](https://github.com/hyperjumptech/monika/discussions).
+Monika is open sourced. How many of you click the "Pricing" menu every time after reading the feature page of a new product? Because it's an open source, we are removing barrier for budget strapped teams. Monika's source code is always open for inspection. Follow any updates or give feedbacks through our discussion forum [here](https://github.com/hyperjumptech/monika/discussions).
 
 ## You talked me into it, what now?
 
