@@ -27,7 +27,7 @@ With this in mind, we created Monika, a synthetic monitoring tool.
 
 There are plenty of free monitoring tools online, but many fall short of our requirements. Free uptime monitors exists, but they only ping for service availability. Most users don't use services only with pings. There are also plenty of real time monitoring tools. These tools need real users, which make them less suitable during development. Monika can synthesize usage scenarios during development, then use same scenarios in production. Synthetic monitoring tool enable you to generate complex usage flows for quality assurance. Those same flows later on can be deploy to check the production environment. All without the need to install agents or third party libraries.
 
-Besides, Monika is easy to deploy. You can deploy Monika to many servers in different locations. Receives notifications if any of those location experiencing service degradation. All these features are available for free.
+Besides, Monika is easy to deploy. You can deploy Monika to many servers in different locations. Afterward, Monika will send notification if any of those location experiencing service degradation. All these features are available for free.
 
 ## Open source
 
