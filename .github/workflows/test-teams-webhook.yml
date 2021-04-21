@@ -14,12 +14,11 @@ jobs:
         id: set_variables
         run: |
           if [ "$GITHUB_EVENT_NAME" = "issues" ]; then
-              echo "::set-output name=webhook_text::\"New issue opened ${{ $GITHUB_CONTEXT.event.issue.title }}\"" 
+              echo "::set-output name=webhook_text::\"New issue opened ${{ github.event.issue.title }}\"" 
           else
-              echo "::set-output name=webhook_text::\"New PR opened\""   
+              echo "::set-output name=webhook_text::\"New PR opened ${{ github.event.pull_request.title }}\""   
           fi
         env:
-          GITHUB_CONTEXT: ${{ github }}
           GITHUB_EVENT_NAME: ${{ github.event_name }}
       - name: Echo
         id: echo_variables
