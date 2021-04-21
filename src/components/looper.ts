@@ -24,11 +24,11 @@
 
 import { Config } from '../interfaces/config'
 import { Probe } from '../interfaces/probe'
-import { doProbe } from '../components/http-probe'
-import { report } from '../components/reporter'
+import { report } from './reporter'
 import { updateConfig } from '../components/config'
-import { log } from '../utils/log'
-import { getUnreportedLogs, setLogsAsReported } from './history'
+import { getUnreportedLogs, setLogsAsReported } from './logger/history'
+import { doProbe } from './probe'
+import { log } from '../utils/pino'
 
 const MILLISECONDS = 1000
 const DEFAULT_THRESHOLD = 5

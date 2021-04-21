@@ -22,11 +22,11 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { ProbeStatus, StatusDetails } from '../interfaces/probe-status'
-import { Probe } from '../interfaces/probe'
+import { ProbeStatus, StatusDetails } from '../../interfaces/probe-status'
+import { Probe } from '../../interfaces/probe'
 import { ValidateResponseStatus } from './alert'
-import { log } from '../utils/log'
-import { AxiosResponseWithExtraData } from '../interfaces/request'
+import { log } from '../../utils/pino'
+import { AxiosResponseWithExtraData } from '../../interfaces/request'
 
 const PROBE_STATUSES: ProbeStatus[] = []
 const INIT_PROBE_STATUS_DETAILS: StatusDetails = {

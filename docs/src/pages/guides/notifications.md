@@ -9,20 +9,21 @@ Monika will send notifications to you whenever [alerts](https://hyperjumptech.gi
 
 At this moment, Monika support these channel of notifications (You can use just one or more):
 
-1. SMTP
-2. Webhook
-3. Mailgun
-4. Sendgrid
-5. Slack
-6. Whatsapp
-7. Microsoft Teams
-8. Discord
+1. [SMTP](https://hyperjumptech.github.io/monika/guides/notifications#smtp)
+2. [Mailgun](https://hyperjumptech.github.io/monika/guides/notifications#mailgun)
+3. [SendGrid](https://hyperjumptech.github.io/monika/guides/notifications#sendgrid)
+4. [Webhook](https://hyperjumptech.github.io/monika/guides/notifications#webhook)
+5. [Slack](https://hyperjumptech.github.io/monika/guides/notifications#slack-incoming-webhook)
+6. [Telegram](https://hyperjumptech.github.io/monika/guides/notifications#telegram)
+7. [WhatsApp](https://hyperjumptech.github.io/monika/guides/notifications#whatsapp)
+8. [Microsoft Teams](https://hyperjumptech.github.io/monika/guides/notifications#microsoft-teams)
+9. [Discord](https://hyperjumptech.github.io/monika/guides/notifications#discord)
 
 We are working on more notifications like Telegram, and many more. You can help!
 
 ## Configurations
 
-To use one or more notifications, you need to define the settings in the config.json file as shown below.
+To use one or more notifications, you need to define the settings in the monika.json file as shown below.
 
 ```json
 "notifications": [
@@ -65,7 +66,7 @@ To use one or more notifications, you need to define the settings in the config.
   ],
 ```
 
-Note that every triggered alert will be sent to you through all the notifications you defined in the config.json, e.g., if you added `webhook` and `smtp` settings, you will receive the alert messages through both.
+Note that every triggered alert will be sent to you through all the notifications you defined in the monika.json, e.g., if you added `webhook` and `smtp` settings, you will receive the alert messages through both.
 
 ## SMTP
 

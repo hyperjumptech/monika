@@ -22,15 +22,15 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { ValidateResponseStatus } from './../../utils/alert'
-import { processProbeStatus } from '../../utils/process-server-status'
-import { probing } from '../../utils/probing'
-import { validateResponse } from '../../utils/alert'
+import { ValidateResponseStatus } from '../notification/alert'
+import { processProbeStatus } from '../notification/process-server-status'
+import { probing } from './probing'
+import { validateResponse } from '../notification/alert'
 import { Probe } from '../../interfaces/probe'
 import { Notification } from '../../interfaces/notification'
-import { probeLog } from '../../utils/logger'
+import { probeLog } from '../logger'
 import { AxiosResponseWithExtraData } from '../../interfaces/request'
-import { log } from '../../utils/log'
+import { log } from '../../utils/pino'
 import { sendAlerts } from '../notification'
 
 /**

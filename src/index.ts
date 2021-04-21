@@ -26,12 +26,17 @@ import { Command, flags } from '@oclif/command'
 import cli from 'cli-ux'
 import chalk from 'chalk'
 import boxen from 'boxen'
+import open from 'open'
 import { MailData, MailgunData, SMTPData, WebhookData } from './interfaces/data'
 import { Config } from './interfaces/config'
-import { loopProbes, loopReport } from './utils/looper'
-import { printAllLogs } from './utils/logger'
-import { log } from './utils/log'
-import { closeLog, openLogfile, flushAllLogs } from './utils/history'
+import { loopProbes, loopReport } from './components/looper'
+import { printAllLogs } from './components/logger'
+import { log } from './utils/pino'
+import {
+  closeLog,
+  openLogfile,
+  flushAllLogs,
+} from './components/logger/history'
 import { notificationChecker } from './components/notification/checker'
 import {
   getConfig,
@@ -50,13 +55,17 @@ class Monika extends Command {
     config: flags.string({
       char: 'c',
       description:
-        'JSON configuration filename. If none is supplied, will look for default in current path.',
-      default: './config.json',
+        'JSON configuration filename. If none is supplied, will look for monika.json in the current directory.',
+      default: './monika.json',
       env: 'MONIKA_JSON_CONFIG',
     }),
 
+    'create-config': flags.boolean({
+      description: 'open Monika Configuration Generator using default browser',
+    }),
+
     logs: flags.boolean({
-      char: 'l', // l shorthand for logs
+      char: 'l', // prints the logs
       description: 'print all logs.',
     }),
 
@@ -91,6 +100,14 @@ class Monika extends Command {
         log.info('Cancelled. Thank you.')
       }
       closeLog()
+      return
+    }
+
+    if (flags['create-config']) {
+      log.info(
+        'Opening Monika Configuration Generator in your default browser...'
+      )
+      await open('https://hyperjumptech.github.io/monika-config-generator/')
       return
     }
 

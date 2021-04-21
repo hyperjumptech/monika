@@ -22,57 +22,69 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios from 'axios'
-import {
-  AxiosRequestConfigWithExtraData,
-  AxiosResponseWithExtraData,
-  RequestConfig,
-} from '../interfaces/request'
+import { Probe } from '../../interfaces/probe'
+import { AxiosResponseWithExtraData } from '../../interfaces/request'
 
-const responseInterceptor = (axiosResponse: AxiosResponseWithExtraData) => {
-  const start = axiosResponse?.config.extraData?.requestStartedAt!
-  const responseTime = new Date().getTime() - start
+type CheckResponseFn = (response: AxiosResponseWithExtraData) => boolean
+export type ValidateResponseStatus = { alert: string; status: boolean }
 
-  const data = {
-    ...axiosResponse,
-    config: {
-      ...axiosResponse?.config,
-      extraData: {
-        ...axiosResponse?.config.extraData,
-        responseTime,
-      },
-    },
-  }
+// Check if response status is not 2xx
+export const statusNot2xx: CheckResponseFn = (response) =>
+  response.status < 200 || response.status >= 300
 
-  return data
+// Check if response time is greater than specified value in milliseconds
+export const responseTimeGreaterThan: (
+  minimumTime: number
+) => CheckResponseFn = (minimumTime) => (
+  response: AxiosResponseWithExtraData
+): boolean => {
+  const respTimeNum = response.config.extraData?.responseTime ?? 0
+
+  return respTimeNum > minimumTime
 }
 
-export const request = async (config: RequestConfig) => {
-  const axiosInstance = axios.create()
-  axiosInstance.interceptors.request.use(
-    (axiosRequestConfig: AxiosRequestConfigWithExtraData) => {
-      const data = {
-        ...axiosRequestConfig,
-        extraData: {
-          ...axiosRequestConfig?.extraData,
-          requestStartedAt: new Date().getTime(),
-        },
-      }
-      return data
+// parse string like "response-time-greater-than-200-ms" and return the time in ms
+export const parseAlertStringTime = (str: string): number => {
+  // match any string that ends with digits followed by unit 's' or 'ms'
+  const match = str.match(/(\d+)-(m?s)$/)
+  if (!match) {
+    throw new Error('alert string does not contain valid time number')
+  }
+
+  const number = Number(match[1])
+  const unit = match[2]
+
+  if (unit === 's') return number * 1000
+  return number
+}
+
+export const getCheckResponseFn = (
+  alert: string
+): CheckResponseFn | undefined => {
+  if (alert === 'status-not-2xx') {
+    return statusNot2xx
+  }
+  if (alert.startsWith('response-time-greater-than-')) {
+    const alertTime = parseAlertStringTime(alert)
+    return responseTimeGreaterThan(alertTime)
+  }
+}
+
+export const validateResponse = (
+  alerts: Probe['alerts'],
+  response: AxiosResponseWithExtraData
+): ValidateResponseStatus[] => {
+  const checks = []
+
+  for (const alert of alerts) {
+    const checkFn = getCheckResponseFn(alert.toLowerCase())
+    if (checkFn) {
+      checks.push({
+        alert,
+        status: checkFn(response),
+      })
     }
-  )
-  axiosInstance.interceptors.response.use(
-    (axiosResponse: AxiosResponseWithExtraData) => {
-      const data = responseInterceptor(axiosResponse)
-      return data
-    },
-    (axiosResponse: AxiosResponseWithExtraData) => {
-      const data = responseInterceptor(axiosResponse)
-      throw data
-    }
-  )
-  return axiosInstance.request({
-    ...config,
-    data: config.body,
-  })
+  }
+
+  return checks
 }

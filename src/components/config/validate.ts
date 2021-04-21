@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 /* eslint-disable complexity */
-import { getCheckResponseFn } from '../../utils/alert'
+import { getCheckResponseFn } from '../notification/alert'
 import { Notification } from '../../interfaces/notification'
 import {
   SMTPData,

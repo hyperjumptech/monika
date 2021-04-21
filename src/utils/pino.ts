@@ -63,6 +63,11 @@ interface NotifyLogObject extends BaseLogObject {
   url: string
 }
 
+interface PlainLogObject {
+  type: 'PLAIN' | ''
+  msg?: string
+}
+
 export type LogObject = ProbeLogObject | AlertLogObject | NotifyLogObject
 
 const isProbeLogObject = (obj: any): obj is ProbeLogObject => {
@@ -75,6 +80,10 @@ const isAlertLogObject = (obj: any): obj is AlertLogObject => {
 
 const isNotifyLogObject = (obj: any): obj is NotifyLogObject => {
   return obj?.type?.startsWith('NOTIFY')
+}
+
+const isPlainLog = (obj: any): obj is PlainLogObject => {
+  return obj?.type?.startsWith('PLAIN')
 }
 
 const prettyPrint = {
@@ -100,6 +109,9 @@ const prettyPrint = {
       return `${time},${type},${log.alertType || '-'},${
         log.notificationType || '-'
       },${log.notificationId || '-'},${log.probeId || '-'},${log.url || '-'}`
+    }
+    if (isPlainLog(log)) {
+      return `${log.msg}`
     }
     return `${time} ${log[messageKey]}`
   },

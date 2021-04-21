@@ -222,5 +222,6 @@ docs/out
 
 #ignore personal configs
 config.json
+monika.json
 #ignore databasefile
-history.db
+monika-logs.db*
