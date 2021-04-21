@@ -25,7 +25,7 @@
 import { Config } from '../interfaces/config'
 import { Probe } from '../interfaces/probe'
 import { report } from './reporter'
-import { updateConfig } from '../components/config'
+import { updateConfig } from './config'
 import { getUnreportedLogs, setLogsAsReported } from './logger/history'
 import { doProbe } from './probe'
 import { log } from '../utils/pino'
@@ -111,12 +111,7 @@ export function loopReport(getConfig: () => Config) {
       try {
         const unreportedLogs = await getUnreportedLogs()
 
-        const { data } = await report(
-          url,
-          key,
-          version || '',
-          Buffer.from(JSON.stringify(unreportedLogs))
-        )
+        const { data } = await report(url, key, version || '', unreportedLogs)
 
         updateConfig(data)
 

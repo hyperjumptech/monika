@@ -28,7 +28,7 @@ import { Config } from '../../interfaces/config'
 import { parseConfig } from './parse'
 import { validateConfig } from './validate'
 import { handshake } from '../reporter'
-import { log } from '../../utils/log'
+import { log } from '../../utils/pino'
 
 const emitter = new EventEmitter()
 

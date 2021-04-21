@@ -37,7 +37,7 @@ export type HistoryLogType = {
   responseTime: number
 }
 
-type HistoryReportLogType = HistoryLogType & {
+export type HistoryReportLogType = HistoryLogType & {
   id: number
   created_at: string
   probe_id: string

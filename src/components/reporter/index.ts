@@ -23,13 +23,14 @@
  **********************************************************************************/
 
 import axios from 'axios'
+import pako from 'pako'
 import { v4 as uuidv4 } from 'uuid'
-import FormData from 'form-data'
 
 import { Config } from '../../interfaces/config'
 import { Probe } from '../../interfaces/probe'
 import { Notification } from '../../interfaces/notification'
 import getIp from '../../utils/ip'
+import { HistoryReportLogType } from '../logger/history'
 
 export interface HQConfig {
   url: string
@@ -43,6 +44,13 @@ export type HQResponse = {
     version: string
     probes?: Probe[]
     notifications?: Notification[]
+  }
+}
+
+const renameResponseDataConfigVersionField = (data: any) => {
+  return {
+    ...data,
+    data: { ...data.data, version: data.data.config_version },
   }
 }
 
@@ -66,37 +74,31 @@ export const handshake = (config: Config): Promise<HQResponse> => {
         },
       }
     )
-    .then((res) => ({
-      ...res.data,
-      data: { ...res.data.data, version: res.data.data['config-version'] },
-    }))
+    .then(({ data }) => renameResponseDataConfigVersionField(data))
 }
 
 export const report = (
   url: string,
   key: string,
   configVersion: string,
-  attachment: Buffer
+  history: HistoryReportLogType[]
 ): Promise<HQResponse> => {
-  const form = new FormData()
-  form.append(
-    'monika',
-    JSON.stringify({
-      id: uuidv4(),
-      ip_address: getIp(),
-      'config-version': configVersion,
-    })
-  )
-  form.append('attachment', attachment)
-
   return axios
-    .post(`${url}/api/report`, form, {
-      headers: {
-        Authorization: `Bearer ${key}`,
+    .post(
+      `${url}/api/report`,
+      {
+        id: uuidv4(),
+        ip_address: getIp(),
+        config_version: configVersion,
+        history,
       },
-    })
-    .then((res) => ({
-      ...res.data,
-      data: { ...res.data.data, version: res.data.data['config-version'] },
-    }))
+      {
+        headers: {
+          'Content-Encoding': 'gzip',
+          Authorization: `Bearer ${key}`,
+        },
+        transformRequest: (data) => pako.gzip(JSON.stringify(data)).buffer,
+      }
+    )
+    .then(({ data }) => renameResponseDataConfigVersionField(data))
 }
