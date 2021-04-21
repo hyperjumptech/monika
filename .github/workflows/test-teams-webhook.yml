@@ -10,15 +10,18 @@ jobs:
   notify:
     runs-on: ubuntu-latest
     steps:
-      - name: Dump GitHub context
+      - name: Set variables
+        id: set_variables
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = "issues" ]; then
+              echo "::set-output name=webhook_text::New issue opened $GITHUB_CONTEXT.event.issue.title" 
+          else
+              echo "::set-output name=webhook_text::New PR opened"   
+          fi
         env:
           GITHUB_CONTEXT: ${{ toJSON(github) }}
-        run: echo "$GITHUB_CONTEXT"
-      - name: Notify Teams
-        uses: joelwmale/webhook-action@fd99bb3b8272237103e349e9bb4d9b0ead9a217c
-        with:
-          url: ${{secrets.TEAMS_WEBHOOK}}
-          body: '{"title": "Monika Repository", "Text": "$EVENT_NAME"}'
-        env:
-          EVENT_NAME: ${{ github.event_name }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+      - name: Echo
+        id: echo_variables
+        run: echo "${{ steps.set_variables.outputs.webhook_test }}"
       
