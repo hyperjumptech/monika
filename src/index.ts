@@ -28,6 +28,7 @@ import cli from 'cli-ux'
 import chalk from 'chalk'
 import boxen from 'boxen'
 import open from 'open'
+import fs from 'fs'
 import { MailData, MailgunData, SMTPData, WebhookData } from './interfaces/data'
 import { looper } from './components/looper'
 import { printAllLogs } from './components/logger'
@@ -39,6 +40,18 @@ import {
 } from './components/logger/history'
 import { notificationChecker } from './components/notification/checker'
 import { getConfig, setupConfigFromFile } from './components/config'
+
+function getDefaultConfig() {
+  const filesArray = fs.readdirSync('./')
+  const monikaDotJsonFile = filesArray.find((x) => x === 'monika.json')
+  const configDotJsonFile = filesArray.find((x) => x === 'config.json')
+
+  return monikaDotJsonFile
+    ? `./${monikaDotJsonFile}`
+    : configDotJsonFile
+    ? `./${configDotJsonFile}`
+    : './monika.json'
+}
 
 class Monika extends Command {
   static description = 'Monika command line monitoring tool'
@@ -52,7 +65,7 @@ class Monika extends Command {
       char: 'c',
       description:
         'JSON configuration filename. If none is supplied, will look for monika.json in the current directory.',
-      default: './monika.json',
+      default: () => getDefaultConfig(),
       env: 'MONIKA_JSON_CONFIG',
     }),
 
