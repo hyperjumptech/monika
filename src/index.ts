@@ -46,7 +46,11 @@ function getDefaultConfig() {
   const monikaDotJsonFile = filesArray.find((x) => x === 'monika.json')
   const configDotJsonFile = filesArray.find((x) => x === 'config.json')
 
-  return monikaDotJsonFile ? `./${monikaDotJsonFile}` : `./${configDotJsonFile}`
+  return monikaDotJsonFile
+    ? `./${monikaDotJsonFile}`
+    : configDotJsonFile
+    ? `./${configDotJsonFile}`
+    : './monika.json'
 }
 
 class Monika extends Command {
