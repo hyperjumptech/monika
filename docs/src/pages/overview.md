@@ -7,7 +7,7 @@ Monika is an open source and free synthetic monitoring command line application.
 
 ## How it works
 
-Monika operates by reading everything from a config file. Based on the configuration it will build and send out http requests. If the request response is not as expected, Monika will create an alert. The alert then can be send via various notification channel (email, webhook, telegram, whatsapp, etc.).
+Monika operates by reading everything from a config file. Based on the configuration it will build and send out http requests. If the request response is not as expected, Monika will create an alert. The alert then can be sent via various notification channel (email, webhook, telegram, whatsapp, etc.).
 
 For more information, please refer to the detailed documentations below.
 
