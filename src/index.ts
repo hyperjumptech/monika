@@ -43,9 +43,10 @@ import { getConfig, setupConfigFromFile } from './components/config'
 
 function getDefaultConfig() {
   const filesArray = fs.readdirSync('./')
-  const configJsonFile = filesArray.find((x) => x === 'config.json')
+  const monikaDotJsonFile = filesArray.find((x) => x === 'monika.json')
+  const configDotJsonFile = filesArray.find((x) => x === 'config.json')
 
-  return configJsonFile ? `./${configJsonFile}` : './monika.json'
+  return monikaDotJsonFile ? `./${monikaDotJsonFile}` : `./${configDotJsonFile}`
 }
 
 class Monika extends Command {
