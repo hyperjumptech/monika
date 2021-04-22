@@ -50,7 +50,7 @@ export type HQResponse = {
 const renameResponseDataConfigVersionField = (data: any) => {
   return {
     ...data,
-    data: { ...data.data, version: data.data.config_version },
+    data: { ...data?.data, version: data?.data?.config_version },
   }
 }
 
@@ -95,6 +95,7 @@ export const report = (
       {
         headers: {
           'Content-Encoding': 'gzip',
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${key}`,
         },
         transformRequest: (data) => pako.gzip(JSON.stringify(data)).buffer,
