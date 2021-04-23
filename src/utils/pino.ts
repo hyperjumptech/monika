@@ -41,6 +41,7 @@ interface ProbeLogObject extends BaseLogObject {
   url: string
   statusCode: number
   responseTime: number
+  length: number
 }
 
 interface AlertLogObject extends BaseLogObject {
@@ -96,7 +97,9 @@ const prettyPrint = {
     if (isProbeLogObject(log)) {
       return `${time},${type},${log.checkOrder || '-'},${log.probeId || '-'},${
         log.url || '-'
-      },${log.statusCode || '-'},${log.responseTime || '-'}`
+      },${log.statusCode || '-'},${log.responseTime || '-'},${
+        log.length || '-'
+      }`
     }
     if (isAlertLogObject(log)) {
       return `${time},${type},${log.alertType || '-'},${

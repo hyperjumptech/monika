@@ -74,6 +74,7 @@ export async function probeLog({
     url: probeRes.config.url,
     statusCode: probeRes.status,
     responseTime: probeRes.config.extraData?.responseTime,
+    contentLength: probeRes.headers['Content-Length'],
   })
 
   saveLog(probe, probeRes, requestIndex, err)
@@ -87,7 +88,7 @@ export async function printAllLogs() {
       type: 'PLAIN',
       msg: `${data.id} id: ${data.probe_id} status: ${chalk.keyword(
         getStatusColor(data.status_code)
-      )(data.status_code)} - ${data.probe_url}, ${data.response_time}`,
+      )(data.status_code)} - ${data.probe_url}, ${data.resp_time}ms`,
     })
   })
 }

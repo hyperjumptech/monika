@@ -22,10 +22,10 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Config } from '../interfaces/config'
-import { Probe } from '../interfaces/probe'
-import { doProbe } from './probe'
-import { log } from '../utils/pino'
+import { Config } from './interfaces/config'
+import { Probe } from './interfaces/probe'
+import { doProbe } from './components/probe'
+import { log } from './utils/pino'
 
 const MILLISECONDS = 1000
 const DEFAULT_THRESHOLD = 5

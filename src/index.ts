@@ -30,7 +30,7 @@ import boxen from 'boxen'
 import open from 'open'
 import fs from 'fs'
 import { MailData, MailgunData, SMTPData, WebhookData } from './interfaces/data'
-import { looper } from './components/looper'
+import { looper } from './looper'
 import { printAllLogs } from './components/logger'
 import { log } from './utils/pino'
 import {
@@ -57,7 +57,6 @@ class Monika extends Command {
   static description = 'Monika command line monitoring tool'
 
   static flags = {
-    // add --version flag to show CLI version
     version: flags.version({ char: 'v' }),
     help: flags.help({ char: 'h' }),
 
@@ -100,7 +99,7 @@ class Monika extends Command {
 
     if (flags.flush) {
       const ans = await cli.prompt(
-        'Are you sure you want to flush all logs in history.db (Y/n)?'
+        'Are you sure you want to flush all logs in monika-logs.db (Y/n)?'
       )
       if (ans === 'Y') {
         flushAllLogs()

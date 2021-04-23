@@ -32,9 +32,15 @@ const sqlite3 = require('sqlite3').verbose()
 export type HistoryLogType = {
   id: number
   probeID: string
-  statusCode: number
+  probeName: string
   probeURL: string
-  responseTime: number
+  probeBody: string
+  statusCode: number
+
+  respTime: number
+  respHdr: string
+  respData: string
+  respErr: string
 }
 
 let db: any
@@ -47,11 +53,15 @@ async function createTable() {
     id INTEGER PRIMARY KEY,
     created_at TEXT,
     probe_id TEXT,
-    status_code INTEGER,
     probe_name TEXT,
     probe_url TEXT,
-    response_time INTEGER,
-    error_resp TEXT
+    probe_body TEXT,
+    status_code INTEGER,
+    
+    resp_time INTEGER,
+    resp_headers TEXT,
+    resp_data TEXT,
+    resp_error TEXT
 );`
   db.run(createTableSQL)
 }
@@ -67,7 +77,7 @@ export async function openLogfile() {
     sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE,
     async (err: Error) => {
       if (err) {
-        log.info('warning: cannot open logfile. error:', err.message)
+        log.error('warning: cannot open logfile. error:', err.message)
       }
       createTable()
     }
@@ -80,7 +90,7 @@ export async function openLogfile() {
  */
 export const getAllLogs = (): Promise<HistoryLogType[]> => {
   const readRowsSQL =
-    'SELECT rowid AS id, probe_id, status_code, probe_url, response_time FROM history'
+    'SELECT rowid AS id, probe_id, probe_name, probe_url, probe_body,  status_code, resp_time, resp_headers, resp_data, resp_error FROM history'
 
   const res: Promise<HistoryLogType[]> = new Promise((resolve, reject) => {
     db.all(readRowsSQL, (err: Error, data: HistoryLogType[]) => {
@@ -116,24 +126,27 @@ export async function saveLog(
   requestIndex: number,
   errorResp: string
 ) {
-  const insertSQL = `INSERT into history (probe_id, created_at, status_code, probe_name, probe_url, response_time, error_resp) 
-  VALUES(?, ?, ?, ?, ?, ?, ?);`
+  const insertSQL = `INSERT into history (created_at, probe_id, probe_name, probe_url, probe_body, status_code, resp_time, resp_headers, resp_data, resp_error) 
+  VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`
 
   const created = new Date()
 
   const params = [
-    probe.id,
     created,
-    probeRes.status,
+    probe.id,
     probe.name,
     probeRes.config.url,
+    probeRes.config.data,
+    probeRes.status,
     probeRes.config.extraData?.responseTime,
+    probeRes.headers,
+    probeRes.data, // TODO: limit data stored.
     errorResp,
   ]
 
   await db.run(insertSQL, params, (err: Error) => {
     if (err) {
-      return log.info('error, cannot insert data into history.db', err)
+      return log.info('error, cannot insert data into monika-log.db: ', err)
     }
   })
 }
