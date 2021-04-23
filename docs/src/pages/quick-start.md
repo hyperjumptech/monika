@@ -5,7 +5,7 @@ title: Quick Start
 
 ## Getting Started
 
-To start monitoring URLs, you need to create a configuration file (JSON file). The configuration file contains the probes, alerts, and notification configurations. You can copy from one of these examples:
+To start monitoring URLs, you need to create a configuration file (JSON file). The configuration file contains the probes, alerts, and notification configurations. You can generate a configuration file using [Monika Config Generator](https://hyperjumptech.github.io/monika-config-generator) web app. Alternatively, you can use one of the following configuration examples:
 
 1. [SMTP Gmail](https://github.com/hyperjumptech/monika/blob/main/config_sample/config.smtp-gmail.example.json)
 2. [Mailgun](https://github.com/hyperjumptech/monika/blob/main/config_sample/config.mailgun.example.json)
@@ -27,7 +27,7 @@ Options and parameters can be seen by running `monika -h`. Or if you cloned this
 
 ## Quick Start
 
-At the center of monica is a configuration file. Follow the following steps to quickly setup monitoring and get notification when the website is down via Gmail.
+At the center of monica is a configuration file. Follow the following steps to quickly setup monitoring and get notification when a website is down via Gmail.
 
 1. Create a `monika.json` file and fill it out with the following
 

@@ -28,6 +28,14 @@ export const Nav = () => (
                 <a className="leading-6 font-medium">Docs</a>
               </Link>
             </div>
+            <div>
+              <a
+                href="https://hyperjumptech.github.io/monika-config-generator"
+                className="leading-6 font-medium"
+              >
+                Config Generator
+              </a>
+            </div>
             {/* <div>
               <Link href="/examples/simple">
                 <a className="leading-6 font-medium">Examples</a>
