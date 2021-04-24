@@ -74,7 +74,7 @@ export async function probeLog({
     url: probeRes.config.url,
     statusCode: probeRes.status,
     responseTime: probeRes.config.extraData?.responseTime,
-    responseLength: probeRes.headers['Content-Length'],
+    responseLength: probeRes.headers['content-length'],
   })
 
   saveLog(probe, probeRes, requestIndex, err)
