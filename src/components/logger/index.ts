@@ -74,12 +74,15 @@ export async function probeLog({
     url: probeRes.config.url,
     statusCode: probeRes.status,
     responseTime: probeRes.config.extraData?.responseTime,
-    contentLength: probeRes.headers['Content-Length'],
+    responseLength: probeRes.headers['Content-Length'],
   })
 
   saveLog(probe, probeRes, requestIndex, err)
 }
 
+/**
+ * printAllLogs dumps the conent of monika-logs.db onto the screen
+ */
 export async function printAllLogs() {
   const data = await getAllLogs()
 
