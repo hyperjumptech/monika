@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.2] - 2021-04-23
+
+### Added
+
+- Show link to [Monika config generator](https://github.com/hyperjumptech/monika-config-generator) when Monika cannot find the configuration file.
+- Docs: Added links to Monika config generator on the landing page.
+
+### Changed
+
+- Default configuration file's name is now `monika.json`. Monika will search for `monika.json` first in the current directory. If it couldn't be found, Monika will search for `config.json`.
+- Docs: Readme, Overview, and Notifications.
+
+### Fixed
+
+- Slow log prints when Monika is run with `-l` flag.
+
 ## [1.3.1] - 2021-04-09
 
 ### Added
