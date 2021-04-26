@@ -1,9 +1,15 @@
+# This workflow will run when a new Pull Request is opened or reopened, and a new issue is opened.
+# This workflow only notifies Hyperjump's Microsoft Teams. Nothing else.
+# WARNING: Since this PR uses pull_request_target trigger, DO NOT BUILD THE PROJECT IN THIS WORKFLOW!
+# For more information: https://securitylab.github.com/research/github-actions-preventing-pwn-requests/
+# To PR reviewers: Please make sure there is no build steps in this workflow.
+
 name: Notify Teams
 
 on:
   issues:
     types: [opened]
-  pull_request:
+  pull_request_target:
     types: [opened, reopened]
 
 jobs:
