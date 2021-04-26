@@ -24,11 +24,15 @@
 
 import { Config } from '../interfaces/config'
 import { Probe } from '../interfaces/probe'
+import { report } from './reporter'
+import { updateConfig } from './config'
+import { getUnreportedLogs, setLogsAsReported } from './logger/history'
 import { doProbe } from './probe'
 import { log } from '../utils/pino'
 
 const MILLISECONDS = 1000
 const DEFAULT_THRESHOLD = 5
+const DEFAULT_REPORT_INTERVAL = 180000 // 3 minutes
 
 function sanitizeProbe(probe: Probe, index: number): Probe {
   const { name, incidentThreshold, recoveryThreshold, alerts } = probe
@@ -65,23 +69,56 @@ function sanitizeProbe(probe: Probe, index: number): Probe {
 /**
  * looper does all the looping
  * @param {object} config is an object that contains all the configs
+ * @returns {function} - function to stop the looper
  */
-export function looper(config: Config) {
-  config.probes.forEach((probe, i) => {
-    const probeInterval = setInterval(
-      (() => {
-        let counter = 0
-        return () => {
-          const sanitizedProbe = sanitizeProbe(probe, i)
+export function loopProbes(config: Config) {
+  let isAborted = false
 
-          return doProbe(++counter, sanitizedProbe, config.notifications)
-        }
-      })(),
-      (probe.interval ?? 10) * MILLISECONDS
-    )
+  config.probes.forEach((probe, i) => {
+    let counter = 0
+    const probeInterval = setInterval(() => {
+      if (isAborted) {
+        clearInterval(probeInterval)
+      }
+
+      const sanitizedProbe = sanitizeProbe(probe, i)
+      return doProbe(++counter, sanitizedProbe, config.notifications)
+    }, (probe.interval ?? 10) * MILLISECONDS)
 
     if (process.env.CI || process.env.NODE_ENV === 'test') {
       clearInterval(probeInterval)
     }
   })
+
+  const abort = () => {
+    isAborted = true
+  }
+
+  return abort
+}
+
+export function loopReport(getConfig: () => Config) {
+  const config = getConfig()
+
+  const { monikaHQ } = config
+
+  if (monikaHQ) {
+    const { url, key, interval = DEFAULT_REPORT_INTERVAL } = monikaHQ
+
+    setInterval(async () => {
+      const { version } = getConfig()
+
+      try {
+        const unreportedLogs = await getUnreportedLogs()
+
+        const { data } = await report(url, key, version || '', unreportedLogs)
+
+        updateConfig(data)
+
+        await setLogsAsReported(unreportedLogs.map((log) => log.id))
+      } catch (error) {
+        log.error(error?.message)
+      }
+    }, interval)
+  }
 }
