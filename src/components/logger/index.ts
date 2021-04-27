@@ -91,7 +91,9 @@ export async function printAllLogs() {
       type: 'PLAIN',
       msg: `${data.id} id: ${data.probe_id} status: ${chalk.keyword(
         getStatusColor(data.status_code)
-      )(data.status_code)} - ${data.probe_url}, ${data.resp_time}ms`,
+      )(data.status_code)} - ${data.probe_url}, ${
+        data.response_time || '- '
+      }ms`,
     })
   })
 }

@@ -105,7 +105,7 @@ export async function openLogfile() {
  */
 export const getAllLogs = (): Promise<HistoryLogType[]> => {
   const readRowsSQL =
-    'SELECT rowid AS id, probe_id, probe_name, probe_url, probe_body,  status_code, response_time, response_headers, response_data, response_error FROM history'
+    'SELECT rowid AS id, probe_id, probe_name, probe_url, probe_body, status_code, response_time, response_headers, response_data, response_error FROM history'
 
   const res: Promise<HistoryLogType[]> = new Promise((resolve, reject) => {
     db.all(readRowsSQL, (err: Error, data: HistoryLogType[]) => {
@@ -119,7 +119,7 @@ export const getAllLogs = (): Promise<HistoryLogType[]> => {
 
 export const getUnreportedLogs = () => {
   const readRowsSQL =
-    'SELECT id, created_at, probe_id, status_code, probe_name, probe_url, response_time, error_resp FROM history WHERE reported = 0'
+    'SELECT id, created_at, probe_id, status_code, probe_name, probe_url, response_time, response_error FROM history WHERE reported = 0'
 
   return new Promise<HistoryReportLogType[]>((resolve, reject) => {
     db.all(readRowsSQL, (err: Error, data: HistoryReportLogType[]) => {
