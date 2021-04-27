@@ -22,13 +22,16 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Config } from '../interfaces/config'
-import { Probe } from '../interfaces/probe'
-import { report } from './reporter'
-import { updateConfig } from './config'
-import { getUnreportedLogs, setLogsAsReported } from './logger/history'
-import { doProbe } from './probe'
-import { log } from '../utils/pino'
+import { Config } from './interfaces/config'
+import { Probe } from './interfaces/probe'
+import { report } from './components/reporter'
+import { updateConfig } from './components/config'
+import {
+  getUnreportedLogs,
+  setLogsAsReported,
+} from './components/logger/history'
+import { doProbe } from './components/probe'
+import { log } from './utils/pino'
 
 const MILLISECONDS = 1000
 const DEFAULT_THRESHOLD = 5

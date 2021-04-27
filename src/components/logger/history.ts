@@ -37,10 +37,12 @@ export type HistoryLogType = {
   probeBody: string
   statusCode: number
 
-  respTime: number
-  respHdr: string
-  respData: string
-  respErr: string
+  responseTime: number
+  responseHdr: string
+  responseData: string
+  responseErr: string
+
+  reported: number
 }
 
 export type HistoryReportLogType = HistoryLogType & {
