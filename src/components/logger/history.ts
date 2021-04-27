@@ -43,6 +43,17 @@ export type HistoryLogType = {
   respErr: string
 }
 
+export type HistoryReportLogType = HistoryLogType & {
+  id: number
+  created_at: string
+  probe_id: string
+  status_code: number
+  probe_name: string
+  probe_url: string
+  response_time: number
+  error_resp: string
+}
+
 let db: any
 
 /**
@@ -58,10 +69,12 @@ async function createTable() {
     probe_body TEXT,
     status_code INTEGER,
     
-    resp_time INTEGER,
-    resp_headers TEXT,
-    resp_data TEXT,
-    resp_error TEXT
+    response_time INTEGER,
+    response_headers TEXT,
+    response_data TEXT,
+    response_error TEXT,
+
+    reported INTEGER DEFAULT 0
 );`
   db.run(createTableSQL)
 }
@@ -102,6 +115,36 @@ export const getAllLogs = (): Promise<HistoryLogType[]> => {
   return res
 }
 
+export const getUnreportedLogs = () => {
+  const readRowsSQL =
+    'SELECT id, created_at, probe_id, status_code, probe_name, probe_url, response_time, error_resp FROM history WHERE reported = 0'
+
+  return new Promise<HistoryReportLogType[]>((resolve, reject) => {
+    db.all(readRowsSQL, (err: Error, data: HistoryReportLogType[]) => {
+      if (err) reject(err)
+      else resolve(data)
+    })
+  })
+}
+
+export const setLogsAsReported = (ids: number[]) => {
+  const updateRowsSQL = `UPDATE history SET reported = 1 WHERE id IN (${ids.join(
+    ', '
+  )})`
+
+  return new Promise<void>((resolve, reject) => {
+    db.run(updateRowsSQL, (err: Error) => {
+      if (err)
+        reject(
+          new Error(
+            'error, cannot mark logs as updated in history.db: ' + err?.message
+          )
+        )
+      else resolve()
+    })
+  })
+}
+
 /**
  * flushAllLogs drops the table and recreates it
  */
@@ -126,10 +169,10 @@ export async function saveLog(
   requestIndex: number,
   errorResp: string
 ) {
-  const insertSQL = `INSERT into history (created_at, probe_id, probe_name, probe_url, probe_body, status_code, resp_time, resp_headers, resp_data, resp_error) 
+  const insertSQL = `INSERT into history (created_at, probe_id, probe_name, probe_url, probe_body, status_code, response_time, response_headers, response_data, response_error) 
   VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`
 
-  const created = new Date()
+  const created = new Date().toISOString()
 
   const params = [
     created,
