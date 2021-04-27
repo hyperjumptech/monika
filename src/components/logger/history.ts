@@ -37,10 +37,12 @@ export type HistoryLogType = {
   probeBody: string
   statusCode: number
 
-  respTime: number
-  respHdr: string
-  respData: string
-  respErr: string
+  responseTime: number
+  responseHdr: string
+  responseData: string
+  responseErr: string
+
+  reported: number
 }
 
 export type HistoryReportLogType = HistoryLogType & {
@@ -103,7 +105,7 @@ export async function openLogfile() {
  */
 export const getAllLogs = (): Promise<HistoryLogType[]> => {
   const readRowsSQL =
-    'SELECT rowid AS id, probe_id, probe_name, probe_url, probe_body,  status_code, resp_time, resp_headers, resp_data, resp_error FROM history'
+    'SELECT rowid AS id, probe_id, probe_name, probe_url, probe_body,  status_code, response_time, response_headers, response_data, response_error FROM history'
 
   const res: Promise<HistoryLogType[]> = new Promise((resolve, reject) => {
     db.all(readRowsSQL, (err: Error, data: HistoryLogType[]) => {
