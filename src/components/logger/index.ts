@@ -74,11 +74,15 @@ export async function probeLog({
     url: probeRes.config.url,
     statusCode: probeRes.status,
     responseTime: probeRes.config.extraData?.responseTime,
+    responseLength: probeRes.headers['content-length'],
   })
 
   saveLog(probe, probeRes, requestIndex, err)
 }
 
+/**
+ * printAllLogs dumps the conent of monika-logs.db onto the screen
+ */
 export async function printAllLogs() {
   const data = await getAllLogs()
 
@@ -87,7 +91,9 @@ export async function printAllLogs() {
       type: 'PLAIN',
       msg: `${data.id} id: ${data.probe_id} status: ${chalk.keyword(
         getStatusColor(data.status_code)
-      )(data.status_code)} - ${data.probe_url}, ${data.response_time}`,
+      )(data.status_code)} - ${data.probe_url}, ${
+        data.response_time || '- '
+      }ms`,
     })
   })
 }

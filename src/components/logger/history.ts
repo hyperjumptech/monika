@@ -32,9 +32,17 @@ const sqlite3 = require('sqlite3').verbose()
 export type HistoryLogType = {
   id: number
   probeID: string
-  statusCode: number
+  probeName: string
   probeURL: string
+  probeBody: string
+  statusCode: number
+
   responseTime: number
+  responseHdr: string
+  responseData: string
+  responseErr: string
+
+  reported: number
 }
 
 export type HistoryReportLogType = HistoryLogType & {
@@ -58,11 +66,16 @@ async function createTable() {
     id INTEGER PRIMARY KEY,
     created_at TEXT,
     probe_id TEXT,
-    status_code INTEGER,
     probe_name TEXT,
     probe_url TEXT,
+    probe_body TEXT,
+    status_code INTEGER,
+    
     response_time INTEGER,
-    error_resp TEXT,
+    response_headers TEXT,
+    response_data TEXT,
+    response_error TEXT,
+
     reported INTEGER DEFAULT 0
 );`
   db.run(createTableSQL)
@@ -79,7 +92,7 @@ export async function openLogfile() {
     sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE,
     async (err: Error) => {
       if (err) {
-        log.info('warning: cannot open logfile. error:', err.message)
+        log.error('warning: cannot open logfile. error:', err.message)
       }
       createTable()
     }
@@ -92,7 +105,7 @@ export async function openLogfile() {
  */
 export const getAllLogs = (): Promise<HistoryLogType[]> => {
   const readRowsSQL =
-    'SELECT rowid AS id, probe_id, status_code, probe_url, response_time FROM history'
+    'SELECT rowid AS id, probe_id, probe_name, probe_url, probe_body, status_code, response_time, response_headers, response_data, response_error FROM history'
 
   const res: Promise<HistoryLogType[]> = new Promise((resolve, reject) => {
     db.all(readRowsSQL, (err: Error, data: HistoryLogType[]) => {
@@ -106,7 +119,7 @@ export const getAllLogs = (): Promise<HistoryLogType[]> => {
 
 export const getUnreportedLogs = () => {
   const readRowsSQL =
-    'SELECT id, created_at, probe_id, status_code, probe_name, probe_url, response_time, error_resp FROM history WHERE reported = 0'
+    'SELECT id, created_at, probe_id, status_code, probe_name, probe_url, response_time, response_error FROM history WHERE reported = 0'
 
   return new Promise<HistoryReportLogType[]>((resolve, reject) => {
     db.all(readRowsSQL, (err: Error, data: HistoryReportLogType[]) => {
@@ -158,24 +171,27 @@ export async function saveLog(
   requestIndex: number,
   errorResp: string
 ) {
-  const insertSQL = `INSERT into history (probe_id, created_at, status_code, probe_name, probe_url, response_time, error_resp) 
-  VALUES(?, ?, ?, ?, ?, ?, ?);`
+  const insertSQL = `INSERT into history (created_at, probe_id, probe_name, probe_url, probe_body, status_code, response_time, response_headers, response_data, response_error) 
+  VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`
 
   const created = new Date().toISOString()
 
   const params = [
-    probe.id,
     created,
-    probeRes.status,
+    probe.id,
     probe.name,
     probeRes.config.url,
+    probeRes.config.data,
+    probeRes.status,
     probeRes.config.extraData?.responseTime,
+    probeRes.headers,
+    probeRes.data, // TODO: limit data stored.
     errorResp,
   ]
 
   await db.run(insertSQL, params, (err: Error) => {
     if (err) {
-      return log.info('error, cannot insert data into history.db', err)
+      return log.info('error, cannot insert data into monika-log.db: ', err)
     }
   })
 }
