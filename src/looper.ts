@@ -25,7 +25,6 @@
 import { Config } from './interfaces/config'
 import { Probe } from './interfaces/probe'
 import { report } from './components/reporter'
-import { updateConfig } from './components/config'
 import {
   getUnreportedLogs,
   setLogsAsReported,
@@ -114,13 +113,13 @@ export function loopReport(getConfig: () => Config) {
       try {
         const unreportedLogs = await getUnreportedLogs()
 
-        const { data } = await report(url, key, version || '', unreportedLogs)
-
-        updateConfig(data)
+        await report(url, key, version || '', unreportedLogs)
 
         await setLogsAsReported(unreportedLogs.map((log) => log.id))
       } catch (error) {
-        log.error(error?.message)
+        log.warn(
+          " ›   Warning: Can't report history to Symon. " + error.message
+        )
       }
     }, interval)
   }

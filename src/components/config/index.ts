@@ -69,13 +69,14 @@ export const setupConfigFromFile = async (path: string) => {
   if (parsed.monikaHQ && parsed.monikaHQ.url && parsed.monikaHQ.key) {
     try {
       const {
-        data: { probes, notifications },
+        data: { probes, notifications, version },
       } = await handshake(parsed)
+      parsed.version = version
       if (probes) parsed.probes = probes
       if (notifications) parsed.notifications = notifications
     } catch (error) {
       log.warn(
-        ` ›   Warning: Please check your monika-hq server, it does not return valid configuration. Monika will use configuration from ${path}.`
+        ` ›   Warning: Can't do handshake with Symon. Monika will use configuration from ${path}.`
       )
     }
   }

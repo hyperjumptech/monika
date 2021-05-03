@@ -33,6 +33,7 @@ import getIp from '../../utils/ip'
 import { HistoryReportLogType } from '../logger/history'
 
 export interface HQConfig {
+  id: string
   url: string
   key: string
   interval?: number
@@ -47,20 +48,13 @@ export type HQResponse = {
   }
 }
 
-const renameResponseDataConfigVersionField = (data: any) => {
-  return {
-    ...data,
-    data: { ...data?.data, version: data?.data?.config_version },
-  }
-}
-
 export const handshake = (config: Config): Promise<HQResponse> => {
   return axios
     .post(
-      `${config.monikaHQ!.url}/api/handshake`,
+      `${config.monikaHQ!.url}/handshake`,
       {
         monika: {
-          id: uuidv4(),
+          id: config.monikaHQ!.id,
           ip_address: getIp(),
         },
         data: {
@@ -70,36 +64,35 @@ export const handshake = (config: Config): Promise<HQResponse> => {
       },
       {
         headers: {
-          Authorization: `Bearer ${config.monikaHQ!.key}`,
+          'x-api-key': config.monikaHQ!.key,
         },
       }
     )
-    .then(({ data }) => renameResponseDataConfigVersionField(data))
+    .then((res) => res.data)
 }
 
 export const report = (
   url: string,
   key: string,
   configVersion: string,
-  history: HistoryReportLogType[]
+  data: HistoryReportLogType[]
 ): Promise<HQResponse> => {
   return axios
     .post(
-      `${url}/api/report`,
+      `${url}/report`,
       {
-        id: uuidv4(),
-        ip_address: getIp(),
+        instance_id: uuidv4(),
         config_version: configVersion,
-        history,
+        data,
       },
       {
         headers: {
           'Content-Encoding': 'gzip',
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${key}`,
+          'x-api-key': key,
         },
         transformRequest: (data) => pako.gzip(JSON.stringify(data)).buffer,
       }
     )
-    .then(({ data }) => renameResponseDataConfigVersionField(data))
+    .then((res) => res.data)
 }
