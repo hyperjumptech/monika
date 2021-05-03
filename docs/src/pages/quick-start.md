@@ -68,6 +68,22 @@ At the center of monica is a configuration file. Follow the following steps to q
 3. Replace `YOUR_GMAIL_ACCOUNT` with your valid Gmail account, e.g., `yourname@gmail.com`.
 4. Replace `YOUR_GMAIL_PASSWORD_OR_APP_PASSWORD` with your Gmail password or if you have activated Two Factor Authentication (2FA), you need to create an app password. Check [here](https://support.google.com/accounts/answer/185833?p=InvalidSecondFactor&visit_id=637516776381460079-1520353003&rd=1) how to create an app password for your Gmail account.
 5. If you have [installed Monika globally](/monika/installation), run `monika` from Terminal app (macOS) in the same directory where monika.json exists. If you haven't, you can quickly run Monika by running `npx @hyperjumptech/monika` in the same directory where monika.json exists.
+6. During runtime, Monika will output a log that looks like this
+   ```bash
+    2021-05-03T10:05:09.345Z,PROBE,1,0,https://hyperjumptech.github.io/monika,200,1157,31358
+    2021-05-03T10:05:19.171Z,PROBE,2,0,https://hyperjumptech.github.io/monika,200,989,31358
+    2021-05-03T10:05:29.151Z,PROBE,3,0,https://hyperjumptech.github.io/monika,200,964,31358
+    2021-05-03T10:05:39.204Z,PROBE,4,0,https://hyperjumptech.github.io/monika,200,1012,31358
+    2021-05-03T10:05:49.165Z,PROBE,5,0,https://hyperjumptech.github.io/monika,200,967,31358
+    2021-05-03T10:05:59.267Z,PROBE,6,0,https://hyperjumptech.github.io/monika,200,1065,31358
+    2021-05-03T10:06:09.214Z,PROBE,7,0,https://hyperjumptech.github.io/monika,200,1011,31358
+    2021-05-03T10:06:19.251Z,PROBE,8,0,https://hyperjumptech.github.io/monika,200,1043,31358
+    2021-05-03T10:06:29.233Z,PROBE,9,0,https://hyperjumptech.github.io/monika,200,1025,31358
+    2021-05-03T10:06:39.211Z,PROBE,10,0,https://hyperjumptech.github.io/monika,200,999,31358
+    2021-05-03T10:06:49.266Z,PROBE,11,0,https://hyperjumptech.github.io/monika,200,1049,31358
+    
+    [timestamp],[log type],[probe counter],[alert threshold counter],[endpoint URL],[response status code],[response time in ms],[response size in bytes]
+   ```
 
 ## Configuration file
 
