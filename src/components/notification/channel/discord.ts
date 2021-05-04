@@ -28,8 +28,6 @@ import { DiscordData } from '../../../interfaces/data'
 
 export const sendDiscord = async (data: DiscordData) => {
   try {
-    if (!data.url) throw new Error(`Webhook url is not provided`)
-
     const postData = {
       content: `${data.body.url} : ${data.body.alert} at ${data.body.time}`,
     }

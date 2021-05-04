@@ -28,10 +28,6 @@ import { TelegramData } from '../../../interfaces/data'
 
 export const sendTelegram = async (data: TelegramData) => {
   try {
-    if (!data.group_id) throw new Error(`Telegram group ID is not provided`)
-
-    if (!data.bot_token) throw new Error(`Telegram bot token is not provided`)
-
     const text = `${data.body.alert}\n\nURL: ${data.body.url}\nTIME: ${data.body.time}\n`
 
     const res = await axios({

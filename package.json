@@ -39,6 +39,7 @@
     "cli-table3": "^0.6.0",
     "cli-ux": "^5.5.1",
     "handlebars": "^4.7.7",
+    "joi": "^17.4.0",
     "mailgun-js": "^0.22.0",
     "node-notifier": "^9.0.1",
     "nodemailer": "^6.5.0",

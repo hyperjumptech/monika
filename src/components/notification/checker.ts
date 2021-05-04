@@ -23,24 +23,34 @@
  **********************************************************************************/
 
 import {
+  DiscordData,
   MailgunData,
   SendgridData,
   SMTPData,
+  TeamsData,
   TelegramData,
   WebhookData,
-  TeamsData,
-  DiscordData,
 } from '../../interfaces/data'
 import { Notification } from '../../interfaces/notification'
 import getIp from '../../utils/ip'
+import { sendDiscord } from './channel/discord'
 import { sendMailgun } from './channel/mailgun'
 import { sendSendgrid } from './channel/sendgrid'
 import { sendSlack } from './channel/slack'
 import { createSmtpTransport, sendSmtpMail } from './channel/smtp'
+import { sendTeams } from './channel/teams'
 import { sendTelegram } from './channel/telegram'
 import { sendWebhook } from './channel/webhook'
-import { sendTeams } from './channel/teams'
-import { sendDiscord } from './channel/discord'
+import {
+  dataDiscordSchemaValidator,
+  dataMailgunSchemaValidator,
+  dataSengridSchemaValidator,
+  dataSlackSchemaValidator,
+  dataSMTPSchemaValidator,
+  dataTeamsSchemaValidator,
+  dataTelegramSchemaValidator,
+  dataWebhookSchemaValidator,
+} from './validator'
 
 const subject = 'Monika is started'
 const body = `Monika is running on ${getIp()}`
@@ -56,6 +66,8 @@ const errorMessage = (
 
 const smtpNotificationInitialChecker = async (data: SMTPData) => {
   try {
+    await dataSMTPSchemaValidator.validateAsync(data)
+
     const transporter = createSmtpTransport(data)
 
     await sendSmtpMail(transporter, {
@@ -71,6 +83,8 @@ const smtpNotificationInitialChecker = async (data: SMTPData) => {
 
 const mailgunNotificationInitialChecker = async (data: MailgunData) => {
   try {
+    await dataMailgunSchemaValidator.validateAsync(data)
+
     await sendMailgun(
       {
         recipients: data?.recipients?.join(','),
@@ -90,6 +104,8 @@ const mailgunNotificationInitialChecker = async (data: MailgunData) => {
 
 const sendgridNotificationInitialChecker = async (data: SendgridData) => {
   try {
+    await dataSengridSchemaValidator.validateAsync(data)
+
     await sendSendgrid(
       {
         recipients: data?.recipients?.join(','),
@@ -109,6 +125,8 @@ const sendgridNotificationInitialChecker = async (data: SendgridData) => {
 
 const webhookNotificationInitialChecker = async (data: WebhookData) => {
   try {
+    await dataWebhookSchemaValidator.validateAsync(data)
+
     await sendWebhook({
       url: data?.url,
       body: {
@@ -124,6 +142,8 @@ const webhookNotificationInitialChecker = async (data: WebhookData) => {
 
 const discordNotificationInitialChecker = async (data: WebhookData) => {
   try {
+    await dataDiscordSchemaValidator.validateAsync(data)
+
     await sendDiscord({
       url: data?.url,
       body: {
@@ -133,12 +153,14 @@ const discordNotificationInitialChecker = async (data: WebhookData) => {
       },
     })
   } catch (error) {
-    throw errorMessage('discord', error?.message)
+    throw errorMessage('Discord', error?.message)
   }
 }
 
 const slackNotificationInitialChecker = async (data: WebhookData) => {
   try {
+    await dataSlackSchemaValidator.validateAsync(data)
+
     await sendSlack({
       url: data?.url,
       body: {
@@ -154,6 +176,8 @@ const slackNotificationInitialChecker = async (data: WebhookData) => {
 
 const telegramNotificationInitialChecker = async (data: TelegramData) => {
   try {
+    await dataTelegramSchemaValidator.validateAsync(data)
+
     await sendTelegram({
       group_id: data?.group_id,
       bot_token: data?.bot_token,
@@ -170,6 +194,8 @@ const telegramNotificationInitialChecker = async (data: TelegramData) => {
 
 const teamsNotificationInitialChecker = async (data: TeamsData) => {
   try {
+    await dataTeamsSchemaValidator.validateAsync(data)
+
     await sendTeams({
       url: data?.url,
       body: {
