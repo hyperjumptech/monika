@@ -48,9 +48,9 @@
     "pino": "6.11.2",
     "pino-pretty": "4.7.1",
     "smtp-server": "^3.8.0",
+    "sqlite": "^4.0.21",
     "sqlite3": "^5.0.2",
-    "tslib": "^1.14.1",
-    "uuid": "^8.3.2"
+    "tslib": "^1.14.1"
   },
   "devDependencies": {
     "@oclif/dev-cli": "^1.26.0",
@@ -65,7 +65,7 @@
     "@types/pako": "^1.0.1",
     "@types/pino": "^6.3.6",
     "@types/smtp-server": "^3.5.6",
-    "@types/uuid": "^8.3.0",
+    "@types/sqlite3": "^3.1.7",
     "chai": "^4.3.4",
     "chai-spies": "^1.0.0",
     "cross-env": "^7.0.3",

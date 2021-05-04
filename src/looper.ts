@@ -105,15 +105,40 @@ export function loopReport(getConfig: () => Config) {
   const { monikaHQ } = config
 
   if (monikaHQ) {
-    const { url, key, interval = DEFAULT_REPORT_INTERVAL } = monikaHQ
+    const {
+      url,
+      key,
+      id: instanceId,
+      interval = DEFAULT_REPORT_INTERVAL,
+    } = monikaHQ
 
     setInterval(async () => {
       const { version } = getConfig()
 
       try {
         const unreportedLogs = await getUnreportedLogs()
+        // convert null value to undefined, so axios won't send it
+        const reportData = unreportedLogs.map((row) => ({
+          timestamp: new Date(row.created_at).valueOf(),
+          probe_id: row.probe_id,
+          request_method: row.request_method,
+          request_url: row.request_url,
+          request_header: row.request_header || undefined,
+          request_body: row.request_body || undefined,
+          response_status: row.response_status,
+          response_header: row.response_header || undefined,
+          response_body: row.response_body || undefined,
+          response_time: row.response_time,
+          response_size: row.response_size || undefined,
+        }))
 
-        await report(url, key, version || '', unreportedLogs)
+        await report({
+          url,
+          key,
+          instanceId,
+          configVersion: version || '',
+          data: reportData,
+        })
 
         await setLogsAsReported(unreportedLogs.map((log) => log.id))
       } catch (error) {

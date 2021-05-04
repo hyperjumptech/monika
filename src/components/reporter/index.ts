@@ -24,13 +24,12 @@
 
 import axios from 'axios'
 import pako from 'pako'
-import { v4 as uuidv4 } from 'uuid'
 
 import { Config } from '../../interfaces/config'
 import { Probe } from '../../interfaces/probe'
 import { Notification } from '../../interfaces/notification'
 import getIp from '../../utils/ip'
-import { HistoryReportLogType } from '../logger/history'
+import { HistoryLog } from '../logger/history'
 
 export interface HQConfig {
   id: string
@@ -71,17 +70,28 @@ export const handshake = (config: Config): Promise<HQResponse> => {
     .then((res) => res.data)
 }
 
-export const report = (
-  url: string,
-  key: string,
-  configVersion: string,
-  data: HistoryReportLogType[]
-): Promise<HQResponse> => {
+type ReportData = (Omit<HistoryLog, 'id' | 'created_at' | 'reported'> & {
+  timestamp: number
+})[]
+
+export const report = ({
+  url,
+  key,
+  instanceId,
+  configVersion,
+  data,
+}: {
+  url: string
+  key: string
+  instanceId: string
+  configVersion: string
+  data: ReportData
+}): Promise<HQResponse> => {
   return axios
     .post(
       `${url}/report`,
       {
-        instance_id: uuidv4(),
+        monika_instance_id: instanceId,
         config_version: configVersion,
         data,
       },

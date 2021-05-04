@@ -93,11 +93,11 @@ class Monika extends Command {
 
   async run() {
     const { flags } = this.parse(Monika)
-    openLogfile()
+    await openLogfile()
 
     if (flags.logs) {
-      printAllLogs()
-      closeLog()
+      await printAllLogs()
+      await closeLog()
       return
     }
 
@@ -106,12 +106,12 @@ class Monika extends Command {
         'Are you sure you want to flush all logs in monika-logs.db (Y/n)?'
       )
       if (ans === 'Y') {
-        flushAllLogs()
+        await flushAllLogs()
         log.info('Records flushed, thank you.')
       } else {
         log.info('Cancelled. Thank you.')
       }
-      closeLog()
+      await closeLog()
       return
     }
 
@@ -151,7 +151,7 @@ class Monika extends Command {
         abortCurrentLooper = loopProbes(config)
       }
     } catch (error) {
-      closeLog()
+      await closeLog()
       this.error(error?.message, { exit: 1 })
     }
   }
