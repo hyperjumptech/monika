@@ -24,15 +24,15 @@
 
 import axios from 'axios'
 import pako from 'pako'
-import { v4 as uuidv4 } from 'uuid'
 
 import { Config } from '../../interfaces/config'
 import { Probe } from '../../interfaces/probe'
 import { Notification } from '../../interfaces/notification'
 import getIp from '../../utils/ip'
-import { HistoryReportLogType } from '../logger/history'
+import { HistoryLog } from '../logger/history'
 
 export interface HQConfig {
+  id: string
   url: string
   key: string
   interval?: number
@@ -47,20 +47,13 @@ export type HQResponse = {
   }
 }
 
-const renameResponseDataConfigVersionField = (data: any) => {
-  return {
-    ...data,
-    data: { ...data?.data, version: data?.data?.config_version },
-  }
-}
-
 export const handshake = (config: Config): Promise<HQResponse> => {
   return axios
     .post(
-      `${config.monikaHQ!.url}/api/handshake`,
+      `${config.monikaHQ!.url}/handshake`,
       {
         monika: {
-          id: uuidv4(),
+          id: config.monikaHQ!.id,
           ip_address: getIp(),
         },
         data: {
@@ -70,36 +63,46 @@ export const handshake = (config: Config): Promise<HQResponse> => {
       },
       {
         headers: {
-          Authorization: `Bearer ${config.monikaHQ!.key}`,
+          'x-api-key': config.monikaHQ!.key,
         },
       }
     )
-    .then(({ data }) => renameResponseDataConfigVersionField(data))
+    .then((res) => res.data)
 }
 
-export const report = (
-  url: string,
-  key: string,
-  configVersion: string,
-  history: HistoryReportLogType[]
-): Promise<HQResponse> => {
+type ReportData = (Omit<HistoryLog, 'id' | 'created_at' | 'reported'> & {
+  timestamp: number
+})[]
+
+export const report = ({
+  url,
+  key,
+  instanceId,
+  configVersion,
+  data,
+}: {
+  url: string
+  key: string
+  instanceId: string
+  configVersion: string
+  data: ReportData
+}): Promise<HQResponse> => {
   return axios
     .post(
-      `${url}/api/report`,
+      `${url}/report`,
       {
-        id: uuidv4(),
-        ip_address: getIp(),
+        monika_instance_id: instanceId,
         config_version: configVersion,
-        history,
+        data,
       },
       {
         headers: {
           'Content-Encoding': 'gzip',
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${key}`,
+          'x-api-key': key,
         },
         transformRequest: (data) => pako.gzip(JSON.stringify(data)).buffer,
       }
     )
-    .then(({ data }) => renameResponseDataConfigVersionField(data))
+    .then((res) => res.data)
 }
