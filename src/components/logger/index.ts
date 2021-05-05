@@ -86,13 +86,13 @@ export async function probeLog({
 export async function printAllLogs() {
   const data = await getAllLogs()
 
-  data.forEach((data: any) => {
+  data.forEach((row) => {
     log.info({
       type: 'PLAIN',
-      msg: `${data.id} id: ${data.probe_id} status: ${chalk.keyword(
-        getStatusColor(data.status_code)
-      )(data.status_code)} - ${data.probe_url}, ${
-        data.response_time || '- '
+      msg: `${row.id} id: ${row.probe_id} status: ${chalk.keyword(
+        getStatusColor(row.response_status)
+      )(String(row.response_status))} - ${row.request_url}, ${
+        row.response_time || '- '
       }ms`,
     })
   })
