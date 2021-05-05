@@ -24,7 +24,20 @@ You can fetch, build, and use `Monika` from source. Clone this repository then i
 ```bash
 git clone git@github.com:hyperjumptech/monika.git
 npm ci
+```
+
+run `Monika`
+
+- on Linux/Unix/Mac
+
+```bash
 npm start
+```
+
+- on Windows
+
+```bash
+.\bin\run.cmd
 ```
 
 Keep your codes formatted with **npm scripts** and ensure **eslint plugin** is installed and allowed to make changes in your IDE.
