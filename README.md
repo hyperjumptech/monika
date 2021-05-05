@@ -37,7 +37,7 @@ npm start
 - on windows
 
 ```bash
-./bin/run.cmd
+.\bin\run.cmd
 ```
 
 Keep your codes formatted with **npm scripts** and ensure **eslint plugin** is installed and allowed to make changes in your IDE.
