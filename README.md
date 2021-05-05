@@ -28,13 +28,13 @@ npm ci
 
 run `Monika`
 
-- on linux/unix
+- on Linux/Unix/Mac
 
 ```bash
 npm start
 ```
 
-- on windows
+- on Windows
 
 ```bash
 .\bin\run.cmd
