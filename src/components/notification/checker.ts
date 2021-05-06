@@ -44,7 +44,7 @@ import { sendWebhook } from './channel/webhook'
 import {
   dataDiscordSchemaValidator,
   dataMailgunSchemaValidator,
-  dataSengridSchemaValidator,
+  dataSendgridSchemaValidator,
   dataSlackSchemaValidator,
   dataSMTPSchemaValidator,
   dataTeamsSchemaValidator,
@@ -55,7 +55,7 @@ import {
 const subject = 'Monika is started'
 const body = `Monika is running on ${getIp()}`
 
-const errorMessage = (
+export const errorMessage = (
   notificationType: string,
   originalErrorMessage?: string
 ) => {
@@ -76,6 +76,8 @@ const smtpNotificationInitialChecker = async (data: SMTPData) => {
       subject: subject,
       text: body,
     })
+
+    return 'success'
   } catch (error) {
     throw errorMessage('SMTP', error?.message)
   }
@@ -97,6 +99,8 @@ const mailgunNotificationInitialChecker = async (data: MailgunData) => {
       },
       { id: 'mailgun', type: 'mailgun', data }
     )
+
+    return 'success'
   } catch (error) {
     throw errorMessage('Mailgun', error?.message)
   }
@@ -104,7 +108,7 @@ const mailgunNotificationInitialChecker = async (data: MailgunData) => {
 
 const sendgridNotificationInitialChecker = async (data: SendgridData) => {
   try {
-    await dataSengridSchemaValidator.validateAsync(data)
+    await dataSendgridSchemaValidator.validateAsync(data)
 
     await sendSendgrid(
       {
@@ -118,6 +122,8 @@ const sendgridNotificationInitialChecker = async (data: SendgridData) => {
       },
       { id: 'sendgrid', type: 'sendgrid', data }
     )
+
+    return 'success'
   } catch (error) {
     throw errorMessage('Sendgrid', error?.message)
   }
@@ -135,6 +141,8 @@ const webhookNotificationInitialChecker = async (data: WebhookData) => {
         time: new Date().toLocaleString(),
       },
     })
+
+    return 'success'
   } catch (error) {
     throw errorMessage('Webhook', error?.message)
   }
@@ -152,6 +160,8 @@ const discordNotificationInitialChecker = async (data: WebhookData) => {
         time: new Date().toLocaleString(),
       },
     })
+
+    return 'success'
   } catch (error) {
     throw errorMessage('Discord', error?.message)
   }
@@ -169,6 +179,8 @@ const slackNotificationInitialChecker = async (data: WebhookData) => {
         time: new Date().toLocaleString(),
       },
     })
+
+    return 'success'
   } catch (error) {
     throw errorMessage('Slack', error?.message)
   }
@@ -187,6 +199,8 @@ const telegramNotificationInitialChecker = async (data: TelegramData) => {
         time: new Date().toLocaleString(),
       },
     })
+
+    return 'success'
   } catch (error) {
     throw errorMessage('Telegram', error?.message)
   }
@@ -205,6 +219,8 @@ const teamsNotificationInitialChecker = async (data: TeamsData) => {
         status: 'INIT',
       },
     })
+
+    return 'success'
   } catch (error) {
     throw errorMessage('Teams', error?.message)
   }
