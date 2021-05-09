@@ -57,62 +57,6 @@ describe('Smtp test', () => {
       const res = createSmtpTransport(mockCfg)
       expect(res).instanceOf(Mail)
     })
-
-    it('should throw hostname Error', async function () {
-      const mockCfg: SMTPData = {
-        hostname: '',
-        port: 587,
-        username: 'me@symon.org',
-        password: 'symonPass',
-        recipients: ['symon@example.com'],
-      }
-
-      expect(() => createSmtpTransport(mockCfg)).to.throw(
-        'Smtp host is not provided!'
-      )
-    })
-
-    it('should throw port Error', async function () {
-      const mockCfg: SMTPData = {
-        hostname: 'smtp.symon.org',
-        port: 0,
-        username: 'me@symon.org',
-        password: 'symonPass',
-        recipients: ['symon@example.com'],
-      }
-
-      expect(() => createSmtpTransport(mockCfg)).to.throw(
-        `Smtp port is not provided!`
-      )
-    })
-
-    it('should throw username Error', async function () {
-      const mockCfg: SMTPData = {
-        hostname: 'smtp.symon.org',
-        port: 587,
-        username: '',
-        password: 'symonPass',
-        recipients: ['symon@example.com'],
-      }
-
-      expect(() => createSmtpTransport(mockCfg)).to.throw(
-        `Smtp user is not provided!`
-      )
-    })
-
-    it('should throw password Error', async function () {
-      const mockCfg = {
-        hostname: 'smtp.symon.org',
-        port: 587,
-        username: 'me@symon.org',
-        password: '',
-        recipients: ['symon@example.com'],
-      }
-
-      expect(() => createSmtpTransport(mockCfg)).to.throw(
-        `Smtp password is not provided!`
-      )
-    })
   })
 
   describe('sendSmtp test', () => {

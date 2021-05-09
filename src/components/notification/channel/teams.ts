@@ -28,8 +28,6 @@ import { AxiosResponseWithExtraData } from '../../../interfaces/request'
 
 export const sendTeams = async (data: TeamsData) => {
   try {
-    if (!data.url) throw new Error(`Teams Webhook URL is not provided`)
-
     const notifType = data.body.status === 'UP' ? 'RECOVERY' : 'INCIDENT'
     const notifColor = data.body.status === 'UP' ? '8CC152' : 'DF202E'
 

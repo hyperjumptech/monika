@@ -22,139 +22,96 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import path from 'path'
+import SQLite3 from 'sqlite3'
+import { open, Database } from 'sqlite'
+
 import { AxiosResponseWithExtraData } from '../../interfaces/request'
 import { Probe } from '../../interfaces/probe'
-import path from 'path'
 import { log } from '../../utils/pino'
 
-const sqlite3 = require('sqlite3').verbose()
+const sqlite3 = SQLite3.verbose()
+const dbPath = path.resolve(process.cwd(), 'monika-logs.db')
 
-export type HistoryLogType = {
-  id: number
-  probeID: string
-  probeName: string
-  probeURL: string
-  probeBody: string
-  statusCode: number
-
-  responseTime: number
-  responseHdr: string
-  responseData: string
-  responseErr: string
-
-  reported: number
-}
-
-export type HistoryReportLogType = HistoryLogType & {
+export type HistoryLog = {
   id: number
   created_at: string
   probe_id: string
-  status_code: number
-  probe_name: string
-  probe_url: string
+  probe_name?: string | null
+  request_method: string
+  request_url: string
+  request_header?: string | null
+  request_body?: string | null
+  response_status: number
+  response_header?: string | null
+  response_body?: string | null
   response_time: number
-  error_resp: string
+  response_size?: number | null
+  error?: string | null
+  reported: number
 }
 
-let db: any
+let db: Database<SQLite3.Database, SQLite3.Statement>
 
-/**
- * createTable will create the history table if it does not exist
- */
-async function createTable() {
-  const createTableSQL = `CREATE TABLE IF NOT EXISTS history (
-    id INTEGER PRIMARY KEY,
-    created_at TEXT,
-    probe_id TEXT,
-    probe_name TEXT,
-    probe_url TEXT,
-    probe_body TEXT,
-    status_code INTEGER,
-    
-    response_time INTEGER,
-    response_headers TEXT,
-    response_data TEXT,
-    response_error TEXT,
-
-    reported INTEGER DEFAULT 0
-);`
-  db.run(createTableSQL)
+async function migrate() {
+  await db.migrate({
+    migrationsPath: path.join(__dirname, 'migrations'),
+  })
 }
 
 /**
  * openLogfile will open the file history.db and if it doesnt exist, create it and sets up the table
  */
 export async function openLogfile() {
-  const dbPath = path.resolve(process.cwd(), 'monika-logs.db')
+  try {
+    db = await open({
+      filename: dbPath,
+      mode: sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE,
+      driver: sqlite3.Database,
+    })
 
-  db = new sqlite3.Database(
-    dbPath,
-    sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE,
-    async (err: Error) => {
-      if (err) {
-        log.error('warning: cannot open logfile. error:', err.message)
-      }
-      createTable()
-    }
-  )
+    await migrate()
+  } catch (error) {
+    log.error('warning: cannot open logfile. error:', error.message)
+  }
 }
 
 /**
  * getAllLogs gets all the history table from sqlite db
  * @returns {obj} result of logs table
  */
-export const getAllLogs = (): Promise<HistoryLogType[]> => {
-  const readRowsSQL =
-    'SELECT rowid AS id, probe_id, probe_name, probe_url, probe_body, status_code, response_time, response_headers, response_data, response_error FROM history'
+export async function getAllLogs(): Promise<HistoryLog[]> {
+  const readRowsSQL = 'SELECT * FROM history'
 
-  const res: Promise<HistoryLogType[]> = new Promise((resolve, reject) => {
-    db.all(readRowsSQL, (err: Error, data: HistoryLogType[]) => {
-      if (err) return reject(err)
-
-      return resolve(data)
-    })
-  })
-  return res
+  return db.all(readRowsSQL)
 }
 
-export const getUnreportedLogs = () => {
-  const readRowsSQL =
-    'SELECT id, created_at, probe_id, status_code, probe_name, probe_url, response_time, response_error FROM history WHERE reported = 0'
+export async function getUnreportedLogs(): Promise<HistoryLog[]> {
+  const readRowsSQL = 'SELECT * FROM history WHERE reported = 0'
 
-  return new Promise<HistoryReportLogType[]>((resolve, reject) => {
-    db.all(readRowsSQL, (err: Error, data: HistoryReportLogType[]) => {
-      if (err) reject(err)
-      else resolve(data)
-    })
-  })
+  return db.all(readRowsSQL)
 }
 
-export const setLogsAsReported = (ids: number[]) => {
+export async function setLogsAsReported(ids: number[]) {
   const updateRowsSQL = `UPDATE history SET reported = 1 WHERE id IN (${ids.join(
     ', '
   )})`
 
-  return new Promise<void>((resolve, reject) => {
-    db.run(updateRowsSQL, (err: Error) => {
-      if (err)
-        reject(
-          new Error(
-            'error, cannot mark logs as updated in history.db: ' + err?.message
-          )
-        )
-      else resolve()
-    })
-  })
+  await db.run(updateRowsSQL)
 }
 
 /**
  * flushAllLogs drops the table and recreates it
  */
 export async function flushAllLogs() {
-  const dropTableSQL = 'DROP TABLE IF EXISTS history'
+  const dropHistoryTableSQL = 'DROP TABLE IF EXISTS history;'
+  const dropMigrationsTableSQL = 'DROP TABLE IF EXISTS migrations;'
 
-  await db.run(dropTableSQL)
-  createTable()
+  await Promise.all([
+    db.run(dropHistoryTableSQL),
+    db.run(dropMigrationsTableSQL),
+  ])
+  await migrate()
 }
 
 /**
@@ -171,34 +128,52 @@ export async function saveLog(
   requestIndex: number,
   errorResp: string
 ) {
-  const insertSQL = `INSERT into history (created_at, probe_id, probe_name, probe_url, probe_body, status_code, response_time, response_headers, response_data, response_error) 
-  VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`
+  const insertSQL = `
+    INSERT INTO history (
+        created_at,
+        probe_id,
+        probe_name,
+        request_method,
+        request_url,
+        request_header,
+        request_body,
+        response_status,
+        response_header,
+        response_body,
+        response_time,
+        response_size,
+        error
+      )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`
 
-  const created = new Date().toISOString()
+  const createdAt = new Date().toISOString()
 
   const params = [
-    created,
+    createdAt,
     probe.id,
     probe.name,
+    probeRes.config.method,
     probeRes.config.url,
+    JSON.stringify(probeRes.config.headers),
     probeRes.config.data,
     probeRes.status,
+    JSON.stringify(probeRes.headers),
+    typeof probeRes.data === 'string'
+      ? probeRes.data
+      : JSON.stringify(probeRes.data), // TODO: limit data stored.
     probeRes.config.extraData?.responseTime,
-    probeRes.headers,
-    probeRes.data, // TODO: limit data stored.
+    probeRes.headers['content-length'],
     errorResp,
   ]
 
-  await db.run(insertSQL, params, (err: Error) => {
-    if (err) {
-      return log.info('error, cannot insert data into monika-log.db: ', err)
-    }
+  await db.run(insertSQL, params).catch((error) => {
+    log.error('error, cannot insert data into monika-log.db: ' + error.message)
   })
 }
 
 /**
- * closeDB closes the database
+ * closeLog closes the database
  */
-export function closeLog() {
-  db.close()
+export async function closeLog() {
+  await db.close()
 }
