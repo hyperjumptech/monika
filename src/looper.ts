@@ -32,6 +32,8 @@ import {
 } from './components/logger/history'
 import { doProbe } from './components/probe'
 import { log } from './utils/pino'
+import { Notification } from './interfaces/notification'
+// import { probeLog } from './components/logger'
 
 const MILLISECONDS = 1000
 const DEFAULT_THRESHOLD = 5
@@ -70,34 +72,110 @@ function sanitizeProbe(probe: Probe, index: number): Probe {
 }
 
 /**
- * looper does all the looping
- * @param {object} config is an object that contains all the configs
- * @returns {function} - function to stop the looper
+ * isIDValid check the user input ids against existing probe ids in config
+ * @param {object} config is the probe configuration
+ * @param {array} ids is array of string ids
+ * @returns {bool} true if all ids found, false if any id is not found
  */
-export function loopProbes(config: Config) {
-  let isAborted = false
+export function isIDValid(config: Config, ids: string): boolean {
+  const idSplit = ids.split(',')
 
-  config.probes.forEach((probe, i) => {
-    let counter = 0
-    const probeInterval = setInterval(() => {
-      if (isAborted) {
-        clearInterval(probeInterval)
+  for (const id of idSplit) {
+    let isFound = false
+
+    for (const probes of config.probes) {
+      if (probes.id === id) {
+        isFound = true
+        break
       }
-
-      const sanitizedProbe = sanitizeProbe(probe, i)
-      return doProbe(++counter, sanitizedProbe, config.notifications)
-    }, (probe.interval ?? 10) * MILLISECONDS)
-
-    if (process.env.CI || process.env.NODE_ENV === 'test') {
-      clearInterval(probeInterval)
     }
-  })
+    if (!isFound) {
+      log.info(`id not found: ${id}`)
+      return false // ran through the probes and didn't find id
+    }
+  }
+  return true
+}
+
+function loopProbes(
+  index: number,
+  probe: Probe,
+  notifications: Notification[],
+  repeats: number
+) {
+  let counter = 0
+  let isAborted = false
 
   const abort = () => {
     isAborted = true
   }
 
+  const probeInterval = setInterval(() => {
+    if (isAborted) {
+      clearInterval(probeInterval)
+    }
+
+    if (counter === repeats) {
+      clearInterval(probeInterval)
+      return abort
+    }
+    return doProbe(++counter, probe, notifications)
+  }, (probe.interval ?? 10) * MILLISECONDS)
+
+  if (process.env.CI || process.env.NODE_ENV === 'test') {
+    clearInterval(probeInterval)
+  }
+
   return abort
+}
+
+/**
+ * idFeeder feeds Prober with actual ids to process
+ * @param {object} config is an object that contains all the configs
+ * @param {number} repeats number of repeats
+ * @param {object} ids of address
+ */
+export function idFeeder(
+  config: Config,
+  repeats: number,
+  ids: string | undefined
+) {
+  if (ids) {
+    if (!isIDValid(config, ids)) {
+      return
+    }
+  }
+
+  // doing custom sequences?
+  if (ids) {
+    for (const id of ids) {
+      let counter = 0
+
+      for (const probe of config.probes) {
+        if (id === probe.id) {
+          const sanitizedProbe = sanitizeProbe(probe, Number(probe.id))
+          loopProbes(
+            ++counter,
+            sanitizedProbe,
+            config.notifications ?? [],
+            repeats ?? 0
+          )
+        }
+      }
+    }
+  } else {
+    // or default sequence for Each element
+    for (const probe of config.probes) {
+      let counter = 0
+      const sanitizedProbe = sanitizeProbe(probe, Number(probe.id))
+      loopProbes(
+        ++counter,
+        sanitizedProbe,
+        config.notifications ?? [],
+        repeats ?? 0
+      )
+    }
+  }
 }
 
 export function loopReport(getConfig: () => Config) {

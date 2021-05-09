@@ -30,7 +30,7 @@ import open from 'open'
 import fs from 'fs'
 import { MailData, MailgunData, SMTPData, WebhookData } from './interfaces/data'
 import { Config } from './interfaces/config'
-import { loopProbes, loopReport } from './looper'
+import { idFeeder, loopReport } from './looper'
 import { printAllLogs } from './components/logger'
 import { log } from './utils/pino'
 import {
@@ -60,6 +60,13 @@ function getDefaultConfig() {
 class Monika extends Command {
   static description = 'Monika command line monitoring tool'
 
+  static examples = [
+    'monika',
+    'monika --1ogs',
+    'monika -r 1 --id 1,2,5,7',
+    'monika --create-config',
+  ]
+
   static flags = {
     version: flags.version({ char: 'v' }),
     help: flags.help({ char: 'h' }),
@@ -67,7 +74,7 @@ class Monika extends Command {
     config: flags.string({
       char: 'c',
       description:
-        'JSON configuration filename. If none is supplied, will look for monika.json in the current directory.',
+        'JSON configuration filename. If none is supplied, will look for monika.json in the current directory',
       default: () => getDefaultConfig(),
       env: 'MONIKA_JSON_CONFIG',
     }),
@@ -77,7 +84,7 @@ class Monika extends Command {
     }),
 
     logs: flags.boolean({
-      char: 'l', // prints the logs
+      char: 'l', // prints the (l)ogs
       description: 'print all logs.',
     }),
 
@@ -88,6 +95,18 @@ class Monika extends Command {
     verbose: flags.boolean({
       description: 'show verbose log messages',
       default: false,
+    }),
+
+    repeat: flags.string({
+      char: 'r', // (r)epeat
+      description: 'repeats the test run n times',
+      multiple: false,
+    }),
+
+    id: flags.string({
+      char: 'i', // (i)ds to run
+      description: 'specific probe ids to run',
+      multiple: false,
     }),
   }
 
@@ -146,9 +165,8 @@ class Monika extends Command {
         const startupMessage = this.buildStartupMessage(config, flags.verbose)
 
         this.log(startupMessage)
-
-        // Loop through all probes
-        abortCurrentLooper = loopProbes(config)
+        // abortCurrentLooper = loopProbes(config, Number(flags.repeat), flags.id)
+        idFeeder(config, Number(flags.repeat), flags.id)
       }
     } catch (error) {
       closeLog()

@@ -22,7 +22,6 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-/* eslint-disable complexity */
 import fs from 'fs'
 import path from 'path'
 import pino, { LoggerOptions, LogDescriptor } from 'pino'
@@ -88,6 +87,7 @@ const isPlainLog = (obj: any): obj is PlainLogObject => {
 }
 
 const prettyPrint = {
+  /* eslint-disable complexity */
   translateTime: true,
   ignore: 'pid,hostname,time,level',
   hideObject: true,
