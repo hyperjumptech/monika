@@ -1,8 +1,9 @@
 name: Build and Deploy Docs to Github Pages
 
 on:
-  pull_request:
-        branches: [main]
+  workflow_dispatch:
+  release:
+    types: [created]
   
 jobs:
   build-and-deploy:
