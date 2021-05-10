@@ -163,9 +163,8 @@ class Monika extends Command {
         }
 
         const startupMessage = this.buildStartupMessage(config, flags.verbose)
-
         this.log(startupMessage)
-        idFeeder(config, Number(flags.repeat), flags.id)
+        abortCurrentLooper = idFeeder(config, Number(flags.repeat), flags.id)
       }
     } catch (error) {
       await closeLog()

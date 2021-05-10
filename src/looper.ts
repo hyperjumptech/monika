@@ -95,17 +95,16 @@ export function isIDValid(config: Config, ids: string): boolean {
   return true
 }
 
+let isAborted = false
+const abort = () => {
+  isAborted = true
+}
 function loopProbes(
   probe: Probe,
   notifications: Notification[],
   repeats: number
 ) {
-  let isAborted = false
   let counter = 0
-
-  const abort = () => {
-    isAborted = true
-  }
 
   const probeInterval = setInterval(() => {
     if (isAborted) {
@@ -131,6 +130,7 @@ function loopProbes(
  * @param {object} config is an object that contains all the configs
  * @param {number} repeats number of repeats
  * @param {object} ids of address
+ * @returns {function} abort flag
  */
 export function idFeeder(
   config: Config,
@@ -149,7 +149,11 @@ export function idFeeder(
       for (const probe of config.probes) {
         if (id === probe.id) {
           const sanitizedProbe = sanitizeProbe(probe, Number(probe.id))
+          /* eslint-disable max-depth */
           loopProbes(sanitizedProbe, config.notifications ?? [], repeats ?? 0)
+          if (isAborted) {
+            return abort
+          }
         }
       }
     }
@@ -158,8 +162,12 @@ export function idFeeder(
     for (const probe of config.probes) {
       const sanitizedProbe = sanitizeProbe(probe, Number(probe.id))
       loopProbes(sanitizedProbe, config.notifications ?? [], repeats ?? 0)
+      if (isAborted) {
+        return abort
+      }
     }
   }
+  return abort
 }
 
 export function loopReport(getConfig: () => Config) {
