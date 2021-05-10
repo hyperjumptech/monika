@@ -22,13 +22,11 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import os from 'os'
 import axios from 'axios'
 import pako from 'pako'
 
 import { Config } from '../../interfaces/config'
-import { Probe } from '../../interfaces/probe'
-import { Notification } from '../../interfaces/notification'
-import getIp from '../../utils/ip'
 import { UnreportedLog } from '../logger/history'
 
 export interface HQConfig {
@@ -40,11 +38,7 @@ export interface HQConfig {
 
 export type HQResponse = {
   result: string
-  data: {
-    version: string
-    probes?: Probe[]
-    notifications?: Notification[]
-  }
+  message: string
 }
 
 export const handshake = (config: Config): Promise<HQResponse> => {
@@ -52,14 +46,8 @@ export const handshake = (config: Config): Promise<HQResponse> => {
     .post(
       `${config.monikaHQ!.url}/handshake`,
       {
-        monika: {
-          id: config.monikaHQ!.id,
-          ip_address: getIp(),
-        },
-        data: {
-          probes: config.probes,
-          notifications: config.notifications,
-        },
+        instanceId: config.monikaHQ!.id,
+        hostname: os.hostname(),
       },
       {
         headers: {

@@ -68,12 +68,10 @@ export const setupConfigFromFile = async (path: string) => {
 
   if (parsed.monikaHQ && parsed.monikaHQ.url && parsed.monikaHQ.key) {
     try {
-      const {
-        data: { probes, notifications, version },
-      } = await handshake(parsed)
-      parsed.version = version
-      if (probes) parsed.probes = probes
-      if (notifications) parsed.notifications = notifications
+      await handshake(parsed)
+
+      // TODO: fetch config from Symon and override local config
+      // Need API in Symon first
     } catch (error) {
       log.warn(
         ` ›   Warning: Can't do handshake with Symon. Monika will use configuration from ${path}.`
