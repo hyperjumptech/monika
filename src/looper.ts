@@ -32,7 +32,6 @@ import {
 import { doProbe } from './components/probe'
 import { log } from './utils/pino'
 import { Notification } from './interfaces/notification'
-// import { probeLog } from './components/logger'
 
 const MILLISECONDS = 1000
 const DEFAULT_THRESHOLD = 5
@@ -97,13 +96,12 @@ export function isIDValid(config: Config, ids: string): boolean {
 }
 
 function loopProbes(
-  index: number,
   probe: Probe,
   notifications: Notification[],
   repeats: number
 ) {
-  let counter = 0
   let isAborted = false
+  let counter = 0
 
   const abort = () => {
     isAborted = true
@@ -148,31 +146,18 @@ export function idFeeder(
   // doing custom sequences?
   if (ids) {
     for (const id of ids) {
-      let counter = 0
-
       for (const probe of config.probes) {
         if (id === probe.id) {
           const sanitizedProbe = sanitizeProbe(probe, Number(probe.id))
-          loopProbes(
-            ++counter,
-            sanitizedProbe,
-            config.notifications ?? [],
-            repeats ?? 0
-          )
+          loopProbes(sanitizedProbe, config.notifications ?? [], repeats ?? 0)
         }
       }
     }
   } else {
     // or default sequence for Each element
     for (const probe of config.probes) {
-      let counter = 0
       const sanitizedProbe = sanitizeProbe(probe, Number(probe.id))
-      loopProbes(
-        ++counter,
-        sanitizedProbe,
-        config.notifications ?? [],
-        repeats ?? 0
-      )
+      loopProbes(sanitizedProbe, config.notifications ?? [], repeats ?? 0)
     }
   }
 }

@@ -165,7 +165,6 @@ class Monika extends Command {
         const startupMessage = this.buildStartupMessage(config, flags.verbose)
 
         this.log(startupMessage)
-        // abortCurrentLooper = loopProbes(config, Number(flags.repeat), flags.id)
         idFeeder(config, Number(flags.repeat), flags.id)
       }
     } catch (error) {
