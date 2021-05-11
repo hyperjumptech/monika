@@ -95,3 +95,9 @@ export const dataDiscordSchemaValidator = dataBaseEmailSchemaValidator(
 ).keys({
   url: Joi.string().uri().required().label('Discord URL'),
 })
+
+export const dataMonikaNotifSchemaValidator = dataBaseEmailSchemaValidator(
+  'MonikaNotif'
+).keys({
+  url: Joi.string().uri().required().label('Monika Notification URL'),
+})

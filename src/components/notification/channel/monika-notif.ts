@@ -22,39 +22,20 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import {
-  MailgunData,
-  SendgridData,
-  SMTPData,
-  TelegramData,
-  WebhookData,
-  WhatsappData,
-  TeamsData,
-  DiscordData,
-  MonikaNotifData,
-} from './data'
+import axios from 'axios'
 
-export interface Notification {
-  id: string
-  type:
-    | 'smtp'
-    | 'mailgun'
-    | 'sendgrid'
-    | 'webhook'
-    | 'slack'
-    | 'whatsapp'
-    | 'teams'
-    | 'telegram'
-    | 'discord'
-    | 'monika-notif'
-  data:
-    | MailgunData
-    | SMTPData
-    | SendgridData
-    | WebhookData
-    | WhatsappData
-    | TeamsData
-    | TelegramData
-    | DiscordData
-    | MonikaNotifData
+import { MonikaNotifData } from '../../../interfaces/data'
+
+export const sendMonikaNotif = async (data: MonikaNotifData) => {
+  try {
+    const res = await axios({
+      method: 'POST',
+      url: data.url,
+      data: data.body,
+    })
+
+    return res
+  } catch (error) {
+    throw error
+  }
 }

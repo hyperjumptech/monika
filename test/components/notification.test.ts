@@ -29,6 +29,7 @@ import {
   WebhookData,
   WhatsappData,
   DiscordData,
+  MonikaNotifData,
 } from '../../src/interfaces/data'
 import * as mailgun from '../../src/components/notification/channel/mailgun'
 import * as webhook from '../../src/components/notification/channel/webhook'
@@ -37,6 +38,7 @@ import * as smtp from '../../src/components/notification/channel/smtp'
 import * as whatsapp from '../../src/components/notification/channel/whatsapp'
 import * as telegram from '../../src/components/notification/channel/telegram'
 import * as discord from '../../src/components/notification/channel/discord'
+import * as monikaNotif from '../../src/components/notification/channel/monika-notif'
 import { sendAlerts } from '../../src/components/notification'
 
 describe('send alerts', () => {
@@ -283,6 +285,36 @@ describe('send alerts', () => {
     })
 
     expect(discord.sendDiscord).to.have.been.called()
+    expect(sent).to.have.length(1)
+  })
+
+  it('should send webhook monika-notif', async () => {
+    chai.spy.on(monikaNotif, 'sendMonikaNotif', () => Promise.resolve())
+
+    const sent = await sendAlerts({
+      validation: {
+        alert: 'status-not-2xx',
+        status: true,
+      },
+      notifications: [
+        {
+          id: 'one',
+          type: 'monika-notif',
+          data: {
+            url: 'xx',
+          } as MonikaNotifData,
+        },
+      ],
+      url: 'https://hyperjump.tech',
+      status: 'DOWN',
+      incidentThreshold: 3,
+      probeName: 'monika-notif test',
+      probeId: 'monika-notif 1',
+      statusCode: 200,
+      responseTime: 50,
+    })
+
+    expect(monikaNotif.sendMonikaNotif).to.have.been.called()
     expect(sent).to.have.length(1)
   })
 })
