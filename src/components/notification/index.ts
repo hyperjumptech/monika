@@ -63,10 +63,10 @@ export async function sendAlerts({
   url: string
   status: string
   incidentThreshold: number
-  probeName: string
-  probeId: string
-  statusCode: number
-  responseTime: number
+  probeName?: string
+  probeId?: string
+  statusCode?: number
+  responseTime?: number
 }): Promise<
   Array<{
     alert: string

@@ -67,10 +67,6 @@ describe('send alerts', () => {
       url: 'https://hyperjump.tech',
       status: 'UP',
       incidentThreshold: 3,
-      probeName: 'mailgun test',
-      probeId: 'mailgun 1',
-      statusCode: 200,
-      responseTime: 50,
     })
     expect(sent).to.have.length(1)
   })
@@ -96,10 +92,6 @@ describe('send alerts', () => {
       url: 'https://hyperjump.tech',
       status: 'DOWN',
       incidentThreshold: 3,
-      probeName: 'mailgun test',
-      probeId: 'mailgun 1',
-      statusCode: 400,
-      responseTime: 500,
     })
     expect(sent).to.have.length(1)
   })
@@ -125,10 +117,6 @@ describe('send alerts', () => {
       url: 'https://hyperjump.tech',
       status: 'DOWN',
       incidentThreshold: 3,
-      probeName: 'mailgun test',
-      probeId: 'mailgun 1',
-      statusCode: 200,
-      responseTime: 500,
     })
     expect(mailgun.sendMailgun).to.have.been.called()
     expect(sent).to.have.length(1)
@@ -162,10 +150,6 @@ describe('send alerts', () => {
       url: 'https://hyperjump.tech',
       status: 'DOWN',
       incidentThreshold: 3,
-      probeName: 'slack test',
-      probeId: 'slack 1',
-      statusCode: 200,
-      responseTime: 50,
     })
 
     expect(webhook.sendWebhook).to.have.been.called()
@@ -196,10 +180,6 @@ describe('send alerts', () => {
       url: 'https://hyperjump.tech',
       status: 'DOWN',
       incidentThreshold: 3,
-      probeName: 'smtp test',
-      probeId: 'smtp 1',
-      statusCode: 200,
-      responseTime: 50,
     })
     expect(smtp.sendSmtpMail).to.have.been.called()
     expect(sent).to.have.length(1)
@@ -228,10 +208,6 @@ describe('send alerts', () => {
       url: 'https://hyperjump.tech',
       status: 'DOWN',
       incidentThreshold: 3,
-      probeName: 'whatsapp test',
-      probeId: 'whatsapp 1',
-      statusCode: 200,
-      responseTime: 50,
     })
 
     expect(whatsapp.sendWhatsapp).to.have.been.called()
@@ -280,10 +256,6 @@ describe('send alerts', () => {
       url: 'https://hyperjump.tech',
       status: 'DOWN',
       incidentThreshold: 3,
-      probeName: 'telegram test',
-      probeId: 'telegram 1',
-      statusCode: 200,
-      responseTime: 50,
     })
 
     expect(telegram.sendTelegram).to.have.been.called()
@@ -310,10 +282,6 @@ describe('send alerts', () => {
       url: 'https://hyperjump.tech',
       status: 'DOWN',
       incidentThreshold: 3,
-      probeName: 'discord test',
-      probeId: 'discord 1',
-      statusCode: 200,
-      responseTime: 50,
     })
 
     expect(discord.sendDiscord).to.have.been.called()
