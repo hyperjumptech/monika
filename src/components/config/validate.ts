@@ -34,6 +34,7 @@ import {
   WhatsappData,
   TeamsData,
   DiscordData,
+  MonikaNotifData,
 } from '../../interfaces/data'
 import { Config } from '../../interfaces/config'
 import { RequestConfig } from '../../interfaces/request'
@@ -94,6 +95,11 @@ const SENDGRID_NO_APIKEY = setInvalidResponse('API key not found')
 
 // Teams
 const TEAMS_NO_URL = setInvalidResponse('Teams Webhook URL not found')
+
+// Teams
+const MONIKA_NOTIF_NO_URL = setInvalidResponse(
+  'Monika Notification Webhook URL not found'
+)
 
 // Webhook
 const WEBHOOK_NO_URL = setInvalidResponse('URL not found')
@@ -173,6 +179,12 @@ function validateNotification(notifications: Notification[]): Validation {
 
       case 'teams': {
         if (!(data as TeamsData).url) return TEAMS_NO_URL
+
+        break
+      }
+
+      case 'monika-notif': {
+        if (!(data as MonikaNotifData).url) return MONIKA_NOTIF_NO_URL
 
         break
       }

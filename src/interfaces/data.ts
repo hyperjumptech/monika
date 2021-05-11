@@ -56,6 +56,21 @@ export interface WebhookData {
   body: WebhookDataBody
 }
 
+export interface MonikaNotifData {
+  url: string
+  body: MonikaNotifDataBody
+}
+
+export interface MonikaNotifDataBody {
+  type: 'start' | 'incident' | 'recovery'
+  probe_url: string
+  probe_name?: string
+  monika_id?: string
+  ip_address: string
+  response_time: number
+  status_code: number
+}
+
 export interface TelegramData {
   group_id: string
   bot_token: string
