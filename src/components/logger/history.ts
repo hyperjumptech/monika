@@ -72,7 +72,7 @@ export async function openLogfile() {
 
     await migrate()
   } catch (error) {
-    log.error('warning: cannot open logfile. error:', error.message)
+    log.error("Warning: Can't open logfile. ", error.message)
   }
 }
 
@@ -81,19 +81,19 @@ export async function openLogfile() {
  * @returns {obj} result of logs table
  */
 export async function getAllLogs(): Promise<HistoryLog[]> {
-  const readRowsSQL = 'SELECT * FROM history'
+  const readRowsSQL = 'SELECT * FROM probe_requests'
 
   return db.all(readRowsSQL)
 }
 
 export async function getUnreportedLogs(): Promise<HistoryLog[]> {
-  const readRowsSQL = 'SELECT * FROM history WHERE reported = 0'
+  const readRowsSQL = 'SELECT * FROM probe_requests WHERE reported = 0'
 
   return db.all(readRowsSQL)
 }
 
 export async function setLogsAsReported(ids: number[]) {
-  const updateRowsSQL = `UPDATE history SET reported = 1 WHERE id IN (${ids.join(
+  const updateRowsSQL = `UPDATE probe_requests SET reported = 1 WHERE id IN (${ids.join(
     ', '
   )})`
 
@@ -104,13 +104,18 @@ export async function setLogsAsReported(ids: number[]) {
  * flushAllLogs drops the table and recreates it
  */
 export async function flushAllLogs() {
-  const dropHistoryTableSQL = 'DROP TABLE IF EXISTS history;'
+  const dropProbeRequestsTableSQL = 'DROP TABLE IF EXISTS probe_requests;'
+  const dropAlertsTableSQL = 'DROP TABLE IF EXISTS alerts;'
+  const dropNotificationsTableSQL = 'DROP TABLE IF EXISTS notifications;'
   const dropMigrationsTableSQL = 'DROP TABLE IF EXISTS migrations;'
 
   await Promise.all([
-    db.run(dropHistoryTableSQL),
+    db.run(dropProbeRequestsTableSQL),
+    db.run(dropAlertsTableSQL),
+    db.run(dropNotificationsTableSQL),
     db.run(dropMigrationsTableSQL),
   ])
+
   await migrate()
 }
 
@@ -129,7 +134,7 @@ export async function saveLog(
   errorResp: string
 ) {
   const insertSQL = `
-    INSERT INTO history (
+    INSERT INTO probe_requests (
         created_at,
         probe_id,
         probe_name,
@@ -146,7 +151,7 @@ export async function saveLog(
       )
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`
 
-  const createdAt = new Date().toISOString()
+  const createdAt = Math.round(Date.now() / 1000)
 
   const params = [
     createdAt,
@@ -167,7 +172,7 @@ export async function saveLog(
   ]
 
   await db.run(insertSQL, params).catch((error) => {
-    log.error('error, cannot insert data into monika-log.db: ' + error.message)
+    log.error("Error: Can't insert data into monika-log.db. " + error.message)
   })
 }
 

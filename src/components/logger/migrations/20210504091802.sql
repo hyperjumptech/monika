@@ -17,4 +17,4 @@ CREATE TABLE history (
   response_size INTEGER,
   error TEXT,
   reported INTEGER DEFAULT 0
-)
+);
