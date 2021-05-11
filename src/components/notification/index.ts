@@ -30,6 +30,7 @@ import {
   WebhookData,
   WhatsappData,
   DiscordData,
+  MonikaNotifData,
 } from '../../interfaces/data'
 import { Notification } from '../../interfaces/notification'
 import getIp from '../../utils/ip'
@@ -42,6 +43,7 @@ import { sendTelegram } from './channel/telegram'
 import { sendWebhook } from './channel/webhook'
 import { sendWhatsapp } from './channel/whatsapp'
 import { sendDiscord } from './channel/discord'
+import { sendMonikaNotif } from './channel/monika-notif'
 
 export type ValidateResponseStatus = { alert: string; status: boolean }
 
@@ -51,12 +53,20 @@ export async function sendAlerts({
   url,
   status,
   incidentThreshold,
+  probeName,
+  probeId,
+  statusCode,
+  responseTime,
 }: {
   validation: ValidateResponseStatus
   notifications: Notification[]
   url: string
   status: string
   incidentThreshold: number
+  probeName?: string
+  probeId?: string
+  statusCode?: number
+  responseTime?: number
 }): Promise<
   Array<{
     alert: string
@@ -185,6 +195,24 @@ export async function sendAlerts({
             },
           } as TeamsData).then(() => ({
             notification: 'teams',
+            alert: validation.alert,
+            url,
+          }))
+        }
+        case 'monika-notif': {
+          return sendMonikaNotif({
+            ...notification.data,
+            body: {
+              type: status === 'DOWN' ? 'incident' : 'recovery',
+              probe_url: url,
+              probe_name: probeName,
+              ip_address: ipAddress,
+              monika_id: probeId,
+              status_code: statusCode,
+              response_time: responseTime,
+            },
+          } as MonikaNotifData).then(() => ({
+            notification: 'monika-notif',
             alert: validation.alert,
             url,
           }))

@@ -331,4 +331,17 @@ describe('monika', () => {
       expect(error.message).to.contain('Teams Webhook URL not found')
     })
     .it('runs with teams config but without webhook url')
+
+  test
+    .stdout()
+    .do(() =>
+      cmd.run([
+        '--config',
+        resolve('./test/testConfigs/monika-notif/monikaNotifconfig.json'),
+        '--verbose',
+      ])
+    )
+    .it('runs with Monika-Notif config', (ctx) => {
+      expect(ctx.stdout).to.contain('URL:')
+    })
 })

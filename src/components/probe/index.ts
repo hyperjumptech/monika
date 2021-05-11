@@ -102,6 +102,10 @@ export async function doProbe(
           url: probe.requests[requestIndex].url ?? '',
           status: status.isDown ? 'DOWN' : 'UP',
           incidentThreshold: probe.incidentThreshold,
+          probeName: probe.name,
+          probeId: probe.id,
+          statusCode: probeRes.status,
+          responseTime: probeRes.config.extraData?.responseTime as number,
         })
       }
     })
