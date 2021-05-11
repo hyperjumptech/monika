@@ -52,6 +52,13 @@
         "username": "someusername",
         "password": "somepassword"
       }
+    },
+    {
+      "id": "unique-id-monika-notif",
+      "type": "monika-notif",
+      "data": {
+        "url": "http://www.example.com"
+      }
     }
   ],
   "probes": [

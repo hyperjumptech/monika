@@ -29,6 +29,7 @@ import {
   WebhookData,
   WhatsappData,
   DiscordData,
+  MonikaNotifData,
 } from '../../src/interfaces/data'
 import * as mailgun from '../../src/components/notification/channel/mailgun'
 import * as webhook from '../../src/components/notification/channel/webhook'
@@ -37,6 +38,7 @@ import * as smtp from '../../src/components/notification/channel/smtp'
 import * as whatsapp from '../../src/components/notification/channel/whatsapp'
 import * as telegram from '../../src/components/notification/channel/telegram'
 import * as discord from '../../src/components/notification/channel/discord'
+import * as monikaNotif from '../../src/components/notification/channel/monika-notif'
 import { sendAlerts } from '../../src/components/notification'
 
 describe('send alerts', () => {
@@ -65,6 +67,10 @@ describe('send alerts', () => {
       url: 'https://hyperjump.tech',
       status: 'UP',
       incidentThreshold: 3,
+      probeName: 'mailgun test',
+      probeId: 'mailgun 1',
+      statusCode: 200,
+      responseTime: 50,
     })
     expect(sent).to.have.length(1)
   })
@@ -90,6 +96,10 @@ describe('send alerts', () => {
       url: 'https://hyperjump.tech',
       status: 'DOWN',
       incidentThreshold: 3,
+      probeName: 'mailgun test',
+      probeId: 'mailgun 1',
+      statusCode: 400,
+      responseTime: 500,
     })
     expect(sent).to.have.length(1)
   })
@@ -115,6 +125,10 @@ describe('send alerts', () => {
       url: 'https://hyperjump.tech',
       status: 'DOWN',
       incidentThreshold: 3,
+      probeName: 'mailgun test',
+      probeId: 'mailgun 1',
+      statusCode: 200,
+      responseTime: 500,
     })
     expect(mailgun.sendMailgun).to.have.been.called()
     expect(sent).to.have.length(1)
@@ -148,6 +162,10 @@ describe('send alerts', () => {
       url: 'https://hyperjump.tech',
       status: 'DOWN',
       incidentThreshold: 3,
+      probeName: 'slack test',
+      probeId: 'slack 1',
+      statusCode: 200,
+      responseTime: 50,
     })
 
     expect(webhook.sendWebhook).to.have.been.called()
@@ -178,6 +196,10 @@ describe('send alerts', () => {
       url: 'https://hyperjump.tech',
       status: 'DOWN',
       incidentThreshold: 3,
+      probeName: 'smtp test',
+      probeId: 'smtp 1',
+      statusCode: 200,
+      responseTime: 50,
     })
     expect(smtp.sendSmtpMail).to.have.been.called()
     expect(sent).to.have.length(1)
@@ -206,6 +228,10 @@ describe('send alerts', () => {
       url: 'https://hyperjump.tech',
       status: 'DOWN',
       incidentThreshold: 3,
+      probeName: 'whatsapp test',
+      probeId: 'whatsapp 1',
+      statusCode: 200,
+      responseTime: 50,
     })
 
     expect(whatsapp.sendWhatsapp).to.have.been.called()
@@ -254,6 +280,10 @@ describe('send alerts', () => {
       url: 'https://hyperjump.tech',
       status: 'DOWN',
       incidentThreshold: 3,
+      probeName: 'telegram test',
+      probeId: 'telegram 1',
+      statusCode: 200,
+      responseTime: 50,
     })
 
     expect(telegram.sendTelegram).to.have.been.called()
@@ -280,9 +310,43 @@ describe('send alerts', () => {
       url: 'https://hyperjump.tech',
       status: 'DOWN',
       incidentThreshold: 3,
+      probeName: 'discord test',
+      probeId: 'discord 1',
+      statusCode: 200,
+      responseTime: 50,
     })
 
     expect(discord.sendDiscord).to.have.been.called()
+    expect(sent).to.have.length(1)
+  })
+
+  it('should send webhook monika-notif', async () => {
+    chai.spy.on(monikaNotif, 'sendMonikaNotif', () => Promise.resolve())
+
+    const sent = await sendAlerts({
+      validation: {
+        alert: 'status-not-2xx',
+        status: true,
+      },
+      notifications: [
+        {
+          id: 'one',
+          type: 'monika-notif',
+          data: {
+            url: 'xx',
+          } as MonikaNotifData,
+        },
+      ],
+      url: 'https://hyperjump.tech',
+      status: 'DOWN',
+      incidentThreshold: 3,
+      probeName: 'monika-notif test',
+      probeId: 'monika-notif 1',
+      statusCode: 200,
+      responseTime: 50,
+    })
+
+    expect(monikaNotif.sendMonikaNotif).to.have.been.called()
     expect(sent).to.have.length(1)
   })
 })

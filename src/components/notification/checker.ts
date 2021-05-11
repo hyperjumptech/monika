@@ -25,6 +25,7 @@
 import {
   DiscordData,
   MailgunData,
+  MonikaNotifData,
   SendgridData,
   SMTPData,
   TeamsData,
@@ -41,9 +42,11 @@ import { createSmtpTransport, sendSmtpMail } from './channel/smtp'
 import { sendTeams } from './channel/teams'
 import { sendTelegram } from './channel/telegram'
 import { sendWebhook } from './channel/webhook'
+import { sendMonikaNotif } from './channel/monika-notif'
 import {
   dataDiscordSchemaValidator,
   dataMailgunSchemaValidator,
+  dataMonikaNotifSchemaValidator,
   dataSendgridSchemaValidator,
   dataSlackSchemaValidator,
   dataSMTPSchemaValidator,
@@ -226,6 +229,26 @@ const teamsNotificationInitialChecker = async (data: TeamsData) => {
   }
 }
 
+const monikaNotificationInitialChecker = async (data: MonikaNotifData) => {
+  try {
+    await dataMonikaNotifSchemaValidator.validateAsync(data)
+    await sendMonikaNotif({
+      url: data?.url,
+      body: {
+        type: 'start',
+        probe_url: '-',
+        ip_address: getIp(),
+        response_time: 0,
+        status_code: 200,
+      },
+    })
+
+    return 'success'
+  } catch (error) {
+    throw errorMessage('Monika-Notif', error?.message)
+  }
+}
+
 export const notificationChecker = async (notifications: Notification[]) => {
   const smtpNotification = notifications
     .filter((notif) => notif.type === 'smtp')
@@ -266,6 +289,11 @@ export const notificationChecker = async (notifications: Notification[]) => {
     .map((notif) => notif.data as TelegramData)
     .map(telegramNotificationInitialChecker)
 
+  const monikaNotification = notifications
+    .filter((notif) => notif.type === 'monika-notif')
+    .map((notif) => notif.data as MonikaNotifData)
+    .map(monikaNotificationInitialChecker)
+
   return Promise.all([
     Promise.all(smtpNotification),
     Promise.all(mailgunNotification),
@@ -275,5 +303,6 @@ export const notificationChecker = async (notifications: Notification[]) => {
     Promise.all(teamsNotification),
     Promise.all(telegramNotification),
     Promise.all(discordNotification),
+    Promise.all(monikaNotification),
   ])
 }
