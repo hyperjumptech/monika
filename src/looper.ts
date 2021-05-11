@@ -70,9 +70,9 @@ function sanitizeProbe(probe: Probe, index: number): Probe {
 }
 
 /**
- * isIDValid check the user input ids against existing probe ids in config
+ * isIDValid checks the user input against existing probe ids in Config
  * @param {object} config is the probe configuration
- * @param {array} ids is array of string ids
+ * @param {array} ids is array of user input string ids
  * @returns {bool} true if all ids found, false if any id is not found
  */
 export function isIDValid(config: Config, ids: string): boolean {
@@ -95,16 +95,25 @@ export function isIDValid(config: Config, ids: string): boolean {
   return true
 }
 
+/**
+ * loopProbes fires off the probe requests after every x interval, and handles repeats.
+ * This function receives the probe id from idFeeder.
+ * @param {object} probe is the target to request
+ * @param {object} notifications is the array of channels to notify the user if probes does not work
+ * @param {number} repeats handle controls test interation/repetition
+ * @returns {function} func with isAborted true if interrupted
+ * @global {bool} isAborted is used to flag loop completion
+ */
 let isAborted = false
-const abort = () => {
-  isAborted = true
-}
 function loopProbes(
   probe: Probe,
   notifications: Notification[],
   repeats: number
 ) {
   let counter = 0
+  const abort = () => {
+    isAborted = true
+  }
 
   const probeInterval = setInterval(() => {
     if (isAborted) {
@@ -131,6 +140,7 @@ function loopProbes(
  * @param {number} repeats number of repeats
  * @param {object} ids of address
  * @returns {function} abort flag
+ * global {bool} isAborted is cleared at the start and used to check exits from doLooper
  */
 export function idFeeder(
   config: Config,
@@ -141,6 +151,11 @@ export function idFeeder(
     if (!isIDValid(config, ids)) {
       return
     }
+  }
+  isAborted = false
+
+  const abort = () => {
+    isAborted = true
   }
 
   // doing custom sequences?

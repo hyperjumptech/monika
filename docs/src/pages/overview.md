@@ -16,6 +16,7 @@ For more information, please refer to the detailed documentations below.
 | [Probes](https://hyperjumptech.github.io/monika/guides/probes)               | How requests are set up and dispatched                 |
 | [Alerts](https://hyperjumptech.github.io/monika/guides/alerts)               | How alerts are triggered and how to setup an alert     |
 | [Notifications](https://hyperjumptech.github.io/monika/guides/notifications) | How to receive notifications when alerts are triggered |
+| [CLI Options](https://hyperjumptech.github.io/monika/guides/cli-options)     | How to run monika from the command line                |
 
 ## Motivation
 
