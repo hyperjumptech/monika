@@ -28,9 +28,8 @@ import { probing } from './probing'
 import { validateResponse } from '../notification/alert'
 import { Probe } from '../../interfaces/probe'
 import { Notification } from '../../interfaces/notification'
-import { probeLog } from '../logger'
+import { notificationLog, probeLog } from '../logger'
 import { AxiosResponseWithExtraData } from '../../interfaces/request'
-import { log } from '../../utils/pino'
 import { sendAlerts } from '../notification'
 
 /**
@@ -57,7 +56,15 @@ export async function doProbe(
       responses.push(probeRes)
 
       validatedResp = validateResponse(probe.alerts, probeRes)
-      await probeLog({ checkOrder, probe, probeRes, requestIndex, err: '' })
+
+      await probeLog({
+        checkOrder,
+        probe,
+        probeRes,
+        alerts: validatedResp
+          .filter((item) => item.status)
+          .map((item) => item.alert),
+      })
 
       // Exit the loop if there is any triggers triggered
       if (validatedResp.filter((item) => item.status).length > 0) break
@@ -84,15 +91,14 @@ export async function doProbe(
         notifications?.length > 0
       ) {
         notifications.forEach((notification) => {
-          log.info({
+          notificationLog({
+            probe,
+            notification,
             type:
               status.state === 'UP_TRUE_EQUALS_THRESHOLD'
                 ? 'NOTIFY-INCIDENT'
                 : 'NOTIFY-RECOVER',
             alertType: probe.alerts[index],
-            notificationType: notification.type,
-            notificationId: notification.id,
-            probeId: probe.id,
             url: probe.requests[requestIndex].url,
           })
         })
@@ -110,6 +116,6 @@ export async function doProbe(
       }
     })
   } catch (error) {
-    probeLog({ checkOrder, probe, probeRes, requestIndex, err: error })
+    probeLog({ checkOrder, probe, probeRes, err: error })
   }
 }
