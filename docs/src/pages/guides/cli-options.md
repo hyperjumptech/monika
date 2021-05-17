@@ -53,7 +53,7 @@ You must respond with a capital `"Y"` to confirm if you want to flush the logs.
 
 ## Repeat
 
-By default monika will continuosuly loop through all your probes in the configuration. You can specify the number of repeats using `-r` or `--repeat` flags followed by a number. For example to repeat only 3 times type the command below:
+By default monika will continuously loop through all your probes in the configuration. You can specify the number of repeats using `-r` or `--repeat` flags followed by a number. For example to repeat only 3 times type the command below:
 
 ```bash
 monika -r 3
