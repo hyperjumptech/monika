@@ -13,11 +13,10 @@ CREATE TABLE probe_requests (
   response_body TEXT,
   response_time INTEGER NOT NULL,
   response_size INTEGER,
+  error TEXT,
   reported INTEGER DEFAULT 0
 );
-PRAGMA foreign_keys = OFF;
 INSERT INTO probe_requests (
-    id,
     created_at,
     probe_id,
     probe_name,
@@ -30,10 +29,10 @@ INSERT INTO probe_requests (
     response_body,
     response_time,
     response_size,
+    error,
     reported
   )
-SELECT id,
-  strftime('%s', created_at),
+SELECT strftime('%s', created_at),
   probe_id,
   probe_name,
   request_method,
@@ -45,24 +44,25 @@ SELECT id,
   response_body,
   response_time,
   response_size,
+  error,
   reported
 FROM history;
 DROP TABLE history;
-PRAGMA foreign_key_check;
-PRAGMA foreign_keys = ON;
 -- Create alerts table
 CREATE TABLE alerts (
   id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
   created_at INTEGER NOT NULL,
   probe_request_id INTEGER NOT NULL REFERENCES probe_requests(id) ON DELETE CASCADE ON UPDATE CASCADE,
-  type TEXT
+  type TEXT NOT NULL
 );
 -- Create notifications table
 CREATE TABLE notifications (
   id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
   created_at INTEGER NOT NULL,
-  probe_request_id INTEGER NOT NULL REFERENCES probe_requests(id) ON DELETE CASCADE ON UPDATE CASCADE,
-  alert_type TEXT,
-  type TEXT,
-  channel TEXT
+  probe_id TEXT NOT NULL,
+  probe_name TEXT,
+  alert_type TEXT NOT NULL,
+  type TEXT NOT NULL,
+  notification_id TEXT NOT NULL,
+  channel TEXT NOT NULL
 );

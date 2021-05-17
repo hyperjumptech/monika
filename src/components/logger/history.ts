@@ -28,6 +28,7 @@ import { open, Database } from 'sqlite'
 
 import { AxiosResponseWithExtraData } from '../../interfaces/request'
 import { Probe } from '../../interfaces/probe'
+import { Notification } from '../../interfaces/notification'
 import { log } from '../../utils/pino'
 
 const sqlite3 = SQLite3.verbose()
@@ -120,20 +121,20 @@ export async function flushAllLogs() {
 }
 
 /**
- * saveLog inserts log information into the table oclumns
+ * saveProbeRequestLog inserts probe request log information into the database
  *
  * @param {object} probe is the probe config
- * @param {object} probeRes this is the response time of the probe
- * @param {number} requestIndex is the request index from a probe
+ * @param {object} probeRes this is the response of the probe
+ * @param {string[]} alerts the alerts triggered
  * @param {string} errorResp if there was an error, it will be stored here
  */
-export async function saveLog(
+export async function saveProbeRequestLog(
   probe: Probe,
   probeRes: AxiosResponseWithExtraData,
-  requestIndex: number,
-  errorResp: string
+  alerts?: string[],
+  errorResp?: string
 ) {
-  const insertSQL = `
+  const insertProbeRequestSQL = `
     INSERT INTO probe_requests (
         created_at,
         probe_id,
@@ -151,29 +152,86 @@ export async function saveLog(
       )
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`
 
-  const createdAt = Math.round(Date.now() / 1000)
+  const insertAlertSQL = `
+    INSERT INTO alerts (
+        created_at,
+        probe_request_id,
+        type
+      )
+    VALUES (?, ?, ?);`
 
-  const params = [
-    createdAt,
-    probe.id,
-    probe.name,
-    probeRes.config.method,
-    probeRes.config.url,
-    JSON.stringify(probeRes.config.headers),
-    probeRes.config.data,
-    probeRes.status,
-    JSON.stringify(probeRes.headers),
-    typeof probeRes.data === 'string'
-      ? probeRes.data
-      : JSON.stringify(probeRes.data), // TODO: limit data stored.
-    probeRes.config.extraData?.responseTime,
-    probeRes.headers['content-length'],
-    errorResp,
-  ]
+  const now = Math.round(Date.now() / 1000)
 
-  await db.run(insertSQL, params).catch((error) => {
+  try {
+    const insertProbeRequestResult = await db.run(insertProbeRequestSQL, [
+      now,
+      probe.id,
+      probe.name,
+      probeRes.config.method,
+      probeRes.config.url,
+      JSON.stringify(probeRes.config.headers),
+      probeRes.config.data,
+      probeRes.status,
+      JSON.stringify(probeRes.headers),
+      typeof probeRes.data === 'string'
+        ? probeRes.data
+        : JSON.stringify(probeRes.data), // TODO: limit data stored.
+      probeRes.config.extraData?.responseTime,
+      probeRes.headers['content-length'],
+      errorResp,
+    ])
+
+    await Promise.all(
+      (alerts ?? []).map((alert) =>
+        db.run(insertAlertSQL, [now, insertProbeRequestResult.lastID, alert])
+      )
+    )
+  } catch (error) {
     log.error("Error: Can't insert data into monika-log.db. " + error.message)
-  })
+  }
+}
+
+/**
+ * saveNotificationLog inserts probe request log information into the database
+ *
+ * @param {object} probe is the probe config
+ * @param {object} notification is the notification config
+ * @param {string} type is the type of notification 'NOTIFY-INCIDENT' | 'NOTIFY-RECOVER'
+ * @param {string} alert the alerts triggered
+ */
+export async function saveNotificationLog(
+  probe: Probe,
+  notification: Notification,
+  type: 'NOTIFY-INCIDENT' | 'NOTIFY-RECOVER',
+  alert: string
+) {
+  const insertNotificationSQL = `
+    INSERT INTO notifications (
+        created_at,
+        probe_id,
+        probe_name,
+        alert_type,
+        type,
+        notification_id,
+        channel
+      )
+    VALUES (?, ?, ?, ?, ?, ?, ?);`
+
+  const now = Math.round(Date.now() / 1000)
+
+  try {
+    await db.run(insertNotificationSQL, [
+      now,
+      probe.id,
+      probe.name,
+      alert,
+      type,
+      notification.id,
+      notification.type,
+    ])
+  } catch (error) {
+    log.error("Error: Can't insert data into monika-log.db. " + error.message)
+  }
 }
 
 /**
