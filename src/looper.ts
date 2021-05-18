@@ -76,7 +76,7 @@ function sanitizeProbe(probe: Probe, id: string): Probe {
  * @returns {bool} true if all ids found, false if any id is not found
  */
 export function isIDValid(config: Config, ids: string): boolean {
-  const idSplit = ids.split(',')
+  const idSplit = ids.split(',').map((item) => item.trim())
 
   for (const id of idSplit) {
     let isFound = false
@@ -92,6 +92,7 @@ export function isIDValid(config: Config, ids: string): boolean {
       return false // ran through the probes and didn't find id
     }
   }
+
   return true
 }
 
@@ -151,7 +152,9 @@ export function idFeeder(
     if (!isIDValid(config, ids)) {
       return
     }
+    return
   }
+
   isAborted = false
 
   const abort = () => {
@@ -160,7 +163,7 @@ export function idFeeder(
 
   // doing custom sequences?
   if (ids) {
-    const idSplit = ids.split(',')
+    const idSplit = ids.split(',').map((item) => item.trim())
 
     for (const id of idSplit) {
       for (const probe of config.probes) {
