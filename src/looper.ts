@@ -37,9 +37,9 @@ const MILLISECONDS = 1000
 const DEFAULT_THRESHOLD = 5
 const DEFAULT_REPORT_INTERVAL = 180000 // 3 minutes
 
-function sanitizeProbe(probe: Probe, index: number): Probe {
+function sanitizeProbe(probe: Probe, id: string): Probe {
   const { name, incidentThreshold, recoveryThreshold, alerts } = probe
-  probe.id = `${index}`
+  probe.id = `${id}`
 
   if (!name) {
     probe.name = `monika_${probe.id}`
@@ -88,7 +88,7 @@ export function isIDValid(config: Config, ids: string): boolean {
       }
     }
     if (!isFound) {
-      log.info(`id not found: ${id}`)
+      log.info(`Error: id not found: ${id}`)
       return false // ran through the probes and didn't find id
     }
   }
@@ -100,7 +100,7 @@ export function isIDValid(config: Config, ids: string): boolean {
  * This function receives the probe id from idFeeder.
  * @param {object} probe is the target to request
  * @param {object} notifications is the array of channels to notify the user if probes does not work
- * @param {number} repeats handle controls test interation/repetition
+ * @param {number} repeats handle controls test interaction/repetition
  * @returns {function} func with isAborted true if interrupted
  * @global {bool} isAborted is used to flag loop completion
  */
@@ -160,10 +160,12 @@ export function idFeeder(
 
   // doing custom sequences?
   if (ids) {
-    for (const id of ids) {
+    const idSplit = ids.split(',')
+
+    for (const id of idSplit) {
       for (const probe of config.probes) {
         if (id === probe.id) {
-          const sanitizedProbe = sanitizeProbe(probe, Number(probe.id))
+          const sanitizedProbe = sanitizeProbe(probe, probe.id)
           /* eslint-disable max-depth */
           loopProbes(sanitizedProbe, config.notifications ?? [], repeats ?? 0)
           if (isAborted) {
@@ -175,7 +177,7 @@ export function idFeeder(
   } else {
     // or default sequence for Each element
     for (const probe of config.probes) {
-      const sanitizedProbe = sanitizeProbe(probe, Number(probe.id))
+      const sanitizedProbe = sanitizeProbe(probe, probe.id)
       loopProbes(sanitizedProbe, config.notifications ?? [], repeats ?? 0)
       if (isAborted) {
         return abort
