@@ -34,22 +34,44 @@ import { log } from '../../utils/pino'
 const sqlite3 = SQLite3.verbose()
 const dbPath = path.resolve(process.cwd(), 'monika-logs.db')
 
-export type HistoryLog = {
+type RequestsLog = {
   id: number
-  created_at: string
   probe_id: string
-  probe_name?: string | null
+  response_status: number
+  request_url: string
+  response_time: number
+}
+
+export type UnreportedRequestsLog = {
+  id: number
+  timestamp: number
+  probe_id: string
+  probe_name?: string
   request_method: string
   request_url: string
-  request_header?: string | null
-  request_body?: string | null
+  request_header?: string
+  request_body?: string
   response_status: number
-  response_header?: string | null
-  response_body?: string | null
+  response_header?: string
   response_time: number
-  response_size?: number | null
-  error?: string | null
-  reported: number
+  response_size?: number
+  alerts: string[]
+}
+
+type UnreportedNotificationsLog = {
+  id: number
+  timestamp: number
+  probe_id: string
+  probe_name: string
+  alert_type: string
+  type: string
+  notification_id: string
+  channel: string
+}
+
+export type UnreportedLog = {
+  requests: UnreportedRequestsLog[]
+  notifications: UnreportedNotificationsLog[]
 }
 
 let db: Database<SQLite3.Database, SQLite3.Statement>
@@ -77,24 +99,95 @@ export async function openLogfile() {
   }
 }
 
+const objectNullValueToUndefined = <T extends Record<string, unknown>>(
+  obj: T
+): { [K in keyof T]: T[K] extends null ? undefined : T[K] } => {
+  return Object.entries(obj)
+    .map(([k, v]) => [k, v === null ? undefined : v] as [string, unknown])
+    .reduce((acc, [k, v]) => {
+      acc[k] = v
+      return acc
+    }, {} as any)
+}
+
 /**
  * getAllLogs gets all the history table from sqlite db
  * @returns {obj} result of logs table
  */
-export async function getAllLogs(): Promise<HistoryLog[]> {
-  const readRowsSQL = 'SELECT * FROM probe_requests'
+export async function getAllLogs(): Promise<RequestsLog[]> {
+  const readRowsSQL =
+    'SELECT id, probe_id, response_status, request_url, response_time FROM probe_requests'
 
   return db.all(readRowsSQL)
 }
 
-export async function getUnreportedLogs(): Promise<HistoryLog[]> {
-  const readRowsSQL = 'SELECT * FROM probe_requests WHERE reported = 0'
+export async function getUnreportedLogs(): Promise<UnreportedLog> {
+  const readUnreportedRequestsSQL = `
+    SELECT PR.id,
+      PR.created_at as timestamp,
+      PR.probe_id,
+      PR.probe_name,
+      PR.request_method,
+      PR.request_url,
+      PR.request_header,
+      PR.request_body,
+      PR.response_status,
+      PR.response_header,
+      PR.response_time,
+      PR.response_size,
+      CASE
+        WHEN A.type IS NULL THEN json_array()
+        ELSE json_group_array(A.type)
+      END alerts
+    FROM probe_requests PR
+      LEFT JOIN alerts A ON PR.id = A.probe_request_id
+    WHERE PR.reported = 0
+    GROUP BY PR.id;`
 
-  return db.all(readRowsSQL)
+  const readUnreportedNotificationsSQL = `
+    SELECT id,
+      created_at as timestamp,
+      probe_id,
+      probe_name,
+      alert_type,
+      type,
+      notification_id,
+      channel
+    FROM notifications
+    WHERE reported = 0;`
+
+  const [unreportedRequests, unreportedNotifications] = await Promise.all([
+    db.all(readUnreportedRequestsSQL).then(
+      (data) =>
+        data.map((d) => ({
+          ...objectNullValueToUndefined(d),
+          alerts: JSON.parse(d.alerts),
+        })) as UnreportedRequestsLog[]
+    ),
+    db
+      .all(readUnreportedNotificationsSQL)
+      .then(
+        (data) =>
+          data.map(objectNullValueToUndefined) as UnreportedNotificationsLog[]
+      ),
+  ])
+
+  return {
+    requests: unreportedRequests,
+    notifications: unreportedNotifications,
+  }
 }
 
-export async function setLogsAsReported(ids: number[]) {
+export async function setRequestLogAsReported(ids: number[]) {
   const updateRowsSQL = `UPDATE probe_requests SET reported = 1 WHERE id IN (${ids.join(
+    ', '
+  )})`
+
+  await db.run(updateRowsSQL)
+}
+
+export async function setNotificationLogAsReported(ids: number[]) {
+  const updateRowsSQL = `UPDATE notifications SET reported = 1 WHERE id IN (${ids.join(
     ', '
   )})`
 

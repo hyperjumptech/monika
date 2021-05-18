@@ -29,7 +29,7 @@ import { Config } from '../../interfaces/config'
 import { Probe } from '../../interfaces/probe'
 import { Notification } from '../../interfaces/notification'
 import getIp from '../../utils/ip'
-import { HistoryLog } from '../logger/history'
+import { UnreportedLog } from '../logger/history'
 
 export interface HQConfig {
   id: string
@@ -70,10 +70,6 @@ export const handshake = (config: Config): Promise<HQResponse> => {
     .then((res) => res.data)
 }
 
-type ReportData = (Omit<HistoryLog, 'id' | 'created_at' | 'reported'> & {
-  timestamp: number
-})[]
-
 export const report = ({
   url,
   key,
@@ -85,7 +81,7 @@ export const report = ({
   key: string
   instanceId: string
   configVersion: string
-  data: ReportData
+  data: UnreportedLog
 }): Promise<HQResponse> => {
   return axios
     .post(

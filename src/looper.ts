@@ -27,7 +27,8 @@ import { Probe } from './interfaces/probe'
 import { report } from './components/reporter'
 import {
   getUnreportedLogs,
-  setLogsAsReported,
+  setRequestLogAsReported,
+  setNotificationLogAsReported,
 } from './components/logger/history'
 import { doProbe } from './components/probe'
 import { log } from './utils/pino'
@@ -116,31 +117,22 @@ export function loopReport(getConfig: () => Config) {
       const { version } = getConfig()
 
       try {
-        const unreportedLogs = await getUnreportedLogs()
-        // convert null value to undefined, so axios won't send it
-        const reportData = unreportedLogs.map((row) => ({
-          timestamp: new Date(row.created_at).valueOf(),
-          probe_id: row.probe_id,
-          request_method: row.request_method,
-          request_url: row.request_url,
-          request_header: row.request_header || undefined,
-          request_body: row.request_body || undefined,
-          response_status: row.response_status,
-          response_header: row.response_header || undefined,
-          response_body: row.response_body || undefined,
-          response_time: row.response_time,
-          response_size: row.response_size || undefined,
-        }))
+        const unreportedLog = await getUnreportedLogs()
 
         await report({
           url,
           key,
           instanceId,
           configVersion: version || '',
-          data: reportData,
+          data: unreportedLog,
         })
 
-        await setLogsAsReported(unreportedLogs.map((log) => log.id))
+        await Promise.all([
+          setRequestLogAsReported(unreportedLog.requests.map((log) => log.id)),
+          setNotificationLogAsReported(
+            unreportedLog.notifications.map((log) => log.id)
+          ),
+        ])
       } catch (error) {
         log.warn(
           " ›   Warning: Can't report history to Symon. " + error.message
