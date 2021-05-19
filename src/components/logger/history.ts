@@ -58,7 +58,7 @@ export type UnreportedRequestsLog = {
   alerts: string[]
 }
 
-type UnreportedNotificationsLog = {
+export type UnreportedNotificationsLog = {
   id: number
   timestamp: number
   probe_id: string

@@ -31,7 +31,8 @@ import {
   getUnreportedLogs,
   setNotificationLogAsReported,
   setRequestLogAsReported,
-  UnreportedLog,
+  UnreportedNotificationsLog,
+  UnreportedRequestsLog,
 } from '../logger/history'
 import { log } from '../../utils/pino'
 import { md5Hash } from '../../utils/hash'
@@ -77,7 +78,10 @@ export const report = ({
   key: string
   instanceId: string
   configVersion: string
-  data: UnreportedLog
+  data: {
+    requests: Omit<UnreportedRequestsLog, 'id'>[]
+    notifications: Omit<UnreportedNotificationsLog, 'id'>[]
+  }
 }): Promise<HQResponse> => {
   return axios
     .post(
@@ -107,13 +111,17 @@ export const getLogsAndReport = async () => {
 
     try {
       const unreportedLog = await getUnreportedLogs()
+      const requests = unreportedLog.requests.map(({ id: _, ...rest }) => rest)
+      const notifications = unreportedLog.notifications.map(
+        ({ id: _, ...rest }) => rest
+      )
 
       await report({
         url,
         key,
         instanceId,
         configVersion: config.version || md5Hash(config),
-        data: unreportedLog,
+        data: { requests, notifications },
       })
 
       await Promise.all([
