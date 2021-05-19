@@ -115,6 +115,11 @@ export async function flushAllLogs() {
     db.run(dropAlertsTableSQL),
     db.run(dropNotificationsTableSQL),
     db.run(dropMigrationsTableSQL),
+
+    // The VACUUM command cleans the main database by copying its contents to a temporary database file and reloading the original database file from the copy.
+    // This eliminates free pages, aligns table data to be contiguous, and otherwise cleans up the database file structure.
+    // When VACUUMing a database, as much as twice the size of the original database file is required in free disk space.
+    db.run('vacuum'),
   ])
 
   await migrate()
