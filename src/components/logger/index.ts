@@ -30,7 +30,7 @@ import { saveProbeRequestLog, getAllLogs, saveNotificationLog } from './history'
 import { log } from '../../utils/pino'
 
 /**
- * getStatusColor colorizes differents tatusCode
+ * getStatusColor colorizes different statusCode
  * @param {number} statusCode is the httpStatus to colorize
  * @returns {string} color code based on chalk: Chalk & { supportsColor: ColorSupport };
  */
@@ -107,7 +107,7 @@ export async function notificationLog({
 }
 
 /**
- * printAllLogs dumps the conent of monika-logs.db onto the screen
+ * printAllLogs dumps the content of monika-logs.db onto the screen
  */
 export async function printAllLogs() {
   const data = await getAllLogs()

@@ -61,7 +61,7 @@ async function migrate() {
 }
 
 /**
- * openLogfile will open the file history.db and if it doesnt exist, create it and sets up the table
+ * openLogfile will open the file history.db and if it doesn't exist, create it and sets up the table
  */
 export async function openLogfile() {
   try {
