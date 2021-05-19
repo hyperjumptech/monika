@@ -24,12 +24,7 @@
 
 import { Config } from './interfaces/config'
 import { Probe } from './interfaces/probe'
-import { report } from './components/reporter'
-import {
-  getUnreportedLogs,
-  setRequestLogAsReported,
-  setNotificationLogAsReported,
-} from './components/logger/history'
+import { getLogsAndReport } from './components/reporter'
 import { doProbe } from './components/probe'
 import { log } from './utils/pino'
 
@@ -101,43 +96,10 @@ export function loopProbes(config: Config) {
 }
 
 export function loopReport(getConfig: () => Config) {
-  const config = getConfig()
-
-  const { monikaHQ } = config
+  const { monikaHQ } = getConfig()
 
   if (monikaHQ) {
-    const {
-      url,
-      key,
-      id: instanceId,
-      interval = DEFAULT_REPORT_INTERVAL,
-    } = monikaHQ
-
-    setInterval(async () => {
-      const { version } = getConfig()
-
-      try {
-        const unreportedLog = await getUnreportedLogs()
-
-        await report({
-          url,
-          key,
-          instanceId,
-          configVersion: version || '',
-          data: unreportedLog,
-        })
-
-        await Promise.all([
-          setRequestLogAsReported(unreportedLog.requests.map((log) => log.id)),
-          setNotificationLogAsReported(
-            unreportedLog.notifications.map((log) => log.id)
-          ),
-        ])
-      } catch (error) {
-        log.warn(
-          " ›   Warning: Can't report history to Symon. " + error.message
-        )
-      }
-    }, interval)
+    const { interval = DEFAULT_REPORT_INTERVAL } = monikaHQ
+    setInterval(getLogsAndReport, interval)
   }
 }

@@ -27,7 +27,15 @@ import axios from 'axios'
 import pako from 'pako'
 
 import { Config } from '../../interfaces/config'
-import { UnreportedLog } from '../logger/history'
+import {
+  getUnreportedLogs,
+  setNotificationLogAsReported,
+  setRequestLogAsReported,
+  UnreportedLog,
+} from '../logger/history'
+import { log } from '../../utils/pino'
+import { md5Hash } from '../../utils/hash'
+import { getConfig } from '../config'
 
 export interface HQConfig {
   id: string
@@ -89,4 +97,33 @@ export const report = ({
       }
     )
     .then((res) => res.data)
+}
+
+export const getLogsAndReport = async () => {
+  const config = getConfig()
+
+  if (config.monikaHQ) {
+    const { url, key, id: instanceId } = config.monikaHQ
+
+    try {
+      const unreportedLog = await getUnreportedLogs()
+
+      await report({
+        url,
+        key,
+        instanceId,
+        configVersion: config.version || md5Hash(config),
+        data: unreportedLog,
+      })
+
+      await Promise.all([
+        setRequestLogAsReported(unreportedLog.requests.map((log) => log.id)),
+        setNotificationLogAsReported(
+          unreportedLog.notifications.map((log) => log.id)
+        ),
+      ])
+    } catch (error) {
+      log.warn(" ›   Warning: Can't report history to Symon. " + error.message)
+    }
+  }
 }
