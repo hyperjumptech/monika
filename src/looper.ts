@@ -27,14 +27,15 @@ import { Probe } from './interfaces/probe'
 import { getLogsAndReport } from './components/reporter'
 import { doProbe } from './components/probe'
 import { log } from './utils/pino'
+import { Notification } from './interfaces/notification'
 
 const MILLISECONDS = 1000
 const DEFAULT_THRESHOLD = 5
 const DEFAULT_REPORT_INTERVAL = 180000 // 3 minutes
 
-function sanitizeProbe(probe: Probe, index: number): Probe {
+function sanitizeProbe(probe: Probe, id: string): Probe {
   const { name, incidentThreshold, recoveryThreshold, alerts } = probe
-  probe.id = `${index}`
+  probe.id = `${id}`
 
   if (!name) {
     probe.name = `monika_${probe.id}`
@@ -65,33 +66,123 @@ function sanitizeProbe(probe: Probe, index: number): Probe {
 }
 
 /**
- * looper does all the looping
- * @param {object} config is an object that contains all the configs
- * @returns {function} - function to stop the looper
+ * isIDValid checks the user input against existing probe ids in Config
+ * @param {object} config is the probe configuration
+ * @param {array} ids is array of user input string ids
+ * @returns {bool} true if all ids found, false if any id is not found
  */
-export function loopProbes(config: Config) {
-  let isAborted = false
+export function isIDValid(config: Config, ids: string): boolean {
+  const idSplit = ids.split(',').map((item) => item.trim())
 
-  config.probes.forEach((probe, i) => {
-    let counter = 0
-    const probeInterval = setInterval(() => {
-      if (isAborted) {
-        clearInterval(probeInterval)
+  for (const id of idSplit) {
+    let isFound = false
+
+    for (const probes of config.probes) {
+      if (probes.id === id) {
+        isFound = true
+        break
       }
+    }
+    if (!isFound) {
+      log.info(`Error: id not found: ${id}`)
+      return false // ran through the probes and didn't find id
+    }
+  }
 
-      const sanitizedProbe = sanitizeProbe(probe, i)
-      return doProbe(++counter, sanitizedProbe, config.notifications)
-    }, (probe.interval ?? 10) * MILLISECONDS)
+  return true
+}
 
-    if (process.env.CI || process.env.NODE_ENV === 'test') {
+/**
+ * loopProbes fires off the probe requests after every x interval, and handles repeats.
+ * This function receives the probe id from idFeeder.
+ * @param {object} probe is the target to request
+ * @param {object} notifications is the array of channels to notify the user if probes does not work
+ * @param {number} repeats handle controls test interaction/repetition
+ * @returns {function} func with isAborted true if interrupted
+ * @global {bool} isAborted is used to flag loop completion
+ */
+let isAborted = false
+function loopProbes(
+  probe: Probe,
+  notifications: Notification[],
+  repeats: number
+) {
+  let counter = 0
+  const abort = () => {
+    isAborted = true
+  }
+
+  const probeInterval = setInterval(() => {
+    if (isAborted) {
       clearInterval(probeInterval)
     }
-  })
+
+    if (counter === repeats) {
+      clearInterval(probeInterval)
+      return abort
+    }
+    return doProbe(++counter, probe, notifications)
+  }, (probe.interval ?? 10) * MILLISECONDS)
+
+  if (process.env.CI || process.env.NODE_ENV === 'test') {
+    clearInterval(probeInterval)
+  }
+
+  return abort
+}
+
+/**
+ * idFeeder feeds Prober with actual ids to process
+ * @param {object} config is an object that contains all the configs
+ * @param {number} repeats number of repeats
+ * @param {object} ids of address
+ * @returns {function} abort flag
+ * global {bool} isAborted is cleared at the start and used to check exits from doLooper
+ */
+export function idFeeder(
+  config: Config,
+  repeats: number,
+  ids: string | undefined
+) {
+  if (ids) {
+    if (!isIDValid(config, ids)) {
+      return
+    }
+    return
+  }
+
+  isAborted = false
 
   const abort = () => {
     isAborted = true
   }
 
+  // doing custom sequences?
+  if (ids) {
+    const idSplit = ids.split(',').map((item) => item.trim())
+
+    for (const id of idSplit) {
+      for (const probe of config.probes) {
+        if (id === probe.id) {
+          const sanitizedProbe = sanitizeProbe(probe, probe.id)
+          /* eslint-disable max-depth */
+          loopProbes(sanitizedProbe, config.notifications ?? [], repeats ?? 0)
+          if (isAborted) {
+            return abort
+          }
+        }
+      }
+    }
+  } else {
+    // or default sequence for Each element
+    for (const probe of config.probes) {
+      const sanitizedProbe = sanitizeProbe(probe, probe.id)
+      loopProbes(sanitizedProbe, config.notifications ?? [], repeats ?? 0)
+      if (isAborted) {
+        return abort
+      }
+    }
+  }
   return abort
 }
 

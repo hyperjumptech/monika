@@ -33,3 +33,13 @@ Or you can stop the container with
 ```
 docker stop monika
 ```
+
+## Command-line Options
+
+The common `-h` or `--help` displays all available options
+
+```bash
+monika -h
+```
+
+See the [CLI Options](https://hyperjumptech.github.io/monika/guides/cli-options) guide to see all the different options possible.
