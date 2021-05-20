@@ -22,67 +22,9 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import EventEmitter from 'events'
-import pEvent from 'p-event'
-import { Config } from '../../interfaces/config'
-import { parseConfig } from './parse'
-import { validateConfig } from './validate'
-import { handshake } from '../reporter'
-import { log } from '../../utils/pino'
+import { createHash } from 'crypto'
 
-const emitter = new EventEmitter()
-
-const CONFIG_UPDATED = 'CONFIG_UPDATED_EVENT'
-
-let cfg: Config
-
-export const getConfig = () => {
-  if (!cfg) throw new Error('Configuration setup has not been run yet')
-  return cfg
-}
-
-export async function* getConfigIterator() {
-  if (!cfg) throw new Error('Configuration setup has not been run yet')
-
-  yield cfg
-
-  if (!(process.env.CI || process.env.NODE_ENV === 'test')) {
-    yield* pEvent.iterator<string, Config>(emitter, CONFIG_UPDATED)
-  }
-}
-
-export const updateConfig = (data: Partial<Config>) => {
-  const lastVersion = cfg.version
-
-  if (data.version) cfg.version = data.version
-  if (data.probes) cfg.probes = data.probes
-  if (data.notifications) cfg.notifications = data.notifications
-
-  if (cfg.version !== lastVersion) {
-    emitter.emit(CONFIG_UPDATED, cfg)
-  }
-}
-
-export const setupConfigFromFile = async (path: string) => {
-  const parsed = parseConfig(path)
-
-  if (parsed.symon?.url && parsed.symon?.key) {
-    try {
-      await handshake(parsed)
-
-      // TODO: fetch config from Symon and override local config
-      // Need API in Symon first
-    } catch (error) {
-      log.warn(
-        ` ›   Warning: Can't do handshake with Symon. Monika will use configuration from ${path}.`
-      )
-    }
-  }
-
-  const validated = validateConfig(parsed)
-  if (validated.valid) {
-    cfg = parsed
-  } else {
-    throw new Error(validated.message)
-  }
+export const md5Hash = (data: string | object) => {
+  const str = typeof data === 'string' ? data : JSON.stringify(data)
+  return createHash('md5').update(str).digest('hex')
 }

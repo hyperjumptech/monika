@@ -22,57 +22,50 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import os from 'os'
 import axios from 'axios'
 import pako from 'pako'
 
 import { Config } from '../../interfaces/config'
-import { Probe } from '../../interfaces/probe'
-import { Notification } from '../../interfaces/notification'
-import getIp from '../../utils/ip'
-import { HistoryLog } from '../logger/history'
+import {
+  getUnreportedLogs,
+  setNotificationLogAsReported,
+  setRequestLogAsReported,
+  UnreportedNotificationsLog,
+  UnreportedRequestsLog,
+} from '../logger/history'
+import { log } from '../../utils/pino'
+import { md5Hash } from '../../utils/hash'
+import { getConfig } from '../config'
 
-export interface HQConfig {
+export interface SymonConfig {
   id: string
   url: string
   key: string
   interval?: number
 }
 
-export type HQResponse = {
+export type SymonResponse = {
   result: string
-  data: {
-    version: string
-    probes?: Probe[]
-    notifications?: Notification[]
-  }
+  message: string
 }
 
-export const handshake = (config: Config): Promise<HQResponse> => {
+export const handshake = (config: Config): Promise<SymonResponse> => {
   return axios
     .post(
-      `${config.monikaHQ!.url}/handshake`,
+      `${config.symon!.url}/handshake`,
       {
-        monika: {
-          id: config.monikaHQ!.id,
-          ip_address: getIp(),
-        },
-        data: {
-          probes: config.probes,
-          notifications: config.notifications,
-        },
+        instanceId: config.symon!.id,
+        hostname: os.hostname(),
       },
       {
         headers: {
-          'x-api-key': config.monikaHQ!.key,
+          'x-api-key': config.symon!.key,
         },
       }
     )
     .then((res) => res.data)
 }
-
-type ReportData = (Omit<HistoryLog, 'id' | 'created_at' | 'reported'> & {
-  timestamp: number
-})[]
 
 export const report = ({
   url,
@@ -85,8 +78,11 @@ export const report = ({
   key: string
   instanceId: string
   configVersion: string
-  data: ReportData
-}): Promise<HQResponse> => {
+  data: {
+    requests: Omit<UnreportedRequestsLog, 'id'>[]
+    notifications: Omit<UnreportedNotificationsLog, 'id'>[]
+  }
+}): Promise<SymonResponse> => {
   return axios
     .post(
       `${url}/report`,
@@ -105,4 +101,37 @@ export const report = ({
       }
     )
     .then((res) => res.data)
+}
+
+export const getLogsAndReport = async () => {
+  const config = getConfig()
+
+  if (config.symon) {
+    const { url, key, id: instanceId } = config.symon
+
+    try {
+      const unreportedLog = await getUnreportedLogs()
+      const requests = unreportedLog.requests.map(({ id: _, ...rest }) => rest)
+      const notifications = unreportedLog.notifications.map(
+        ({ id: _, ...rest }) => rest
+      )
+
+      await report({
+        url,
+        key,
+        instanceId,
+        configVersion: config.version || md5Hash(config),
+        data: { requests, notifications },
+      })
+
+      await Promise.all([
+        setRequestLogAsReported(unreportedLog.requests.map((log) => log.id)),
+        setNotificationLogAsReported(
+          unreportedLog.notifications.map((log) => log.id)
+        ),
+      ])
+    } catch (error) {
+      log.warn(" ›   Warning: Can't report history to Symon. " + error.message)
+    }
+  }
 }

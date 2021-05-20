@@ -24,12 +24,12 @@
 
 import { Notification } from './notification'
 import { Probe } from './probe'
-import { HQConfig } from '../components/reporter'
+import { SymonConfig } from '../components/reporter'
 
 export interface Config {
   interval?: number
   notifications?: Notification[]
   probes: Probe[]
-  monikaHQ?: HQConfig
+  symon?: SymonConfig
   version?: string
 }

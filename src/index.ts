@@ -145,7 +145,7 @@ class Monika extends Command {
     try {
       await setupConfigFromFile(flags.config)
 
-      // Run report on interval if monikaHQ configuration exists
+      // Run report on interval if symon configuration exists
       if (!(process.env.CI || process.env.NODE_ENV === 'test')) {
         loopReport(getConfig)
       }
