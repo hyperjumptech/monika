@@ -66,7 +66,7 @@ export const updateConfig = (data: Partial<Config>) => {
 export const setupConfigFromFile = async (path: string) => {
   const parsed = parseConfig(path)
 
-  if (parsed.monikaHQ && parsed.monikaHQ.url && parsed.monikaHQ.key) {
+  if (parsed.symon?.url && parsed.symon?.key) {
     try {
       await handshake(parsed)
 

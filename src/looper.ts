@@ -187,10 +187,10 @@ export function idFeeder(
 }
 
 export function loopReport(getConfig: () => Config) {
-  const { monikaHQ } = getConfig()
+  const { symon } = getConfig()
 
-  if (monikaHQ) {
-    const { interval = DEFAULT_REPORT_INTERVAL } = monikaHQ
+  if (symon) {
+    const { interval = DEFAULT_REPORT_INTERVAL } = symon
     setInterval(getLogsAndReport, interval)
   }
 }

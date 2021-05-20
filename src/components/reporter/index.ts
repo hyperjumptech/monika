@@ -38,29 +38,29 @@ import { log } from '../../utils/pino'
 import { md5Hash } from '../../utils/hash'
 import { getConfig } from '../config'
 
-export interface HQConfig {
+export interface SymonConfig {
   id: string
   url: string
   key: string
   interval?: number
 }
 
-export type HQResponse = {
+export type SymonResponse = {
   result: string
   message: string
 }
 
-export const handshake = (config: Config): Promise<HQResponse> => {
+export const handshake = (config: Config): Promise<SymonResponse> => {
   return axios
     .post(
-      `${config.monikaHQ!.url}/handshake`,
+      `${config.symon!.url}/handshake`,
       {
-        instanceId: config.monikaHQ!.id,
+        instanceId: config.symon!.id,
         hostname: os.hostname(),
       },
       {
         headers: {
-          'x-api-key': config.monikaHQ!.key,
+          'x-api-key': config.symon!.key,
         },
       }
     )
@@ -82,7 +82,7 @@ export const report = ({
     requests: Omit<UnreportedRequestsLog, 'id'>[]
     notifications: Omit<UnreportedNotificationsLog, 'id'>[]
   }
-}): Promise<HQResponse> => {
+}): Promise<SymonResponse> => {
   return axios
     .post(
       `${url}/report`,
@@ -106,8 +106,8 @@ export const report = ({
 export const getLogsAndReport = async () => {
   const config = getConfig()
 
-  if (config.monikaHQ) {
-    const { url, key, id: instanceId } = config.monikaHQ
+  if (config.symon) {
+    const { url, key, id: instanceId } = config.symon
 
     try {
       const unreportedLog = await getUnreportedLogs()

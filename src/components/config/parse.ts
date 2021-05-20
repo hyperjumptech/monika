@@ -32,11 +32,7 @@ export const parseConfig = (configPath: string): Config => {
     const configString = readFileSync(configPath, 'utf-8')
 
     // Parse the content
-    const output = JSON.parse(configString)
-    output.monikaHQ = output['monika-hq']
-    delete output['monika-hq']
-
-    return output
+    return JSON.parse(configString)
   } catch (error) {
     if (error.code === 'ENOENT' && error.path === configPath) {
       throw new Error(
