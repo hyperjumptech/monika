@@ -95,7 +95,8 @@
   "files": [
     "/bin",
     "/lib",
-    "/scripts"
+    "/scripts",
+    "/db/migrations"
   ],
   "homepage": "https://github.com/https://github.com/hyperjumptech/monika",
   "bugs": "https://github.com/https://github.com/hyperjumptech/monika/issues",
