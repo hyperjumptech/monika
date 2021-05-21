@@ -78,7 +78,7 @@ let db: Database<SQLite3.Database, SQLite3.Statement>
 
 async function migrate() {
   await db.migrate({
-    migrationsPath: path.join(__dirname, 'migrations'),
+    migrationsPath: path.join(__dirname, '../../../db/migrations'),
   })
 }
 
