@@ -9,7 +9,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Monika notification channel
 - Store alerts and notifications events to database
 - Ability to customize sequence of probe id to run
 
