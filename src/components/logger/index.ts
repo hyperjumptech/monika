@@ -76,8 +76,7 @@ export async function probeLog({
 
   for (const rq of probe.requests) {
     if (rq?.saveBody !== true ?? undefined) {
-      // if not saved, flush .data
-      probeRes.data = ''
+      probeRes.data = '' // if not saved, flush .data
     }
   }
 
