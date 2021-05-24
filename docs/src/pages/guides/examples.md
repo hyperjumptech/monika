@@ -108,12 +108,14 @@ Here is an example configuration with multiple requests:
         {
           "method": "GET",
           "url": "https://github.com/",
-          "timeout": 7000
+          "timeout": 7000,
+          "saveBody": false
         },
         {
           "method": "GET",
           "url": "https://github.com/hyperjumptech",
-          "timeout": 7000
+          "timeout": 7000,
+          "saveBody": true
         }
       ],
       "incidentThreshold": 3,

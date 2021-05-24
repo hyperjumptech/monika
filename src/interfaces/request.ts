@@ -38,6 +38,7 @@ export interface AxiosResponseWithExtraData extends AxiosResponse {
 }
 
 export interface RequestConfig extends Omit<AxiosRequestConfig, 'data'> {
+  saveBody: boolean
   url: string
   body: JSON
   timeout: number

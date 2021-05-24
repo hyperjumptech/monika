@@ -40,6 +40,7 @@ An actual probe request may be something like below.
         "method": "POST",
         "url": "https://mybackend.org/user/login",
         "timeout": 7000,
+        "saveBody": true,
         "headers": {
           "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkhlbGxvIGZyb20gSHlwZXJqdW1wIiwiaWF0IjoxNTE2MjM5MDIyfQ.T2SbP1G39CMD4MMfkOZYGFgNIQgNkyi0sPdiFi_DfVA"
         },
@@ -68,6 +69,7 @@ Details of the field are give in the table below.
 | incidentThreshold (optional) | Number of times an alert should return true before Monika sends notifications. For example, when incidentThreshold is 3, Monika will only send notifications when the probed URL returns non-2xx status 3 times in a row. After sending the notifications, Monika will not send notifications anymore until the alert status changes. Default value is 5. |
 | recoveryThreshold (optional) | Number of times an alert should return false before Monika sends notifications. For example, when recoveryThreshold is 3, Monika will only send notifications when the probed URL returns status 2xx 3 times in a row. After sending the notifications, Monika will not send notifications anymore until the alert status changes. Default value is 5.    |
 | alerts                       | The condition which will trigger an alert, and the subsequent notification method to send out the alert. See below for further details on alerts and notifications.                                                                                                                                                                                       |
+| saveBody (optional)          | When set to true, the response body of the request is stored internally. The default is off when not defined. This is to keep the log files size small as some responses can be sizeable. The setting is for each probe request.                                                                                                                          |
 
 ## Probe Response Anatomy
 
@@ -106,9 +108,9 @@ Probe response data could be used for [Request Chaining](https://hyperjumptech.g
 
 ## Execution order
 
-In a configuration with multiple probes, `Monika` will perform the requests in sequence in the order that they are entered, one after another.
+In a configuration with multiple probes, `Monika` will perform the requests in sequence in the order that they are entered, one after another. When the `--id` flag is used, the sequence of IDs are executed as entered.
 
-On completion, `Monika` will sleep until the next interval to start again. At the top of the `monika.json` file there is an `interval` setting. The execution will be restarted after every `interval`. If interval is shorter than the amount of time to dispatch all the requests, then `Monika` will immediately repeat after the last probe response and any notification alerts sent.
+On completion, `Monika` will sleep until the next interval to start again. At the top of the `monika.json` file there is an `interval` setting. The execution will be restarted after every `interval`. If interval is shorter than the amount of time to dispatch all the requests, then `Monika` will immediately repeat after the last probe response and any notification alerts sent. When the `--repeat` flag is set, the test is looped specified by the user.
 
 ## Further reading
 

@@ -74,6 +74,13 @@ export async function probeLog({
     responseLength: probeRes.headers['content-length'],
   })
 
+  for (const rq of probe.requests) {
+    if (rq?.saveBody !== true ?? undefined) {
+      // if not saved, flush .data
+      probeRes.data = ''
+    }
+  }
+
   await saveProbeRequestLog(probe, probeRes, alerts, err)
 }
 
