@@ -33,7 +33,7 @@ To measure response time. The time value and unit can be changed.
 | :------------------------------------ | ---------------------------------------------------------------------------------------- |
 | response-time-greater-than-`200`-`ms` | Condition met if the response time from the probes URL is greater than 200 milliseconds. |
 
-- The time value can be changed to any positif integer value. In above example, the value is `200`.
+- The time value can be changed to any positive integer value. In above example, the value is `200`.
 - The time unit can be changed to `s` second. In above example, the unit is `ms` for milliseconds.
 
 Example changed time value and unit:
