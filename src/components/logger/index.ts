@@ -54,15 +54,17 @@ export function getStatusColor(statusCode: number) {
 export async function probeLog({
   checkOrder,
   probe,
+  requestIndex,
   probeRes,
   alerts,
-  err,
+  error,
 }: {
   checkOrder: number
   probe: Probe
+  requestIndex: number
   probeRes: AxiosResponseWithExtraData
   alerts?: string[]
-  err?: string
+  error?: string
 }) {
   log.info({
     type: 'PROBE',
@@ -80,7 +82,13 @@ export async function probeLog({
     }
   }
 
-  await saveProbeRequestLog(probe, probeRes, alerts, err)
+  await saveProbeRequestLog({
+    probe,
+    requestIndex,
+    probeRes,
+    alerts,
+    error,
+  })
 }
 
 /**
