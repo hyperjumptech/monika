@@ -148,7 +148,6 @@ export function idFeeder(
     if (!isIDValid(config, ids)) {
       return
     }
-    return
   }
 
   isAborted = false
