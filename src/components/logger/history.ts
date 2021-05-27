@@ -95,7 +95,7 @@ export async function openLogfile() {
 
     await migrate()
   } catch (error) {
-    log.error("Warning: Can't open logfile. ", error.message)
+    log.error("Warning: Can't open logfile. " + error.message)
   }
 }
 
@@ -221,17 +221,21 @@ export async function flushAllLogs() {
 /**
  * saveProbeRequestLog inserts probe request log information into the database
  *
- * @param {object} probe is the probe config
- * @param {object} probeRes this is the response of the probe
- * @param {string[]} alerts the alerts triggered
- * @param {string} errorResp if there was an error, it will be stored here
+ * @param {object} data is the log data containing information about probe request
  */
-export async function saveProbeRequestLog(
-  probe: Probe,
-  probeRes: AxiosResponseWithExtraData,
-  alerts?: string[],
-  errorResp?: string
-) {
+export async function saveProbeRequestLog({
+  probe,
+  requestIndex,
+  probeRes,
+  alerts,
+  error: errorResp,
+}: {
+  probe: Probe
+  requestIndex: number
+  probeRes: AxiosResponseWithExtraData
+  alerts?: string[]
+  error?: string
+}) {
   const insertProbeRequestSQL = `
     INSERT INTO probe_requests (
         created_at,
@@ -259,22 +263,23 @@ export async function saveProbeRequestLog(
     VALUES (?, ?, ?);`
 
   const now = Math.round(Date.now() / 1000)
+  const requestConfig = probe.requests[requestIndex]
 
   try {
     const insertProbeRequestResult = await db.run(insertProbeRequestSQL, [
       now,
       probe.id,
       probe.name,
-      probeRes.config.method,
-      probeRes.config.url,
-      JSON.stringify(probeRes.config.headers),
-      probeRes.config.data,
+      requestConfig.method,
+      requestConfig.url,
+      JSON.stringify(requestConfig.headers),
+      requestConfig.body,
       probeRes.status,
       JSON.stringify(probeRes.headers),
       typeof probeRes.data === 'string'
         ? probeRes.data
         : JSON.stringify(probeRes.data), // TODO: limit data stored.
-      probeRes.config.extraData?.responseTime,
+      probeRes.config.extraData?.responseTime ?? 0,
       probeRes.headers['content-length'],
       errorResp,
     ])

@@ -60,6 +60,7 @@ export async function doProbe(
       await probeLog({
         checkOrder,
         probe,
+        requestIndex,
         probeRes,
         alerts: validatedResp
           .filter((item) => item.status)
@@ -124,6 +125,6 @@ export async function doProbe(
       }
     })
   } catch (error) {
-    probeLog({ checkOrder, probe, probeRes, err: error })
+    probeLog({ checkOrder, probe, requestIndex, probeRes, err: error })
   }
 }
