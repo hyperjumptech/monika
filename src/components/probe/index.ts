@@ -125,6 +125,6 @@ export async function doProbe(
       }
     })
   } catch (error) {
-    probeLog({ checkOrder, probe, requestIndex, probeRes, err: error })
+    probeLog({ checkOrder, probe, requestIndex, probeRes, error })
   }
 }

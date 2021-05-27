@@ -273,7 +273,7 @@ export async function saveProbeRequestLog({
       requestConfig.method,
       requestConfig.url,
       JSON.stringify(requestConfig.headers),
-      requestConfig.body,
+      JSON.stringify(requestConfig.body),
       probeRes.status,
       JSON.stringify(probeRes.headers),
       typeof probeRes.data === 'string'
