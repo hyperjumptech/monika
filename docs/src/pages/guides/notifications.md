@@ -105,7 +105,7 @@ To use Gmail SMTP with Monika,
 3. Use `587` for `port`.
 4. Use your Gmail address for `username`.
 5. Use your Gmail password for `password`.
-   1. If you have activated 2-Factor-Authentication (2FA), you need to <a className="text-blue-700 font-semibold" href="https://support.google.com/accounts/answer/185833">create an App Password from your Account Settings</a>. Then use the app password for `password`.
+   1. If you have activated 2-Factor-Authentication (2FA), you need to [create an App Password from your Account Settings](https://support.google.com/accounts/answer/185833). Then use the app password for `password`.
 
 ## Mailgun
 
@@ -114,8 +114,8 @@ Mailgun is an email notification delivery provided by Mailgun email service. To 
 1. You would need a [mailgun account](https://app.mailgun.com/).
 2. Get your **API key** by referring to [this documentation](https://help.mailgun.com/hc/en-us/articles/203380100-Where-Can-I-Find-My-API-Key-and-SMTP-Credentials).
 3. For your **domain**
-   - • If you are on the free plan, add authorized recipients as instructed <a className="text-blue-700 font-semibold" href="https://help.mailgun.com/hc/en-us/articles/217531258-Authorized-Recipients">here</a>.
-   - • If you want to use your own domain, refer <a className="text-blue-700 font-semibold" href="https://help.mailgun.com/hc/en-us/articles/203637190-How-Do-I-Add-or-Delete-a-Domain">here</a> to add it.
+   - • If you are on the free plan, add authorized recipients as instructed [here](https://help.mailgun.com/hc/en-us/articles/217531258-Authorized-Recipients).
+   - • If you want to use your own domain, refer [here](https://help.mailgun.com/hc/en-us/articles/203637190-How-Do-I-Add-or-Delete-a-Domain) to add it.
 4. After that, put them in `monika.json` configuration as follows:
 
 ```json
