@@ -33,7 +33,7 @@ const MILLISECONDS = 1000
 const DEFAULT_THRESHOLD = 5
 const DEFAULT_REPORT_INTERVAL = 180000 // 3 minutes
 
-function sanitizeProbe(probe: Probe, id: string): Probe {
+export function sanitizeProbe(probe: Probe, id: string): Probe {
   const { name, incidentThreshold, recoveryThreshold, alerts } = probe
   probe.id = `${id}`
 
