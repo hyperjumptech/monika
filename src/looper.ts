@@ -102,7 +102,7 @@ export function isIDValid(config: Config, ids: string): boolean {
  * @global {bool} isAborted is used to flag loop completion
  */
 let isAborted = false
-function loopProbes(
+export function loopProbes(
   probe: Probe,
   notifications: Notification[],
   repeats: number

@@ -22,13 +22,13 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import chai, { expect } from 'chai'
-import spies from 'chai-spies'
-
+import * as looper from '../src/looper'
 import { Config } from '../src/interfaces/config'
 import { Probe } from '../src/interfaces/probe'
-import { isIDValid, sanitizeProbe } from '../src/looper'
+import { isIDValid, sanitizeProbe, idFeeder } from '../src/looper'
 
+import chai, { expect } from 'chai'
+import spies from 'chai-spies'
 chai.use(spies)
 
 describe('--ids flag validation', () => {
@@ -52,8 +52,8 @@ describe('--ids flag validation', () => {
   const config: Config = {
     probes: [probe1, probe2],
   }
-  it('it should return true when all id is found', () => {
-    const input = '1, 2, 1'
+  it('it should return true when all id is found, spaces trimmed', () => {
+    const input = '1, 2,         1'
 
     const result = isIDValid(config, input)
     expect(result).is.true
@@ -86,5 +86,70 @@ describe('sanitized probe', () => {
     expect(sanitizedProbe.incidentThreshold).to.equal(DEFAULT_THRESHOLD)
     expect(sanitizedProbe.recoveryThreshold).to.equal(DEFAULT_THRESHOLD)
     expect(sanitizedProbe.alerts).to.have.lengthOf(2)
+  })
+})
+
+/* eslint-disable no-console */
+describe('Looper tests', () => {
+  const probe1: Probe = {
+    id: '1',
+    name: '',
+    requests: [],
+    incidentThreshold: 0,
+    recoveryThreshold: 0,
+    alerts: [],
+  }
+
+  const probe2: Probe = {
+    id: '2',
+    name: '',
+    requests: [],
+    incidentThreshold: 0,
+    recoveryThreshold: 0,
+    alerts: [],
+  }
+  const probe3: Probe = {
+    id: '3',
+    name: '',
+    requests: [],
+    incidentThreshold: 0,
+    recoveryThreshold: 0,
+    alerts: [],
+  }
+
+  let spied: Chai.ChaiStatic
+  beforeEach(() => {
+    spied = chai.spy.on(looper, ['loopProbes'])
+  })
+  afterEach(() => {
+    chai.spy.restore(looper)
+  })
+
+  it('it should run one probe', () => {
+    const config: Config = {
+      probes: [probe1],
+    }
+    idFeeder(config, 0, undefined)
+
+    expect(spied).to.be.spy
+    expect(spied).to.be.called
+    expect(looper.idFeeder).to.have.been.called()
+    expect(looper.loopProbes).to.have.been.called()
+  })
+
+  it.skip('it should run three probes', () => {
+    const config: Config = {
+      probes: [probe1, probe2, probe1],
+    }
+    idFeeder(config, 0, undefined)
+    expect(looper.loopProbes).to.have.been.called
+  })
+
+  it.skip('it should run ids 1, 3, 1', () => {
+    const config: Config = {
+      probes: [probe1, probe2, probe3],
+    }
+    const input = '1,3, 1'
+    idFeeder(config, 0, input)
   })
 })
