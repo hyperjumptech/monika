@@ -22,14 +22,15 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import chalk from 'chalk'
 import { AxiosResponseWithExtraData } from '../../interfaces/request'
 import { Probe } from '../../interfaces/probe'
-import chalk from 'chalk'
-import { saveLog, getAllLogs } from './history'
+import { Notification } from '../../interfaces/notification'
+import { saveProbeRequestLog, getAllLogs, saveNotificationLog } from './history'
 import { log } from '../../utils/pino'
 
 /**
- * getStatusColor colorizes differents tatusCode
+ * getStatusColor colorizes different statusCode
  * @param {number} statusCode is the httpStatus to colorize
  * @returns {string} color code based on chalk: Chalk & { supportsColor: ColorSupport };
  */
@@ -49,23 +50,21 @@ export function getStatusColor(statusCode: number) {
 /**
  * probeLog just prints probe results for the user and to persistent log (through history.ts)
  *
- * @param {number} checkOrder is the order of probe being processed
- * @param {Probe} probe is the probe that made the log
- * @param {AxiosResponseWithExtraData} probRes is result of the probing
- * @param {string} err if theres any error, catch it here
  */
 export async function probeLog({
   checkOrder,
   probe,
-  probeRes,
   requestIndex,
-  err,
+  probeRes,
+  alerts,
+  error,
 }: {
   checkOrder: number
   probe: Probe
-  probeRes: AxiosResponseWithExtraData
   requestIndex: number
-  err: string
+  probeRes: AxiosResponseWithExtraData
+  alerts?: string[]
+  error?: string
 }) {
   log.info({
     type: 'PROBE',
@@ -77,11 +76,52 @@ export async function probeLog({
     responseLength: probeRes.headers['content-length'],
   })
 
-  saveLog(probe, probeRes, requestIndex, err)
+  for (const rq of probe.requests) {
+    if (rq?.saveBody !== true ?? undefined) {
+      probeRes.data = '' // if not saved, flush .data
+    }
+  }
+
+  await saveProbeRequestLog({
+    probe,
+    requestIndex,
+    probeRes,
+    alerts,
+    error,
+  })
 }
 
 /**
- * printAllLogs dumps the conent of monika-logs.db onto the screen
+ * notificationLog just prints notifications for the user and to persistent log (through history.ts)
+ *
+ */
+export async function notificationLog({
+  type,
+  alertType,
+  notification,
+  probe,
+  url,
+}: {
+  probe: Probe
+  notification: Notification
+  type: 'NOTIFY-INCIDENT' | 'NOTIFY-RECOVER'
+  alertType: string
+  url: string
+}) {
+  log.info({
+    type,
+    alertType,
+    notificationType: notification.type,
+    notificationId: notification.id,
+    probeId: probe.id,
+    url,
+  })
+
+  await saveNotificationLog(probe, notification, type, alertType)
+}
+
+/**
+ * printAllLogs dumps the content of monika-logs.db onto the screen
  */
 export async function printAllLogs() {
   const data = await getAllLogs()
