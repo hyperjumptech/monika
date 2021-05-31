@@ -298,4 +298,24 @@ Monika supports Discord. To enable notification via Discord, you must create a d
 | Type | Notification types                                            | `discord`                                                      |
 | Url  | The URL of the Discord Webhook that will receive notification | `https://discord.com/api/webhook/<webhook.id>/<webhook.token>` |
 
+## Monika Whatsapp Notifier
+
+Monika now have its own notification channel, sent through your whatsapp number. To enable notification via Monika Whatsapp Notifier, you must create a Monika Notifier account first. Please consult [Intro to Monika Whatsapp Notifier](http://monika-whatsapp-staging.azurewebsites.net)
+
+```json
+{
+  "id": "unique-id-monika-notif",
+  "type": "monika-notif",
+  "data": {
+    "url": "https://YOUR_MONIKA_NOTIF_URL"
+  }
+}
+```
+
+| Key  | Description                              | Example                                                        |
+| ---- | ---------------------------------------- | -------------------------------------------------------------- |
+| ID   | Notification identity number             | `MonikaNotif12345`                                             |
+| Type | Notification types                       | `monika-notif`                                                 |
+| Url  | The URL of the Monika Notif Webhook link | `https://monika-whatsapp.net/api/notify?token=<webhook.token>` |
+
 Keep watch on these pages, new notification methods are being developed.
