@@ -238,8 +238,8 @@ const monikaNotificationInitialChecker = async (data: MonikaNotifData) => {
         type: 'start',
         probe_url: '-',
         ip_address: getIp(),
-        response_time: 0,
-        status_code: 200,
+        response_time: '2020-12-01 00:00:00.000',
+        alert: body,
       },
     })
 
