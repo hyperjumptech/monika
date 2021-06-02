@@ -129,10 +129,9 @@ const Home = ({ sponsors }) => {
                     <p className="mt-2  lg:mt-4 text-base xl:text-lg lg:leading-normal leading-6 text-gray-600">
                       Get notified of the incidents through your favourite tools
                       including by e-mail via SMTP, mailgun, and sendgrid,
-                      webhook, telegram, slack incoming webhook or through your
-                      whatsapp number by registering to Monika Whatsapp
-                      Notifier. More notification channels are coming including
-                      Microsoft Teams!
+                      webhook, telegram, or through slack incoming webhook. More
+                      notification channels are coming including Microsoft
+                      Teams!
                     </p>
                   </div>
                 </div>
