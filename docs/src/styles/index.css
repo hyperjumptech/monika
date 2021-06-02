@@ -10,6 +10,17 @@ html {
   -moz-osx-font-smoothing: grayscale;
 }
 
+.outline {
+  border: 8px solid;
+  border-image-source: linear-gradient(86.29deg, #987CE8 4.96%, #2FDCDC 106.68%);
+  box-shadow: 0px 8px 25px 0px #40CCDD33;
+  border-radius: 24px;
+}
+
+p.monika-gradient {
+  background: linear-gradient(86.29deg, #987CE8 4.96%, #2FDCDC 106.68%);
+}
+
 .top-24 {
   top: 6rem;
 }

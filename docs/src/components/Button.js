@@ -14,7 +14,7 @@ export default function Button(props) {
 function ButtonOutlined(props) {
   return (
     <button
-      className={`min-w-md px-4 py-2 border-4 border-solid rounded-full font-sans ${props.className}`}>
+      className={`min-w-md px-4 py-2 outline font-sans ${props.className}`}>
       {props.children}
     </button>
   )
