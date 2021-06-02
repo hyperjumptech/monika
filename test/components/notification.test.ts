@@ -310,8 +310,6 @@ describe('send alerts', () => {
       incidentThreshold: 3,
       probeName: 'monika-notif test',
       probeId: 'monika-notif 1',
-      statusCode: 200,
-      responseTime: 50,
     })
 
     expect(monikaNotif.sendMonikaNotif).to.have.been.called()

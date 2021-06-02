@@ -114,8 +114,6 @@ export async function doProbe(
           incidentThreshold: probe.incidentThreshold,
           probeName: probe.name,
           probeId: probe.id,
-          statusCode: probeRes.status,
-          responseTime: probeRes.config.extraData?.responseTime as number,
         })
 
         await notificationsLogPromise

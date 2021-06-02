@@ -67,8 +67,8 @@ export interface MonikaNotifDataBody {
   probe_name?: string
   monika_id?: string
   ip_address: string
-  response_time: number
-  status_code: number
+  response_time: string
+  alert: string
 }
 
 export interface TelegramData {
