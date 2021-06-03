@@ -5,7 +5,7 @@ export default function Button(props) {
 
   return (
     <button
-      className={`min-w-md px-4 py-2 bg-gradient-to-r from-aqua to-purple rounded-full font-sans text-white ${props.className}`}
+      className={`min-w-md px-4 py-2 bg-gradient-to-r from-aqua to-purple rounded-full font-sans text-white`}
     >
       {props.children}
     </button>)
@@ -14,8 +14,8 @@ export default function Button(props) {
 function ButtonOutlined(props) {
   return (
     <button
-      className={`min-w-md px-4 py-2 outline font-sans ${props.className}`}>
-      {props.children}
+      className={`min-w-md px-4 py-2 outline font-sans`}>
+      <span className="bg-gradient-to-r from-aqua to-purple text-transparent bg-clip-text">{props.children}</span>
     </button>
   )
 }
