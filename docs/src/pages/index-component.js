@@ -28,13 +28,15 @@ export default function Home() {
   return (
     <>
       <p>
-        <Button>normal button</Button>
+        <Button className="m-2">normal button</Button>
       </p>
       <p>
-        <Button outline>outlined button</Button>
+        <Button outline className="m-2">
+          outlined button
+        </Button>
       </p>
       <p>
-        <Button outline>
+        <Button outline className="m-2">
           <span className="inline-flex items-center fill-current">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -48,7 +50,7 @@ export default function Home() {
         </Button>
       </p>
       <p>
-        <Button>
+        <Button className="m-2">
           <span className="inline-flex items-center fill-current">
             <svg
               xmlns="http://www.w3.org/2000/svg"

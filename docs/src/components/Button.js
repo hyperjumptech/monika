@@ -33,7 +33,7 @@ export default function Button(props) {
 
   return (
     <button
-      className={`min-w-md px-4 py-2 bg-gradient-to-r from-aqua to-purple rounded-full font-sans text-white ${
+      className={`min-w-md px-4 py-2 bg-gradient-to-r from-aqua-monika to-purple-monika rounded-full font-sans text-white ${
         props.className ? props.className : ''
       }`}
     >
@@ -45,7 +45,7 @@ export default function Button(props) {
 function ButtonOutlined(props) {
   return (
     <button
-      className={`min-w-md px-4 py-2 outline font-sans ${
+      className={`min-w-md px-4 py-2 rounded-full border-2 border-aqua-monika text-aqua-monika font-sans ${
         props.className ? props.className : ''
       }`}
     >

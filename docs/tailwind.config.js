@@ -35,6 +35,8 @@ module.exports = {
     }),
     extend: {
       colors: {
+        'aqua-monika': '#987CE8',
+        'purple-monika': '#2FDCDC',
         coral: {
           light: '#FF6070',
           default: '#FF4154',
@@ -46,22 +48,18 @@ module.exports = {
       sans: ['IBM Plex Sans', ...defaultTheme.fontFamily.sans],
       serif: ['Inter', ...defaultTheme.fontFamily.serif],
     },
-    gradientColorStops: theme => ({
-      'aqua': '#987CE8',
-      'purple': '#2FDCDC',
-    }),
     minWidth: {
-      'md': '15%',
+      md: '15%',
+    },
+    rotate: {
+      ...defaultTheme.rotate,
+      '-30': '-30deg',
     },
     screens: {
       sm: '640px',
       md: '768px',
       lg: '1024px',
       xl: '1400px',
-    },
-    rotate: {
-      ...defaultTheme.rotate,
-      '-30': '-30deg',
     },
   },
   variants: {},
