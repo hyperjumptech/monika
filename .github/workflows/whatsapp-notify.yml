@@ -1,0 +1,33 @@
+# This workflow will run when a new Pull Request is opened or reopened, and a new issue is opened.
+# This workflow only notifies Hyperjump's Team Whatsapp no. Nothing else.
+# WARNING: Since this PR uses pull_request_target trigger, DO NOT BUILD THE PROJECT IN THIS WORKFLOW!
+# For more information: https://securitylab.github.com/research/github-actions-preventing-pwn-requests/
+# To PR reviewers: Please make sure there is no build steps in this workflow.
+
+name: Notify Whatsapp
+
+on:
+  push:
+    branches: [main]
+  pull_request_target:
+    types: [opened, reopened]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Set variables
+      id: set_variables
+      run: |
+        if [ "$GITHUB_EVENT_NAME" = "push" ]; then
+            echo "::set-output name=webhook_url::https://waba.damcorp.id/whatsapp/sendHsm/new_commit" 
+        else
+            echo "::set-output name=webhook_url::https://waba.damcorp.id/whatsapp/sendHsm/new_pr" 
+        fi
+      env:
+        GITHUB_EVENT_NAME: ${{ github.event_name }}
+    - name: Notify Whatsapp
+      uses: joelwmale/webhook-action@fd99bb3b8272237103e349e9bb4d9b0ead9a217c
+      with:
+        url: "${{ steps.set_variables.outputs.webhook_url }}"
+        body: '{"token": "${{ secrets.HYPERJUMP_DAM_TOKEN }}", "to": [${{ secrets.HYPERJUMP_WA_NUMBERS }}], "param": ["${{ github.repository }}", "${{ github.actor }}"]}'
