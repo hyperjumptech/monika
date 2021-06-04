@@ -4,6 +4,7 @@
 
 Monika is a command line application for synthetic monitoring. The name Monika stands for "**Moni**toring Ber**ka**la", which means "periodic monitoring" in the Indonesian language.
 
+test
 ## Installation
 
 Install from the npm package manager (you need to install Node.js first)
