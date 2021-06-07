@@ -37,6 +37,7 @@ module.exports = {
       colors: {
         'aqua-monika': '#987CE8',
         'purple-monika': '#2FDCDC',
+        'black-monika': '#1B1B1B',
         coral: {
           light: '#FF6070',
           default: '#FF4154',
