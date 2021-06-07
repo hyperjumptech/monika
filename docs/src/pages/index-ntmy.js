@@ -1,5 +1,7 @@
 import { Seo } from 'components/Seo'
 import NavBar from 'components/NavBar'
+import Head from 'next/head'
+import { Sticky } from 'components/Sticky'
 
 export default function IndexPage() {
   return (
@@ -8,7 +10,12 @@ export default function IndexPage() {
         title="Monika"
         description="Free and Open Source Synthetic Monitoring Tool"
       />
-      <NavBar />
+      <Head>
+        <title>Monika - Free and Open Source Synthetic Monitoring Tool</title>
+      </Head>
+      <Sticky>
+        <NavBar />
+      </Sticky>
     </>
   )
 }
