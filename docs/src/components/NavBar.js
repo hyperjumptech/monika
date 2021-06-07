@@ -23,7 +23,6 @@
  **********************************************************************************/
 
 import Link from 'next/link'
-import logoSrc from '../images/logo.svg'
 import { siteConfig } from 'siteConfig'
 import Head from 'next/head'
 import Button from 'components/Button'
