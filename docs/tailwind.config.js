@@ -15,29 +15,6 @@ module.exports = {
     },
   },
   theme: {
-    extend: {
-      colors: {
-        coral: {
-          light: '#FF6070',
-          default: '#FF4154',
-          dark: '#EB2135',
-        },
-      },
-    },
-    fontFamily: {
-      sans: ['Inter', ...defaultTheme.fontFamily.sans],
-      serif: ['Inter', ...defaultTheme.fontFamily.serif],
-    },
-    screens: {
-      sm: '640px',
-      md: '768px',
-      lg: '1024px',
-      xl: '1400px',
-    },
-    rotate: {
-      ...defaultTheme.rotate,
-      '-30': '-30deg',
-    },
     container: {
       padding: '1rem',
     },
@@ -56,6 +33,34 @@ module.exports = {
         },
       },
     }),
+    extend: {
+      colors: {
+        'aqua-monika': '#987CE8',
+        'purple-monika': '#2FDCDC',
+        coral: {
+          light: '#FF6070',
+          default: '#FF4154',
+          dark: '#EB2135',
+        },
+      },
+    },
+    fontFamily: {
+      sans: ['IBM Plex Sans', ...defaultTheme.fontFamily.sans],
+      serif: ['Inter', ...defaultTheme.fontFamily.serif],
+    },
+    minWidth: {
+      md: '15%',
+    },
+    rotate: {
+      ...defaultTheme.rotate,
+      '-30': '-30deg',
+    },
+    screens: {
+      sm: '640px',
+      md: '768px',
+      lg: '1024px',
+      xl: '1400px',
+    },
   },
   variants: {},
   plugins: [require('@tailwindcss/ui')],
