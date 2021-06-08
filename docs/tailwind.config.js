@@ -35,14 +35,18 @@ module.exports = {
     }),
     extend: {
       colors: {
-        'aqua-monika': '#987CE8',
-        'purple-monika': '#2FDCDC',
+        'aqua-monika': '#2FDCDC',
+        'purple-monika': '#987CE8',
         'black-monika': '#1B1B1B',
+        'gray-monika': '#C4C4C4',
         coral: {
           light: '#FF6070',
           default: '#FF4154',
           dark: '#EB2135',
         },
+      },
+      opacity: {
+        10: '0.1',
       },
     },
     fontFamily: {
@@ -51,6 +55,7 @@ module.exports = {
     },
     minWidth: {
       md: '15%',
+      30: '30%',
     },
     rotate: {
       ...defaultTheme.rotate,

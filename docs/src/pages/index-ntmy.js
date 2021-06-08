@@ -2,6 +2,7 @@ import { Seo } from 'components/Seo'
 import NavBar from 'components/NavBar'
 import Head from 'next/head'
 import { Sticky } from 'components/Sticky'
+import Banner from 'components/landing-page/Banner'
 
 export default function IndexPage() {
   return (
@@ -16,6 +17,7 @@ export default function IndexPage() {
       <Sticky>
         <NavBar />
       </Sticky>
+      <Banner />
     </>
   )
 }
