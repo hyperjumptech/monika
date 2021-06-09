@@ -72,7 +72,10 @@ export default function Banner(props) {
         </div>
       </div>
       <img src={StarBlurSvg} className="absolute -top-16 right-0" />
-      <img src={WorldDotSvg} className="absolute top-0 -left-16 mt-64" />
+      <img
+        src={WorldDotSvg}
+        className="sm:invisible xl:visible absolute top-0 -left-16 mt-64"
+      />
     </div>
   )
 }
