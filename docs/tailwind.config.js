@@ -48,6 +48,9 @@ module.exports = {
       opacity: {
         10: '0.1',
       },
+      inset: {
+        '-16': '-4rem',
+      },
     },
     fontFamily: {
       sans: ['IBM Plex Sans', ...defaultTheme.fontFamily.sans],

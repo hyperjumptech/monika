@@ -24,21 +24,28 @@
 
 import ButtonLink from 'components/ButtonLink'
 import { useEffect, useState } from 'react'
+import StarBlurSvg from '../../../public/star-blur.svg'
+import WorldDotSvg from '../../../public/world-dot.svg'
+import { siteConfig } from 'siteConfig'
 
-export default function Banner() {
+export default function Banner(props) {
   return (
-    <div className="flex flex-col bg-black-monika">
-      <div className="mt-20 px-4 text-5xl font-bold text-center text-white">
+    <div
+      className={`relative h-screen flex flex-col bg-black-monika ${
+        props.className ? props.className : ''
+      }`}
+    >
+      <div className="z-10 mt-20 px-4 text-5xl font-bold text-center text-white">
         <p>Know when your web is down</p>
         <p>before your users do.</p>
       </div>
-      <div className="mt-4 px-4 font-normal text-center text-white">
+      <div className="z-10 mt-4 px-4 font-normal text-center text-white">
         <p>
           React faster when your app is having problem before your users notice!
         </p>
         <p>Let's get started in seconds.</p>
       </div>
-      <div className="m-auto">
+      <div className="z-10 m-auto mt-4">
         <p className="mt-4 px-16 py-4 bg-gray-monika bg-opacity-10 rounded-md">
           <span className="bg-gradient-to-r from-purple-monika to-aqua-monika bg-clip-text font-normal text-center text-transparent">
             npm i -g @hyperjumptech/monika
@@ -59,6 +66,8 @@ export default function Banner() {
           </div>
         </div>
       </div>
+      <img src={StarBlurSvg} className="absolute -top-16 right-0" />
+      <img src={WorldDotSvg} className="absolute top-0 -left-16 mt-64" />
     </div>
   )
 }
@@ -81,7 +90,7 @@ function StarButton() {
     <ButtonLink
       outline="true"
       className="w-40 flex justify-center leading-snug font-semibold text-center"
-      href="/quick-start"
+      href={siteConfig.repoUrl}
       target="_blank"
       rel="noopener noreferrer"
     >
