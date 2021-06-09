@@ -36,7 +36,12 @@ export default function Banner(props) {
       }`}
     >
       <div className="z-10 mt-20 px-4 text-5xl font-bold text-center text-white">
-        <p>Know when your web is down</p>
+        <p>
+          Know when your{' '}
+          <span className="bg-gradient-to-r from-purple-monika to-aqua-monika bg-clip-text text-transparent">
+            web app is down
+          </span>
+        </p>
         <p>before your users do.</p>
       </div>
       <div className="z-10 mt-4 px-4 font-normal text-center text-white">
