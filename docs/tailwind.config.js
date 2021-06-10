@@ -46,7 +46,7 @@ module.exports = {
         },
       },
       margin: {
-        half: '50vh',
+        '3/4': '75vh',
       },
       opacity: {
         10: '0.1',
