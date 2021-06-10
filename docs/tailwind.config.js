@@ -45,11 +45,15 @@ module.exports = {
           dark: '#EB2135',
         },
       },
+      margin: {
+        half: '50vh',
+      },
       opacity: {
         10: '0.1',
       },
       inset: {
         '-16': '-4rem',
+        '-20': '-6rem',
       },
     },
     fontFamily: {

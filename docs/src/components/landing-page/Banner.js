@@ -31,18 +31,19 @@ import { siteConfig } from 'siteConfig'
 export default function Banner(props) {
   return (
     <div
-      className={`relative h-screen flex flex-col bg-black-monika ${
+      className={`h-screen flex flex-col bg-black-monika ${
         props.className ? props.className : ''
       }`}
     >
       <div className="z-10 mt-20 px-4 text-5xl font-bold text-center text-white">
-        <p>
+        <h1>
           Know when your{' '}
           <span className="bg-gradient-to-r from-purple-monika to-aqua-monika bg-clip-text text-transparent">
             web app is down
           </span>
-        </p>
-        <p>before your users do.</p>
+          <br />
+          before your users do.
+        </h1>
       </div>
       <div className="z-10 mt-4 px-4 font-normal text-center text-white">
         <p>
@@ -74,7 +75,7 @@ export default function Banner(props) {
       <img src={StarBlurSvg} className="absolute -top-16 right-0" />
       <img
         src={WorldDotSvg}
-        className="sm:invisible xl:visible absolute top-0 -left-16 mt-64"
+        className="sm:invisible xl:visible absolute top-0 -left-16 mt-half"
       />
     </div>
   )
