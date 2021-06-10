@@ -22,73 +22,11 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import EventEmitter from 'events'
-import pEvent from 'p-event'
+import axios from 'axios'
 import { Config } from '../../interfaces/config'
-import { parseConfig } from './parse'
-import { validateConfig } from './validate'
-import { handshake } from '../reporter'
-import { log } from '../../utils/pino'
-import { fetchConfig } from './fetch'
 
-const emitter = new EventEmitter()
+export const fetchConfig = async (url: string): Promise<Config> => {
+  const { data } = await axios.get(url)
 
-const CONFIG_UPDATED = 'CONFIG_UPDATED_EVENT'
-
-let cfg: Config
-
-export const getConfig = () => {
-  if (!cfg) throw new Error('Configuration setup has not been run yet')
-  return cfg
-}
-
-export async function* getConfigIterator() {
-  if (!cfg) throw new Error('Configuration setup has not been run yet')
-
-  yield cfg
-
-  if (!(process.env.CI || process.env.NODE_ENV === 'test')) {
-    yield* pEvent.iterator<string, Config>(emitter, CONFIG_UPDATED)
-  }
-}
-
-export const updateConfig = (data: Partial<Config>) => {
-  const lastVersion = cfg.version
-
-  if (data.version) cfg.version = data.version
-  if (data.probes) cfg.probes = data.probes
-  if (data.notifications) cfg.notifications = data.notifications
-
-  if (cfg.version !== lastVersion) {
-    emitter.emit(CONFIG_UPDATED, cfg)
-  }
-}
-
-const setupConfig = async (config: Config) => {
-  if (config.symon?.url && config.symon?.key) {
-    try {
-      await handshake(config)
-    } catch (error) {
-      log.warn(` ›   Warning: Can't do handshake with Symon.`)
-    }
-  }
-
-  const validated = validateConfig(config)
-  if (validated.valid) {
-    cfg = config
-  } else {
-    throw new Error(validated.message)
-  }
-}
-
-export const setupConfigFromFile = async (path: string) => {
-  const parsed = parseConfig(path)
-
-  await setupConfig(parsed)
-}
-
-export const setupConfigFromUrl = async (url: string) => {
-  const fetched = await fetchConfig(url)
-
-  await setupConfig(fetched)
+  return data
 }
