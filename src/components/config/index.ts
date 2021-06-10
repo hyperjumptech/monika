@@ -64,7 +64,7 @@ export const updateConfig = (data: Config) => {
   }
 }
 
-export const setupConfigFromFile = async (path: string) => {
+export const setupConfigFromFile = async (path: string, watch: boolean) => {
   const parseValidateHandshake = async () => {
     const parsed = parseConfig(path)
 
@@ -93,7 +93,7 @@ export const setupConfigFromFile = async (path: string) => {
     parseValidateHandshake().then(updateConfig)
   }
 
-  if (!(process.env.CI || process.env.NODE_ENV === 'test')) {
+  if (watch) {
     const fileWatcher = chokidar.watch(path)
     fileWatcher.on('change', handler)
   }
