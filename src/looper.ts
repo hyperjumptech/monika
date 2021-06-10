@@ -99,15 +99,15 @@ export function isIDValid(config: Config, ids: string): boolean {
  * @param {object} notifications is the array of channels to notify the user if probes does not work
  * @param {number} repeats handle controls test interaction/repetition
  * @returns {function} func with isAborted true if interrupted
- * @global {bool} isAborted is used to flag loop completion
  */
-let isAborted = false
-function loopProbes(
+function loopProbe(
   probe: Probe,
   notifications: Notification[],
   repeats: number
 ) {
   let counter = 0
+
+  let isAborted = false
   const abort = () => {
     isAborted = true
   }
@@ -136,53 +136,41 @@ function loopProbes(
  * @param {object} config is an object that contains all the configs
  * @param {number} repeats number of repeats
  * @param {object} ids of address
- * @returns {function} abort flag
- * global {bool} isAborted is cleared at the start and used to check exits from doLooper
+ * @returns {function} abort function
  */
 export function idFeeder(
   config: Config,
   repeats: number,
   ids: string | undefined
 ) {
+  // default sequence for Each element
+  let probesToRun = config.probes
   if (ids) {
     if (!isIDValid(config, ids)) {
       return
     }
-  }
-
-  isAborted = false
-
-  const abort = () => {
-    isAborted = true
-  }
-
-  // doing custom sequences?
-  if (ids) {
+    // doing custom sequences if list of ids is declared
     const idSplit = ids.split(',').map((item) => item.trim())
-
-    for (const id of idSplit) {
-      for (const probe of config.probes) {
-        if (id === probe.id) {
-          const sanitizedProbe = sanitizeProbe(probe, probe.id)
-          /* eslint-disable max-depth */
-          loopProbes(sanitizedProbe, config.notifications ?? [], repeats ?? 0)
-          if (isAborted) {
-            return abort
-          }
-        }
-      }
-    }
-  } else {
-    // or default sequence for Each element
-    for (const probe of config.probes) {
-      const sanitizedProbe = sanitizeProbe(probe, probe.id)
-      loopProbes(sanitizedProbe, config.notifications ?? [], repeats ?? 0)
-      if (isAborted) {
-        return abort
-      }
-    }
+    probesToRun = config.probes.filter((probe) => idSplit.includes(probe.id))
   }
-  return abort
+
+  const abortFns: Array<() => void> = []
+
+  for (const probe of probesToRun) {
+    const sanitizedProbe = sanitizeProbe(probe, probe.id)
+    const abortFn = loopProbe(
+      sanitizedProbe,
+      config.notifications ?? [],
+      repeats ?? 0
+    )
+    abortFns.push(abortFn)
+  }
+
+  const abortAll = () => {
+    abortFns.forEach((fn) => fn())
+  }
+
+  return abortAll
 }
 
 export function loopReport(getConfig: () => Config) {
