@@ -21,13 +21,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  *
  * SOFTWARE.                                                                      *
  **********************************************************************************/
+import DashboardIconSvg from '../../../public/dashboard-icon.svg'
+import TimerIconSvg from '../../../public/timer-icon.svg'
+import AlarmIconSvg from '../../../public/alarm-icon.svg'
+import ListIconSvg from '../../../public/list-icon.svg'
+import RecycleIconSvg from '../../../public/recycle-icon.svg'
+import WhatsAppIconSvg from '../../../public/whatsapp-icon.svg'
 
 export default function FeatureBanner() {
   return (
     <div className="relative flex flex-col bg-white h-screen z-10 transform -skew-y-6 -mt-20">
       <div className="w-1/4 h-6 absolute top-0 right-0 bg-gradient-to-r from-purple-monika to-aqua-monika" />
       <div className="w-1/4 h-6 absolute bottom-0 left-0 bg-gradient-to-r from-purple-monika to-aqua-monika" />
-      <div className="m-auto flex flex-col z-10 transform skew-y-6">
+      <div className="m-auto mx-48 flex flex-col z-10 transform skew-y-6">
         <h2 className="mr-auto bg-gradient-to-r from-purple-monika to-aqua-monika bg-clip-text text-transparent font-bold text-xl">
           Why Monika
         </h2>
@@ -36,13 +42,59 @@ export default function FeatureBanner() {
           <br />
           Monitoring Tool
         </h2>
-        <div className="grid grid-cols-3 gap-4 mt-4">
-          <p>Monitor Multiple Websites</p>
-          <p>Monitor When Down or Slow</p>
-          <p>Monitor When Down or Slow</p>
-          <p>Monitor When Down or Slow</p>
-          <p>Monitor When Down or Slow</p>
-          <p>Monitor When Down or Slow</p>
+        <div className="grid grid-cols-3 gap-2 mt-4">
+          <div>
+            <img src={DashboardIconSvg} />
+            <h3 className="font-semibold">Monitor Multiple Websites</h3>
+            <p>
+              You can add as many as websites you want to monitor with Monika to
+              help grow your business.
+            </p>
+          </div>
+          <div>
+            <img src={TimerIconSvg} />
+            <h3 className="font-semibold">Monitor When Down or Slow</h3>
+            <p>
+              With Monika, you can monitor website several status such as down
+              or slow based on notifications.
+            </p>
+          </div>
+          <div>
+            <img src={AlarmIconSvg} />
+            <h3 className="font-semibold">Various Notifications</h3>
+            <p>
+              Get notified of the incidents on your website through your
+              favourite communication tools like SMTP mail, telegram, and etc.
+            </p>
+          </div>
+          <div>
+            <img src={ListIconSvg} />
+            <h3 className="font-semibold">Customizable Requests</h3>
+            <p>
+              Monitor all different parts of your websites. For example, you can
+              monitor your login website form through POST HTTP.
+            </p>
+          </div>
+          <div>
+            <img src={RecycleIconSvg} />
+            <h3 className="font-semibold">Requests Chaining</h3>
+            <p>
+              Request chaining enables you to send multiple requests and the
+              ability to use past responses from earlier requests.
+            </p>
+          </div>
+          <div>
+            <img src={WhatsAppIconSvg} />
+            <h3 className="font-semibold">
+              Whatsapp Notifications{' '}
+              <span className="bg-gradient-to-r from-purple-monika to-aqua-monika bg-clip-text text-transparent">
+                (Soon!)
+              </span>
+            </h3>
+            <p>
+              Monika will send notifications directly to your WhatsApp account.
+            </p>
+          </div>
         </div>
       </div>
     </div>
