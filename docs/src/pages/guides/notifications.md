@@ -18,6 +18,7 @@ At this moment, Monika support these channel of notifications (You can use just 
 7. [WhatsApp](https://hyperjumptech.github.io/monika/guides/notifications#whatsapp)
 8. [Microsoft Teams](https://hyperjumptech.github.io/monika/guides/notifications#microsoft-teams)
 9. [Discord](https://hyperjumptech.github.io/monika/guides/notifications#discord)
+10. [Facebook Workplace](https://hyperjumptech.github.io/monika/guides/notifications#facebook-workplace)
 
 We are working on more notifications like Telegram, and many more. You can help!
 
@@ -297,6 +298,28 @@ Monika supports Discord. To enable notification via Discord, you must create a d
 | ID   | Notification identity number                                  | `Discord12345`                                                 |
 | Type | Notification types                                            | `discord`                                                      |
 | Url  | The URL of the Discord Webhook that will receive notification | `https://discord.com/api/webhook/<webhook.id>/<webhook.token>` |
+
+## Facebook Workplace
+
+Monika supports Facebook Workplace. To enable notifiation via Workplace, you must create custom integration first. More info at [Facebook Workplace Custom Integrations](https://developers.facebook.com/docs/workplace/custom-integrations-new/)
+
+```json
+{
+  "id": "unique-workplace-id",
+  "type": "workplace",
+  "data": {
+    "thread_id": "12345678910",
+    "access_token": "your_custom_integration_access_token"
+  }
+}
+```
+
+| Key         | Description                                     | Example                         |
+| ----------- | ----------------------------------------------- | ------------------------------- |
+| ID          | Notification identity number                    | `Workplace12345`                |
+| Type        | Notification types                              | `workplace`                     |
+| ThreadID    | It's located at thread url, in the last segment | `6367478493277649`              |
+| AccessToken | Workplace access token for custom integration   | `DQVJzYWtsdHRJRWIxUk9uOG5VV...` |
 
 ## Monika Whatsapp Notifier (COMING SOON!)
 
