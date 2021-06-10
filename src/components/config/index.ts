@@ -65,15 +65,8 @@ export const updateConfig = (data: Config) => {
 }
 
 export const setupConfigFromFile = async (path: string) => {
-  const handler = async () => {
+  const parseValidateHandshake = async () => {
     const parsed = parseConfig(path)
-
-    const validated = validateConfig(parsed)
-    if (!validated.valid) {
-      throw new Error(validated.message)
-    }
-
-    updateConfig(parsed)
 
     if (parsed.symon?.url && parsed.symon?.key) {
       try {
@@ -85,9 +78,23 @@ export const setupConfigFromFile = async (path: string) => {
         log.warn(` ›   Warning: Can't do handshake with Symon.`)
       }
     }
+
+    const validated = validateConfig(parsed)
+    if (!validated.valid) {
+      throw new Error(validated.message)
+    }
+
+    return parsed
   }
 
-  await handler()
+  cfg = await parseValidateHandshake()
 
-  chokidar.watch(path).on('change', handler)
+  const handler = () => {
+    parseValidateHandshake().then(updateConfig)
+  }
+
+  if (!(process.env.CI || process.env.NODE_ENV === 'test')) {
+    const fileWatcher = chokidar.watch(path)
+    fileWatcher.on('change', handler)
+  }
 }

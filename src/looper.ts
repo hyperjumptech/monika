@@ -107,28 +107,19 @@ function loopProbe(
 ) {
   let counter = 0
 
-  let isAborted = false
-  const abort = () => {
-    isAborted = true
-  }
-
   const probeInterval = setInterval(() => {
-    if (isAborted) {
-      clearInterval(probeInterval)
-    }
-
     if (counter === repeats) {
       clearInterval(probeInterval)
-      return abort
+    } else {
+      doProbe(++counter, probe, notifications)
     }
-    return doProbe(++counter, probe, notifications)
   }, (probe.interval ?? 10) * MILLISECONDS)
 
   if (process.env.CI || process.env.NODE_ENV === 'test') {
     clearInterval(probeInterval)
   }
 
-  return abort
+  return probeInterval
 }
 
 /**
@@ -154,23 +145,23 @@ export function idFeeder(
     probesToRun = config.probes.filter((probe) => idSplit.includes(probe.id))
   }
 
-  const abortFns: Array<() => void> = []
+  const intervals: Array<NodeJS.Timeout> = []
 
   for (const probe of probesToRun) {
     const sanitizedProbe = sanitizeProbe(probe, probe.id)
-    const abortFn = loopProbe(
+    const interval = loopProbe(
       sanitizedProbe,
       config.notifications ?? [],
       repeats ?? 0
     )
-    abortFns.push(abortFn)
+    intervals.push(interval)
   }
 
-  const abortAll = () => {
-    abortFns.forEach((fn) => fn())
+  const abort = () => {
+    intervals.forEach((i) => clearInterval(i))
   }
 
-  return abortAll
+  return abort
 }
 
 export function loopReport(getConfig: () => Config) {
