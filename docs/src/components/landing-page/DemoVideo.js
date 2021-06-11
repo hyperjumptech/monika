@@ -23,12 +23,14 @@
  **********************************************************************************/
 
 import ButtonLink from 'components/ButtonLink'
+import WorldDotSvg from '../../../public/world-dot.svg'
 
 export default function DemoVideo() {
   return (
     <div className="flex flex-col justify-center h-screen bg-black-monika -mt-20">
+      <img src={WorldDotSvg} className="m-auto mr-4 -mt-y-3/4" />
       <div className="m-auto flex flex-col">
-        <h3 className="m-auto text-white text-xl">
+        <h3 className="m-auto text-white text-xl -mt-y-1/4">
           <span className="bg-gradient-to-r from-purple-monika to-aqua-monika bg-clip-text text-transparent font-bold">
             Monika
           </span>{' '}
