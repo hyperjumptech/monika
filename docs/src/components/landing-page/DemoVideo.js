@@ -1,3 +1,80 @@
+/**********************************************************************************
+ * MIT License                                                                    *
+ *                                                                                *
+ * Copyright (c) 2021 Hyperjump Technology                                        *
+ *                                                                                *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy   *
+ * of this software and associated documentation files (the "Software"), to deal  *
+ * in the Software without restriction, including without limitation the rights   *
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell      *
+ * copies of the Software, and to permit persons to whom the Software is          *
+ * furnished to do so, subject to the following conditions:                       *
+ *                                                                                *
+ * The above copyright notice and this permission notice shall be included in all *
+ * copies or substantial portions of the Software.                                *
+ *                                                                                *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR     *
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,       *
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE    *
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER         *
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,  *
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  *
+ * SOFTWARE.                                                                      *
+ **********************************************************************************/
+
+import ButtonLink from 'components/ButtonLink'
+
 export default function DemoVideo() {
-  return <div className="h-screen bg-black-monika -mt-20"></div>
+  return (
+    <div className="flex flex-col justify-center h-screen bg-black-monika -mt-20">
+      <div className="m-auto flex flex-col">
+        <h3 className="m-auto text-white text-xl">
+          <span className="bg-gradient-to-r from-purple-monika to-aqua-monika bg-clip-text text-transparent font-bold">
+            Monika
+          </span>{' '}
+          Quick Start
+        </h3>
+        <div className="flex gap-8 mt-8">
+          <iframe
+            className="my-auto"
+            width="560"
+            height="315"
+            src="https://www.youtube-nocookie.com/embed/o4jrNeNeFmM"
+            title="YouTube video player"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen={true}
+          />
+          <div className="m-auto flex flex-col">
+            <p className="text-white text-4xl leading-none">
+              Sleep well knowing
+              <br />
+              that your{' '}
+              <span className="bg-gradient-to-r from-purple-monika to-aqua-monika bg-clip-text text-transparent font-bold">
+                server
+                <br />
+                is working as it should be
+              </span>
+            </p>
+            <p className="text-white mt-4 leading-tight">
+              Monitor every part of your web app using
+              <br />
+              a simple JSON configuration file.
+              <br />
+              Get alert not only when your site is down,
+              <br />
+              but also when it's slow.
+            </p>
+            <ButtonLink
+              className="mt-6 w-40 leading-snug font-semibold text-sm text-center"
+              href="/quick-start"
+              rel="noopener noreferrer"
+            >
+              Find Out More
+            </ButtonLink>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
 }
