@@ -5,6 +5,7 @@ import { Sticky } from 'components/Sticky'
 import Banner from 'components/landing-page/Banner'
 import FeatureBanner from 'components/landing-page/FeatureBanner'
 import DemoVideo from 'components/landing-page/DemoVideo'
+import GetStartedBanner from 'components/landing-page/GetStartedBanner'
 
 export default function IndexPage() {
   return (
@@ -22,6 +23,7 @@ export default function IndexPage() {
       <Banner />
       <FeatureBanner />
       <DemoVideo />
+      <GetStartedBanner />
     </div>
   )
 }
