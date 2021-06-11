@@ -30,6 +30,7 @@ import {
   WebhookData,
   WhatsappData,
   DiscordData,
+  WorkplaceData,
   MonikaNotifData,
 } from '../../interfaces/data'
 import { Notification } from '../../interfaces/notification'
@@ -44,6 +45,7 @@ import { sendWebhook } from './channel/webhook'
 import { sendWhatsapp } from './channel/whatsapp'
 import { sendDiscord } from './channel/discord'
 import { sendMonikaNotif } from './channel/monika-notif'
+import { sendWorkplace } from './channel/workplace'
 
 export type ValidateResponseStatus = { alert: string; status: boolean }
 
@@ -209,6 +211,20 @@ export async function sendAlerts({
             },
           } as MonikaNotifData).then(() => ({
             notification: 'monika-notif',
+            alert: validation.alert,
+            url,
+          }))
+        }
+        case 'workplace': {
+          return sendWorkplace({
+            ...notification.data,
+            body: {
+              url,
+              alert: validation.alert,
+              time: new Date().toLocaleString(),
+            },
+          } as WorkplaceData).then(() => ({
+            notification: 'workplace',
             alert: validation.alert,
             url,
           }))
