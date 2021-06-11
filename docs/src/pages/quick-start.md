@@ -15,7 +15,8 @@ To start monitoring URLs, you need to provide a configuration (JSON file) either
 6. [Telegram](https://github.com/hyperjumptech/monika/blob/main/config_sample/config.telegram.example.json)
 7. [WhatsApp](https://github.com/hyperjumptech/monika/blob/main/config_sample/config.whatsapp.example.json)
 8. [Microsoft Teams](https://github.com/hyperjumptech/monika/blob/main/config_sample/config.teams.example.json)
-9. [Default](https://github.com/hyperjumptech/monika/blob/main/monika.example.json)
+9. [Monika Whatsapp Notifier](https://github.com/hyperjumptech/monika/blob/main/config_sample/config.monika-whatsapp.example.json)
+10. [Default](https://github.com/hyperjumptech/monika/blob/main/monika.example.json)
 
 When you have created the configuration file, you can run `monika` as follows
 

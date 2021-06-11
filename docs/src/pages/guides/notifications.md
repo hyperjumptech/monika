@@ -15,9 +15,10 @@ At this moment, Monika support these channel of notifications (You can use just 
 4. [Webhook](https://hyperjumptech.github.io/monika/guides/notifications#webhook)
 5. [Slack](https://hyperjumptech.github.io/monika/guides/notifications#slack-incoming-webhook)
 6. [Telegram](https://hyperjumptech.github.io/monika/guides/notifications#telegram)
-7. [WhatsApp](https://hyperjumptech.github.io/monika/guides/notifications#whatsapp)
+7. [WhatsApp Business](https://hyperjumptech.github.io/monika/guides/notifications#whatsapp)
 8. [Microsoft Teams](https://hyperjumptech.github.io/monika/guides/notifications#microsoft-teams)
 9. [Discord](https://hyperjumptech.github.io/monika/guides/notifications#discord)
+10. [Monika Whatsapp Notifier](https://hyperjumptech.github.io/monika/guides/notifications#monika-whatsapp-notifier)
 
 We are working on more notifications like Telegram, and many more. You can help!
 
@@ -298,9 +299,9 @@ Monika supports Discord. To enable notification via Discord, you must create a d
 | Type | Notification types                                            | `discord`                                                      |
 | Url  | The URL of the Discord Webhook that will receive notification | `https://discord.com/api/webhook/<webhook.id>/<webhook.token>` |
 
-## Monika Whatsapp Notifier (COMING SOON!)
+## Monika Whatsapp Notifier
 
-Monika now have its own notification channel, sent through your whatsapp number. To enable notification via Monika Whatsapp Notifier, you must create a Monika Notifier account first.
+You can get a Monika's alert notification to your Whatsapp number without having a Whatsapp Business account. First, you must create a [Monika Whatsapp Notifier account](https://whatsapp.hyperjump.tech).
 
 ```json
 {
@@ -312,10 +313,10 @@ Monika now have its own notification channel, sent through your whatsapp number.
 }
 ```
 
-| Key  | Description                              | Example                                                        |
-| ---- | ---------------------------------------- | -------------------------------------------------------------- |
-| ID   | Notification identity number             | `MonikaNotif12345`                                             |
-| Type | Notification types                       | `monika-notif`                                                 |
-| Url  | The URL of the Monika Notif Webhook link | `https://monika-whatsapp.net/api/notify?token=<webhook.token>` |
+| Key  | Description                              | Example                                                            |
+| ---- | ---------------------------------------- | ------------------------------------------------------------------ |
+| ID   | Notification identity number             | `MonikaNotif12345`                                                 |
+| Type | Notification types                       | `monika-notif`                                                     |
+| Url  | The URL of the Monika Notif Webhook link | `https://whatsapp.hyperjump.tech/api/notify?token=<webhook.token>` |
 
 Keep watch on these pages, new notification methods are being developed.
