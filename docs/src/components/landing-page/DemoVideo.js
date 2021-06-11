@@ -36,7 +36,7 @@ export default function DemoVideo() {
           </span>{' '}
           Quick Start
         </h3>
-        <div className="flex gap-8 mt-8">
+        <div className="flex flex-wrap justify-around gap-8 mt-8">
           <iframe
             className="my-auto"
             width="560"

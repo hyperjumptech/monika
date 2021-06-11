@@ -30,10 +30,10 @@ import WhatsAppIconSvg from '../../../public/whatsapp-icon.svg'
 
 export default function FeatureBanner() {
   return (
-    <div className="relative flex flex-col bg-white h-screen z-10 transform -skew-y-6 -mt-20">
+    <div className="relative flex flex-col bg-white py-32 z-10 transform -skew-y-6 -mt-20">
       <div className="w-1/4 h-6 absolute top-0 right-0 bg-gradient-to-r from-purple-monika to-aqua-monika" />
       <div className="w-1/4 h-6 absolute bottom-0 left-0 bg-gradient-to-r from-purple-monika to-aqua-monika" />
-      <div className="m-auto mx-48 flex flex-col z-10 transform skew-y-6">
+      <div className="m-auto mx-1/6 flex flex-col z-10 transform skew-y-6">
         <h2 className="mr-auto bg-gradient-to-r from-purple-monika to-aqua-monika bg-clip-text text-transparent font-bold text-xl">
           Why Monika
         </h2>
@@ -42,7 +42,7 @@ export default function FeatureBanner() {
           <br />
           Monitoring Tool
         </h2>
-        <div className="grid grid-cols-3 gap-2 mt-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-2 grid-flow-row mt-4">
           <div>
             <img src={DashboardIconSvg} />
             <h3 className="font-semibold">Monitor Multiple Websites</h3>
