@@ -101,3 +101,10 @@ export const dataMonikaNotifSchemaValidator = dataBaseEmailSchemaValidator(
 ).keys({
   url: Joi.string().uri().required().label('Monika Notification URL'),
 })
+
+export const dataWorkplaceSchemaValidator = dataBaseEmailSchemaValidator(
+  'Workplace'
+).keys({
+  thread_id: Joi.string().required().label('Workplace Thread ID'),
+  access_token: Joi.string().required().label('Workplace Access Token'),
+})

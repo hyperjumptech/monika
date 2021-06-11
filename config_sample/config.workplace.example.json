@@ -1,0 +1,21 @@
+{
+  "notifications": [
+    {
+      "id": "unique-workplace-id",
+      "type": "workplace",
+      "data": {
+        "thread_id": "12345678910",
+        "access_token": "your_custom_integration_access_token"
+      }
+    }
+  ],
+  "probes": [
+    {
+      "requests": [
+        {
+          "url": "https://github.com"
+        }
+      ]
+    }
+  ]
+}
