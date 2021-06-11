@@ -22,82 +22,15 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import EventEmitter from 'events'
-import chokidar from 'chokidar'
-import pEvent from 'p-event'
+import axios from 'axios'
 import { Config } from '../../interfaces/config'
-import { fetchConfig } from './fetch'
-import { parseConfig } from './parse'
-import { validateConfig } from './validate'
-import { handshake } from '../reporter'
-import { log } from '../../utils/pino'
-import { md5Hash } from '../../utils/hash'
 
-const emitter = new EventEmitter()
-
-const CONFIG_UPDATED = 'CONFIG_UPDATED_EVENT'
-
-let cfg: Config
-
-export const getConfig = () => {
-  if (!cfg) throw new Error('Configuration setup has not been run yet')
-  return cfg
-}
-
-export async function* getConfigIterator() {
-  if (!cfg) throw new Error('Configuration setup has not been run yet')
-
-  yield cfg
-
-  if (!(process.env.CI || process.env.NODE_ENV === 'test')) {
-    yield* pEvent.iterator<string, Config>(emitter, CONFIG_UPDATED)
+export const fetchConfig = async (url: string): Promise<Config> => {
+  try {
+    const { data } = await axios.get(url)
+    return data
+  } catch (error) {
+    throw new Error(`The configuration file in ${url} is unreachable. Please check the URL again or your internet connection. 
+    `)
   }
-}
-
-export const updateConfig = (data: Config) => {
-  const lastVersion = cfg?.version
-
-  cfg = data
-  cfg.version = cfg.version || md5Hash(cfg)
-
-  if (cfg.version !== lastVersion) {
-    emitter.emit(CONFIG_UPDATED, cfg)
-  }
-}
-
-const handshakeAndValidate = async (config: Config) => {
-  if (config.symon?.url && config.symon?.key) {
-    try {
-      await handshake(config)
-    } catch (error) {
-      log.warn(` ›   Warning: Can't do handshake with Symon.`)
-    }
-  }
-
-  const validated = validateConfig(config)
-
-  if (!validated.valid) {
-    throw new Error(validated.message)
-  }
-}
-
-export const setupConfigFromFile = async (path: string, watch: boolean) => {
-  const parsed = parseConfig(path)
-  await handshakeAndValidate(parsed)
-  cfg = parsed
-
-  if (watch) {
-    const fileWatcher = chokidar.watch(path)
-    fileWatcher.on('change', async () => {
-      const parsed = parseConfig(path)
-      await handshakeAndValidate(parsed)
-      updateConfig(parsed)
-    })
-  }
-}
-
-export const setupConfigFromUrl = async (url: string) => {
-  const fetched = await fetchConfig(url)
-  await handshakeAndValidate(fetched)
-  cfg = fetched
 }
