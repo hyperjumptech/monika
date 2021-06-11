@@ -45,6 +45,9 @@ module.exports = {
           dark: '#EB2135',
         },
       },
+      height: {
+        '3/4': '75vh',
+      },
       margin: {
         '-y-3/4': '-75vh',
         '-y-1/4': '-25vh',

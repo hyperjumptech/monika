@@ -6,6 +6,7 @@ import Banner from 'components/landing-page/Banner'
 import FeatureBanner from 'components/landing-page/FeatureBanner'
 import DemoVideo from 'components/landing-page/DemoVideo'
 import GetStartedBanner from 'components/landing-page/GetStartedBanner'
+import FooterDark from 'components/FooterDark'
 
 export default function IndexPage() {
   return (
@@ -24,6 +25,7 @@ export default function IndexPage() {
       <FeatureBanner />
       <DemoVideo />
       <GetStartedBanner />
+      <FooterDark />
     </div>
   )
 }

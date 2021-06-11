@@ -22,38 +22,72 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import MonikaSvg from '../../public/monika.svg'
+import HyperjumpSvg from '../../public/hyperjump.svg'
 import { siteConfig } from 'siteConfig'
-import WaveMonika from '../../../public/wave-monika.svg'
 
-export default function GetStartedBanner() {
+export default function FooterDark() {
   return (
-    <div className="relative bg-black-monika h-3/4 flex">
-      <div className="flex flex-col z-10 m-auto bg-gradient-to-br from-purple-monika to-aqua-monika px-16 py-8 rounded">
-        <p className="text-center text-2xl text-white font-bold">
-          Get Started with Monika Now!
-        </p>
-        <p className="text-center text-white">
-          Detect problem as soon as possible, before your user do, and fix them
-          <br />
-          before they realize. No hidden fees or anything, free forever!
-        </p>
+    <div className="flex justify-around bg-black-monika text-white pt-8 pb-16">
+      <a href="/">
+        <img className="w-16 h-4" src={MonikaSvg} />
+      </a>
+      <div className="flex flex-col">
+        <p className="font-bold">Resources</p>
+        <a className="text-xs pt-2" href="/overview" rel="noopener noreferrer">
+          Documentation
+        </a>
+        <a className="text-xs pt-1" href="/examples" rel="noopener noreferrer">
+          Example
+        </a>
         <a
-          className="m-auto mt-4 px-4 py-2 bg-white rounded-full font-sans text-white"
-          href={siteConfig.repoUrl}
+          className="text-xs pt-1"
+          href="/quick-start"
+          rel="noopener noreferrer"
+        >
+          Configuration
+        </a>
+      </div>
+      <div className="flex flex-col">
+        <p className="font-bold">Community</p>
+        <a
+          className="text-xs pt-2"
+          href={siteConfig.repoUrl + '/discussions'}
           target="_blank"
           rel="noopener noreferrer"
         >
-          <span className="bg-gradient-to-r from-purple-monika to-aqua-monika text-transparent bg-clip-text font-bold">
-            Check on Github!
-          </span>
+          Discussion
+        </a>
+        <a
+          className="text-xs pt-1"
+          href={siteConfig.repoUrl + '/releases'}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Releases
         </a>
       </div>
-      <div className="absolute inset-x-0 bottom-0 flex flex-col">
-        <img src={WaveMonika} className="object-fill w-screen" />
-        <div
-          style={{ height: '2px', marginTop: '2px' }}
-          className="bg-gradient-to-r from-purple-monika to-aqua-monika"
-        />
+      <div className="flex flex-col">
+        <a
+          className="font-bold"
+          href="https://hyperjump.tech/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <img src={HyperjumpSvg} />
+        </a>
+        <p className="text-xs pt-2">
+          {' '}
+          PT Artha Rajamas Mandiri (Hyperjump) is an open-source-first
+          <br />
+          company providing engineering excellence service. We aim to
+          <br />
+          build and commercialize open-source tools to help companies
+          <br />
+          streamline, simplify, and secure the most important aspects of
+          <br />
+          its modern DevOps practices.
+        </p>
       </div>
     </div>
   )
