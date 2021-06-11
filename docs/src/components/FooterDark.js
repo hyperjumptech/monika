@@ -67,7 +67,7 @@ export default function FooterDark() {
           Releases
         </a>
       </div>
-      <div className="flex flex-col">
+      <div className="flex flex-col max-w-sm">
         <a
           className="font-bold"
           href="https://hyperjump.tech/"
@@ -78,15 +78,11 @@ export default function FooterDark() {
         </a>
         <p className="text-xs pt-2">
           {' '}
-          PT Artha Rajamas Mandiri (Hyperjump) is an open-source-first
-          <br />
-          company providing engineering excellence service. We aim to
-          <br />
-          build and commercialize open-source tools to help companies
-          <br />
-          streamline, simplify, and secure the most important aspects of
-          <br />
-          its modern DevOps practices.
+          PT Artha Rajamas Mandiri (Hyperjump) is an open-source-first company
+          providing engineering excellence service. We aim to build and
+          commercialize open-source tools to help companies streamline,
+          simplify, and secure the most important aspects of its modern DevOps
+          practices.
         </p>
       </div>
     </div>

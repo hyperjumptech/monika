@@ -31,17 +31,16 @@ import { siteConfig } from 'siteConfig'
 export default function Banner(props) {
   return (
     <div
-      className={`h-screen flex flex-col bg-black-monika ${
+      className={`flex flex-col bg-black-monika py-32 ${
         props.className ? props.className : ''
       }`}
     >
-      <div className="z-10 mt-20 px-4 text-5xl font-bold text-center text-white">
+      <div className="z-10 m-auto mb-0 px-4 max-w-4xl text-5xl font-bold text-center text-white">
         <h1>
           Know when your{' '}
           <span className="bg-gradient-to-r from-purple-monika to-aqua-monika bg-clip-text text-transparent">
             web app is down
-          </span>
-          <br />
+          </span>{' '}
           before your users do.
         </h1>
       </div>

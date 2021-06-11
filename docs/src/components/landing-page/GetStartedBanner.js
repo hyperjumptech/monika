@@ -27,14 +27,13 @@ import WaveMonika from '../../../public/wave-monika.svg'
 
 export default function GetStartedBanner() {
   return (
-    <div className="relative bg-black-monika h-3/4 flex">
+    <div className="relative bg-black-monika py-32 flex">
       <div className="flex flex-col z-10 m-auto bg-gradient-to-br from-purple-monika to-aqua-monika px-16 py-8 rounded">
         <p className="text-center text-2xl text-white font-bold">
           Get Started with Monika Now!
         </p>
-        <p className="text-center text-white">
+        <p className="text-center text-white max-w-lg">
           Detect problem as soon as possible, before your user do, and fix them
-          <br />
           before they realize. No hidden fees or anything, free forever!
         </p>
         <a

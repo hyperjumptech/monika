@@ -27,8 +27,12 @@ import WorldDotSvg from '../../../public/world-dot.svg'
 
 export default function DemoVideo() {
   return (
-    <div className="flex flex-col justify-center h-screen bg-black-monika -mt-20">
-      <img src={WorldDotSvg} className="m-auto mr-4 -mt-y-3/4" />
+    <div className="relative flex flex-col justify-center pt-64 bg-black-monika">
+      <img
+        src={WorldDotSvg}
+        style={{ marginTop: '-42rem' }}
+        className="absolute top-0 right-0"
+      />
       <div className="m-auto flex flex-col">
         <h3 className="m-auto text-white text-xl -mt-y-1/4">
           <span className="bg-gradient-to-r from-purple-monika to-aqua-monika bg-clip-text text-transparent font-bold">
@@ -47,25 +51,17 @@ export default function DemoVideo() {
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen={true}
           />
-          <div className="m-auto flex flex-col">
+          <div className="m-auto flex flex-col max-w-sm">
             <p className="text-white text-4xl leading-none">
-              Sleep well knowing
-              <br />
-              that your{' '}
+              Sleep well knowing that your{' '}
               <span className="bg-gradient-to-r from-purple-monika to-aqua-monika bg-clip-text text-transparent font-bold">
-                server
-                <br />
-                is working as it should be
+                server is working as it should be
               </span>
             </p>
             <p className="text-white mt-4 leading-tight">
-              Monitor every part of your web app using
-              <br />
-              a simple JSON configuration file.
-              <br />
-              Get alert not only when your site is down,
-              <br />
-              but also when it's slow.
+              Monitor every part of your web app using a simple JSON
+              configuration file. Get alert not only when your site is down, but
+              also when it's slow.
             </p>
             <ButtonLink
               className="mt-6 w-40 leading-snug font-semibold text-sm text-center"
