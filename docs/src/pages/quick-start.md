@@ -5,7 +5,7 @@ title: Quick Start
 
 ## Getting Started
 
-To start monitoring URLs, you need to create a configuration file (JSON file). The configuration file contains the probes, alerts, and notification configurations. You can generate a configuration file using [Monika Config Generator](https://hyperjumptech.github.io/monika-config-generator) web app. Alternatively, you can use one of the following configuration examples:
+To start monitoring URLs, you need to provide a configuration (JSON file) either from an URL or local file. The configuration file contains the probes, alerts, and notification configurations. You can generate a configuration file using [Monika Config Generator](https://hyperjumptech.github.io/monika-config-generator) web app. Alternatively, you can use one of the following configuration examples:
 
 1. [SMTP Gmail](https://github.com/hyperjumptech/monika/blob/main/config_sample/config.smtp-gmail.example.json)
 2. [Mailgun](https://github.com/hyperjumptech/monika/blob/main/config_sample/config.mailgun.example.json)
@@ -21,6 +21,12 @@ When you have created the configuration file, you can run `monika` as follows
 
 ```bash
 monika -c <path_to_your_configuration.json>
+```
+
+Or you can provide an URL that contains monika configuration
+
+```bash
+monika -c https://domain.com/path/to/your/configuration.json
 ```
 
 Options and parameters can be seen by running `monika -h`. Or if you cloned this repository, you need to run `bin/run -h`.
