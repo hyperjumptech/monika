@@ -26,7 +26,11 @@ import axios from 'axios'
 import { Config } from '../../interfaces/config'
 
 export const fetchConfig = async (url: string): Promise<Config> => {
-  const { data } = await axios.get(url)
-
-  return data
+  try {
+    const { data } = await axios.get(url)
+    return data
+  } catch (error) {
+    throw new Error(`The configuration file in ${url} is unreachable. Please check the URL again or your internet connection. 
+    `)
+  }
 }
