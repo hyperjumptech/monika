@@ -22,42 +22,33 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import {
-  MailgunData,
-  SendgridData,
-  SMTPData,
-  TelegramData,
-  WebhookData,
-  WhatsappData,
-  TeamsData,
-  DiscordData,
-  MonikaNotifData,
-  WorkplaceData,
-} from './data'
+import axios from 'axios'
+import { WorkplaceData } from '../../../interfaces/data'
 
-export interface Notification {
-  id: string
-  type:
-    | 'smtp'
-    | 'mailgun'
-    | 'sendgrid'
-    | 'webhook'
-    | 'slack'
-    | 'whatsapp'
-    | 'teams'
-    | 'telegram'
-    | 'discord'
-    | 'monika-notif'
-    | 'workplace'
-  data:
-    | MailgunData
-    | SMTPData
-    | SendgridData
-    | WebhookData
-    | WhatsappData
-    | TeamsData
-    | TelegramData
-    | DiscordData
-    | MonikaNotifData
-    | WorkplaceData
+export const sendWorkplace = async (data: WorkplaceData) => {
+  try {
+    const httpClient = axios.create({
+      baseURL: 'https://graph.workplace.com',
+      headers: {
+        Authorization: `Bearer ${data.access_token}`,
+      },
+    })
+
+    const res = await httpClient({
+      method: 'POST',
+      url: '/me/messages',
+      data: {
+        recipient: {
+          thread_key: data.thread_id,
+        },
+        message: {
+          text: `*${data.body.alert}*\n\n*URL*: ${data.body.url}\n*TIME*: ${data.body.time}\n`,
+        },
+      },
+    })
+
+    return res
+  } catch (error) {
+    throw error
+  }
 }

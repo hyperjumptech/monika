@@ -148,7 +148,13 @@ class Monika extends Command {
       if (isUrl(flags.config)) {
         await setupConfigFromUrl(flags.config)
       } else {
-        await setupConfigFromFile(flags.config)
+        const watchConfigFile = !(
+          process.env.CI ||
+          process.env.NODE_ENV === 'test' ||
+          flags.repeat
+        )
+
+        await setupConfigFromFile(flags.config, watchConfigFile)
       }
 
       // Run report on interval if symon configuration exists

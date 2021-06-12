@@ -35,6 +35,7 @@ import {
   TeamsData,
   DiscordData,
   MonikaNotifData,
+  WorkplaceData,
 } from '../../interfaces/data'
 import { Config } from '../../interfaces/config'
 import { RequestConfig } from '../../interfaces/request'
@@ -112,6 +113,14 @@ const WHATSAPP_NO_URL = setInvalidResponse('Whatsapp URL not found')
 const WHATSAPP_NO_USERNAME = setInvalidResponse('Whatsapp Username not found')
 const WHATSAPP_NO_PASSWORD = setInvalidResponse('Whatsapp Password not found')
 
+// Workplace
+const WORKPLACE_NO_ACCESS_TOKEN = setInvalidResponse(
+  'Workplace Access Token not found'
+)
+const WORKPLACE_NO_THREAD_ID = setInvalidResponse(
+  'Workplace Thread ID not found'
+)
+
 function validateNotification(notifications: Notification[]): Validation {
   // Check notifications properties
   for (const notification of notifications) {
@@ -185,6 +194,14 @@ function validateNotification(notifications: Notification[]): Validation {
 
       case 'monika-notif': {
         if (!(data as MonikaNotifData).url) return MONIKA_NOTIF_NO_URL
+
+        break
+      }
+
+      case 'workplace': {
+        if (!(data as WorkplaceData).access_token)
+          return WORKPLACE_NO_ACCESS_TOKEN
+        if (!(data as WorkplaceData).thread_id) return WORKPLACE_NO_THREAD_ID
 
         break
       }

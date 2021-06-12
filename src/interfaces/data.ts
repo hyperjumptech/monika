@@ -99,3 +99,15 @@ export interface DiscordDataBody {
   time: string
   alert: string
 }
+
+export interface WorkplaceData {
+  thread_id: string
+  access_token: string
+  body: WorkplaceDataBody
+}
+
+export interface WorkplaceDataBody {
+  url: string
+  time: string
+  alert: string
+}
