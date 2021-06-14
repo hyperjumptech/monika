@@ -31,6 +31,7 @@ import {
   TeamsData,
   TelegramData,
   WebhookData,
+  WorkplaceData,
 } from '../../interfaces/data'
 import { Notification } from '../../interfaces/notification'
 import getIp from '../../utils/ip'
@@ -43,6 +44,7 @@ import { sendTeams } from './channel/teams'
 import { sendTelegram } from './channel/telegram'
 import { sendWebhook } from './channel/webhook'
 import { sendMonikaNotif } from './channel/monika-notif'
+import { sendWorkplace } from './channel/workplace'
 import {
   dataDiscordSchemaValidator,
   dataMailgunSchemaValidator,
@@ -53,6 +55,7 @@ import {
   dataTeamsSchemaValidator,
   dataTelegramSchemaValidator,
   dataWebhookSchemaValidator,
+  dataWorkplaceSchemaValidator,
 } from './validator'
 
 const subject = 'Monika is started'
@@ -238,14 +241,34 @@ const monikaNotificationInitialChecker = async (data: MonikaNotifData) => {
         type: 'start',
         probe_url: '-',
         ip_address: getIp(),
-        response_time: 0,
-        status_code: 200,
+        response_time: new Date().toLocaleString(),
+        alert: body,
       },
     })
 
     return 'success'
   } catch (error) {
     throw errorMessage('Monika-Notif', error?.message)
+  }
+}
+
+const workplaceNotificationInitialChecker = async (data: WorkplaceData) => {
+  try {
+    await dataWorkplaceSchemaValidator.validateAsync(data)
+
+    await sendWorkplace({
+      thread_id: data.thread_id,
+      access_token: data.access_token,
+      body: {
+        url: '-',
+        alert: body,
+        time: new Date().toLocaleString(),
+      },
+    })
+
+    return 'success'
+  } catch (error) {
+    throw errorMessage('Workplace', error?.message)
   }
 }
 
@@ -294,6 +317,11 @@ export const notificationChecker = async (notifications: Notification[]) => {
     .map((notif) => notif.data as MonikaNotifData)
     .map(monikaNotificationInitialChecker)
 
+  const workplaceNotification = notifications
+    .filter((notif) => notif.type === 'workplace')
+    .map((notif) => notif.data as WorkplaceData)
+    .map(workplaceNotificationInitialChecker)
+
   return Promise.all([
     Promise.all(smtpNotification),
     Promise.all(mailgunNotification),
@@ -304,5 +332,6 @@ export const notificationChecker = async (notifications: Notification[]) => {
     Promise.all(telegramNotification),
     Promise.all(discordNotification),
     Promise.all(monikaNotification),
+    Promise.all(workplaceNotification),
   ])
 }

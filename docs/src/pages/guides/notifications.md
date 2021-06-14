@@ -18,6 +18,7 @@ At this moment, Monika support these channel of notifications (You can use just 
 7. [WhatsApp](https://hyperjumptech.github.io/monika/guides/notifications#whatsapp)
 8. [Microsoft Teams](https://hyperjumptech.github.io/monika/guides/notifications#microsoft-teams)
 9. [Discord](https://hyperjumptech.github.io/monika/guides/notifications#discord)
+10. [Facebook Workplace](https://hyperjumptech.github.io/monika/guides/notifications#facebook-workplace)
 
 We are working on more notifications like Telegram, and many more. You can help!
 
@@ -104,12 +105,19 @@ To use Gmail SMTP with Monika,
 2. Use `smtp.gmail.com` for `hostname`.
 3. Use `587` for `port`.
 4. Use your Gmail address for `username`.
-5. Use your Gmail password for `password`. If you have activated 2-Factor-Authentication (2FA), you need to [create an App Password from your Account Settings](https://myaccount.google.com/security). Then use the app password for `password`.
+5. Use your Gmail password for `password`.
+   1. If you have activated 2-Factor-Authentication (2FA), you need to [create an App Password from your Account Settings](https://support.google.com/accounts/answer/185833). Then use the app password for `password`.
 
 ## Mailgun
 
-Mailgun is an email notification delivery provided by Mailgun email service. To use mailgun for your notification, you
-would need a mailgun account to obtain your API_KEY and DOMAIN. Please consult [mailgun documentation here](https://documentation.mailgun.com/en/latest/quickstart.html) on how to obtain them. Once that done, you could use the API_KEY and DOMAIN in monika's json configuration as follows;
+Mailgun is an email notification delivery provided by Mailgun email service. To use mailgun for your notification,
+
+1. You would need a [mailgun account](https://app.mailgun.com/).
+2. Get your **API key** by referring to [this documentation](https://help.mailgun.com/hc/en-us/articles/203380100-Where-Can-I-Find-My-API-Key-and-SMTP-Credentials).
+3. For your **domain**
+   - • If you are on the free plan, add authorized recipients as instructed [here](https://help.mailgun.com/hc/en-us/articles/217531258-Authorized-Recipients).
+   - • If you want to use your own domain, refer [here](https://help.mailgun.com/hc/en-us/articles/203637190-How-Do-I-Add-or-Delete-a-Domain) to add it.
+4. After that, put them in `monika.json` configuration as follows:
 
 ```json
 {
@@ -123,17 +131,17 @@ would need a mailgun account to obtain your API_KEY and DOMAIN. Please consult [
 }
 ```
 
-| Key        | Description                                                                  | Example                                         |
-| ---------- | ---------------------------------------------------------------------------- | ----------------------------------------------- |
-| ID         | Notification identity number                                                 | `Mailgun12345`                                  |
-| Type       | Notification types                                                           | `mailgun`                                       |
-| Recipients | An array of email addresses that will receive the e-mail from Monika         | `["monika@testmail.com", "symon@testmail.com"]` |
-| Api Key    | Mailgun's account api key, mailgun's registered key to identify your account | `MAILGUN_API_KEY`                               |
-| Domain     | The domain to set in Mailgun                                                 | `sandboxmail.mailgun.com`                       |
+| Key        | Description                                                              | Example                                         |
+| ---------- | ------------------------------------------------------------------------ | ----------------------------------------------- |
+| ID         | Notification identity number                                             | `Mailgun12345`                                  |
+| Type       | Notification types                                                       | `mailgun`                                       |
+| Recipients | An array of email addresses that will receive the e-mail from Monika     | `["monika@testmail.com", "symon@testmail.com"]` |
+| Api Key    | Mailgun account api key, mailgun registered key to identify your account | `MAILGUN_API_KEY`                               |
+| Domain     | The domain to set in Mailgun                                             | `sandboxmail.mailgun.com`                       |
 
 ## Sendgrid
 
-Similar to mailgun, sendgrid is also an email delivery service. First, sign up for an account in sendgrid and get the API key. Please check [sendgrid's documentation](https://sendgrid.com/docs/api-reference/). Then put the API key in Monika's configuration as follows.
+Similar to mailgun, sendgrid is also an email delivery service. Make sure you have a [sendgrid account](https://app.sendgrid.com/). To obtain your API key, refer to [sendgrid documentation](https://sendgrid.com/docs/ui/account-and-settings/api-keys/). Then put the API key in Monika's configuration as follows:
 
 ```json
 {
@@ -146,12 +154,12 @@ Similar to mailgun, sendgrid is also an email delivery service. First, sign up f
 }
 ```
 
-| Key        | Description                                                                  | Example                                         |
-| ---------- | ---------------------------------------------------------------------------- | ----------------------------------------------- |
-| ID         | Notification identity number                                                 | `Sendgrid12345`                                 |
-| Type       | Notification types                                                           | `sendgrid`                                      |
-| Recipients | An array of email addresses that will receive the e-mail from Monika         | `["monika@testmail.com", "symon@testmail.com"]` |
-| Api Key    | Mailgun's account api key, mailgun's registered key to identify your account | `70e34aba-0ea908325`                            |
+| Key        | Description                                                                | Example                                         |
+| ---------- | -------------------------------------------------------------------------- | ----------------------------------------------- |
+| ID         | Notification identity number                                               | `Sendgrid12345`                                 |
+| Type       | Notification types                                                         | `sendgrid`                                      |
+| Recipients | An array of email addresses that will receive the e-mail from Monika       | `["monika@testmail.com", "symon@testmail.com"]` |
+| Api Key    | Sendgrid account api key, sendgrid registered key to identify your account | `70e34aba-0ea908325`                            |
 
 ## Webhook
 
@@ -185,7 +193,7 @@ body: {
 
 ## Slack Incoming Webhook
 
-Monika supports Slack Incoming Webhook. To enable notification via Slack, you must have a `Slack's Incoming Webhook URL`. Please consult [Sending messages using Incoming Webhooks](https://api.slack.com/messaging/webhooks) documentation.
+Monika supports Slack Incoming Webhook. To enable notification via Slack, you must have a `Slack's Incoming Webhook URL`. Please consult to [Sending messages using Incoming Webhooks](https://api.slack.com/messaging/webhooks) documentation.
 
 ```json
 {
@@ -205,7 +213,7 @@ Monika supports Slack Incoming Webhook. To enable notification via Slack, you mu
 
 ## Telegram
 
-Monika supports Telegram. To enable notification via Telegram, you must have a Telegram bot. Please consult [Bots: An introduction for developers](https://core.telegram.org/bots).
+Monika supports Telegram. To enable notification via Telegram, you must have a Telegram bot. Please consult to [Bots: An introduction for developers](https://core.telegram.org/bots).
 
 ```json
 {
@@ -227,7 +235,7 @@ Monika supports Telegram. To enable notification via Telegram, you must have a T
 
 ## Whatsapp
 
-Monika supports Whatsapp notification. To enable notification via whatsapp, you must have a registered user in whatsapp business api server. Please consult [WhatsApp Business API](https://developers.facebook.com/docs/whatsapp) documentation.
+Monika supports Whatsapp notification. To enable notification via whatsapp, you must have a registered user in whatsapp business api server. Please refer to [WhatsApp Business API](https://developers.facebook.com/docs/whatsapp) documentation.
 
 ```json
 {
@@ -273,7 +281,7 @@ Monika supports sending notifications via Microsoft Teams. In order to be able t
 
 ## Discord
 
-Monika supports Discord. To enable notification via Discord, you must create a discord webhook first. Please consult [Intro to Webhook](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks)
+Monika supports Discord. To enable notification via Discord, you must create a discord webhook first. More info at [Discord webhook documentation](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks)
 
 ```json
 {
@@ -290,5 +298,47 @@ Monika supports Discord. To enable notification via Discord, you must create a d
 | ID   | Notification identity number                                  | `Discord12345`                                                 |
 | Type | Notification types                                            | `discord`                                                      |
 | Url  | The URL of the Discord Webhook that will receive notification | `https://discord.com/api/webhook/<webhook.id>/<webhook.token>` |
+
+## Facebook Workplace
+
+Monika supports Facebook Workplace. To enable notifiation via Workplace, you must create custom integration first. More info at [Facebook Workplace Custom Integrations](https://developers.facebook.com/docs/workplace/custom-integrations-new/)
+
+```json
+{
+  "id": "unique-workplace-id",
+  "type": "workplace",
+  "data": {
+    "thread_id": "12345678910",
+    "access_token": "your_custom_integration_access_token"
+  }
+}
+```
+
+| Key         | Description                                     | Example                         |
+| ----------- | ----------------------------------------------- | ------------------------------- |
+| ID          | Notification identity number                    | `Workplace12345`                |
+| Type        | Notification types                              | `workplace`                     |
+| ThreadID    | It's located at thread url, in the last segment | `6367478493277649`              |
+| AccessToken | Workplace access token for custom integration   | `DQVJzYWtsdHRJRWIxUk9uOG5VV...` |
+
+## Monika Whatsapp Notifier (COMING SOON!)
+
+Monika now have its own notification channel, sent through your whatsapp number. To enable notification via Monika Whatsapp Notifier, you must create a Monika Notifier account first.
+
+```json
+{
+  "id": "unique-id-monika-notif",
+  "type": "monika-notif",
+  "data": {
+    "url": "https://YOUR_MONIKA_NOTIF_URL"
+  }
+}
+```
+
+| Key  | Description                              | Example                                                        |
+| ---- | ---------------------------------------- | -------------------------------------------------------------- |
+| ID   | Notification identity number             | `MonikaNotif12345`                                             |
+| Type | Notification types                       | `monika-notif`                                                 |
+| Url  | The URL of the Monika Notif Webhook link | `https://monika-whatsapp.net/api/notify?token=<webhook.token>` |
 
 Keep watch on these pages, new notification methods are being developed.

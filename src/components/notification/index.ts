@@ -30,6 +30,7 @@ import {
   WebhookData,
   WhatsappData,
   DiscordData,
+  WorkplaceData,
   MonikaNotifData,
 } from '../../interfaces/data'
 import { Notification } from '../../interfaces/notification'
@@ -44,6 +45,7 @@ import { sendWebhook } from './channel/webhook'
 import { sendWhatsapp } from './channel/whatsapp'
 import { sendDiscord } from './channel/discord'
 import { sendMonikaNotif } from './channel/monika-notif'
+import { sendWorkplace } from './channel/workplace'
 
 export type ValidateResponseStatus = { alert: string; status: boolean }
 
@@ -55,8 +57,6 @@ export async function sendAlerts({
   incidentThreshold,
   probeName,
   probeId,
-  statusCode,
-  responseTime,
 }: {
   validation: ValidateResponseStatus
   notifications: Notification[]
@@ -65,8 +65,6 @@ export async function sendAlerts({
   incidentThreshold: number
   probeName?: string
   probeId?: string
-  statusCode?: number
-  responseTime?: number
 }): Promise<
   Array<{
     alert: string
@@ -208,11 +206,25 @@ export async function sendAlerts({
               probe_name: probeName,
               ip_address: ipAddress,
               monika_id: probeId,
-              status_code: statusCode,
-              response_time: responseTime,
+              alert: validation.alert,
+              response_time: new Date().toLocaleString(),
             },
           } as MonikaNotifData).then(() => ({
             notification: 'monika-notif',
+            alert: validation.alert,
+            url,
+          }))
+        }
+        case 'workplace': {
+          return sendWorkplace({
+            ...notification.data,
+            body: {
+              url,
+              alert: validation.alert,
+              time: new Date().toLocaleString(),
+            },
+          } as WorkplaceData).then(() => ({
+            notification: 'workplace',
             alert: validation.alert,
             url,
           }))

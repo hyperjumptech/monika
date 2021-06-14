@@ -27,6 +27,7 @@ import chalk from 'chalk'
 import boxen from 'boxen'
 import open from 'open'
 import fs from 'fs'
+import isUrl from 'is-url'
 import { MailData, MailgunData, SMTPData, WebhookData } from './interfaces/data'
 import { Config } from './interfaces/config'
 import { idFeeder, loopReport } from './looper'
@@ -42,6 +43,7 @@ import {
   getConfig,
   getConfigIterator,
   setupConfigFromFile,
+  setupConfigFromUrl,
 } from './components/config'
 
 function getDefaultConfig() {
@@ -72,7 +74,7 @@ class Monika extends Command {
     config: flags.string({
       char: 'c',
       description:
-        'JSON configuration filename. If none is supplied, will look for monika.json in the current directory',
+        'JSON configuration filename or URL. If none is supplied, will look for monika.json in the current directory',
       default: () => getDefaultConfig(),
       env: 'MONIKA_JSON_CONFIG',
     }),
@@ -141,7 +143,17 @@ class Monika extends Command {
     }
 
     try {
-      await setupConfigFromFile(flags.config)
+      if (isUrl(flags.config)) {
+        await setupConfigFromUrl(flags.config)
+      } else {
+        const watchConfigFile = !(
+          process.env.CI ||
+          process.env.NODE_ENV === 'test' ||
+          flags.repeat
+        )
+
+        await setupConfigFromFile(flags.config, watchConfigFile)
+      }
 
       // Run report on interval if symon configuration exists
       if (!(process.env.CI || process.env.NODE_ENV === 'test')) {

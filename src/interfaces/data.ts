@@ -67,8 +67,8 @@ export interface MonikaNotifDataBody {
   probe_name?: string
   monika_id?: string
   ip_address: string
-  response_time: number
-  status_code: number
+  response_time: string
+  alert: string
 }
 
 export interface TelegramData {
@@ -95,6 +95,18 @@ export interface DiscordData {
 }
 
 export interface DiscordDataBody {
+  url: string
+  time: string
+  alert: string
+}
+
+export interface WorkplaceData {
+  thread_id: string
+  access_token: string
+  body: WorkplaceDataBody
+}
+
+export interface WorkplaceDataBody {
   url: string
   time: string
   alert: string
