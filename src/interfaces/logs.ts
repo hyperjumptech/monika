@@ -22,71 +22,28 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import fs from 'fs'
-import path from 'path'
-import pino, { LoggerOptions, LogDescriptor } from 'pino'
-import { LogObject, HQLogObject, PlainLogObject } from '../interfaces/logs'
-
-const project = path.join(__dirname, '../../tsconfig.json')
-const dev = fs.existsSync(project)
-
-const isLogObject = (obj: any): obj is LogObject => {
-  return obj?.type === 'PROBE'
+export interface Alerts {
+  flag: string
+  message: string[]
 }
 
-const isHQLogObject = (obj: any): obj is HQLogObject => {
-  return obj?.type === 'HQ'
+export interface LogObject {
+  type: 'PROBE'
+  iteration: number
+  id: string
+  responseCode: number
+  url: string
+  responseTime: number
+  alert: Alerts
+  notification: Alerts
 }
 
-const isPlainLog = (obj: any): obj is PlainLogObject => {
-  return obj?.type?.startsWith('PLAIN')
+export interface HQLogObject {
+  type: 'HQ'
+  alert: Alerts
 }
 
-const prettyPrint = {
-  translateTime: true,
-  ignore: 'pid,time',
-  hideObject: true,
-  sync: false, // async mode for better performance
-  messageFormat(log: LogDescriptor) {
-    const time = new Date(log.time).toISOString()
-
-    if (isPlainLog(log)) {
-      return `${log.msg}`
-    }
-    if (isHQLogObject(log)) {
-      return `${time} HQ: ${log.alert.flag} ${log.alert.message}`
-    }
-
-    if (isLogObject(log)) {
-      let alertMsg = ''
-      let notifMsg = ''
-
-      const probeMsg = `${log.iteration} id:${log.id} ${log.responseCode} ${log.url} ${log.responseTime}ms`
-
-      if (log.notification?.flag) {
-        notifMsg = `, NOTIF: ${log.notification.message}`
-      }
-      if (log.alert?.flag) {
-        alertMsg = `, ${log.alert.flag}: ${log.alert.message}`
-      }
-
-      return `${time} ${probeMsg}${alertMsg}${notifMsg}`
-    }
-    return `${log.msg}`
-  },
+export interface PlainLogObject {
+  type: 'PLAIN' | ''
+  msg?: string
 }
-
-const transport: LoggerOptions = dev
-  ? {
-      prettyPrint: {
-        ...prettyPrint,
-        colorize: true,
-      },
-      level: 'debug',
-    }
-  : {
-      prettyPrint,
-      level: 'info',
-    }
-
-export const log = pino(transport)

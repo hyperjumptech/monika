@@ -21,7 +21,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  *
  * SOFTWARE.                                                                      *
  **********************************************************************************/
-
 import { Command, flags } from '@oclif/command'
 import cli from 'cli-ux'
 import chalk from 'chalk'
@@ -56,7 +55,6 @@ function getDefaultConfig() {
     ? `./${configDotJsonFile}`
     : './monika.json'
 }
-
 class Monika extends Command {
   static description = 'Monika command line monitoring tool'
 
