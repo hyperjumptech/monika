@@ -111,7 +111,7 @@ export default function NavBar() {
                 rel="noopener noreferrer"
               >
                 <svg
-                  className="h-6 w-6"
+                  className="h-6 w-6 mr-2"
                   fill="currentColor"
                   viewBox="0 0 24 24"
                 >
