@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.7] - 2021-06-14
+
+### Added
+
+- Docs: Monika Whatsapp Notifier information
+- Reload probes on config change
+- Facebook workplace integration. [@adeyahya](https://github.com/adeyahya) in [#219](https://github.com/hyperjumptech/monika/pull/219)
+- Read configuration from url
+
 ## [1.3.6] - 2021-06-02
 
 ### Added
