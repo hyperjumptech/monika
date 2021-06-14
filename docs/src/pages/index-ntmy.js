@@ -10,7 +10,7 @@ import FooterDark from 'components/FooterDark'
 
 export default function IndexPage() {
   return (
-    <div className="relative">
+    <div className="relative bg-black-monika">
       <Seo
         title="Monika"
         description="Free and Open Source Synthetic Monitoring Tool"

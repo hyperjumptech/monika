@@ -28,7 +28,7 @@ import { siteConfig } from 'siteConfig'
 
 export default function FooterDark() {
   return (
-    <div className="flex flex-wrap justify-around bg-black-monika text-white pt-8 pb-16 px-16">
+    <div className="flex flex-wrap justify-around text-white pt-8 pb-16 px-16">
       <a href="/">
         <img className="w-16 h-4" src={MonikaSvg} />
       </a>

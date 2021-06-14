@@ -27,13 +27,13 @@ import WorldDotSvg from '../../../public/world-dot.svg'
 
 export default function DemoVideo() {
   return (
-    <div className="relative flex flex-col justify-center pt-64 bg-black-monika">
+    <div className="relative flex flex-col justify-center pt-1/3 xl:pt-1/5">
       <img
         src={WorldDotSvg}
         style={{ marginTop: '-42rem' }}
         className="absolute top-0 right-0"
       />
-      <div className="m-auto flex flex-col">
+      <div className="m-auto flex flex-col z-10">
         <h3 className="m-auto text-white text-xl -mt-y-1/4">
           <span className="bg-gradient-to-r from-purple-monika to-aqua-monika bg-clip-text text-transparent font-bold">
             Monika
@@ -42,9 +42,7 @@ export default function DemoVideo() {
         </h3>
         <div className="flex flex-wrap justify-around gap-8 mt-8">
           <iframe
-            className="my-auto"
-            width="560"
-            height="315"
+            className="my-auto w-96 h-72"
             src="https://www.youtube-nocookie.com/embed/o4jrNeNeFmM"
             title="YouTube video player"
             frameBorder="0"

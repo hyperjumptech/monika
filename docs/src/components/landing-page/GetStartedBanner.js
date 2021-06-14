@@ -27,7 +27,7 @@ import WaveMonika from '../../../public/wave-monika.svg'
 
 export default function GetStartedBanner() {
   return (
-    <div className="relative bg-black-monika py-32 flex">
+    <div className="relative py-32 flex">
       <div className="flex flex-col z-10 m-auto bg-gradient-to-br from-purple-monika to-aqua-monika px-16 py-8 rounded">
         <p className="text-center text-2xl text-white font-bold">
           Get Started with Monika Now!

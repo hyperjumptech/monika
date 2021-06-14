@@ -31,7 +31,7 @@ import { siteConfig } from 'siteConfig'
 export default function Banner(props) {
   return (
     <div
-      className={`flex flex-col bg-black-monika py-32 ${
+      className={`relative flex flex-col py-32 ${
         props.className ? props.className : ''
       }`}
     >
@@ -74,7 +74,7 @@ export default function Banner(props) {
       <img src={StarBlurSvg} className="absolute -top-16 right-0" />
       <img
         src={WorldDotSvg}
-        className="sm:invisible xl:visible absolute top-0 -left-16 mt-y-3/4"
+        className="sm:invisible xl:visible absolute -bottom-128 -left-16"
       />
     </div>
   )

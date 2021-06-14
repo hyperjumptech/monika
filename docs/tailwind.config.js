@@ -71,18 +71,21 @@ module.exports = {
       },
       height: {
         '3/4': '75vh',
+        72: '18rem',
       },
       inset: {
         '-16': '-4rem',
-        '-20': '-6rem',
+        '-128': '-32rem',
       },
       margin: {
         '-y-3/4': '-75vh',
         '-y-1/4': '-25vh',
-        'y-3/4': '75vh',
       },
       opacity: {
         10: '0.1',
+      },
+      width: {
+        96: '24rem',
       },
     },
     fontFamily: {
