@@ -322,7 +322,7 @@ Monika supports Facebook Workplace. To enable notifiation via Workplace, you mus
 
 ## Monika Whatsapp Notifier
 
-You can get a Monika's alert notification to your Whatsapp number without having a Whatsapp Business account. First, you must create a [Monika Whatsapp Notifier account](https://whatsapp.hyperjump.tech).
+You can get a notification from Monika to your Whatsapp number without having a Whatsapp Business account. First, you must create a [Monika Whatsapp Notifier account](https://whatsapp.hyperjump.tech).
 
 ```json
 {
