@@ -1,0 +1,20 @@
+{
+  "notifications": [
+    {
+      "id": "monika-webhook",
+      "type": "monika-notif",
+      "data": {
+        "url": "YOUR_MONIKA_WHATSAPP_WEBHOOK"
+      }
+    }
+  ],
+  "probes": [
+    {
+      "requests": [
+        {
+          "url": "https://github.com"
+        }
+      ]
+    }
+  ]
+}

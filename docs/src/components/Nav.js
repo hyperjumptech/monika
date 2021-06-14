@@ -30,6 +30,14 @@ export const Nav = () => (
             </div>
             <div>
               <a
+                href="https://whatsapp.hyperjump.tech"
+                className="leading-6 font-medium"
+              >
+                Whatsapp Notifier
+              </a>
+            </div>
+            <div>
+              <a
                 href="https://hyperjumptech.github.io/monika-config-generator"
                 className="leading-6 font-medium"
               >

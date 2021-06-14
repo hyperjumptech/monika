@@ -60,6 +60,14 @@ export const Footer = (props) => {
                       Config Generator
                     </a>
                   </li>
+                  <li className="mt-4">
+                    <a
+                      href="https://whatsapp.hyperjump.tech"
+                      className="text-base leading-6 text-gray-500 hover:text-gray-900"
+                    >
+                      Whatsapp Notifier
+                    </a>
+                  </li>
                 </ul>
               </div>
               <div className="mt-12 md:mt-0">
