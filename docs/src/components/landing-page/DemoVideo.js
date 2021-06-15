@@ -30,7 +30,7 @@ export default function DemoVideo() {
     <div className="relative flex flex-col justify-center pt-1/3 xl:pt-1/5">
       <img
         src={WorldDotSvg}
-        style={{ marginTop: '-42rem' }}
+        style={{ marginTop: '-50rem' }}
         className="absolute top-0 right-0"
       />
       <div className="m-auto flex flex-col z-10">
