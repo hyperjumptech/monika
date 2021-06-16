@@ -28,6 +28,7 @@ import { getLogsAndReport } from './components/reporter'
 import { doProbe } from './components/probe'
 import { log } from './utils/pino'
 import { Notification } from './interfaces/notification'
+import { getUnreportedLogsCount } from './components/logger/history'
 
 const MILLISECONDS = 1000
 const DEFAULT_THRESHOLD = 5
@@ -164,10 +165,20 @@ export function idFeeder(
   return abort
 }
 
-export function loopReport(getConfig: () => Config) {
+export async function loopReport(getConfig: () => Config) {
   const { symon } = getConfig()
 
   if (symon) {
+    // Send previously unreported logs to symon
+    const unreportedCount = await getUnreportedLogsCount()
+    const limit = parseInt(process.env.MONIKA_REPORT_LIMIT || '100', 10)
+
+    for (let i = unreportedCount; i > 0; i -= limit) {
+      // eslint-disable-next-line no-await-in-loop
+      await getLogsAndReport()
+    }
+
+    // Next run report on interval
     const { interval = DEFAULT_REPORT_INTERVAL } = symon
     setInterval(getLogsAndReport, interval)
   }
