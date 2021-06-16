@@ -32,6 +32,7 @@ import {
   DiscordData,
   WorkplaceData,
   MonikaNotifData,
+  DesktopData,
 } from '../../interfaces/data'
 import { Notification } from '../../interfaces/notification'
 import getIp from '../../utils/ip'
@@ -46,6 +47,7 @@ import { sendWhatsapp } from './channel/whatsapp'
 import { sendDiscord } from './channel/discord'
 import { sendMonikaNotif } from './channel/monika-notif'
 import { sendWorkplace } from './channel/workplace'
+import { sendDesktop } from './channel/desktop'
 
 export type ValidateResponseStatus = { alert: string; status: boolean }
 
@@ -225,6 +227,21 @@ export async function sendAlerts({
             },
           } as WorkplaceData).then(() => ({
             notification: 'workplace',
+            alert: validation.alert,
+            url,
+          }))
+        }
+        case 'desktop': {
+          return sendDesktop({
+            ...notification.data,
+            body: {
+              url,
+              alert: validation.alert,
+              time: new Date().toLocaleString(),
+              status,
+            },
+          } as DesktopData).then(() => ({
+            notification: 'desktop',
             alert: validation.alert,
             url,
           }))

@@ -22,104 +22,25 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-export interface MailData {
-  recipients: string[]
-}
+import { notify } from 'node-notifier'
+import { DesktopData } from './../../../interfaces/data'
 
-export interface MailgunData extends MailData {
-  apiKey: string
-  domain: string
-}
+export const sendDesktop = async (data: DesktopData) => {
+  try {
+    const notifType = data.body.status === 'UP' ? 'RECOVERY' : 'INCIDENT'
 
-export interface SendgridData extends MailData {
-  apiKey: string
-}
-
-export interface SMTPData extends MailData {
-  hostname: string
-  port: number
-  username: string
-  password: string
-}
-
-export interface TeamsData {
-  url: string
-  body: TeamsDataBody
-}
-
-export interface TeamsDataBody extends WebhookDataBody {
-  status: string
-}
-
-export interface WebhookData {
-  url: string
-  body: WebhookDataBody
-}
-
-export interface MonikaNotifData {
-  url: string
-  body: MonikaNotifDataBody
-}
-
-export interface MonikaNotifDataBody {
-  type: 'start' | 'incident' | 'recovery'
-  probe_url: string
-  probe_name?: string
-  monika_id?: string
-  ip_address: string
-  response_time: string
-  alert: string
-}
-
-export interface TelegramData {
-  group_id: string
-  bot_token: string
-  body: WebhookDataBody
-}
-
-export interface WebhookDataBody {
-  url: string
-  time: string
-  alert: string
-}
-
-export interface WhatsappData extends MailData {
-  url: string
-  username: string
-  password: string
-}
-
-export interface DiscordData {
-  url: string
-  body: DiscordDataBody
-}
-
-export interface DiscordDataBody {
-  url: string
-  time: string
-  alert: string
-}
-
-export interface WorkplaceData {
-  thread_id: string
-  access_token: string
-  body: WorkplaceDataBody
-}
-
-export interface WorkplaceDataBody {
-  url: string
-  time: string
-  alert: string
-}
-
-export interface DesktopData {
-  url: string
-  body: DesktopDataBody
-}
-
-export interface DesktopDataBody {
-  url: string
-  time: string
-  alert: string
-  status: string
+    if (data.body.status === 'INIT') {
+      notify({
+        title: 'Monika is running',
+        message: data.body.alert,
+      })
+    } else {
+      notify({
+        title: `New ${notifType} notification from Monika`,
+        message: `${data.body.alert} for URL ${data.body.url} at ${data.body.time}`,
+      })
+    }
+  } catch (error) {
+    throw error
+  }
 }
