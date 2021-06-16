@@ -23,13 +23,13 @@
  **********************************************************************************/
 
 import ButtonLink from 'components/ButtonLink'
-import WorldDotSvg from '../../../public/world-dot.svg'
+import WorldDotPng from '../../../public/world-dot.png'
 
 export default function DemoVideo() {
   return (
     <div className="relative flex flex-col justify-center pt-1/3 xl:pt-1/5">
       <img
-        src={WorldDotSvg}
+        src={WorldDotPng}
         style={{ marginTop: '-50rem' }}
         className="absolute top-0 right-0"
       />

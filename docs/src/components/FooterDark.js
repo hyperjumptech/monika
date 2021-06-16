@@ -47,6 +47,13 @@ export default function FooterDark() {
         >
           Configuration
         </a>
+        <a
+          className="text-xs pt-1"
+          href="https://whatsapp.hyperjump.tech/"
+          rel="noopener noreferrer"
+        >
+          WhatsApp Notifier
+        </a>
       </div>
       <div className="flex flex-col">
         <p className="font-bold">Community</p>

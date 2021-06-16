@@ -42,9 +42,9 @@ export default function FeatureBanner() {
           <br />
           Monitoring Tool
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-2 grid-flow-row mt-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 grid-flow-row mt-4">
           <div>
-            <img src={DashboardIconSvg} />
+            <img className="max-h-20" src={DashboardIconSvg} />
             <h3 className="font-semibold">Monitor Multiple Websites</h3>
             <p>
               You can add as many as websites you want to monitor with Monika to
@@ -52,7 +52,7 @@ export default function FeatureBanner() {
             </p>
           </div>
           <div>
-            <img src={TimerIconSvg} />
+            <img className="max-h-20" src={TimerIconSvg} />
             <h3 className="font-semibold">Monitor When Down or Slow</h3>
             <p>
               With Monika, you can monitor website several status such as down
@@ -60,7 +60,7 @@ export default function FeatureBanner() {
             </p>
           </div>
           <div>
-            <img src={AlarmIconSvg} />
+            <img className="max-h-20" src={AlarmIconSvg} />
             <h3 className="font-semibold">Various Notifications</h3>
             <p>
               Get notified of the incidents on your website through your
@@ -68,7 +68,7 @@ export default function FeatureBanner() {
             </p>
           </div>
           <div>
-            <img src={ListIconSvg} />
+            <img className="max-h-20" src={ListIconSvg} />
             <h3 className="font-semibold">Customizable Requests</h3>
             <p>
               Monitor all different parts of your websites. For example, you can
@@ -76,7 +76,7 @@ export default function FeatureBanner() {
             </p>
           </div>
           <div>
-            <img src={RecycleIconSvg} />
+            <img className="max-h-20" src={RecycleIconSvg} />
             <h3 className="font-semibold">Requests Chaining</h3>
             <p>
               Request chaining enables you to send multiple requests and the
@@ -84,13 +84,8 @@ export default function FeatureBanner() {
             </p>
           </div>
           <div>
-            <img src={WhatsAppIconSvg} />
-            <h3 className="font-semibold">
-              Whatsapp Notifications{' '}
-              <span className="bg-gradient-to-r from-purple-monika to-aqua-monika bg-clip-text text-transparent">
-                (Soon!)
-              </span>
-            </h3>
+            <img className="max-h-20" src={WhatsAppIconSvg} />
+            <h3 className="font-semibold">Whatsapp Notifications</h3>
             <p>
               Monika will send notifications directly to your WhatsApp account.
             </p>

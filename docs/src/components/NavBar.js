@@ -88,6 +88,14 @@ export default function NavBar() {
             <li className="nav-item">
               <a
                 className="px-3 py-2 flex items-center text-white font-sans font-bold leading-snug hover:opacity-75"
+                href="https://whatsapp.hyperjump.tech/"
+              >
+                <span className="ml-2">WhatsApp Notifier</span>
+              </a>
+            </li>
+            <li className="nav-item">
+              <a
+                className="px-3 py-2 flex items-center text-white font-sans font-bold leading-snug hover:opacity-75"
                 href="https://github.com/hyperjumptech/monika/discussions"
                 target="_blank"
               >

@@ -25,7 +25,7 @@
 import ButtonLink from 'components/ButtonLink'
 import { useEffect, useState } from 'react'
 import StarBlurSvg from '../../../public/star-blur.svg'
-import WorldDotSvg from '../../../public/world-dot.svg'
+import WorldDotPng from '../../../public/world-dot.png'
 import { siteConfig } from 'siteConfig'
 
 export default function Banner(props) {
@@ -73,8 +73,8 @@ export default function Banner(props) {
       </div>
       <img src={StarBlurSvg} className="absolute -top-16 right-0" />
       <img
-        src={WorldDotSvg}
-        className="sm:invisible xl:visible absolute -bottom-128 -left-16"
+        src={WorldDotPng}
+        className="sm:invisible xl:visible absolute -bottom-128 -left-16 max-w-2xl"
       />
     </div>
   )
