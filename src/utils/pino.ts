@@ -40,7 +40,7 @@ const isPlainLog = (obj: any): obj is PlainLogObject => {
 
 const prettyPrint = {
   translateTime: true,
-  ignore: 'pid,time',
+  ignore: 'hostname,pid,time',
   hideObject: true,
   sync: false, // async mode for better performance
   messageFormat(log: LogDescriptor) {
