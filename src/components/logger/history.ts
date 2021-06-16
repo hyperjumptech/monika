@@ -121,7 +121,18 @@ export async function getAllLogs(): Promise<RequestsLog[]> {
   return db.all(readRowsSQL)
 }
 
-export async function getUnreportedLogs(): Promise<UnreportedLog> {
+export async function getUnreportedLogsCount(): Promise<number> {
+  const readUnreportedRequestsCountSQL = `
+    SELECT COUNT(id) as count
+    FROM probe_requests
+    WHERE reported = 0;`
+
+  const row = await db.get(readUnreportedRequestsCountSQL)
+
+  return row?.count || 0
+}
+
+export async function getUnreportedLogs(limit: number): Promise<UnreportedLog> {
   const readUnreportedRequestsSQL = `
     SELECT PR.id,
       PR.created_at as timestamp,
@@ -142,7 +153,8 @@ export async function getUnreportedLogs(): Promise<UnreportedLog> {
     FROM probe_requests PR
       LEFT JOIN alerts A ON PR.id = A.probe_request_id
     WHERE PR.reported = 0
-    GROUP BY PR.id;`
+    GROUP BY PR.id
+    LIMIT ${limit};`
 
   const readUnreportedNotificationsSQL = `
     SELECT id,
@@ -154,7 +166,8 @@ export async function getUnreportedLogs(): Promise<UnreportedLog> {
       notification_id,
       channel
     FROM notifications
-    WHERE reported = 0;`
+    WHERE reported = 0
+    LIMIT ${limit};`
 
   const [unreportedRequests, unreportedNotifications] = await Promise.all([
     db.all(readUnreportedRequestsSQL).then(
