@@ -126,7 +126,7 @@ class Monika extends Command {
       )
       if (ans === 'Y') {
         await flushAllLogs()
-        log.info('Records flushed, thank you.')
+        log.warn('Records flushed, thank you.')
       } else {
         log.info('Cancelled. Thank you.')
       }
@@ -173,12 +173,12 @@ class Monika extends Command {
         }
 
         const startupMessage = this.buildStartupMessage(config, flags.verbose)
-        this.log(startupMessage)
+        log.info(startupMessage)
         abortCurrentLooper = idFeeder(config, Number(flags.repeat), flags.id)
       }
     } catch (error) {
       await closeLog()
-      this.error(error?.message, { exit: 1 })
+      log.error(error?.message, { exit: 1 })
     }
   }
 

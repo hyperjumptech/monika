@@ -38,11 +38,6 @@ export interface LogObject {
   notification: Alerts
 }
 
-export interface HQLogObject {
-  type: 'HQ'
-  alert: Alerts
-}
-
 export interface PlainLogObject {
   type: 'PLAIN' | ''
   msg?: string

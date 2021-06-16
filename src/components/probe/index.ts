@@ -109,7 +109,6 @@ export async function doProbe(
             })
           })
         )
-
         const sendAlertsPromise = sendAlerts({
           validation: validatedResp[index],
           notifications: notifications,
