@@ -109,8 +109,10 @@ export const getLogsAndReport = async () => {
   if (config.symon) {
     const { url, key, id: instanceId } = config.symon
 
+    const limit = parseInt(process.env.MONIKA_REPORT_LIMIT || '100', 10)
+
     try {
-      const unreportedLog = await getUnreportedLogs()
+      const unreportedLog = await getUnreportedLogs(limit)
       const requests = unreportedLog.requests.map(({ id: _, ...rest }) => rest)
       const notifications = unreportedLog.notifications.map(
         ({ id: _, ...rest }) => rest
