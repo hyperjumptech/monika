@@ -22,33 +22,32 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import * as React from 'react'
-import cn from 'classnames'
-export const Sticky = ({ offset, children, shadow }) => {
-  return (
-    <div
-      style={{
-        top: offset || 0,
-      }}
-      className={cn(
-        {
-          shadow,
-        },
-        'z-20'
-      )}
-    >
-      {children}
+export default function ButtonLink(props) {
+  if (props.outline) {
+    return <ButtonOutlined {...props}>{props.children}</ButtonOutlined>
+  }
 
-      <style jsx>{`
-        div {
-          background: #fff;
-          position: sticky;
-        }
-        div.shadow {
-          box-shadow: rgba(0, 0, 0, 0.06) 0px 6px 20px;
-        }
-      `}</style>
-    </div>
+  return (
+    <a
+      {...props}
+      className={`px-4 py-2 bg-gradient-to-r from-purple-monika to-aqua-monika rounded-full font-sans text-white ${
+        props.className ? props.className : ''
+      }`}
+    >
+      {props.children}
+    </a>
   )
 }
-Sticky.displayName = 'Sticky'
+
+function ButtonOutlined(props) {
+  return (
+    <a
+      {...props}
+      className={`px-4 py-2 rounded-full border-2 border-purple-monika text-purple-monika font-sans ${
+        props.className ? props.className : ''
+      }`}
+    >
+      {props.children}
+    </a>
+  )
+}
