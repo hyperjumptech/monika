@@ -21,7 +21,7 @@ process.on('SIGINT', () => {
     console.log('\nThank you for using Monika!')
     console.log('We need your help to make Monika better.')
     console.log(
-      'Can you give us some feedback by clicking this link https://github.com/hyperjumptech/monika/discussions ?'
+      'Can you give us some feedback by clicking this link https://github.com/hyperjumptech/monika/discussions?'
     )
     console.log('')
   }

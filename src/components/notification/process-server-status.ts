@@ -27,6 +27,9 @@ import { Probe } from '../../interfaces/probe'
 import { ValidateResponseStatus } from './alert'
 import { log } from '../../utils/pino'
 import { AxiosResponseWithExtraData } from '../../interfaces/request'
+import { setAlert } from '../../components/logger'
+
+import { printProbeLog } from '../../components/logger'
 
 const PROBE_STATUSES: ProbeStatus[] = []
 const INIT_PROBE_STATUS_DETAILS: StatusDetails = {
@@ -160,10 +163,7 @@ const updateProbeStatus = (
 }
 
 export const processProbeStatus = ({
-  checkOrder,
   probe,
-  probeRes,
-  requestIndex,
   validatedResp,
   incidentThreshold,
   recoveryThreshold,
@@ -248,20 +248,12 @@ export const processProbeStatus = ({
         results.push(updatedStatus)
 
         if (validation.status === true) {
-          log.info({
-            type: 'ALERT',
-            alertType: updatedStatus.alert,
-            consecutiveTrue: updatedStatus.consecutiveTrue,
-            probeId: probe.id,
-            checkOrder,
-            url: probe.requests[requestIndex].url,
-            statusCode: probeRes.status,
-            responseTime: probeRes.config.extraData?.responseTime,
-          })
+          setAlert({ flag: 'ALERT', message: updatedStatus.alert as any })
+          // done probes, got some alerts&notif.. print log
+          printProbeLog()
         }
       })
     }
-
     return results
   } catch (error) {
     log.error(error.message)
