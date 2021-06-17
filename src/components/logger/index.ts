@@ -29,6 +29,20 @@ import { Notification } from '../../interfaces/notification'
 import { saveProbeRequestLog, getAllLogs, saveNotificationLog } from './history'
 import { log } from '../../utils/pino'
 
+import { Alerts, LogObject } from '../../interfaces/logs'
+
+// declare monika logs and initialize
+let mLogs = {
+  alert: {
+    flag: '',
+    message: [],
+  } as Alerts,
+  notification: {
+    flag: '',
+    message: [],
+  } as Alerts,
+} as LogObject
+
 /**
  * getStatusColor colorizes different statusCode
  * @param {number} statusCode is the httpStatus to colorize
@@ -48,7 +62,7 @@ export function getStatusColor(statusCode: number) {
 }
 
 /**
- * probeLog just prints probe results for the user and to persistent log (through history.ts)
+ * probeLog prints probe results for the user and to persistent log (through history.ts)
  *
  */
 export async function probeLog({
@@ -66,15 +80,19 @@ export async function probeLog({
   alerts?: string[]
   error?: string
 }) {
-  log.info({
-    type: 'PROBE',
-    checkOrder,
-    probeId: probe.id,
-    url: probeRes.config.url,
-    statusCode: probeRes.status,
-    responseTime: probeRes.config.extraData?.responseTime,
-    responseLength: probeRes.headers['content-length'],
-  })
+  mLogs.type = 'PROBE'
+  mLogs.iteration = checkOrder
+  mLogs.id = probe.id
+  mLogs.url = probe.requests[requestIndex].url
+  mLogs.responseCode = probeRes.status
+  mLogs.responseTime = probeRes.config.extraData?.responseTime ?? 0
+
+  if (alerts?.length) {
+    mLogs.alert.flag = 'alert'
+    mLogs.alert.message = alerts
+  }
+
+  if (error?.length) log.error('probe error: ', error)
 
   for (const rq of probe.requests) {
     if (rq?.saveBody !== true ?? undefined) {
@@ -97,27 +115,84 @@ export async function probeLog({
  */
 export async function notificationLog({
   type,
-  alertType,
+  alertMsg,
   notification,
   probe,
-  url,
 }: {
   probe: Probe
   notification: Notification
   type: 'NOTIFY-INCIDENT' | 'NOTIFY-RECOVER'
-  alertType: string
-  url: string
+  alertMsg: string
 }) {
-  log.info({
-    type,
-    alertType,
-    notificationType: notification.type,
-    notificationId: notification.id,
-    probeId: probe.id,
-    url,
-  })
+  let msg: string
+  mLogs.notification.flag = type
+  switch (type) {
+    case 'NOTIFY-INCIDENT':
+      msg = 'service probably down'
+      break
+    case 'NOTIFY-RECOVER':
+      msg = 'service is back up'
+  }
+  mLogs.notification.flag = type
+  mLogs.notification.message[0] = msg
+  await saveNotificationLog(probe, notification, type, alertMsg)
+}
 
-  await saveNotificationLog(probe, notification, type, alertType)
+/**
+ * setNotification sets notification message
+ * flag: type of notif message, ex: disruption
+ * message: body of notification message
+ */
+export function setNotification({
+  flag,
+  message,
+}: {
+  flag: string
+  message: string[]
+}) {
+  mLogs.notification.flag = flag
+  mLogs.notification.message = message
+}
+
+/**
+ * setAlert
+ *
+ */
+export function setAlert({
+  flag,
+  message,
+}: {
+  flag: string
+  message: string[]
+}) {
+  mLogs.alert.flag = flag
+  mLogs.alert.message = message
+}
+
+function flushMLog() {
+  mLogs = {
+    alert: {
+      flag: '',
+      message: [],
+    } as Alerts,
+    notification: {
+      flag: '',
+      message: [],
+    } as Alerts,
+  } as LogObject
+}
+
+/**
+ * printLogs prints the monika logs and clear buffers
+ */
+export async function printProbeLog() {
+  if (mLogs.alert.flag.length > 0) {
+    log.warn(mLogs)
+  } else {
+    log.info(mLogs)
+  }
+
+  flushMLog()
 }
 
 /**

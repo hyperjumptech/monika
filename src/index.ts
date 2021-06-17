@@ -21,13 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  *
  * SOFTWARE.                                                                      *
  **********************************************************************************/
-
 import { Command, flags } from '@oclif/command'
 import cli from 'cli-ux'
 import chalk from 'chalk'
 import boxen from 'boxen'
 import open from 'open'
 import fs from 'fs'
+import isUrl from 'is-url'
 import { MailData, MailgunData, SMTPData, WebhookData } from './interfaces/data'
 import { Config } from './interfaces/config'
 import { idFeeder, loopReport } from './looper'
@@ -43,6 +43,7 @@ import {
   getConfig,
   getConfigIterator,
   setupConfigFromFile,
+  setupConfigFromUrl,
 } from './components/config'
 
 function getDefaultConfig() {
@@ -56,7 +57,6 @@ function getDefaultConfig() {
     ? `./${configDotJsonFile}`
     : './monika.json'
 }
-
 class Monika extends Command {
   static description = 'Monika command line monitoring tool'
 
@@ -74,7 +74,7 @@ class Monika extends Command {
     config: flags.string({
       char: 'c',
       description:
-        'JSON configuration filename. If none is supplied, will look for monika.json in the current directory',
+        'JSON configuration filename or URL. If none is supplied, will look for monika.json in the current directory',
       default: () => getDefaultConfig(),
       env: 'MONIKA_JSON_CONFIG',
     }),
@@ -126,7 +126,7 @@ class Monika extends Command {
       )
       if (ans === 'Y') {
         await flushAllLogs()
-        log.info('Records flushed, thank you.')
+        log.warn('Records flushed, thank you.')
       } else {
         log.info('Cancelled. Thank you.')
       }
@@ -143,7 +143,17 @@ class Monika extends Command {
     }
 
     try {
-      await setupConfigFromFile(flags.config)
+      if (isUrl(flags.config)) {
+        await setupConfigFromUrl(flags.config)
+      } else {
+        const watchConfigFile = !(
+          process.env.CI ||
+          process.env.NODE_ENV === 'test' ||
+          flags.repeat
+        )
+
+        await setupConfigFromFile(flags.config, watchConfigFile)
+      }
 
       // Run report on interval if symon configuration exists
       if (!(process.env.CI || process.env.NODE_ENV === 'test')) {

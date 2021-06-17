@@ -22,42 +22,23 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import {
-  MailgunData,
-  SendgridData,
-  SMTPData,
-  TelegramData,
-  WebhookData,
-  WhatsappData,
-  TeamsData,
-  DiscordData,
-  MonikaNotifData,
-  WorkplaceData,
-} from './data'
+export interface Alerts {
+  flag: string
+  message: string[]
+}
 
-export interface Notification {
+export interface LogObject {
+  type: 'PROBE'
+  iteration: number
   id: string
-  type:
-    | 'smtp'
-    | 'mailgun'
-    | 'sendgrid'
-    | 'webhook'
-    | 'slack'
-    | 'whatsapp'
-    | 'teams'
-    | 'telegram'
-    | 'discord'
-    | 'monika-notif'
-    | 'workplace'
-  data:
-    | MailgunData
-    | SMTPData
-    | SendgridData
-    | WebhookData
-    | WhatsappData
-    | TeamsData
-    | TelegramData
-    | DiscordData
-    | MonikaNotifData
-    | WorkplaceData
+  responseCode: number
+  url: string
+  responseTime: number
+  alert: Alerts
+  notification: Alerts
+}
+
+export interface PlainLogObject {
+  type: 'PLAIN' | ''
+  msg?: string
 }

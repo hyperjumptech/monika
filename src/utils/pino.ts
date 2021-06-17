@@ -25,61 +25,13 @@
 import fs from 'fs'
 import path from 'path'
 import pino, { LoggerOptions, LogDescriptor } from 'pino'
+import { LogObject, PlainLogObject } from '../interfaces/logs'
 
 const project = path.join(__dirname, '../../tsconfig.json')
 const dev = fs.existsSync(project)
 
-interface BaseLogObject {
-  time?: string
-}
-
-interface ProbeLogObject extends BaseLogObject {
-  type: 'PROBE'
-  checkOrder: number
-  probeId: string
-  url: string
-  statusCode: number
-  responseTime: number
-  responseLength: number
-}
-
-interface AlertLogObject extends BaseLogObject {
-  type: 'ALERT'
-  alertType: string
-  consecutiveTrue: number
-  checkOrder: number
-  probeId: string
-  url: string
-  statusCode: number
-  responseTime: number
-}
-
-interface NotifyLogObject extends BaseLogObject {
-  type: 'NOTIFY-INCIDENT' | 'NOTIFY-RECOVER'
-  alertType: string
-  notificationType: string
-  notificationId: string
-  probeId: string
-  url: string
-}
-
-interface PlainLogObject {
-  type: 'PLAIN' | ''
-  msg?: string
-}
-
-export type LogObject = ProbeLogObject | AlertLogObject | NotifyLogObject
-
-const isProbeLogObject = (obj: any): obj is ProbeLogObject => {
+const isLogObject = (obj: any): obj is LogObject => {
   return obj?.type === 'PROBE'
-}
-
-const isAlertLogObject = (obj: any): obj is AlertLogObject => {
-  return obj?.type === 'ALERT'
-}
-
-const isNotifyLogObject = (obj: any): obj is NotifyLogObject => {
-  return obj?.type?.startsWith('NOTIFY')
 }
 
 const isPlainLog = (obj: any): obj is PlainLogObject => {
@@ -87,36 +39,33 @@ const isPlainLog = (obj: any): obj is PlainLogObject => {
 }
 
 const prettyPrint = {
-  /* eslint-disable complexity */
   translateTime: true,
-  ignore: 'pid,hostname,time,level',
+  ignore: 'hostname,pid,time',
   hideObject: true,
-  messageFormat(log: LogDescriptor, messageKey: string) {
+  sync: false, // async mode for better performance
+  messageFormat(log: LogDescriptor) {
     const time = new Date(log.time).toISOString()
-    const type: string | undefined = log.type?.toUpperCase()
-    if (isProbeLogObject(log)) {
-      return `${time},${type},${log.checkOrder || '-'},${log.probeId || '-'},${
-        log.url || '-'
-      },${log.statusCode || '-'},${log.responseTime || '-'},${
-        log.responseLength || '-'
-      }`
-    }
-    if (isAlertLogObject(log)) {
-      return `${time},${type},${log.alertType || '-'},${
-        log.consecutiveTrue || '-'
-      },${log.checkOrder || '-'},${log.probeId || '-'},${log.url || '-'},${
-        log.statusCode || '-'
-      },${log.responseTime || '-'}`
-    }
-    if (isNotifyLogObject(log)) {
-      return `${time},${type},${log.alertType || '-'},${
-        log.notificationType || '-'
-      },${log.notificationId || '-'},${log.probeId || '-'},${log.url || '-'}`
-    }
+
     if (isPlainLog(log)) {
       return `${log.msg}`
     }
-    return `${time} ${log[messageKey]}`
+
+    if (isLogObject(log)) {
+      let alertMsg = ''
+      let notifMsg = ''
+
+      const probeMsg = `${log.iteration} id:${log.id} ${log.responseCode} ${log.url} ${log.responseTime}ms`
+
+      if (log.notification?.flag) {
+        notifMsg = `, NOTIF: ${log.notification.message}`
+      }
+      if (log.alert?.flag) {
+        alertMsg = `, ${log.alert.flag}: ${log.alert.message}`
+      }
+
+      return `${time} ${probeMsg}${alertMsg}${notifMsg}`
+    }
+    return `${log.msg}`
   },
 }
 

@@ -22,42 +22,34 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import {
-  MailgunData,
-  SendgridData,
-  SMTPData,
-  TelegramData,
-  WebhookData,
-  WhatsappData,
-  TeamsData,
-  DiscordData,
-  MonikaNotifData,
-  WorkplaceData,
-} from './data'
+export default function Button(props) {
+  if (props.outline) {
+    return (
+      <ButtonOutlined className={props.className}>
+        {props.children}
+      </ButtonOutlined>
+    )
+  }
 
-export interface Notification {
-  id: string
-  type:
-    | 'smtp'
-    | 'mailgun'
-    | 'sendgrid'
-    | 'webhook'
-    | 'slack'
-    | 'whatsapp'
-    | 'teams'
-    | 'telegram'
-    | 'discord'
-    | 'monika-notif'
-    | 'workplace'
-  data:
-    | MailgunData
-    | SMTPData
-    | SendgridData
-    | WebhookData
-    | WhatsappData
-    | TeamsData
-    | TelegramData
-    | DiscordData
-    | MonikaNotifData
-    | WorkplaceData
+  return (
+    <button
+      className={`px-4 py-2 bg-gradient-to-r from-purple-monika to-aqua-monika rounded-full font-sans text-white ${
+        props.className ? props.className : ''
+      }`}
+    >
+      {props.children}
+    </button>
+  )
+}
+
+function ButtonOutlined(props) {
+  return (
+    <button
+      className={`px-4 py-2 rounded-full border-2 border-purple-monika text-purple-monika font-sans ${
+        props.className ? props.className : ''
+      }`}
+    >
+      {props.children}
+    </button>
+  )
 }

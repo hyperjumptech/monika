@@ -5,7 +5,7 @@ title: Quick Start
 
 ## Getting Started
 
-To start monitoring URLs, you need to create a configuration file (JSON file). The configuration file contains the probes, alerts, and notification configurations. You can generate a configuration file using [Monika Config Generator](https://hyperjumptech.github.io/monika-config-generator) web app. Alternatively, you can use one of the following configuration examples:
+To start monitoring URLs, you need to provide a configuration (JSON file) either from an URL or local file. The configuration file contains the probes, alerts, and notification configurations. You can generate a configuration file using [Monika Config Generator](https://hyperjumptech.github.io/monika-config-generator) web app. Alternatively, you can use one of the following configuration examples:
 
 1. [SMTP Gmail](https://github.com/hyperjumptech/monika/blob/main/config_sample/config.smtp-gmail.example.json)
 2. [Mailgun](https://github.com/hyperjumptech/monika/blob/main/config_sample/config.mailgun.example.json)
@@ -15,12 +15,19 @@ To start monitoring URLs, you need to create a configuration file (JSON file). T
 6. [Telegram](https://github.com/hyperjumptech/monika/blob/main/config_sample/config.telegram.example.json)
 7. [WhatsApp](https://github.com/hyperjumptech/monika/blob/main/config_sample/config.whatsapp.example.json)
 8. [Microsoft Teams](https://github.com/hyperjumptech/monika/blob/main/config_sample/config.teams.example.json)
-9. [Default](https://github.com/hyperjumptech/monika/blob/main/monika.example.json)
+9. [Monika Whatsapp Notifier](https://github.com/hyperjumptech/monika/blob/main/config_sample/config.monika-whatsapp.example.json)
+10. [Default](https://github.com/hyperjumptech/monika/blob/main/monika.example.json)
 
 When you have created the configuration file, you can run `monika` as follows
 
 ```bash
 monika -c <path_to_your_configuration.json>
+```
+
+Or you can provide an URL that contains monika configuration
+
+```bash
+monika -c https://domain.com/path/to/your/configuration.json
 ```
 
 Options and parameters can be seen by running `monika -h`. Or if you cloned this repository, you need to run `bin/run -h`.
@@ -72,19 +79,25 @@ At the center of monica is a configuration file. Follow the following steps to q
 6. During runtime, Monika will output a log that looks like this
 
    ```bash
-    2021-05-03T10:05:09.345Z,PROBE,1,0,https://hyperjumptech.github.io/monika,200,1157,31358
-    2021-05-03T10:05:19.171Z,PROBE,2,0,https://hyperjumptech.github.io/monika,200,989,31358
-    2021-05-03T10:05:29.151Z,PROBE,3,0,https://hyperjumptech.github.io/monika,200,964,31358
-    2021-05-03T10:05:39.204Z,PROBE,4,0,https://hyperjumptech.github.io/monika,200,1012,31358
-    2021-05-03T10:05:49.165Z,PROBE,5,0,https://hyperjumptech.github.io/monika,200,967,31358
-    2021-05-03T10:05:59.267Z,PROBE,6,0,https://hyperjumptech.github.io/monika,200,1065,31358
-    2021-05-03T10:06:09.214Z,PROBE,7,0,https://hyperjumptech.github.io/monika,200,1011,31358
-    2021-05-03T10:06:19.251Z,PROBE,8,0,https://hyperjumptech.github.io/monika,200,1043,31358
-    2021-05-03T10:06:29.233Z,PROBE,9,0,https://hyperjumptech.github.io/monika,200,1025,31358
-    2021-05-03T10:06:39.211Z,PROBE,10,0,https://hyperjumptech.github.io/monika,200,999,31358
-    2021-05-03T10:06:49.266Z,PROBE,11,0,https://hyperjumptech.github.io/monika,200,1049,31358
+    INFO (on x1): Starting Monika. Probes: 4. Notifications: 1
 
-    [timestamp],[log type],[probe counter],[alert threshold counter],[endpoint URL],[response status code],[response time in ms],[response size in bytes]
+
+    INFO: 2021-06-16T04:14:40.128Z 1 id:5 200 http://localhost:7001/health 7ms
+    INFO: 2021-06-16T04:14:45.109Z 2 id:5 200 http://localhost:7001/health 4ms
+    INFO: 2021-06-16T04:14:50.126Z 3 id:5 200 http://localhost:7001/health 10ms
+    INFO: 2021-06-16T04:14:55.107Z 4 id:5 200 http://localhost:7001/health 1ms
+    WARN: 2021-06-16T04:15:00.117Z 5 id:5 500 http://localhost:7001/health 0ms, ALERT: status-not-2xx
+    WARN: 2021-06-16T04:15:05.371Z 6 id:5 500 http://localhost:7001/health 0ms, ALERT: status-not-2xx
+    WARN: 2021-06-16T04:15:10.128Z 7 id:5 500 http://localhost:7001/health 0ms, ALERT: status-not-2xx
+    WARN: 2021-06-16T04:15:15.138Z 8 id:5 500 http://localhost:7001/health 0ms, ALERT: status-not-2xx, NOTIF: service probably down
+    INFO: 2021-06-16T04:15:20.130Z 9 id:5 200 http://localhost:7001/health 6ms
+    INFO: 2021-06-16T04:15:25.128Z 10 id:5 200 http://localhost:7001/health 4ms
+    INFO: 2021-06-16T04:15:30.137Z 11 id:5 200 http://localhost:7001/health 6ms
+    INFO: 2021-06-16T04:15:35.146Z 12 id:5 200 http://localhost:7001/health 8ms, NOTIF: service is back up
+    INFO: 2021-06-16T04:15:40.140Z 13 id:5 200 http://localhost:7001/health 4ms
+
+
+    INFO_TYPE: current-time iteration probe:id _probeURL_ [response time in ms],[ALERT messages if any], [NOTIFICATION messages if any]
    ```
 
 ## Configuration file

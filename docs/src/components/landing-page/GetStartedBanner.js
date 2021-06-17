@@ -22,42 +22,38 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import {
-  MailgunData,
-  SendgridData,
-  SMTPData,
-  TelegramData,
-  WebhookData,
-  WhatsappData,
-  TeamsData,
-  DiscordData,
-  MonikaNotifData,
-  WorkplaceData,
-} from './data'
+import { siteConfig } from 'siteConfig'
+import WaveMonika from '../../../public/wave-monika.svg'
 
-export interface Notification {
-  id: string
-  type:
-    | 'smtp'
-    | 'mailgun'
-    | 'sendgrid'
-    | 'webhook'
-    | 'slack'
-    | 'whatsapp'
-    | 'teams'
-    | 'telegram'
-    | 'discord'
-    | 'monika-notif'
-    | 'workplace'
-  data:
-    | MailgunData
-    | SMTPData
-    | SendgridData
-    | WebhookData
-    | WhatsappData
-    | TeamsData
-    | TelegramData
-    | DiscordData
-    | MonikaNotifData
-    | WorkplaceData
+export default function GetStartedBanner() {
+  return (
+    <div className="relative py-32 flex">
+      <div className="flex flex-col z-10 m-auto bg-gradient-to-br from-purple-monika to-aqua-monika px-16 py-8 rounded">
+        <p className="text-center text-2xl text-white font-bold">
+          Get Started with Monika Now!
+        </p>
+        <p className="text-center text-white max-w-lg">
+          Detect problem as soon as possible, before your user do, and fix them
+          before they realize. No hidden fees or anything, free forever!
+        </p>
+        <a
+          className="m-auto mt-4 px-4 py-2 bg-white rounded-full font-sans text-white"
+          href={siteConfig.repoUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <span className="bg-gradient-to-r from-purple-monika to-aqua-monika text-transparent bg-clip-text font-bold">
+            Check on Github!
+          </span>
+        </a>
+      </div>
+      <div className="absolute inset-x-0 bottom-0 flex flex-col">
+        <img src={WaveMonika} className="object-fill w-screen" />
+        <div
+          style={{ height: '2px', marginTop: '2px' }}
+          className="bg-gradient-to-r from-purple-monika to-aqua-monika"
+        />
+      </div>
+    </div>
+  )
 }

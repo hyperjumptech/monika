@@ -53,7 +53,7 @@ export type SymonResponse = {
 export const handshake = (config: Config): Promise<SymonResponse> => {
   return axios
     .post(
-      `${config.symon!.url}/handshake`,
+      `${config.symon!.url}/v1/monika/handshake`,
       {
         instanceId: config.symon!.id,
         hostname: os.hostname(),
@@ -85,7 +85,7 @@ export const report = ({
 }): Promise<SymonResponse> => {
   return axios
     .post(
-      `${url}/report`,
+      `${url}/v1/monika/report`,
       {
         monika_instance_id: instanceId,
         config_version: configVersion,
@@ -109,8 +109,10 @@ export const getLogsAndReport = async () => {
   if (config.symon) {
     const { url, key, id: instanceId } = config.symon
 
+    const limit = parseInt(process.env.MONIKA_REPORT_LIMIT || '100', 10)
+
     try {
-      const unreportedLog = await getUnreportedLogs()
+      const unreportedLog = await getUnreportedLogs(limit)
       const requests = unreportedLog.requests.map(({ id: _, ...rest }) => rest)
       const notifications = unreportedLog.notifications.map(
         ({ id: _, ...rest }) => rest
