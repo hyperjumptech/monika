@@ -27,10 +27,12 @@ import { processProbeStatus } from '../notification/process-server-status'
 import { probing } from './probing'
 import { Probe } from '../../interfaces/probe'
 import { Notification } from '../../interfaces/notification'
-import { notificationLog, probeLog } from '../logger'
+import { notificationLog, probeLog, setAlert } from '../logger'
 import { AxiosResponseWithExtraData } from '../../interfaces/request'
 import { sendAlerts } from '../notification'
 import { getLogsAndReport } from '../reporter'
+
+import { printProbeLog } from '../logger'
 
 /**
  * doProbe sends out the http request
@@ -66,13 +68,16 @@ export async function doProbe(
           .filter((item) => item.status)
           .map((item) => item.alert),
       })
-
       // Exit the loop if there is any triggers triggered
-      if (validatedResp.filter((item) => item.status).length > 0) break
+      if (validatedResp.filter((item) => item.status).length > 0) {
+        break
+      }
 
       if (probe.requests.length > 1) {
         requestIndex += 1
       }
+      // done probes, no alerts, no notif.. now print log
+      printProbeLog()
     }
 
     const serverStatuses = processProbeStatus({
@@ -100,12 +105,10 @@ export async function doProbe(
                 status.state === 'UP_TRUE_EQUALS_THRESHOLD'
                   ? 'NOTIFY-INCIDENT'
                   : 'NOTIFY-RECOVER',
-              alertType: probe.alerts[index],
-              url: probe.requests[requestIndex].url,
+              alertMsg: probe.alerts[index],
             })
           })
         )
-
         const sendAlertsPromise = sendAlerts({
           validation: validatedResp[index],
           notifications: notifications,
@@ -123,6 +126,6 @@ export async function doProbe(
       }
     })
   } catch (error) {
-    probeLog({ checkOrder, probe, requestIndex, probeRes, error })
+    setAlert({ flag: 'error', message: error })
   }
 }
