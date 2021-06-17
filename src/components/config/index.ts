@@ -62,6 +62,7 @@ export const updateConfig = (data: Config) => {
 
   if (cfg.version !== lastVersion) {
     emitter.emit(CONFIG_UPDATED, cfg)
+    log.warn('config file update detected')
   }
 }
 
