@@ -20,6 +20,7 @@ At this moment, Monika support these channel of notifications (You can use just 
 9. [Discord](https://hyperjumptech.github.io/monika/guides/notifications#discord)
 10. [Monika Whatsapp Notifier](https://hyperjumptech.github.io/monika/guides/notifications#monika-whatsapp-notifier)
 11. [Facebook Workplace](https://hyperjumptech.github.io/monika/guides/notifications#facebook-workplace)
+12. [Desktop Notifications](https://hyperjumptech.github.io/monika/guides/notifications#desktop-notifications)
 
 ## Configurations
 
@@ -339,5 +340,20 @@ You can get a notification from Monika to your Whatsapp number without having a 
 | ID   | Notification identity number             | `MonikaNotif12345`                                                 |
 | Type | Notification types                       | `monika-notif`                                                     |
 | Url  | The URL of the Monika Notif Webhook link | `https://whatsapp.hyperjump.tech/api/notify?token=<webhook.token>` |
+
+## Desktop Notifications
+
+Monika uses [node-notifier](https://github.com/mikaelbr/node-notifier#readme) to support desktop notifications. Here are the prerequisites for enabling the desktop notifications:
+
+- macOS: >= 10.8 for native notifications, or Growl if earlier.
+- Linux: `notify-osd` or `libnotify-bin` installed (Ubuntu should have this by default)
+- Windows: >= 8, or task bar balloons for Windows < 8. Growl as fallback. Growl takes precedence over Windows balloons.
+
+```json
+{
+  "id": "unique-id-monika-notif",
+  "type": "desktop"
+}
+```
 
 Keep watch on these pages, new notification methods are being developed.

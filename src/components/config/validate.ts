@@ -206,6 +206,10 @@ function validateNotification(notifications: Notification[]): Validation {
         break
       }
 
+      case 'desktop': {
+        break
+      }
+
       default:
         return NOTIFICATION_INVALID_TYPE
     }
