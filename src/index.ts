@@ -62,9 +62,10 @@ class Monika extends Command {
 
   static examples = [
     'monika',
-    'monika --1ogs',
+    'monika --logs',
     'monika -r 1 --id 1,2,5,7',
     'monika --create-config',
+    'monika --config https://raw.githubusercontent.com/hyperjumptech/monika/main/monika.example.json --config-interval 900',
   ]
 
   static flags = {
@@ -81,6 +82,13 @@ class Monika extends Command {
 
     'create-config': flags.boolean({
       description: 'open Monika Configuration Generator using default browser',
+    }),
+
+    'config-interval': flags.integer({
+      description:
+        'The interval (in seconds) for periodic config checking if url is used as config source',
+      default: 900,
+      dependsOn: ['config'],
     }),
 
     logs: flags.boolean({
@@ -144,7 +152,7 @@ class Monika extends Command {
 
     try {
       if (isUrl(flags.config)) {
-        await setupConfigFromUrl(flags.config)
+        await setupConfigFromUrl(flags.config, flags['config-interval'])
       } else {
         const watchConfigFile = !(
           process.env.CI ||

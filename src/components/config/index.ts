@@ -97,8 +97,17 @@ export const setupConfigFromFile = async (path: string, watch: boolean) => {
   }
 }
 
-export const setupConfigFromUrl = async (url: string) => {
+export const setupConfigFromUrl = async (
+  url: string,
+  checkingInterval: number
+) => {
   const fetched = await fetchConfig(url)
   await handshakeAndValidate(fetched)
   cfg = fetched
+
+  setInterval(async () => {
+    const fetched = await fetchConfig(url)
+    await handshakeAndValidate(fetched)
+    updateConfig(fetched)
+  }, checkingInterval * 1000)
 }
