@@ -32,6 +32,7 @@ import {
   TelegramData,
   WebhookData,
   WorkplaceData,
+  DesktopData,
 } from '../../interfaces/data'
 import { Notification } from '../../interfaces/notification'
 import getIp from '../../utils/ip'
@@ -45,6 +46,7 @@ import { sendTelegram } from './channel/telegram'
 import { sendWebhook } from './channel/webhook'
 import { sendMonikaNotif } from './channel/monika-notif'
 import { sendWorkplace } from './channel/workplace'
+import { sendDesktop } from './channel/desktop'
 import {
   dataDiscordSchemaValidator,
   dataMailgunSchemaValidator,
@@ -272,6 +274,24 @@ const workplaceNotificationInitialChecker = async (data: WorkplaceData) => {
   }
 }
 
+const desktopNotificationInitialChecker = async (data: TeamsData) => {
+  try {
+    await sendDesktop({
+      url: data?.url,
+      body: {
+        url: '-',
+        alert: body,
+        time: new Date().toLocaleString(),
+        status: 'INIT',
+      },
+    })
+
+    return 'success'
+  } catch (error) {
+    throw errorMessage('Desktop', error?.message)
+  }
+}
+
 export const notificationChecker = async (notifications: Notification[]) => {
   const smtpNotification = notifications
     .filter((notif) => notif.type === 'smtp')
@@ -322,6 +342,11 @@ export const notificationChecker = async (notifications: Notification[]) => {
     .map((notif) => notif.data as WorkplaceData)
     .map(workplaceNotificationInitialChecker)
 
+  const desktopNotification = notifications
+    .filter((notif) => notif.type === 'desktop')
+    .map((notif) => notif.data as DesktopData)
+    .map(desktopNotificationInitialChecker)
+
   return Promise.all([
     Promise.all(smtpNotification),
     Promise.all(mailgunNotification),
@@ -333,5 +358,6 @@ export const notificationChecker = async (notifications: Notification[]) => {
     Promise.all(discordNotification),
     Promise.all(monikaNotification),
     Promise.all(workplaceNotification),
+    Promise.all(desktopNotification),
   ])
 }
