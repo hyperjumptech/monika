@@ -24,18 +24,16 @@
 
 export default function Button(props) {
   if (props.outline) {
-    return (
-      <ButtonOutlined className={props.className}>
-        {props.children}
-      </ButtonOutlined>
-    )
+    return <ButtonOutlined {...props}>{props.children}</ButtonOutlined>
   }
+
+  const isRounded = props.rounded !== false
 
   return (
     <button
-      className={`px-4 py-2 bg-gradient-to-r from-purple-monika to-aqua-monika rounded-full font-sans text-white ${
+      className={`px-4 py-2 bg-gradient-to-r from-purple-monika to-aqua-monika font-sans text-white ${
         props.className ? props.className : ''
-      }`}
+      } ${isRounded ? 'rounded-full' : 'rounded-md'}`}
     >
       {props.children}
     </button>
@@ -43,11 +41,12 @@ export default function Button(props) {
 }
 
 function ButtonOutlined(props) {
+  const isRounded = props.rounded !== false
   return (
     <button
-      className={`px-4 py-2 rounded-full border-2 border-purple-monika text-purple-monika font-sans ${
+      className={`px-4 py-2 border-2 border-purple-monika text-purple-monika font-sans ${
         props.className ? props.className : ''
-      }`}
+      } ${isRounded ? 'rounded-full' : 'rounded-md'}`}
     >
       {props.children}
     </button>
