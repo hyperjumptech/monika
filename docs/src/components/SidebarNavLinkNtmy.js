@@ -16,7 +16,9 @@ export function SidebarNavLink({
         {
           selected,
         },
-        selected ? 'border-2 py-2 border-purple-monika rounded-md' : ''
+        selected
+          ? 'border-2 py-2 border-purple-monika rounded-md'
+          : 'text-black-monika text-opacity-50 font-semibold'
       )}
     >
       {
@@ -26,7 +28,7 @@ export function SidebarNavLink({
             className={
               selected
                 ? 'selected text-purple-monika hover:text-purple-700'
-                : ''
+                : 'text-black-monika text-opacity-50 font-semibold'
             }
             href={`${router.basePath}${pathname}`}
           >
@@ -34,7 +36,9 @@ export function SidebarNavLink({
           </a>
         ) : (
           <Link href={href} as={pathname}>
-            <a>{title}</a>
+            <a className="text-black-monika text-opacity-50 font-semibold">
+              {title}
+            </a>
           </Link>
         )
       }
@@ -61,13 +65,7 @@ export function SidebarNavLink({
         }
         @media screen and (max-width: 950px) {
           div {
-            padding-top: 0;
-            padding-left: 0;
-            padding-bottom: 0;
-          }
-          div.selected {
-            border-left: none;
-            padding-left: 0;
+            padding-left: 0.5rem;
           }
           .nav-link :global(a) {
             display: flex;
