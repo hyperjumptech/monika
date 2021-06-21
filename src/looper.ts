@@ -26,6 +26,10 @@ import { Config } from './interfaces/config'
 import { Probe } from './interfaces/probe'
 import { getLogsAndReport } from './components/reporter'
 import { doProbe } from './components/probe'
+import {
+  registerCollectorFromProbe,
+  PrometheusRequestMetricCollector,
+} from './sidecar/metrics/prometheus'
 import { log } from './utils/pino'
 import { Notification } from './interfaces/notification'
 import { getUnreportedLogsCount } from './components/logger/history'
@@ -99,12 +103,14 @@ export function isIDValid(config: Config, ids: string): boolean {
  * @param {object} probe is the target to request
  * @param {object} notifications is the array of channels to notify the user if probes does not work
  * @param {number} repeats handle controls test interaction/repetition
+ * @param {object} prometheusRequestMetricCollectors contains function to fire Prometheus metric
  * @returns {function} func with isAborted true if interrupted
  */
 function loopProbe(
   probe: Probe,
   notifications: Notification[],
-  repeats: number
+  repeats: number,
+  prometheusRequestMetricCollectors: PrometheusRequestMetricCollector[]
 ) {
   let counter = 0
 
@@ -112,7 +118,12 @@ function loopProbe(
     if (counter === repeats) {
       clearInterval(probeInterval)
     } else {
-      doProbe(++counter, probe, notifications)
+      doProbe(
+        ++counter,
+        probe,
+        prometheusRequestMetricCollectors,
+        notifications
+      )
     }
   }, (probe.interval ?? 10) * MILLISECONDS)
 
@@ -150,10 +161,12 @@ export function idFeeder(
 
   for (const probe of probesToRun) {
     const sanitizedProbe = sanitizeProbe(probe, probe.id)
+    const prometheusRequestMetricCollectors = registerCollectorFromProbe(probe)
     const interval = loopProbe(
       sanitizedProbe,
       config.notifications ?? [],
-      repeats ?? 0
+      repeats ?? 0,
+      prometheusRequestMetricCollectors
     )
     intervals.push(interval)
   }

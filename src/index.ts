@@ -32,6 +32,7 @@ import { MailData, MailgunData, SMTPData, WebhookData } from './interfaces/data'
 import { Config } from './interfaces/config'
 import { idFeeder, loopReport } from './looper'
 import { printAllLogs } from './components/logger'
+import { startPrometheusMetricsServer } from './sidecar/metrics/prometheus'
 import { log } from './utils/pino'
 import {
   closeLog,
@@ -116,6 +117,11 @@ class Monika extends Command {
       description: 'specific probe ids to run',
       multiple: false,
     }),
+
+    prometheus: flags.integer({
+      char: 'p',
+      description: 'enable Prometheus server metric',
+    }),
   }
 
   async run() {
@@ -148,6 +154,11 @@ class Monika extends Command {
       )
       await open('https://hyperjumptech.github.io/monika-config-generator/')
       return
+    }
+
+    // start Promotheus server
+    if (flags.prometheus) {
+      startPrometheusMetricsServer(flags.prometheus)
     }
 
     try {

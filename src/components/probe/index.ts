@@ -29,6 +29,10 @@ import { Probe } from '../../interfaces/probe'
 import { Notification } from '../../interfaces/notification'
 import { notificationLog, probeLog, setAlert } from '../logger'
 import { AxiosResponseWithExtraData } from '../../interfaces/request'
+import {
+  collectProbeRequestPrometheusMetrics,
+  PrometheusRequestMetricCollector,
+} from '../../sidecar/metrics/prometheus'
 import { sendAlerts } from '../notification'
 import { getLogsAndReport } from '../reporter'
 
@@ -38,11 +42,13 @@ import { printProbeLog } from '../logger'
  * doProbe sends out the http request
  * @param {number} checkOrder the order of probe being processed
  * @param {object} probe contains all the probes
+ * @param {object} prometheusRequestMetricCollectors contains function to fire Prometheus metric
  * @param {array} notifications contains all the notifications
  */
 export async function doProbe(
   checkOrder: number,
   probe: Probe,
+  prometheusRequestMetricCollectors: PrometheusRequestMetricCollector[],
   notifications?: Notification[]
 ) {
   let probeRes: AxiosResponseWithExtraData = {} as AxiosResponseWithExtraData
@@ -76,6 +82,19 @@ export async function doProbe(
       if (probe.requests.length > 1) {
         requestIndex += 1
       }
+
+      // collect prometheus metrics
+      const prometheusRequestMetricCollector = prometheusRequestMetricCollectors.find(
+        (pmc: any) => pmc.requestIndex === requestIndex
+      )
+      if (prometheusRequestMetricCollector) {
+        collectProbeRequestPrometheusMetrics({
+          request,
+          probeResponse: probeRes,
+          prometheusRequestMetricCollector,
+        })
+      }
+
       // done probes, no alerts, no notif.. now print log
       printProbeLog()
     }
