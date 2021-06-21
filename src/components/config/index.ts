@@ -60,7 +60,7 @@ export const updateConfig = (data: Config) => {
   cfg = data
   cfg.version = cfg.version || md5Hash(cfg)
 
-  if (cfg.version !== lastVersion) {
+  if (cfg.version !== lastVersion && lastVersion !== undefined) {
     emitter.emit(CONFIG_UPDATED, cfg)
     log.warn('config file update detected')
   }
