@@ -43,3 +43,11 @@ monika -h
 ```
 
 See the [CLI Options](https://hyperjumptech.github.io/monika/guides/cli-options) guide to see all the different options possible.
+
+## Troubleshoot
+
+If you have problem installing using `npm`, please check this [issue #216](https://github.com/hyperjumptech/monika/issues/216). It might be related to permission issue. In most cases, it can be solved by running
+
+```
+sudo npm i -g @hyperjumptech/monika --unsafe-perm=true --allow-root
+```
