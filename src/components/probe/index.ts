@@ -26,13 +26,13 @@ import { ValidateResponseStatus, validateResponse } from '../notification/alert'
 import { processProbeStatus } from '../notification/process-server-status'
 import { probing } from './probing'
 import { Probe } from '../../interfaces/probe'
-import { Notification } from '../../interfaces/notification'
 import { notificationLog, probeLog, setAlert } from '../logger'
 import { AxiosResponseWithExtraData } from '../../interfaces/request'
 import {
   collectProbeRequestPrometheusMetrics,
   PrometheusRequestMetricCollector,
 } from '../../sidecar/metrics/prometheus'
+import { Context } from '../context'
 import { sendAlerts } from '../notification'
 import { getLogsAndReport } from '../reporter'
 
@@ -40,17 +40,19 @@ import { printProbeLog } from '../logger'
 
 /**
  * doProbe sends out the http request
+ * @param {object} ctx consists of Monika config and command-line flags
  * @param {number} checkOrder the order of probe being processed
  * @param {object} probe contains all the probes
  * @param {object} prometheusRequestMetricCollectors contains function to fire Prometheus metric
- * @param {array} notifications contains all the notifications
  */
 export async function doProbe(
+  ctx: Context,
   checkOrder: number,
   probe: Probe,
-  prometheusRequestMetricCollectors: PrometheusRequestMetricCollector[],
-  notifications?: Notification[]
+  prometheusRequestMetricCollectors?: PrometheusRequestMetricCollector[]
 ) {
+  const { config } = ctx
+  const { notifications } = config
   let probeRes: AxiosResponseWithExtraData = {} as AxiosResponseWithExtraData
   let validatedResp: ValidateResponseStatus[] = []
   let requestIndex = 0
@@ -84,7 +86,7 @@ export async function doProbe(
       }
 
       // collect prometheus metrics
-      const prometheusRequestMetricCollector = prometheusRequestMetricCollectors.find(
+      const prometheusRequestMetricCollector = prometheusRequestMetricCollectors?.find(
         (pmc: any) => pmc.requestIndex === requestIndex
       )
       if (prometheusRequestMetricCollector) {

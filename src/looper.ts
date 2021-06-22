@@ -24,6 +24,7 @@
 
 import { Config } from './interfaces/config'
 import { Probe } from './interfaces/probe'
+import { Context } from './components/context'
 import { getLogsAndReport } from './components/reporter'
 import { doProbe } from './components/probe'
 import {
@@ -31,7 +32,6 @@ import {
   PrometheusRequestMetricCollector,
 } from './sidecar/metrics/prometheus'
 import { log } from './utils/pino'
-import { Notification } from './interfaces/notification'
 import { getUnreportedLogsCount } from './components/logger/history'
 
 const MILLISECONDS = 1000
@@ -100,30 +100,25 @@ export function isIDValid(config: Config, ids: string): boolean {
 /**
  * loopProbes fires off the probe requests after every x interval, and handles repeats.
  * This function receives the probe id from idFeeder.
+ * @param {object} ctx consists of Monika config and command-line flags
  * @param {object} probe is the target to request
- * @param {object} notifications is the array of channels to notify the user if probes does not work
- * @param {number} repeats handle controls test interaction/repetition
  * @param {object} prometheusRequestMetricCollectors contains function to fire Prometheus metric
  * @returns {function} func with isAborted true if interrupted
  */
 function loopProbe(
+  ctx: Context,
   probe: Probe,
-  notifications: Notification[],
-  repeats: number,
-  prometheusRequestMetricCollectors: PrometheusRequestMetricCollector[]
+  prometheusRequestMetricCollectors?: PrometheusRequestMetricCollector[]
 ) {
+  const { flags } = ctx
+  const { repeat } = flags
   let counter = 0
 
   const probeInterval = setInterval(() => {
-    if (counter === repeats) {
+    if (counter === Number(repeat) ?? 0) {
       clearInterval(probeInterval)
     } else {
-      doProbe(
-        ++counter,
-        probe,
-        prometheusRequestMetricCollectors,
-        notifications
-      )
+      doProbe(ctx, ++counter, probe, prometheusRequestMetricCollectors)
     }
   }, (probe.interval ?? 10) * MILLISECONDS)
 
@@ -134,38 +129,32 @@ function loopProbe(
   return probeInterval
 }
 
-/**
- * idFeeder feeds Prober with actual ids to process
- * @param {object} config is an object that contains all the configs
- * @param {number} repeats number of repeats
- * @param {object} ids of address
- * @returns {function} abort function
- */
-export function idFeeder(
-  config: Config,
-  repeats: number,
-  ids: string | undefined
-) {
+export function idFeeder(ctx: Context) {
+  const { config, flags } = ctx
+  const { probes } = config
+  const { id, prometheus } = flags
+
   // default sequence for Each element
-  let probesToRun = config.probes
-  if (ids) {
-    if (!isIDValid(config, ids)) {
+  let probesToRun = probes
+  if (id) {
+    if (!isIDValid(config, id)) {
       return
     }
-    // doing custom sequences if list of ids is declared
-    const idSplit = ids.split(',').map((item) => item.trim())
-    probesToRun = config.probes.filter((probe) => idSplit.includes(probe.id))
+    // doing custom sequences if list of id is declared
+    const idSplit = id.split(',').map((item: string) => item.trim())
+    probesToRun = probes.filter((probe) => idSplit.includes(probe.id))
   }
 
   const intervals: Array<NodeJS.Timeout> = []
 
   for (const probe of probesToRun) {
     const sanitizedProbe = sanitizeProbe(probe, probe.id)
-    const prometheusRequestMetricCollectors = registerCollectorFromProbe(probe)
+    const prometheusRequestMetricCollectors = prometheus
+      ? registerCollectorFromProbe(probe)
+      : []
     const interval = loopProbe(
+      ctx,
       sanitizedProbe,
-      config.notifications ?? [],
-      repeats ?? 0,
       prometheusRequestMetricCollectors
     )
     intervals.push(interval)
