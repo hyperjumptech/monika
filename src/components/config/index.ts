@@ -22,9 +22,24 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import EventEmitter from 'events'
 import chokidar from 'chokidar'
-import pEvent from 'p-event'
+import {
+  fromEvent,
+  merge,
+  Observable,
+  BehaviorSubject,
+  from,
+  timer,
+  of,
+} from 'rxjs'
+import {
+  distinctUntilKeyChanged,
+  first,
+  map,
+  share,
+  switchMap,
+  tap,
+} from 'rxjs/operators'
 import { Config } from '../../interfaces/config'
 import { fetchConfig } from './fetch'
 import { parseConfig } from './parse'
@@ -33,37 +48,14 @@ import { handshake } from '../reporter'
 import { log } from '../../utils/pino'
 import { md5Hash } from '../../utils/hash'
 
-const emitter = new EventEmitter()
+const configSubject$ = new BehaviorSubject<Config | null>(null)
 
-const CONFIG_UPDATED = 'CONFIG_UPDATED_EVENT'
-
-let cfg: Config
+export let config$: Observable<Config | null>
 
 export const getConfig = () => {
-  if (!cfg) throw new Error('Configuration setup has not been run yet')
-  return cfg
-}
-
-export async function* getConfigIterator() {
-  if (!cfg) throw new Error('Configuration setup has not been run yet')
-
-  yield cfg
-
-  if (!(process.env.CI || process.env.NODE_ENV === 'test')) {
-    yield* pEvent.iterator<string, Config>(emitter, CONFIG_UPDATED)
-  }
-}
-
-export const updateConfig = (data: Config) => {
-  const lastVersion = cfg?.version
-
-  cfg = data
-  cfg.version = cfg.version || md5Hash(cfg)
-
-  if (cfg.version !== lastVersion && lastVersion !== undefined) {
-    emitter.emit(CONFIG_UPDATED, cfg)
-    log.warn('config file update detected')
-  }
+  const config = configSubject$.getValue()
+  if (!config) throw new Error('Configuration setup has not been run yet')
+  return config
 }
 
 const handshakeAndValidate = async (config: Config) => {
@@ -82,32 +74,41 @@ const handshakeAndValidate = async (config: Config) => {
   }
 }
 
-export const setupConfigFromFile = async (path: string, watch: boolean) => {
-  const parsed = parseConfig(path)
-  await handshakeAndValidate(parsed)
-  cfg = parsed
+const processConfig = () => (source: Observable<Config>) =>
+  source.pipe(
+    tap(handshakeAndValidate),
+    map((config) => {
+      return Object.assign(config, {
+        version: config.version || md5Hash(config),
+      })
+    }),
+    distinctUntilKeyChanged('version'),
+    share({ connector: () => configSubject$ })
+  )
+
+export const setupConfigFromFile = (path: string, watch: boolean) => {
+  let file$ = of(path)
 
   if (watch) {
     const fileWatcher = chokidar.watch(path)
-    fileWatcher.on('change', async () => {
-      const parsed = parseConfig(path)
-      await handshakeAndValidate(parsed)
-      updateConfig(parsed)
-    })
+    file$ = merge(
+      fromEvent<string>(fileWatcher, 'add', (...args) => args[0]).pipe(first()),
+      fromEvent<string>(fileWatcher, 'change')
+    )
   }
+
+  config$ = file$.pipe(map(parseConfig), processConfig())
 }
 
-export const setupConfigFromUrl = async (
-  url: string,
-  checkingInterval: number
-) => {
-  const fetched = await fetchConfig(url)
-  await handshakeAndValidate(fetched)
-  cfg = fetched
-
-  setInterval(async () => {
-    const fetched = await fetchConfig(url)
-    await handshakeAndValidate(fetched)
-    updateConfig(fetched)
-  }, checkingInterval * 1000)
+export const setupConfigFromUrl = (url: string, checkingInterval: number) => {
+  timer(0, checkingInterval * 1000)
+    .pipe(
+      switchMap(() => from(fetchConfig(url))),
+      processConfig()
+    )
+    .subscribe((value) => {
+      if (value) {
+        configSubject$.next(value)
+      }
+    })
 }

@@ -165,8 +165,8 @@ export function idFeeder(
   return abort
 }
 
-export async function loopReport(getConfig: () => Config) {
-  const { symon } = getConfig()
+export async function loopReport(config: Config) {
+  const { symon } = config
 
   if (symon) {
     // Send previously unreported logs to symon

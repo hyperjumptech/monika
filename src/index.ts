@@ -27,6 +27,7 @@ import chalk from 'chalk'
 import boxen from 'boxen'
 import open from 'open'
 import fs from 'fs'
+import { filter, first } from 'rxjs/operators'
 import isUrl from 'is-url'
 import { MailData, MailgunData, SMTPData, WebhookData } from './interfaces/data'
 import { Config } from './interfaces/config'
@@ -40,10 +41,9 @@ import {
 } from './components/logger/history'
 import { notificationChecker } from './components/notification/checker'
 import {
-  getConfig,
-  getConfigIterator,
   setupConfigFromFile,
   setupConfigFromUrl,
+  config$,
 } from './components/config'
 
 function getDefaultConfig() {
@@ -152,7 +152,7 @@ class Monika extends Command {
 
     try {
       if (isUrl(flags.config)) {
-        await setupConfigFromUrl(flags.config, flags['config-interval'])
+        setupConfigFromUrl(flags.config, flags['config-interval'])
       } else {
         const watchConfigFile = !(
           process.env.CI ||
@@ -160,37 +160,44 @@ class Monika extends Command {
           flags.repeat
         )
 
-        await setupConfigFromFile(flags.config, watchConfigFile)
+        setupConfigFromFile(flags.config, watchConfigFile)
       }
 
       // Run report on interval if symon configuration exists
       if (!(process.env.CI || process.env.NODE_ENV === 'test')) {
-        loopReport(getConfig)
+        config$.pipe(filter(Boolean), first()).subscribe(loopReport)
       }
 
       // run probes on interval
       let abortCurrentLooper: (() => void) | undefined
+      let isFirstRun = true
 
-      for await (const config of getConfigIterator()) {
+      config$.pipe(filter(Boolean)).subscribe(async (config) => {
         if (abortCurrentLooper) {
           abortCurrentLooper()
         }
-
+        if (!isFirstRun) {
+          log.info('config file update detected')
+        }
         if (process.env.NODE_ENV !== 'test') {
           await notificationChecker(config.notifications ?? [])
         }
-
-        const startupMessage = this.buildStartupMessage(config, flags.verbose)
+        const startupMessage = this.buildStartupMessage(
+          config,
+          flags.verbose,
+          isFirstRun
+        )
         this.log(startupMessage)
         abortCurrentLooper = idFeeder(config, Number(flags.repeat), flags.id)
-      }
+        isFirstRun = false
+      })
     } catch (error) {
       await closeLog()
       this.error(error?.message, { exit: 1 })
     }
   }
 
-  buildStartupMessage(config: Config, verbose = false) {
+  buildStartupMessage(config: Config, verbose = false, firstRun: boolean) {
     const { probes, notifications } = config
 
     let startupMessage = ''
@@ -213,9 +220,11 @@ Please refer to the Monika documentations on how to how to configure notificatio
       })
     }
 
-    startupMessage += `Starting Monika. Probes: ${
-      probes.length
-    }. Notifications: ${notifications?.length ?? 0}\n\n`
+    startupMessage += `${
+      firstRun ? 'Starting' : 'Restarting'
+    } Monika. Probes: ${probes.length}. Notifications: ${
+      notifications?.length ?? 0
+    }\n\n`
 
     if (verbose) {
       startupMessage += 'Probes:\n'
