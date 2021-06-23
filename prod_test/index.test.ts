@@ -22,104 +22,37 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-export interface MailData {
-  recipients: string[]
-}
+import { expect } from 'chai'
+import { exec } from 'child_process'
 
-export interface MailgunData extends MailData {
-  apiKey: string
-  domain: string
-}
+describe('monika', () => {
+  it('shows version', (done) => {
+    exec(`monika -v`, (_, stdout) => {
+      expect(stdout).to.contain('@hyperjumptech/monika/')
+      done()
+    })
+  })
 
-export interface SendgridData extends MailData {
-  apiKey: string
-}
+  it('shows error when no config', (done) => {
+    exec(`monika`, (_, _stdout, stderr) => {
+      expect(stderr).to.contain('Error')
+      done()
+    })
+  })
 
-export interface SMTPData extends MailData {
-  hostname: string
-  port: number
-  username: string
-  password: string
-}
+  it('shows config generator link when no config', (done) => {
+    exec(`monika`, (_, _stdout, stderr) => {
+      expect(stderr).to.contain(
+        'https://hyperjumptech.github.io/monika-config-generator/'
+      )
+      done()
+    })
+  })
 
-export interface TeamsData {
-  url: string
-  body: TeamsDataBody
-}
-
-export interface TeamsDataBody extends WebhookDataBody {
-  status: string
-}
-
-export interface WebhookData {
-  url: string
-  body: WebhookDataBody
-}
-
-export interface MonikaNotifData {
-  url: string
-  body: MonikaNotifDataBody
-}
-
-export interface MonikaNotifDataBody {
-  type: 'start' | 'incident' | 'recovery'
-  probe_url: string
-  probe_name?: string
-  monika_id?: string
-  ip_address: string
-  response_time: string
-  alert: string
-}
-
-export interface TelegramData {
-  group_id: string
-  bot_token: string
-  body: WebhookDataBody
-}
-
-export interface WebhookDataBody {
-  url: string
-  time: string
-  alert: string
-}
-
-export interface WhatsappData extends MailData {
-  url: string
-  username: string
-  password: string
-}
-
-export interface DiscordData {
-  url: string
-  body: DiscordDataBody
-}
-
-export interface DiscordDataBody {
-  url: string
-  time: string
-  alert: string
-}
-
-export interface WorkplaceData {
-  thread_id: string
-  access_token: string
-  body: WorkplaceDataBody
-}
-
-export interface WorkplaceDataBody {
-  url: string
-  time: string
-  alert: string
-}
-
-export interface DesktopData {
-  url: string
-  body: DesktopDataBody
-}
-
-export interface DesktopDataBody {
-  url: string
-  time: string
-  alert: string
-  status: string
-}
+  it('shows starting message with valid config', (done) => {
+    exec(`monika -c ./monika.example.json`, (_, stdout) => {
+      expect(stdout).to.contain('Starting Monika.')
+      done()
+    })
+  })
+})

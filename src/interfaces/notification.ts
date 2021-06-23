@@ -33,6 +33,7 @@ import {
   DiscordData,
   MonikaNotifData,
   WorkplaceData,
+  DesktopData,
 } from './data'
 
 export interface Notification {
@@ -49,6 +50,7 @@ export interface Notification {
     | 'discord'
     | 'monika-notif'
     | 'workplace'
+    | 'desktop'
   data:
     | MailgunData
     | SMTPData
@@ -60,4 +62,5 @@ export interface Notification {
     | DiscordData
     | MonikaNotifData
     | WorkplaceData
+    | DesktopData
 }
