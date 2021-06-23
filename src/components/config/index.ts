@@ -32,14 +32,7 @@ import {
   timer,
   of,
 } from 'rxjs'
-import {
-  distinctUntilKeyChanged,
-  first,
-  map,
-  share,
-  switchMap,
-  tap,
-} from 'rxjs/operators'
+import { distinctUntilKeyChanged, map, switchMap, tap } from 'rxjs/operators'
 import { Config } from '../../interfaces/config'
 import { fetchConfig } from './fetch'
 import { parseConfig } from './parse'
@@ -50,7 +43,7 @@ import { md5Hash } from '../../utils/hash'
 
 const configSubject$ = new BehaviorSubject<Config | null>(null)
 
-export let config$: Observable<Config | null>
+export const config$ = configSubject$.asObservable()
 
 export const getConfig = () => {
   const config = configSubject$.getValue()
@@ -82,8 +75,7 @@ const processConfig = () => (source: Observable<Config>) =>
         version: config.version || md5Hash(config),
       })
     }),
-    distinctUntilKeyChanged('version'),
-    share({ connector: () => configSubject$ })
+    distinctUntilKeyChanged('version')
   )
 
 export const setupConfigFromFile = (path: string, watch: boolean) => {
@@ -92,12 +84,16 @@ export const setupConfigFromFile = (path: string, watch: boolean) => {
   if (watch) {
     const fileWatcher = chokidar.watch(path)
     file$ = merge(
-      fromEvent<string>(fileWatcher, 'add', (...args) => args[0]).pipe(first()),
+      fromEvent<string>(fileWatcher, 'add', (...args) => args[0]),
       fromEvent<string>(fileWatcher, 'change')
     )
   }
 
-  config$ = file$.pipe(map(parseConfig), processConfig())
+  file$.pipe(map(parseConfig), processConfig()).subscribe((value) => {
+    if (value) {
+      configSubject$.next(value)
+    }
+  })
 }
 
 export const setupConfigFromUrl = (url: string, checkingInterval: number) => {

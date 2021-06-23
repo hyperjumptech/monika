@@ -28,10 +28,16 @@ import { ValidateResponseStatus } from './alert'
 import { log } from '../../utils/pino'
 import { AxiosResponseWithExtraData } from '../../interfaces/request'
 import { setAlert } from '../../components/logger'
-
 import { printProbeLog } from '../../components/logger'
+import { config$ } from '../config'
 
-const PROBE_STATUSES: ProbeStatus[] = []
+let PROBE_STATUSES: ProbeStatus[] = []
+
+// reset PROBE_STATUSES on new config
+config$.subscribe(() => {
+  PROBE_STATUSES = []
+})
+
 const INIT_PROBE_STATUS_DETAILS: StatusDetails = {
   alert: '',
   state: 'INIT',
