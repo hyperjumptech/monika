@@ -11,22 +11,34 @@ export function SidebarNavLink({
 
   return (
     <div
-      className={cn('nav-link', {
-        selected,
-      })}
+      className={cn(
+        'nav-link pl-4',
+        {
+          selected,
+        },
+        selected
+          ? 'border-2 py-2 border-purple-monika rounded-md'
+          : 'text-black-monika text-opacity-50 font-semibold'
+      )}
     >
       {
         // NOTE: use just anchor element for triggering `hashchange` event
         onlyHashChange ? (
           <a
-            className={selected ? 'selected' : ''}
+            className={
+              selected
+                ? 'selected text-purple-monika hover:text-purple-700'
+                : 'text-black-monika text-opacity-50 font-semibold'
+            }
             href={`${router.basePath}${pathname}`}
           >
             {title}
           </a>
         ) : (
           <Link href={href} as={pathname}>
-            <a>{title}</a>
+            <a className="text-black-monika text-opacity-50 font-semibold">
+              {title}
+            </a>
           </Link>
         )
       }
@@ -42,29 +54,18 @@ export function SidebarNavLink({
           text-decoration: none;
           font-size: 1rem;
           line-height: 1.5rem;
-          color: #4b5563;
           width: 100%;
           box-sizing: border-box;
         }
         .selected :global(a) {
           font-weight: 600;
-          color: #161e2e;
-        }
-        .nav-link:hover :global(a) {
-          color: #161e2e;
         }
         span {
           color: #a0aec0;
         }
         @media screen and (max-width: 950px) {
           div {
-            padding-top: 0;
-            padding-left: 0;
-            padding-bottom: 0;
-          }
-          div.selected {
-            border-left: none;
-            padding-left: 0;
+            padding-left: 0.5rem;
           }
           .nav-link :global(a) {
             display: flex;
