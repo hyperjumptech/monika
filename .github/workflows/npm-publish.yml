@@ -29,7 +29,7 @@ jobs:
       - run: npm ci
       - run: npm pack
       - run: npm install -g ./hyperjumptech-monika-*.tgz
-      - run: monika -v
+      - run: npm run prod_test
 
   publish-npm:
     needs: test
