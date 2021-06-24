@@ -171,7 +171,7 @@ export const processProbeStatus = ({
   checkOrder: number
   probe: Probe
   probeRes: AxiosResponseWithExtraData
-  requestIndex: number
+  totalRequests: number
   validatedResp: ValidateResponseStatus[]
   incidentThreshold: number
   recoveryThreshold: number
