@@ -1,9 +1,9 @@
 import * as React from 'react'
 import { MDXProvider } from '@mdx-js/react'
-import { Nav } from 'components/Nav'
+import NavBar from 'components/NavBar'
 import { Sidebar } from 'components/Sidebar'
 import { SidebarCategory } from 'components/SidebarCategory'
-import { SidebarHeading } from 'components/SidebarHeading'
+import { SidebarHeading } from './SidebarHeading'
 import { SidebarMobile } from 'components/SidebarMobile'
 import { SidebarPost } from 'components/SidebarPost'
 import { Sticky } from 'components/Sticky'
@@ -12,14 +12,14 @@ import { findRouteByPath } from 'lib/docs/findRouteByPath'
 import { removeFromLast } from 'lib/docs/utils'
 import { getRouteContext } from 'lib/get-route-context'
 import { useRouter } from 'next/router'
-import { Toc } from './Toc'
 import s from './markdown.module.css'
-import { Footer } from './Footer'
+import FooterDark from './FooterDark'
 import { DocsPageFooter } from './DocsPageFooter'
 import { Seo } from './Seo'
 import MDXComponents from './MDXComponents'
 import Head from 'next/head'
 import { getManifest } from 'manifests/getManifest'
+import StarButton from './StarButton'
 
 const getSlugAndTag = (path) => {
   const parts = path.split('/')
@@ -44,12 +44,10 @@ export const LayoutDocs = (props) => {
   const router = useRouter()
   const { slug, tag } = getSlugAndTag(router.asPath)
   const { routes } = getManifest(tag)
-
   const _route = findRouteByPath(removeFromLast(slug, '#'), routes) // @ts-ignore
-
-  const isMobile = useIsMobile()
   const { route, prevRoute, nextRoute } = getRouteContext(_route, routes)
   const title = route && `${route.title}`
+  const isMobile = useIsMobile()
 
   return (
     <>
@@ -61,7 +59,7 @@ export const LayoutDocs = (props) => {
       <div>
         {isMobile ? (
           <>
-            <Nav />
+            <NavBar />
             <Sticky shadow>
               <SidebarMobile>
                 <SidebarRoutes isMobile={true} routes={routes} />
@@ -70,7 +68,7 @@ export const LayoutDocs = (props) => {
           </>
         ) : (
           <Sticky>
-            <Nav />
+            <NavBar />
           </Sticky>
         )}
         <Seo
@@ -88,7 +86,12 @@ export const LayoutDocs = (props) => {
                 )}
 
                 <div className={s['markdown'] + ' w-full docs'}>
-                  <h1 id="_top">{props.meta.title}</h1>
+                  <div className="flex">
+                    <h1 id="_top" className="mr-auto">
+                      {props.meta.title}
+                    </h1>{' '}
+                    <StarButton />
+                  </div>
                   <MDXProvider components={MDXComponents}>
                     {props.children}
                   </MDXProvider>
@@ -99,27 +102,12 @@ export const LayoutDocs = (props) => {
                     nextRoute={nextRoute}
                   />
                 </div>
-                {props.meta.toc === false ? null : (
-                  <div
-                    className="hidden xl:block ml-10 flex-shrink-0"
-                    style={{
-                      width: 200,
-                    }}
-                  >
-                    <div className="sticky top-24 overflow-y-auto">
-                      <h4 className="font-semibold uppercase text-sm mb-2 mt-2 text-gray-500">
-                        On this page
-                      </h4>
-                      <Toc title={props.meta.title} />
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
           </>
         </div>
       </div>
-      <Footer />
+      <FooterDark className="bg-black-monika" />
       <style jsx>{`
         .docs {
           min-width: calc(100% - 300px - 1rem - 200px);
