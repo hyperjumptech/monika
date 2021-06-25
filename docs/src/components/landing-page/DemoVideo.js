@@ -27,11 +27,11 @@ import WorldDotPng from '../../../public/world-dot.png'
 
 export default function DemoVideo() {
   return (
-    <div className="relative flex flex-col justify-center pt-1/3 xl:pt-1/5">
+    <div className="relative flex flex-col justify-center pt-64 xl:pt-1/5">
       <img
         src={WorldDotPng}
         style={{ marginTop: '-50rem' }}
-        className="absolute top-0 right-0 lg:block hidden"
+        className="absolute top-0 right-0 xl:block hidden"
       />
       <div className="m-auto flex flex-col z-10">
         <h3 className="m-auto text-white text-xl -mt-y-1/4">
