@@ -55,17 +55,17 @@ export default function Banner(props) {
             npm i -g @hyperjumptech/monika
           </span>
         </p>
-        <div className="flex flex-row justify-between mt-4">
+        <div className="flex flex-col sm:flex-row justify-between mt-4">
           <div className="flex">
             <ButtonLink
-              className="w-40 leading-snug font-semibold text-center"
+              className="w-40 mx-auto leading-snug font-semibold text-center"
               href="/quick-start"
               rel="noopener noreferrer"
             >
               Get Started!
             </ButtonLink>
           </div>
-          <div className="flex">
+          <div className="flex sm:m-0 mx-auto sm:mt-0 mt-4">
             <StarButton />
           </div>
         </div>
@@ -73,7 +73,7 @@ export default function Banner(props) {
       <img src={StarBlurSvg} className="absolute -top-16 right-0" />
       <img
         src={WorldDotPng}
-        className="sm:invisible xl:visible absolute -bottom-128 -left-16 max-w-2xl"
+        className="xl:block hidden absolute -bottom-128 -left-16 max-w-2xl"
       />
     </div>
   )
