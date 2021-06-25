@@ -30,7 +30,7 @@ import StarButton from 'components/StarButton'
 export default function Banner(props) {
   return (
     <div
-      className={`relative flex flex-col py-32 ${
+      className={`relative flex flex-col pt-12 pb-32 md:py-32 ${
         props.className ? props.className : ''
       }`}
     >
