@@ -60,7 +60,7 @@ export const updateConfig = (data: Config) => {
   cfg = data
   cfg.version = cfg.version || md5Hash(cfg)
 
-  if (cfg.version !== lastVersion) {
+  if (cfg.version !== lastVersion && lastVersion !== undefined) {
     emitter.emit(CONFIG_UPDATED, cfg)
     log.warn('config file update detected')
   }
@@ -97,8 +97,17 @@ export const setupConfigFromFile = async (path: string, watch: boolean) => {
   }
 }
 
-export const setupConfigFromUrl = async (url: string) => {
+export const setupConfigFromUrl = async (
+  url: string,
+  checkingInterval: number
+) => {
   const fetched = await fetchConfig(url)
   await handshakeAndValidate(fetched)
   cfg = fetched
+
+  setInterval(async () => {
+    const fetched = await fetchConfig(url)
+    await handshakeAndValidate(fetched)
+    updateConfig(fetched)
+  }, checkingInterval * 1000)
 }

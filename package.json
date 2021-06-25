@@ -24,6 +24,7 @@
     "prepack": "rm -rf lib && tsc -b && oclif-dev readme",
     "start": "./bin/run",
     "test": "cross-env NODE_ENV=test nyc --extension .ts mocha --forbid-only \"test/**/*.test.ts\"",
+    "prod_test": "cross-env NODE_ENV=test nyc --extension .ts mocha --forbid-only \"prod_test/**/*.test.ts\"",
     "version": "oclif-dev readme && git add README.md",
     "format": "prettier --write .",
     "check-format": "prettier --check ."

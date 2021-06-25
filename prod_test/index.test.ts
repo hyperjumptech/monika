@@ -22,30 +22,37 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-export default function Button(props) {
-  if (props.outline) {
-    return <ButtonOutlined {...props}>{props.children}</ButtonOutlined>
-  }
+import { expect } from 'chai'
+import { exec } from 'child_process'
 
-  return (
-    <button
-      className={`px-4 py-2 bg-gradient-to-r from-purple-monika to-aqua-monika font-sans text-white ${
-        props.className ? props.className : ''
-      } ${props.rounded !== false ? 'rounded-full' : 'rounded-md'}`}
-    >
-      {props.children}
-    </button>
-  )
-}
+describe('monika', () => {
+  it('shows version', (done) => {
+    exec(`monika -v`, (_, stdout) => {
+      expect(stdout).to.contain('@hyperjumptech/monika/')
+      done()
+    })
+  })
 
-function ButtonOutlined(props) {
-  return (
-    <button
-      className={`px-4 py-2 border-2 border-purple-monika text-purple-monika font-sans ${
-        props.className ? props.className : ''
-      } ${props.rounded !== false ? 'rounded-full' : 'rounded-md'}`}
-    >
-      {props.children}
-    </button>
-  )
-}
+  it('shows error when no config', (done) => {
+    exec(`monika`, (_, _stdout, stderr) => {
+      expect(stderr).to.contain('Error')
+      done()
+    })
+  })
+
+  it('shows config generator link when no config', (done) => {
+    exec(`monika`, (_, _stdout, stderr) => {
+      expect(stderr).to.contain(
+        'https://hyperjumptech.github.io/monika-config-generator/'
+      )
+      done()
+    })
+  })
+
+  it('shows starting message with valid config', (done) => {
+    exec(`monika -c ./monika.example.json`, (_, stdout) => {
+      expect(stdout).to.contain('Starting Monika.')
+      done()
+    })
+  })
+})
