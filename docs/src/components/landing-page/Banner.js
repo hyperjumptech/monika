@@ -46,7 +46,8 @@ export default function Banner(props) {
       </div>
       <div className="z-10 mt-4 px-4 font-normal text-center text-white">
         <p>
-          React faster when your app is having problem before your users notice!
+          React faster when your app is having problems before your users
+          notice!
         </p>
         <p>Let's get started in seconds.</p>
       </div>
