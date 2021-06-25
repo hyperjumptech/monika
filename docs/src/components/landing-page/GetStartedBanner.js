@@ -33,8 +33,8 @@ export default function GetStartedBanner() {
           Get Started with Monika Now!
         </p>
         <p className="text-center text-white max-w-lg">
-          Detect problem as soon as possible, before your user do, and fix them
-          before they realize. No hidden fees or anything, free forever!
+          Detect problems as soon as possible, before your users do, and fix
+          them before they realize. No hidden fees, free forever!
         </p>
         <a
           className="m-auto mt-4 px-4 py-2 bg-white rounded-full font-sans text-white"

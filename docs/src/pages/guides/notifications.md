@@ -301,7 +301,7 @@ Monika supports Discord. To enable notification via Discord, you must create a d
 
 ## Facebook Workplace
 
-Monika supports Facebook Workplace. To enable notifiation via Workplace, you must create custom integration first. More info at [Facebook Workplace Custom Integrations](https://developers.facebook.com/docs/workplace/custom-integrations-new/)
+Monika supports Facebook Workplace. To enable notification via Workplace, you must create custom integration first. More info at [Facebook Workplace Custom Integrations](https://developers.facebook.com/docs/workplace/custom-integrations-new/)
 
 ```json
 {

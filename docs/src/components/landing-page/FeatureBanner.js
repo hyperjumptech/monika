@@ -47,13 +47,13 @@ export default function FeatureBanner() {
             <img className="max-h-20" src={DashboardIconSvg} />
             <h3 className="font-semibold">Monitor Multiple Websites</h3>
             <p>
-              You can add as many as websites you want to monitor with Monika to
+              You can add as many websites as you want to monitor with Monika to
               help grow your business.
             </p>
           </div>
           <div>
             <img className="max-h-20" src={TimerIconSvg} />
-            <h3 className="font-semibold">Monitor When Down or Slow</h3>
+            <h3 className="font-semibold">Monitor Service Quality</h3>
             <p>
               With Monika, you can monitor website several status such as down
               or slow based on notifications.
@@ -71,8 +71,8 @@ export default function FeatureBanner() {
             <img className="max-h-20" src={ListIconSvg} />
             <h3 className="font-semibold">Customizable Requests</h3>
             <p>
-              Monitor all different parts of your websites. For example, you can
-              monitor your login website form through POST HTTP.
+              Monitor all parts of your websites. For example, you can monitor
+              your login performance with Monika.
             </p>
           </div>
           <div>
@@ -80,15 +80,13 @@ export default function FeatureBanner() {
             <h3 className="font-semibold">Requests Chaining</h3>
             <p>
               Request chaining enables you to send multiple requests and the
-              ability to use past responses from earlier requests.
+              ability to use past responses as parameters.
             </p>
           </div>
           <div>
             <img className="max-h-20" src={WhatsAppIconSvg} />
             <h3 className="font-semibold">Whatsapp Notifications</h3>
-            <p>
-              Monika will send notifications directly to your WhatsApp account.
-            </p>
+            <p>Get alert notifications directly to your WhatsApp account.</p>
           </div>
         </div>
       </div>
