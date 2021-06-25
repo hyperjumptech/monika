@@ -68,14 +68,14 @@ export function getStatusColor(statusCode: number) {
 export async function probeLog({
   checkOrder,
   probe,
-  requestIndex,
+  totalRequests,
   probeRes,
   alerts,
   error,
 }: {
   checkOrder: number
   probe: Probe
-  requestIndex: number
+  totalRequests: number
   probeRes: AxiosResponseWithExtraData
   alerts?: string[]
   error?: string
@@ -83,7 +83,7 @@ export async function probeLog({
   mLogs.type = 'PROBE'
   mLogs.iteration = checkOrder
   mLogs.id = probe.id
-  mLogs.url = probe.requests[requestIndex].url
+  mLogs.url = probe.requests[totalRequests].url
   mLogs.responseCode = probeRes.status
   mLogs.responseTime = probeRes.config.extraData?.responseTime ?? 0
 
@@ -102,7 +102,7 @@ export async function probeLog({
 
   await saveProbeRequestLog({
     probe,
-    requestIndex,
+    totalRequests,
     probeRes,
     alerts,
     error,
