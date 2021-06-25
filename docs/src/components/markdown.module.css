@@ -27,6 +27,7 @@
 }
 
 .markdown > h1,
+.markdown > div > h1,
 .markdown > a > h1 {
   @apply mb-6 text-4xl font-semibold leading-snug tracking-tighter text-gray-900;
 }
@@ -66,7 +67,7 @@
 .markdown > ol > li > a,
 .markdown > blockquote > p > a,
 .markdown > table > tbody > tr > td > a {
-  @apply text-blue-600 font-semibold transition-colors duration-150 ease-out;
+  @apply bg-gradient-to-r from-purple-monika to-aqua-monika bg-clip-text text-transparent font-semibold transition-colors duration-150 ease-out;
 }
 
 .markdown > p > a:hover,
@@ -74,7 +75,7 @@
 .markdown > ol > li > a:hover,
 .markdown > blockquote > p > a:hover,
 .markdown > table > tbody > tr > td > a:hover {
-  @apply text-blue-800 transition-colors duration-150 ease-out;
+  @apply text-purple-monika transition-colors duration-150 ease-out;
 }
 
 .markdown strong {
