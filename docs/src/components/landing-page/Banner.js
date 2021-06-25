@@ -30,11 +30,11 @@ import StarButton from 'components/StarButton'
 export default function Banner(props) {
   return (
     <div
-      className={`relative flex flex-col pt-12 pb-32 md:py-32 ${
+      className={`relative flex flex-col pt-12 pb-32 lg:pt-32 ${
         props.className ? props.className : ''
       }`}
     >
-      <div className="z-10 m-auto mb-0 px-4 max-w-4xl text-3xl lg:text-5xl font-bold text-center text-white">
+      <div className="z-10 mx-8 lg:mx-auto mb-0 px-4 max-w-4xl text-3xl lg:text-5xl font-bold text-center text-white">
         <h1>
           Know when your{' '}
           <span className="bg-gradient-to-r from-purple-monika to-aqua-monika bg-clip-text text-transparent">
