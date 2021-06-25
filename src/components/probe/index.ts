@@ -47,7 +47,7 @@ export async function doProbe(
 ) {
   let probeRes: AxiosResponseWithExtraData = {} as AxiosResponseWithExtraData
   let validatedResp: ValidateResponseStatus[] = []
-  let requestIndex = 0
+  let totalRequests = 0 // is the number of requests in  probe.requests[x]
 
   try {
     const responses: Array<AxiosResponseWithExtraData> = []
@@ -62,20 +62,21 @@ export async function doProbe(
       await probeLog({
         checkOrder,
         probe,
-        requestIndex,
+        totalRequests,
         probeRes,
         alerts: validatedResp
           .filter((item) => item.status)
           .map((item) => item.alert),
       })
+
+      // done one request, is there another
+      totalRequests += 1
+
       // Exit the loop if there is any triggers triggered
       if (validatedResp.filter((item) => item.status).length > 0) {
         break
       }
 
-      if (probe.requests.length > 1) {
-        requestIndex += 1
-      }
       // done probes, no alerts, no notif.. now print log
       printProbeLog()
     }
@@ -84,7 +85,7 @@ export async function doProbe(
       checkOrder,
       probe,
       probeRes,
-      requestIndex,
+      totalRequests,
       validatedResp,
       incidentThreshold: probe.incidentThreshold,
       recoveryThreshold: probe.recoveryThreshold,
@@ -109,10 +110,11 @@ export async function doProbe(
             })
           })
         )
+
         const sendAlertsPromise = sendAlerts({
           validation: validatedResp[index],
           notifications: notifications,
-          url: probe.requests[requestIndex].url ?? '',
+          url: probe.requests[totalRequests - 1].url ?? '',
           status: status.isDown ? 'DOWN' : 'UP',
           incidentThreshold: probe.incidentThreshold,
           probeName: probe.name,

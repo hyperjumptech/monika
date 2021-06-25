@@ -58,8 +58,8 @@ export default function DemoVideo() {
             </p>
             <p className="text-white mt-4 leading-tight lg:text-left text-center">
               Monitor every part of your web app using a simple JSON
-              configuration file. Get alert not only when your site is down, but
-              also when it's slow.
+              configuration file. Get alerts not only when your site is down,
+              but also when it's slow.
             </p>
             <ButtonLink
               className="mt-6 w-40 lg:ml-0 mx-auto leading-snug font-semibold text-sm text-center"

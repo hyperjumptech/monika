@@ -60,7 +60,7 @@ export const updateConfig = (data: Config) => {
   cfg = data
   cfg.version = cfg.version || md5Hash(cfg)
 
-  if (cfg.version !== lastVersion && lastVersion !== undefined) {
+  if (cfg.version !== lastVersion) {
     emitter.emit(CONFIG_UPDATED, cfg)
     log.warn('config file update detected')
   }
@@ -86,6 +86,7 @@ export const setupConfigFromFile = async (path: string, watch: boolean) => {
   const parsed = parseConfig(path)
   await handshakeAndValidate(parsed)
   cfg = parsed
+  cfg.version = cfg.version || md5Hash(cfg)
 
   if (watch) {
     const fileWatcher = chokidar.watch(path)
@@ -104,6 +105,7 @@ export const setupConfigFromUrl = async (
   const fetched = await fetchConfig(url)
   await handshakeAndValidate(fetched)
   cfg = fetched
+  cfg.version = cfg.version || md5Hash(cfg)
 
   setInterval(async () => {
     const fetched = await fetchConfig(url)
