@@ -49,8 +49,8 @@ export default function DemoVideo() {
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen={true}
           />
-          <div className="m-auto flex flex-col max-w-sm">
-            <p className="text-white text-4xl leading-none lg:text-left text-center">
+          <div className="mx-8 md:m-auto flex flex-col max-w-sm">
+            <p className="text-white text-3xl lg:text-4xl leading-none lg:text-left text-center">
               Sleep well knowing that your{' '}
               <span className="bg-gradient-to-r from-purple-monika to-aqua-monika bg-clip-text text-transparent font-bold">
                 server is working as it should be

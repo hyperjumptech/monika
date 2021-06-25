@@ -34,7 +34,7 @@ export default function Banner(props) {
         props.className ? props.className : ''
       }`}
     >
-      <div className="z-10 m-auto mb-0 px-4 max-w-4xl text-5xl font-bold text-center text-white">
+      <div className="z-10 m-auto mb-0 px-4 max-w-4xl text-3xl lg:text-5xl font-bold text-center text-white">
         <h1>
           Know when your{' '}
           <span className="bg-gradient-to-r from-purple-monika to-aqua-monika bg-clip-text text-transparent">
