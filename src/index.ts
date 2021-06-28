@@ -1,4 +1,3 @@
-import { Probe } from './interfaces/probe'
 /**********************************************************************************
  * MIT License                                                                    *
  *                                                                                *
@@ -29,6 +28,7 @@ import boxen from 'boxen'
 import open from 'open'
 import fs from 'fs'
 import isUrl from 'is-url'
+import { Probe } from './interfaces/probe'
 import { MailData, MailgunData, SMTPData, WebhookData } from './interfaces/data'
 import { Config } from './interfaces/config'
 import { idFeeder, loopReport, isIDValid, sanitizeProbe } from './looper'
@@ -48,6 +48,8 @@ import {
   setupConfigFromUrl,
 } from './components/config'
 import { getEventEmitter } from './utils/events'
+
+const em = getEventEmitter()
 
 function getDefaultConfig() {
   const filesArray = fs.readdirSync('./')
@@ -210,6 +212,11 @@ class Monika extends Command {
           sanitizeProbe(probe, probe.id)
         )
 
+        // emit the sanitized probe
+        if (sanitizedProbe) {
+          em.emit('SANITIZED_CONFIG')
+        }
+
         abortCurrentLooper = idFeeder(
           sanitizedProbe,
           config.notifications ?? [],
@@ -316,11 +323,14 @@ Please refer to the Monika documentations on how to how to configure notificatio
   }
 }
 
-const em = getEventEmitter()
-
 // Subscribe FirstEvent
 em.addListener('TERMINATE_EVENT', function (data) {
   log.info('Monika Event: ' + data)
+})
+
+// Subscribe to Sanitize Config
+em.addListener('SANITIZED_CONFIG', function () {
+  log.info(`Config has been sanitized`)
 })
 
 /**
