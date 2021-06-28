@@ -1,3 +1,4 @@
+import { Probe } from './interfaces/probe'
 /**********************************************************************************
  * MIT License                                                                    *
  *                                                                                *
@@ -30,7 +31,7 @@ import fs from 'fs'
 import isUrl from 'is-url'
 import { MailData, MailgunData, SMTPData, WebhookData } from './interfaces/data'
 import { Config } from './interfaces/config'
-import { idFeeder, loopReport } from './looper'
+import { idFeeder, loopReport, isIDValid, sanitizeProbe } from './looper'
 import { printAllLogs } from './components/logger'
 import { log } from './utils/pino'
 import {
@@ -189,7 +190,31 @@ class Monika extends Command {
           !abortCurrentLooper
         )
         this.log(startupMessage)
-        abortCurrentLooper = idFeeder(config, Number(flags.repeat), flags.id)
+
+        // config probes to be run by the looper
+        // default sequence for Each element
+        let probesToRun = config.probes
+        if (flags.id) {
+          if (!isIDValid(config, flags.id)) {
+            return
+          }
+          // doing custom sequences if list of ids is declared
+          const idSplit = flags.id.split(',').map((item: string) => item.trim())
+          probesToRun = config.probes.filter((probe) =>
+            idSplit.includes(probe.id)
+          )
+        }
+
+        // sanitize the probe
+        const sanitizedProbe = probesToRun.map((probe: Probe) =>
+          sanitizeProbe(probe, probe.id)
+        )
+
+        abortCurrentLooper = idFeeder(
+          sanitizedProbe,
+          config.notifications ?? [],
+          Number(flags.repeat)
+        )
       }
     } catch (error) {
       await closeLog()
