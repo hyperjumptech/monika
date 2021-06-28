@@ -26,13 +26,17 @@ import MonikaSvg from '../../public/monika.svg'
 import HyperjumpSvg from '../../public/hyperjump.svg'
 import { siteConfig } from 'siteConfig'
 
-export default function FooterDark() {
+export default function FooterDark(props) {
   return (
-    <div className="flex flex-wrap justify-around text-white pt-8 pb-16 px-16">
+    <div
+      className={`flex lg:flex-row flex-col justify-around text-white pt-8 pb-16 px-16 ${
+        props.className ? props.className : ''
+      }`}
+    >
       <a href="/">
-        <img className="w-16 h-4" src={MonikaSvg} />
+        <img className="w-16 h-4 mt-1" src={MonikaSvg} />
       </a>
-      <div className="flex flex-col">
+      <div className="flex flex-col mt-2 lg:mt-0">
         <p className="font-bold">Resources</p>
         <a className="text-xs pt-2" href="/overview" rel="noopener noreferrer">
           Documentation
@@ -55,7 +59,7 @@ export default function FooterDark() {
           WhatsApp Notifier
         </a>
       </div>
-      <div className="flex flex-col">
+      <div className="flex flex-col mt-2 lg:mt-0">
         <p className="font-bold">Community</p>
         <a
           className="text-xs pt-2"
@@ -74,7 +78,7 @@ export default function FooterDark() {
           Releases
         </a>
       </div>
-      <div className="flex flex-col max-w-sm">
+      <div className="flex flex-col max-w-sm mt-2 lg:mt-0">
         <a
           className="font-bold"
           href="https://hyperjump.tech/"

@@ -39,6 +39,7 @@ import {
   flushAllLogs,
 } from './components/logger/history'
 import { notificationChecker } from './components/notification/checker'
+import { resetProbeStatuses } from './components/notification/process-server-status'
 import {
   getConfig,
   getConfigIterator,
@@ -173,6 +174,7 @@ class Monika extends Command {
 
       for await (const config of getConfigIterator()) {
         if (abortCurrentLooper) {
+          resetProbeStatuses()
           abortCurrentLooper()
         }
 
@@ -180,7 +182,11 @@ class Monika extends Command {
           await notificationChecker(config.notifications ?? [])
         }
 
-        const startupMessage = this.buildStartupMessage(config, flags.verbose)
+        const startupMessage = this.buildStartupMessage(
+          config,
+          flags.verbose,
+          !abortCurrentLooper
+        )
         this.log(startupMessage)
         abortCurrentLooper = idFeeder(config, Number(flags.repeat), flags.id)
       }
@@ -190,7 +196,7 @@ class Monika extends Command {
     }
   }
 
-  buildStartupMessage(config: Config, verbose = false) {
+  buildStartupMessage(config: Config, verbose = false, firstRun: boolean) {
     const { probes, notifications } = config
 
     let startupMessage = ''
@@ -213,9 +219,11 @@ Please refer to the Monika documentations on how to how to configure notificatio
       })
     }
 
-    startupMessage += `Starting Monika. Probes: ${
-      probes.length
-    }. Notifications: ${notifications?.length ?? 0}\n\n`
+    startupMessage += `${
+      firstRun ? 'Starting' : 'Restarting'
+    } Monika. Probes: ${probes.length}. Notifications: ${
+      notifications?.length ?? 0
+    }\n\n`
 
     if (verbose) {
       startupMessage += 'Probes:\n'

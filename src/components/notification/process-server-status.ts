@@ -31,7 +31,7 @@ import { setAlert } from '../../components/logger'
 
 import { printProbeLog } from '../../components/logger'
 
-const PROBE_STATUSES: ProbeStatus[] = []
+let PROBE_STATUSES: ProbeStatus[] = []
 const INIT_PROBE_STATUS_DETAILS: StatusDetails = {
   alert: '',
   state: 'INIT',
@@ -50,6 +50,10 @@ enum PROBE_STATE {
   DOWN_FALSE_EQUALS_THRESHOLD = 'DOWN_FALSE_EQUALS_THRESHOLD',
   DOWN_FALSE_BELOW_THRESHOLD = 'DOWN_FALSE_BELOW_THRESHOLD',
   DOWN_TRUE = 'DOWN_TRUE',
+}
+
+export const resetProbeStatuses = () => {
+  PROBE_STATUSES = []
 }
 
 // Function to determine probe state
@@ -171,7 +175,7 @@ export const processProbeStatus = ({
   checkOrder: number
   probe: Probe
   probeRes: AxiosResponseWithExtraData
-  requestIndex: number
+  totalRequests: number
   validatedResp: ValidateResponseStatus[]
   incidentThreshold: number
   recoveryThreshold: number
