@@ -39,6 +39,7 @@ import {
   flushAllLogs,
 } from './components/logger/history'
 import { notificationChecker } from './components/notification/checker'
+import { terminationNotif } from './components/notification/termination'
 import { resetProbeStatuses } from './components/notification/process-server-status'
 import {
   getConfig,
@@ -47,6 +48,8 @@ import {
   setupConfigFromUrl,
 } from './components/config'
 import { getEventEmitter } from './utils/events'
+
+const em = getEventEmitter()
 
 function getDefaultConfig() {
   const filesArray = fs.readdirSync('./')
@@ -291,11 +294,12 @@ Please refer to the Monika documentations on how to how to configure notificatio
   }
 }
 
-const em = getEventEmitter()
-
-// Subscribe FirstEvent
-em.addListener('TERMINATE_EVENT', function (data) {
+// Subscribe Termintion
+em.addListener('TERMINATE_EVENT', async function (data) {
   log.info('Monika Event: ' + data)
+  for await (const config of getConfigIterator()) {
+    await terminationNotif(config.notifications ?? [])
+  }
 })
 
 /**
