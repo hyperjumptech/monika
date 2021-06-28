@@ -303,7 +303,7 @@ em.addListener('TERMINATE_EVENT', function (data) {
  */
 process.on('SIGINT', () => {
   if (!process.env.DISABLE_EXIT_MESSAGE) {
-    log.info('\nThank you for using Monika!')
+    log.info('Thank you for using Monika!')
     log.info('We need your help to make Monika better.')
     log.info(
       'Can you give us some feedback by clicking this link https://github.com/hyperjumptech/monika/discussions?'
