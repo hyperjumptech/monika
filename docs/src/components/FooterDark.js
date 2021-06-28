@@ -26,9 +26,13 @@ import MonikaSvg from '../../public/monika.svg'
 import HyperjumpSvg from '../../public/hyperjump.svg'
 import { siteConfig } from 'siteConfig'
 
-export default function FooterDark() {
+export default function FooterDark(props) {
   return (
-    <div className="flex flex-wrap justify-around text-white pt-8 pb-16 px-16">
+    <div
+      className={`flex flex-wrap justify-around text-white pt-8 pb-16 px-16 ${
+        props.className ? props.className : ''
+      }`}
+    >
       <a href="/">
         <img className="w-16 h-4" src={MonikaSvg} />
       </a>

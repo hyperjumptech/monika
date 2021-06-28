@@ -23,54 +23,40 @@
  **********************************************************************************/
 
 import ButtonLink from 'components/ButtonLink'
-import WorldDotPng from '../../../public/world-dot.png'
+import { useEffect, useState } from 'react'
+import { siteConfig } from 'siteConfig'
 
-export default function DemoVideo() {
+export default function StarButton(props) {
+  const [starCount, setStarCount] = useState(0)
+  useEffect(() => {
+    fetch('https://api.github.com/repos/hyperjumptech/monika')
+      .then((res) => res.json())
+      .then(
+        (result) => {
+          setStarCount(result.stargazers_count)
+        },
+        () => {
+          // do nothing
+        }
+      )
+  })
   return (
-    <div className="relative flex flex-col justify-center pt-1/3 xl:pt-1/5">
-      <img
-        src={WorldDotPng}
-        style={{ marginTop: '-50rem' }}
-        className="absolute top-0 right-0"
-      />
-      <div className="m-auto flex flex-col z-10">
-        <h3 className="m-auto text-white text-xl -mt-y-1/4">
-          <span className="bg-gradient-to-r from-purple-monika to-aqua-monika bg-clip-text text-transparent font-bold">
-            Monika
-          </span>{' '}
-          Quick Start
-        </h3>
-        <div className="flex flex-wrap justify-around gap-8 mt-8">
-          <iframe
-            className="my-auto w-96 h-72"
-            src="https://www.youtube-nocookie.com/embed/o4jrNeNeFmM"
-            title="YouTube video player"
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen={true}
-          />
-          <div className="m-auto flex flex-col max-w-sm">
-            <p className="text-white text-4xl leading-none">
-              Sleep well knowing that your{' '}
-              <span className="bg-gradient-to-r from-purple-monika to-aqua-monika bg-clip-text text-transparent font-bold">
-                server is working as it should be
-              </span>
-            </p>
-            <p className="text-white mt-4 leading-tight">
-              Monitor every part of your web app using a simple JSON
-              configuration file. Get alerts not only when your site is down,
-              but also when it's slow.
-            </p>
-            <ButtonLink
-              className="mt-6 w-40 leading-snug font-semibold text-sm text-center"
-              href="/quick-start"
-              rel="noopener noreferrer"
-            >
-              Find Out More
-            </ButtonLink>
-          </div>
-        </div>
-      </div>
-    </div>
+    <ButtonLink
+      outline="true"
+      className={`w-40 flex justify-center leading-snug font-semibold text-center max-h-11`}
+      href={siteConfig.repoUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-5 w-5 mr-2"
+        fill="currentColor"
+        viewBox="0 0 20 20"
+      >
+        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+      </svg>{' '}
+      Star ({starCount})
+    </ButtonLink>
   )
 }
