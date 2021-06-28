@@ -45,6 +45,7 @@ import {
   setupConfigFromFile,
   setupConfigFromUrl,
 } from './components/config'
+import { getEventEmitter } from './utils/events'
 
 function getDefaultConfig() {
   const filesArray = fs.readdirSync('./')
@@ -281,5 +282,28 @@ Please refer to the Monika documentations on how to how to configure notificatio
     return startupMessage
   }
 }
+
+const em = getEventEmitter()
+
+// Subscribe FirstEvent
+em.addListener('TERMINATE_EVENT', function (data) {
+  log.info('Monika Event: ' + data)
+})
+
+/**
+ * Show Exit Message
+ */
+process.on('SIGINT', () => {
+  if (!process.env.DISABLE_EXIT_MESSAGE) {
+    log.info('\nThank you for using Monika!')
+    log.info('We need your help to make Monika better.')
+    log.info(
+      'Can you give us some feedback by clicking this link https://github.com/hyperjumptech/monika/discussions?'
+    )
+    log.info('')
+  }
+  em.emit('TERMINATE_EVENT', 'Monika is terminating')
+  process.exit(process.exitCode)
+})
 
 export = Monika
