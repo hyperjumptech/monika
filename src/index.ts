@@ -333,6 +333,11 @@ em.addListener('SANITIZED_CONFIG', function () {
   log.info(`Config has been sanitized`)
 })
 
+// Subscribe to Receive Response
+em.addListener('RESPONSE_RECEIVED', function () {
+  log.info('Response received')
+})
+
 /**
  * Show Exit Message
  */
