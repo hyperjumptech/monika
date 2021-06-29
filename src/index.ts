@@ -297,12 +297,9 @@ const em = getEventEmitter()
 // Subscribe FirstEvent
 em.addListener('TERMINATE_EVENT', async (data) => {
   log.info('Monika Event: ' + data)
-  const config = getConfigIterator()
-  log.info(config)
-  for await (const config of getConfigIterator()) {
-    if (process.env.NODE_ENV !== 'test') {
-      await terminationNotif(config.notifications ?? [])
-    }
+  const config = getConfig()
+  if (process.env.NODE_ENV !== 'test') {
+    await terminationNotif(config.notifications ?? [])
   }
 })
 
