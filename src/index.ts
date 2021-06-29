@@ -48,7 +48,7 @@ import {
   setupConfigFromUrl,
 } from './components/config'
 import { getEventEmitter } from './utils/events'
-let notificationsConfig: any[] = []
+
 function getDefaultConfig() {
   const filesArray = fs.readdirSync('./')
   const monikaDotJsonFile = filesArray.find((x) => x === 'monika.json')
@@ -181,7 +181,6 @@ class Monika extends Command {
         }
 
         if (process.env.NODE_ENV !== 'test') {
-          notificationsConfig = config.notifications ?? []
           await notificationChecker(config.notifications ?? [])
         }
 
@@ -298,8 +297,13 @@ const em = getEventEmitter()
 // Subscribe FirstEvent
 em.addListener('TERMINATE_EVENT', async (data) => {
   log.info('Monika Event: ' + data)
-  log.info(notificationsConfig)
-  await terminationNotif(notificationsConfig)
+  const config = getConfigIterator()
+  log.info(config)
+  for await (const config of getConfigIterator()) {
+    if (process.env.NODE_ENV !== 'test') {
+      await terminationNotif(config.notifications ?? [])
+    }
+  }
 })
 
 /**
