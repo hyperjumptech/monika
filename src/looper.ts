@@ -34,7 +34,13 @@ const MILLISECONDS = 1000
 const DEFAULT_THRESHOLD = 5
 const DEFAULT_REPORT_INTERVAL = 180000 // 3 minutes
 
-function sanitizeProbe(probe: Probe, id: string): Probe {
+/**
+ * sanitizeProbe sanitize currently mapped probe name, alerts, and threshold
+ * @param {object} probe is the probe configuration
+ * @param {array} id is the probe ID
+ * @returns {object} as probe
+ */
+export function sanitizeProbe(probe: Probe, id: string): Probe {
   const { name, incidentThreshold, recoveryThreshold, alerts } = probe
   probe.id = `${id}`
 
@@ -125,36 +131,21 @@ function loopProbe(
 
 /**
  * idFeeder feeds Prober with actual ids to process
- * @param {object} config is an object that contains all the configs
+ * @param {object} sanitizedProbes probes that has been sanitized
+ * @param {object} notifications probe notifications
  * @param {number} repeats number of repeats
  * @param {object} ids of address
  * @returns {function} abort function
  */
 export function idFeeder(
-  config: Config,
-  repeats: number,
-  ids: string | undefined
+  sanitizedProbes: Probe[],
+  notifications: Notification[],
+  repeats: number
 ) {
-  // default sequence for Each element
-  let probesToRun = config.probes
-  if (ids) {
-    if (!isIDValid(config, ids)) {
-      return
-    }
-    // doing custom sequences if list of ids is declared
-    const idSplit = ids.split(',').map((item) => item.trim())
-    probesToRun = config.probes.filter((probe) => idSplit.includes(probe.id))
-  }
-
   const intervals: Array<NodeJS.Timeout> = []
 
-  for (const probe of probesToRun) {
-    const sanitizedProbe = sanitizeProbe(probe, probe.id)
-    const interval = loopProbe(
-      sanitizedProbe,
-      config.notifications ?? [],
-      repeats ?? 0
-    )
+  for (const probe of sanitizedProbes) {
+    const interval = loopProbe(probe, notifications ?? [], repeats ?? 0)
     intervals.push(interval)
   }
 
