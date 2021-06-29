@@ -48,9 +48,7 @@ import {
   setupConfigFromUrl,
 } from './components/config'
 import { getEventEmitter } from './utils/events'
-
-const em = getEventEmitter()
-
+let notificationsConfig: any[] = []
 function getDefaultConfig() {
   const filesArray = fs.readdirSync('./')
   const monikaDotJsonFile = filesArray.find((x) => x === 'monika.json')
@@ -183,6 +181,7 @@ class Monika extends Command {
         }
 
         if (process.env.NODE_ENV !== 'test') {
+          notificationsConfig = config.notifications ?? []
           await notificationChecker(config.notifications ?? [])
         }
 
@@ -294,12 +293,13 @@ Please refer to the Monika documentations on how to how to configure notificatio
   }
 }
 
-// Subscribe Termintion
-em.addListener('TERMINATE_EVENT', async function (data) {
+const em = getEventEmitter()
+
+// Subscribe FirstEvent
+em.addListener('TERMINATE_EVENT', async (data) => {
   log.info('Monika Event: ' + data)
-  for await (const config of getConfigIterator()) {
-    await terminationNotif(config.notifications ?? [])
-  }
+  log.info(notificationsConfig)
+  await terminationNotif(notificationsConfig)
 })
 
 /**
@@ -307,7 +307,7 @@ em.addListener('TERMINATE_EVENT', async function (data) {
  */
 process.on('SIGINT', () => {
   if (!process.env.DISABLE_EXIT_MESSAGE) {
-    log.info('\nThank you for using Monika!')
+    log.info('Thank you for using Monika!')
     log.info('We need your help to make Monika better.')
     log.info(
       'Can you give us some feedback by clicking this link https://github.com/hyperjumptech/monika/discussions?'
