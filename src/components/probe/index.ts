@@ -33,6 +33,9 @@ import { sendAlerts } from '../notification'
 import { getLogsAndReport } from '../reporter'
 
 import { printProbeLog } from '../logger'
+import { getEventEmitter } from '../../utils/events'
+
+const em = getEventEmitter()
 
 /**
  * doProbe sends out the http request
@@ -53,6 +56,7 @@ export async function doProbe(
     const responses: Array<AxiosResponseWithExtraData> = []
     for await (const request of probe.requests) {
       probeRes = await probing(request, responses)
+      em.emit('RESPONSE_RECEIVED')
 
       // Add to an array to be accessed by another request
       responses.push(probeRes)
