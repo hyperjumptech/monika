@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2021-06-30
+
+### Added
+
+- Emit event on receiving response
+- Add Desktop Notifications for Notification Channel
+- Check configuration from URL periodically
+- Troubleshoot docs
+- Tests for the production built
+- Terminate event
+
+### Changed
+
+- Log messages
+- Revamp landing page
+- Docs: revamp design
+- Append /v1/monika to symon url (**BREAKING CHANGE**). With this version, symon URL in Monika configuration now only use the base URL.
+
+### Fixed
+
+- Initial report to symon fails if the logs db is big
+- Updated alerts is not displayed when config is updated with new alert options
+- Array index error
+- Fix spelling and some grammar
+- Responsive mobile home page
+- Move sanitizeConfig out of looper and add event emitter
+
 ## [1.3.7] - 2021-06-14
 
 ### Added
