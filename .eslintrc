@@ -2,6 +2,7 @@
     "extends": ["oclif", "oclif-typescript", "prettier"],
     "rules": {
         "no-warning-comments": "off",
+        "no-process-exit": "off"
     },
     "overrides": [
         {

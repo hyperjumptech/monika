@@ -28,9 +28,10 @@ import boxen from 'boxen'
 import open from 'open'
 import fs from 'fs'
 import isUrl from 'is-url'
+import { Probe } from './interfaces/probe'
 import { MailData, MailgunData, SMTPData, WebhookData } from './interfaces/data'
 import { Config } from './interfaces/config'
-import { idFeeder, loopReport } from './looper'
+import { idFeeder, loopReport, isIDValid, sanitizeProbe } from './looper'
 import { printAllLogs } from './components/logger'
 import { log } from './utils/pino'
 import {
@@ -46,6 +47,9 @@ import {
   setupConfigFromFile,
   setupConfigFromUrl,
 } from './components/config'
+import { getEventEmitter } from './utils/events'
+
+const em = getEventEmitter()
 
 function getDefaultConfig() {
   const filesArray = fs.readdirSync('./')
@@ -188,7 +192,36 @@ class Monika extends Command {
           !abortCurrentLooper
         )
         this.log(startupMessage)
-        abortCurrentLooper = idFeeder(config, Number(flags.repeat), flags.id)
+
+        // config probes to be run by the looper
+        // default sequence for Each element
+        let probesToRun = config.probes
+        if (flags.id) {
+          if (!isIDValid(config, flags.id)) {
+            return
+          }
+          // doing custom sequences if list of ids is declared
+          const idSplit = flags.id.split(',').map((item: string) => item.trim())
+          probesToRun = config.probes.filter((probe) =>
+            idSplit.includes(probe.id)
+          )
+        }
+
+        // sanitize the probe
+        const sanitizedProbe = probesToRun.map((probe: Probe) =>
+          sanitizeProbe(probe, probe.id)
+        )
+
+        // emit the sanitized probe
+        if (sanitizedProbe) {
+          em.emit('SANITIZED_CONFIG')
+        }
+
+        abortCurrentLooper = idFeeder(
+          sanitizedProbe,
+          config.notifications ?? [],
+          Number(flags.repeat)
+        )
       }
     } catch (error) {
       await closeLog()
@@ -289,5 +322,36 @@ Please refer to the Monika documentations on how to how to configure notificatio
     return startupMessage
   }
 }
+
+// Subscribe FirstEvent
+em.addListener('TERMINATE_EVENT', function (data) {
+  log.info('Monika Event: ' + data)
+})
+
+// Subscribe to Sanitize Config
+em.addListener('SANITIZED_CONFIG', function () {
+  log.info(`Config has been sanitized`)
+})
+
+// Subscribe to Receive Response
+em.addListener('RESPONSE_RECEIVED', function () {
+  log.info('Response received')
+})
+
+/**
+ * Show Exit Message
+ */
+process.on('SIGINT', () => {
+  if (!process.env.DISABLE_EXIT_MESSAGE) {
+    log.info('Thank you for using Monika!')
+    log.info('We need your help to make Monika better.')
+    log.info(
+      'Can you give us some feedback by clicking this link https://github.com/hyperjumptech/monika/discussions?'
+    )
+    log.info('')
+  }
+  em.emit('TERMINATE_EVENT', 'Monika is terminating')
+  process.exit(process.exitCode)
+})
 
 export = Monika
