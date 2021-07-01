@@ -32,7 +32,7 @@ export const sendTeams = async (data: TeamsData) => {
     const notifColor = data.body.status === 'UP' ? '8CC152' : 'DF202E'
 
     let res: AxiosResponseWithExtraData
-    if (data.body.status === 'INIT') {
+    if (data.body.status === 'INIT' || data.body.status === 'TERMINATE') {
       res = await axios({
         method: 'POST',
         url: data.url,
