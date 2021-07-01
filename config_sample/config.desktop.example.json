@@ -1,0 +1,17 @@
+{
+  "notifications": [
+    {
+      "id": "unique-id-desktop",
+      "type": "desktop"
+    }
+  ],
+  "probes": [
+    {
+      "requests": [
+        {
+          "url": "https://github.com"
+        }
+      ]
+    }
+  ]
+}
