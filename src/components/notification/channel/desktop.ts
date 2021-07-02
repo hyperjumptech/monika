@@ -27,19 +27,29 @@ import { DesktopData } from './../../../interfaces/data'
 
 export const sendDesktop = async (data: DesktopData) => {
   try {
-    const notifType = data.body.status === 'UP' ? 'RECOVERY' : 'INCIDENT'
-
     if (data.body.status === 'INIT') {
       notify({
         title: 'Monika is running',
         message: data.body.alert,
       })
-    } else {
-      notify({
-        title: `New ${notifType} notification from Monika`,
-        message: `${data.body.alert} for URL ${data.body.url} at ${data.body.time}`,
-      })
+
+      return
     }
+
+    if (data.body.status === 'TERMINATE') {
+      notify({
+        title: 'Monika terminated',
+        message: data.body.alert,
+      })
+
+      return
+    }
+
+    const notifType = data.body.status === 'UP' ? 'RECOVERY' : 'INCIDENT'
+    notify({
+      title: `New ${notifType} notification from Monika`,
+      message: `${data.body.alert} for URL ${data.body.url} at ${data.body.time}`,
+    })
   } catch (error) {
     throw error
   }

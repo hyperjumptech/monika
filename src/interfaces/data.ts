@@ -62,7 +62,7 @@ export interface MonikaNotifData {
 }
 
 export interface MonikaNotifDataBody {
-  type: 'start' | 'incident' | 'recovery'
+  type: 'start' | 'incident' | 'recovery' | 'termination'
   probe_url: string
   probe_name?: string
   monika_id?: string
