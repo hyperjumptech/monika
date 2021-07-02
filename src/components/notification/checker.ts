@@ -36,17 +36,6 @@ import {
 } from '../../interfaces/data'
 import { Notification } from '../../interfaces/notification'
 import getIp from '../../utils/ip'
-import { sendDiscord } from './channel/discord'
-import { sendMailgun } from './channel/mailgun'
-import { sendSendgrid } from './channel/sendgrid'
-import { sendSlack } from './channel/slack'
-import { createSmtpTransport, sendSmtpMail } from './channel/smtp'
-import { sendTeams } from './channel/teams'
-import { sendTelegram } from './channel/telegram'
-import { sendWebhook } from './channel/webhook'
-import { sendMonikaNotif } from './channel/monika-notif'
-import { sendWorkplace } from './channel/workplace'
-import { sendDesktop } from './channel/desktop'
 import {
   dataDiscordSchemaValidator,
   dataMailgunSchemaValidator,
@@ -59,9 +48,23 @@ import {
   dataWebhookSchemaValidator,
   dataWorkplaceSchemaValidator,
 } from './validator'
+import {
+  desktopNotificationSender,
+  discordNotificationSender,
+  mailgunNotificationSender,
+  monikaNotificationSender,
+  sendgridNotificationSender,
+  slackNotificationSender,
+  smtpNotificationSender,
+  teamsNotificationSender,
+  telegramNotificationSender,
+  webhookNotificationSender,
+  workplaceNotificationSender,
+} from './sender'
 
 const subject = 'Monika is started'
 const body = `Monika is running on ${getIp()}`
+const status = 'INIT'
 
 export const errorMessage = (
   notificationType: string,
@@ -75,15 +78,7 @@ export const errorMessage = (
 const smtpNotificationInitialChecker = async (data: SMTPData) => {
   try {
     await dataSMTPSchemaValidator.validateAsync(data)
-
-    const transporter = createSmtpTransport(data)
-
-    await sendSmtpMail(transporter, {
-      from: 'Monika@hyperjump.tech',
-      to: data?.recipients?.join(','),
-      subject: subject,
-      text: body,
-    })
+    await smtpNotificationSender({ data, subject, body })
 
     return 'success'
   } catch (error) {
@@ -94,19 +89,7 @@ const smtpNotificationInitialChecker = async (data: SMTPData) => {
 const mailgunNotificationInitialChecker = async (data: MailgunData) => {
   try {
     await dataMailgunSchemaValidator.validateAsync(data)
-
-    await sendMailgun(
-      {
-        recipients: data?.recipients?.join(','),
-        subject: subject,
-        body: body,
-        sender: {
-          name: 'Monika',
-          email: 'monika@hyperjump.tech',
-        },
-      },
-      { id: 'mailgun', type: 'mailgun', data }
-    )
+    await mailgunNotificationSender({ data, subject, body })
 
     return 'success'
   } catch (error) {
@@ -117,19 +100,7 @@ const mailgunNotificationInitialChecker = async (data: MailgunData) => {
 const sendgridNotificationInitialChecker = async (data: SendgridData) => {
   try {
     await dataSendgridSchemaValidator.validateAsync(data)
-
-    await sendSendgrid(
-      {
-        recipients: data?.recipients?.join(','),
-        subject: subject,
-        body: body,
-        sender: {
-          name: 'Monika',
-          email: 'monika@hyperjump.tech',
-        },
-      },
-      { id: 'sendgrid', type: 'sendgrid', data }
-    )
+    await sendgridNotificationSender({ data, subject, body })
 
     return 'success'
   } catch (error) {
@@ -140,15 +111,7 @@ const sendgridNotificationInitialChecker = async (data: SendgridData) => {
 const webhookNotificationInitialChecker = async (data: WebhookData) => {
   try {
     await dataWebhookSchemaValidator.validateAsync(data)
-
-    await sendWebhook({
-      url: data?.url,
-      body: {
-        url: '-',
-        alert: body,
-        time: new Date().toLocaleString(),
-      },
-    })
+    await webhookNotificationSender({ data, body })
 
     return 'success'
   } catch (error) {
@@ -159,15 +122,7 @@ const webhookNotificationInitialChecker = async (data: WebhookData) => {
 const discordNotificationInitialChecker = async (data: WebhookData) => {
   try {
     await dataDiscordSchemaValidator.validateAsync(data)
-
-    await sendDiscord({
-      url: data?.url,
-      body: {
-        url: '-',
-        alert: body,
-        time: new Date().toLocaleString(),
-      },
-    })
+    await discordNotificationSender({ data, body })
 
     return 'success'
   } catch (error) {
@@ -178,15 +133,7 @@ const discordNotificationInitialChecker = async (data: WebhookData) => {
 const slackNotificationInitialChecker = async (data: WebhookData) => {
   try {
     await dataSlackSchemaValidator.validateAsync(data)
-
-    await sendSlack({
-      url: data?.url,
-      body: {
-        url: '-',
-        alert: body,
-        time: new Date().toLocaleString(),
-      },
-    })
+    await slackNotificationSender({ data, body })
 
     return 'success'
   } catch (error) {
@@ -197,16 +144,7 @@ const slackNotificationInitialChecker = async (data: WebhookData) => {
 const telegramNotificationInitialChecker = async (data: TelegramData) => {
   try {
     await dataTelegramSchemaValidator.validateAsync(data)
-
-    await sendTelegram({
-      group_id: data?.group_id,
-      bot_token: data?.bot_token,
-      body: {
-        url: '-',
-        alert: body,
-        time: new Date().toLocaleString(),
-      },
-    })
+    await telegramNotificationSender({ data, body })
 
     return 'success'
   } catch (error) {
@@ -217,16 +155,7 @@ const telegramNotificationInitialChecker = async (data: TelegramData) => {
 const teamsNotificationInitialChecker = async (data: TeamsData) => {
   try {
     await dataTeamsSchemaValidator.validateAsync(data)
-
-    await sendTeams({
-      url: data?.url,
-      body: {
-        url: '-',
-        alert: body,
-        time: new Date().toLocaleString(),
-        status: 'INIT',
-      },
-    })
+    await teamsNotificationSender({ data, body, status })
 
     return 'success'
   } catch (error) {
@@ -237,16 +166,7 @@ const teamsNotificationInitialChecker = async (data: TeamsData) => {
 const monikaNotificationInitialChecker = async (data: MonikaNotifData) => {
   try {
     await dataMonikaNotifSchemaValidator.validateAsync(data)
-    await sendMonikaNotif({
-      url: data?.url,
-      body: {
-        type: 'start',
-        probe_url: '-',
-        ip_address: getIp(),
-        response_time: new Date().toLocaleString(),
-        alert: body,
-      },
-    })
+    await monikaNotificationSender({ data, body, status })
 
     return 'success'
   } catch (error) {
@@ -257,16 +177,7 @@ const monikaNotificationInitialChecker = async (data: MonikaNotifData) => {
 const workplaceNotificationInitialChecker = async (data: WorkplaceData) => {
   try {
     await dataWorkplaceSchemaValidator.validateAsync(data)
-
-    await sendWorkplace({
-      thread_id: data.thread_id,
-      access_token: data.access_token,
-      body: {
-        url: '-',
-        alert: body,
-        time: new Date().toLocaleString(),
-      },
-    })
+    await workplaceNotificationSender({ data, body })
 
     return 'success'
   } catch (error) {
@@ -276,15 +187,7 @@ const workplaceNotificationInitialChecker = async (data: WorkplaceData) => {
 
 const desktopNotificationInitialChecker = async (data: TeamsData) => {
   try {
-    await sendDesktop({
-      url: data?.url,
-      body: {
-        url: '-',
-        alert: body,
-        time: new Date().toLocaleString(),
-        status: 'INIT',
-      },
-    })
+    desktopNotificationSender({ data, body, status })
 
     return 'success'
   } catch (error) {
