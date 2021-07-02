@@ -1,3 +1,10 @@
+import boxen from 'boxen'
+import chalk from 'chalk'
+import cli from 'cli-ux'
+import fs from 'fs'
+import isUrl from 'is-url'
+import open from 'open'
+
 /**********************************************************************************
  * MIT License                                                                    *
  *                                                                                *
@@ -22,33 +29,34 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 import { Command, flags } from '@oclif/command'
-import cli from 'cli-ux'
-import chalk from 'chalk'
-import boxen from 'boxen'
-import open from 'open'
-import fs from 'fs'
-import isUrl from 'is-url'
-import { Probe } from './interfaces/probe'
-import { MailData, MailgunData, SMTPData, WebhookData } from './interfaces/data'
-import { Config } from './interfaces/config'
-import { idFeeder, loopReport, isIDValid, sanitizeProbe } from './looper'
-import { printAllLogs } from './components/logger'
-import { log } from './utils/pino'
-import {
-  closeLog,
-  openLogfile,
-  flushAllLogs,
-} from './components/logger/history'
-import { notificationChecker } from './components/notification/checker'
-import { terminationNotif } from './components/notification/termination'
-import { resetProbeStatuses } from './components/notification/process-server-status'
+
 import {
   getConfig,
   getConfigIterator,
   setupConfigFromFile,
   setupConfigFromUrl,
 } from './components/config'
+import { printAllLogs } from './components/logger'
+import {
+  closeLog,
+  flushAllLogs,
+  openLogfile,
+} from './components/logger/history'
+import { validateResponse } from './components/notification/alert'
+import { notificationChecker } from './components/notification/checker'
+import { terminationNotif } from './components/notification/termination'
+import { resetProbeStatuses } from './components/notification/process-server-status'
+import {
+  RESPONSE_RECEIVED,
+  RESPONSE_VALIDATED,
+} from './constants/event-emitter'
+import { Config } from './interfaces/config'
+import { MailData, MailgunData, SMTPData, WebhookData } from './interfaces/data'
+import { Probe } from './interfaces/probe'
+import { AxiosResponseWithExtraData } from './interfaces/request'
+import { idFeeder, isIDValid, loopReport, sanitizeProbe } from './looper'
 import { getEventEmitter } from './utils/events'
+import { log } from './utils/pino'
 
 const em = getEventEmitter()
 
@@ -338,9 +346,17 @@ em.addListener('SANITIZED_CONFIG', function () {
   log.info(`Config has been sanitized`)
 })
 
-// Subscribe to Receive Response
-em.addListener('RESPONSE_RECEIVED', function () {
-  log.info('Response received')
+// EVENT EMITTER - RESPONSE_RECEIVED
+interface ResponseReceived {
+  alerts: string[]
+  response: AxiosResponseWithExtraData
+}
+
+// RESPONSE_RECEIVED - VALIDATE RESPONSE
+em.on(RESPONSE_RECEIVED, function (data: ResponseReceived) {
+  const res = validateResponse(data.alerts, data.response)
+
+  em.emit(RESPONSE_VALIDATED, res)
 })
 
 /**
