@@ -19,8 +19,6 @@
   ],
   "scripts": {
     "preinstall": "node scripts/preinstall.js",
-    "pretest": "npm run check-format",
-    "posttest": "eslint . --ext .ts --config .eslintrc",
     "prepack": "rm -rf lib && tsc -b && oclif-dev readme",
     "start": "./bin/run",
     "test": "cross-env NODE_ENV=test nyc --extension .ts mocha --forbid-only \"test/**/*.test.ts\"",
