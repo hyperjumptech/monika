@@ -37,11 +37,39 @@ describe('statusNot2xx', () => {
     const res = generateMockedResponse(100)
     const data = statusNot2xx(res)
 
-    expect(data).to.equals(false)
+    expect(data).to.equals(true)
   })
 
   it('should handle when response status is 200', () => {
     const res = generateMockedResponse(200)
+    const data = statusNot2xx(res)
+
+    expect(data).to.equals(false)
+  })
+
+  it('should handle when response status is 201', () => {
+    const res = generateMockedResponse(201)
+    const data = statusNot2xx(res)
+
+    expect(data).to.equals(false)
+  })
+
+  it('should handle when response status is 300', () => {
+    const res = generateMockedResponse(300)
+    const data = statusNot2xx(res)
+
+    expect(data).to.equals(true)
+  })
+
+  it('should handle when response status is 400', () => {
+    const res = generateMockedResponse(400)
+    const data = statusNot2xx(res)
+
+    expect(data).to.equals(true)
+  })
+
+  it('should handle when response status is 500', () => {
+    const res = generateMockedResponse(500)
     const data = statusNot2xx(res)
 
     expect(data).to.equals(true)
