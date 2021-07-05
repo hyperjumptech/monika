@@ -40,6 +40,7 @@ import {
   flushAllLogs,
 } from './components/logger/history'
 import { notificationChecker } from './components/notification/checker'
+import { terminationNotif } from './components/notification/termination'
 import { resetProbeStatuses } from './components/notification/process-server-status'
 import {
   getConfig,
@@ -324,8 +325,12 @@ Please refer to the Monika documentations on how to how to configure notificatio
 }
 
 // Subscribe FirstEvent
-em.addListener('TERMINATE_EVENT', function () {
-  // TODO: Add function here
+em.addListener('TERMINATE_EVENT', async (data) => {
+  log.info('Monika Event: ' + data)
+  const config = getConfig()
+  if (process.env.NODE_ENV !== 'test') {
+    await terminationNotif(config.notifications ?? [])
+  }
 })
 
 // Subscribe to Sanitize Config
