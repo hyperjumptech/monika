@@ -22,11 +22,14 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import React from 'react'
+import React, { useEffect } from 'react'
 import '@docsearch/react/dist/style.css'
 import '../styles/index.css'
 import Head from 'next/head'
 import { SearchProvider } from 'components/useSearch'
+import CookieConsent, { getCookieConsentValue } from 'react-cookie-consent'
+import { useRouter } from 'next/router'
+import * as gtag from '../lib/gtag'
 
 function loadScript(src, attrs = {}) {
   if (typeof document !== 'undefined') {
@@ -43,6 +46,21 @@ function MyApp({ Component, pageProps }) {
   React.useEffect(() => {
     loadScript('https://buttons.github.io/buttons.js')
   }, [])
+
+  const router = useRouter()
+  useEffect(() => {
+    const handleRouteChange = (url) => {
+      if (getCookieConsentValue() === 'true') {
+        //isConsentAllowed
+        gtag.pageview(url)
+      }
+    }
+
+    router.events.on('routeChangeComplete', handleRouteChange)
+    return () => {
+      router.events.off('routeChangeComplete', handleRouteChange)
+    }
+  }, [router.events])
 
   return (
     <>
@@ -74,6 +92,9 @@ function MyApp({ Component, pageProps }) {
         />
       </Head>
       <SearchProvider>
+        <CookieConsent enableDeclineButton>
+          This website uses cookies to enhance the user experience.
+        </CookieConsent>
         <Component {...pageProps} />
       </SearchProvider>
     </>
