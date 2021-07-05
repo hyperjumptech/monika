@@ -323,6 +323,21 @@ Please refer to the Monika documentations on how to how to configure notificatio
   }
 }
 
+// Subscribe FirstEvent
+em.addListener('TERMINATE_EVENT', function () {
+  // TODO: Add function here
+})
+
+// Subscribe to Sanitize Config
+em.addListener('SANITIZED_CONFIG', function () {
+  // TODO: Add function here
+})
+
+// Subscribe to Receive Response
+em.addListener('RESPONSE_RECEIVED', function () {
+  // TODO: Add function here
+})
+
 /**
  * Show Exit Message
  */
