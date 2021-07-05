@@ -28,8 +28,6 @@ import { exec } from 'child_process'
 describe('monika', () => {
   it('shows version', (done) => {
     exec(`monika -v`, (_, stdout) => {
-      // eslint-disable-next-line no-console
-      console.log('stdout', stdout)
       expect(stdout).to.contain('@hyperjumptech/monika/')
       done()
     })
