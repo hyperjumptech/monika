@@ -35,7 +35,7 @@ export default function DemoVideo() {
       />
       <div className="m-auto flex flex-col z-10">
         <h3 className="m-auto text-white text-xl -mt-y-1/4">
-          <span className="bg-gradient-to-r from-purple-monika to-aqua-monika bg-clip-text text-transparent font-bold">
+          <span className="bg-gradient-to-r from-purple-monika to-aqua-monika bg-clip-text text-transparent font-semibold">
             Monika
           </span>{' '}
           Quick Start
@@ -49,10 +49,16 @@ export default function DemoVideo() {
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen={true}
           />
-          <div className="mx-8 md:m-auto flex flex-col max-w-sm">
-            <p className="text-white text-3xl lg:text-4xl leading-none lg:text-left text-center">
+          <div className="mx-4 md:m-auto flex flex-col max-w-sm">
+            <p className="text-white text-2xl lg:text-4xl leading-none lg:text-left text-center">
               Sleep well knowing that your{' '}
-              <span className="bg-gradient-to-r from-purple-monika to-aqua-monika bg-clip-text text-transparent font-bold">
+              <span
+                style={{
+                  boxDecorationBreak: 'clone',
+                  WebkitBoxDecorationBreak: 'clone',
+                }}
+                className="bg-gradient-to-r from-purple-monika to-aqua-monika bg-clip-text text-transparent font-semibold"
+              >
                 server is working as it should be
               </span>
             </p>
