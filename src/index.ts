@@ -335,12 +335,12 @@ em.addListener('TERMINATE_EVENT', async (data) => {
 
 // Subscribe to Sanitize Config
 em.addListener('SANITIZED_CONFIG', function () {
-  log.info(`Config has been sanitized`)
+  // TODO: Add function here
 })
 
 // Subscribe to Receive Response
 em.addListener('RESPONSE_RECEIVED', function () {
-  log.info('Response received')
+  // TODO: Add function here
 })
 
 /**
@@ -351,9 +351,8 @@ process.on('SIGINT', () => {
     log.info('Thank you for using Monika!')
     log.info('We need your help to make Monika better.')
     log.info(
-      'Can you give us some feedback by clicking this link https://github.com/hyperjumptech/monika/discussions?'
+      'Can you give us some feedback by clicking this link https://github.com/hyperjumptech/monika/discussions?\n'
     )
-    log.info('')
   }
   em.emit('TERMINATE_EVENT', 'Monika is terminating')
   process.exit(process.exitCode)
