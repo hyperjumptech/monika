@@ -1,10 +1,3 @@
-import boxen from 'boxen'
-import chalk from 'chalk'
-import cli from 'cli-ux'
-import fs from 'fs'
-import isUrl from 'is-url'
-import open from 'open'
-
 /**********************************************************************************
  * MIT License                                                                    *
  *                                                                                *
@@ -28,8 +21,14 @@ import open from 'open'
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  *
  * SOFTWARE.                                                                      *
  **********************************************************************************/
-import { Command, flags } from '@oclif/command'
 
+import { Command, flags } from '@oclif/command'
+import boxen from 'boxen'
+import chalk from 'chalk'
+import cli from 'cli-ux'
+import fs from 'fs'
+import isUrl from 'is-url'
+import open from 'open'
 import {
   getConfig,
   getConfigIterator,
