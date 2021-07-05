@@ -37,10 +37,19 @@ describe('resTimeGreaterThanX', () => {
     } as AxiosResponseWithExtraData
   }
 
-  it('should handle when response time is greater than', () => {
+  it('should handle when response time is greater than minimum response time', () => {
+    const minimumResponseTime = 2
     const res = generateMockedResponse(5)
-    const data = resTimeGreaterThanX(res, 2)
+    const data = resTimeGreaterThanX(res, minimumResponseTime)
 
     expect(data).to.equals(true)
+  })
+
+  it('should handle when response time is less than minimum response time', () => {
+    const minimumResponseTime = 2
+    const res = generateMockedResponse(1)
+    const data = resTimeGreaterThanX(res, minimumResponseTime)
+
+    expect(data).to.equals(false)
   })
 })
