@@ -22,14 +22,12 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { ProbeStatus, StatusDetails } from '../../interfaces/probe-status'
+import { printProbeLog, setAlert } from '../../components/logger'
 import { Probe } from '../../interfaces/probe'
-import { ValidateResponseStatus } from './alert'
-import { log } from '../../utils/pino'
+import { ProbeStatus, StatusDetails } from '../../interfaces/probe-status'
 import { AxiosResponseWithExtraData } from '../../interfaces/request'
-import { setAlert } from '../../components/logger'
-
-import { printProbeLog } from '../../components/logger'
+import { ValidateResponse } from '../../plugins/validate-response'
+import { log } from '../../utils/pino'
 
 let PROBE_STATUSES: ProbeStatus[] = []
 const INIT_PROBE_STATUS_DETAILS: StatusDetails = {
@@ -65,7 +63,7 @@ const determineProbeState = ({
 }: {
   errorName: string
   probeStatus: StatusDetails
-  validation: ValidateResponseStatus
+  validation: ValidateResponse
   incidentThreshold: number
   recoveryThreshold: number
 }) => {
@@ -176,7 +174,7 @@ export const processProbeStatus = ({
   probe: Probe
   probeRes: AxiosResponseWithExtraData
   totalRequests: number
-  validatedResp: ValidateResponseStatus[]
+  validatedResp: ValidateResponse[]
   incidentThreshold: number
   recoveryThreshold: number
 }) => {
