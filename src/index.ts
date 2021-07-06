@@ -35,19 +35,25 @@ import {
   setupConfigFromFile,
   setupConfigFromUrl,
 } from './components/config'
-import { printAllLogs } from './components/logger'
+import { notificationLog, printAllLogs } from './components/logger'
 import {
   closeLog,
   flushAllLogs,
   openLogfile,
 } from './components/logger/history'
-import { validateResponse } from './components/notification/alert'
+import {
+  validateResponse,
+  ValidateResponseStatus,
+} from './components/notification/alert'
 import { notificationChecker } from './components/notification/checker'
 import { terminationNotif } from './components/notification/termination'
 import { resetProbeStatuses } from './components/notification/process-server-status'
 import {
-  RESPONSE_RECEIVED,
-  RESPONSE_VALIDATED,
+  PROBE_RESPONSE_RECEIVED,
+  PROBE_RESPONSE_VALIDATED,
+  PROBE_SAVE_LOG_TO_DATABASE,
+  PROBE_SEND_NOTIFICATION,
+  PROBE_STATUS_PROCESSED,
 } from './constants/event-emitter'
 import { Config } from './interfaces/config'
 import { MailData, MailgunData, SMTPData, WebhookData } from './interfaces/data'
@@ -56,6 +62,10 @@ import { AxiosResponseWithExtraData } from './interfaces/request'
 import { idFeeder, isIDValid, loopReport, sanitizeProbe } from './looper'
 import { getEventEmitter } from './utils/events'
 import { log } from './utils/pino'
+import { StatusDetails } from './interfaces/probe-status'
+import { Notification } from './interfaces/notification'
+import { sendAlerts } from './components/notification'
+import { getLogsAndReport } from './components/reporter'
 
 const em = getEventEmitter()
 
@@ -345,17 +355,125 @@ em.addListener('SANITIZED_CONFIG', function () {
   // TODO: Add function here
 })
 
-// EVENT EMITTER - RESPONSE_RECEIVED
-interface ResponseReceived {
+// EVENT EMITTER - PROBE_RESPONSE_RECEIVED
+interface ProbeResponseReceived {
   alerts: string[]
   response: AxiosResponseWithExtraData
 }
 
-// RESPONSE_RECEIVED - VALIDATE RESPONSE
-em.on(RESPONSE_RECEIVED, function (data: ResponseReceived) {
+// PROBE_RESPONSE_RECEIVED - VALIDATE RESPONSE
+em.on(PROBE_RESPONSE_RECEIVED, function (data: ProbeResponseReceived) {
   const res = validateResponse(data.alerts, data.response)
 
-  em.emit(RESPONSE_VALIDATED, res)
+  em.emit(PROBE_RESPONSE_VALIDATED, res)
+})
+
+// EVENT EMITTER - PROBE_STATUS_PROCESSED
+interface ProbeStatusProcessed {
+  probe: Probe
+  statuses?: StatusDetails[]
+  notifications?: Notification[]
+  validatedResponseStatuses: ValidateResponseStatus[]
+  totalRequests: number
+}
+
+interface ProbeSendNotification extends Omit<ProbeStatusProcessed, 'statuses'> {
+  index: number
+  status?: StatusDetails
+}
+
+interface ProbeSaveLogToDatabase
+  extends Omit<
+    ProbeStatusProcessed,
+    'statuses' | 'totalRequests' | 'validatedResponseStatuses'
+  > {
+  index: number
+  status?: StatusDetails
+}
+
+// PROBE_STATUS_PROCESSED
+em.on(PROBE_STATUS_PROCESSED, (data: ProbeStatusProcessed) => {
+  const {
+    probe,
+    statuses,
+    notifications,
+    totalRequests,
+    validatedResponseStatuses,
+  } = data
+
+  statuses
+    ?.filter((status) => status.shouldSendNotification)
+    ?.forEach((status, index) => {
+      em.emit(PROBE_SEND_NOTIFICATION, {
+        index,
+        probe,
+        status,
+        notifications,
+        totalRequests,
+        validatedResponseStatuses,
+      })
+
+      em.emit(PROBE_SAVE_LOG_TO_DATABASE, {
+        index,
+        probe,
+        status,
+        notifications,
+      })
+    })
+})
+
+// PROBE_STATUS_PROCESSED -> PROBE_SEND_NOTIFICATION
+em.on(PROBE_SEND_NOTIFICATION, async (data: ProbeSendNotification) => {
+  const {
+    index,
+    probe,
+    status,
+    notifications,
+    totalRequests,
+    validatedResponseStatuses,
+  } = data
+
+  const statusString = status?.isDown ? 'DOWN' : 'UP'
+  const url = probe.requests[totalRequests - 1].url ?? ''
+
+  if ((notifications?.length ?? 0) > 0) {
+    await sendAlerts({
+      url: url,
+      status: statusString,
+      probeId: probe.id,
+      probeName: probe.name,
+      incidentThreshold: probe.incidentThreshold,
+      notifications: notifications ?? [],
+      validation: validatedResponseStatuses[index],
+    })
+  }
+})
+
+// PROBE_STATUS_PROCESSED -> PROBE_SAVE_LOG_TO_DATABASE
+em.on(PROBE_SAVE_LOG_TO_DATABASE, async (data: ProbeSaveLogToDatabase) => {
+  const { index, probe, status, notifications } = data
+
+  const type =
+    status?.state === 'UP_TRUE_EQUALS_THRESHOLD'
+      ? 'NOTIFY-INCIDENT'
+      : 'NOTIFY-RECOVER'
+
+  if ((notifications?.length ?? 0) > 0) {
+    Promise.all(
+      notifications?.map((notification) => {
+        const alertMsg = probe.alerts[index]
+
+        return notificationLog({
+          type,
+          probe,
+          alertMsg,
+          notification,
+        })
+      })!
+    ).then(() => {
+      getLogsAndReport()
+    })
+  }
 })
 
 /**
