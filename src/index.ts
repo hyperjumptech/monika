@@ -54,6 +54,10 @@ import { MailData, MailgunData, SMTPData, WebhookData } from './interfaces/data'
 import { Probe } from './interfaces/probe'
 import { AxiosResponseWithExtraData } from './interfaces/request'
 import { idFeeder, isIDValid, loopReport, sanitizeProbe } from './looper'
+import {
+  PrometheusCollector,
+  startPrometheusMetricsServer,
+} from './plugins/metrics/prometheus'
 import { getEventEmitter } from './utils/events'
 import { log } from './utils/pino'
 
@@ -118,6 +122,11 @@ class Monika extends Command {
       default: false,
     }),
 
+    prometheus: flags.integer({
+      char: 'p',
+      description: 'enable Prometheus server metric',
+    }),
+
     repeat: flags.string({
       char: 'r', // (r)epeat
       description: 'repeats the test run n times',
@@ -153,6 +162,18 @@ class Monika extends Command {
       }
       await closeLog()
       return
+    }
+
+    // start Promotheus server
+    if (flags.prometheus) {
+      const prometheusCollector = new PrometheusCollector()
+
+      // register prometheus metric collectors
+      em.on('SANITIZED_CONFIG', prometheusCollector.registerCollectorFromProbes)
+      // collect prometheus metrics
+      em.on(RESPONSE_RECEIVED, prometheusCollector.collectProbeRequestMetrics)
+
+      startPrometheusMetricsServer(flags.prometheus)
     }
 
     if (flags['create-config']) {
@@ -222,7 +243,7 @@ class Monika extends Command {
 
         // emit the sanitized probe
         if (sanitizedProbe) {
-          em.emit('SANITIZED_CONFIG')
+          em.emit('SANITIZED_CONFIG', sanitizedProbe)
         }
 
         abortCurrentLooper = idFeeder(
@@ -340,20 +361,16 @@ em.addListener('TERMINATE_EVENT', async (data) => {
   }
 })
 
-// Subscribe to Sanitize Config
-em.addListener('SANITIZED_CONFIG', function () {
-  // TODO: Add function here
-})
-
 // EVENT EMITTER - RESPONSE_RECEIVED
 interface ResponseReceived {
-  alerts: string[]
+  probe: Probe
+  requestIndex: number
   response: AxiosResponseWithExtraData
 }
 
 // RESPONSE_RECEIVED - VALIDATE RESPONSE
 em.on(RESPONSE_RECEIVED, function (data: ResponseReceived) {
-  const res = validateResponse(data.alerts, data.response)
+  const res = validateResponse(data.probe.alerts, data.response)
 
   em.emit(RESPONSE_VALIDATED, res)
 })

@@ -66,7 +66,8 @@ export async function doProbe(
       probeRes = await probing(request, responses)
 
       em.emit(RESPONSE_RECEIVED, {
-        alerts: probe.alerts,
+        probe,
+        requestIndex: totalRequests,
         response: probeRes,
       })
 
