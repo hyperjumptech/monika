@@ -22,20 +22,28 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { ValidateResponseStatus, validateResponse } from '../notification/alert'
-import { processProbeStatus } from '../notification/process-server-status'
-import { probing } from './probing'
-import { Probe } from '../../interfaces/probe'
+import {
+  RESPONSE_RECEIVED,
+  RESPONSE_VALIDATED,
+} from '../../constants/event-emitter'
 import { Notification } from '../../interfaces/notification'
-import { notificationLog, probeLog, setAlert } from '../logger'
+import { Probe } from '../../interfaces/probe'
 import { AxiosResponseWithExtraData } from '../../interfaces/request'
-import { sendAlerts } from '../notification'
-import { getLogsAndReport } from '../reporter'
-
-import { printProbeLog } from '../logger'
+import { ValidateResponse } from '../../plugins/validate-response'
 import { getEventEmitter } from '../../utils/events'
+import { notificationLog, printProbeLog, probeLog, setAlert } from '../logger'
+import { sendAlerts } from '../notification'
+import { processProbeStatus } from '../notification/process-server-status'
+import { getLogsAndReport } from '../reporter'
+import { probing } from './probing'
 
 const em = getEventEmitter()
+
+let validatedRes: ValidateResponse[] = []
+
+em.on(RESPONSE_VALIDATED, (data: ValidateResponse[]) => {
+  validatedRes = data
+})
 
 /**
  * doProbe sends out the http request
@@ -49,26 +57,28 @@ export async function doProbe(
   notifications?: Notification[]
 ) {
   let probeRes: AxiosResponseWithExtraData = {} as AxiosResponseWithExtraData
-  let validatedResp: ValidateResponseStatus[] = []
   let totalRequests = 0 // is the number of requests in  probe.requests[x]
 
   try {
     const responses: Array<AxiosResponseWithExtraData> = []
+
     for await (const request of probe.requests) {
       probeRes = await probing(request, responses)
-      em.emit('RESPONSE_RECEIVED')
+
+      em.emit(RESPONSE_RECEIVED, {
+        alerts: probe.alerts,
+        response: probeRes,
+      })
 
       // Add to an array to be accessed by another request
       responses.push(probeRes)
-
-      validatedResp = validateResponse(probe.alerts, probeRes)
 
       await probeLog({
         checkOrder,
         probe,
         totalRequests,
         probeRes,
-        alerts: validatedResp
+        alerts: validatedRes
           .filter((item) => item.status)
           .map((item) => item.alert),
       })
@@ -77,7 +87,7 @@ export async function doProbe(
       totalRequests += 1
 
       // Exit the loop if there is any triggers triggered
-      if (validatedResp.filter((item) => item.status).length > 0) {
+      if (validatedRes.filter((item) => item.status).length > 0) {
         break
       }
 
@@ -90,7 +100,7 @@ export async function doProbe(
       probe,
       probeRes,
       totalRequests,
-      validatedResp,
+      validatedResp: validatedRes,
       incidentThreshold: probe.incidentThreshold,
       recoveryThreshold: probe.recoveryThreshold,
     })
@@ -116,7 +126,7 @@ export async function doProbe(
         )
 
         const sendAlertsPromise = sendAlerts({
-          validation: validatedResp[index],
+          validation: validatedRes[index],
           notifications: notifications,
           url: probe.requests[totalRequests - 1].url ?? '',
           status: status.isDown ? 'DOWN' : 'UP',

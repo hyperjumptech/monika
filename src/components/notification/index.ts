@@ -48,8 +48,7 @@ import { sendDiscord } from './channel/discord'
 import { sendMonikaNotif } from './channel/monika-notif'
 import { sendWorkplace } from './channel/workplace'
 import { sendDesktop } from './channel/desktop'
-
-export type ValidateResponseStatus = { alert: string; status: boolean }
+import { ValidateResponse } from '../../plugins/validate-response'
 
 export async function sendAlerts({
   validation,
@@ -60,7 +59,7 @@ export async function sendAlerts({
   probeName,
   probeId,
 }: {
-  validation: ValidateResponseStatus
+  validation: ValidateResponse
   notifications: Notification[]
   url: string
   status: string
