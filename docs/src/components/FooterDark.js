@@ -36,7 +36,7 @@ export default function FooterDark(props) {
       <a href="/">
         <img className="w-16 h-4 mt-1" src={MonikaSvg} />
       </a>
-      <div className="flex flex-col mt-2 lg:mt-0">
+      <div className="flex flex-col mt-4 lg:mt-0">
         <p className="font-bold">Resources</p>
         <a className="text-xs pt-2" href="/overview" rel="noopener noreferrer">
           Documentation
@@ -59,7 +59,7 @@ export default function FooterDark(props) {
           WhatsApp Notifier
         </a>
       </div>
-      <div className="flex flex-col mt-2 lg:mt-0">
+      <div className="flex flex-col mt-4 lg:mt-0">
         <p className="font-bold">Community</p>
         <a
           className="text-xs pt-2"
@@ -77,8 +77,16 @@ export default function FooterDark(props) {
         >
           Releases
         </a>
+        <a
+          className="text-xs pt-1"
+          href={siteConfig.npmUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          NPM Homepage
+        </a>
       </div>
-      <div className="flex flex-col max-w-sm mt-2 lg:mt-0">
+      <div className="flex flex-col max-w-sm mt-8 lg:mt-0">
         <a
           className="font-bold"
           href="https://hyperjump.tech/"
@@ -95,6 +103,7 @@ export default function FooterDark(props) {
           simplify, and secure the most important aspects of its modern DevOps
           practices.
         </p>
+        <p className="text-xs mr-auto pt-2">{siteConfig.copyright}</p>
       </div>
     </div>
   )
