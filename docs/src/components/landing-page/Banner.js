@@ -34,16 +34,22 @@ export default function Banner(props) {
         props.className ? props.className : ''
       }`}
     >
-      <div className="z-10 mx-8 lg:mx-auto mb-0 px-4 max-w-4xl text-3xl lg:text-5xl font-bold text-center text-white">
+      <div className="z-10 mx-4 sm:mx-8 md:mx-16 lg:mx-auto mb-0 max-w-4xl text-3xl lg:text-5xl font-bold text-center text-white">
         <h1>
           Know when your{' '}
-          <span className="bg-gradient-to-r from-purple-monika to-aqua-monika bg-clip-text text-transparent">
+          <span
+            style={{
+              boxDecorationBreak: 'clone',
+              WebkitBoxDecorationBreak: 'clone',
+            }}
+            className="break-words bg-gradient-to-r from-purple-monika to-aqua-monika bg-clip-text text-transparent"
+          >
             web app is down
           </span>{' '}
           before your users do.
         </h1>
       </div>
-      <div className="z-10 mt-4 px-4 font-normal text-center text-white">
+      <div className="z-10 mt-4 mx-8 font-normal text-center text-white">
         <p>
           React faster when your app is having problems before your users
           notice!
@@ -51,12 +57,12 @@ export default function Banner(props) {
         <p>Let's get started in seconds.</p>
       </div>
       <div className="z-10 m-auto mt-4">
-        <p className="mt-4 px-16 py-4 bg-gray-monika bg-opacity-10 rounded-md">
-          <span className="bg-gradient-to-r from-purple-monika to-aqua-monika bg-clip-text font-normal text-center text-transparent">
+        <p className="flex w-screen sm:w-auto sm:px-4 lg:px-16 mt-4 py-4 bg-gray-monika bg-opacity-10 rounded-md">
+          <span className="select-all mx-auto bg-gradient-to-r from-purple-monika to-aqua-monika bg-clip-text font-normal text-center text-transparent">
             npm i -g @hyperjumptech/monika
           </span>
         </p>
-        <div className="flex flex-col sm:flex-row justify-between mt-4">
+        <div className="flex flex-col lg:flex-row justify-between mt-4">
           <div className="flex">
             <ButtonLink
               className="w-40 mx-auto leading-snug font-semibold text-center"
@@ -66,7 +72,7 @@ export default function Banner(props) {
               Get Started!
             </ButtonLink>
           </div>
-          <div className="flex sm:m-0 mx-auto sm:mt-0 mt-4">
+          <div className="flex lg:m-0 mx-auto lg:mt-0 mt-4">
             <StarButton />
           </div>
         </div>

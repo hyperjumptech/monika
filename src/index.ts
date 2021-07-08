@@ -21,34 +21,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  *
  * SOFTWARE.                                                                      *
  **********************************************************************************/
+
 import { Command, flags } from '@oclif/command'
-import cli from 'cli-ux'
-import chalk from 'chalk'
 import boxen from 'boxen'
-import open from 'open'
+import chalk from 'chalk'
+import cli from 'cli-ux'
 import fs from 'fs'
 import isUrl from 'is-url'
-import { Probe } from './interfaces/probe'
-import { MailData, MailgunData, SMTPData, WebhookData } from './interfaces/data'
-import { Config } from './interfaces/config'
-import { idFeeder, loopReport, isIDValid, sanitizeProbe } from './looper'
-import { printAllLogs } from './components/logger'
-import { log } from './utils/pino'
-import {
-  closeLog,
-  openLogfile,
-  flushAllLogs,
-} from './components/logger/history'
-import { notificationChecker } from './components/notification/checker'
-import { terminationNotif } from './components/notification/termination'
-import { resetProbeStatuses } from './components/notification/process-server-status'
+import open from 'open'
 import {
   getConfig,
   getConfigIterator,
   setupConfigFromFile,
   setupConfigFromUrl,
 } from './components/config'
+import { printAllLogs } from './components/logger'
+import {
+  closeLog,
+  flushAllLogs,
+  openLogfile,
+} from './components/logger/history'
+import { validateResponse } from './components/notification/alert'
+import { notificationChecker } from './components/notification/checker'
+import { terminationNotif } from './components/notification/termination'
+import { resetProbeStatuses } from './components/notification/process-server-status'
+import {
+  RESPONSE_RECEIVED,
+  RESPONSE_VALIDATED,
+} from './constants/event-emitter'
+import { Config } from './interfaces/config'
+import { MailData, MailgunData, SMTPData, WebhookData } from './interfaces/data'
+import { Probe } from './interfaces/probe'
+import { AxiosResponseWithExtraData } from './interfaces/request'
+import { idFeeder, isIDValid, loopReport, sanitizeProbe } from './looper'
 import { getEventEmitter } from './utils/events'
+import { log } from './utils/pino'
 
 const em = getEventEmitter()
 
@@ -335,12 +342,20 @@ em.addListener('TERMINATE_EVENT', async (data) => {
 
 // Subscribe to Sanitize Config
 em.addListener('SANITIZED_CONFIG', function () {
-  log.info(`Config has been sanitized`)
+  // TODO: Add function here
 })
 
-// Subscribe to Receive Response
-em.addListener('RESPONSE_RECEIVED', function () {
-  log.info('Response received')
+// EVENT EMITTER - RESPONSE_RECEIVED
+interface ResponseReceived {
+  alerts: string[]
+  response: AxiosResponseWithExtraData
+}
+
+// RESPONSE_RECEIVED - VALIDATE RESPONSE
+em.on(RESPONSE_RECEIVED, function (data: ResponseReceived) {
+  const res = validateResponse(data.alerts, data.response)
+
+  em.emit(RESPONSE_VALIDATED, res)
 })
 
 /**
@@ -351,9 +366,8 @@ process.on('SIGINT', () => {
     log.info('Thank you for using Monika!')
     log.info('We need your help to make Monika better.')
     log.info(
-      'Can you give us some feedback by clicking this link https://github.com/hyperjumptech/monika/discussions?'
+      'Can you give us some feedback by clicking this link https://github.com/hyperjumptech/monika/discussions?\n'
     )
-    log.info('')
   }
   em.emit('TERMINATE_EVENT', 'Monika is terminating')
   process.exit(process.exitCode)
