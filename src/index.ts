@@ -451,24 +451,24 @@ em.on(PROBE_STATUS_PROCESSED, (data: ProbeStatusProcessed) => {
 
   statuses
     ?.filter((status) => status.shouldSendNotification)
-    ?.forEach(async (status, index) => {
-      await probeSendNotification({
+    ?.forEach((status, index) => {
+      probeSendNotification({
         index,
         probe,
         status,
         notifications,
         totalRequests,
         validatedResponseStatuses,
-      })
+      }).catch((error: Error) => log.error(error.message))
 
-      await probeSaveLogToDatabase({
+      probeSaveLogToDatabase({
         index,
         probe,
         status,
         notifications,
       })
-
-      getLogsAndReport()
+        .then(getLogsAndReport)
+        .catch((error: Error) => log.error(error.message))
     })
 })
 
