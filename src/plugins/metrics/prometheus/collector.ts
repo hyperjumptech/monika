@@ -47,7 +47,9 @@ export class PrometheusCollector {
       const { id, requests } = probe
 
       requests?.forEach((_: RequestConfig, requestIndex: number) => {
-        const metricNamePrefix = `${snakeCase(id)}_request_${requestIndex}`
+        const metricNamePrefix = `monika_${snakeCase(
+          id
+        )}_request_${requestIndex}`
         const httpStatusCodeGauge = new Gauge({
           name: `${metricNamePrefix}_status_code_info`,
           help: `${metricNamePrefix}: HTTP status code`,
