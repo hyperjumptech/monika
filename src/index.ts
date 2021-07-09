@@ -51,8 +51,6 @@ import { resetProbeStatuses } from './components/notification/process-server-sta
 import {
   PROBE_RESPONSE_RECEIVED,
   PROBE_RESPONSE_VALIDATED,
-  PROBE_SAVE_LOG_TO_DATABASE,
-  PROBE_SEND_NOTIFICATION,
   PROBE_STATUS_PROCESSED,
 } from './constants/event-emitter'
 import { Config } from './interfaces/config'
@@ -391,39 +389,7 @@ interface ProbeSaveLogToDatabase
   status?: StatusDetails
 }
 
-// PROBE_STATUS_PROCESSED
-em.on(PROBE_STATUS_PROCESSED, (data: ProbeStatusProcessed) => {
-  const {
-    probe,
-    statuses,
-    notifications,
-    totalRequests,
-    validatedResponseStatuses,
-  } = data
-
-  statuses
-    ?.filter((status) => status.shouldSendNotification)
-    ?.forEach((status, index) => {
-      em.emit(PROBE_SEND_NOTIFICATION, {
-        index,
-        probe,
-        status,
-        notifications,
-        totalRequests,
-        validatedResponseStatuses,
-      })
-
-      em.emit(PROBE_SAVE_LOG_TO_DATABASE, {
-        index,
-        probe,
-        status,
-        notifications,
-      })
-    })
-})
-
-// PROBE_STATUS_PROCESSED -> PROBE_SEND_NOTIFICATION
-em.on(PROBE_SEND_NOTIFICATION, async (data: ProbeSendNotification) => {
+const probeSendNotification = async (data: ProbeSendNotification) => {
   const {
     index,
     probe,
@@ -447,10 +413,9 @@ em.on(PROBE_SEND_NOTIFICATION, async (data: ProbeSendNotification) => {
       validation: validatedResponseStatuses[index],
     })
   }
-})
+}
 
-// PROBE_STATUS_PROCESSED -> PROBE_SAVE_LOG_TO_DATABASE
-em.on(PROBE_SAVE_LOG_TO_DATABASE, async (data: ProbeSaveLogToDatabase) => {
+const probeSaveLogToDatabase = async (data: ProbeSaveLogToDatabase) => {
   const { index, probe, status, notifications } = data
 
   const type =
@@ -470,10 +435,41 @@ em.on(PROBE_SAVE_LOG_TO_DATABASE, async (data: ProbeSaveLogToDatabase) => {
           notification,
         })
       })!
-    ).then(() => {
+    )
+  }
+}
+
+// PROBE_STATUS_PROCESSED
+em.on(PROBE_STATUS_PROCESSED, (data: ProbeStatusProcessed) => {
+  const {
+    probe,
+    statuses,
+    notifications,
+    totalRequests,
+    validatedResponseStatuses,
+  } = data
+
+  statuses
+    ?.filter((status) => status.shouldSendNotification)
+    ?.forEach(async (status, index) => {
+      await probeSendNotification({
+        index,
+        probe,
+        status,
+        notifications,
+        totalRequests,
+        validatedResponseStatuses,
+      })
+
+      await probeSaveLogToDatabase({
+        index,
+        probe,
+        status,
+        notifications,
+      })
+
       getLogsAndReport()
     })
-  }
 })
 
 /**
