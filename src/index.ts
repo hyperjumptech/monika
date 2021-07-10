@@ -49,6 +49,7 @@ import { notificationChecker } from './components/notification/checker'
 import { terminationNotif } from './components/notification/termination'
 import { resetProbeStatuses } from './components/notification/process-server-status'
 import {
+  PROBE_READY_TOEAT,
   PROBE_RESPONSE_RECEIVED,
   PROBE_RESPONSE_VALIDATED,
   PROBE_STATUS_PROCESSED,
@@ -353,6 +354,11 @@ em.addListener('SANITIZED_CONFIG', function () {
   // TODO: Add function here
 })
 
+em.addListener(PROBE_READY_TOEAT, async (mLog) => {
+  // eslint-disable-next-line no-console
+  console.log(mLog) // TODO TODO remove this later this is for debug
+})
+
 // EVENT EMITTER - PROBE_RESPONSE_RECEIVED
 interface ProbeResponseReceived {
   alerts: string[]
@@ -429,6 +435,7 @@ const probeSaveLogToDatabase = async (data: ProbeSaveLogToDatabase) => {
         const alertMsg = probe.alerts[index]
 
         return notificationLog({
+          /// ///// why is this notification in saveto database?!
           type,
           probe,
           alertMsg,

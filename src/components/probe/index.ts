@@ -26,7 +26,9 @@ import {
   PROBE_STATUS_PROCESSED,
   PROBE_RESPONSE_RECEIVED,
   PROBE_RESPONSE_VALIDATED,
+  PROBE_READY_TOEAT,
 } from '../../constants/event-emitter'
+import { LogObject } from '../../interfaces/logs'
 import { Notification } from '../../interfaces/notification'
 import { Probe } from '../../interfaces/probe'
 import { AxiosResponseWithExtraData } from '../../interfaces/request'
@@ -57,6 +59,7 @@ export async function doProbe(
 ) {
   let probeRes: AxiosResponseWithExtraData = {} as AxiosResponseWithExtraData
   let totalRequests = 0 // is the number of requests in  probe.requests[x]
+  let mLog: LogObject = {} as LogObject
 
   try {
     const responses: Array<AxiosResponseWithExtraData> = []
@@ -72,7 +75,8 @@ export async function doProbe(
       // Add to an array to be accessed by another request
       responses.push(probeRes)
 
-      await probeLog({
+      mLog = await probeLog({
+        mLog,
         checkOrder,
         probe,
         totalRequests,
@@ -91,6 +95,7 @@ export async function doProbe(
       }
 
       // done probes, no alerts, no notif.. now print log
+      em.emit(PROBE_READY_TOEAT, mLog)
       printProbeLog()
     }
 
@@ -112,6 +117,6 @@ export async function doProbe(
       validatedResponseStatuses: validatedRes,
     })
   } catch (error) {
-    setAlert({ flag: 'error', message: error })
+    mLog = setAlert({ mLog, flag: 'error', message: error })
   }
 }

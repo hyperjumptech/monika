@@ -29,19 +29,7 @@ import { Notification } from '../../interfaces/notification'
 import { saveProbeRequestLog, getAllLogs, saveNotificationLog } from './history'
 import { log } from '../../utils/pino'
 
-import { Alerts, LogObject } from '../../interfaces/logs'
-
-// declare monika logs and initialize
-let mLogs = {
-  alert: {
-    flag: '',
-    message: [],
-  } as Alerts,
-  notification: {
-    flag: '',
-    message: [],
-  } as Alerts,
-} as LogObject
+import { LogObject } from '../../interfaces/logs'
 
 /**
  * getStatusColor colorizes different statusCode
@@ -72,6 +60,7 @@ export async function probeLog({
   probeRes,
   alerts,
   error,
+  mLog,
 }: {
   checkOrder: number
   probe: Probe
@@ -79,17 +68,18 @@ export async function probeLog({
   probeRes: AxiosResponseWithExtraData
   alerts?: string[]
   error?: string
-}) {
-  mLogs.type = 'PROBE'
-  mLogs.iteration = checkOrder
-  mLogs.id = probe.id
-  mLogs.url = probe.requests[totalRequests].url
-  mLogs.responseCode = probeRes.status
-  mLogs.responseTime = probeRes.config.extraData?.responseTime ?? 0
+  mLog: LogObject
+}): Promise<LogObject> {
+  mLog.type = 'PROBE'
+  mLog.iteration = checkOrder
+  mLog.id = probe.id
+  mLog.url = probe.requests[totalRequests].url
+  mLog.responseCode = probeRes.status
+  mLog.responseTime = probeRes.config.extraData?.responseTime ?? 0
 
   if (alerts?.length) {
-    mLogs.alert.flag = 'alert'
-    mLogs.alert.message = alerts
+    mLog.alert.flag = 'alert'
+    mLog.alert.message = alerts
   }
 
   if (error?.length) log.error('probe error: ', error)
@@ -100,7 +90,10 @@ export async function probeLog({
     }
   }
 
+  return Promise.resolve(mLog)
+
   await saveProbeRequestLog({
+    // TODO: move saving for last
     probe,
     totalRequests,
     probeRes,
@@ -118,14 +111,16 @@ export async function notificationLog({
   alertMsg,
   notification,
   probe,
+  mLog,
 }: {
   probe: Probe
   notification: Notification
   type: 'NOTIFY-INCIDENT' | 'NOTIFY-RECOVER'
   alertMsg: string
-}) {
+  mLog: LogObject
+}): Promise<LogObject> {
   let msg: string
-  mLogs.notification.flag = type
+  mLog.notification.flag = type
   switch (type) {
     case 'NOTIFY-INCIDENT':
       msg = 'service probably down'
@@ -133,66 +128,66 @@ export async function notificationLog({
     case 'NOTIFY-RECOVER':
       msg = 'service is back up'
   }
-  mLogs.notification.flag = type
-  mLogs.notification.message[0] = msg
-  await saveNotificationLog(probe, notification, type, alertMsg)
+  mLog.notification.flag = type
+  mLog.notification.message[0] = msg
+  return Promise.resolve(mLog)
+
+  await saveNotificationLog(probe, notification, type, alertMsg) // TOOODOOO: save to db last!!!
 }
 
 /**
  * setNotification sets notification message
- * flag: type of notif message, ex: disruption
- * message: body of notification message
+ * @param {flag} flag: type of notification message, ex: disruption
+ * @param {string} message[]: body of notification message
+ * @param {LogObject} mLog is the log to be updated
+ * @returns {LogObject} mLog is returned again after updating
  */
 export function setNotification({
   flag,
   message,
+  mLog,
 }: {
   flag: string
   message: string[]
-}) {
-  mLogs.notification.flag = flag
-  mLogs.notification.message = message
+  mLog: LogObject
+}): LogObject {
+  mLog.notification.flag = flag
+  mLog.notification.message = message
+  return mLog
 }
 
 /**
  * setAlert
+ * @param {flag} flag: type of alert message, ex: not-2xx
+ * @param {string} message[]: body of alert message
+ * @param {LogObject} mLog is the log object being updated
+ * @returns {LogObject} mLog returned again afte being updated
  *
  */
 export function setAlert({
   flag,
   message,
+  mLog,
 }: {
   flag: string
   message: string[]
-}) {
-  mLogs.alert.flag = flag
-  mLogs.alert.message = message
-}
-
-function flushMLog() {
-  mLogs = {
-    alert: {
-      flag: '',
-      message: [],
-    } as Alerts,
-    notification: {
-      flag: '',
-      message: [],
-    } as Alerts,
-  } as LogObject
+  mLog: LogObject
+}): LogObject {
+  mLog.alert.flag = flag
+  mLog.alert.message = message
+  return mLog
 }
 
 /**
  * printLogs prints the monika logs and clear buffers
+ * @param {LogObject} mLog that is displayed
  */
-export async function printProbeLog() {
-  if (mLogs.alert.flag.length > 0) {
-    log.warn(mLogs)
+export async function printProbeLog(mLog: LogObject) {
+  if (mLog.alert.flag.length > 0) {
+    log.warn(mLog)
   } else {
-    log.info(mLogs)
+    log.info(mLog)
   }
-
-  flushMLog()
 }
 
 /**
