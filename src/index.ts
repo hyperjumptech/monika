@@ -214,7 +214,8 @@ class Monika extends Command {
         let probesToRun = config.probes
         if (flags.id) {
           if (!isIDValid(config, flags.id)) {
-            return
+            em.emit('TERMINATE_EVENT', 'Monika is terminating')
+            throw new Error('Input error') // can't continue, exit from app
           }
           // doing custom sequences if list of ids is declared
           const idSplit = flags.id.split(',').map((item: string) => item.trim())
@@ -341,7 +342,7 @@ Please refer to the Monika documentations on how to how to configure notificatio
 
 // Subscribe FirstEvent
 em.addListener('TERMINATE_EVENT', async (data) => {
-  log.info('Monika Event: ' + data)
+  log.warn(data)
   const config = getConfig()
   if (process.env.NODE_ENV !== 'test') {
     await terminationNotif(config.notifications ?? [])
