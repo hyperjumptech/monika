@@ -123,8 +123,9 @@ class Monika extends Command {
     }),
 
     prometheus: flags.integer({
-      char: 'p',
-      description: 'enable Prometheus server metric',
+      description:
+        'Specifies the port the Prometheus metric server is listening on. e.g., 3001.',
+      exclusive: ['r'],
     }),
 
     repeat: flags.string({
