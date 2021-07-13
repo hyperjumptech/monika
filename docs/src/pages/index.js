@@ -5,6 +5,7 @@ import { Sticky } from 'components/Sticky'
 import Banner from 'components/landing-page/Banner'
 import FeatureBanner from 'components/landing-page/FeatureBanner'
 import DemoVideo from 'components/landing-page/DemoVideo'
+import SpeakerDeck from 'components/landing-page/SpeakerDeck'
 import GetStartedBanner from 'components/landing-page/GetStartedBanner'
 import FooterDark from 'components/FooterDark'
 
@@ -24,6 +25,7 @@ export default function IndexPage() {
       <Banner />
       <FeatureBanner />
       <DemoVideo />
+      <SpeakerDeck />
       <GetStartedBanner />
       <FooterDark />
     </div>
