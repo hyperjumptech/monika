@@ -1,5 +1,6 @@
 {
-  "name": "App",
+  "name": "Monika",
+  "short_name": "Monika",
   "icons": [
     {
       "src": "/android-chrome-192x192.png",
