@@ -91,7 +91,7 @@ export function isIDValid(config: Config, ids: string): boolean {
       }
     }
     if (!isFound) {
-      log.info(`Error: id not found: ${id}`)
+      log.error(`id not found: ${id}`)
       return false // ran through the probes and didn't find id
     }
   }
