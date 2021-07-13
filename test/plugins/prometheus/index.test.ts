@@ -22,36 +22,61 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import express, { Request, Response, NextFunction } from 'express'
-import helmet from 'helmet'
-import { register } from 'prom-client'
-import { log } from '../../../utils/pino'
+import { expect, test } from '@oclif/test'
+import axios from 'axios'
+import { resolve } from 'path'
+import cmd from '../../../src'
 
-export function startPrometheusMetricsServer(port: number) {
-  const app = express()
+describe('Prometheus plugin', () => {
+  describe('success', () => {
+    test
+      .stdout()
+      .do(() =>
+        cmd.run([
+          '-c',
+          resolve('./monika.example.json'),
+          '--prometheus',
+          '4444',
+        ])
+      )
+      .it('runs Prometheus metric server', async (ctx) => {
+        // act
+        const res = await axios('http://localhost:4444/metrics')
 
-  // security middleware
-  app.use(helmet())
-  app.use((req: Request, res: Response, next: NextFunction) => {
-    if (req.method !== 'GET') {
-      return res.status(405).end()
-    }
-    next()
+        // assert
+        expect(ctx.stdout).to.contain('Starting Monika.')
+        expect(res.status).to.equal(200)
+      })
   })
 
-  app.get('/metrics', async (_: Request, res: Response) => {
-    try {
-      const prometheusMetrics = await register.metrics()
+  describe('failed', () => {
+    test
+      .stderr()
+      .do(() => cmd.run(['--prometheus']))
+      .catch((error) => {
+        // assert
+        expect(error.message).to.contain('Flag --prometheus expects a value')
+      })
+      .it('shows an error if Prometheus metric server port is not specifies')
 
-      res.status(200).end(prometheusMetrics)
-    } catch (error) {
-      res.status(500).json({ message: error.message })
-    }
+    test
+      .stdout()
+      .do(() =>
+        cmd.run([
+          '-c',
+          resolve('./monika.example.json'),
+          '--prometheus',
+          '4446',
+        ])
+      )
+      .it('runs Prometheus metric server but return 405', async () => {
+        try {
+          // act
+          await axios.post('http://localhost:4446/metrics')
+        } catch (error) {
+          // assert
+          expect(error.response.status).to.equal(405)
+        }
+      })
   })
-
-  app.listen(port, () => {
-    log.info(
-      `You can scrape Prometheus metrics from http://localhost:${port}/metrics`
-    )
-  })
-}
+})

@@ -55,7 +55,6 @@
     "pino-pretty": "4.7.1",
     "prom-client": "13.1.0",
     "smtp-server": "^3.8.0",
-    "snake-case": "3.0.4",
     "sqlite": "^4.0.21",
     "sqlite3": "^5.0.2",
     "tslib": "^1.14.1"

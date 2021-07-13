@@ -175,15 +175,15 @@ class Monika extends Command {
 
     // start Promotheus server
     if (flags.prometheus) {
-      const prometheusCollector = new PrometheusCollector()
+      const {
+        registerCollectorFromProbes,
+        collectProbeRequestMetrics,
+      } = new PrometheusCollector()
 
       // register prometheus metric collectors
-      em.on('SANITIZED_CONFIG', prometheusCollector.registerCollectorFromProbes)
+      em.on('SANITIZED_CONFIG', registerCollectorFromProbes)
       // collect prometheus metrics
-      em.on(
-        PROBE_RESPONSE_RECEIVED,
-        prometheusCollector.collectProbeRequestMetrics
-      )
+      em.on(PROBE_RESPONSE_RECEIVED, collectProbeRequestMetrics)
 
       startPrometheusMetricsServer(flags.prometheus)
     }

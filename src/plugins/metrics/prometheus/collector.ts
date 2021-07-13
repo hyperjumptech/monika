@@ -22,88 +22,86 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { RequestConfig } from '../../../interfaces/request'
-import { Gauge, register } from 'prom-client'
-import { snakeCase } from 'snake-case'
+import { Gauge, register, collectDefaultMetrics, Histogram } from 'prom-client'
 import { Probe } from '../../../interfaces/probe'
 
-type requestMetricCollector = {
-  probeID: string
-  requestIndex: number
-  httpStatusCodeGauge: Gauge<string>
-  responseTimeGauge: Gauge<'url' | 'method' | 'statusCode'>
-  responseSizeGauge: Gauge<'url' | 'method' | 'statusCode'>
+type PrometheusCustomCollector = {
+  statusCode: Gauge<'id' | 'name' | 'url' | 'method'>
+  responseTime: Histogram<'id' | 'name' | 'url' | 'method' | 'statusCode'>
+  responseSize: Gauge<'id' | 'name' | 'url' | 'method' | 'statusCode'>
 }
-
 export class PrometheusCollector {
-  private requestMetricCollectors: requestMetricCollector[] = []
+  private prometheusCustomCollector: Partial<PrometheusCustomCollector> = {}
 
   registerCollectorFromProbes(probes: Probe[]) {
     // remove all registered metrics
     register.clear()
-    this.requestMetricCollectors = []
 
-    probes.forEach((probe) => {
-      const { id, requests } = probe
-
-      requests?.forEach((_: RequestConfig, requestIndex: number) => {
-        const metricNamePrefix = `monika_${snakeCase(
-          id
-        )}_request_${requestIndex}`
-        const httpStatusCodeGauge = new Gauge({
-          name: `${metricNamePrefix}_status_code_info`,
-          help: `${metricNamePrefix}: HTTP status code`,
-        })
-        const responseTimeGauge = new Gauge({
-          name: `${metricNamePrefix}_response_time_seconds`,
-          help: `${metricNamePrefix}: Duration of probe in seconds`,
-          labelNames: ['url', 'method', 'statusCode'],
-        })
-        const responseSizeGauge = new Gauge({
-          name: `${metricNamePrefix}_response_size_bytes`,
-          help: `${metricNamePrefix}: Size of response size in bytes`,
-          labelNames: ['url', 'method', 'statusCode'],
-        })
-
-        this.requestMetricCollectors.push({
-          probeID: id,
-          requestIndex,
-          httpStatusCodeGauge,
-          responseTimeGauge,
-          responseSizeGauge,
-        })
-      })
+    // register metric collector
+    const statusCode = new Gauge({
+      name: 'monika_request_status_code_info',
+      help: 'HTTP status code',
+      labelNames: ['id', 'name', 'url', 'method'] as const,
     })
+    const responseTime = new Histogram({
+      name: 'monika_request_response_time_seconds',
+      help: 'Duration of probe request in seconds',
+      labelNames: ['id', 'name', 'url', 'method', 'statusCode'] as const,
+    })
+    const responseSize = new Gauge({
+      name: 'monika_request_response_size_bytes',
+      help: 'Size of response size in bytes',
+      labelNames: ['id', 'name', 'url', 'method', 'statusCode'] as const,
+    })
+
+    // register and collect default Node.js metrics
+    collectDefaultMetrics({ register })
+    // register and collect probe total
+    new Gauge({
+      name: 'monika_probes_total',
+      help: 'Total of all probe',
+    }).set(probes.length)
+
+    this.prometheusCustomCollector = {
+      statusCode,
+      responseTime,
+      responseSize,
+    }
   }
 
-  collectProbeRequestMetrics(probeResult: any) {
+  collectProbeRequestMetrics(probeResult: Record<string, any>) {
     const { probe, requestIndex, response } = probeResult
-    const requestMetricCollector = this.requestMetricCollectors?.find(
-      (prmc: any) =>
-        prmc.probeID === probe.id && prmc.requestIndex === requestIndex
-    )
-    const request = probe.requests[requestIndex]
-
-    if (requestMetricCollector) {
-      const {
-        httpStatusCodeGauge,
-        responseTimeGauge,
-        responseSizeGauge,
-      } = requestMetricCollector
-      const responseTimeInSecond =
-        (response.config.extraData?.responseTime ?? 0) / 1000
-      const responesizeBytes = Number(response.headers['content-length'])
-      const labels = {
-        url: request.url,
-        method: request?.method ?? 'GET',
-        statusCode: response?.status,
-      }
-
-      httpStatusCodeGauge.set(response?.status)
-      responseTimeGauge.labels(labels).set(responseTimeInSecond)
-      responseSizeGauge
-        .labels(labels)
-        .set(isNaN(responesizeBytes) ? 0 : responesizeBytes)
+    const { id, name, requests } = probe
+    const request = requests[requestIndex]
+    const { method, url } = request
+    const { config, headers } = response
+    const responseTimeInSecond = config.extraData?.responseTime ?? 0
+    const responseSizeBytes = Number(headers['content-length'])
+    const labels = {
+      id,
+      name,
+      url,
+      method: method ?? 'GET',
+      statusCode: response?.status,
     }
+    const {
+      statusCode,
+      responseTime,
+      responseSize,
+    } = this.prometheusCustomCollector
+
+    // collect metrics
+    statusCode
+      ?.labels({
+        id,
+        name,
+        url,
+        method: method ?? 'GET',
+      })
+      .set(response?.status)
+    responseTime?.labels(labels).observe(responseTimeInSecond)
+    responseSize
+      ?.labels(labels)
+      .set(isNaN(responseSizeBytes) ? 0 : responseSizeBytes)
   }
 }
