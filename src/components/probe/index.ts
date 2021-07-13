@@ -23,25 +23,24 @@
  **********************************************************************************/
 
 import {
-  RESPONSE_RECEIVED,
-  RESPONSE_VALIDATED,
+  PROBE_STATUS_PROCESSED,
+  PROBE_RESPONSE_RECEIVED,
+  PROBE_RESPONSE_VALIDATED,
 } from '../../constants/event-emitter'
 import { Notification } from '../../interfaces/notification'
 import { Probe } from '../../interfaces/probe'
 import { AxiosResponseWithExtraData } from '../../interfaces/request'
 import { ValidateResponse } from '../../plugins/validate-response'
 import { getEventEmitter } from '../../utils/events'
-import { notificationLog, printProbeLog, probeLog, setAlert } from '../logger'
-import { sendAlerts } from '../notification'
+import { printProbeLog, probeLog, setAlert } from '../logger'
 import { processProbeStatus } from '../notification/process-server-status'
-import { getLogsAndReport } from '../reporter'
 import { probing } from './probing'
 
 const em = getEventEmitter()
 
 let validatedRes: ValidateResponse[] = []
 
-em.on(RESPONSE_VALIDATED, (data: ValidateResponse[]) => {
+em.on(PROBE_RESPONSE_VALIDATED, (data: ValidateResponse[]) => {
   validatedRes = data
 })
 
@@ -65,7 +64,7 @@ export async function doProbe(
     for await (const request of probe.requests) {
       probeRes = await probing(request, responses)
 
-      em.emit(RESPONSE_RECEIVED, {
+      em.emit(PROBE_RESPONSE_RECEIVED, {
         probe,
         requestIndex: totalRequests,
         response: probeRes,
@@ -96,7 +95,7 @@ export async function doProbe(
       printProbeLog()
     }
 
-    const serverStatuses = processProbeStatus({
+    const statuses = processProbeStatus({
       checkOrder,
       probe,
       probeRes,
@@ -106,41 +105,12 @@ export async function doProbe(
       recoveryThreshold: probe.recoveryThreshold,
     })
 
-    serverStatuses.forEach(async (status, index) => {
-      if (
-        status.shouldSendNotification &&
-        notifications &&
-        notifications?.length > 0
-      ) {
-        const notificationsLogPromise = Promise.all(
-          notifications.map((notification) => {
-            return notificationLog({
-              probe,
-              notification,
-              type:
-                status.state === 'UP_TRUE_EQUALS_THRESHOLD'
-                  ? 'NOTIFY-INCIDENT'
-                  : 'NOTIFY-RECOVER',
-              alertMsg: probe.alerts[index],
-            })
-          })
-        )
-
-        const sendAlertsPromise = sendAlerts({
-          validation: validatedRes[index],
-          notifications: notifications,
-          url: probe.requests[totalRequests - 1].url ?? '',
-          status: status.isDown ? 'DOWN' : 'UP',
-          incidentThreshold: probe.incidentThreshold,
-          probeName: probe.name,
-          probeId: probe.id,
-        })
-
-        await notificationsLogPromise
-        await sendAlertsPromise
-
-        getLogsAndReport()
-      }
+    em.emit(PROBE_STATUS_PROCESSED, {
+      probe,
+      statuses,
+      notifications,
+      totalRequests,
+      validatedResponseStatuses: validatedRes,
     })
   } catch (error) {
     setAlert({ flag: 'error', message: error })
