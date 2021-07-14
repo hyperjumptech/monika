@@ -46,6 +46,9 @@ describe('Prometheus plugin', () => {
         // assert
         expect(ctx.stdout).to.contain('Starting Monika.')
         expect(res.status).to.equal(200)
+
+        // eslint-disable-next-line unicorn/no-process-exit
+        process.exit(0)
       })
   })
 
@@ -53,11 +56,8 @@ describe('Prometheus plugin', () => {
     test
       .stderr()
       .do(() => cmd.run(['--prometheus']))
-      .catch((error) => {
-        // assert
-        expect(error.message).to.contain('Flag --prometheus expects a value')
-      })
-      .it('shows an error if Prometheus metric server port is not specifies')
+      .exit(2)
+      .it('exits when Prometheus metric server port is not specify')
 
     test
       .stdout()
@@ -77,6 +77,8 @@ describe('Prometheus plugin', () => {
           // assert
           expect(error.response.status).to.equal(405)
         }
+        // eslint-disable-next-line unicorn/no-process-exit
+        process.exit(0)
       })
   })
 })
