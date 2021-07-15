@@ -25,38 +25,58 @@
 import { Config } from '../../interfaces/config'
 import { readFileSync } from 'fs'
 import { Probe } from '../../interfaces/probe'
+import { DEFAULT_THRESHOLD } from '../../looper'
+
+const defaultNotification = [
+  {
+    type: 'desktop',
+    id: 'unique-id-desktop-monika-notif',
+  },
+]
+
+const getConvertedProbeFromPostmanItem = (item: any) => {
+  const req = item.request
+  const probe: Probe = {
+    id: item.name,
+    name: item.name,
+    requests: [
+      {
+        url: req.url.raw,
+        method: req.method,
+        headers: req?.header?.reduce(
+          (obj: any, it: any) => Object.assign(obj, { [it.key]: it.value }),
+          {}
+        ),
+        body: req?.body?.raw || JSON.parse('{}'),
+        timeout: 10000,
+      },
+    ],
+    incidentThreshold: DEFAULT_THRESHOLD,
+    recoveryThreshold: DEFAULT_THRESHOLD,
+    alerts: ['status-not-2xx', 'response-time-greater-than-285-ms'],
+  }
+
+  return probe
+}
 
 const parseConfigFromPostman = (configString: string): Config => {
   try {
     const parsed = JSON.parse(configString)
+    const probes: Probe[] = []
 
-    const convertedProbes = parsed.item.map((item: any) => {
-      const req = item.request
-
-      const probe: Probe = {
-        id: item.name,
-        name: item.name,
-        requests: [
-          {
-            url: req.url.raw,
-            method: req.method,
-            headers: req?.header?.reduce(
-              (obj: any, it: any) => Object.assign(obj, { [it.key]: it.value }),
-              {}
-            ),
-            body: req?.body?.raw || JSON.parse('{}'),
-            timeout: 10000,
-          },
-        ],
-        incidentThreshold: 2,
-        recoveryThreshold: 2,
-        alerts: [],
+    parsed.item.forEach((item: any) => {
+      if (item.item) {
+        item.item.forEach((child: any) => {
+          probes.push(getConvertedProbeFromPostmanItem(child))
+        })
+      } else {
+        probes.push(getConvertedProbeFromPostmanItem(item))
       }
-      return probe
     })
 
-    const configMonika: Config = {
-      probes: convertedProbes,
+    const configMonika: any = {
+      notifications: defaultNotification,
+      probes,
     }
 
     return configMonika
