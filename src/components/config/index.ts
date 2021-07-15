@@ -82,8 +82,12 @@ const handshakeAndValidate = async (config: Config) => {
   }
 }
 
-export const setupConfigFromFile = async (path: string, watch: boolean) => {
-  const parsed = parseConfig(path)
+export const setupConfigFromFile = async (
+  path: string,
+  watch: boolean,
+  type: string
+) => {
+  const parsed = parseConfig(path, type)
   await handshakeAndValidate(parsed)
   cfg = parsed
   cfg.version = cfg.version || md5Hash(cfg)
@@ -91,7 +95,7 @@ export const setupConfigFromFile = async (path: string, watch: boolean) => {
   if (watch) {
     const fileWatcher = chokidar.watch(path)
     fileWatcher.on('change', async () => {
-      const parsed = parseConfig(path)
+      const parsed = parseConfig(path, type)
       await handshakeAndValidate(parsed)
       updateConfig(parsed)
     })

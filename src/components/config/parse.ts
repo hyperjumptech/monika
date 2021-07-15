@@ -24,14 +24,58 @@
 
 import { Config } from '../../interfaces/config'
 import { readFileSync } from 'fs'
+import { Probe } from '../../interfaces/probe'
 
-export const parseConfig = (configPath: string): Config => {
+const parseConfigFromPostman = (configString: string): Config => {
+  try {
+    const parsed = JSON.parse(configString)
+
+    const convertedProbes = parsed.item.map((item: any) => {
+      const req = item.request
+
+      const probe: Probe = {
+        id: item.name,
+        name: item.name,
+        requests: [
+          {
+            url: req.url.raw,
+            method: req.method,
+            headers: req?.header?.reduce(
+              (obj: any, it: any) => Object.assign(obj, { [it.key]: it.value }),
+              {}
+            ),
+            body: req?.body?.raw || JSON.parse('{}'),
+            timeout: 10000,
+          },
+        ],
+        incidentThreshold: 2,
+        recoveryThreshold: 2,
+        alerts: [],
+      }
+      return probe
+    })
+
+    const configMonika: Config = {
+      probes: convertedProbes,
+    }
+
+    return configMonika
+  } catch (error) {
+    throw new Error(error.message)
+  }
+}
+
+export const parseConfig = (configPath: string, type: string): Config => {
   // Read file from configPath
   try {
     // Read file from configPath
     const configString = readFileSync(configPath, 'utf-8')
 
     // Parse the content
+    if (type === 'postman') {
+      return parseConfigFromPostman(configString)
+    }
+
     return JSON.parse(configString)
   } catch (error) {
     if (error.code === 'ENOENT' && error.path === configPath) {

@@ -1,0 +1,183 @@
+{
+	"info": {
+		"_postman_id": "73401126-e1d1-4a9e-b43e-7e4822f2b50e",
+		"name": "Tes Monika",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Request",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:5000/v1",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"v1"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Get Request",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "127.0.0.1:5000/v1",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "5000",
+							"path": [
+								"v1"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "html",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "text/html; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "15"
+						},
+						{
+							"key": "Server",
+							"value": "Werkzeug/1.0.1 Python/3.8.2"
+						},
+						{
+							"key": "Date",
+							"value": "Wed, 14 Jul 2021 06:52:56 GMT"
+						}
+					],
+					"cookie": [],
+					"body": "recommender app"
+				}
+			]
+		},
+		{
+			"name": "Post request monika",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "x-api-key",
+						"value": "188952079ac184709b528fbd729c29dcc3ce084c5ffc48842d2fb68b0fae2878",
+						"type": "text"
+					},
+					{
+						"key": "x-request-timestamp",
+						"value": "1626319375.66815",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"age\": 30,\n  \"course_ids\": [\n    66\n  ],\n  \"gender\": \"L\",\n  \"last_education_id\": 6,\n  \"user_id\": 1233887,\n  \"wallet_amount\": 600000,\n  \"topn\": 5,\n  \"topic_id\": 2\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/v1/course_recommendations",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"v1",
+						"course_recommendations"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Post request monika",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-api-key",
+								"value": "188952079ac184709b528fbd729c29dcc3ce084c5ffc48842d2fb68b0fae2878",
+								"type": "text"
+							},
+							{
+								"key": "x-request-timestamp",
+								"value": "1626319375.66815",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"age\": 30,\n  \"course_ids\": [\n    66\n  ],\n  \"gender\": \"L\",\n  \"last_education_id\": 6,\n  \"user_id\": 1233887,\n  \"wallet_amount\": 600000,\n  \"topn\": 5,\n  \"topic_id\": 2\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:5000/v1/course_recommendations",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "5000",
+							"path": [
+								"v1",
+								"course_recommendations"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "2336"
+						},
+						{
+							"key": "Server",
+							"value": "Werkzeug/1.0.1 Python/3.8.2"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 15 Jul 2021 02:23:55 GMT"
+						}
+					],
+					"cookie": [],
+					"body": "[\n    {\n        \"course_id\": 726,\n        \"name\": \"Membuat Web E Commerce dengan Wordpress\",\n        \"category_id\": 2,\n        \"status\": 1,\n        \"amount\": 500000,\n        \"url\": \"https://pelatihan.kemnaker.go.id/programs/4777ea01-175d-49aa-bb6c-6b95a5f7942b/detail/competencies?previous=%2Fprakerja%3Fpage%3D1%26keyword%3DMembuat%2520Web%2520E%2520Commerce%2520dengan%2520Wordpress&acceptPreWorkCard=1\",\n        \"image_url\": null,\n        \"_source\": \"-\",\n        \"company_name\": \"TechforID\",\n        \"platform_name\": \"Kemenaker\",\n        \"company_id\": 129,\n        \"platform_id\": 7,\n        \"cosine_val\": 0.8688699007034302\n    },\n    {\n        \"course_id\": 726,\n        \"name\": \"Membuat Web E Commerce dengan Wordpress\",\n        \"category_id\": 2,\n        \"status\": 1,\n        \"amount\": 500000,\n        \"url\": \"https://pelatihan.kemnaker.go.id/programs/4777ea01-175d-49aa-bb6c-6b95a5f7942b/detail/competencies?previous=%2Fprakerja%3Fpage%3D1%26keyword%3DMembuat%2520Web%2520E%2520Commerce%2520dengan%2520Wordpress&acceptPreWorkCard=1\",\n        \"image_url\": null,\n        \"_source\": \"-\",\n        \"company_name\": \"TechforID\",\n        \"platform_name\": \"Kemenaker\",\n        \"company_id\": 129,\n        \"platform_id\": 7,\n        \"cosine_val\": 0.8688699007034302\n    },\n    {\n        \"course_id\": 4279,\n        \"name\": \"Jago WordPress dalam 2 jam! Langsung Bisa Bikin Website Toko Online Sendiri!\",\n        \"category_id\": 2,\n        \"status\": 1,\n        \"amount\": 150000,\n        \"url\": \"https://pintaria.com/jago-word-press-dalam-2jam-langsung-bisa-bikin-website-toko-online-sendiri\",\n        \"image_url\": null,\n        \"_source\": \"-\",\n        \"company_name\": \"Skill Academy by Ruangguru\",\n        \"platform_name\": \"Pintaria\",\n        \"company_id\": 2,\n        \"platform_id\": 8,\n        \"cosine_val\": 0.8659512996673584\n    },\n    {\n        \"course_id\": 3919,\n        \"name\": \"Jago WordPress dalam 2 jam! Langsung Bisa Bikin Website Toko Online Sendiri!\",\n        \"category_id\": 2,\n        \"status\": 1,\n        \"amount\": 150000,\n        \"url\": \"https://skillacademy.com/course-detail/jago-wordpress-dalam-2-jam-langsung-bisa-bikin-website-toko-online-sendiri/COURSE-B5MUOM79?courseType=SingleCourse\",\n        \"image_url\": null,\n        \"_source\": \"-\",\n        \"company_name\": \"Skill Academy by Ruangguru\",\n        \"platform_name\": \"Tokopedia\",\n        \"company_id\": 2,\n        \"platform_id\": 1,\n        \"cosine_val\": 0.8628659248352051\n    },\n    {\n        \"course_id\": 3455,\n        \"name\": \"Membuat Web E Commerce dengan Javascript\",\n        \"category_id\": 2,\n        \"status\": 1,\n        \"amount\": 499000,\n        \"url\": \"https://kartuprakerja.babastudio.com/my-course\",\n        \"image_url\": null,\n        \"_source\": \"-\",\n        \"company_name\": \"Baba Studio\",\n        \"platform_name\": \"Kemenaker\",\n        \"company_id\": 19,\n        \"platform_id\": 7,\n        \"cosine_val\": 0.8460125923156738\n    }\n]"
+				}
+			]
+		}
+	]
+}

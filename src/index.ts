@@ -116,6 +116,12 @@ class Monika extends Command {
       dependsOn: ['config'],
     }),
 
+    postman: flags.string({
+      char: 'p', // (p)ostman
+      description: 'Postman json file.',
+      multiple: false,
+    }),
+
     logs: flags.boolean({
       char: 'l', // prints the (l)ogs
       description: 'print all logs.',
@@ -206,7 +212,16 @@ class Monika extends Command {
           flags.repeat
         )
 
-        await setupConfigFromFile(flags.config, watchConfigFile)
+        let configPath = flags.config
+        let type = 'monika'
+        if (flags.postman) {
+          log.info('Getting config from postman json file...')
+
+          configPath = flags.postman
+          type = 'postman'
+        }
+
+        await setupConfigFromFile(configPath, watchConfigFile, type)
       }
 
       // Run report on interval if symon configuration exists

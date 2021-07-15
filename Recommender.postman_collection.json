@@ -1,0 +1,214 @@
+{
+	"info": {
+		"_postman_id": "fee0c5ff-55bb-49c9-890b-10c6894e610d",
+		"name": "Recommender",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authorization",
+			"item": [
+				{
+					"name": "Get Key",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);",
+									"postman.setEnvironmentVariable(\"x_api_key\", jsonData.X-Api-Key);",
+									"postman.setEnvironmentVariable(\"x_request_time\", jsonData.X-Request-Timestamp);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://172.31.165.219/v1/get_key",
+							"protocol": "http",
+							"host": [
+								"172",
+								"31",
+								"165",
+								"219"
+							],
+							"path": [
+								"v1",
+								"get_key"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "recommendations",
+			"item": [
+				{
+					"name": "Default health check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://172.31.165.219/v1/",
+							"protocol": "http",
+							"host": [
+								"172",
+								"31",
+								"165",
+								"219"
+							],
+							"path": [
+								"v1",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Course recommendation",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Api-Key",
+								"value": "{{x_api_key}}",
+								"type": "text"
+							},
+							{
+								"key": "X-Request-Timestamp",
+								"value": "{{x_request_time}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"age\": 30,\n  \"course_ids\": [\n    66\n  ],\n  \"gender\": \"L\",\n  \"last_education_id\": 6,\n  \"user_id\": 1233887,\n  \"wallet_amount\": 600000,\n  \"topn\": 5,\n  \"topic_id\": 2\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://172.31.165.219/v1/course_recommendations",
+							"protocol": "http",
+							"host": [
+								"172",
+								"31",
+								"165",
+								"219"
+							],
+							"path": [
+								"v1",
+								"course_recommendations"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "debug",
+			"item": [
+				{
+					"name": "Course recommendations compare by titles only",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "X-Api-Key",
+								"value": "{{x_api_key}}",
+								"type": "text"
+							},
+							{
+								"key": "X-Request-Timestamp",
+								"value": "{{x_request_time}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"age\": 30,\n  \"course_ids\": [\n    66\n  ],\n  \"gender\": \"L\",\n  \"last_education_id\": 6,\n  \"user_id\": 1233887,\n  \"wallet_amount\": 600000,\n  \"topn\": 5,\n  \"topic_id\": 2\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://172.31.165.219/v1/course_recommendations_title",
+							"protocol": "http",
+							"host": [
+								"172",
+								"31",
+								"165",
+								"219"
+							],
+							"path": [
+								"v1",
+								"course_recommendations_title"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Course by Id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": ""
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get recommendations by word",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://172.31.165.219/v1/by_word/kopi",
+							"protocol": "http",
+							"host": [
+								"172",
+								"31",
+								"165",
+								"219"
+							],
+							"path": [
+								"v1",
+								"by_word",
+								"kopi"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Compare courses by ids",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": ""
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
