@@ -32,6 +32,7 @@ import { validateConfig } from './validate'
 import { handshake } from '../reporter'
 import { log } from '../../utils/pino'
 import { md5Hash } from '../../utils/hash'
+import isUrl from 'is-url'
 
 const emitter = new EventEmitter()
 
@@ -82,50 +83,64 @@ const handshakeAndValidate = async (config: Config) => {
   }
 }
 
-export const setupConfigFromFile = async (path: string, watch: boolean) => {
+const fetchConfigAndValidate = async (path: string) => {
+  const fetched = await fetchConfig(path)
+  await handshakeAndValidate(fetched)
+  return fetched
+}
+
+const parseConfigAndValidate = async (path: string) => {
   const parsed = parseConfig(path)
   await handshakeAndValidate(parsed)
+  return parsed
+}
+
+export const setupConfigFromConfigFlag = async (
+  path: string,
+  watch: boolean,
+  checkingInterval: number
+) => {
+  if (isUrl(path)) {
+    const fetched = await fetchConfigAndValidate(path)
+    cfg = fetched
+    cfg.version = cfg.version || md5Hash(cfg)
+
+    setInterval(async () => {
+      const fetched = await fetchConfigAndValidate(path)
+      updateConfig(fetched)
+    }, checkingInterval * 1000)
+
+    return
+  }
+
+  const parsed = await parseConfigAndValidate(path)
   cfg = parsed
   cfg.version = cfg.version || md5Hash(cfg)
 
   if (watch) {
     const fileWatcher = chokidar.watch(path)
     fileWatcher.on('change', async () => {
-      const parsed = parseConfig(path)
-      await handshakeAndValidate(parsed)
+      const parsed = await parseConfigAndValidate(path)
       updateConfig(parsed)
     })
   }
 }
 
-export const setupConfigFromUrl = async (
-  url: string,
-  checkingInterval: number
-) => {
-  const fetched = await fetchConfig(url)
-  await handshakeAndValidate(fetched)
-  cfg = fetched
-  cfg.version = cfg.version || md5Hash(cfg)
-
-  setInterval(async () => {
-    const fetched = await fetchConfig(url)
-    await handshakeAndValidate(fetched)
-    updateConfig(fetched)
-  }, checkingInterval * 1000)
+const parseHarAndValidate = async (path: string) => {
+  const parsed = parseHarFile(path)
+  await handshakeAndValidate(parsed)
+  return parsed
 }
 
 export const setupConfigFromHarFile = async (path: string, watch: boolean) => {
-  const parsed = parseHarFile(path)
-  log.info(`parse har file config: ${JSON.stringify(parsed)}`)
-  await handshakeAndValidate(parsed)
+  const parsed = await parseHarAndValidate(path)
   cfg = parsed
   cfg.version = cfg.version || md5Hash(cfg)
 
   if (watch) {
     const fileWatcher = chokidar.watch(path)
     fileWatcher.on('change', async () => {
-      const parsed = parseHarFile(path)
-      await handshakeAndValidate(parsed)
+      const parsed = await parseHarAndValidate(path)
       updateConfig(parsed)
     })
   }

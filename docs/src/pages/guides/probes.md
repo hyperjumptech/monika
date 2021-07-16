@@ -112,6 +112,10 @@ In a configuration with multiple probes, `Monika` will perform the requests in s
 
 On completion, `Monika` will sleep until the next interval to start again. At the top of the `monika.json` file there is an `interval` setting. The execution will be restarted after every `interval`. If interval is shorter than the amount of time to dispatch all the requests, then `Monika` will immediately repeat after the last probe response and any notification alerts sent. When the `--repeat` flag is set with a value, Monika will not run indefinitely, instead, it will stop after executing the probes as many times as specified.
 
+## HAR file support
+
+HAR [HTTP-Archive](<https://en.wikipedia.org/wiki/HAR_(file_format)>) format is created by Web Performance Working Group and become the standard use in browser archive request data definition. Currently `Monika` are able to run using HAR format, `--har` flag is set with path to the har definition file.
+
 ## Further reading
 
 1. [Alerts](./alerts)

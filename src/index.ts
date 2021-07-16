@@ -27,14 +27,12 @@ import boxen from 'boxen'
 import chalk from 'chalk'
 import cli from 'cli-ux'
 import fs from 'fs'
-import isUrl from 'is-url'
 import open from 'open'
 import {
   getConfig,
   getConfigIterator,
-  setupConfigFromFile,
   setupConfigFromHarFile,
-  setupConfigFromUrl,
+  setupConfigFromConfigFlag,
 } from './components/config'
 import { notificationLog, printAllLogs } from './components/logger'
 import {
@@ -179,26 +177,22 @@ class Monika extends Command {
     }
 
     try {
-      if (flags.har) {
-        const watchHarFile = !(
-          process.env.CI ||
-          process.env.NODE_ENV === 'test' ||
-          flags.repeat
-        )
+      const watchFile = !(
+        process.env.CI ||
+        process.env.NODE_ENV === 'test' ||
+        flags.repeat
+      )
 
-        await setupConfigFromHarFile(flags.har, watchHarFile)
+      if (flags.har) {
+        await setupConfigFromHarFile(flags.har, watchFile)
       }
 
-      if (isUrl(flags.config)) {
-        await setupConfigFromUrl(flags.config, flags['config-interval'])
-      } else {
-        const watchConfigFile = !(
-          process.env.CI ||
-          process.env.NODE_ENV === 'test' ||
-          flags.repeat
+      if (flags.config) {
+        await setupConfigFromConfigFlag(
+          flags.config,
+          watchFile,
+          flags['config-interval']
         )
-
-        await setupConfigFromFile(flags.config, watchConfigFile)
       }
 
       // Run report on interval if symon configuration exists
