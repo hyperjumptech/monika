@@ -185,9 +185,7 @@ class Monika extends Command {
 
       if (flags.har) {
         await setupConfigFromHarFile(flags.har, watchFile)
-      }
-
-      if (flags.config) {
+      } else {
         await setupConfigFromConfigFlag(
           flags.config,
           watchFile,
