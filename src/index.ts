@@ -58,6 +58,10 @@ import { MailData, MailgunData, SMTPData, WebhookData } from './interfaces/data'
 import { Probe } from './interfaces/probe'
 import { AxiosResponseWithExtraData } from './interfaces/request'
 import { idFeeder, isIDValid, loopReport, sanitizeProbe } from './looper'
+import {
+  PrometheusCollector,
+  startPrometheusMetricsServer,
+} from './plugins/metrics/prometheus'
 import { getEventEmitter } from './utils/events'
 import { log } from './utils/pino'
 import { StatusDetails } from './interfaces/probe-status'
@@ -126,6 +130,12 @@ class Monika extends Command {
       default: false,
     }),
 
+    prometheus: flags.integer({
+      description:
+        'Specifies the port the Prometheus metric server is listening on. e.g., 3001. (EXPERIMENTAL)',
+      exclusive: ['r'],
+    }),
+
     repeat: flags.string({
       char: 'r', // (r)epeat
       description: 'repeats the test run n times',
@@ -161,6 +171,21 @@ class Monika extends Command {
       }
       await closeLog()
       return
+    }
+
+    // start Promotheus server
+    if (flags.prometheus) {
+      const {
+        registerCollectorFromProbes,
+        collectProbeRequestMetrics,
+      } = new PrometheusCollector()
+
+      // register prometheus metric collectors
+      em.on('SANITIZED_CONFIG', registerCollectorFromProbes)
+      // collect prometheus metrics
+      em.on(PROBE_RESPONSE_RECEIVED, collectProbeRequestMetrics)
+
+      startPrometheusMetricsServer(flags.prometheus)
     }
 
     if (flags['create-config']) {
@@ -231,7 +256,7 @@ class Monika extends Command {
 
         // emit the sanitized probe
         if (sanitizedProbe) {
-          em.emit('SANITIZED_CONFIG')
+          em.emit('SANITIZED_CONFIG', sanitizedProbe)
         }
 
         abortCurrentLooper = idFeeder(
@@ -349,20 +374,16 @@ em.addListener('TERMINATE_EVENT', async (data) => {
   }
 })
 
-// Subscribe to Sanitize Config
-em.addListener('SANITIZED_CONFIG', function () {
-  // TODO: Add function here
-})
-
 // EVENT EMITTER - PROBE_RESPONSE_RECEIVED
 interface ProbeResponseReceived {
-  alerts: string[]
+  probe: Probe
+  requestIndex: number
   response: AxiosResponseWithExtraData
 }
 
 // PROBE_RESPONSE_RECEIVED - VALIDATE RESPONSE
 em.on(PROBE_RESPONSE_RECEIVED, function (data: ProbeResponseReceived) {
-  const res = validateResponse(data.alerts, data.response)
+  const res = validateResponse(data.probe.alerts, data.response)
 
   em.emit(PROBE_RESPONSE_VALIDATED, res)
 })
