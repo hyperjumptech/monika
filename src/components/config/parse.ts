@@ -24,6 +24,8 @@
 
 import { Config } from '../../interfaces/config'
 import { readFileSync } from 'fs'
+import { RequestConfig } from '../../interfaces/request'
+import { Probe } from '../../interfaces/probe'
 
 export const parseConfig = (configPath: string): Config => {
   // Read file from configPath
@@ -42,6 +44,50 @@ export const parseConfig = (configPath: string): Config => {
 
     if (error.name === 'SyntaxError') {
       throw new Error('JSON configuration file is in invalid JSON format!')
+    }
+
+    throw new Error(error.message)
+  }
+}
+
+export const parseHarFile = (filepath: string): Config => {
+  // Read file from filepath
+  try {
+    const fileContents = readFileSync(filepath)
+    const harJson = JSON.parse(fileContents.toString())
+
+    const harRequest: RequestConfig[] = harJson.log.entries.map(
+      (entry: { request: any }) => ({
+        method: entry.request.method,
+        url: entry.request.url,
+        headers: Object.assign({}, ...entry.request.headers),
+        params: Object.assign({}, ...entry.request.queryString),
+      })
+    )
+
+    const harProbe: Probe = {
+      id: '',
+      name: '',
+      requests: harRequest,
+      incidentThreshold: 5,
+      recoveryThreshold: 5,
+      alerts: [],
+    }
+
+    const harConfig: Config = {
+      probes: [harProbe],
+    }
+
+    return harConfig
+  } catch (error) {
+    if (error.code === 'ENOENT' && error.path === filepath) {
+      throw new Error(
+        'Har file not found. By default, Monika looks for monika.json configuration file in the current directory.\n\nOtherwise, you can also specify a configuration file using -c flag as follows:\n\nmonika -c <path_to_configuration_file>\n\nYou can create a configuration file via web interface by opening this web app: https://hyperjumptech.github.io/monika-config-generator/'
+      )
+    }
+
+    if (error.name === 'SyntaxError') {
+      throw new Error('Har file is in invalid JSON format!')
     }
 
     throw new Error(error.message)

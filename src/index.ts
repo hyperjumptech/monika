@@ -33,6 +33,7 @@ import {
   getConfig,
   getConfigIterator,
   setupConfigFromFile,
+  setupConfigFromHarFile,
   setupConfigFromUrl,
 } from './components/config'
 import { notificationLog, printAllLogs } from './components/logger'
@@ -137,6 +138,12 @@ class Monika extends Command {
       description: 'specific probe ids to run',
       multiple: false,
     }),
+
+    har: flags.string({
+      char: 'H', // (H)ar file to
+      description: 'add Har file to read',
+      multiple: false,
+    }),
   }
 
   async run() {
@@ -172,6 +179,16 @@ class Monika extends Command {
     }
 
     try {
+      if (flags.har) {
+        const watchHarFile = !(
+          process.env.CI ||
+          process.env.NODE_ENV === 'test' ||
+          flags.repeat
+        )
+
+        await setupConfigFromHarFile(flags.har, watchHarFile)
+      }
+
       if (isUrl(flags.config)) {
         await setupConfigFromUrl(flags.config, flags['config-interval'])
       } else {

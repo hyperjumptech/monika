@@ -27,7 +27,7 @@ import chokidar from 'chokidar'
 import pEvent from 'p-event'
 import { Config } from '../../interfaces/config'
 import { fetchConfig } from './fetch'
-import { parseConfig } from './parse'
+import { parseConfig, parseHarFile } from './parse'
 import { validateConfig } from './validate'
 import { handshake } from '../reporter'
 import { log } from '../../utils/pino'
@@ -112,4 +112,21 @@ export const setupConfigFromUrl = async (
     await handshakeAndValidate(fetched)
     updateConfig(fetched)
   }, checkingInterval * 1000)
+}
+
+export const setupConfigFromHarFile = async (path: string, watch: boolean) => {
+  const parsed = parseHarFile(path)
+  log.info(`parse har file config: ${JSON.stringify(parsed)}`)
+  await handshakeAndValidate(parsed)
+  cfg = parsed
+  cfg.version = cfg.version || md5Hash(cfg)
+
+  if (watch) {
+    const fileWatcher = chokidar.watch(path)
+    fileWatcher.on('change', async () => {
+      const parsed = parseHarFile(path)
+      await handshakeAndValidate(parsed)
+      updateConfig(parsed)
+    })
+  }
 }

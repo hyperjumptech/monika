@@ -43,6 +43,13 @@ describe('monika', () => {
 
   test
     .stdout()
+    .do(() => cmd.run(['--har', resolve('./test/testConfigs/harTest.har')]))
+    .it('runs with har file config', (ctx) => {
+      expect(ctx.stdout).to.contain('Starting Monika.')
+    })
+
+  test
+    .stdout()
     .do(() =>
       cmd.run(['--config', resolve('./test/testConfigs/noInterval.json')])
     )
