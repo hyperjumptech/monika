@@ -35,7 +35,11 @@ import {
   setupConfigFromFile,
   setupConfigFromUrl,
 } from './components/config'
-import { notificationLog, printAllLogs } from './components/logger'
+import {
+  setNotificationLog,
+  printAllLogs,
+  printProbeLog,
+} from './components/logger'
 import {
   closeLog,
   flushAllLogs,
@@ -49,10 +53,10 @@ import { notificationChecker } from './components/notification/checker'
 import { terminationNotif } from './components/notification/termination'
 import { resetProbeStatuses } from './components/notification/process-server-status'
 import {
-  PROBE_READY_TOEAT,
-  PROBE_RESPONSE_RECEIVED,
+  PROBE_RESPONSES_READY,
   PROBE_RESPONSE_VALIDATED,
-  PROBE_STATUS_PROCESSED,
+  ALERTS_READY_TO_SEND,
+  LOGS_READY_TO_PRINT,
 } from './constants/event-emitter'
 import { Config } from './interfaces/config'
 import { MailData, MailgunData, SMTPData, WebhookData } from './interfaces/data'
@@ -64,7 +68,7 @@ import { log } from './utils/pino'
 import { StatusDetails } from './interfaces/probe-status'
 import { Notification } from './interfaces/notification'
 import { sendAlerts } from './components/notification'
-import { getLogsAndReport } from './components/reporter'
+import { LogObject } from './interfaces/logs'
 
 const em = getEventEmitter()
 
@@ -354,9 +358,14 @@ em.addListener('SANITIZED_CONFIG', function () {
   // TODO: Add function here
 })
 
-em.addListener(PROBE_READY_TOEAT, async (mLog) => {
-  // eslint-disable-next-line no-console
-  console.log(mLog) // TODO TODO remove this later this is for debug
+em.addListener(LOGS_READY_TO_PRINT, async (mLog) => {
+  printProbeLog(mLog)
+  // return mLog
+
+  // Finally save these logs into database
+  // 1.  saveProbeRequestLog({  probe, totalRequests, probeRes, alerts, error,   // })
+  // 2.  saveNotificationLog(probe, notification, type, alertMsg)
+  // 3.  getLogsAndReport()
 })
 
 // EVENT EMITTER - PROBE_RESPONSE_RECEIVED
@@ -365,14 +374,14 @@ interface ProbeResponseReceived {
   response: AxiosResponseWithExtraData
 }
 
-// PROBE_RESPONSE_RECEIVED - VALIDATE RESPONSE
-em.on(PROBE_RESPONSE_RECEIVED, function (data: ProbeResponseReceived) {
+// 1. PROBE_RESPONSE_READY - probing done, validate response
+em.on(PROBE_RESPONSES_READY, function (data: ProbeResponseReceived) {
   const res = validateResponse(data.alerts, data.response)
 
+  // 2. responses processed, and validated
   em.emit(PROBE_RESPONSE_VALIDATED, res)
 })
 
-// EVENT EMITTER - PROBE_STATUS_PROCESSED
 interface ProbeStatusProcessed {
   probe: Probe
   statuses?: StatusDetails[]
@@ -421,7 +430,11 @@ const probeSendNotification = async (data: ProbeSendNotification) => {
   }
 }
 
-const probeSaveLogToDatabase = async (data: ProbeSaveLogToDatabase) => {
+// const probeSaveLogToDatabase = async (data: ProbeSaveLogToDatabase) => { // RENAME THIS /
+const createNotificationLog = (
+  data: ProbeSaveLogToDatabase,
+  mLog: LogObject
+): Promise<LogObject> => {
   const { index, probe, status, notifications } = data
 
   const type =
@@ -434,20 +447,24 @@ const probeSaveLogToDatabase = async (data: ProbeSaveLogToDatabase) => {
       notifications?.map((notification) => {
         const alertMsg = probe.alerts[index]
 
-        return notificationLog({
-          /// ///// why is this notification in saveto database?!
+        // eslint-disable-next-line no-console
+        console.log('src/index 449 notif: ', mLog.notification.message) // DEBUGDEBUGDEBUG
+
+        return setNotificationLog({
           type,
           probe,
           alertMsg,
           notification,
+          mLog,
         })
       })!
     )
   }
+  return Promise.resolve(mLog)
 }
 
-// PROBE_STATUS_PROCESSED
-em.on(PROBE_STATUS_PROCESSED, (data: ProbeStatusProcessed) => {
+// 3. Probes thresholds process, notifications/alerts set to send.
+em.on(ALERTS_READY_TO_SEND, (data: ProbeStatusProcessed, mLog: LogObject) => {
   const {
     probe,
     statuses,
@@ -468,13 +485,19 @@ em.on(PROBE_STATUS_PROCESSED, (data: ProbeStatusProcessed) => {
         validatedResponseStatuses,
       }).catch((error: Error) => log.error(error.message))
 
-      probeSaveLogToDatabase({
-        index,
-        probe,
-        status,
-        notifications,
-      })
-        .then(getLogsAndReport)
+      // eslint-disable-next-line no-console
+      console.log('src/index 486 notif: ', mLog.notification.message) // DEBUGDEBUDEBUG
+
+      createNotificationLog(
+        {
+          index,
+          probe,
+          status,
+          notifications,
+        },
+        mLog
+      )
+        .then(em.emit()) // notification logs done, we can print everythng
         .catch((error: Error) => log.error(error.message))
     })
 })

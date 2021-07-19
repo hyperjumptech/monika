@@ -26,7 +26,7 @@ import chalk from 'chalk'
 import { AxiosResponseWithExtraData } from '../../interfaces/request'
 import { Probe } from '../../interfaces/probe'
 import { Notification } from '../../interfaces/notification'
-import { saveProbeRequestLog, getAllLogs, saveNotificationLog } from './history'
+import { getAllLogs } from './history'
 import { log } from '../../utils/pino'
 
 import { LogObject } from '../../interfaces/logs'
@@ -50,10 +50,10 @@ export function getStatusColor(statusCode: number) {
 }
 
 /**
- * probeLog prints probe results for the user and to persistent log (through history.ts)
- *
+ * probeBuildLog builds the last probe results for logging (through history.ts)
+ * @returns {LogObject} mLog built log
  */
-export async function probeLog({
+export function probeBuildLog({
   checkOrder,
   probe,
   totalRequests,
@@ -69,7 +69,7 @@ export async function probeLog({
   alerts?: string[]
   error?: string
   mLog: LogObject
-}): Promise<LogObject> {
+}): LogObject {
   mLog.type = 'PROBE'
   mLog.iteration = checkOrder
   mLog.id = probe.id
@@ -89,28 +89,26 @@ export async function probeLog({
       probeRes.data = '' // if not saved, flush .data
     }
   }
+  return mLog
 
-  return Promise.resolve(mLog)
-
-  await saveProbeRequestLog({
-    // TODO: move saving for last
-    probe,
-    totalRequests,
-    probeRes,
-    alerts,
-    error,
-  })
+  // await saveProbeRequestLog({ //// TODO TODO TODO SAVING TO PERSISTENCE LOGS DO ELSEWHERE!!!
+  //   // TODO: move saving for last
+  //   probe,
+  //   totalRequests,
+  //   probeRes,
+  //   alerts,
+  //   error,
+  // })
 }
 
 /**
  * notificationLog just prints notifications for the user and to persistent log (through history.ts)
- *
+ * @returns {LogObject} mLog
  */
-export async function notificationLog({
+export function setNotificationLog({
   type,
-  alertMsg,
-  notification,
-  probe,
+  // alertMsg, // no need
+  // notification, // no not need
   mLog,
 }: {
   probe: Probe
@@ -118,9 +116,9 @@ export async function notificationLog({
   type: 'NOTIFY-INCIDENT' | 'NOTIFY-RECOVER'
   alertMsg: string
   mLog: LogObject
-}): Promise<LogObject> {
+}): LogObject {
   let msg: string
-  mLog.notification.flag = type
+
   switch (type) {
     case 'NOTIFY-INCIDENT':
       msg = 'service probably down'
@@ -130,9 +128,15 @@ export async function notificationLog({
   }
   mLog.notification.flag = type
   mLog.notification.message[0] = msg
-  return Promise.resolve(mLog)
 
-  await saveNotificationLog(probe, notification, type, alertMsg) // TOOODOOO: save to db last!!!
+  // eslint-disable-next-line no-console
+  console.log('type: ', mLog.notification.flag) // DEBUGDEBUGDEBUG
+  // eslint-disable-next-line no-console
+  console.log('NOTIFICATION: goooot here. mLog: ', mLog.alert.message) // DEBUGDEBUGDEBUG
+
+  return mLog
+
+  // await saveNotificationLog(probe, notification, type, alertMsg) // TOOODOOO: save to db last!!!
 }
 
 /**
@@ -148,11 +152,12 @@ export function setNotification({
   mLog,
 }: {
   flag: string
-  message: string[]
+  message: string
   mLog: LogObject
 }): LogObject {
   mLog.notification.flag = flag
-  mLog.notification.message = message
+  mLog.notification.message[0] = message
+
   return mLog
 }
 
@@ -161,7 +166,7 @@ export function setNotification({
  * @param {flag} flag: type of alert message, ex: not-2xx
  * @param {string} message[]: body of alert message
  * @param {LogObject} mLog is the log object being updated
- * @returns {LogObject} mLog returned again afte being updated
+ * @returns {LogObject} mLog returned again after being updated
  *
  */
 export function setAlert({
@@ -170,11 +175,12 @@ export function setAlert({
   mLog,
 }: {
   flag: string
-  message: string[]
+  message: string
   mLog: LogObject
 }): LogObject {
   mLog.alert.flag = flag
-  mLog.alert.message = message
+  mLog.alert.message[0] = message
+
   return mLog
 }
 
@@ -182,7 +188,7 @@ export function setAlert({
  * printLogs prints the monika logs and clear buffers
  * @param {LogObject} mLog that is displayed
  */
-export async function printProbeLog(mLog: LogObject) {
+export function printProbeLog(mLog: LogObject) {
   if (mLog.alert.flag.length > 0) {
     log.warn(mLog)
   } else {

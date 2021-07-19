@@ -22,8 +22,8 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-export const PROBE_RESPONSE_RECEIVED = 'PROBE_RESPONSE_RECEIVED'
-export const PROBE_RESPONSE_VALIDATED = 'PROBE_RESPONSE_VALIDATED'
-export const PROBE_STATUS_PROCESSED = 'PROBE_STATUS_PROCESSED'
+export const PROBE_RESPONSES_READY = 'PROBE_RESPONSES_READY' // 1. probe done, process responses
+export const PROBE_RESPONSE_VALIDATED = 'PROBE_RESPONSE_VALIDATED' // 2. results validated
 
-export const PROBE_READY_TOEAT = 'PROBE_READY_TOEAT'
+export const ALERTS_READY_TO_SEND = 'ALERTS_READY_TO_SEND' // 3. alerts/notifs built and ready to send
+export const LOGS_READY_TO_PRINT = 'LOGS_READY_TO_PRINT' // 4.Logs generated and collected, ready to save to db

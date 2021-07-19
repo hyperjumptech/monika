@@ -23,10 +23,10 @@
  **********************************************************************************/
 
 import {
-  PROBE_STATUS_PROCESSED,
-  PROBE_RESPONSE_RECEIVED,
+  PROBE_RESPONSES_READY,
   PROBE_RESPONSE_VALIDATED,
-  PROBE_READY_TOEAT,
+  ALERTS_READY_TO_SEND,
+  PROBE_LOGS_READY,
 } from '../../constants/event-emitter'
 import { LogObject } from '../../interfaces/logs'
 import { Notification } from '../../interfaces/notification'
@@ -34,14 +34,15 @@ import { Probe } from '../../interfaces/probe'
 import { AxiosResponseWithExtraData } from '../../interfaces/request'
 import { ValidateResponse } from '../../plugins/validate-response'
 import { getEventEmitter } from '../../utils/events'
-import { printProbeLog, probeLog, setAlert } from '../logger'
-import { processProbeStatus } from '../notification/process-server-status'
+import { printProbeLog, probeBuildLog, setAlert } from '../logger'
+import { processThresholds } from '../notification/process-server-status'
 import { probing } from './probing'
 
 const em = getEventEmitter()
 
 let validatedRes: ValidateResponse[] = []
 
+// 2. Responses have been processed and validated
 em.on(PROBE_RESPONSE_VALIDATED, (data: ValidateResponse[]) => {
   validatedRes = data
 })
@@ -59,15 +60,32 @@ export async function doProbe(
 ) {
   let probeRes: AxiosResponseWithExtraData = {} as AxiosResponseWithExtraData
   let totalRequests = 0 // is the number of requests in  probe.requests[x]
-  let mLog: LogObject = {} as LogObject
+  let mLog: LogObject = {
+    type: 'PROBE',
+    iteration: 0,
+    id: probe.id,
+    responseCode: 0,
+    url: '',
+    responseTime: 0,
+    alert: {
+      flag: '',
+      message: [],
+    },
+    notification: {
+      flag: 'na',
+      message: [],
+    },
+  } as LogObject
 
   try {
     const responses: Array<AxiosResponseWithExtraData> = []
 
     for await (const request of probe.requests) {
+      mLog.url = request.url
       probeRes = await probing(request, responses)
 
-      em.emit(PROBE_RESPONSE_RECEIVED, {
+      // 1. probing above done, response are ready for processing
+      em.emit(PROBE_RESPONSES_READY, {
         alerts: probe.alerts,
         response: probeRes,
       })
@@ -75,8 +93,8 @@ export async function doProbe(
       // Add to an array to be accessed by another request
       responses.push(probeRes)
 
-      mLog = await probeLog({
-        mLog,
+      // done probing, got the results, build logs
+      mLog = probeBuildLog({
         checkOrder,
         probe,
         totalRequests,
@@ -84,6 +102,7 @@ export async function doProbe(
         alerts: validatedRes
           .filter((item) => item.status)
           .map((item) => item.alert),
+        mLog,
       })
 
       // done one request, is there another
@@ -94,12 +113,13 @@ export async function doProbe(
         break
       }
 
-      // done probes, no alerts, no notif.. now print log
-      em.emit(PROBE_READY_TOEAT, mLog)
-      printProbeLog()
+      // 4. done probes, no alerts, no notification.. now print log
+      em.emit(PROBE_LOGS_READY, mLog)
+      printProbeLog(mLog) // TODO TODO MOVE THIS TO LISTENER
     }
 
-    const statuses = processProbeStatus({
+    // done probing, got some result, process it, check for thresholds and notifications
+    const statuses = processThresholds({
       checkOrder,
       probe,
       probeRes,
@@ -107,16 +127,23 @@ export async function doProbe(
       validatedResp: validatedRes,
       incidentThreshold: probe.incidentThreshold,
       recoveryThreshold: probe.recoveryThreshold,
+      mLog,
     })
 
-    em.emit(PROBE_STATUS_PROCESSED, {
+    // eslint-disable-next-line no-console
+    console.log('src/probe 133 notif: ', mLog.notification.message)
+
+    // 3. Done processing results, emit RESULT_READY
+    em.emit(ALERTS_READY_TO_SEND, {
       probe,
       statuses,
       notifications,
       totalRequests,
       validatedResponseStatuses: validatedRes,
+      mLog,
     })
   } catch (error) {
-    mLog = setAlert({ mLog, flag: 'error', message: error })
+    mLog = setAlert({ flag: 'error', message: error, mLog })
+    printProbeLog(mLog) // TODO TODO MOVE THIS TO LISTENER ==> add an emit here
   }
 }
