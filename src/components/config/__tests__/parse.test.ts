@@ -38,6 +38,16 @@ describe('parseConfigFromPostman', () => {
         simpleEndpointsPostmanJson.item[0].request.url.raw
       )
     })
+
+    it('should return not valid', () => {
+      try {
+        parseConfigFromPostman('../fetch.ts')
+      } catch (error) {
+        expect(() => {
+          throw error
+        }).to.throw('Postman file is in invalid JSON format!')
+      }
+    })
   })
 
   describe('grouped endpoints', () => {
