@@ -8,7 +8,8 @@
     "rootDir": "src",
     "strict": true,
     "target": "es2017",
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "resolveJsonModule": true
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "**/*.json"]
 }

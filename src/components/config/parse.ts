@@ -59,7 +59,7 @@ const getConvertedProbeFromPostmanItem = (item: any) => {
   return probe
 }
 
-const parseConfigFromPostman = (configString: string): Config => {
+export const parseConfigFromPostman = (configString: string): Config => {
   try {
     const parsed = JSON.parse(configString)
     const probes: Probe[] = []
