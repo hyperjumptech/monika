@@ -126,21 +126,14 @@ export const setupConfigFromConfigFlag = async (
   }
 }
 
-const parseHarAndValidate = async (path: string) => {
-  const parsed = parseHarFile(path)
-  await handshakeAndValidate(parsed)
-  return parsed
-}
-
 export const setupConfigFromHarFile = async (path: string, watch: boolean) => {
-  const parsed = await parseHarAndValidate(path)
-  cfg = parsed
+  cfg = parseHarFile(path)
   cfg.version = cfg.version || md5Hash(cfg)
 
   if (watch) {
     const fileWatcher = chokidar.watch(path)
     fileWatcher.on('change', async () => {
-      const parsed = await parseHarAndValidate(path)
+      const parsed = parseHarFile(path)
       updateConfig(parsed)
     })
   }

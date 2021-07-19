@@ -139,7 +139,7 @@ class Monika extends Command {
 
     har: flags.string({
       char: 'H', // (H)ar file to
-      description: 'add Har file to read',
+      description: 'Run Monika using a HAR file',
       multiple: false,
     }),
   }

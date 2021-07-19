@@ -114,7 +114,11 @@ On completion, `Monika` will sleep until the next interval to start again. At th
 
 ## HAR file support
 
-HAR [HTTP-Archive](<https://en.wikipedia.org/wiki/HAR_(file_format)>) format is created by Web Performance Working Group and become the standard use in browser archive request data definition. Currently `Monika` are able to run using HAR format, `--har` flag is set with path to the har definition file.
+HAR [HTTP-Archive](<https://en.wikipedia.org/wiki/HAR_(file_format)>) format was created by the Web Performance Working Group and has become the standard in browser archive request data definition. To run monika using a HAR file, use --har flag as follows:
+
+```bash
+monika --har <path_to_HAR_file>
+```
 
 ## Further reading
 
