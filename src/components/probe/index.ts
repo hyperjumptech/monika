@@ -130,19 +130,23 @@ export async function doProbe(
       mLog,
     })
 
-    console.log('src/probe 133 notif: ', mLog.notification.message)
-
     // 3. Done processing results, emit RESULT_READY
-    em.emit(ALERTS_READY_TO_SEND, {
-      probe,
-      statuses,
-      notifications,
-      totalRequests,
-      validatedResponseStatuses: validatedRes,
-      mLog,
-    })
+    em.emit(
+      ALERTS_READY_TO_SEND,
+      {
+        probe,
+        statuses,
+        notifications,
+        totalRequests,
+        validatedResponseStatuses: validatedRes,
+      },
+      mLog
+    )
   } catch (error) {
-    mLog = setAlert({ flag: 'error', message: error, mLog })
+    mLog = setAlert({ flag: 'error', message: error }, mLog)
+
+    console.log('Error CAUGHT 147: ', error)
+
     printProbeLog(mLog) // TODO TODO MOVE THIS TO LISTENER ==> add an emit here
   }
 }

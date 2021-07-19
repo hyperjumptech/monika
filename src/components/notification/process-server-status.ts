@@ -253,7 +253,7 @@ export const processThresholds = ({
         results.push(updatedStatus)
 
         if (validation.status === true) {
-          setAlert({ flag: 'ALERT', message: updatedStatus.alert as any, mLog })
+          setAlert({ flag: 'ALERT', message: updatedStatus.alert as any }, mLog)
           // done probes, got some alerts & notif.. print log
           printProbeLog(mLog)
         }

@@ -130,9 +130,6 @@ export function setNotificationLog(
       msg = 'service is back up'
   }
 
-  console.log('setNotificationLog 131 type: ', mLog.notification.flag) // DEBUGDEBUGDEBUG
-  console.log('setNotificationLog 132: goooot here. mLog: ', mLog.alert.message) // DEBUGDEBUGDEBUG
-
   mLog.notification.flag = type
   mLog.notification.message[0] = msg
 
@@ -142,22 +139,20 @@ export function setNotificationLog(
 
 /**
  * setNotification sets notification message
- * @param {flag} flag: type of notification message, ex: disruption
- * @param {string} message[]: body of notification message
+ * @param {object} flag: type of notification message, ex: disruption
  * @param {LogObject} mLog is the log to be updated
  * @returns {LogObject} mLog is returned again after updating
  */
-export function setNotification({
-  flag,
-  message,
-  mLog,
-}: {
-  flag: string
-  message: string
+export function setNotification(
+  {
+    flag,
+    message,
+  }: {
+    flag: string
+    message: string
+  },
   mLog: LogObject
-}): LogObject {
-  console.log('setNotifiction 158')
-
+): LogObject {
   mLog.notification.flag = flag
   mLog.notification.message[0] = message
 
@@ -165,22 +160,22 @@ export function setNotification({
 }
 
 /**
- * setAlert
- * @param {flag} flag: type of alert message, ex: not-2xx
- * @param {string} message[]: body of alert message
+ * setAlert populaates the mLog.alert{} object with flag and message string in the input
+ * @param {object} flag: type of alert message, ex: not-2xx
  * @param {LogObject} mLog is the log object being updated
  * @returns {LogObject} mLog returned again after being updated
  *
  */
-export function setAlert({
-  flag,
-  message,
-  mLog,
-}: {
-  flag: string
-  message: string
+export function setAlert(
+  {
+    flag,
+    message,
+  }: {
+    flag: string
+    message: string
+  },
   mLog: LogObject
-}): LogObject {
+): LogObject {
   mLog.alert.flag = flag
   mLog.alert.message[0] = message
 

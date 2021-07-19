@@ -359,12 +359,6 @@ em.addListener('SANITIZED_CONFIG', function () {
 })
 
 em.addListener(LOGS_READY_TO_PRINT, async (mLog: LogObject) => {
-  console.log('src/index logs_ready_to_print 363 alert: ', mLog.alert.message)
-  console.log(
-    'src/index logs_ready_to_print 363 notif: ',
-    mLog.notification.message
-  )
-
   printProbeLog(mLog)
   // return mLog
 
@@ -442,8 +436,6 @@ const createNotificationLog = (
 ): LogObject => {
   const { index, probe, status, notifications } = data
 
-  console.log('creatNotificationLog 445: ', mLog)
-
   const type =
     status?.state === 'UP_TRUE_EQUALS_THRESHOLD'
       ? 'NOTIFY-INCIDENT'
@@ -466,7 +458,6 @@ const createNotificationLog = (
       })!
     )
   }
-  console.log('createNotificationLog 467 exiting....')
   return mLog
 }
 
@@ -480,8 +471,6 @@ em.on(ALERTS_READY_TO_SEND, (data: ProbeStatusProcessed, mLog: LogObject) => {
     validatedResponseStatuses,
   } = data
 
-  console.log('ALERT_READY_TO_SEND')
-
   statuses
     ?.filter((status) => status.shouldSendNotification)
     ?.forEach((status, index) => {
@@ -494,12 +483,6 @@ em.on(ALERTS_READY_TO_SEND, (data: ProbeStatusProcessed, mLog: LogObject) => {
         validatedResponseStatuses,
       }).catch((error: Error) => log.error(error.message))
 
-
-      console.log(
-        'src/index 486 on ALERTS_READY_TO_SEND notif: ',
-        mLog.notification.message
-      )
-
       mLog = createNotificationLog(
         {
           index,
@@ -509,13 +492,8 @@ em.on(ALERTS_READY_TO_SEND, (data: ProbeStatusProcessed, mLog: LogObject) => {
         },
         mLog
       )
-      // .then(mLog => {
 
-      console.log('createNotificationLog 507. mlog: ', mLog)
-
-      // em.emit(LOGS_READY_TO_PRINT, mLog)
-      // }) // notification logs done, we can print everything
-      // .catch((error: Error) => log.error(error.message))
+      em.emit(LOGS_READY_TO_PRINT, mLog)
     })
 })
 
