@@ -82,11 +82,15 @@ const handshakeAndValidate = async (config: Config) => {
   }
 }
 
-export const setupConfigFromFile = async (
-  path: string,
-  watch: boolean,
-  type: string
-) => {
+export const setupConfigFromFile = async (flags: any, watch: boolean) => {
+  let path = flags.config
+  let type = 'monika'
+
+  if (flags.postman) {
+    path = flags.postman
+    type = 'postman'
+  }
+
   const parsed = parseConfig(path, type)
   await handshakeAndValidate(parsed)
   cfg = parsed
