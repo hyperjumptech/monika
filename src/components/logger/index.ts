@@ -103,20 +103,23 @@ export function probeBuildLog({
 
 /**
  * notificationLog just prints notifications for the user and to persistent log (through history.ts)
- * @returns {LogObject} mLog
+ * @param {objct} contain notification fields
+ * @param {LogObjec} mLog to update and return
+ * @returns {LogObject} mLog is returned once updated
  */
-export function setNotificationLog({
-  type,
-  // alertMsg, // no need
+export function setNotificationLog(
+  {
+    type,
+  }: // alertMsg, // no need
   // notification, // no not need
-  mLog,
-}: {
-  probe: Probe
-  notification: Notification
-  type: 'NOTIFY-INCIDENT' | 'NOTIFY-RECOVER'
-  alertMsg: string
+  {
+    probe: Probe
+    notification: Notification
+    type: 'NOTIFY-INCIDENT' | 'NOTIFY-RECOVER'
+    alertMsg: string
+  },
   mLog: LogObject
-}): LogObject {
+): LogObject {
   let msg: string
 
   switch (type) {
@@ -126,16 +129,14 @@ export function setNotificationLog({
     case 'NOTIFY-RECOVER':
       msg = 'service is back up'
   }
+
+  console.log('setNotificationLog 131 type: ', mLog.notification.flag) // DEBUGDEBUGDEBUG
+  console.log('setNotificationLog 132: goooot here. mLog: ', mLog.alert.message) // DEBUGDEBUGDEBUG
+
   mLog.notification.flag = type
   mLog.notification.message[0] = msg
 
-  // eslint-disable-next-line no-console
-  console.log('type: ', mLog.notification.flag) // DEBUGDEBUGDEBUG
-  // eslint-disable-next-line no-console
-  console.log('NOTIFICATION: goooot here. mLog: ', mLog.alert.message) // DEBUGDEBUGDEBUG
-
   return mLog
-
   // await saveNotificationLog(probe, notification, type, alertMsg) // TOOODOOO: save to db last!!!
 }
 
@@ -155,6 +156,8 @@ export function setNotification({
   message: string
   mLog: LogObject
 }): LogObject {
+  console.log('setNotifiction 158')
+
   mLog.notification.flag = flag
   mLog.notification.message[0] = message
 

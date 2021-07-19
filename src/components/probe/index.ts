@@ -26,7 +26,7 @@ import {
   PROBE_RESPONSES_READY,
   PROBE_RESPONSE_VALIDATED,
   ALERTS_READY_TO_SEND,
-  PROBE_LOGS_READY,
+  LOGS_READY_TO_PRINT,
 } from '../../constants/event-emitter'
 import { LogObject } from '../../interfaces/logs'
 import { Notification } from '../../interfaces/notification'
@@ -114,7 +114,7 @@ export async function doProbe(
       }
 
       // 4. done probes, no alerts, no notification.. now print log
-      em.emit(PROBE_LOGS_READY, mLog)
+      em.emit(LOGS_READY_TO_PRINT, mLog)
       printProbeLog(mLog) // TODO TODO MOVE THIS TO LISTENER
     }
 
@@ -130,7 +130,6 @@ export async function doProbe(
       mLog,
     })
 
-    // eslint-disable-next-line no-console
     console.log('src/probe 133 notif: ', mLog.notification.message)
 
     // 3. Done processing results, emit RESULT_READY

@@ -358,7 +358,13 @@ em.addListener('SANITIZED_CONFIG', function () {
   // TODO: Add function here
 })
 
-em.addListener(LOGS_READY_TO_PRINT, async (mLog) => {
+em.addListener(LOGS_READY_TO_PRINT, async (mLog: LogObject) => {
+  console.log('src/index logs_ready_to_print 363 alert: ', mLog.alert.message)
+  console.log(
+    'src/index logs_ready_to_print 363 notif: ',
+    mLog.notification.message
+  )
+
   printProbeLog(mLog)
   // return mLog
 
@@ -430,12 +436,13 @@ const probeSendNotification = async (data: ProbeSendNotification) => {
   }
 }
 
-// const probeSaveLogToDatabase = async (data: ProbeSaveLogToDatabase) => { // RENAME THIS /
 const createNotificationLog = (
   data: ProbeSaveLogToDatabase,
   mLog: LogObject
-): Promise<LogObject> => {
+): LogObject => {
   const { index, probe, status, notifications } = data
+
+  console.log('creatNotificationLog 445: ', mLog)
 
   const type =
     status?.state === 'UP_TRUE_EQUALS_THRESHOLD'
@@ -447,23 +454,23 @@ const createNotificationLog = (
       notifications?.map((notification) => {
         const alertMsg = probe.alerts[index]
 
-        // eslint-disable-next-line no-console
-        console.log('src/index 449 notif: ', mLog.notification.message) // DEBUGDEBUGDEBUG
-
-        return setNotificationLog({
-          type,
-          probe,
-          alertMsg,
-          notification,
-          mLog,
-        })
+        return setNotificationLog(
+          {
+            type,
+            probe,
+            alertMsg,
+            notification,
+          },
+          mLog
+        )
       })!
     )
   }
-  return Promise.resolve(mLog)
+  console.log('createNotificationLog 467 exiting....')
+  return mLog
 }
 
-// 3. Probes thresholds process, notifications/alerts set to send.
+// 3. Probes Thresholds processed, Send out notifications/alerts.
 em.on(ALERTS_READY_TO_SEND, (data: ProbeStatusProcessed, mLog: LogObject) => {
   const {
     probe,
@@ -472,6 +479,8 @@ em.on(ALERTS_READY_TO_SEND, (data: ProbeStatusProcessed, mLog: LogObject) => {
     totalRequests,
     validatedResponseStatuses,
   } = data
+
+  console.log('ALERT_READY_TO_SEND')
 
   statuses
     ?.filter((status) => status.shouldSendNotification)
@@ -485,10 +494,13 @@ em.on(ALERTS_READY_TO_SEND, (data: ProbeStatusProcessed, mLog: LogObject) => {
         validatedResponseStatuses,
       }).catch((error: Error) => log.error(error.message))
 
-      // eslint-disable-next-line no-console
-      console.log('src/index 486 notif: ', mLog.notification.message) // DEBUGDEBUDEBUG
 
-      createNotificationLog(
+      console.log(
+        'src/index 486 on ALERTS_READY_TO_SEND notif: ',
+        mLog.notification.message
+      )
+
+      mLog = createNotificationLog(
         {
           index,
           probe,
@@ -497,8 +509,13 @@ em.on(ALERTS_READY_TO_SEND, (data: ProbeStatusProcessed, mLog: LogObject) => {
         },
         mLog
       )
-        .then(em.emit()) // notification logs done, we can print everythng
-        .catch((error: Error) => log.error(error.message))
+      // .then(mLog => {
+
+      console.log('createNotificationLog 507. mlog: ', mLog)
+
+      // em.emit(LOGS_READY_TO_PRINT, mLog)
+      // }) // notification logs done, we can print everything
+      // .catch((error: Error) => log.error(error.message))
     })
 })
 

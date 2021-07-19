@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 export const PROBE_RESPONSES_READY = 'PROBE_RESPONSES_READY' // 1. probe done, process responses
-export const PROBE_RESPONSE_VALIDATED = 'PROBE_RESPONSE_VALIDATED' // 2. results validated
+export const PROBE_RESPONSE_VALIDATED = 'PROBE_RESPONSE_VALIDATED' // 2. results validated, good to process
 
 export const ALERTS_READY_TO_SEND = 'ALERTS_READY_TO_SEND' // 3. alerts/notifs built and ready to send
 export const LOGS_READY_TO_PRINT = 'LOGS_READY_TO_PRINT' // 4.Logs generated and collected, ready to save to db
