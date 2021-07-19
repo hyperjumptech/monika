@@ -215,7 +215,7 @@ class Monika extends Command {
         let configPath = flags.config
         let type = 'monika'
         if (flags.postman) {
-          log.info('Getting config from postman json file...')
+          log.info('Run Monika using a Postman json file...')
 
           configPath = flags.postman
           type = 'postman'
