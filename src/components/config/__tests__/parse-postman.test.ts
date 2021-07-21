@@ -24,7 +24,7 @@
 
 import { expect } from 'chai'
 import { Config } from '../../../interfaces/config'
-import { parseConfigFromPostman } from '../parse'
+import { parseConfigFromPostman } from '../parse-postman'
 import simpleEndpointsPostmanJson from './simple.postman_collection.json'
 import groupedEndpointsPostmanJson from './grouped.postman_collection.json'
 
