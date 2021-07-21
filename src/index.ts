@@ -53,10 +53,11 @@ import { notificationChecker } from './components/notification/checker'
 import { terminationNotif } from './components/notification/termination'
 import { resetProbeStatuses } from './components/notification/process-server-status'
 import {
-  PROBE_RESPONSES_READY,
+  RESPONSES_READY_TO_PROCESS,
   PROBE_RESPONSE_VALIDATED,
   ALERTS_READY_TO_SEND,
   LOGS_READY_TO_PRINT,
+  LOGS_READY_TO_SAVE,
 } from './constants/event-emitter'
 import { Config } from './interfaces/config'
 import { MailData, MailgunData, SMTPData, WebhookData } from './interfaces/data'
@@ -362,10 +363,7 @@ em.addListener(LOGS_READY_TO_PRINT, async (mLog: LogObject) => {
   printProbeLog(mLog)
   // return mLog
 
-  // Finally save these logs into database
-  // 1.  saveProbeRequestLog({  probe, totalRequests, probeRes, alerts, error,   // })
-  // 2.  saveNotificationLog(probe, notification, type, alertMsg)
-  // 3.  getLogsAndReport()
+  em.emit(LOGS_READY_TO_SAVE, 'hellooo')
 })
 
 // EVENT EMITTER - PROBE_RESPONSE_RECEIVED
@@ -375,7 +373,7 @@ interface ProbeResponseReceived {
 }
 
 // 1. PROBE_RESPONSE_READY - probing done, validate response
-em.on(PROBE_RESPONSES_READY, function (data: ProbeResponseReceived) {
+em.on(RESPONSES_READY_TO_PROCESS, function (data: ProbeResponseReceived) {
   const res = validateResponse(data.alerts, data.response)
 
   // 2. responses processed, and validated

@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import {
-  PROBE_RESPONSES_READY,
+  RESPONSES_READY_TO_PROCESS,
   PROBE_RESPONSE_VALIDATED,
   ALERTS_READY_TO_SEND,
   LOGS_READY_TO_PRINT,
@@ -34,7 +34,7 @@ import { Probe } from '../../interfaces/probe'
 import { AxiosResponseWithExtraData } from '../../interfaces/request'
 import { ValidateResponse } from '../../plugins/validate-response'
 import { getEventEmitter } from '../../utils/events'
-import { printProbeLog, probeBuildLog, setAlert } from '../logger'
+import { probeBuildLog, setAlert } from '../logger'
 import { processThresholds } from '../notification/process-server-status'
 import { probing } from './probing'
 
@@ -85,7 +85,7 @@ export async function doProbe(
       probeRes = await probing(request, responses)
 
       // 1. probing above done, response are ready for processing
-      em.emit(PROBE_RESPONSES_READY, {
+      em.emit(RESPONSES_READY_TO_PROCESS, {
         alerts: probe.alerts,
         response: probeRes,
       })
@@ -115,7 +115,6 @@ export async function doProbe(
 
       // 4. done probes, no alerts, no notification.. now print log
       em.emit(LOGS_READY_TO_PRINT, mLog)
-      printProbeLog(mLog) // TODO TODO MOVE THIS TO LISTENER
     }
 
     // done probing, got some result, process it, check for thresholds and notifications
@@ -144,9 +143,6 @@ export async function doProbe(
     )
   } catch (error) {
     mLog = setAlert({ flag: 'error', message: error }, mLog)
-
-    console.log('Error CAUGHT 147: ', error)
-
-    printProbeLog(mLog) // TODO TODO MOVE THIS TO LISTENER ==> add an emit here
+    em.emit(LOGS_READY_TO_PRINT, mLog)
   }
 }
