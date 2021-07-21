@@ -52,7 +52,7 @@ const getConvertedProbeFromPostmanItem = (item: any) => {
     ],
     incidentThreshold: DEFAULT_THRESHOLD,
     recoveryThreshold: DEFAULT_THRESHOLD,
-    alerts: ['status-not-2xx', 'response-time-greater-than-285-ms'],
+    alerts: ['status-not-2xx', 'response-time-greater-than-2-s'],
   }
 
   return probe
