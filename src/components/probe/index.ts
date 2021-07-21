@@ -84,9 +84,9 @@ export async function doProbe(
       mLog.url = request.url
       probeRes = await probing(request, responses)
 
-      // 1. probing above done, response are ready for processing
       em.emit(RESPONSES_READY_TO_PROCESS, {
-        alerts: probe.alerts,
+        probe,
+        requestIndex: totalRequests,
         response: probeRes,
       })
 

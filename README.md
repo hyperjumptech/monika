@@ -1,6 +1,8 @@
-# MONIKA
+![](https://raw.githubusercontent.com/hyperjumptech/monika/main/docs/public/monika.svg)
 
 [![Build Status](https://github.com/hyperjumptech/monika/workflows/Node.js%20CI/badge.svg?event=push&branch=main)](https://github.com/hyperjumptech/monika/actions)
+
+# About
 
 Monika is a command line application for synthetic monitoring. The name Monika stands for "**Moni**toring Ber**ka**la", which means "periodic monitoring" in the Indonesian language.
 

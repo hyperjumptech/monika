@@ -64,6 +64,10 @@ import { MailData, MailgunData, SMTPData, WebhookData } from './interfaces/data'
 import { Probe } from './interfaces/probe'
 import { AxiosResponseWithExtraData } from './interfaces/request'
 import { idFeeder, isIDValid, loopReport, sanitizeProbe } from './looper'
+import {
+  PrometheusCollector,
+  startPrometheusMetricsServer,
+} from './plugins/metrics/prometheus'
 import { getEventEmitter } from './utils/events'
 import { log } from './utils/pino'
 import { StatusDetails } from './interfaces/probe-status'
@@ -132,6 +136,12 @@ class Monika extends Command {
       default: false,
     }),
 
+    prometheus: flags.integer({
+      description:
+        'Specifies the port the Prometheus metric server is listening on. e.g., 3001. (EXPERIMENTAL)',
+      exclusive: ['r'],
+    }),
+
     repeat: flags.string({
       char: 'r', // (r)epeat
       description: 'repeats the test run n times',
@@ -167,6 +177,21 @@ class Monika extends Command {
       }
       await closeLog()
       return
+    }
+
+    // start Promotheus server
+    if (flags.prometheus) {
+      const {
+        registerCollectorFromProbes,
+        collectProbeRequestMetrics,
+      } = new PrometheusCollector()
+
+      // register prometheus metric collectors
+      em.on('SANITIZED_CONFIG', registerCollectorFromProbes)
+      // collect prometheus metrics
+      em.on(RESPONSES_READY_TO_PROCESS, collectProbeRequestMetrics)
+
+      startPrometheusMetricsServer(flags.prometheus)
     }
 
     if (flags['create-config']) {
@@ -220,7 +245,8 @@ class Monika extends Command {
         let probesToRun = config.probes
         if (flags.id) {
           if (!isIDValid(config, flags.id)) {
-            return
+            em.emit('TERMINATE_EVENT', 'Monika is terminating')
+            throw new Error('Input error') // can't continue, exit from app
           }
           // doing custom sequences if list of ids is declared
           const idSplit = flags.id.split(',').map((item: string) => item.trim())
@@ -236,7 +262,7 @@ class Monika extends Command {
 
         // emit the sanitized probe
         if (sanitizedProbe) {
-          em.emit('SANITIZED_CONFIG')
+          em.emit('SANITIZED_CONFIG', sanitizedProbe)
         }
 
         abortCurrentLooper = idFeeder(
@@ -347,7 +373,7 @@ Please refer to the Monika documentations on how to how to configure notificatio
 
 // Subscribe FirstEvent
 em.addListener('TERMINATE_EVENT', async (data) => {
-  log.info('Monika Event: ' + data)
+  log.warn(data)
   const config = getConfig()
   if (process.env.NODE_ENV !== 'test') {
     await terminationNotif(config.notifications ?? [])
@@ -368,13 +394,14 @@ em.addListener(LOGS_READY_TO_PRINT, async (mLog: LogObject) => {
 
 // EVENT EMITTER - PROBE_RESPONSE_RECEIVED
 interface ProbeResponseReceived {
-  alerts: string[]
+  probe: Probe
+  requestIndex: number
   response: AxiosResponseWithExtraData
 }
 
 // 1. PROBE_RESPONSE_READY - probing done, validate response
 em.on(RESPONSES_READY_TO_PROCESS, function (data: ProbeResponseReceived) {
-  const res = validateResponse(data.alerts, data.response)
+  const res = validateResponse(data.probe.alerts, data.response)
 
   // 2. responses processed, and validated
   em.emit(PROBE_RESPONSE_VALIDATED, res)
