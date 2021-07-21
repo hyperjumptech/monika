@@ -27,12 +27,11 @@ import chokidar from 'chokidar'
 import pEvent from 'p-event'
 import { Config } from '../../interfaces/config'
 import { fetchConfig } from './fetch'
-import { parseConfig, parseHarFile } from './parse'
+import { parseConfig } from './parse'
 import { validateConfig } from './validate'
 import { handshake } from '../reporter'
 import { log } from '../../utils/pino'
 import { md5Hash } from '../../utils/hash'
-import isUrl from 'is-url'
 
 const emitter = new EventEmitter()
 
@@ -83,58 +82,40 @@ const handshakeAndValidate = async (config: Config) => {
   }
 }
 
-const fetchConfigAndValidate = async (path: string) => {
-  const fetched = await fetchConfig(path)
-  await handshakeAndValidate(fetched)
-  return fetched
-}
+export const setupConfigFromFile = async (flags: any, watch: boolean) => {
+  let path = flags.config
+  let type = 'config'
 
-const parseConfigAndValidate = async (path: string) => {
-  const parsed = parseConfig(path)
-  await handshakeAndValidate(parsed)
-  return parsed
-}
-
-export const setupConfigFromConfigFlag = async (
-  path: string,
-  watch: boolean,
-  checkingInterval: number
-) => {
-  if (isUrl(path)) {
-    const fetched = await fetchConfigAndValidate(path)
-    cfg = fetched
-    cfg.version = cfg.version || md5Hash(cfg)
-
-    setInterval(async () => {
-      const fetched = await fetchConfigAndValidate(path)
-      updateConfig(fetched)
-    }, checkingInterval * 1000)
-
-    return
+  if (flags.har) {
+    path = flags.har
+    type = 'har'
   }
 
-  const parsed = await parseConfigAndValidate(path)
+  const parsed = parseConfig(path, type)
+  await handshakeAndValidate(parsed)
   cfg = parsed
   cfg.version = cfg.version || md5Hash(cfg)
 
   if (watch) {
     const fileWatcher = chokidar.watch(path)
     fileWatcher.on('change', async () => {
-      const parsed = await parseConfigAndValidate(path)
+      const parsed = parseConfig(path, type)
+      await handshakeAndValidate(parsed)
       updateConfig(parsed)
     })
   }
 }
 
-export const setupConfigFromHarFile = async (path: string, watch: boolean) => {
-  cfg = parseHarFile(path)
-  cfg.version = cfg.version || md5Hash(cfg)
-
-  if (watch) {
-    const fileWatcher = chokidar.watch(path)
-    fileWatcher.on('change', async () => {
-      const parsed = parseHarFile(path)
-      updateConfig(parsed)
-    })
-  }
+export const setupConfigFromUrl = async (
+  url: string,
+  checkingInterval: number
+) => {
+  const fetched = await fetchConfig(url)
+  await handshakeAndValidate(fetched)
+  cfg = fetched
+  setInterval(async () => {
+    const fetched = await fetchConfig(url)
+    await handshakeAndValidate(fetched)
+    updateConfig(fetched)
+  }, checkingInterval * 1000)
 }

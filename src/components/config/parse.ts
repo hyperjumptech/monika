@@ -27,34 +27,10 @@ import { readFileSync } from 'fs'
 import { RequestConfig } from '../../interfaces/request'
 import { Probe } from '../../interfaces/probe'
 
-export const parseConfig = (configPath: string): Config => {
-  // Read file from configPath
-  try {
-    // Read file from configPath
-    const configString = readFileSync(configPath, 'utf-8')
-
-    // Parse the content
-    return JSON.parse(configString)
-  } catch (error) {
-    if (error.code === 'ENOENT' && error.path === configPath) {
-      throw new Error(
-        'Configuration file not found. By default, Monika looks for monika.json configuration file in the current directory.\n\nOtherwise, you can also specify a configuration file using -c flag as follows:\n\nmonika -c <path_to_configuration_file>\n\nYou can create a configuration file via web interface by opening this web app: https://hyperjumptech.github.io/monika-config-generator/'
-      )
-    }
-
-    if (error.name === 'SyntaxError') {
-      throw new Error('JSON configuration file is in invalid JSON format!')
-    }
-
-    throw new Error(error.message)
-  }
-}
-
-export const parseHarFile = (filepath: string): Config => {
+export const parseHarFile = (fileContents: string): Config => {
   // Read file from filepath
   try {
-    const fileContents = readFileSync(filepath)
-    const harJson = JSON.parse(fileContents.toString())
+    const harJson = JSON.parse(fileContents)
 
     const harRequest: RequestConfig[] = harJson.log.entries.map(
       (entry: { request: any }) => ({
@@ -80,12 +56,35 @@ export const parseHarFile = (filepath: string): Config => {
 
     return harConfig
   } catch (error) {
-    if (error.code === 'ENOENT' && error.path === filepath) {
-      throw new Error('HAR file not found.')
+    if (error.name === 'SyntaxError') {
+      throw new Error('Har file is in invalid JSON format!')
+    }
+
+    throw new Error(error.message)
+  }
+}
+
+export const parseConfig = (configPath: string, type: string): Config => {
+  // Read file from configPath
+  try {
+    // Read file from configPath
+    const configString = readFileSync(configPath, 'utf-8')
+
+    if (type === 'har') {
+      return parseHarFile(configString)
+    }
+
+    // Parse the content
+    return JSON.parse(configString)
+  } catch (error) {
+    if (error.code === 'ENOENT' && error.path === configPath) {
+      throw new Error(
+        'Configuration file not found. By default, Monika looks for monika.json configuration file in the current directory.\n\nOtherwise, you can also specify a configuration file using -c flag as follows:\n\nmonika -c <path_to_configuration_file>\n\nYou can create a configuration file via web interface by opening this web app: https://hyperjumptech.github.io/monika-config-generator/'
+      )
     }
 
     if (error.name === 'SyntaxError') {
-      throw new Error('Har file is in invalid JSON format!')
+      throw new Error('JSON configuration file is in invalid JSON format!')
     }
 
     throw new Error(error.message)
