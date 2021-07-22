@@ -72,6 +72,17 @@
           "editUrl": "/guides/examples.md"
         }
       ]
+    },
+    {
+      "title": "Tutorial",
+      "heading": true,
+      "routes": [
+        {
+          "title": "Run Monika in Raspberry Pi",
+          "path": "/tutorial/run-in-raspberry-pi",
+          "editUrl": "/tutorial/run-in-raspberry-pi.md"
+        }
+      ]
     }
   ]
 }
