@@ -57,7 +57,6 @@ import {
   PROBE_RESPONSE_VALIDATED,
   ALERTS_READY_TO_SEND,
   LOGS_READY_TO_PRINT,
-  LOGS_READY_TO_SAVE,
 } from './constants/event-emitter'
 import { Config } from './interfaces/config'
 import { MailData, MailgunData, SMTPData, WebhookData } from './interfaces/data'
@@ -74,6 +73,7 @@ import { StatusDetails } from './interfaces/probe-status'
 import { Notification } from './interfaces/notification'
 import { sendAlerts } from './components/notification'
 import { LogObject } from './interfaces/logs'
+import { getLogsAndReport } from './components/reporter'
 
 const em = getEventEmitter()
 
@@ -387,9 +387,8 @@ em.addListener('SANITIZED_CONFIG', function () {
 
 em.addListener(LOGS_READY_TO_PRINT, async (mLog: LogObject) => {
   printProbeLog(mLog)
-  // return mLog
 
-  em.emit(LOGS_READY_TO_SAVE, 'hellooo')
+  // em.emit(LOGS_READY_TO_SAVE, data, mLog)
 })
 
 // EVENT EMITTER - PROBE_RESPONSE_RECEIVED
@@ -519,6 +518,7 @@ em.on(ALERTS_READY_TO_SEND, (data: ProbeStatusProcessed, mLog: LogObject) => {
       )
 
       em.emit(LOGS_READY_TO_PRINT, mLog)
+      getLogsAndReport()
     })
 })
 

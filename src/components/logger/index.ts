@@ -26,10 +26,14 @@ import chalk from 'chalk'
 import { AxiosResponseWithExtraData } from '../../interfaces/request'
 import { Probe } from '../../interfaces/probe'
 import { Notification } from '../../interfaces/notification'
-import { getAllLogs } from './history'
+import { getAllLogs, saveProbeRequestLog } from './history'
 import { log } from '../../utils/pino'
 
 import { LogObject } from '../../interfaces/logs'
+import { getEventEmitter } from '../../utils/events'
+import { LOGS_READY_TO_SAVE } from '../../constants/event-emitter'
+
+const em = getEventEmitter()
 
 /**
  * getStatusColor colorizes different statusCode
@@ -89,16 +93,16 @@ export function probeBuildLog({
       probeRes.data = '' // if not saved, flush .data
     }
   }
-  return mLog
 
-  // await saveProbeRequestLog({ //// TODO TODO TODO SAVING TO PERSISTENCE LOGS DO ELSEWHERE!!!
-  //   // TODO: move saving for last
-  //   probe,
-  //   totalRequests,
-  //   probeRes,
-  //   alerts,
-  //   error,
-  // })
+  saveProbeRequestLog({
+    probe,
+    totalRequests,
+    probeRes,
+    alerts,
+    error,
+  })
+
+  return mLog
 }
 
 /**
@@ -110,9 +114,7 @@ export function probeBuildLog({
 export function setNotificationLog(
   {
     type,
-  }: // alertMsg, // no need
-  // notification, // no not need
-  {
+  }: {
     probe: Probe
     notification: Notification
     type: 'NOTIFY-INCIDENT' | 'NOTIFY-RECOVER'
@@ -134,7 +136,6 @@ export function setNotificationLog(
   mLog.notification.message[0] = msg
 
   return mLog
-  // await saveNotificationLog(probe, notification, type, alertMsg) // TOOODOOO: save to db last!!!
 }
 
 /**
@@ -160,7 +161,7 @@ export function setNotification(
 }
 
 /**
- * setAlert populaates the mLog.alert{} object with flag and message string in the input
+ * setAlert populates the mLog.alert{} object with flag and message string in the input
  * @param {object} flag: type of alert message, ex: not-2xx
  * @param {LogObject} mLog is the log object being updated
  * @returns {LogObject} mLog returned again after being updated
@@ -211,3 +212,10 @@ export async function printAllLogs() {
     })
   })
 }
+
+em.on(LOGS_READY_TO_SAVE, async () => {
+  // Finally save these logs into database
+  // TODO: add log persistence functions here
+  // await saveProbeRequestLog(mLog)
+  // await saveNotificationLog(probe, notification, type, alertMsg)
+})

@@ -27,4 +27,4 @@ export const PROBE_RESPONSE_VALIDATED = 'PROBE_RESPONSE_VALIDATED' // 2. results
 
 export const ALERTS_READY_TO_SEND = 'ALERTS_READY_TO_SEND' // 3. alerts/notifications built and ready to send
 export const LOGS_READY_TO_PRINT = 'LOGS_READY_TO_PRINT' // 4.Logs generated and collected, ready to save to db
-export const LOGS_READY_TO_SAVE = 'LOGS_READY_TO_PRINT' // 5. If any log persistence in this event
+export const LOGS_READY_TO_SAVE = 'LOGS_READY_TO_SAVE' // 5. If any log persistence in this event
