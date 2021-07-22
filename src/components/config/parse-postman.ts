@@ -33,6 +33,8 @@ const defaultNotification = [
   },
 ]
 
+let probes: Probe[] = []
+
 const getConvertedProbeFromPostmanItem = (item: any) => {
   const req = item.request
   const probe: Probe = {
@@ -52,26 +54,31 @@ const getConvertedProbeFromPostmanItem = (item: any) => {
     ],
     incidentThreshold: DEFAULT_THRESHOLD,
     recoveryThreshold: DEFAULT_THRESHOLD,
-    alerts: ['status-not-2xx', 'response-time-greater-than-2-s'],
+    alerts: [],
   }
 
   return probe
 }
 
+const parsePostmanItem = (item: any) => {
+  if (item && item.length > 0) {
+    item.forEach((child: any) => {
+      if (!child.item) {
+        probes.push(getConvertedProbeFromPostmanItem(child))
+        return
+      }
+
+      parsePostmanItem(child.item)
+    })
+  }
+}
+
 export const parseConfigFromPostman = (configString: string): Config => {
   try {
     const parsed = JSON.parse(configString)
-    const probes: Probe[] = []
+    probes = []
 
-    parsed.item.forEach((item: any) => {
-      if (item.item) {
-        item.item.forEach((child: any) => {
-          probes.push(getConvertedProbeFromPostmanItem(child))
-        })
-      } else {
-        probes.push(getConvertedProbeFromPostmanItem(item))
-      }
-    })
+    parsePostmanItem(parsed.item)
 
     const configMonika: any = {
       notifications: defaultNotification,

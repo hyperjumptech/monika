@@ -58,6 +58,9 @@ describe('parseConfigFromPostman', () => {
       expect(config.probes[0].requests[0].url).to.equals(
         groupedEndpointsPostmanJson.item[0].item[0].request.url.raw
       )
+      expect(config.probes[1].requests[0].url).to.equals(
+        groupedEndpointsPostmanJson.item[1].item[0].request.url.raw
+      )
     })
   })
 })
