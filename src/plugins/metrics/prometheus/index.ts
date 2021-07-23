@@ -22,33 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Config } from '../../interfaces/config'
-import { readFileSync } from 'fs'
-import { parseHarFile } from './har'
+import { PrometheusCollector } from './collector'
+import { startPrometheusMetricsServer } from './publisher'
 
-export const parseConfig = (configPath: string, type: string): Config => {
-  // Read file from configPath
-  try {
-    // Read file from configPath
-    const configString = readFileSync(configPath, 'utf-8')
-
-    if (type === 'har') {
-      return parseHarFile(configString)
-    }
-
-    // Parse the content
-    return JSON.parse(configString)
-  } catch (error) {
-    if (error.code === 'ENOENT' && error.path === configPath) {
-      throw new Error(
-        'Configuration file not found. By default, Monika looks for monika.json configuration file in the current directory.\n\nOtherwise, you can also specify a configuration file using -c flag as follows:\n\nmonika -c <path_to_configuration_file>\n\nYou can create a configuration file via web interface by opening this web app: https://hyperjumptech.github.io/monika-config-generator/'
-      )
-    }
-
-    if (error.name === 'SyntaxError') {
-      throw new Error('JSON configuration file is in invalid JSON format!')
-    }
-
-    throw new Error(error.message)
-  }
-}
+export { PrometheusCollector, startPrometheusMetricsServer }

@@ -22,33 +22,36 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Config } from '../../interfaces/config'
-import { readFileSync } from 'fs'
-import { parseHarFile } from './har'
+import express, { Request, Response, NextFunction } from 'express'
+import helmet from 'helmet'
+import { register } from 'prom-client'
+import { log } from '../../../utils/pino'
 
-export const parseConfig = (configPath: string, type: string): Config => {
-  // Read file from configPath
-  try {
-    // Read file from configPath
-    const configString = readFileSync(configPath, 'utf-8')
+export function startPrometheusMetricsServer(port: number) {
+  const app = express()
 
-    if (type === 'har') {
-      return parseHarFile(configString)
+  // security middleware
+  app.use(helmet())
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    if (req.method !== 'GET') {
+      return res.status(405).end()
     }
+    next()
+  })
 
-    // Parse the content
-    return JSON.parse(configString)
-  } catch (error) {
-    if (error.code === 'ENOENT' && error.path === configPath) {
-      throw new Error(
-        'Configuration file not found. By default, Monika looks for monika.json configuration file in the current directory.\n\nOtherwise, you can also specify a configuration file using -c flag as follows:\n\nmonika -c <path_to_configuration_file>\n\nYou can create a configuration file via web interface by opening this web app: https://hyperjumptech.github.io/monika-config-generator/'
-      )
+  app.get('/metrics', async (_: Request, res: Response) => {
+    try {
+      const prometheusMetrics = await register.metrics()
+
+      res.status(200).end(prometheusMetrics)
+    } catch (error) {
+      res.status(500).json({ message: error.message })
     }
+  })
 
-    if (error.name === 'SyntaxError') {
-      throw new Error('JSON configuration file is in invalid JSON format!')
-    }
-
-    throw new Error(error.message)
-  }
+  app.listen(port, () => {
+    log.info(
+      `You can scrape Prometheus metrics from http://localhost:${port}/metrics`
+    )
+  })
 }

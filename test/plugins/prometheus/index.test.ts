@@ -22,33 +22,63 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Config } from '../../interfaces/config'
-import { readFileSync } from 'fs'
-import { parseHarFile } from './har'
+import { expect, test } from '@oclif/test'
+import axios from 'axios'
+import { resolve } from 'path'
+import cmd from '../../../src'
 
-export const parseConfig = (configPath: string, type: string): Config => {
-  // Read file from configPath
-  try {
-    // Read file from configPath
-    const configString = readFileSync(configPath, 'utf-8')
-
-    if (type === 'har') {
-      return parseHarFile(configString)
-    }
-
-    // Parse the content
-    return JSON.parse(configString)
-  } catch (error) {
-    if (error.code === 'ENOENT' && error.path === configPath) {
-      throw new Error(
-        'Configuration file not found. By default, Monika looks for monika.json configuration file in the current directory.\n\nOtherwise, you can also specify a configuration file using -c flag as follows:\n\nmonika -c <path_to_configuration_file>\n\nYou can create a configuration file via web interface by opening this web app: https://hyperjumptech.github.io/monika-config-generator/'
+describe('Prometheus plugin', () => {
+  describe('success', () => {
+    test
+      .stdout()
+      .do(() =>
+        cmd.run([
+          '-c',
+          resolve('./monika.example.json'),
+          '--prometheus',
+          '4444',
+        ])
       )
-    }
+      .it('runs Prometheus metric server', async (ctx) => {
+        // act
+        const res = await axios('http://localhost:4444/metrics')
 
-    if (error.name === 'SyntaxError') {
-      throw new Error('JSON configuration file is in invalid JSON format!')
-    }
+        // assert
+        expect(ctx.stdout).to.contain('Starting Monika.')
+        expect(res.status).to.equal(200)
 
-    throw new Error(error.message)
-  }
-}
+        // eslint-disable-next-line unicorn/no-process-exit
+        process.exit(0)
+      })
+  })
+
+  describe('failed', () => {
+    test
+      .stderr()
+      .do(() => cmd.run(['--prometheus']))
+      .exit(2)
+      .it('exits when Prometheus metric server port is not specify')
+
+    test
+      .stdout()
+      .do(() =>
+        cmd.run([
+          '-c',
+          resolve('./monika.example.json'),
+          '--prometheus',
+          '4446',
+        ])
+      )
+      .it('runs Prometheus metric server but return 405', async () => {
+        try {
+          // act
+          await axios.post('http://localhost:4446/metrics')
+        } catch (error) {
+          // assert
+          expect(error.response.status).to.equal(405)
+        }
+        // eslint-disable-next-line unicorn/no-process-exit
+        process.exit(0)
+      })
+  })
+})
