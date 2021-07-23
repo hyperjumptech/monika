@@ -147,6 +147,12 @@ class Monika extends Command {
       description: 'specific probe ids to run',
       multiple: false,
     }),
+
+    har: flags.string({
+      char: 'H', // (H)ar file to
+      description: 'Run Monika using a HAR file',
+      multiple: false,
+    }),
   }
 
   async run() {
@@ -206,7 +212,7 @@ class Monika extends Command {
           flags.repeat
         )
 
-        await setupConfigFromFile(flags.config, watchConfigFile)
+        await setupConfigFromFile(flags, watchConfigFile)
       }
 
       // Run report on interval if symon configuration exists
