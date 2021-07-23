@@ -32,6 +32,7 @@ import { log } from '../../utils/pino'
 import { LogObject } from '../../interfaces/logs'
 import { getEventEmitter } from '../../utils/events'
 import { PROBE_LOGS_BUILT } from '../../constants/event-emitter'
+import { saveNotificationLog } from '../logger/history'
 
 const em = getEventEmitter()
 
@@ -107,13 +108,16 @@ export function probeBuildLog({
 
 /**
  * notificationLog just prints notifications for the user and to persistent log (through history.ts)
- * @param {objct} contain notification fields
- * @param {LogObjec} mLog to update and return
+ * @param {object} contain notification fields
+ * @param {LogObject} mLog to update and return
  * @returns {LogObject} mLog is returned once updated
  */
 export function setNotificationLog(
   {
     type,
+    alertMsg,
+    notification,
+    probe,
   }: {
     probe: Probe
     notification: Notification
@@ -134,6 +138,7 @@ export function setNotificationLog(
 
   mLog.notification.flag = type
   mLog.notification.message[0] = msg
+  saveNotificationLog(probe, notification, type, alertMsg)
 
   return mLog
 }

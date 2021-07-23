@@ -476,7 +476,7 @@ const createNotificationLog = (
       notifications?.map((notification) => {
         const alertMsg = probe.alerts[index]
 
-        return setNotificationLog(
+        mLog = setNotificationLog(
           {
             type,
             probe,
@@ -492,41 +492,43 @@ const createNotificationLog = (
 }
 
 // 3. Probes Thresholds processed, Send out notifications/alerts.
-em.on(PROBE_ALERTS_READY, (data: ProbeStatusProcessed, mLog: LogObject) => {
-  const {
-    probe,
-    statuses,
-    notifications,
-    totalRequests,
-    validatedResponseStatuses,
-  } = data
+em.on(
+  PROBE_ALERTS_READY,
+  async (data: ProbeStatusProcessed, mLog: LogObject) => {
+    const {
+      probe,
+      statuses,
+      notifications,
+      totalRequests,
+      validatedResponseStatuses,
+    } = data
 
-  statuses
-    ?.filter((status) => status.shouldSendNotification)
-    ?.forEach((status, index) => {
-      probeSendNotification({
-        index,
-        probe,
-        status,
-        notifications,
-        totalRequests,
-        validatedResponseStatuses,
-      }).catch((error: Error) => log.error(error.message))
-
-      mLog = createNotificationLog(
-        {
+    statuses
+      ?.filter((status) => status.shouldSendNotification)
+      ?.forEach((status, index) => {
+        probeSendNotification({
           index,
           probe,
           status,
           notifications,
-        },
-        mLog
-      )
+          totalRequests,
+          validatedResponseStatuses,
+        }).catch((error: Error) => log.error(error.message))
 
-      em.emit(PROBE_LOGS_BUILT, mLog)
-      getLogsAndReport()
-    })
-})
+        mLog = createNotificationLog(
+          {
+            index,
+            probe,
+            status,
+            notifications,
+          },
+          mLog
+        )
+        em.emit(PROBE_LOGS_BUILT, mLog)
+        getLogsAndReport()
+      })
+  }
+)
 
 /**
  * Show Exit Message
