@@ -56,7 +56,7 @@ const prettyPrint = {
 
       const probeMsg = `${log.iteration} id:${log.id} ${log.responseCode} ${log.url} ${log.responseTime}ms`
 
-      if (log.notification?.flag.length > 2) {
+      if (log.notification?.flag) {
         notifMsg = `, NOTIF: ${log.notification.message}`
       }
       if (log.alert?.flag) {

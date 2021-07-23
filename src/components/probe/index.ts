@@ -72,7 +72,7 @@ export async function doProbe(
       message: [],
     },
     notification: {
-      flag: 'na',
+      flag: '',
       message: [],
     },
   } as LogObject
