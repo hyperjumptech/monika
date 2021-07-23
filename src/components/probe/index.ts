@@ -23,10 +23,10 @@
  **********************************************************************************/
 
 import {
-  RESPONSES_READY_TO_PROCESS,
+  PROBE_RESPONSE_RECEIVED,
   PROBE_RESPONSE_VALIDATED,
-  ALERTS_READY_TO_SEND,
-  LOGS_READY_TO_PRINT,
+  PROBE_ALERTS_READY,
+  PROBE_LOGS_BUILT,
 } from '../../constants/event-emitter'
 import { LogObject } from '../../interfaces/logs'
 import { Notification } from '../../interfaces/notification'
@@ -84,7 +84,7 @@ export async function doProbe(
       mLog.url = request.url
       probeRes = await probing(request, responses)
 
-      em.emit(RESPONSES_READY_TO_PROCESS, {
+      em.emit(PROBE_RESPONSE_RECEIVED, {
         probe,
         requestIndex: totalRequests,
         response: probeRes,
@@ -114,7 +114,7 @@ export async function doProbe(
       }
 
       // 4. done probes, no alerts, no notification.. now print log
-      em.emit(LOGS_READY_TO_PRINT, mLog)
+      em.emit(PROBE_LOGS_BUILT, mLog)
     }
 
     // done probing, got some result, process it, check for thresholds and notifications
@@ -131,7 +131,7 @@ export async function doProbe(
 
     // 3. Done processing results, emit RESULT_READY
     em.emit(
-      ALERTS_READY_TO_SEND,
+      PROBE_ALERTS_READY,
       {
         probe,
         statuses,
@@ -143,6 +143,6 @@ export async function doProbe(
     )
   } catch (error) {
     mLog = setAlert({ flag: 'error', message: error }, mLog)
-    em.emit(LOGS_READY_TO_PRINT, mLog)
+    em.emit(PROBE_LOGS_BUILT, mLog)
   }
 }

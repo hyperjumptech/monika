@@ -31,7 +31,7 @@ import { log } from '../../utils/pino'
 
 import { LogObject } from '../../interfaces/logs'
 import { getEventEmitter } from '../../utils/events'
-import { LOGS_READY_TO_SAVE } from '../../constants/event-emitter'
+import { PROBE_LOGS_BUILT } from '../../constants/event-emitter'
 
 const em = getEventEmitter()
 
@@ -213,7 +213,7 @@ export async function printAllLogs() {
   })
 }
 
-em.on(LOGS_READY_TO_SAVE, async () => {
+em.on(PROBE_LOGS_BUILT, async () => {
   // Finally save these logs into database
   // TODO: add log persistence functions here
   // await saveProbeRequestLog(mLog)

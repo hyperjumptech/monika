@@ -53,10 +53,10 @@ import { notificationChecker } from './components/notification/checker'
 import { terminationNotif } from './components/notification/termination'
 import { resetProbeStatuses } from './components/notification/process-server-status'
 import {
-  RESPONSES_READY_TO_PROCESS,
+  PROBE_RESPONSE_RECEIVED,
   PROBE_RESPONSE_VALIDATED,
-  ALERTS_READY_TO_SEND,
-  LOGS_READY_TO_PRINT,
+  PROBE_ALERTS_READY,
+  PROBE_LOGS_BUILT,
 } from './constants/event-emitter'
 import { Config } from './interfaces/config'
 import { MailData, MailgunData, SMTPData, WebhookData } from './interfaces/data'
@@ -189,7 +189,7 @@ class Monika extends Command {
       // register prometheus metric collectors
       em.on('SANITIZED_CONFIG', registerCollectorFromProbes)
       // collect prometheus metrics
-      em.on(RESPONSES_READY_TO_PROCESS, collectProbeRequestMetrics)
+      em.on(PROBE_RESPONSE_RECEIVED, collectProbeRequestMetrics)
 
       startPrometheusMetricsServer(flags.prometheus)
     }
@@ -385,7 +385,7 @@ em.addListener('SANITIZED_CONFIG', function () {
   // TODO: Add function here
 })
 
-em.addListener(LOGS_READY_TO_PRINT, async (mLog: LogObject) => {
+em.addListener(PROBE_LOGS_BUILT, async (mLog: LogObject) => {
   printProbeLog(mLog)
 
   // em.emit(LOGS_READY_TO_SAVE, data, mLog)
@@ -399,7 +399,7 @@ interface ProbeResponseReceived {
 }
 
 // 1. PROBE_RESPONSE_READY - probing done, validate response
-em.on(RESPONSES_READY_TO_PROCESS, function (data: ProbeResponseReceived) {
+em.on(PROBE_RESPONSE_RECEIVED, function (data: ProbeResponseReceived) {
   const res = validateResponse(data.probe.alerts, data.response)
 
   // 2. responses processed, and validated
@@ -486,7 +486,7 @@ const createNotificationLog = (
 }
 
 // 3. Probes Thresholds processed, Send out notifications/alerts.
-em.on(ALERTS_READY_TO_SEND, (data: ProbeStatusProcessed, mLog: LogObject) => {
+em.on(PROBE_ALERTS_READY, (data: ProbeStatusProcessed, mLog: LogObject) => {
   const {
     probe,
     statuses,
@@ -517,7 +517,7 @@ em.on(ALERTS_READY_TO_SEND, (data: ProbeStatusProcessed, mLog: LogObject) => {
         mLog
       )
 
-      em.emit(LOGS_READY_TO_PRINT, mLog)
+      em.emit(PROBE_LOGS_BUILT, mLog)
       getLogsAndReport()
     })
 })

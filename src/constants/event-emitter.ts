@@ -22,9 +22,15 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-export const RESPONSES_READY_TO_PROCESS = 'RESPONSES_READY_TO_PROCESS' // 1. probe done, process responses
-export const PROBE_RESPONSE_VALIDATED = 'PROBE_RESPONSE_VALIDATED' // 2. results validated, good to process
+// Note: Loose standard on event names. not really enforced
+// but if done right, should be clear and self documenting.
 
-export const ALERTS_READY_TO_SEND = 'ALERTS_READY_TO_SEND' // 3. alerts/notifications built and ready to send
-export const LOGS_READY_TO_PRINT = 'LOGS_READY_TO_PRINT' // 4.Logs generated and collected, ready to save to db
-export const LOGS_READY_TO_SAVE = 'LOGS_READY_TO_SAVE' // 5. If any log persistence in this event
+// format is: SCOPE_ITEM_STATE
+// scope : is where it came from ie: probe, or config or maybe timer
+// item  : is the "item" that the listener will be processing/handling
+// state : is the state of that item, is it ready? is it received?
+
+export const PROBE_RESPONSE_RECEIVED = 'PROBE_RESPONSE_RECEIVED'
+export const PROBE_RESPONSE_VALIDATED = 'PROBE_RESPONSE_VALIDATED'
+export const PROBE_ALERTS_READY = 'PROBE_ALERTS_READY'
+export const PROBE_LOGS_BUILT = 'LOGS_BUILT'

@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import { setAlert } from '../../components/logger'
-import { LOGS_READY_TO_PRINT } from '../../constants/event-emitter'
+import { PROBE_LOGS_BUILT } from '../../constants/event-emitter'
 import { LogObject } from '../../interfaces/logs'
 import { Probe } from '../../interfaces/probe'
 import { ProbeStatus, StatusDetails } from '../../interfaces/probe-status'
@@ -259,7 +259,7 @@ export const processThresholds = ({
         if (validation.status === true) {
           setAlert({ flag: 'ALERT', message: updatedStatus.alert as any }, mLog)
           // done probes, got some alerts & notif.. print log
-          em.emit(LOGS_READY_TO_PRINT, mLog)
+          em.emit(PROBE_LOGS_BUILT, mLog)
         }
       })
     }
