@@ -84,7 +84,7 @@ const handshakeAndValidate = async (config: Config) => {
 
 export const setupConfigFromFile = async (flags: any, watch: boolean) => {
   let path = flags.config
-  let type = 'config'
+  let type = 'monika'
 
   if (flags.har) {
     path = flags.har
@@ -113,6 +113,8 @@ export const setupConfigFromUrl = async (
   const fetched = await fetchConfig(url)
   await handshakeAndValidate(fetched)
   cfg = fetched
+  cfg.version = cfg.version || md5Hash(cfg)
+
   setInterval(async () => {
     const fetched = await fetchConfig(url)
     await handshakeAndValidate(fetched)
