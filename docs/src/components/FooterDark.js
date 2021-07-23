@@ -41,15 +41,20 @@ export default function FooterDark(props) {
         <a className="text-xs pt-2" href="/overview" rel="noopener noreferrer">
           Documentation
         </a>
-        <a className="text-xs pt-1" href="/examples" rel="noopener noreferrer">
-          Example
+        <a
+          className="text-xs pt-1"
+          href="/guides/examples"
+          rel="noopener noreferrer"
+        >
+          Examples
         </a>
         <a
           className="text-xs pt-1"
-          href="/quick-start"
+          target="_blank"
+          href="https://hyperjumptech.github.io/monika-config-generator"
           rel="noopener noreferrer"
         >
-          Configuration
+          Config Generator
         </a>
         <a
           className="text-xs pt-1"
