@@ -153,6 +153,12 @@ class Monika extends Command {
       description: 'specific probe ids to run',
       multiple: false,
     }),
+
+    har: flags.string({
+      char: 'H', // (H)ar file to
+      description: 'Run Monika using a HAR file',
+      multiple: false,
+    }),
   }
 
   async run() {

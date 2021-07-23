@@ -120,6 +120,14 @@ To run monika using a Postman JSON file, use --postman flag as follows:
 monika --postman <path_to_postman_file>
 ```
 
+## HAR file support
+
+HAR [HTTP-Archive](<https://en.wikipedia.org/wiki/HAR_(file_format)>) format was created by the Web Performance Working Group and has become the standard in browser archive request data definition. To run monika using a HAR file, use --har flag as follows:
+
+```bash
+monika --har <path_to_HAR_file>
+```
+
 ## Further reading
 
 1. [Alerts](./alerts)

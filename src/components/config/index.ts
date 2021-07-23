@@ -90,6 +90,10 @@ export const setupConfigFromFile = async (flags: any, watch: boolean) => {
     path = flags.postman
     type = 'postman'
   }
+  if (flags.har) {
+    path = flags.har
+    type = 'har'
+  }
 
   const parsed = parseConfig(path, type)
   await handshakeAndValidate(parsed)
