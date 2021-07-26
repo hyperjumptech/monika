@@ -23,33 +23,72 @@
  **********************************************************************************/
 
 import { Config } from '../../interfaces/config'
-import { readFileSync } from 'fs'
-import { parseConfigFromPostman } from './parse-postman'
-import { parseHarFile } from './har'
+import { Probe } from '../../interfaces/probe'
+import { DEFAULT_THRESHOLD } from '../../looper'
 
-export const parseConfig = (configPath: string, type: string): Config => {
-  // Read file from configPath
+const defaultNotification = [
+  {
+    type: 'desktop',
+    id: 'unique-id-desktop-monika-notif',
+  },
+]
+
+let probes: Probe[] = []
+
+const getConvertedProbeFromPostmanItem = (item: any) => {
+  const req = item.request
+  const probe: Probe = {
+    id: item.name,
+    name: item.name,
+    requests: [
+      {
+        url: req.url.raw,
+        method: req.method,
+        headers: req?.header?.reduce(
+          (obj: any, it: any) => Object.assign(obj, { [it.key]: it.value }),
+          {}
+        ),
+        body: req?.body?.raw || JSON.parse('{}'),
+        timeout: 10000,
+      },
+    ],
+    incidentThreshold: DEFAULT_THRESHOLD,
+    recoveryThreshold: DEFAULT_THRESHOLD,
+    alerts: [],
+  }
+
+  return probe
+}
+
+const parsePostmanItem = (item: any) => {
+  if (item && item.length > 0) {
+    item.forEach((child: any) => {
+      if (!child.item) {
+        probes.push(getConvertedProbeFromPostmanItem(child))
+        return
+      }
+
+      parsePostmanItem(child.item)
+    })
+  }
+}
+
+export const parseConfigFromPostman = (configString: string): Config => {
   try {
-    // Read file from configPath
-    const configString = readFileSync(configPath, 'utf-8')
+    const parsed = JSON.parse(configString)
+    probes = []
 
-    if (type === 'har') {
-      return parseHarFile(configString)
-    }
-    if (type === 'postman') {
-      return parseConfigFromPostman(configString)
+    parsePostmanItem(parsed.item)
+
+    const configMonika: any = {
+      notifications: defaultNotification,
+      probes,
     }
 
-    return JSON.parse(configString)
+    return configMonika
   } catch (error) {
-    if (error.code === 'ENOENT' && error.path === configPath) {
-      throw new Error(
-        'Configuration file not found. By default, Monika looks for monika.json configuration file in the current directory.\n\nOtherwise, you can also specify a configuration file using -c flag as follows:\n\nmonika -c <path_to_configuration_file>\n\nYou can create a configuration file via web interface by opening this web app: https://hyperjumptech.github.io/monika-config-generator/'
-      )
-    }
-
     if (error.name === 'SyntaxError') {
-      throw new Error('JSON configuration file is in invalid JSON format!')
+      throw new Error('Postman file is in invalid JSON format!')
     }
 
     throw new Error(error.message)
