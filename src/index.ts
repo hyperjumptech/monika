@@ -208,8 +208,12 @@ class Monika extends Command {
       startPrometheusMetricsServer(flags.prometheus)
     }
 
-    const isOpenConfigGenPage = await this.openConfigGenerator(flags)
+    const isOpenConfigGenPage = this.isOpenConfigGeneratorPage(flags)
     if (isOpenConfigGenPage) {
+      log.info(
+        'Opening Monika Configuration Generator in your default browser...'
+      )
+      await open('https://hyperjumptech.github.io/monika-config-generator/')
       return
     }
 
@@ -288,17 +292,8 @@ class Monika extends Command {
     }
   }
 
-  async openConfigGenerator(flags: any): Promise<boolean> {
-    const openPage = flags['create-config'] && !flags.har && !flags.postman
-
-    if (openPage) {
-      log.info(
-        'Opening Monika Configuration Generator in your default browser...'
-      )
-      await open('https://hyperjumptech.github.io/monika-config-generator/')
-    }
-
-    return openPage
+  isOpenConfigGeneratorPage(flags: any): boolean {
+    return flags['create-config'] && !flags.har && !flags.postman
   }
 
   buildStartupMessage(config: Config, verbose = false, firstRun: boolean) {
