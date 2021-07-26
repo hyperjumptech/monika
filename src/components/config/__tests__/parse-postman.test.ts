@@ -22,36 +22,45 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Config } from '../../interfaces/config'
-import { readFileSync } from 'fs'
-import { parseConfigFromPostman } from './parse-postman'
-import { parseHarFile } from './har'
+import { expect } from 'chai'
+import { Config } from '../../../interfaces/config'
+import { parseConfigFromPostman } from '../parse-postman'
+import simpleEndpointsPostmanJson from './simple.postman_collection.json'
+import groupedEndpointsPostmanJson from './grouped.postman_collection.json'
 
-export const parseConfig = (configPath: string, type: string): Config => {
-  // Read file from configPath
-  try {
-    // Read file from configPath
-    const configString = readFileSync(configPath, 'utf-8')
-
-    if (type === 'har') {
-      return parseHarFile(configString)
-    }
-    if (type === 'postman') {
-      return parseConfigFromPostman(configString)
-    }
-
-    return JSON.parse(configString)
-  } catch (error) {
-    if (error.code === 'ENOENT' && error.path === configPath) {
-      throw new Error(
-        'Configuration file not found. By default, Monika looks for monika.json configuration file in the current directory.\n\nOtherwise, you can also specify a configuration file using -c flag as follows:\n\nmonika -c <path_to_configuration_file>\n\nYou can create a configuration file via web interface by opening this web app: https://hyperjumptech.github.io/monika-config-generator/'
+describe('parseConfigFromPostman', () => {
+  describe('simple endpoints', () => {
+    it('should converted to json', () => {
+      const config: Config = parseConfigFromPostman(
+        JSON.stringify(simpleEndpointsPostmanJson)
       )
-    }
+      expect(config.probes[0].requests[0].url).to.equals(
+        simpleEndpointsPostmanJson.item[0].request.url.raw
+      )
+    })
 
-    if (error.name === 'SyntaxError') {
-      throw new Error('JSON configuration file is in invalid JSON format!')
-    }
+    it('should return not valid', () => {
+      try {
+        parseConfigFromPostman('../fetch.ts')
+      } catch (error) {
+        expect(() => {
+          throw error
+        }).to.throw('Postman file is in invalid JSON format!')
+      }
+    })
+  })
 
-    throw new Error(error.message)
-  }
-}
+  describe('grouped endpoints', () => {
+    it('should converted to json', () => {
+      const config: Config = parseConfigFromPostman(
+        JSON.stringify(groupedEndpointsPostmanJson)
+      )
+      expect(config.probes[0].requests[0].url).to.equals(
+        groupedEndpointsPostmanJson.item[0].item[0].request.url.raw
+      )
+      expect(config.probes[1].requests[0].url).to.equals(
+        groupedEndpointsPostmanJson.item[1].item[0].request.url.raw
+      )
+    })
+  })
+})
