@@ -120,6 +120,7 @@ class Monika extends Command {
       char: 'p', // (p)ostman
       description: 'Run Monika using a Postman json file.',
       multiple: false,
+      exclusive: ['config', 'har'],
     }),
 
     logs: flags.boolean({
@@ -158,17 +159,12 @@ class Monika extends Command {
       char: 'H', // (H)ar file to
       description: 'Run Monika using a HAR file',
       multiple: false,
+      exclusive: ['config', 'postman'],
     }),
 
     output: flags.string({
       char: 'o', // (o)utput file to write config to
       description: 'Write monika config file to this file',
-      multiple: false,
-    }),
-
-    postman: flags.string({
-      char: 'p', // (p)ostman
-      description: 'Run Monika using a Postman json file.',
       multiple: false,
     }),
   }
