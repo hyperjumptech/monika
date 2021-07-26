@@ -86,6 +86,10 @@ export const setupConfigFromFile = async (flags: any, watch: boolean) => {
   let path = flags.config
   let type = 'monika'
 
+  if (flags.postman) {
+    path = flags.postman
+    type = 'postman'
+  }
   if (flags.har) {
     path = flags.har
     type = 'har'
