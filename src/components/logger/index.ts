@@ -34,7 +34,7 @@ import { getEventEmitter } from '../../utils/events'
 import { PROBE_LOGS_BUILT } from '../../constants/event-emitter'
 import { saveNotificationLog } from '../logger/history'
 
-const em = getEventEmitter()
+const EventEmitter = getEventEmitter()
 
 /**
  * getStatusColor colorizes different statusCode
@@ -218,9 +218,7 @@ export async function printAllLogs() {
   })
 }
 
-em.on(PROBE_LOGS_BUILT, async () => {
-  // Finally save these logs into database
+// WIP/TODO: handle probe logs operations here
+EventEmitter.on(PROBE_LOGS_BUILT, async () => {
   // TODO: add log persistence functions here
-  // await saveProbeRequestLog(mLog)
-  // await saveNotificationLog(probe, notification, type, alertMsg)
 })

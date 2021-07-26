@@ -38,12 +38,12 @@ import { probeBuildLog, setAlert } from '../logger'
 import { processThresholds } from '../notification/process-server-status'
 import { probing } from './probing'
 
-const em = getEventEmitter()
+const EventEmitter = getEventEmitter()
 
 let validatedRes: ValidateResponse[] = []
 
-// 2. Responses have been processed and validated
-em.on(PROBE_RESPONSE_VALIDATED, (data: ValidateResponse[]) => {
+// Responses have been processed and validated
+EventEmitter.on(PROBE_RESPONSE_VALIDATED, (data: ValidateResponse[]) => {
   validatedRes = data
 })
 
@@ -84,7 +84,7 @@ export async function doProbe(
       mLog.url = request.url
       probeRes = await probing(request, responses)
 
-      em.emit(PROBE_RESPONSE_RECEIVED, {
+      EventEmitter.emit(PROBE_RESPONSE_RECEIVED, {
         probe,
         requestIndex: totalRequests,
         response: probeRes,
@@ -113,8 +113,8 @@ export async function doProbe(
         break
       }
 
-      // 4. done probes, no alerts, no notification.. now print log
-      em.emit(PROBE_LOGS_BUILT, mLog)
+      // done probes, no alerts, no notification.. now print log
+      EventEmitter.emit(PROBE_LOGS_BUILT, mLog)
     }
 
     // done probing, got some result, process it, check for thresholds and notifications
@@ -129,8 +129,8 @@ export async function doProbe(
       mLog,
     })
 
-    // 3. Done processing results, emit RESULT_READY
-    em.emit(
+    // Done processing results, emit RESULT_READY
+    EventEmitter.emit(
       PROBE_ALERTS_READY,
       {
         probe,
@@ -143,6 +143,6 @@ export async function doProbe(
     )
   } catch (error) {
     mLog = setAlert({ flag: 'error', message: error }, mLog)
-    em.emit(PROBE_LOGS_BUILT, mLog)
+    EventEmitter.emit(PROBE_LOGS_BUILT, mLog)
   }
 }
