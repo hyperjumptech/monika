@@ -116,6 +116,12 @@ class Monika extends Command {
       dependsOn: ['config'],
     }),
 
+    postman: flags.string({
+      char: 'p', // (p)ostman
+      description: 'Run Monika using a Postman json file.',
+      multiple: false,
+    }),
+
     logs: flags.boolean({
       char: 'l', // prints the (l)ogs
       description: 'print all logs.',
