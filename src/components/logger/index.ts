@@ -218,7 +218,7 @@ export async function printAllLogs() {
   })
 }
 
-// WIP/TODO: handle probe logs operations here
+// TODO: Handle event when probe logs has been built
 EventEmitter.on(PROBE_LOGS_BUILT, async () => {
-  // TODO: add log persistence functions here
+  // TODO: put saving to db in one spot
 })
