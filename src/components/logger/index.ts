@@ -26,22 +26,15 @@ import chalk from 'chalk'
 import { AxiosResponseWithExtraData } from '../../interfaces/request'
 import { Probe } from '../../interfaces/probe'
 import { Notification } from '../../interfaces/notification'
-import { saveProbeRequestLog, getAllLogs, saveNotificationLog } from './history'
+import { getAllLogs, saveProbeRequestLog } from './history'
 import { log } from '../../utils/pino'
 
-import { Alerts, LogObject } from '../../interfaces/logs'
+import { LogObject } from '../../interfaces/logs'
+import { getEventEmitter } from '../../utils/events'
+import { PROBE_LOGS_BUILT } from '../../constants/event-emitter'
+import { saveNotificationLog } from '../logger/history'
 
-// declare monika logs and initialize
-let mLogs = {
-  alert: {
-    flag: '',
-    message: [],
-  } as Alerts,
-  notification: {
-    flag: '',
-    message: [],
-  } as Alerts,
-} as LogObject
+const EventEmitter = getEventEmitter()
 
 /**
  * getStatusColor colorizes different statusCode
@@ -62,16 +55,17 @@ export function getStatusColor(statusCode: number) {
 }
 
 /**
- * probeLog prints probe results for the user and to persistent log (through history.ts)
- *
+ * probeBuildLog builds the last probe results for logging (through history.ts)
+ * @returns {LogObject} mLog built log
  */
-export async function probeLog({
+export function probeBuildLog({
   checkOrder,
   probe,
   totalRequests,
   probeRes,
   alerts,
   error,
+  mLog,
 }: {
   checkOrder: number
   probe: Probe
@@ -79,17 +73,18 @@ export async function probeLog({
   probeRes: AxiosResponseWithExtraData
   alerts?: string[]
   error?: string
-}) {
-  mLogs.type = 'PROBE'
-  mLogs.iteration = checkOrder
-  mLogs.id = probe.id
-  mLogs.url = probe.requests[totalRequests].url
-  mLogs.responseCode = probeRes.status
-  mLogs.responseTime = probeRes.config.extraData?.responseTime ?? 0
+  mLog: LogObject
+}): LogObject {
+  mLog.type = 'PROBE'
+  mLog.iteration = checkOrder
+  mLog.id = probe.id
+  mLog.url = probe.requests[totalRequests].url
+  mLog.responseCode = probeRes.status
+  mLog.responseTime = probeRes.config.extraData?.responseTime ?? 0
 
   if (alerts?.length) {
-    mLogs.alert.flag = 'alert'
-    mLogs.alert.message = alerts
+    mLog.alert.flag = 'alert'
+    mLog.alert.message = alerts
   }
 
   if (error?.length) log.error('probe error: ', error)
@@ -100,32 +95,39 @@ export async function probeLog({
     }
   }
 
-  await saveProbeRequestLog({
+  saveProbeRequestLog({
     probe,
     totalRequests,
     probeRes,
     alerts,
     error,
   })
+
+  return mLog
 }
 
 /**
  * notificationLog just prints notifications for the user and to persistent log (through history.ts)
- *
+ * @param {object} contain notification fields
+ * @param {LogObject} mLog to update and return
+ * @returns {LogObject} mLog is returned once updated
  */
-export async function notificationLog({
-  type,
-  alertMsg,
-  notification,
-  probe,
-}: {
-  probe: Probe
-  notification: Notification
-  type: 'NOTIFY-INCIDENT' | 'NOTIFY-RECOVER'
-  alertMsg: string
-}) {
+export function setNotificationLog(
+  {
+    type,
+    alertMsg,
+    notification,
+    probe,
+  }: {
+    probe: Probe
+    notification: Notification
+    type: 'NOTIFY-INCIDENT' | 'NOTIFY-RECOVER'
+    alertMsg: string
+  },
+  mLog: LogObject
+): LogObject {
   let msg: string
-  mLogs.notification.flag = type
+
   switch (type) {
     case 'NOTIFY-INCIDENT':
       msg = 'service probably down'
@@ -133,66 +135,69 @@ export async function notificationLog({
     case 'NOTIFY-RECOVER':
       msg = 'service is back up'
   }
-  mLogs.notification.flag = type
-  mLogs.notification.message[0] = msg
-  await saveNotificationLog(probe, notification, type, alertMsg)
+
+  mLog.notification.flag = type
+  mLog.notification.message[0] = msg
+  saveNotificationLog(probe, notification, type, alertMsg)
+
+  return mLog
 }
 
 /**
  * setNotification sets notification message
- * flag: type of notif message, ex: disruption
- * message: body of notification message
+ * @param {object} flag: type of notification message, ex: disruption
+ * @param {LogObject} mLog is the log to be updated
+ * @returns {LogObject} mLog is returned again after updating
  */
-export function setNotification({
-  flag,
-  message,
-}: {
-  flag: string
-  message: string[]
-}) {
-  mLogs.notification.flag = flag
-  mLogs.notification.message = message
+export function setNotification(
+  {
+    flag,
+    message,
+  }: {
+    flag: string
+    message: string
+  },
+  mLog: LogObject
+): LogObject {
+  mLog.notification.flag = flag
+  mLog.notification.message[0] = message
+
+  return mLog
 }
 
 /**
- * setAlert
+ * setAlert populates the mLog.alert{} object with flag and message string in the input
+ * @param {object} flag: type of alert message, ex: not-2xx
+ * @param {LogObject} mLog is the log object being updated
+ * @returns {LogObject} mLog returned again after being updated
  *
  */
-export function setAlert({
-  flag,
-  message,
-}: {
-  flag: string
-  message: string[]
-}) {
-  mLogs.alert.flag = flag
-  mLogs.alert.message = message
-}
+export function setAlert(
+  {
+    flag,
+    message,
+  }: {
+    flag: string
+    message: string
+  },
+  mLog: LogObject
+): LogObject {
+  mLog.alert.flag = flag
+  mLog.alert.message[0] = message
 
-function flushMLog() {
-  mLogs = {
-    alert: {
-      flag: '',
-      message: [],
-    } as Alerts,
-    notification: {
-      flag: '',
-      message: [],
-    } as Alerts,
-  } as LogObject
+  return mLog
 }
 
 /**
  * printLogs prints the monika logs and clear buffers
+ * @param {LogObject} mLog that is displayed
  */
-export async function printProbeLog() {
-  if (mLogs.alert.flag.length > 0) {
-    log.warn(mLogs)
+export function printProbeLog(mLog: LogObject) {
+  if (mLog.alert.flag.length > 0) {
+    log.warn(mLog)
   } else {
-    log.info(mLogs)
+    log.info(mLog)
   }
-
-  flushMLog()
 }
 
 /**
@@ -212,3 +217,8 @@ export async function printAllLogs() {
     })
   })
 }
+
+// TODO: Handle event when probe logs has been built
+EventEmitter.on(PROBE_LOGS_BUILT, async () => {
+  // TODO: put saving to db in one spot
+})

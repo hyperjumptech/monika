@@ -30,7 +30,6 @@ import { AxiosResponseWithExtraData } from '../../interfaces/request'
 import { Probe } from '../../interfaces/probe'
 import { Notification } from '../../interfaces/notification'
 import { log } from '../../utils/pino'
-
 const sqlite3 = SQLite3.verbose()
 const dbPath = path.resolve(process.cwd(), 'monika-logs.db')
 
