@@ -43,7 +43,6 @@ import { Validation } from '../../interfaces/validation'
 import { isValidURL } from '../../utils/is-valid-url'
 
 const HTTPMethods = [
-  'CONNECT',
   'DELETE',
   'GET',
   'HEAD',
@@ -51,7 +50,9 @@ const HTTPMethods = [
   'PATCH',
   'POST',
   'PUT',
-  'TRACE',
+  'PURGE',
+  'LINK',
+  'UNLINK',
 ]
 
 const setInvalidResponse = (message: string): Validation => ({
@@ -265,7 +266,7 @@ export const validateConfig = (configuration: Config): Validation => {
         request.method = 'GET'
       }
 
-      if (HTTPMethods.indexOf(request.method) < 0)
+      if (HTTPMethods.indexOf(request.method.toUpperCase()) < 0)
         return PROBE_REQUEST_INVALID_METHOD
 
       // Check probe alert properties
