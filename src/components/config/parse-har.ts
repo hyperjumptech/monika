@@ -24,7 +24,6 @@
 
 import { Config } from '../../interfaces/config'
 import { RequestConfig } from '../../interfaces/request'
-import { Probe } from '../../interfaces/probe'
 
 export const parseHarFile = (fileContents: string): Config => {
   // Read file from filepath
@@ -40,17 +39,18 @@ export const parseHarFile = (fileContents: string): Config => {
       })
     )
 
-    const harProbe: Probe = {
-      id: '',
-      name: '',
-      requests: harRequest,
-      incidentThreshold: 5,
-      recoveryThreshold: 5,
-      alerts: [],
-    }
-
-    const harConfig: Config = {
-      probes: [harProbe],
+    const harConfig: any = {
+      notifications: [
+        {
+          id: 'har-desktop-notif',
+          type: 'desktop',
+        },
+      ],
+      probes: [
+        {
+          requests: harRequest,
+        },
+      ],
     }
 
     return harConfig
