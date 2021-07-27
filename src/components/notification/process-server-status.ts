@@ -22,12 +22,17 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { printProbeLog, setAlert } from '../../components/logger'
+import { setAlert } from '../../components/logger'
+import { PROBE_LOGS_BUILT } from '../../constants/event-emitter'
+import { LogObject } from '../../interfaces/logs'
 import { Probe } from '../../interfaces/probe'
 import { ProbeStatus, StatusDetails } from '../../interfaces/probe-status'
 import { AxiosResponseWithExtraData } from '../../interfaces/request'
 import { ValidateResponse } from '../../plugins/validate-response'
 import { log } from '../../utils/pino'
+import { getEventEmitter } from '../../utils/events'
+
+const em = getEventEmitter()
 
 let PROBE_STATUSES: ProbeStatus[] = []
 const INIT_PROBE_STATUS_DETAILS: StatusDetails = {
@@ -164,11 +169,12 @@ const updateProbeStatus = (
   }
 }
 
-export const processProbeStatus = ({
+export const processThresholds = ({
   probe,
   validatedResp,
   incidentThreshold,
   recoveryThreshold,
+  mLog,
 }: {
   checkOrder: number
   probe: Probe
@@ -177,6 +183,7 @@ export const processProbeStatus = ({
   validatedResp: ValidateResponse[]
   incidentThreshold: number
   recoveryThreshold: number
+  mLog: LogObject
 }) => {
   try {
     // Get Probe ID and Name
@@ -250,9 +257,9 @@ export const processProbeStatus = ({
         results.push(updatedStatus)
 
         if (validation.status === true) {
-          setAlert({ flag: 'ALERT', message: updatedStatus.alert as any })
-          // done probes, got some alerts&notif.. print log
-          printProbeLog()
+          setAlert({ flag: 'ALERT', message: updatedStatus.alert as any }, mLog)
+          // done probes, got some alerts & notif.. print log
+          em.emit(PROBE_LOGS_BUILT, mLog)
         }
       })
     }
