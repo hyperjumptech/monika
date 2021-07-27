@@ -23,24 +23,27 @@
  **********************************************************************************/
 
 import {
-  PROBE_STATUS_PROCESSED,
   PROBE_RESPONSE_RECEIVED,
   PROBE_RESPONSE_VALIDATED,
+  PROBE_ALERTS_READY,
+  PROBE_LOGS_BUILT,
 } from '../../constants/event-emitter'
+import { LogObject } from '../../interfaces/logs'
 import { Notification } from '../../interfaces/notification'
 import { Probe } from '../../interfaces/probe'
 import { AxiosResponseWithExtraData } from '../../interfaces/request'
 import { ValidateResponse } from '../../plugins/validate-response'
 import { getEventEmitter } from '../../utils/events'
-import { printProbeLog, probeLog, setAlert } from '../logger'
-import { processProbeStatus } from '../notification/process-server-status'
+import { probeBuildLog, setAlert } from '../logger'
+import { processThresholds } from '../notification/process-server-status'
 import { probing } from './probing'
 
-const em = getEventEmitter()
+const EventEmitter = getEventEmitter()
 
 let validatedRes: ValidateResponse[] = []
 
-em.on(PROBE_RESPONSE_VALIDATED, (data: ValidateResponse[]) => {
+// Responses have been processed and validated
+EventEmitter.on(PROBE_RESPONSE_VALIDATED, (data: ValidateResponse[]) => {
   validatedRes = data
 })
 
@@ -57,14 +60,31 @@ export async function doProbe(
 ) {
   let probeRes: AxiosResponseWithExtraData = {} as AxiosResponseWithExtraData
   let totalRequests = 0 // is the number of requests in  probe.requests[x]
+  let mLog: LogObject = {
+    type: 'PROBE',
+    iteration: 0,
+    id: probe.id,
+    responseCode: 0,
+    url: '',
+    responseTime: 0,
+    alert: {
+      flag: '',
+      message: [],
+    },
+    notification: {
+      flag: '',
+      message: [],
+    },
+  } as LogObject
 
   try {
     const responses: Array<AxiosResponseWithExtraData> = []
 
     for await (const request of probe.requests) {
+      mLog.url = request.url
       probeRes = await probing(request, responses)
 
-      em.emit(PROBE_RESPONSE_RECEIVED, {
+      EventEmitter.emit(PROBE_RESPONSE_RECEIVED, {
         probe,
         requestIndex: totalRequests,
         response: probeRes,
@@ -73,7 +93,8 @@ export async function doProbe(
       // Add to an array to be accessed by another request
       responses.push(probeRes)
 
-      await probeLog({
+      // done probing, got the results, build logs
+      mLog = probeBuildLog({
         checkOrder,
         probe,
         totalRequests,
@@ -81,6 +102,7 @@ export async function doProbe(
         alerts: validatedRes
           .filter((item) => item.status)
           .map((item) => item.alert),
+        mLog,
       })
 
       // done one request, is there another
@@ -91,11 +113,12 @@ export async function doProbe(
         break
       }
 
-      // done probes, no alerts, no notif.. now print log
-      printProbeLog()
+      // done probes, no alerts, no notification.. now print log
+      EventEmitter.emit(PROBE_LOGS_BUILT, mLog)
     }
 
-    const statuses = processProbeStatus({
+    // done probing, got some result, process it, check for thresholds and notifications
+    const statuses = processThresholds({
       checkOrder,
       probe,
       probeRes,
@@ -103,16 +126,23 @@ export async function doProbe(
       validatedResp: validatedRes,
       incidentThreshold: probe.incidentThreshold,
       recoveryThreshold: probe.recoveryThreshold,
+      mLog,
     })
 
-    em.emit(PROBE_STATUS_PROCESSED, {
-      probe,
-      statuses,
-      notifications,
-      totalRequests,
-      validatedResponseStatuses: validatedRes,
-    })
+    // Done processing results, emit RESULT_READY
+    EventEmitter.emit(
+      PROBE_ALERTS_READY,
+      {
+        probe,
+        statuses,
+        notifications,
+        totalRequests,
+        validatedResponseStatuses: validatedRes,
+      },
+      mLog
+    )
   } catch (error) {
-    setAlert({ flag: 'error', message: error })
+    mLog = setAlert({ flag: 'error', message: error }, mLog)
+    EventEmitter.emit(PROBE_LOGS_BUILT, mLog)
   }
 }
