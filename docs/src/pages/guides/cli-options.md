@@ -51,6 +51,27 @@ monika --flush
 
 You must respond with a capital `"Y"` to confirm if you want to flush the logs.
 
+## Prometheus
+
+You can expose the [Prometheus](https://prometheus.io/) metrics server with the `--prometheus` flag and server port as a value.
+
+```bash
+monika --prometheus 3001
+```
+
+Then you can scrape the metrics from `http://localhost:3001/metrics`.
+
+### Available metrics
+
+Monika exposes [Prometheus default metrics](https://prometheus.io/docs/instrumenting/writing_clientlibs/#standard-and-runtime-collectors), [Node.js specific metrics](https://github.com/siimon/prom-client/tree/master/lib/metrics), and Monika probe metrics below.
+
+| Metric Name                            | Type      | Purpose                                      | Label                                       |
+| -------------------------------------- | --------- | -------------------------------------------- | ------------------------------------------- |
+| `monika_probes_total`                  | Gauge     | Collect total probe                          | -                                           |
+| `monika_request_status_code_info`      | Gauge     | Collect HTTP status code                     | `id`, `name`, `url`, `method`               |
+| `monika_request_response_time_seconds` | Histogram | Collect duration of probe request in seconds | `id`, `name`, `url`, `method`, `statusCode` |
+| `monika_request_response_size_bytes`   | Gauge     | Collect size of response size in bytes       | `id`, `name`, `url`, `method`, `statusCode` |
+
 ## Repeat
 
 By default monika will continuously loop through all your probes in the configuration. You can specify the number of repeats using `-r` or `--repeat` flags followed by a number. For example to repeat only 3 times type the command below:
