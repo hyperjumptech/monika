@@ -61,7 +61,7 @@ monika --prometheus 3001
 
 Then you can scrape the metrics from `http://localhost:3001/metrics`.
 
-### Available metrics
+### Available Metrics
 
 Monika exposes [Prometheus default metrics](https://prometheus.io/docs/instrumenting/writing_clientlibs/#standard-and-runtime-collectors), [Node.js specific metrics](https://github.com/siimon/prom-client/tree/master/lib/metrics), and Monika probe metrics below.
 
