@@ -126,6 +126,7 @@ class Monika extends Command {
       char: 'p', // (p)ostman
       description: 'Run Monika using a Postman json file.',
       multiple: false,
+      exclusive: ['config', 'har'],
     }),
 
     logs: flags.boolean({
@@ -163,6 +164,13 @@ class Monika extends Command {
     har: flags.string({
       char: 'H', // (H)ar file to
       description: 'Run Monika using a HAR file',
+      multiple: false,
+      exclusive: ['config', 'postman'],
+    }),
+
+    output: flags.string({
+      char: 'o', // (o)utput file to write config to
+      description: 'Write monika config file to this file',
       multiple: false,
     }),
   }
@@ -206,7 +214,8 @@ class Monika extends Command {
       startPrometheusMetricsServer(flags.prometheus)
     }
 
-    if (flags['create-config']) {
+    const isOpenConfigGenPage = this.isOpenConfigGeneratorPage(flags)
+    if (isOpenConfigGenPage) {
       log.info(
         'Opening Monika Configuration Generator in your default browser...'
       )
@@ -287,6 +296,10 @@ class Monika extends Command {
       await closeLog()
       this.error(error?.message, { exit: 1 })
     }
+  }
+
+  isOpenConfigGeneratorPage(flags: any): boolean {
+    return flags['create-config'] && !flags.har && !flags.postman
   }
 
   buildStartupMessage(config: Config, verbose = false, firstRun: boolean) {
