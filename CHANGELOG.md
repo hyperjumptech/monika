@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.1] - 2021-07-27
+
+### Added
+
+- Add google analytics with consent
+- Add Prometheus Metric Server
+- Add HAR file config definition
+- Add support for postman config file
+- Add termination notif
+- Write config file from har or postman
+
+### Fixed
+
+- Cleanup log display in comand line (CLI)
+- Move validate response to core plugin
+- Fix iphone se 2 visuals on zoomed ui
+- Move notification and store from probe to event emitter
+- Fix throw error when bad id
+- Add dockerignore to reduce size
+- Fix footer deadlink
+- Fix undefined bug in CLI logs
+
+### Changed
+
+- Change favicons
+
 ## [1.4.0] - 2021-06-30
 
 ### Added
