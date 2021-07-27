@@ -24,6 +24,34 @@
 
 import { Config } from '../../interfaces/config'
 import { RequestConfig } from '../../interfaces/request'
+import { log } from '../../utils/pino'
+
+const convertNameValueArraysToObject = (
+  headers: {
+    name: string
+    value: any
+  }[]
+) => {
+  const obj: any = {}
+  headers.forEach((item) => {
+    if (item.name.charAt(0) !== ':') {
+      obj[item.name] = item.value
+    }
+  })
+  return obj
+}
+
+const parsePostData = (postData: any) => {
+  if (!postData) {
+    return {}
+  }
+
+  if (postData.mimeType === 'application/json') {
+    return JSON.parse(postData.text)
+  }
+
+  return postData.text
+}
 
 export const parseHarFile = (fileContents: string): Config => {
   // Read file from filepath
@@ -34,8 +62,9 @@ export const parseHarFile = (fileContents: string): Config => {
       (entry: { request: any }) => ({
         method: entry.request.method,
         url: entry.request.url,
-        headers: Object.assign({}, ...entry.request.headers),
-        params: Object.assign({}, ...entry.request.queryString),
+        headers: convertNameValueArraysToObject(entry.request.headers),
+        params: convertNameValueArraysToObject(entry.request.queryString),
+        body: parsePostData(entry.request.postData),
       })
     )
 
@@ -52,6 +81,8 @@ export const parseHarFile = (fileContents: string): Config => {
         },
       ],
     }
+
+    log.info(JSON.stringify(harConfig))
 
     return harConfig
   } catch (error) {
