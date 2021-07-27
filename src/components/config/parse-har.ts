@@ -24,7 +24,6 @@
 
 import { Config } from '../../interfaces/config'
 import { RequestConfig } from '../../interfaces/request'
-import { log } from '../../utils/pino'
 
 const convertNameValueArraysToObject = (
   headers: {
@@ -81,8 +80,6 @@ export const parseHarFile = (fileContents: string): Config => {
         },
       ],
     }
-
-    log.info(JSON.stringify(harConfig))
 
     return harConfig
   } catch (error) {
