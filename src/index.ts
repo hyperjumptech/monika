@@ -35,7 +35,11 @@ import {
   setupConfigFromFile,
   setupConfigFromUrl,
 } from './components/config'
-import { notificationLog, printAllLogs } from './components/logger'
+import {
+  setNotificationLog,
+  printAllLogs,
+  printProbeLog,
+} from './components/logger'
 import {
   closeLog,
   flushAllLogs,
@@ -51,7 +55,8 @@ import { resetProbeStatuses } from './components/notification/process-server-sta
 import {
   PROBE_RESPONSE_RECEIVED,
   PROBE_RESPONSE_VALIDATED,
-  PROBE_STATUS_PROCESSED,
+  PROBE_ALERTS_READY,
+  PROBE_LOGS_BUILT,
 } from './constants/event-emitter'
 import { Config } from './interfaces/config'
 import { MailData, MailgunData, SMTPData, WebhookData } from './interfaces/data'
@@ -67,6 +72,7 @@ import { log } from './utils/pino'
 import { StatusDetails } from './interfaces/probe-status'
 import { Notification } from './interfaces/notification'
 import { sendAlerts } from './components/notification'
+import { LogObject } from './interfaces/logs'
 import { getLogsAndReport } from './components/reporter'
 
 const em = getEventEmitter()
@@ -116,6 +122,13 @@ class Monika extends Command {
       dependsOn: ['config'],
     }),
 
+    postman: flags.string({
+      char: 'p', // (p)ostman
+      description: 'Run Monika using a Postman json file.',
+      multiple: false,
+      exclusive: ['config', 'har'],
+    }),
+
     logs: flags.boolean({
       char: 'l', // prints the (l)ogs
       description: 'print all logs.',
@@ -151,6 +164,13 @@ class Monika extends Command {
     har: flags.string({
       char: 'H', // (H)ar file to
       description: 'Run Monika using a HAR file',
+      multiple: false,
+      exclusive: ['config', 'postman'],
+    }),
+
+    output: flags.string({
+      char: 'o', // (o)utput file to write config to
+      description: 'Write monika config file to this file',
       multiple: false,
     }),
   }
@@ -194,7 +214,8 @@ class Monika extends Command {
       startPrometheusMetricsServer(flags.prometheus)
     }
 
-    if (flags['create-config']) {
+    const isOpenConfigGenPage = this.isOpenConfigGeneratorPage(flags)
+    if (isOpenConfigGenPage) {
       log.info(
         'Opening Monika Configuration Generator in your default browser...'
       )
@@ -275,6 +296,10 @@ class Monika extends Command {
       await closeLog()
       this.error(error?.message, { exit: 1 })
     }
+  }
+
+  isOpenConfigGeneratorPage(flags: any): boolean {
+    return flags['create-config'] && !flags.har && !flags.postman
   }
 
   buildStartupMessage(config: Config, verbose = false, firstRun: boolean) {
@@ -380,6 +405,17 @@ em.addListener('TERMINATE_EVENT', async (data) => {
   }
 })
 
+// Subscribe to Sanitize Config
+em.addListener('SANITIZED_CONFIG', function () {
+  // TODO: Add function here
+})
+
+em.addListener(PROBE_LOGS_BUILT, async (mLog: LogObject) => {
+  printProbeLog(mLog)
+
+  // em.emit(LOGS_READY_TO_SAVE, data, mLog)
+})
+
 // EVENT EMITTER - PROBE_RESPONSE_RECEIVED
 interface ProbeResponseReceived {
   probe: Probe
@@ -387,14 +423,14 @@ interface ProbeResponseReceived {
   response: AxiosResponseWithExtraData
 }
 
-// PROBE_RESPONSE_RECEIVED - VALIDATE RESPONSE
+// 1. PROBE_RESPONSE_READY - probing done, validate response
 em.on(PROBE_RESPONSE_RECEIVED, function (data: ProbeResponseReceived) {
   const res = validateResponse(data.probe.alerts, data.response)
 
+  // 2. responses processed, and validated
   em.emit(PROBE_RESPONSE_VALIDATED, res)
 })
 
-// EVENT EMITTER - PROBE_STATUS_PROCESSED
 interface ProbeStatusProcessed {
   probe: Probe
   statuses?: StatusDetails[]
@@ -443,7 +479,10 @@ const probeSendNotification = async (data: ProbeSendNotification) => {
   }
 }
 
-const probeSaveLogToDatabase = async (data: ProbeSaveLogToDatabase) => {
+const createNotificationLog = (
+  data: ProbeSaveLogToDatabase,
+  mLog: LogObject
+): LogObject => {
   const { index, probe, status, notifications } = data
 
   const type =
@@ -456,49 +495,59 @@ const probeSaveLogToDatabase = async (data: ProbeSaveLogToDatabase) => {
       notifications?.map((notification) => {
         const alertMsg = probe.alerts[index]
 
-        return notificationLog({
-          type,
-          probe,
-          alertMsg,
-          notification,
-        })
+        mLog = setNotificationLog(
+          {
+            type,
+            probe,
+            alertMsg,
+            notification,
+          },
+          mLog
+        )
       })!
     )
   }
+  return mLog
 }
 
-// PROBE_STATUS_PROCESSED
-em.on(PROBE_STATUS_PROCESSED, (data: ProbeStatusProcessed) => {
-  const {
-    probe,
-    statuses,
-    notifications,
-    totalRequests,
-    validatedResponseStatuses,
-  } = data
+// 3. Probes Thresholds processed, Send out notifications/alerts.
+em.on(
+  PROBE_ALERTS_READY,
+  async (data: ProbeStatusProcessed, mLog: LogObject) => {
+    const {
+      probe,
+      statuses,
+      notifications,
+      totalRequests,
+      validatedResponseStatuses,
+    } = data
 
-  statuses
-    ?.filter((status) => status.shouldSendNotification)
-    ?.forEach((status, index) => {
-      probeSendNotification({
-        index,
-        probe,
-        status,
-        notifications,
-        totalRequests,
-        validatedResponseStatuses,
-      }).catch((error: Error) => log.error(error.message))
+    statuses
+      ?.filter((status) => status.shouldSendNotification)
+      ?.forEach((status, index) => {
+        probeSendNotification({
+          index,
+          probe,
+          status,
+          notifications,
+          totalRequests,
+          validatedResponseStatuses,
+        }).catch((error: Error) => log.error(error.message))
 
-      probeSaveLogToDatabase({
-        index,
-        probe,
-        status,
-        notifications,
+        mLog = createNotificationLog(
+          {
+            index,
+            probe,
+            status,
+            notifications,
+          },
+          mLog
+        )
+        em.emit(PROBE_LOGS_BUILT, mLog)
+        getLogsAndReport()
       })
-        .then(getLogsAndReport)
-        .catch((error: Error) => log.error(error.message))
-    })
-})
+  }
+)
 
 /**
  * Show Exit Message

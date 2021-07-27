@@ -22,6 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import { writeFile } from 'fs'
 import EventEmitter from 'events'
 import chokidar from 'chokidar'
 import pEvent from 'p-event'
@@ -86,6 +87,10 @@ export const setupConfigFromFile = async (flags: any, watch: boolean) => {
   let path = flags.config
   let type = 'monika'
 
+  if (flags.postman) {
+    path = flags.postman
+    type = 'postman'
+  }
   if (flags.har) {
     path = flags.har
     type = 'har'
@@ -102,6 +107,18 @@ export const setupConfigFromFile = async (flags: any, watch: boolean) => {
       const parsed = parseConfig(path, type)
       await handshakeAndValidate(parsed)
       updateConfig(parsed)
+    })
+  }
+
+  if (flags['create-config'] && (flags.har || flags.postman)) {
+    const file = flags.output || 'monika.json'
+    writeFile(file, JSON.stringify(parsed), 'utf8', function (err) {
+      if (err) {
+        log.error('An error occured while writing har config to File.')
+        return log.error(err)
+      }
+
+      log.info(`${file} file has been created.`)
     })
   }
 }

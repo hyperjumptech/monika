@@ -22,15 +22,75 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-// Note: Loose standard on event names. not really enforced
-// but if done right, should be clear and self documenting.
+import { Config } from '../../interfaces/config'
+import { Probe } from '../../interfaces/probe'
+import { DEFAULT_THRESHOLD } from '../../looper'
 
-// format is: SCOPE_ITEM_STATE
-// scope : is where it came from ie: probe, or config or maybe timer
-// item  : is the "item" that the listener will be processing/handling
-// state : is the state of that item, is it ready? is it received?
+const defaultNotification = [
+  {
+    type: 'desktop',
+    id: 'unique-id-desktop-monika-notif',
+  },
+]
 
-export const PROBE_RESPONSE_RECEIVED = 'PROBE_RESPONSE_RECEIVED'
-export const PROBE_RESPONSE_VALIDATED = 'PROBE_RESPONSE_VALIDATED'
-export const PROBE_ALERTS_READY = 'PROBE_ALERTS_READY'
-export const PROBE_LOGS_BUILT = 'PROBE_LOGS_BUILT'
+let probes: Probe[] = []
+
+const getConvertedProbeFromPostmanItem = (item: any) => {
+  const req = item.request
+  const probe: Probe = {
+    id: item.name,
+    name: item.name,
+    requests: [
+      {
+        url: req.url.raw,
+        method: req.method,
+        headers: req?.header?.reduce(
+          (obj: any, it: any) => Object.assign(obj, { [it.key]: it.value }),
+          {}
+        ),
+        body: req?.body?.raw || JSON.parse('{}'),
+        timeout: 10000,
+      },
+    ],
+    incidentThreshold: DEFAULT_THRESHOLD,
+    recoveryThreshold: DEFAULT_THRESHOLD,
+    alerts: [],
+  }
+
+  return probe
+}
+
+const parsePostmanItem = (item: any) => {
+  if (item && item.length > 0) {
+    item.forEach((child: any) => {
+      if (!child.item) {
+        probes.push(getConvertedProbeFromPostmanItem(child))
+        return
+      }
+
+      parsePostmanItem(child.item)
+    })
+  }
+}
+
+export const parseConfigFromPostman = (configString: string): Config => {
+  try {
+    const parsed = JSON.parse(configString)
+    probes = []
+
+    parsePostmanItem(parsed.item)
+
+    const configMonika: any = {
+      notifications: defaultNotification,
+      probes,
+    }
+
+    return configMonika
+  } catch (error) {
+    if (error.name === 'SyntaxError') {
+      throw new Error('Postman file is in invalid JSON format!')
+    }
+
+    throw new Error(error.message)
+  }
+}

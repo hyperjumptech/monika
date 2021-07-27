@@ -22,43 +22,45 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Config } from '../../interfaces/config'
-import { RequestConfig } from '../../interfaces/request'
-import { Probe } from '../../interfaces/probe'
+import { expect } from 'chai'
+import { Config } from '../../../interfaces/config'
+import { parseConfigFromPostman } from '../parse-postman'
+import simpleEndpointsPostmanJson from './simple.postman_collection.json'
+import groupedEndpointsPostmanJson from './grouped.postman_collection.json'
 
-export const parseHarFile = (fileContents: string): Config => {
-  // Read file from filepath
-  try {
-    const harJson = JSON.parse(fileContents)
+describe('parseConfigFromPostman', () => {
+  describe('simple endpoints', () => {
+    it('should converted to json', () => {
+      const config: Config = parseConfigFromPostman(
+        JSON.stringify(simpleEndpointsPostmanJson)
+      )
+      expect(config.probes[0].requests[0].url).to.equals(
+        simpleEndpointsPostmanJson.item[0].request.url.raw
+      )
+    })
 
-    const harRequest: RequestConfig[] = harJson.log.entries.map(
-      (entry: { request: any }) => ({
-        method: entry.request.method,
-        url: entry.request.url,
-        headers: Object.assign({}, ...entry.request.headers),
-        params: Object.assign({}, ...entry.request.queryString),
-      })
-    )
+    it('should return not valid', () => {
+      try {
+        parseConfigFromPostman('../fetch.ts')
+      } catch (error) {
+        expect(() => {
+          throw error
+        }).to.throw('Postman file is in invalid JSON format!')
+      }
+    })
+  })
 
-    const harProbe: Probe = {
-      id: '',
-      name: '',
-      requests: harRequest,
-      incidentThreshold: 5,
-      recoveryThreshold: 5,
-      alerts: [],
-    }
-
-    const harConfig: Config = {
-      probes: [harProbe],
-    }
-
-    return harConfig
-  } catch (error) {
-    if (error.name === 'SyntaxError') {
-      throw new Error('Har file is in invalid JSON format!')
-    }
-
-    throw new Error(error.message)
-  }
-}
+  describe('grouped endpoints', () => {
+    it('should converted to json', () => {
+      const config: Config = parseConfigFromPostman(
+        JSON.stringify(groupedEndpointsPostmanJson)
+      )
+      expect(config.probes[0].requests[0].url).to.equals(
+        groupedEndpointsPostmanJson.item[0].item[0].request.url.raw
+      )
+      expect(config.probes[1].requests[0].url).to.equals(
+        groupedEndpointsPostmanJson.item[1].item[0].request.url.raw
+      )
+    })
+  })
+})

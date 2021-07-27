@@ -24,7 +24,8 @@
 
 import { Config } from '../../interfaces/config'
 import { readFileSync } from 'fs'
-import { parseHarFile } from './har'
+import { parseConfigFromPostman } from './parse-postman'
+import { parseHarFile } from './parse-har'
 
 export const parseConfig = (configPath: string, type: string): Config => {
   // Read file from configPath
@@ -35,8 +36,10 @@ export const parseConfig = (configPath: string, type: string): Config => {
     if (type === 'har') {
       return parseHarFile(configString)
     }
+    if (type === 'postman') {
+      return parseConfigFromPostman(configString)
+    }
 
-    // Parse the content
     return JSON.parse(configString)
   } catch (error) {
     if (error.code === 'ENOENT' && error.path === configPath) {

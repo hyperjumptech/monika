@@ -31,7 +31,7 @@ import { Notification } from './interfaces/notification'
 import { getUnreportedLogsCount } from './components/logger/history'
 
 const MILLISECONDS = 1000
-const DEFAULT_THRESHOLD = 5
+export const DEFAULT_THRESHOLD = 5
 const DEFAULT_REPORT_INTERVAL = 180000 // 3 minutes
 
 /**

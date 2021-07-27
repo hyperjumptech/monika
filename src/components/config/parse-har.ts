@@ -22,15 +22,43 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-// Note: Loose standard on event names. not really enforced
-// but if done right, should be clear and self documenting.
+import { Config } from '../../interfaces/config'
+import { RequestConfig } from '../../interfaces/request'
 
-// format is: SCOPE_ITEM_STATE
-// scope : is where it came from ie: probe, or config or maybe timer
-// item  : is the "item" that the listener will be processing/handling
-// state : is the state of that item, is it ready? is it received?
+export const parseHarFile = (fileContents: string): Config => {
+  // Read file from filepath
+  try {
+    const harJson = JSON.parse(fileContents)
 
-export const PROBE_RESPONSE_RECEIVED = 'PROBE_RESPONSE_RECEIVED'
-export const PROBE_RESPONSE_VALIDATED = 'PROBE_RESPONSE_VALIDATED'
-export const PROBE_ALERTS_READY = 'PROBE_ALERTS_READY'
-export const PROBE_LOGS_BUILT = 'PROBE_LOGS_BUILT'
+    const harRequest: RequestConfig[] = harJson.log.entries.map(
+      (entry: { request: any }) => ({
+        method: entry.request.method,
+        url: entry.request.url,
+        headers: Object.assign({}, ...entry.request.headers),
+        params: Object.assign({}, ...entry.request.queryString),
+      })
+    )
+
+    const harConfig: any = {
+      notifications: [
+        {
+          id: 'har-desktop-notif',
+          type: 'desktop',
+        },
+      ],
+      probes: [
+        {
+          requests: harRequest,
+        },
+      ],
+    }
+
+    return harConfig
+  } catch (error) {
+    if (error.name === 'SyntaxError') {
+      throw new Error('Har file is in invalid JSON format!')
+    }
+
+    throw new Error(error.message)
+  }
+}
