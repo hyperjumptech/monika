@@ -27,7 +27,12 @@ import boxen from 'boxen'
 import chalk from 'chalk'
 import cli from 'cli-ux'
 import fs from 'fs'
-import { getConfig, getConfigIterator, setupConfig } from './components/config'
+import {
+  createConfig,
+  getConfig,
+  getConfigIterator,
+  setupConfig,
+} from './components/config'
 import {
   setNotificationLog,
   printAllLogs,
@@ -170,6 +175,12 @@ class Monika extends Command {
 
   async run() {
     const { flags } = this.parse(Monika)
+
+    if (flags['create-config']) {
+      await createConfig(flags)
+      return
+    }
+
     await openLogfile()
 
     if (flags.logs) {
@@ -209,9 +220,6 @@ class Monika extends Command {
 
     try {
       await setupConfig(flags)
-      if (flags['create-config']) {
-        return
-      }
 
       // Run report on interval if symon configuration exists
       if (!(process.env.CI || process.env.NODE_ENV === 'test')) {
