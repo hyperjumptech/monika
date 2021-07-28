@@ -84,7 +84,7 @@ const PROBE_REQUEST_INVALID_URL = setInvalidResponse(
   'Probe request URL should start with http:// or https://'
 )
 const PROBE_REQUEST_INVALID_METHOD = setInvalidResponse(
-  'Probe request method is invalid!'
+  'Probe request method is invalid! Valid methods are GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS, PURGE, LINK, and UNLINK'
 )
 const PROBE_ALERT_INVALID = setInvalidResponse(
   `Probe alert should be 'status-not-2xx' or 'response-time-greater-than-<number>-(m)s`
