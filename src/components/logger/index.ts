@@ -78,6 +78,7 @@ export function probeBuildLog({
   mLog.type = 'PROBE'
   mLog.iteration = checkOrder
   mLog.id = probe.id
+  mLog.method = probe.requests[totalRequests].method
   mLog.url = probe.requests[totalRequests].url
   mLog.responseCode = probeRes.status
   mLog.responseTime = probeRes.config.extraData?.responseTime ?? 0

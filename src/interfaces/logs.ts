@@ -22,6 +22,8 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import { Method } from 'axios'
+
 export interface Alerts {
   flag: string
   message: string[]
@@ -36,6 +38,7 @@ export interface LogObject {
   responseTime: number
   alert: Alerts
   notification: Alerts
+  method: Method | undefined
 }
 
 export interface PlainLogObject {

@@ -66,6 +66,7 @@ export async function doProbe(
     id: probe.id,
     responseCode: 0,
     url: '',
+    method: 'GET',
     responseTime: 0,
     alert: {
       flag: '',
