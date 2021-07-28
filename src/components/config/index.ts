@@ -34,7 +34,7 @@ import { validateConfig } from './validate'
 import { handshake } from '../reporter'
 import { log } from '../../utils/pino'
 import { md5Hash } from '../../utils/hash'
-import { writeFile } from 'fs'
+import { writeFileSync } from 'fs'
 
 const emitter = new EventEmitter()
 
@@ -164,13 +164,7 @@ export const createConfig = async (flags: any) => {
     const parsed = parseConfig(path, type)
     const file = flags.output || 'monika.json'
 
-    await writeFile(file, JSON.stringify(parsed), 'utf8', function (err) {
-      if (err) {
-        log.error(`Could not write the new configuration to ${file}.`)
-        return log.error(err)
-      }
-
-      log.info(`${file} file has been created.`)
-    })
+    writeFileSync(file, JSON.stringify(parsed), 'utf8')
+    log.info(`${file} file has been created.`)
   }
 }

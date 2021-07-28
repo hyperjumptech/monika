@@ -25,7 +25,6 @@
 import { expect } from 'chai'
 import fs from 'fs'
 import { createConfig } from '..'
-import { log } from '../../../utils/pino'
 
 afterEach(() => {
   if (fs.existsSync('monika.har.json')) {
@@ -59,7 +58,6 @@ describe('Postman config', () => {
         output: 'monika.postman.json',
       }
       await createConfig(flags)
-      log.info('created postman config file')
       expect(fs.lstatSync('monika.postman.json').isFile()).to.be.true
     })
   })
