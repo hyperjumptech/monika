@@ -46,16 +46,7 @@ describe('Har config', () => {
       }
       await createConfig(flags)
       expect(fs.lstatSync('monika.har.json').isFile()).to.be.true
-    })
-  })
 
-  describe('Compare generated config from har file', () => {
-    it('should create config and compare with expected har file', async () => {
-      const flags = {
-        har: './src/components/config/__tests__/form_encoded.har',
-        output: 'monika.har.json',
-      }
-      await createConfig(flags)
       const generated = fs.readFileSync('monika.har.json', 'utf-8')
       const expected = fs.readFileSync(
         './src/components/config/__tests__/expected.har.json',
@@ -76,17 +67,7 @@ describe('Postman config', () => {
       }
       await createConfig(flags)
       expect(fs.lstatSync('monika.postman.json').isFile()).to.be.true
-    })
-  })
 
-  describe('Compare generated config from postman file', () => {
-    it('should create config and compare with expected postman file', async () => {
-      const flags = {
-        postman:
-          './src/components/config/__tests__/simple.postman_collection.json',
-        output: 'monika.postman.json',
-      }
-      await createConfig(flags)
       const generated = fs.readFileSync('monika.postman.json', 'utf-8')
       const expected = fs.readFileSync(
         './src/components/config/__tests__/expected.postman.json',
