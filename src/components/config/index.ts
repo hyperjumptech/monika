@@ -22,10 +22,11 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { writeFile } from 'fs'
 import EventEmitter from 'events'
 import chokidar from 'chokidar'
 import pEvent from 'p-event'
+import isUrl from 'is-url'
+import open from 'open'
 import { Config } from '../../interfaces/config'
 import { fetchConfig } from './fetch'
 import { parseConfig } from './parse'
@@ -33,6 +34,7 @@ import { validateConfig } from './validate'
 import { handshake } from '../reporter'
 import { log } from '../../utils/pino'
 import { md5Hash } from '../../utils/hash'
+import { writeFileSync } from 'fs'
 
 const emitter = new EventEmitter()
 
@@ -83,7 +85,7 @@ const handshakeAndValidate = async (config: Config) => {
   }
 }
 
-export const setupConfigFromFile = async (flags: any, watch: boolean) => {
+const getPathAndTypeFromFlag = (flags: any) => {
   let path = flags.config
   let type = 'monika'
 
@@ -91,10 +93,20 @@ export const setupConfigFromFile = async (flags: any, watch: boolean) => {
     path = flags.postman
     type = 'postman'
   }
+
   if (flags.har) {
     path = flags.har
     type = 'har'
   }
+
+  return {
+    path,
+    type,
+  }
+}
+
+export const setupConfigFromFile = async (flags: any, watch: boolean) => {
+  const { path, type } = getPathAndTypeFromFlag(flags)
 
   const parsed = parseConfig(path, type)
   await handshakeAndValidate(parsed)
@@ -107,18 +119,6 @@ export const setupConfigFromFile = async (flags: any, watch: boolean) => {
       const parsed = parseConfig(path, type)
       await handshakeAndValidate(parsed)
       updateConfig(parsed)
-    })
-  }
-
-  if (flags['create-config'] && (flags.har || flags.postman)) {
-    const file = flags.output || 'monika.json'
-    writeFile(file, JSON.stringify(parsed), 'utf8', function (err) {
-      if (err) {
-        log.error('An error occured while writing har config to File.')
-        return log.error(err)
-      }
-
-      log.info(`${file} file has been created.`)
     })
   }
 }
@@ -137,4 +137,34 @@ export const setupConfigFromUrl = async (
     await handshakeAndValidate(fetched)
     updateConfig(fetched)
   }, checkingInterval * 1000)
+}
+
+export const setupConfig = async (flags: any) => {
+  if (isUrl(flags.config)) {
+    await setupConfigFromUrl(flags.config, flags['config-interval'])
+  } else {
+    const watchConfigFile = !(
+      process.env.CI ||
+      process.env.NODE_ENV === 'test' ||
+      flags.repeat
+    )
+
+    await setupConfigFromFile(flags, watchConfigFile)
+  }
+}
+
+export const createConfig = async (flags: any) => {
+  if (!flags.har && !flags.postman) {
+    log.info(
+      'Opening Monika Configuration Generator in your default browser...'
+    )
+    open('https://hyperjumptech.github.io/monika-config-generator/')
+  } else {
+    const { path, type } = getPathAndTypeFromFlag(flags)
+    const parsed = parseConfig(path, type)
+    const file = flags.output || 'monika.json'
+
+    writeFileSync(file, JSON.stringify(parsed), 'utf8')
+    log.info(`${file} file has been created.`)
+  }
 }
