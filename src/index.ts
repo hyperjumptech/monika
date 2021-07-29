@@ -74,6 +74,7 @@ import { Notification } from './interfaces/notification'
 import { sendAlerts } from './components/notification'
 import { LogObject } from './interfaces/logs'
 import { getLogsAndReport } from './components/reporter'
+import { getPublicIp } from './utils/ip'
 
 const em = getEventEmitter()
 
@@ -177,6 +178,7 @@ class Monika extends Command {
 
   async run() {
     const { flags } = this.parse(Monika)
+    getPublicIp() // calling it here to give time getting public IP before calling on alert functions
     await openLogfile()
 
     if (flags.logs) {
