@@ -77,7 +77,9 @@ export const sendTeams = async (data: TeamsData) => {
                 },
                 {
                   name: 'Monika',
-                  value: `${getIp()} (local), ${publicIpAdress} (public), ${hostname} (hostname)`,
+                  value: `${getIp()} (local), ${
+                    publicIpAdress ? `${publicIpAdress} (public)` : ''
+                  } ${hostname} (hostname)`,
                 },
               ],
               markdown: true,
