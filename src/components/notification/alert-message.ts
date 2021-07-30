@@ -70,19 +70,26 @@ export function getMessageForAlert({
   }
 
   const getExpectedMessage = (status: string, responseValue: number) => {
-    if (alert === 'status-not-2xx' && status === 'DOWN') {
-      return `Status is ${responseValue}, was expecting 200.`
+    if (alert === 'status-not-2xx') {
+      if (status === 'DOWN') {
+        return `Status is ${responseValue}, was expecting 200.`
+      }
+
+      if (status === 'UP') {
+        return `Service is ok. Status now 200`
+      }
     }
-    if (alert === 'status-not-2xx' && status === 'UP') {
-      return `Service is ok. Status now 200`
-    }
-    if (alert.includes('response-time-greater-than-') && status === 'DOWN') {
+
+    if (alert.includes('response-time-greater-than-')) {
       const alertTime = parseAlertStringTime(alert)
-      return `Response time is ${responseValue}ms expecting a ${alertTime}ms`
-    }
-    if (alert.includes('response-time-greater-than-') && status === 'UP') {
-      const alertTime = parseAlertStringTime(alert)
-      return `Service is ok. Response now is within ${alertTime}ms`
+
+      if (status === 'DOWN') {
+        return `Response time is ${responseValue}ms expecting a ${alertTime}ms`
+      }
+
+      if (status === 'UP') {
+        return `Service is ok. Response now is within ${alertTime}ms`
+      }
     }
 
     return ''

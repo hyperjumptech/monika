@@ -25,7 +25,7 @@
 import axios from 'axios'
 import { TeamsData } from './../../../interfaces/data'
 import { AxiosResponseWithExtraData } from '../../../interfaces/request'
-import getIp, { publicIpAdress } from '../../../utils/ip'
+import getIp, { publicIpAddress } from '../../../utils/ip'
 import { hostname } from 'os'
 
 export const sendTeams = async (data: TeamsData) => {
@@ -78,7 +78,7 @@ export const sendTeams = async (data: TeamsData) => {
                 {
                   name: 'Monika',
                   value: `${getIp()} (local), ${
-                    publicIpAdress ? `${publicIpAdress} (public)` : ''
+                    publicIpAddress ? `${publicIpAddress} (public)` : ''
                   } ${hostname} (hostname)`,
                 },
               ],

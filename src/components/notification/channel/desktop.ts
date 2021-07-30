@@ -24,7 +24,7 @@
 
 import { notify } from 'node-notifier'
 import { DesktopData } from './../../../interfaces/data'
-import getIp, { publicIpAdress } from '../../../utils/ip'
+import getIp, { publicIpAddress } from '../../../utils/ip'
 import { hostname } from 'os'
 
 export const sendDesktop = async (data: DesktopData) => {
@@ -53,7 +53,7 @@ export const sendDesktop = async (data: DesktopData) => {
       message: `${data.body.expected} for URL ${data.body.url} at ${
         data.body.time
       }.\rMonika: ${getIp()} (local), ${
-        publicIpAdress ? `${publicIpAdress} (public)` : ''
+        publicIpAddress ? `${publicIpAddress} (public)` : ''
       } ${hostname} (hostname)`,
     })
   } catch (error) {

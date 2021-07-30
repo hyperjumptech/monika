@@ -26,7 +26,7 @@ import { networkInterfaces } from 'os'
 import axios from 'axios'
 import { log } from './pino'
 
-export let publicIpAdress = ''
+export let publicIpAddress = ''
 
 export default function getIp(): string {
   let address = ''
@@ -52,7 +52,7 @@ export function getPublicIp() {
   })
     .then((res) => {
       log.info(`Monika is running on Public IP ${res?.data}`)
-      publicIpAdress = res?.data
+      publicIpAddress = res?.data
     })
     .catch(() => {
       log.info(`Can't obtain Public IP`)
