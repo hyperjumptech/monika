@@ -19,11 +19,40 @@ monika --config staging-set.json
 
 ## Create Config
 
-Just starting out? Want to make a new configuration? The `--create-config` flag will spin up a configuration file generator
+Just starting out? Want to make a new configuration? The `--create-config` flag will spin up an easy Web based configuration file generator.
 
 ```bash
 monika --create-config
 ```
+
+As an alternative, configuration generator is able to read HAR or postman files as input to convert into monika.json configuration files.
+
+Use the `--har` or the `--postman` in combination with `--create-config` on the command line to convert those files into a monika config.
+
+```bash
+monika --create-config --har myfile.har
+```
+
+The above examples creates a monika.json config file from an existing HAR file.
+Use the `-o` output flag to specify the output file.
+
+```bash
+monika --create-config --postman mypostman.json -o new-monika.config
+```
+
+## HAR
+
+Monika supports HAR files as input. HAR are JSON formatted HTTP ARchive file. Generate a HAR file from the site you've visited then use Monika to refetch the pages and ensure they still work.
+
+You use the `-H` or `--har` to specify a HAR file.
+
+```bash
+monika -H my-file.har
+```
+
+You can use the combination of --create-config and --har switches to convert the HAR files to monika.config.
+
+Please note, HAR files may contain sensitive information, use caution when distributing HAR filles.
 
 ## Id
 
@@ -33,7 +62,7 @@ By default Monika loops through all the probe configuration in order they are en
 monika -i 1,3,1,2,4,5,7,7
 ```
 
-The above example will run probe id 1, 3, 1, 2, 4, 5, 7, 7 in that order. All id must be valid ids on the configuration file.
+The above example will run probe id 1, 3, 1, 2, 4, 5, 7, 7 in that order just once. All id must be valid ids on the configuration file. You can combine the `--id` flag with the `-r` repeat flag to continuously repeat the specific ids.
 
 ## Logging
 
@@ -50,6 +79,16 @@ monika --flush
 ```
 
 You must respond with a capital `"Y"` to confirm if you want to flush the logs.
+
+## Postman
+
+Have an existing request on postman you want to automate? Monika supports reading postman.json as configuration input. Use the `-p` or the `--postman` switches.
+
+```bash
+monika -p postman.json
+```
+
+You can use the combination of `--create-config` and `--postman` switches to convert the postman files to monika.config.
 
 ## Prometheus
 
