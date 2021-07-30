@@ -35,6 +35,7 @@ import { handshake } from '../reporter'
 import { log } from '../../utils/pino'
 import { md5Hash } from '../../utils/hash'
 import { existsSync, writeFileSync } from 'fs'
+import { cli } from 'cli-ux'
 
 const emitter = new EventEmitter()
 
@@ -171,10 +172,14 @@ export const createConfig = async (flags: any) => {
     const file = flags.output || 'monika.json'
 
     if (existsSync(file) && !flags.force) {
-      log.error(
-        `Cannot write configuration file to ${file} because file already exists.`
+      const ans = await cli.prompt(
+        `\n${file} file is already exists. Do you want to rewrite the file (Y/n)?`
       )
-      return
+
+      if (ans.toLowerCase() !== 'y') {
+        log.warn(`Exit without rewriting configurations to ${file}.`)
+        return
+      }
     }
 
     writeFileSync(file, JSON.stringify(parsed), 'utf8')
