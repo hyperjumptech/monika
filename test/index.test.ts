@@ -132,7 +132,7 @@ describe('monika', () => {
     )
     .catch((error) => {
       expect(error.message).to.contain(
-        'Probe request method should be GET or POST only'
+        'Probe request method is invalid! Valid methods are GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS, PURGE, LINK, and UNLINK'
       )
     })
     .it('runs with config with invalid probe request method')
