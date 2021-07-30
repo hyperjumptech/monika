@@ -17,6 +17,14 @@ You may want to store different configurations for different environments or pro
 monika --config staging-set.json
 ```
 
+Configuration files may be placed remotely which you can specify using the same flag and using a URI.
+
+```bash
+monika -c https://raw.githubusercontent.com/hyperjumptech/monika/main/config_sample/config.desktop.example.json
+```
+
+A neat feature is that the configuration file will be re-read and monitoring updated if Monika detects any changes to it.
+
 ## Create Config
 
 Just starting out? Want to make a new configuration? The `--create-config` flag will spin up an easy Web based configuration file generator.
