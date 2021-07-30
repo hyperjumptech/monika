@@ -42,6 +42,19 @@ import { RequestConfig } from '../../interfaces/request'
 import { Validation } from '../../interfaces/validation'
 import { isValidURL } from '../../utils/is-valid-url'
 
+const HTTPMethods = [
+  'DELETE',
+  'GET',
+  'HEAD',
+  'OPTIONS',
+  'PATCH',
+  'POST',
+  'PUT',
+  'PURGE',
+  'LINK',
+  'UNLINK',
+]
+
 const setInvalidResponse = (message: string): Validation => ({
   valid: false,
   message: message,
@@ -71,7 +84,7 @@ const PROBE_REQUEST_INVALID_URL = setInvalidResponse(
   'Probe request URL should start with http:// or https://'
 )
 const PROBE_REQUEST_INVALID_METHOD = setInvalidResponse(
-  'Probe request method should be GET or POST only'
+  'Probe request method is invalid! Valid methods are GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS, PURGE, LINK, and UNLINK'
 )
 const PROBE_ALERT_INVALID = setInvalidResponse(
   `Probe alert should be 'status-not-2xx' or 'response-time-greater-than-<number>-(m)s`
@@ -253,7 +266,7 @@ export const validateConfig = (configuration: Config): Validation => {
         request.method = 'GET'
       }
 
-      if (['GET', 'POST'].indexOf(request.method) < 0)
+      if (HTTPMethods.indexOf(request.method.toUpperCase()) < 0)
         return PROBE_REQUEST_INVALID_METHOD
 
       // Check probe alert properties

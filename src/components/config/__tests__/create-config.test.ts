@@ -22,71 +22,58 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Config } from '../../interfaces/config'
-import { RequestConfig } from '../../interfaces/request'
+import { expect } from 'chai'
+import fs from 'fs'
+import { createConfig } from '..'
+import _ from 'lodash'
 
-const convertNameValueArraysToObject = (
-  headers: {
-    name: string
-    value: any
-  }[]
-) => {
-  const obj: any = {}
-  headers.forEach((item) => {
-    if (item.name.charAt(0) !== ':') {
-      obj[item.name] = item.value
-    }
+afterEach(() => {
+  if (fs.existsSync('monika.har.json')) {
+    fs.unlinkSync('monika.har.json')
+  }
+
+  if (fs.existsSync('monika.postman.json')) {
+    fs.unlinkSync('monika.postman.json')
+  }
+})
+
+describe('Har config', () => {
+  describe('Create config from har file', () => {
+    it('should create config from har file', async () => {
+      const flags = {
+        har: './src/components/config/__tests__/form_encoded.har',
+        output: 'monika.har.json',
+      }
+      await createConfig(flags)
+      expect(fs.lstatSync('monika.har.json').isFile()).to.be.true
+
+      const generated = fs.readFileSync('monika.har.json', 'utf-8')
+      const expected = fs.readFileSync(
+        './src/components/config/__tests__/expected.har.json',
+        'utf-8'
+      )
+      expect(_.isEqual(JSON.parse(generated), JSON.parse(expected))).to.be.true
+    })
   })
-  return obj
-}
+})
 
-const parsePostData = (postData: any) => {
-  if (!postData) {
-    return {}
-  }
+describe('Postman config', () => {
+  describe('Create config from postman file', () => {
+    it('should create config from postman file', async () => {
+      const flags = {
+        postman:
+          './src/components/config/__tests__/simple.postman_collection.json',
+        output: 'monika.postman.json',
+      }
+      await createConfig(flags)
+      expect(fs.lstatSync('monika.postman.json').isFile()).to.be.true
 
-  if (postData.mimeType === 'application/json') {
-    return JSON.parse(postData.text)
-  }
-
-  return postData.text
-}
-
-export const parseHarFile = (fileContents: string): Config => {
-  // Read file from filepath
-  try {
-    const harJson = JSON.parse(fileContents)
-
-    const harRequest: RequestConfig[] = harJson.log.entries.map(
-      (entry: { request: any }) => ({
-        method: entry.request.method,
-        url: entry.request.url,
-        headers: convertNameValueArraysToObject(entry.request.headers),
-        params: convertNameValueArraysToObject(entry.request.queryString),
-        body: parsePostData(entry.request.postData),
-      })
-    )
-
-    const harConfig: any = {
-      notifications: [
-        {
-          id: 'har-desktop-notif',
-          type: 'desktop',
-        },
-      ],
-      probes: [
-        {
-          requests: harRequest,
-        },
-      ],
-    }
-
-    return harConfig
-  } catch (error) {
-    if (error.name === 'SyntaxError') {
-      throw new Error('Har file is in invalid JSON format!')
-    }
-
-    throw new Error(error.message)
-  }
-}
+      const generated = fs.readFileSync('monika.postman.json', 'utf-8')
+      const expected = fs.readFileSync(
+        './src/components/config/__tests__/expected.postman.json',
+        'utf-8'
+      )
+      expect(_.isEqual(JSON.parse(generated), JSON.parse(expected))).to.be.true
+    })
+  })
+})

@@ -27,13 +27,11 @@ import boxen from 'boxen'
 import chalk from 'chalk'
 import cli from 'cli-ux'
 import fs from 'fs'
-import isUrl from 'is-url'
-import open from 'open'
 import {
+  createConfig,
   getConfig,
   getConfigIterator,
-  setupConfigFromFile,
-  setupConfigFromUrl,
+  setupConfig,
 } from './components/config'
 import {
   setNotificationLog,
@@ -177,6 +175,12 @@ class Monika extends Command {
 
   async run() {
     const { flags } = this.parse(Monika)
+
+    if (flags['create-config']) {
+      await createConfig(flags)
+      return
+    }
+
     await openLogfile()
 
     if (flags.logs) {
@@ -214,27 +218,8 @@ class Monika extends Command {
       startPrometheusMetricsServer(flags.prometheus)
     }
 
-    const isOpenConfigGenPage = this.isOpenConfigGeneratorPage(flags)
-    if (isOpenConfigGenPage) {
-      log.info(
-        'Opening Monika Configuration Generator in your default browser...'
-      )
-      await open('https://hyperjumptech.github.io/monika-config-generator/')
-      return
-    }
-
     try {
-      if (isUrl(flags.config)) {
-        await setupConfigFromUrl(flags.config, flags['config-interval'])
-      } else {
-        const watchConfigFile = !(
-          process.env.CI ||
-          process.env.NODE_ENV === 'test' ||
-          flags.repeat
-        )
-
-        await setupConfigFromFile(flags, watchConfigFile)
-      }
+      await setupConfig(flags)
 
       // Run report on interval if symon configuration exists
       if (!(process.env.CI || process.env.NODE_ENV === 'test')) {
@@ -296,10 +281,6 @@ class Monika extends Command {
       await closeLog()
       this.error(error?.message, { exit: 1 })
     }
-  }
-
-  isOpenConfigGeneratorPage(flags: any): boolean {
-    return flags['create-config'] && !flags.har && !flags.postman
   }
 
   buildStartupMessage(config: Config, verbose = false, firstRun: boolean) {
