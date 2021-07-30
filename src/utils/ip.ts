@@ -49,10 +49,12 @@ export function getPublicIp() {
   axios({
     method: 'GET',
     url: 'https://ifconfig.co/ip',
-  }).then((res) => {
-    log.info(`Monika is running on Public IP ${res?.data}`)
-    publicIpAdress = res?.data
-  }).catch(() => {
-    log.info(`Can't obtain Public IP`)
   })
+    .then((res) => {
+      log.info(`Monika is running on Public IP ${res?.data}`)
+      publicIpAdress = res?.data
+    })
+    .catch(() => {
+      log.info(`Can't obtain Public IP`)
+    })
 }

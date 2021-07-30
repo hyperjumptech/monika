@@ -26,7 +26,9 @@ import { AxiosResponseWithExtraData } from '../../../interfaces/request'
 import responseTimeGreaterThanX from './res-time-greater-than-x'
 import statusNot2xx from './status-not-2xx'
 
+// parse string like "response-time-greater-than-200-ms" and return the time in ms
 export const parseAlertStringTime = (str: string): number => {
+  // match any string that ends with digits followed by unit 's' or 'ms'
   const match = str.match(/(\d+)-(m?s)$/)
 
   if (!match) {
@@ -39,6 +41,20 @@ export const parseAlertStringTime = (str: string): number => {
   if (unit === 's') return number * 1000
 
   return number
+}
+
+export const getResponseValue = (
+  alert: string,
+  response: AxiosResponseWithExtraData
+): number => {
+  if (alert === 'status-not-2xx') {
+    return response?.status ?? 0
+  }
+  if (alert.startsWith('response-time-greater-than-')) {
+    return response.config.extraData?.responseTime ?? 0
+  }
+
+  return 0
 }
 
 const responseChecker = (

@@ -45,10 +45,6 @@ import {
   flushAllLogs,
   openLogfile,
 } from './components/logger/history'
-import {
-  validateResponse,
-  ValidateResponseStatus,
-} from './components/notification/alert'
 import { notificationChecker } from './components/notification/checker'
 import { terminationNotif } from './components/notification/termination'
 import { resetProbeStatuses } from './components/notification/process-server-status'
@@ -75,6 +71,7 @@ import { sendAlerts } from './components/notification'
 import { LogObject } from './interfaces/logs'
 import { getLogsAndReport } from './components/reporter'
 import { getPublicIp } from './utils/ip'
+import validateResponse, { ValidateResponse } from './plugins/validate-response'
 
 const em = getEventEmitter()
 
@@ -437,7 +434,7 @@ interface ProbeStatusProcessed {
   probe: Probe
   statuses?: StatusDetails[]
   notifications?: Notification[]
-  validatedResponseStatuses: ValidateResponseStatus[]
+  validatedResponseStatuses: ValidateResponse[]
   totalRequests: number
 }
 

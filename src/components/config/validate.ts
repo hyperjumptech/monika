@@ -23,7 +23,6 @@
  **********************************************************************************/
 
 /* eslint-disable complexity */
-import { getCheckResponseFn } from '../notification/alert'
 import { Notification } from '../../interfaces/notification'
 import {
   SMTPData,
@@ -231,6 +230,13 @@ function validateNotification(notifications: Notification[]): Validation {
   return VALID_CONFIG
 }
 
+const isValidProbeAlert = (alert: string): boolean => {
+  return (
+    alert === 'status-not-2xx' ||
+    alert.startsWith('response-time-greater-than-')
+  )
+}
+
 export const validateConfig = (configuration: Config): Validation => {
   const { notifications, probes } = configuration
 
@@ -271,7 +277,7 @@ export const validateConfig = (configuration: Config): Validation => {
 
       // Check probe alert properties
       for (const alert of probe.alerts) {
-        const check = getCheckResponseFn(alert)
+        const check = isValidProbeAlert(alert)
         if (!check) {
           return PROBE_ALERT_INVALID
         }

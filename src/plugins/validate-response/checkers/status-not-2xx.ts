@@ -24,6 +24,7 @@
 
 import { AxiosResponseWithExtraData } from '../../../interfaces/request'
 
+// Check if response status is not 2xx
 const statusNot2xx = (res: AxiosResponseWithExtraData) => {
   return res.status < 200 || res.status >= 300
 }

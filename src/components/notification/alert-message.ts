@@ -22,7 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { parseAlertStringTime } from './alert'
+import { parseAlertStringTime } from '../../plugins/validate-response/checkers'
 
 export function getMessageForAlert({
   alert,

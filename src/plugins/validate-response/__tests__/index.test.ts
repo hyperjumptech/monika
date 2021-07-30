@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import { expect } from 'chai'
-import { validateResponse } from '../../../components/notification/alert'
+import validateResponse from '..'
 import { AxiosResponseWithExtraData } from '../../../interfaces/request'
 
 describe('validateResponse', () => {
