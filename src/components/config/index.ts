@@ -173,11 +173,11 @@ export const createConfig = async (flags: any) => {
 
     if (existsSync(file) && !flags.force) {
       const ans = await cli.prompt(
-        `\n${file} file is already exists. Do you want to rewrite the file (Y/n)?`
+        `\n${file} file is already exists. Overwrite (Y/n)?`
       )
 
       if (ans.toLowerCase() !== 'y') {
-        log.warn(`Exit without rewriting configurations to ${file}.`)
+        log.warn(`Exit without overwriting ${file}.`)
         return
       }
     }
