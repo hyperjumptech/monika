@@ -45,8 +45,12 @@ describe('validateResponse', () => {
     const data = validateResponse(mockedAlerts, res)
 
     expect(data).to.eql([
-      { alert: 'status-not-2xx', status: true },
-      { alert: 'response-time-greater-than-10-ms', status: true },
+      { alert: 'status-not-2xx', responseValue: 300, status: true },
+      {
+        alert: 'response-time-greater-than-10-ms',
+        responseValue: 20,
+        status: true,
+      },
     ])
   })
 
@@ -55,8 +59,12 @@ describe('validateResponse', () => {
     const data = validateResponse(mockedAlerts, res)
 
     expect(data).to.eql([
-      { alert: 'status-not-2xx', status: false },
-      { alert: 'response-time-greater-than-10-ms', status: true },
+      { alert: 'status-not-2xx', responseValue: 200, status: false },
+      {
+        alert: 'response-time-greater-than-10-ms',
+        responseValue: 20,
+        status: true,
+      },
     ])
   })
 
@@ -65,8 +73,12 @@ describe('validateResponse', () => {
     const data = validateResponse(mockedAlerts, res)
 
     expect(data).to.eql([
-      { alert: 'status-not-2xx', status: true },
-      { alert: 'response-time-greater-than-10-ms', status: false },
+      { alert: 'status-not-2xx', responseValue: 300, status: true },
+      {
+        alert: 'response-time-greater-than-10-ms',
+        responseValue: 10,
+        status: false,
+      },
     ])
   })
 
@@ -75,8 +87,12 @@ describe('validateResponse', () => {
     const data = validateResponse(mockedAlerts, res)
 
     expect(data).to.eql([
-      { alert: 'status-not-2xx', status: false },
-      { alert: 'response-time-greater-than-10-ms', status: false },
+      { alert: 'status-not-2xx', responseValue: 200, status: false },
+      {
+        alert: 'response-time-greater-than-10-ms',
+        responseValue: 10,
+        status: false,
+      },
     ])
   })
 })
