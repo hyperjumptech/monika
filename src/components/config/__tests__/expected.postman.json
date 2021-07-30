@@ -1,0 +1,23 @@
+{
+  "notifications": [
+    { "type": "desktop", "id": "unique-id-desktop-monika-notif" }
+  ],
+  "probes": [
+    {
+      "id": "Get Request",
+      "name": "Get Request",
+      "requests": [
+        {
+          "url": "http://127.0.0.1:5000/v1",
+          "method": "GET",
+          "headers": {},
+          "body": {},
+          "timeout": 10000
+        }
+      ],
+      "incidentThreshold": 5,
+      "recoveryThreshold": 5,
+      "alerts": []
+    }
+  ]
+}
