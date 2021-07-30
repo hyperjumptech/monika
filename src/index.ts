@@ -473,7 +473,11 @@ const probeSendNotification = async (data: ProbeSendNotification) => {
       probeName: probe.name,
       incidentThreshold: probe.incidentThreshold,
       notifications: notifications ?? [],
-      validation: validatedResponseStatuses[index],
+      validation:
+        validatedResponseStatuses.find(
+          (validateResponse: ValidateResponse) =>
+            validateResponse.alert === status?.alert
+        ) || validatedResponseStatuses[index],
     })
   }
 }

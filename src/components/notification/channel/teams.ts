@@ -65,7 +65,7 @@ export const sendTeams = async (data: TeamsData) => {
               facts: [
                 {
                   name: 'Alert',
-                  value: `Status is ${data.body.alert}, was expecting 200`,
+                  value: data.body.expected,
                 },
                 {
                   name: 'URL',

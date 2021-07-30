@@ -49,8 +49,8 @@ export const sendDesktop = async (data: DesktopData) => {
 
     const notifType = data.body.status === 'UP' ? 'RECOVERY' : 'INCIDENT'
     notify({
-      title: `New ${notifType} notification from Monika`,
-      message: `${data.body.alert} for URL ${data.body.url} at ${
+      title: `New ${notifType} notification from Monika (${data.body.alert})`,
+      message: `${data.body.expected} for URL ${data.body.url} at ${
         data.body.time
       }.\rMonika: ${getIp()} (local), ${
         publicIpAdress ? `${publicIpAdress} (public)` : ''
