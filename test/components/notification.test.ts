@@ -50,7 +50,7 @@ describe('send alerts', () => {
     chai.spy.on(mailgun, 'sendMailgun', () => Promise.resolve())
     const sent = await sendAlerts({
       validation: {
-        alert: 'status-not-2xx',
+        alert: { query: 'status-not-2xx', subject: '', message: '' },
         status: false,
         responseValue: 200,
       },
@@ -76,7 +76,7 @@ describe('send alerts', () => {
     chai.spy.on(mailgun, 'sendMailgun', () => Promise.resolve())
     const sent = await sendAlerts({
       validation: {
-        alert: 'status-not-2xx',
+        alert: { query: 'status-not-2xx', subject: '', message: '' },
         status: true,
         responseValue: 500,
       },
@@ -102,7 +102,7 @@ describe('send alerts', () => {
     chai.spy.on(mailgun, 'sendMailgun', () => Promise.resolve())
     const sent = await sendAlerts({
       validation: {
-        alert: 'status-not-2xx',
+        alert: { query: 'status-not-2xx', subject: '', message: '' },
         status: true,
         responseValue: 500,
       },
@@ -131,7 +131,7 @@ describe('send alerts', () => {
 
     const sent = await sendAlerts({
       validation: {
-        alert: 'status-not-2xx',
+        alert: { query: 'status-not-2xx', subject: '', message: '' },
         status: true,
         responseValue: 500,
       },
@@ -165,7 +165,7 @@ describe('send alerts', () => {
     chai.spy.on(smtp, 'sendSmtpMail', () => Promise.resolve())
     const sent = await sendAlerts({
       validation: {
-        alert: 'status-not-2xx',
+        alert: { query: 'status-not-2xx', subject: '', message: '' },
         status: true,
         responseValue: 500,
       },
@@ -195,7 +195,7 @@ describe('send alerts', () => {
 
     const sent = await sendAlerts({
       validation: {
-        alert: 'status-not-2xx',
+        alert: { query: 'status-not-2xx', subject: '', message: '' },
         status: true,
         responseValue: 500,
       },
@@ -243,7 +243,7 @@ describe('send alerts', () => {
 
     const sent = await sendAlerts({
       validation: {
-        alert: 'status-not-2xx',
+        alert: { query: 'status-not-2xx', subject: '', message: '' },
         status: true,
         responseValue: 500,
       },
@@ -274,7 +274,7 @@ describe('send alerts', () => {
 
     const sent = await sendAlerts({
       validation: {
-        alert: 'status-not-2xx',
+        alert: { query: 'status-not-2xx', subject: '', message: '' },
         status: true,
         responseValue: 500,
       },
@@ -301,7 +301,7 @@ describe('send alerts', () => {
 
     const sent = await sendAlerts({
       validation: {
-        alert: 'status-not-2xx',
+        alert: { query: 'status-not-2xx', subject: '', message: '' },
         status: true,
         responseValue: 500,
       },

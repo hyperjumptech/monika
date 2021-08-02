@@ -29,7 +29,7 @@ export interface ProbeStatus {
 }
 
 export interface StatusDetails {
-  alert: string
+  alertQuery: string
   state:
     | 'INIT'
     | 'UP_TRUE_EQUALS_THRESHOLD'

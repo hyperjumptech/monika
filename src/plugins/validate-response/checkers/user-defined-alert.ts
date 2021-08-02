@@ -22,58 +22,28 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { ProbeAlert } from '../../../interfaces/probe'
+import { compileExpression } from 'filtrex'
 import { AxiosResponseWithExtraData } from '../../../interfaces/request'
-import responseTimeGreaterThanX from './res-time-greater-than-x'
-import statusNot2xx from './status-not-2xx'
-import queryExpression from './user-defined-alert'
 
-// parse string like "response-time-greater-than-200-ms" and return the time in ms
-export const parseAlertStringTime = (str: string): number => {
-  // match any string that ends with digits followed by unit 's' or 'ms'
-  const match = str.match(/(\d+)-(m?s)$/)
+export const queryExpression = (
+  res: AxiosResponseWithExtraData,
+  query: string
+) => {
+  const fn = compileExpression(query)
 
-  if (!match) {
-    throw new Error('Alert string does not contain valid time number')
-  }
+  const isBodyString = typeof res.data === 'string'
+  const bodyText = isBodyString ? res.data : JSON.stringify(res.data)
+  const bodyJSON = isBodyString ? undefined : res.data
 
-  const number = Number(match[1])
-  const unit = match[2]
-
-  if (unit === 's') return number * 1000
-
-  return number
+  return Boolean(
+    fn({
+      size: res.headers['content-length'],
+      status: res.status,
+      time: res.config.extraData?.responseTime,
+      body: { text: bodyText, JSON: bodyJSON },
+      headers: res.headers,
+    })
+  )
 }
 
-export const getResponseValue = (
-  alert: string,
-  response: AxiosResponseWithExtraData
-): number => {
-  if (alert === 'status-not-2xx') {
-    return response?.status ?? 0
-  }
-  if (alert.startsWith('response-time-greater-than-')) {
-    return response.config.extraData?.responseTime ?? 0
-  }
-
-  return 0
-}
-
-const responseChecker = (
-  alert: ProbeAlert,
-  res: AxiosResponseWithExtraData
-): boolean => {
-  if (alert.query === 'status-not-2xx') {
-    return statusNot2xx(res)
-  }
-
-  if (alert.query.startsWith('response-time-greater-than-')) {
-    const alertTime = parseAlertStringTime(alert.query)
-
-    return responseTimeGreaterThanX(res, alertTime)
-  }
-
-  return queryExpression(res, alert.query)
-}
-
-export default responseChecker
+export default queryExpression

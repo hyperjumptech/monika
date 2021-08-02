@@ -22,58 +22,97 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { ProbeAlert } from '../../../interfaces/probe'
-import { AxiosResponseWithExtraData } from '../../../interfaces/request'
-import responseTimeGreaterThanX from './res-time-greater-than-x'
-import statusNot2xx from './status-not-2xx'
-import queryExpression from './user-defined-alert'
+import { compileExpression } from 'filtrex'
+import { ProbeAlert } from '../../interfaces/probe'
+import { AxiosResponseWithExtraData } from '../../interfaces/request'
+
+type CheckResponseFn = (response: AxiosResponseWithExtraData) => boolean
+export type ValidateResponseStatus = { alert: ProbeAlert; status: boolean }
+
+// Check if response status is not 2xx
+export const statusNot2xx: CheckResponseFn = (response) =>
+  response.status < 200 || response.status >= 300
+
+// Check if response time is greater than specified value in milliseconds
+export const responseTimeGreaterThan: (
+  minimumTime: number
+) => CheckResponseFn = (minimumTime) => (
+  response: AxiosResponseWithExtraData
+): boolean => {
+  const respTimeNum = response.config.extraData?.responseTime ?? 0
+
+  return respTimeNum > minimumTime
+}
+
+export const queryExpression = (query: string) => {
+  const fn = compileExpression(query)
+
+  return (res: AxiosResponseWithExtraData) => {
+    const isBodyString = typeof res.data === 'string'
+    const bodyText = isBodyString ? res.data : JSON.stringify(res.data)
+    const bodyJSON = isBodyString ? undefined : res.data
+
+    return Boolean(
+      fn({
+        size: res.headers['content-length'],
+        status: res.status,
+        time: res.config.extraData?.responseTime,
+        body: { text: bodyText, JSON: bodyJSON },
+        headers: res.headers,
+      })
+    )
+  }
+}
 
 // parse string like "response-time-greater-than-200-ms" and return the time in ms
 export const parseAlertStringTime = (str: string): number => {
   // match any string that ends with digits followed by unit 's' or 'ms'
   const match = str.match(/(\d+)-(m?s)$/)
-
   if (!match) {
-    throw new Error('Alert string does not contain valid time number')
+    throw new Error('alert string does not contain valid time number')
   }
 
   const number = Number(match[1])
   const unit = match[2]
 
   if (unit === 's') return number * 1000
-
   return number
 }
 
-export const getResponseValue = (
-  alert: string,
-  response: AxiosResponseWithExtraData
-): number => {
-  if (alert === 'status-not-2xx') {
-    return response?.status ?? 0
-  }
-  if (alert.startsWith('response-time-greater-than-')) {
-    return response.config.extraData?.responseTime ?? 0
-  }
-
-  return 0
-}
-
-const responseChecker = (
-  alert: ProbeAlert,
-  res: AxiosResponseWithExtraData
-): boolean => {
+export const getCheckResponseFn = (
+  alert: ProbeAlert
+): CheckResponseFn | undefined => {
   if (alert.query === 'status-not-2xx') {
-    return statusNot2xx(res)
+    return statusNot2xx
   }
 
   if (alert.query.startsWith('response-time-greater-than-')) {
     const alertTime = parseAlertStringTime(alert.query)
-
-    return responseTimeGreaterThanX(res, alertTime)
+    return responseTimeGreaterThan(alertTime)
   }
 
-  return queryExpression(res, alert.query)
+  try {
+    return queryExpression(alert.query)
+  } catch (error) {
+    // nothing, just return undefined
+  }
 }
 
-export default responseChecker
+export const validateResponse = (
+  alerts: ProbeAlert[],
+  response: AxiosResponseWithExtraData
+): ValidateResponseStatus[] => {
+  const checks = []
+
+  for (const alert of alerts) {
+    const checkFn = getCheckResponseFn(alert)
+    if (checkFn) {
+      checks.push({
+        alert,
+        status: checkFn(response),
+      })
+    }
+  }
+
+  return checks
+}
