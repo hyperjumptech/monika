@@ -17,13 +17,50 @@ You may want to store different configurations for different environments or pro
 monika --config staging-set.json
 ```
 
+Configuration files may be placed remotely which you can specify using the same flag and using a URI.
+
+```bash
+monika -c https://raw.githubusercontent.com/hyperjumptech/monika/main/config_sample/config.desktop.example.json
+```
+
+A neat feature is that the configuration file will be re-read and monitoring updated if Monika detects any changes to it.
+
 ## Create Config
 
-Just starting out? Want to make a new configuration? The `--create-config` flag will spin up a configuration file generator
+Just starting out? Want to make a new configuration? The `--create-config` flag will spin up an easy Web based configuration file generator.
 
 ```bash
 monika --create-config
 ```
+
+As an alternative, configuration generator is able to read HAR or postman files as input to convert into monika.json configuration files.
+
+Use the `--har` or the `--postman` in combination with `--create-config` on the command line to convert those files into a monika config.
+
+```bash
+monika --create-config --har myfile.har
+```
+
+The above examples creates a monika.json config file from an existing HAR file.
+Use the `-o` output flag to specify the output file.
+
+```bash
+monika --create-config --postman mypostman.json -o new-monika.json
+```
+
+## HAR
+
+Monika supports HAR files as input. HAR are JSON formatted HTTP ARchive file. Generate a HAR file from the site you've visited then use Monika to refetch the pages and ensure they still work.
+
+You use the `-H` or `--har` to specify a HAR file.
+
+```bash
+monika -H my-file.har
+```
+
+You can use the combination of --create-config and --har flags to convert the HAR archive into to a monika.json configuration file.
+
+Please note, HAR files may contain sensitive information, use caution when distributing HAR filles.
 
 ## Id
 
@@ -33,7 +70,7 @@ By default Monika loops through all the probe configuration in order they are en
 monika -i 1,3,1,2,4,5,7,7
 ```
 
-The above example will run probe id 1, 3, 1, 2, 4, 5, 7, 7 in that order. All id must be valid ids on the configuration file.
+The above example will run probe id 1, 3, 1, 2, 4, 5, 7, 7 in that order just once. All id must be valid ids on the configuration file. You can combine the `--id` flag with the `-r` repeat flag to continuously repeat the specific ids.
 
 ## Logging
 
@@ -51,6 +88,16 @@ monika --flush
 
 You must respond with a capital `"Y"` to confirm if you want to flush the logs.
 
+## Postman
+
+Have an existing request on postman you want to automate? Monika supports reading postman.json as configuration input. Use the `-p` or the `--postman` switches.
+
+```bash
+monika -p postman.json
+```
+
+You can use the combination of `--create-config` and `--postman` flags to convert the postman files to a monika.json config file.
+
 ## Prometheus
 
 You can expose the [Prometheus](https://prometheus.io/) metrics server with the `--prometheus` flag and server port as a value.
@@ -61,7 +108,7 @@ monika --prometheus 3001
 
 Then you can scrape the metrics from `http://localhost:3001/metrics`.
 
-### Available metrics
+### Available Metrics
 
 Monika exposes [Prometheus default metrics](https://prometheus.io/docs/instrumenting/writing_clientlibs/#standard-and-runtime-collectors), [Node.js specific metrics](https://github.com/siimon/prom-client/tree/master/lib/metrics), and Monika probe metrics below.
 
