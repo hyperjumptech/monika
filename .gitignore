@@ -226,3 +226,5 @@ monika.json
 monika.postman_collection.json
 #ignore databasefile
 monika-logs.db*
+#ignore HAR archives
+*.har
