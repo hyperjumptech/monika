@@ -177,7 +177,9 @@ export const createConfig = async (flags: any) => {
       )
 
       if (ans.toLowerCase() !== 'y') {
-        log.warn(`Exit without overwriting ${file}.`)
+        log.warn(
+          `Command cancelled. You can use the -o flag to specify an output file or --force to overwrite without prompting.`
+        )
         return
       }
     }
