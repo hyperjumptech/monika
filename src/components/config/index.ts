@@ -34,7 +34,8 @@ import { validateConfig } from './validate'
 import { handshake } from '../reporter'
 import { log } from '../../utils/pino'
 import { md5Hash } from '../../utils/hash'
-import { writeFileSync } from 'fs'
+import { existsSync, writeFileSync } from 'fs'
+import { cli } from 'cli-ux'
 
 const emitter = new EventEmitter()
 
@@ -161,8 +162,27 @@ export const createConfig = async (flags: any) => {
     open('https://hyperjumptech.github.io/monika-config-generator/')
   } else {
     const { path, type } = getPathAndTypeFromFlag(flags)
+
+    if (!existsSync(path)) {
+      log.error(`Couldn't found the ${path} file.`)
+      return
+    }
+
     const parsed = parseConfig(path, type)
     const file = flags.output || 'monika.json'
+
+    if (existsSync(file) && !flags.force) {
+      const ans = await cli.prompt(
+        `\n${file} file is already exists. Overwrite (Y/n)?`
+      )
+
+      if (ans.toLowerCase() !== 'y') {
+        log.warn(
+          `Command cancelled. You can use the -o flag to specify an output file or --force to overwrite without prompting.`
+        )
+        return
+      }
+    }
 
     writeFileSync(file, JSON.stringify(parsed), 'utf8')
     log.info(`${file} file has been created.`)
