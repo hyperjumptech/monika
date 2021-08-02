@@ -45,7 +45,7 @@ The above examples creates a monika.json config file from an existing HAR file.
 Use the `-o` output flag to specify the output file.
 
 ```bash
-monika --create-config --postman mypostman.json -o new-monika.config
+monika --create-config --postman mypostman.json -o new-monika.json
 ```
 
 ## HAR
@@ -58,7 +58,7 @@ You use the `-H` or `--har` to specify a HAR file.
 monika -H my-file.har
 ```
 
-You can use the combination of --create-config and --har switches to convert the HAR files to monika.config.
+You can use the combination of --create-config and --har flags to convert the HAR archive into to a monika.json configuration file.
 
 Please note, HAR files may contain sensitive information, use caution when distributing HAR filles.
 
@@ -96,7 +96,7 @@ Have an existing request on postman you want to automate? Monika supports readin
 monika -p postman.json
 ```
 
-You can use the combination of `--create-config` and `--postman` switches to convert the postman files to monika.config.
+You can use the combination of `--create-config` and `--postman` flags to convert the postman files to a monika.json config file.
 
 ## Prometheus
 
