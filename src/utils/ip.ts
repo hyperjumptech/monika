@@ -45,16 +45,18 @@ export default function getIp(): string {
   return address
 }
 
-export function getPublicIp() {
-  axios({
-    method: 'GET',
-    url: 'https://ifconfig.co/ip',
-  })
-    .then((res) => {
-      log.info(`Monika is running on Public IP ${res?.data}`)
-      publicIpAddress = res?.data
+export async function getPublicIp() {
+  try {
+    const response = await axios({
+      method: 'GET',
+      url: 'https://ifconfig.co/ip',
     })
-    .catch(() => {
-      log.info(`Can't obtain Public IP`)
-    })
+
+    if (response?.data) {
+      publicIpAddress = response.data
+      log.info(`Monika is running on Public IP ${response.data}`)
+    }
+  } catch (error) {
+    log.info(`Can't obtain Public IP`)
+  }
 }

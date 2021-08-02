@@ -173,13 +173,13 @@ class Monika extends Command {
 
   async run() {
     const { flags } = this.parse(Monika)
-    getPublicIp() // calling it here to give time getting public IP before calling on alert functions
 
     if (flags['create-config']) {
       await createConfig(flags)
       return
     }
 
+    await getPublicIp() // calling it here once. So no need to fetch public IP for every alert functions invocation
     await openLogfile()
 
     if (flags.logs) {
