@@ -226,19 +226,7 @@ export const processThresholds = ({
           (detail) => detail.alertQuery === alert.query
         )
 
-        if (probeStatusDetail?.alertQuery.includes('status-not')) {
-          const state = determineProbeState({
-            errorName: alert.query,
-            probeStatus: probeStatusDetail,
-            validation,
-            incidentThreshold,
-            recoveryThreshold,
-          })
-          updatedStatus = updateProbeStatus(probeStatusDetail, state)
-        }
-
-        // Handle is response time error
-        if (probeStatusDetail?.alertQuery.includes('response-time-greater')) {
+        if (probeStatusDetail) {
           const state = determineProbeState({
             errorName: alert.query,
             probeStatus: probeStatusDetail,

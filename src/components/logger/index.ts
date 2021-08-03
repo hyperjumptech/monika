@@ -85,7 +85,7 @@ export function probeBuildLog({
 
   if (alerts?.length) {
     mLog.alert.flag = 'alert'
-    mLog.alert.message = alerts.map((alert) => alert.message || alert.query)
+    mLog.alert.message = alerts.map((alert) => alert.query)
   }
 
   if (error?.length) log.error('probe error: ', error)

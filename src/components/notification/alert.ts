@@ -22,9 +22,9 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { compileExpression } from 'filtrex'
 import { ProbeAlert } from '../../interfaces/probe'
 import { AxiosResponseWithExtraData } from '../../interfaces/request'
+import { compileExpression } from '../../utils/expression-parser'
 
 type CheckResponseFn = (response: AxiosResponseWithExtraData) => boolean
 export type ValidateResponseStatus = { alert: ProbeAlert; status: boolean }
@@ -54,11 +54,11 @@ export const queryExpression = (query: string) => {
 
     return Boolean(
       fn({
-        size: res.headers['content-length'],
-        status: res.status,
-        time: res.config.extraData?.responseTime,
-        body: { text: bodyText, JSON: bodyJSON },
-        headers: res.headers,
+        responseSize: Number(res.headers['content-length']),
+        responseStatus: res.status,
+        responseTime: res.config.extraData?.responseTime,
+        responseBody: { text: bodyText, JSON: bodyJSON },
+        responseHeaders: res.headers,
       })
     )
   }
