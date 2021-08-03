@@ -57,6 +57,7 @@
     "smtp-server": "^3.8.0",
     "sqlite": "^4.0.21",
     "sqlite3": "^5.0.2",
+    "stun": "^2.1.0",
     "tslib": "^1.14.1"
   },
   "devDependencies": {

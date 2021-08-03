@@ -22,43 +22,4 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { networkInterfaces } from 'os'
-import { log } from './pino'
-import stun from 'stun'
-
-export let publicIpAddress = ''
-
-export default function getIp(): string {
-  let address = ''
-
-  const ifaces = networkInterfaces()
-  for (const dev in ifaces) {
-    if (dev) {
-      const iface = ifaces[dev].filter(function (details) {
-        return details.family === 'IPv4' && details.internal === false
-      })
-
-      if (iface.length > 0) address = iface[0].address
-    }
-  }
-
-  return address
-}
-
-export async function getPublicIp() {
-  if (process.env.NODE_ENV === 'test') {
-    publicIpAddress = '127.0.0.1'
-    return
-  }
-
-  try {
-    const response = await stun.request('stun.l.google.com:19302')
-    const address = response?.getXorAddress()?.address
-    if (address) {
-      publicIpAddress = address
-      log.info(`Monika is running on Public IP ${address}`)
-    }
-  } catch (error) {
-    log.info(`Can't obtain Public IP`)
-  }
-}
+declare module 'stun'
