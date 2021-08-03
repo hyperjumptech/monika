@@ -26,6 +26,7 @@ import { Command, flags } from '@oclif/command'
 import boxen from 'boxen'
 import chalk from 'chalk'
 import cli from 'cli-ux'
+import cron from 'node-cron'
 import fs from 'fs'
 import {
   createConfig,
@@ -69,9 +70,11 @@ import { getEventEmitter } from './utils/events'
 import { log } from './utils/pino'
 import { StatusDetails } from './interfaces/probe-status'
 import { Notification } from './interfaces/notification'
+import { saveNotificationLog } from './components/logger/history'
 import { sendAlerts } from './components/notification'
 import { LogObject } from './interfaces/logs'
 import { getLogsAndReport } from './components/reporter'
+import { checkTLS } from './components/tls-checker'
 
 const em = getEventEmitter()
 
@@ -271,6 +274,34 @@ class Monika extends Command {
           em.emit('SANITIZED_CONFIG', sanitizedProbe)
         }
 
+        // run TLS checker
+        if (config?.certificate && config.certificate?.domains.length > 0) {
+          config.certificate?.domains.forEach(async (domain) => {
+            // TODO: Remove probe below
+            // probe is used because probe detail is needed to save the notification log
+            const probe = sanitizedProbe[0]
+            // check TLS when Monika starts
+            this.checkTLSAndSaveNotifIfFail(
+              domain,
+              config.certificate?.remider ?? 30,
+              probe,
+              config?.notifications
+            ).catch((error) => log.error(error.message))
+
+            // schedule TLS checker every day at 00:00
+            cron.schedule('0 0 * * *', async () => {
+              log.info(`Running TLS check for ${domain} every day at 00:00`)
+
+              this.checkTLSAndSaveNotifIfFail(
+                domain,
+                config.certificate?.remider ?? 30,
+                probe,
+                config?.notifications
+              ).catch((error) => log.error(error.message))
+            })
+          })
+        }
+
         abortCurrentLooper = idFeeder(
           sanitizedProbe,
           config.notifications ?? [],
@@ -374,6 +405,45 @@ Please refer to the Monika documentations on how to how to configure notificatio
     }
 
     return startupMessage
+  }
+
+  async checkTLSAndSaveNotifIfFail(
+    domain: string,
+    reminder: number,
+    probe: Probe,
+    notifications?: Notification[]
+  ) {
+    try {
+      await checkTLS(domain, reminder)
+    } catch (error) {
+      log.error(error.message)
+
+      if (notifications && notifications?.length > 0) {
+        await Promise.all(
+          notifications.map(async (notification: Notification) => {
+            try {
+              await saveNotificationLog(
+                probe,
+                notification,
+                'NOTIFY-TLS',
+                error.message
+              )
+              await sendAlerts({
+                url: domain,
+                status: 'invalid',
+                probeId: probe.id,
+                probeName: probe.name,
+                incidentThreshold: probe.incidentThreshold,
+                notifications: notifications ?? [],
+                validation: { alert: '', status: true },
+              })
+            } catch (error) {
+              log.error(error.message)
+            }
+          })
+        )
+      }
+    }
   }
 }
 

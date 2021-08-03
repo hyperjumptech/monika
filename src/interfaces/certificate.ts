@@ -22,16 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Certificate } from './certificate'
-import { Notification } from './notification'
-import { Probe } from './probe'
-import { SymonConfig } from '../components/reporter'
-
-export interface Config {
-  certificate?: Certificate
-  interval?: number
-  notifications?: Notification[]
-  probes: Probe[]
-  symon?: SymonConfig
-  version?: string
+export interface Certificate {
+  domains: string[]
+  remider?: number
 }

@@ -22,16 +22,49 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Certificate } from './certificate'
-import { Notification } from './notification'
-import { Probe } from './probe'
-import { SymonConfig } from '../components/reporter'
+import { expect } from '@oclif/test'
+import { checkTLS } from '../tls-checker'
 
-export interface Config {
-  certificate?: Certificate
-  interval?: number
-  notifications?: Notification[]
-  probes: Probe[]
-  symon?: SymonConfig
-  version?: string
-}
+describe('TLS Checker', () => {
+  describe('fail attempt', () => {
+    it('expired domain', async () => {
+      // arrange
+      const url = 'expired.badssl.com'
+
+      try {
+        // act
+        await checkTLS(url)
+      } catch (error) {
+        // assert
+        expect(error.message).to.include(
+          `${url} security certificate has expired at`
+        )
+      }
+    })
+
+    it('tests example.com with long cert expiry threshold', async () => {
+      // arrange
+      const url = 'example.com'
+
+      try {
+        // act
+        await checkTLS(url)
+      } catch (error) {
+        // assert
+        expect(error.message).to.include(
+          `${url} security certificate will expire at`
+        )
+      }
+    })
+  })
+
+  describe('success attempt', () => {
+    it('tests example.com', async () => {
+      // arrange
+      const url = 'example.com'
+
+      // act
+      await checkTLS(url)
+    })
+  })
+})
