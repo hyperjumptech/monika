@@ -22,42 +22,20 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { notify } from 'node-notifier'
-import { DesktopData } from './../../../interfaces/data'
-import getIp from '../../../utils/ip'
-import { hostname } from 'os'
-import { publicIpAddress } from '../../../utils/public-ip'
+import { log } from './pino'
+import stun from 'stun'
 
-export const sendDesktop = async (data: DesktopData) => {
+export let publicIpAddress = ''
+
+export async function getPublicIp() {
   try {
-    if (data.body.status === 'INIT') {
-      notify({
-        title: 'Monika is running',
-        message: data.body.alert,
-      })
-
-      return
+    const response = await stun.request('stun.l.google.com:19302')
+    const address = response?.getXorAddress()?.address
+    if (address) {
+      publicIpAddress = address
+      log.info(`Monika is running on Public IP ${address}`)
     }
-
-    if (data.body.status === 'TERMINATE') {
-      notify({
-        title: 'Monika terminated',
-        message: data.body.alert,
-      })
-
-      return
-    }
-
-    const notifType = data.body.status === 'UP' ? 'RECOVERY' : 'INCIDENT'
-    notify({
-      title: `New ${notifType} notification from Monika (${data.body.alert})`,
-      message: `${data.body.expected} for URL ${data.body.url} at ${
-        data.body.time
-      }.\rMonika: ${getIp()} (local), ${
-        publicIpAddress ? `${publicIpAddress} (public)` : ''
-      } ${hostname} (hostname)`,
-    })
   } catch (error) {
-    throw error
+    log.info(`Can't obtain Public IP`)
   }
 }

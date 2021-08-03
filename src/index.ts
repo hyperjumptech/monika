@@ -68,7 +68,7 @@ import { Notification } from './interfaces/notification'
 import { sendAlerts } from './components/notification'
 import { LogObject } from './interfaces/logs'
 import { getLogsAndReport } from './components/reporter'
-import { getPublicIp } from './utils/ip'
+import { getPublicIp } from './utils/public-ip'
 import validateResponse, { ValidateResponse } from './plugins/validate-response'
 
 const em = getEventEmitter()

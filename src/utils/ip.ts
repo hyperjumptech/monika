@@ -23,10 +23,6 @@
  **********************************************************************************/
 
 import { networkInterfaces } from 'os'
-import { log } from './pino'
-import stun from 'stun'
-
-export let publicIpAddress = ''
 
 export default function getIp(): string {
   let address = ''
@@ -43,22 +39,4 @@ export default function getIp(): string {
   }
 
   return address
-}
-
-export async function getPublicIp() {
-  if (process.env.NODE_ENV === 'test') {
-    publicIpAddress = '127.0.0.1'
-    return
-  }
-
-  try {
-    const response = await stun.request('stun.l.google.com:19302')
-    const address = response?.getXorAddress()?.address
-    if (address) {
-      publicIpAddress = address
-      log.info(`Monika is running on Public IP ${address}`)
-    }
-  } catch (error) {
-    log.info(`Can't obtain Public IP`)
-  }
 }

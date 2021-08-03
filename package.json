@@ -54,6 +54,7 @@
     "pino": "6.11.2",
     "pino-pretty": "4.7.1",
     "prom-client": "13.1.0",
+    "sinon": "^11.1.2",
     "smtp-server": "^3.8.0",
     "sqlite": "^4.0.21",
     "sqlite3": "^5.0.2",

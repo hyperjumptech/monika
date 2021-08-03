@@ -25,8 +25,9 @@
 import axios from 'axios'
 import { TeamsData } from './../../../interfaces/data'
 import { AxiosResponseWithExtraData } from '../../../interfaces/request'
-import getIp, { publicIpAddress } from '../../../utils/ip'
+import getIp from '../../../utils/ip'
 import { hostname } from 'os'
+import { publicIpAddress } from '../../../utils/public-ip'
 
 export const sendTeams = async (data: TeamsData) => {
   try {
