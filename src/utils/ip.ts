@@ -46,6 +46,11 @@ export default function getIp(): string {
 }
 
 export async function getPublicIp() {
+  if (process.env.NODE_ENV === 'test') {
+    publicIpAddress = '127.0.0.1'
+    return
+  }
+
   try {
     const response = await axios({
       method: 'GET',
