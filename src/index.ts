@@ -283,7 +283,7 @@ class Monika extends Command {
             // check TLS when Monika starts
             this.checkTLSAndSaveNotifIfFail(
               domain,
-              config.certificate?.remider ?? 30,
+              config.certificate?.reminder ?? 30,
               probe,
               config?.notifications
             ).catch((error) => log.error(error.message))
@@ -294,7 +294,7 @@ class Monika extends Command {
 
               this.checkTLSAndSaveNotifIfFail(
                 domain,
-                config.certificate?.remider ?? 30,
+                config.certificate?.reminder ?? 30,
                 probe,
                 config?.notifications
               ).catch((error) => log.error(error.message))

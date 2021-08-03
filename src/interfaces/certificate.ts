@@ -24,5 +24,5 @@
 
 export interface Certificate {
   domains: string[]
-  remider?: number
+  reminder?: number
 }
