@@ -16,7 +16,7 @@
       "description": "Probe",
       "requests": [
         {
-          "method": "PATCH",
+          "method": "NON_HTTP_METHOD",
           "url": "https://something/something",
           "headers": {
             "Authorization": ""
