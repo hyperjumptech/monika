@@ -48,6 +48,16 @@ Use the `-o` output flag to specify the output file.
 monika --create-config --postman mypostman.json -o new-monika.json
 ```
 
+## Force
+
+The `--force` flag forces the execution of a command. The force flag will bypass any user prompts with an affirmative. If a Yes/No prompt is normally presented, `--force` will bypass the prompt and assume a Yes.
+
+```bash
+monika --flush --force
+```
+
+The example above flushes the database bypassing without waiting for user confirmation.
+
 ## HAR
 
 Monika supports HAR files as input. HAR are JSON formatted HTTP ARchive file. Generate a HAR file from the site you've visited then use Monika to refetch the pages and ensure they still work.
@@ -80,13 +90,13 @@ All command and responses are stored in an internal log file. You can dump (disp
 monika --logs
 ```
 
-You can flush the log history with the flush option. there is no `-f` short flag for this command.
+You can flush the log history with the `--flush` option. there is no `-f` short flag for this command.
 
 ```bash
 monika --flush
 ```
 
-You must respond with a capital `"Y"` to confirm if you want to flush the logs.
+You must respond with a capital `"Y"` to confirm if you want to flush the logs or use the `--force` flag to force a Yes without prompting.
 
 ## Postman
 

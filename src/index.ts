@@ -195,10 +195,15 @@ class Monika extends Command {
     }
 
     if (flags.flush) {
-      const ans = await cli.prompt(
-        'Are you sure you want to flush all logs in monika-logs.db (Y/n)?'
-      )
-      if (ans === 'Y') {
+      let ans
+
+      if (!flags.force) {
+        ans = await cli.prompt(
+          'Are you sure you want to flush all logs in monika-logs.db (Y/n)?'
+        )
+      }
+
+      if (ans === 'Y' || flags.force) {
         await flushAllLogs()
         log.warn('Records flushed, thank you.')
       } else {
