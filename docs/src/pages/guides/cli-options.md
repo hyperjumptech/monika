@@ -33,20 +33,21 @@ Just starting out? Want to make a new configuration? The `--create-config` flag 
 monika --create-config
 ```
 
-As an alternative, configuration generator is able to read HAR or postman files as input to convert into monika.json configuration files.
+As an alternative, the generator is able to read HAR or postman files as input to convert into monika.json configuration files.
 
-Use the `--har` or the `--postman` in combination with `--create-config` on the command line to convert those files into a monika config.
+Use the `--har` or the `--postman` in combination with `--create-config` on the command line to convert those files.
 
 ```bash
 monika --create-config --har myfile.har
 ```
 
-The above examples creates a monika.json config file from an existing HAR file.
-Use the `-o` output flag to specify the output file.
+The above example creates a config file from an existing HAR archive. Auto generated files defaults to 'monika.json'. Use the `-o` output flag to specify another name.
 
 ```bash
 monika --create-config --postman mypostman.json -o new-monika.json
 ```
+
+When generating config files, if an existing monika.json file already exist, the user is prompted before overwriting. To bypass the user prompt, use the `--force` flag.
 
 ## Force
 
