@@ -21,7 +21,7 @@ wget https://nodejs.org/dist/v14.17.3/node-v14.17.3-linux-armv7l.tar.xz
 
 ![uname example](/tutorials/raspberry-pi/uname-and-wget-node-arm-v7.png)
 
-Untar the file:
+Un-tar the file:
 
 ```bash
 tar xf node-v14.17.3-linux-armv7l.tar.xz
