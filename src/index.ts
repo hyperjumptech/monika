@@ -285,7 +285,7 @@ class Monika extends Command {
         }
 
         // run TLS checker
-        if (config?.certificate && config.certificate?.domains.length > 0) {
+        if (config?.certificate && config.certificate.domains.length > 0) {
           config.certificate?.domains.forEach(async (domain) => {
             // TODO: Remove probe below
             // probe is used because probe detail is needed to save the notification log
