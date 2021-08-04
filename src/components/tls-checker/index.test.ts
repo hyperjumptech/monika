@@ -27,7 +27,7 @@ import { checkTLS } from '../tls-checker'
 
 describe('TLS Checker', () => {
   describe('fail attempt', () => {
-    it('expired domain', async () => {
+    it('should check expired domain', async () => {
       // arrange
       const url = 'expired.badssl.com'
 
@@ -64,7 +64,10 @@ describe('TLS Checker', () => {
       const url = 'example.com'
 
       // act
-      await checkTLS(url)
+      const result = await checkTLS(url)
+
+      // assert
+      expect(result).to.equal(null)
     })
   })
 })

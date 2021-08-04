@@ -34,4 +34,6 @@ export async function checkTLS(url: string, expiryThreshold = 30) {
   if (daysRemaining <= expiryThreshold) {
     throw new Error(`${url} security certificate will expire at ${validTo}!`)
   }
+
+  return null
 }
