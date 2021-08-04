@@ -286,7 +286,7 @@ class Monika extends Command {
 
         // run TLS checker
         if (config?.certificate && config.certificate.domains.length > 0) {
-          config.certificate?.domains.forEach(async (domain) => {
+          config.certificate?.domains.forEach((domain) => {
             // TODO: Remove probe below
             // probe is used because probe detail is needed to save the notification log
             const probe = sanitizedProbe[0]
@@ -296,10 +296,10 @@ class Monika extends Command {
               config.certificate?.reminder ?? 30,
               probe,
               config?.notifications
-            ).catch((error) => log.error(error.message))
+            )
 
             // schedule TLS checker every day at 00:00
-            cron.schedule('0 0 * * *', async () => {
+            cron.schedule('0 0 * * *', () => {
               log.info(`Running TLS check for ${domain} every day at 00:00`)
 
               this.checkTLSAndSaveNotifIfFail(
@@ -307,7 +307,7 @@ class Monika extends Command {
                 config.certificate?.reminder ?? 30,
                 probe,
                 config?.notifications
-              ).catch((error) => log.error(error.message))
+              )
             })
           })
         }
@@ -429,29 +429,23 @@ Please refer to the Monika documentations on how to how to configure notificatio
       log.error(error.message)
 
       if (notifications && notifications?.length > 0) {
-        await Promise.all(
-          notifications.map(async (notification: Notification) => {
-            try {
-              await saveNotificationLog(
-                probe,
-                notification,
-                'NOTIFY-TLS',
-                error.message
-              )
-              await sendAlerts({
-                url: domain,
-                status: 'invalid',
-                probeId: probe.id,
-                probeName: probe.name,
-                incidentThreshold: probe.incidentThreshold,
-                notifications: notifications ?? [],
-                validation: { alert: '', status: true },
-              })
-            } catch (error) {
-              log.error(error.message)
-            }
-          })
-        )
+        notifications.map(async (notification: Notification) => {
+          saveNotificationLog(
+            probe,
+            notification,
+            'NOTIFY-TLS',
+            error.message
+          ).catch((err) => log.error(err.message))
+          sendAlerts({
+            url: domain,
+            status: 'invalid',
+            probeId: probe.id,
+            probeName: probe.name,
+            incidentThreshold: probe.incidentThreshold,
+            notifications: notifications ?? [],
+            validation: { alert: '', status: true },
+          }).catch((err) => log.error(err.message))
+        })
       }
     }
   }
