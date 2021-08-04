@@ -24,5 +24,6 @@
 
 export interface Certificate {
   domains: string[]
+  // The reminder is the number of days to send notification to user before the domain expires.
   reminder?: number
 }
