@@ -174,6 +174,11 @@ class Monika extends Command {
       description: 'Write monika config file to this file',
       multiple: false,
     }),
+
+    force: flags.boolean({
+      description: 'force command',
+      default: false,
+    }),
   }
 
   async run() {

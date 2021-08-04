@@ -39,6 +39,11 @@
           "title": "Alerts",
           "path": "/guides/alerts",
           "editUrl": "/guides/alerts.md"
+        },
+        {
+          "title": "CLI Options",
+          "path": "/guides/cli-options",
+          "editUrl": "/guides/cli-options.md"
         }
       ]
     },
