@@ -1,12 +1,14 @@
 import { compileExpression as _compileExpression } from 'filtrex'
-import { get, merge } from 'lodash'
+import { get as _get, has } from 'lodash'
 
-export const compileExpression: typeof _compileExpression = (
-  expression,
-  options
-) => {
-  return _compileExpression(
-    expression,
-    merge({ extraFunctions: { get } }, options)
-  )
+export const compileExpression = (expression: string) => (obj: any) => {
+  return _compileExpression(expression, {
+    extraFunctions: {
+      get: (path: string) => _get(obj, path),
+      has: (obj: any, key: string) => {
+        const val = has(obj, key)
+        return val
+      },
+    },
+  })(obj)
 }

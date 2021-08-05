@@ -37,11 +37,13 @@ export const queryExpression = (
 
   return Boolean(
     fn({
-      size: res.headers['content-length'],
-      status: res.status,
-      time: res.config.extraData?.responseTime,
-      body: { text: bodyText, JSON: bodyJSON },
-      headers: res.headers,
+      response: {
+        size: res.headers['content-length'],
+        status: res.status,
+        time: res.config.extraData?.responseTime,
+        body: { text: bodyText, JSON: bodyJSON },
+        headers: res.headers,
+      },
     })
   )
 }

@@ -45,20 +45,18 @@ export const responseTimeGreaterThan: (
 }
 
 export const queryExpression = (query: string) => {
-  const fn = compileExpression(query)
-
   return (res: AxiosResponseWithExtraData) => {
-    const isBodyString = typeof res.data === 'string'
-    const bodyText = isBodyString ? res.data : JSON.stringify(res.data)
-    const bodyJSON = isBodyString ? undefined : res.data
+    const compiledFn = compileExpression(query)
 
     return Boolean(
-      fn({
-        responseSize: Number(res.headers['content-length']),
-        responseStatus: res.status,
-        responseTime: res.config.extraData?.responseTime,
-        responseBody: { text: bodyText, JSON: bodyJSON },
-        responseHeaders: res.headers,
+      compiledFn({
+        response: {
+          size: Number(res.headers['content-length']),
+          status: res.status,
+          time: res.config.extraData?.responseTime,
+          body: res.data,
+          headers: res.headers,
+        },
       })
     )
   }
