@@ -52,6 +52,7 @@ describe('send alerts', () => {
       validation: {
         alert: 'status-not-2xx',
         status: false,
+        responseValue: 200,
       },
       notifications: [
         {
@@ -77,6 +78,7 @@ describe('send alerts', () => {
       validation: {
         alert: 'status-not-2xx',
         status: true,
+        responseValue: 500,
       },
       notifications: [
         {
@@ -102,6 +104,7 @@ describe('send alerts', () => {
       validation: {
         alert: 'status-not-2xx',
         status: true,
+        responseValue: 500,
       },
       notifications: [
         {
@@ -130,6 +133,7 @@ describe('send alerts', () => {
       validation: {
         alert: 'status-not-2xx',
         status: true,
+        responseValue: 500,
       },
       notifications: [
         {
@@ -163,6 +167,7 @@ describe('send alerts', () => {
       validation: {
         alert: 'status-not-2xx',
         status: true,
+        responseValue: 500,
       },
       notifications: [
         {
@@ -192,6 +197,7 @@ describe('send alerts', () => {
       validation: {
         alert: 'status-not-2xx',
         status: true,
+        responseValue: 500,
       },
       notifications: [
         {
@@ -239,6 +245,7 @@ describe('send alerts', () => {
       validation: {
         alert: 'status-not-2xx',
         status: true,
+        responseValue: 500,
       },
       notifications: [
         {
@@ -269,6 +276,7 @@ describe('send alerts', () => {
       validation: {
         alert: 'status-not-2xx',
         status: true,
+        responseValue: 500,
       },
       notifications: [
         {
@@ -295,6 +303,7 @@ describe('send alerts', () => {
       validation: {
         alert: 'status-not-2xx',
         status: true,
+        responseValue: 500,
       },
       notifications: [
         {
