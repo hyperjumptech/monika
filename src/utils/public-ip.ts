@@ -22,106 +22,20 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-export interface MailData {
-  recipients: string[]
-}
+import { log } from './pino'
+import stun from 'stun'
 
-export interface MailgunData extends MailData {
-  apiKey: string
-  domain: string
-}
+export let publicIpAddress = ''
 
-export interface SendgridData extends MailData {
-  apiKey: string
-}
-
-export interface SMTPData extends MailData {
-  hostname: string
-  port: number
-  username: string
-  password: string
-}
-
-export interface TeamsData {
-  url: string
-  body: TeamsDataBody
-}
-
-export interface TeamsDataBody extends WebhookDataBody {
-  status: string
-  expected?: string
-}
-
-export interface WebhookData {
-  url: string
-  body: WebhookDataBody
-}
-
-export interface MonikaNotifData {
-  url: string
-  body: MonikaNotifDataBody
-}
-
-export interface MonikaNotifDataBody {
-  type: 'start' | 'incident' | 'recovery' | 'termination'
-  probe_url: string
-  probe_name?: string
-  monika_id?: string
-  ip_address: string
-  response_time: string
-  alert: string
-}
-
-export interface TelegramData {
-  group_id: string
-  bot_token: string
-  body: WebhookDataBody
-}
-
-export interface WebhookDataBody {
-  url: string
-  time: string
-  alert: string
-}
-
-export interface WhatsappData extends MailData {
-  url: string
-  username: string
-  password: string
-}
-
-export interface DiscordData {
-  url: string
-  body: DiscordDataBody
-}
-
-export interface DiscordDataBody {
-  url: string
-  time: string
-  alert: string
-}
-
-export interface WorkplaceData {
-  thread_id: string
-  access_token: string
-  body: WorkplaceDataBody
-}
-
-export interface WorkplaceDataBody {
-  url: string
-  time: string
-  alert: string
-}
-
-export interface DesktopData {
-  url: string
-  body: DesktopDataBody
-}
-
-export interface DesktopDataBody {
-  url: string
-  time: string
-  alert: string
-  status: string
-  expected?: string
+export async function getPublicIp() {
+  try {
+    const response = await stun.request('stun.l.google.com:19302')
+    const address = response?.getXorAddress()?.address
+    if (address) {
+      publicIpAddress = address
+      log.info(`Monika is running on Public IP ${address}`)
+    }
+  } catch (error) {
+    log.info(`Can't obtain Public IP`)
+  }
 }

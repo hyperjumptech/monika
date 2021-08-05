@@ -27,10 +27,20 @@ import { resolve } from 'path'
 import chai from 'chai'
 import spies from 'chai-spies'
 import cmd from '../src'
+import sinon from 'sinon'
+import * as IpUtil from '../src/utils/public-ip'
 
 chai.use(spies)
 
 describe('monika', () => {
+  let getPublicIPStub: any
+  beforeEach(() => {
+    getPublicIPStub = sinon.stub(IpUtil, 'getPublicIp' as never)
+  })
+  afterEach(() => {
+    getPublicIPStub.restore()
+  })
+
   // General Test
   test
     .stdout()
