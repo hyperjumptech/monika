@@ -44,10 +44,6 @@ import {
   flushAllLogs,
   openLogfile,
 } from './components/logger/history'
-import {
-  validateResponse,
-  ValidateResponseStatus,
-} from './components/notification/alert'
 import { notificationChecker } from './components/notification/checker'
 import { terminationNotif } from './components/notification/termination'
 import { resetProbeStatuses } from './components/notification/process-server-status'
@@ -75,6 +71,8 @@ import { sendAlerts } from './components/notification'
 import { LogObject } from './interfaces/logs'
 import { getLogsAndReport } from './components/reporter'
 import { checkTLS } from './components/tls-checker'
+import { getPublicIp } from './utils/public-ip'
+import validateResponse, { ValidateResponse } from './plugins/validate-response'
 
 const em = getEventEmitter()
 
@@ -189,6 +187,7 @@ class Monika extends Command {
       return
     }
 
+    await getPublicIp() // calling it here once. So no need to fetch public IP for every alert functions invocation
     await openLogfile()
 
     if (flags.logs) {
@@ -443,7 +442,7 @@ Please refer to the Monika documentations on how to how to configure notificatio
             probeName: probe.name,
             incidentThreshold: probe.incidentThreshold,
             notifications: notifications ?? [],
-            validation: { alert: '', status: true },
+            validation: { alert: '', status: true, responseValue: 0 },
           }).catch((err) => log.error(err.message))
         })
       }
@@ -490,7 +489,7 @@ interface ProbeStatusProcessed {
   probe: Probe
   statuses?: StatusDetails[]
   notifications?: Notification[]
-  validatedResponseStatuses: ValidateResponseStatus[]
+  validatedResponseStatuses: ValidateResponse[]
   totalRequests: number
 }
 
@@ -529,7 +528,11 @@ const probeSendNotification = async (data: ProbeSendNotification) => {
       probeName: probe.name,
       incidentThreshold: probe.incidentThreshold,
       notifications: notifications ?? [],
-      validation: validatedResponseStatuses[index],
+      validation:
+        validatedResponseStatuses.find(
+          (validateResponse: ValidateResponse) =>
+            validateResponse.alert === status?.alert
+        ) || validatedResponseStatuses[index],
     })
   }
 }

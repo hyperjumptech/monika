@@ -22,7 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { parseAlertStringTime } from './alert'
+import { parseAlertStringTime } from '../../plugins/validate-response/checkers'
 
 export function getMessageForAlert({
   alert,
@@ -30,15 +30,18 @@ export function getMessageForAlert({
   ipAddress,
   status,
   incidentThreshold,
+  responseValue,
 }: {
   alert: string
   url: string
   ipAddress: string
   status: string
   incidentThreshold: number
+  responseValue: number
 }): {
   subject: string
   body: string
+  expected: string
 } {
   const getSubject = (url: string, status: string) => {
     const statusAlert = `Target ${url} is not OK`
@@ -66,6 +69,32 @@ export function getMessageForAlert({
     return `Target ${url} is back to healthy.`
   }
 
+  const getExpectedMessage = (status: string, responseValue: number) => {
+    if (alert === 'status-not-2xx') {
+      if (status === 'DOWN') {
+        return `Status is ${responseValue}, was expecting 200.`
+      }
+
+      if (status === 'UP') {
+        return `Service is ok. Status now 200`
+      }
+    }
+
+    if (alert.includes('response-time-greater-than-')) {
+      const alertTime = parseAlertStringTime(alert)
+
+      if (status === 'DOWN') {
+        return `Response time is ${responseValue}ms expecting a ${alertTime}ms`
+      }
+
+      if (status === 'UP') {
+        return `Service is ok. Response now is within ${alertTime}ms`
+      }
+    }
+
+    return ''
+  }
+
   const today = new Date().toUTCString()
   const message = {
     subject: getSubject(url, status),
@@ -75,6 +104,7 @@ export function getMessageForAlert({
       Target URL: ${url}\n
       From server: ${ipAddress}
     `,
+    expected: getExpectedMessage(status, responseValue),
   }
 
   return message

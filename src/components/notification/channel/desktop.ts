@@ -24,6 +24,9 @@
 
 import { notify } from 'node-notifier'
 import { DesktopData } from './../../../interfaces/data'
+import getIp from '../../../utils/ip'
+import { hostname } from 'os'
+import { publicIpAddress } from '../../../utils/public-ip'
 
 export const sendDesktop = async (data: DesktopData) => {
   try {
@@ -47,8 +50,12 @@ export const sendDesktop = async (data: DesktopData) => {
 
     const notifType = data.body.status === 'UP' ? 'RECOVERY' : 'INCIDENT'
     notify({
-      title: `New ${notifType} notification from Monika`,
-      message: `${data.body.alert} for URL ${data.body.url} at ${data.body.time}`,
+      title: `New ${notifType} notification from Monika (${data.body.alert})`,
+      message: `${data.body.expected} for URL ${data.body.url} at ${
+        data.body.time
+      }.\rMonika: ${getIp()} (local), ${
+        publicIpAddress ? `${publicIpAddress} (public)` : ''
+      } ${hostname} (hostname)`,
     })
   } catch (error) {
     throw error

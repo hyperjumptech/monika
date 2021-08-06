@@ -22,24 +22,27 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import { Probe } from '../../interfaces/probe'
 import { AxiosResponseWithExtraData } from '../../interfaces/request'
-import responseChecker from './checkers'
+import responseChecker, { getResponseValue } from './checkers'
 
 export interface ValidateResponse {
   alert: string
   status: boolean
+  responseValue: number
 }
 
 const validateResponse = (
-  alerts: string[],
+  alerts: Probe['alerts'],
   response: AxiosResponseWithExtraData
 ): ValidateResponse[] => {
   const checks = alerts
     .map((alert) => alert.toLowerCase())
     .map((alert) => {
       const status = responseChecker(alert, response)
+      const responseValue = getResponseValue(alert, response)
 
-      return { alert, status }
+      return { alert, status, responseValue }
     })
 
   return checks
