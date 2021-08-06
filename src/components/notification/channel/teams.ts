@@ -25,6 +25,9 @@
 import axios from 'axios'
 import { TeamsData } from './../../../interfaces/data'
 import { AxiosResponseWithExtraData } from '../../../interfaces/request'
+import getIp from '../../../utils/ip'
+import { hostname } from 'os'
+import { publicIpAddress } from '../../../utils/public-ip'
 
 export const sendTeams = async (data: TeamsData) => {
   try {
@@ -63,15 +66,21 @@ export const sendTeams = async (data: TeamsData) => {
               facts: [
                 {
                   name: 'Alert',
-                  value: data.body.alert,
+                  value: data.body.expected,
                 },
                 {
                   name: 'URL',
                   value: `[${data.body.url}](${data.body.url})`,
                 },
                 {
-                  name: 'Time',
+                  name: 'At',
                   value: data.body.time,
+                },
+                {
+                  name: 'Monika',
+                  value: `${getIp()} (local), ${
+                    publicIpAddress ? `${publicIpAddress} (public)` : ''
+                  } ${hostname} (hostname)`,
                 },
               ],
               markdown: true,

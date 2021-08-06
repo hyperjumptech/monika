@@ -9,7 +9,8 @@
     "strict": true,
     "target": "es2017",
     "esModuleInterop": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "typeRoots": ["node_modules/@types", "custom_types"]
   },
   "include": ["src/**/*", "src/**/*.json"]
 }

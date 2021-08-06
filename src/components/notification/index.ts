@@ -80,6 +80,7 @@ export async function sendAlerts({
     ipAddress,
     status,
     incidentThreshold,
+    responseValue: validation.responseValue,
   })
   const sent = await Promise.all<any>(
     notifications.map((notification) => {
@@ -191,6 +192,7 @@ export async function sendAlerts({
               url,
               time: new Date().toLocaleString(),
               status,
+              expected: message.expected,
             },
           } as TeamsData).then(() => ({
             notification: 'teams',
@@ -238,6 +240,7 @@ export async function sendAlerts({
               alert: validation.alert,
               time: new Date().toLocaleString(),
               status,
+              expected: message.expected,
             },
           } as DesktopData).then(() => ({
             notification: 'desktop',
