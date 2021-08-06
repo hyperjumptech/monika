@@ -41,6 +41,11 @@
           "editUrl": "/guides/alerts.md"
         },
         {
+          "title": "TLS Checkers",
+          "path": "/guides/tls-checkers",
+          "editUrl": "/guides/tls-checkers.md"
+        },
+        {
           "title": "CLI Options",
           "path": "/guides/cli-options",
           "editUrl": "/guides/cli-options.md"

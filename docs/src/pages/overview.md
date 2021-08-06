@@ -11,12 +11,13 @@ Monika operates by reading everything from a config file. Based on the configura
 
 For more information, please refer to the detailed documentations below.
 
-| Topic                                                                        | Description                                            |
-| ---------------------------------------------------------------------------- | ------------------------------------------------------ |
-| [Probes](https://hyperjumptech.github.io/monika/guides/probes)               | How requests are set up and dispatched                 |
-| [Alerts](https://hyperjumptech.github.io/monika/guides/alerts)               | How alerts are triggered and how to setup an alert     |
-| [Notifications](https://hyperjumptech.github.io/monika/guides/notifications) | How to receive notifications when alerts are triggered |
-| [CLI Options](https://hyperjumptech.github.io/monika/guides/cli-options)     | How to run monika from the command line                |
+| Topic                                  | Description                                                     |
+| -------------------------------------- | --------------------------------------------------------------- |
+| [Probes](/guides/probes)               | How requests are set up and dispatched                          |
+| [Alerts](/guides/alerts)               | How alerts are triggered and how to setup an alert              |
+| [Notifications](/guides/notifications) | How to receive notifications when alerts are triggered          |
+| [TLS Checkers](/guides/tls-checkers)   | Check TLS validity and send notification before the expiry time |
+| [CLI Options](/guides/cli-options)     | How to run monika from the command line                         |
 
 ## Motivation
 
