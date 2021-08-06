@@ -49,6 +49,7 @@ import { sendMonikaNotif } from './channel/monika-notif'
 import { sendWorkplace } from './channel/workplace'
 import { sendDesktop } from './channel/desktop'
 import { ValidateResponse } from '../../plugins/validate-response'
+import { sendSendgrid } from './channel/sendgrid'
 
 export async function sendAlerts({
   validation,
@@ -105,6 +106,22 @@ export async function sendAlerts({
             alert: validation.alert,
             url,
           }))
+        }
+        case 'sendgrid': {
+          return sendSendgrid(
+            {
+              recipients: (notification?.data as MailgunData)?.recipients?.join(
+                ','
+              ),
+              subject: message.subject,
+              body: message.body,
+              sender: {
+                name: 'Monika',
+                email: 'monika@hyperjump.tech',
+              },
+            },
+            notification
+          )
         }
         case 'webhook': {
           return sendWebhook({
