@@ -214,6 +214,7 @@ describe('monika', () => {
     .it('runs with mailgun config', (ctx) => {
       expect(ctx.stdout).to.contain('Type: mailgun')
       expect(ctx.stdout).to.contain('Domain:')
+      expect(ctx.stdout).to.contain('Username:')
     })
 
   test
