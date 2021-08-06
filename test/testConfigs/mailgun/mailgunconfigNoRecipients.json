@@ -5,7 +5,8 @@
       "type": "mailgun",
       "data": {
         "apiKey": "adfsafdsadfdsafsafds",
-        "domain": "api.mailgun.net"
+        "domain": "api.mailgun.net",
+        "username": "mailgunuser"
       }
     }
   ],

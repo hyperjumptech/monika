@@ -46,6 +46,7 @@ export const dataMailgunSchemaValidator = dataBaseEmailSchemaValidator(
 ).keys({
   apiKey: Joi.string().required().label('Mailgun API Key'),
   domain: Joi.string().required().label('Mailgun Domain'),
+  username: Joi.string().required().label('Mailgun Username'),
 })
 
 export const dataSendgridSchemaValidator = dataBaseEmailSchemaValidator(

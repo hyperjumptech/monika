@@ -27,6 +27,7 @@ describe('notificationChecker - mailgunNotification', () => {
           ...notificationConfig,
           data: {
             domain: 'mailgun.com',
+            username: 'mailgunuser',
           } as MailgunData,
         },
       ])
@@ -47,11 +48,33 @@ describe('notificationChecker - mailgunNotification', () => {
           ...notificationConfig,
           data: {
             apiKey: 'ABC-EFG-HIJ-KLM-NOP-QRS-TUV-WXY-Z',
+            username: 'mailgunuser',
           } as MailgunData,
         },
       ])
     } catch (error) {
       const originalErrorMessage = '"Mailgun Domain" is required'
+      const { message } = errorMessage('Mailgun', originalErrorMessage)
+
+      expect(() => {
+        throw error
+      }).to.throw(message)
+    }
+  })
+
+  it('should handle validation error - without username', async () => {
+    try {
+      await notificationChecker([
+        {
+          ...notificationConfig,
+          data: {
+            apiKey: 'ABC-EFG-HIJ-KLM-NOP-QRS-TUV-WXY-Z',
+            domain: 'mailgun.com',
+          } as MailgunData,
+        },
+      ])
+    } catch (error) {
+      const originalErrorMessage = '"Mailgun Username" is required'
       const { message } = errorMessage('Mailgun', originalErrorMessage)
 
       expect(() => {
