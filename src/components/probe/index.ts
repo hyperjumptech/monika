@@ -66,7 +66,7 @@ export async function doProbe(
     id: probe.id,
     responseCode: 0,
     url: '',
-    method: 'GET',
+    method: 'GET', // GET must be pre-filled here since method '' (empty) is undefined
     responseTime: 0,
     alert: {
       flag: '',
