@@ -23,13 +23,19 @@
  **********************************************************************************/
 
 import { compileExpression as _compileExpression } from 'filtrex'
-import { get, has } from 'lodash'
+import { get, has, endsWith, startsWith, lowerCase, upperCase } from 'lodash'
 
 export const compileExpression = (expression: string) => (obj: any) => {
   return _compileExpression(expression, {
     extraFunctions: {
-      get: (path: string) => get(obj, path),
-      has: (path: string, key: string) => has(get(obj, path), key),
+      __getValueByPath: (path: string) => get(obj, path), //  for internal use, not to be exposed to user
+      has,
+      lowerCase,
+      upperCase,
+      startsWith,
+      endsWith,
+      contains: (string: string, substring: string) =>
+        string.includes(substring),
     },
   })(obj)
 }

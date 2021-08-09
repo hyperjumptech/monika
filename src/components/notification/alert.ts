@@ -44,9 +44,24 @@ export const responseTimeGreaterThan: (
   return respTimeNum > minimumTime
 }
 
+// wrap substrings that are object accessor with double quote
+// then wrap again with __getValueByPath function call
+// eg: 'response.body.title' becomes '__getValueByPath("response.body.title")'
+const sanitizeQuery = (query: string, objectKeys: string[]) => {
+  let sanitizedQuery = query
+
+  objectKeys.forEach((key) => {
+    const pattern = new RegExp(`(^| |\\()(${key}(\\.|\\[)\\S*[^\\s),])`, 'g')
+    sanitizedQuery = sanitizedQuery.replace(pattern, '$1__getValueByPath("$2")')
+  })
+
+  return sanitizedQuery
+}
+
 export const queryExpression = (query: string) => {
   return (res: AxiosResponseWithExtraData) => {
-    const compiledFn = compileExpression(query)
+    const sanitizedQuery = sanitizeQuery(query, ['response'])
+    const compiledFn = compileExpression(sanitizedQuery)
 
     return Boolean(
       compiledFn({
