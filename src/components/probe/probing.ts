@@ -66,31 +66,28 @@ export async function probing(
     })
     return res as AxiosResponseWithExtraData
   } catch (error) {
-    let errStatus
+    let errResponseCode
     let errData
     let errHdr
 
     if (error.response) {
       // Axios doesn't always return error response
-      errStatus = error.response.status
+      errResponseCode = error.response.status
       errData = error.response.data
       errHdr = error.response.headers
     } else {
-      errStatus = 500 // TODO: how to detect timeouts?
+      errResponseCode = 500 // TODO: how to detect timeouts?
       errData = ''
       errHdr = ''
     }
 
     return {
       data: errData,
-      status: errStatus,
+      status: errResponseCode,
       statusText: 'ERROR',
       headers: errHdr,
-      config: '',
-      extraData: {
-        requestStartedAt: 0,
-        responseTime: 0,
-      },
+      config: error.config, // get the response from error.config instead of error.response.xxx as -
+      extraData: error.config.extraData, // the response data lives in the data.config space
     } as AxiosResponseWithExtraData
   }
 }
