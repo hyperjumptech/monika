@@ -61,7 +61,7 @@ const notify = (data: NotifyData) => {
   const operatingSystem = type()
 
   // OSAScript for OS X
-  const osascript = `display notification "${message}" with title "${title}"`
+  const osascript = `display notification "${message}" with title "Monika" subtitle "${title}"`
 
   // Powershell Script for Windows
   const powershellScript = `
