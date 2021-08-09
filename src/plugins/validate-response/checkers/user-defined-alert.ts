@@ -22,26 +22,34 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { compileExpression } from 'filtrex'
+import { compileExpression } from '../../../utils/expression-parser'
 import { AxiosResponseWithExtraData } from '../../../interfaces/request'
 
-export const queryExpression = (
-  res: AxiosResponseWithExtraData,
-  query: string
-) => {
-  const fn = compileExpression(query)
+// wrap substrings that are object accessor with double quote
+// then wrap again with __getValueByPath function call
+// eg: 'response.body.title' becomes '__getValueByPath("response.body.title")'
+const sanitizeQuery = (query: string, objectKeys: string[]) => {
+  let sanitizedQuery = query
 
-  const isBodyString = typeof res.data === 'string'
-  const bodyText = isBodyString ? res.data : JSON.stringify(res.data)
-  const bodyJSON = isBodyString ? undefined : res.data
+  objectKeys.forEach((key) => {
+    const pattern = new RegExp(`(^| |\\()(${key}(\\.|\\[)\\S*[^\\s),])`, 'g')
+    sanitizedQuery = sanitizedQuery.replace(pattern, '$1__getValueByPath("$2")')
+  })
+
+  return sanitizedQuery
+}
+
+const queryExpression = (res: AxiosResponseWithExtraData, query: string) => {
+  const sanitizedQuery = sanitizeQuery(query, ['response'])
+  const compiledFn = compileExpression(sanitizedQuery)
 
   return Boolean(
-    fn({
+    compiledFn({
       response: {
-        size: res.headers['content-length'],
+        size: Number(res.headers['content-length']),
         status: res.status,
         time: res.config.extraData?.responseTime,
-        body: { text: bodyText, JSON: bodyJSON },
+        body: res.data,
         headers: res.headers,
       },
     })

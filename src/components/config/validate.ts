@@ -23,7 +23,6 @@
  **********************************************************************************/
 
 /* eslint-disable complexity */
-import { getCheckResponseFn } from '../notification/alert'
 import { Notification } from '../../interfaces/notification'
 import {
   SMTPData,
@@ -38,9 +37,12 @@ import {
   WorkplaceData,
 } from '../../interfaces/data'
 import { Config } from '../../interfaces/config'
+import { ProbeAlert } from '../../interfaces/probe'
 import { RequestConfig } from '../../interfaces/request'
 import { Validation } from '../../interfaces/validation'
 import { isValidURL } from '../../utils/is-valid-url'
+import { parseAlertStringTime } from '../../plugins/validate-response/checkers'
+import { compileExpression } from '../../utils/expression-parser'
 
 const HTTPMethods = [
   'DELETE',
@@ -231,6 +233,22 @@ function validateNotification(notifications: Notification[]): Validation {
   return VALID_CONFIG
 }
 
+const isValidProbeAlert = (alert: ProbeAlert | string): boolean => {
+  try {
+    if (typeof alert === 'string') {
+      return (
+        alert === 'status-not-2xx' ||
+        (alert.startsWith('response-time-greater-than-') &&
+          Boolean(parseAlertStringTime(alert)))
+      )
+    }
+
+    return Boolean(compileExpression(alert.query))
+  } catch (error) {
+    return false
+  }
+}
+
 export const validateConfig = (configuration: Config): Validation => {
   const { notifications, probes } = configuration
 
@@ -267,14 +285,14 @@ export const validateConfig = (configuration: Config): Validation => {
         return PROBE_REQUEST_INVALID_METHOD
     }
 
-    if ((alerts?.length ?? 0) === 0) {
-      probe.alerts = [
-        { query: 'status-not-2xx', subject: '', message: `` },
-        { query: 'response-time-greater-than-2-s', subject: '', message: '' },
-      ]
+    // Check probe alert properties
+    for (const alert of probe.alerts) {
+      const check = isValidProbeAlert(alert)
+      if (!check) {
+        return PROBE_ALERT_INVALID
+      }
     }
 
-    // Check probe alert properties
     for (let i = 0; i < probe.alerts.length; i++) {
       if (typeof probe.alerts[i] === 'string') {
         probe.alerts[i] = {
@@ -283,10 +301,13 @@ export const validateConfig = (configuration: Config): Validation => {
           message: '',
         }
       }
-      const check = getCheckResponseFn(probe.alerts[i])
-      if (!check) {
-        return PROBE_ALERT_INVALID
-      }
+    }
+
+    if ((alerts?.length ?? 0) === 0) {
+      probe.alerts = [
+        { query: 'status-not-2xx', subject: '', message: `` },
+        { query: 'response-time-greater-than-2-s', subject: '', message: '' },
+      ]
     }
   }
 
