@@ -25,35 +25,19 @@
 import { compileExpression } from '../../../utils/expression-parser'
 import { AxiosResponseWithExtraData } from '../../../interfaces/request'
 
-// wrap substrings that are object accessor with double quote
-// then wrap again with __getValueByPath function call
-// eg: 'response.body.title' becomes '__getValueByPath("response.body.title")'
-const sanitizeQuery = (query: string, objectKeys: string[]) => {
-  let sanitizedQuery = query
-
-  objectKeys.forEach((key) => {
-    const pattern = new RegExp(`(^| |\\()(${key}(\\.|\\[)\\S*[^\\s),])`, 'g')
-    sanitizedQuery = sanitizedQuery.replace(pattern, '$1__getValueByPath("$2")')
-  })
-
-  return sanitizedQuery
-}
-
 const queryExpression = (res: AxiosResponseWithExtraData, query: string) => {
-  const sanitizedQuery = sanitizeQuery(query, ['response'])
-  const compiledFn = compileExpression(sanitizedQuery)
+  const object = {
+    response: {
+      size: Number(res.headers['content-length']),
+      status: res.status,
+      time: res.config.extraData?.responseTime,
+      body: res.data,
+      headers: res.headers,
+    },
+  }
+  const compiledFn = compileExpression(query, Object.keys(object))
 
-  return Boolean(
-    compiledFn({
-      response: {
-        size: Number(res.headers['content-length']),
-        status: res.status,
-        time: res.config.extraData?.responseTime,
-        body: res.data,
-        headers: res.headers,
-      },
-    })
-  )
+  return Boolean(compiledFn(object))
 }
 
 export default queryExpression
