@@ -265,7 +265,7 @@ export const validateConfig = (configuration: Config): Validation => {
 
   // Check probes properties
   for (const probe of probes) {
-    const { alerts, requests } = probe
+    const { alerts = [], requests } = probe
 
     if ((requests?.length ?? 0) === 0) return PROBE_NO_REQUESTS
 
@@ -286,24 +286,27 @@ export const validateConfig = (configuration: Config): Validation => {
     }
 
     // Check probe alert properties
-    for (const alert of probe.alerts) {
+    for (const alert of alerts) {
       const check = isValidProbeAlert(alert)
       if (!check) {
         return PROBE_ALERT_INVALID
       }
     }
 
-    for (let i = 0; i < probe.alerts.length; i++) {
-      if (typeof probe.alerts[i] === 'string') {
-        probe.alerts[i] = {
-          query: (probe.alerts[i] as any).toLowerCase(),
+    // convert old alert format to new format
+    probe.alerts = alerts.map((alert: any) => {
+      if (typeof alert === 'string') {
+        return {
+          query: alert.toLowerCase(),
           subject: '',
           message: '',
         }
       }
-    }
 
-    if ((alerts?.length ?? 0) === 0) {
+      return alert
+    })
+
+    if (alerts.length === 0) {
       probe.alerts = [
         { query: 'status-not-2xx', subject: '', message: `` },
         { query: 'response-time-greater-than-2-s', subject: '', message: '' },
