@@ -41,6 +41,7 @@
     "cli-table3": "^0.6.0",
     "cli-ux": "^5.5.1",
     "express": "4.17.1",
+    "form-data": "^4.0.0",
     "handlebars": "^4.7.7",
     "helmet": "4.6.0",
     "is-url": "^1.2.4",
