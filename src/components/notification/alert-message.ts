@@ -22,7 +22,9 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import { hostname } from 'os'
 import { parseAlertStringTime } from '../../plugins/validate-response/checkers'
+import { publicIpAddress } from '../../utils/public-ip'
 
 export function getMessageForAlert({
   alert,
@@ -100,9 +102,12 @@ export function getMessageForAlert({
     subject: getSubject(url, status),
     body: `
       ${getBody(status)}\n\n
-      Time: ${today}\n
-      Target URL: ${url}\n
-      From server: ${ipAddress}
+      Alert: ${getExpectedMessage(status, responseValue)}\n
+      URL: ${url}\n
+      At: ${today}\n
+      Monika: ${ipAddress} (local), ${
+      publicIpAddress ? `${publicIpAddress} (public)` : ''
+    } ${hostname} (hostname)
     `,
     expected: getExpectedMessage(status, responseValue),
   }
