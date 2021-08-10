@@ -22,48 +22,32 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { compileExpression as _compileExpression } from 'filtrex'
-import {
-  get,
-  has,
-  endsWith,
-  startsWith,
-  lowerCase,
-  upperCase,
-  size,
-  includes,
-} from 'lodash'
+import { expect } from 'chai'
+import { sanitizeExpression } from '../../src/utils/expression-parser'
 
-// wrap substrings that are object accessor with double quote
-// then wrap again with __getValueByPath function call
-// eg: 'response.body.title' becomes '__getValueByPath("response.body.title")'
-export const sanitizeExpression = (query: string, objectKeys: string[]) => {
-  let sanitizedQuery = query
-
-  objectKeys.forEach((key) => {
-    const pattern = new RegExp(`(^| |\\()(${key}(\\.|\\[)\\S*[^\\s),])`, 'g')
-    sanitizedQuery = sanitizedQuery.replace(pattern, '$1__getValueByPath("$2")')
+describe('sanitizeExpression', () => {
+  it('sanitize "response.status == 500" expression', () => {
+    const sanitized = sanitizeExpression('response.status == 500', ['response'])
+    expect(sanitized).to.equals('__getValueByPath("response.status") == 500')
   })
 
-  return sanitizedQuery
-}
+  it('sanitize "response.body.data[0].title == "The Title"" expression', () => {
+    const sanitized = sanitizeExpression(
+      'response.body.data[0].title == "The Title"',
+      ['response']
+    )
+    expect(sanitized).to.equals(
+      '__getValueByPath("response.body.data[0].title") == "The Title"'
+    )
+  })
 
-export const compileExpression = (
-  expression: string,
-  objectKeys: string[] = []
-) => (obj: any) => {
-  const sanitizedExpression = sanitizeExpression(expression, objectKeys)
-
-  return _compileExpression(sanitizedExpression, {
-    extraFunctions: {
-      __getValueByPath: (path: string) => get(obj, path), //  for internal use, not to be exposed to user
-      has,
-      lowerCase,
-      upperCase,
-      startsWith,
-      endsWith,
-      includes,
-      size,
-    },
-  })(obj)
-}
+  it('sanitize "startsWith(lowerCase(response.body.title), "The")" expression', () => {
+    const sanitized = sanitizeExpression(
+      'startsWith(lowerCase(response.body.title), "The")',
+      ['response']
+    )
+    expect(sanitized).to.equals(
+      'startsWith(lowerCase(__getValueByPath("response.body.title")), "The")'
+    )
+  })
+})

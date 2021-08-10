@@ -22,48 +22,80 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { compileExpression as _compileExpression } from 'filtrex'
-import {
-  get,
-  has,
-  endsWith,
-  startsWith,
-  lowerCase,
-  upperCase,
-  size,
-  includes,
-} from 'lodash'
+import { expect } from 'chai'
+import { AxiosResponseWithExtraData } from '../../../../interfaces/request'
+import queryExpression from '../query-expression'
 
-// wrap substrings that are object accessor with double quote
-// then wrap again with __getValueByPath function call
-// eg: 'response.body.title' becomes '__getValueByPath("response.body.title")'
-export const sanitizeExpression = (query: string, objectKeys: string[]) => {
-  let sanitizedQuery = query
+describe('queryExpression', () => {
+  it('should handle response time query', () => {
+    const res = {
+      headers: {},
+      config: {
+        extraData: {
+          responseTime: 150,
+        },
+      },
+    } as AxiosResponseWithExtraData
 
-  objectKeys.forEach((key) => {
-    const pattern = new RegExp(`(^| |\\()(${key}(\\.|\\[)\\S*[^\\s),])`, 'g')
-    sanitizedQuery = sanitizedQuery.replace(pattern, '$1__getValueByPath("$2")')
+    const result = queryExpression(res, 'response.time > 1000')
+
+    expect(result).to.be.false
   })
 
-  return sanitizedQuery
-}
+  it('should handle response status query', () => {
+    const res = {
+      status: 200,
+      headers: {},
+      config: {},
+    } as AxiosResponseWithExtraData
 
-export const compileExpression = (
-  expression: string,
-  objectKeys: string[] = []
-) => (obj: any) => {
-  const sanitizedExpression = sanitizeExpression(expression, objectKeys)
+    const result = queryExpression(res, 'response.status != 200')
 
-  return _compileExpression(sanitizedExpression, {
-    extraFunctions: {
-      __getValueByPath: (path: string) => get(obj, path), //  for internal use, not to be exposed to user
-      has,
-      lowerCase,
-      upperCase,
-      startsWith,
-      endsWith,
-      includes,
-      size,
-    },
-  })(obj)
-}
+    expect(result).to.be.false
+  })
+
+  it('should handle response size query', () => {
+    const res = {
+      status: 200,
+      headers: { 'content-length': 2000 },
+      config: {},
+    } as AxiosResponseWithExtraData
+
+    const result = queryExpression(res, 'response.size < 1000')
+
+    expect(result).to.be.false
+  })
+
+  it('should handle response headers query', () => {
+    const res = {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+      config: {},
+    } as AxiosResponseWithExtraData
+
+    const result = queryExpression(
+      res,
+      "response.headers['content-type'] != 'application/json'"
+    )
+
+    expect(result).to.be.false
+  })
+
+  it('should handle response body query', () => {
+    const res = {
+      status: 200,
+      headers: {},
+      config: {},
+      data: {
+        message: 'Hello',
+      },
+    } as AxiosResponseWithExtraData
+
+    const result = queryExpression(
+      res,
+      "startsWith(response.body.message, 'Hello')"
+    )
+
+    expect(result).to.be.false
+  })
+})

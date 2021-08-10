@@ -26,7 +26,7 @@ import { ProbeAlert } from '../../../interfaces/probe'
 import { AxiosResponseWithExtraData } from '../../../interfaces/request'
 import responseTimeGreaterThanX from './res-time-greater-than-x'
 import statusNot2xx from './status-not-2xx'
-import queryExpression from './user-defined-alert'
+import queryExpression from './query-expression'
 
 // parse string like "response-time-greater-than-200-ms" and return the time in ms
 export const parseAlertStringTime = (str: string): number => {
