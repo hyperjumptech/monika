@@ -22,16 +22,8 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Certificate } from './certificate'
-import { Notification } from './notification'
-import { Probe } from './probe'
-import { SymonConfig } from '../components/reporter'
-
-export interface Config {
-  certificate?: Certificate
-  interval?: number
-  notifications?: Notification[]
-  probes: Probe[]
-  symon?: SymonConfig
-  version?: string
+export interface Certificate {
+  domains: string[]
+  // The reminder is the number of days to send notification to user before the domain expires.
+  reminder?: number
 }
