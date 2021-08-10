@@ -289,7 +289,14 @@ class Monika extends Command {
           config.certificate?.domains.forEach((domain) => {
             // TODO: Remove probe below
             // probe is used because probe detail is needed to save the notification log
-            const probe = sanitizedProbe[0]
+            const probe = {
+              id: '',
+              name: '',
+              requests: [],
+              incidentThreshold: 0,
+              recoveryThreshold: 0,
+              alerts: [],
+            }
             // check TLS when Monika starts
             this.checkTLSAndSaveNotifIfFail(
               domain,
