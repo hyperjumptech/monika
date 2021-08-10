@@ -22,16 +22,18 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Certificate } from './certificate'
-import { Notification } from './notification'
-import { Probe } from './probe'
-import { SymonConfig } from '../components/reporter'
+import sslChecker from 'ssl-checker'
 
-export interface Config {
-  certificate?: Certificate
-  interval?: number
-  notifications?: Notification[]
-  probes: Probe[]
-  symon?: SymonConfig
-  version?: string
+export async function checkTLS(url: string, expiryThreshold = 30) {
+  const { valid, validTo, daysRemaining } = await sslChecker(url)
+
+  if (!valid) {
+    throw new Error(`${url} security certificate has expired at ${validTo}!`)
+  }
+
+  if (daysRemaining <= expiryThreshold) {
+    throw new Error(`${url} security certificate will expire at ${validTo}!`)
+  }
+
+  return null
 }
