@@ -59,15 +59,16 @@ export function getMessageForAlert({
   }
 
   const getBody = (status: string) => {
-    if (alert.query === 'status-not-2xx' && status === 'DOWN')
-      return `Target ${url} is not healthy. It has not been returning status code 2xx ${incidentThreshold} times in a row.`
+    if (status === 'DOWN') {
+      if (alert.query === 'status-not-2xx')
+        return `Target ${url} is not healthy. It has not been returning status code 2xx ${incidentThreshold} times in a row.`
 
-    if (
-      alert.query.includes('response-time-greater-than-') &&
-      status === 'DOWN'
-    ) {
-      const alertTime = parseAlertStringTime(alert.query)
-      return `Target ${url} is not healthy. The response time has been greater than ${alertTime} ${incidentThreshold} times in a row`
+      if (alert.query.includes('response-time-greater-than-')) {
+        const alertTime = parseAlertStringTime(alert.query)
+        return `Target ${url} is not healthy. The response time has been greater than ${alertTime} ${incidentThreshold} times in a row`
+      }
+
+      return alert.message
     }
 
     return `Target ${url} is back to healthy.`
