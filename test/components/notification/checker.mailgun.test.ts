@@ -61,25 +61,4 @@ describe('notificationChecker - mailgunNotification', () => {
       }).to.throw(message)
     }
   })
-
-  it('should handle validation error - without username', async () => {
-    try {
-      await notificationChecker([
-        {
-          ...notificationConfig,
-          data: {
-            apiKey: 'ABC-EFG-HIJ-KLM-NOP-QRS-TUV-WXY-Z',
-            domain: 'mailgun.com',
-          } as MailgunData,
-        },
-      ])
-    } catch (error) {
-      const originalErrorMessage = '"Mailgun Username" is required'
-      const { message } = errorMessage('Mailgun', originalErrorMessage)
-
-      expect(() => {
-        throw error
-      }).to.throw(message)
-    }
-  })
 })

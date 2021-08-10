@@ -34,7 +34,7 @@ export const sendMailgun = async (
 ) => {
   const { subject, body, sender, recipients } = inputData
   const { data: mailgunConfigData } = notifConfigItem
-  const USERNAME = (mailgunConfigData as MailgunData)?.username
+  const USERNAME = (mailgunConfigData as MailgunData)?.username || 'api'
   const DOMAIN = (mailgunConfigData as MailgunData)?.domain
   const API_KEY = (mailgunConfigData as MailgunData)?.apiKey
 

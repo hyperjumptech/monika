@@ -29,7 +29,7 @@ export interface MailData {
 export interface MailgunData extends MailData {
   apiKey: string
   domain: string
-  username: string
+  username?: string
 }
 
 export interface SendgridData extends MailData {

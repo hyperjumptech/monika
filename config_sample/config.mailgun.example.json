@@ -6,8 +6,7 @@
       "data": {
         "recipients": ["RECIPIENT_EMAIL_ADDRESS"],
         "apiKey": "YOUR_API_KEY",
-        "domain": "YOUR_DOMAIN",
-        "username": "YOUR_USERNAME"
+        "domain": "YOUR_DOMAIN"
       }
     }
   ],

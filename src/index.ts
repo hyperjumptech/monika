@@ -406,8 +406,7 @@ Please refer to the Monika documentations on how to how to configure notificatio
             case 'mailgun':
               startupMessage += `    Domain: ${
                 (item.data as MailgunData).domain
-              }
-              Username: ${(item.data as MailgunData).username}\n`
+              }\n`
               break
             case 'sendgrid':
               break

@@ -102,7 +102,6 @@ const SMTP_NO_PASSWORD = setInvalidResponse('Password not found')
 // Mailgun
 const MAILGUN_NO_APIKEY = setInvalidResponse('API key not found')
 const MAILGUN_NO_DOMAIN = setInvalidResponse('Domain not found')
-const MAILGUN_NO_USERNAME = setInvalidResponse('Username not found')
 
 // Sendgrid
 const SENDGRID_NO_APIKEY = setInvalidResponse('API key not found')
@@ -159,7 +158,6 @@ function validateNotification(notifications: Notification[]): Validation {
       case 'mailgun': {
         if (!(data as MailgunData).apiKey) return MAILGUN_NO_APIKEY
         if (!(data as MailgunData).domain) return MAILGUN_NO_DOMAIN
-        if (!(data as MailgunData).username) return MAILGUN_NO_USERNAME
 
         break
       }

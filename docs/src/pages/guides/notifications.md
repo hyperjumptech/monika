@@ -34,8 +34,7 @@ To use one or more notifications, you need to define the settings in the monika.
       "data": {
         "recipients": ["RECIPIENT_EMAIL_ADDRESS"],
         "apiKey": "YOUR_API_KEY",
-        "domain": "YOUR_DOMAIN",
-        "domain": "YOUR_USERNAME"
+        "domain": "YOUR_DOMAIN"
       }
     },
     {
@@ -118,8 +117,7 @@ Mailgun is an email notification delivery provided by Mailgun email service. To 
 3. For your **domain**
    - • If you are on the free plan, add authorized recipients as instructed [here](https://help.mailgun.com/hc/en-us/articles/217531258-Authorized-Recipients).
    - • If you want to use your own domain, refer [here](https://help.mailgun.com/hc/en-us/articles/203637190-How-Do-I-Add-or-Delete-a-Domain) to add it.
-4. For your **username** by referring to [this documentation](https://help.mailgun.com/hc/en-us/articles/203380100-Where-Can-I-Find-My-API-Key-and-SMTP-Credentials).
-5. After that, put them in `monika.json` configuration as follows:
+4. After that, put them in `monika.json` configuration as follows:
 
 ```json
 {
@@ -128,8 +126,7 @@ Mailgun is an email notification delivery provided by Mailgun email service. To 
   "data": {
     "recipients": ["RECIPIENT_EMAIL_ADDRESS"],
     "apiKey": "YOUR_API_KEY",
-    "domain": "YOUR_DOMAIN",
-    "username": "YOUR_USERNAME"
+    "domain": "YOUR_DOMAIN"
   }
 }
 ```
@@ -141,7 +138,6 @@ Mailgun is an email notification delivery provided by Mailgun email service. To 
 | Recipients | An array of email addresses that will receive the e-mail from Monika     | `["monika@testmail.com", "symon@testmail.com"]` |
 | Api Key    | Mailgun account api key, mailgun registered key to identify your account | `MAILGUN_API_KEY`                               |
 | Domain     | The domain to set in Mailgun                                             | `sandboxmail.mailgun.com`                       |
-| Username   | The username to set in Mailgun                                           | `mailgunuser`                                   |
 
 ## Sendgrid
 
