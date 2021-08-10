@@ -48,6 +48,7 @@ import { notificationChecker } from './components/notification/checker'
 import { terminationNotif } from './components/notification/termination'
 import { resetProbeStatuses } from './components/notification/process-server-status'
 import {
+  CONFIG_SANITIZED,
   PROBE_RESPONSE_RECEIVED,
   PROBE_RESPONSE_VALIDATED,
   PROBE_ALERTS_READY,
@@ -223,7 +224,7 @@ class Monika extends Command {
       } = new PrometheusCollector()
 
       // register prometheus metric collectors
-      em.on('SANITIZED_CONFIG', registerCollectorFromProbes)
+      em.on(CONFIG_SANITIZED, registerCollectorFromProbes)
       // collect prometheus metrics
       em.on(PROBE_RESPONSE_RECEIVED, collectProbeRequestMetrics)
 
@@ -280,7 +281,7 @@ class Monika extends Command {
 
         // emit the sanitized probe
         if (sanitizedProbe) {
-          em.emit('SANITIZED_CONFIG', sanitizedProbe)
+          em.emit(CONFIG_SANITIZED, sanitizedProbe)
         }
 
         // run TLS checker
@@ -460,7 +461,7 @@ em.addListener('TERMINATE_EVENT', async (data) => {
 })
 
 // Subscribe to Sanitize Config
-em.addListener('SANITIZED_CONFIG', function () {
+em.addListener(CONFIG_SANITIZED, function () {
   // TODO: Add function here
 })
 
