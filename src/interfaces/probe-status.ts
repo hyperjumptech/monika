@@ -25,10 +25,10 @@
 export interface ProbeStatus {
   id: string
   name: string
-  details: StatusDetails[]
+  details: ProbeStateDetails[]
 }
 
-export interface StatusDetails {
+export interface ProbeStateDetails {
   alert: string
   state:
     | 'INIT'

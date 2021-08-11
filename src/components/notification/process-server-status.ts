@@ -26,7 +26,7 @@ import { setAlert } from '../../components/logger'
 import { PROBE_LOGS_BUILT } from '../../constants/event-emitter'
 import { LogObject } from '../../interfaces/logs'
 import { Probe } from '../../interfaces/probe'
-import { ProbeStatus, StatusDetails } from '../../interfaces/probe-status'
+import { ProbeStatus, ProbeStateDetails } from '../../interfaces/probe-status'
 import { AxiosResponseWithExtraData } from '../../interfaces/request'
 import { ValidateResponse } from '../../plugins/validate-response'
 import { log } from '../../utils/pino'
@@ -35,7 +35,7 @@ import { getEventEmitter } from '../../utils/events'
 const em = getEventEmitter()
 
 let PROBE_STATUSES: ProbeStatus[] = []
-const INIT_PROBE_STATUS_DETAILS: StatusDetails = {
+const INIT_PROBE_STATUS_DETAILS: ProbeStateDetails = {
   alert: '',
   state: 'INIT',
   isDown: false,
@@ -67,7 +67,7 @@ const determineProbeState = ({
   recoveryThreshold,
 }: {
   errorName: string
-  probeStatus: StatusDetails
+  probeStatus: ProbeStateDetails
   validation: ValidateResponse
   incidentThreshold: number
   recoveryThreshold: number
@@ -97,7 +97,7 @@ const determineProbeState = ({
 
 // Function to update probe status according to the state
 const updateProbeStatus = (
-  statusDetails: StatusDetails,
+  statusDetails: ProbeStateDetails,
   state: PROBE_STATE
 ) => {
   switch (state) {
@@ -188,7 +188,7 @@ export const processThresholds = ({
   try {
     // Get Probe ID and Name
     const { id, name, alerts } = probe
-    const results: Array<StatusDetails> = []
+    const results: Array<ProbeStateDetails> = []
 
     // Initialize server status
     // This checks if there are no item in PROBE_STATUSES
@@ -220,7 +220,7 @@ export const processThresholds = ({
     if (validatedResp.length > 0) {
       validatedResp.forEach(async (validation) => {
         const { alert } = validation
-        let updatedStatus: StatusDetails = INIT_PROBE_STATUS_DETAILS
+        let updatedStatus: ProbeStateDetails = INIT_PROBE_STATUS_DETAILS
 
         const probeStatusDetail = currentProbe.details.find(
           (detail) => detail.alert === alert

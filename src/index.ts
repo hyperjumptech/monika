@@ -65,7 +65,7 @@ import {
 } from './plugins/metrics/prometheus'
 import { getEventEmitter } from './utils/events'
 import { log } from './utils/pino'
-import { StatusDetails } from './interfaces/probe-status'
+import { ProbeStateDetails } from './interfaces/probe-status'
 import { Notification } from './interfaces/notification'
 import { saveNotificationLog } from './components/logger/history'
 import { sendAlerts } from './components/notification'
@@ -445,7 +445,7 @@ Please refer to the Monika documentations on how to how to configure notificatio
           ).catch((err) => log.error(err.message))
           sendAlerts({
             url: domain,
-            status: 'invalid',
+            probeState: 'invalid',
             probeId: probe.id,
             probeName: probe.name,
             incidentThreshold: probe.incidentThreshold,
@@ -474,8 +474,6 @@ em.addListener(CONFIG_SANITIZED, function () {
 
 em.addListener(PROBE_LOGS_BUILT, async (mLog: LogObject) => {
   printProbeLog(mLog)
-
-  // em.emit(LOGS_READY_TO_SAVE, data, mLog)
 })
 
 // EVENT EMITTER - PROBE_RESPONSE_RECEIVED
@@ -493,45 +491,48 @@ em.on(PROBE_RESPONSE_RECEIVED, function (data: ProbeResponseReceived) {
   em.emit(PROBE_RESPONSE_VALIDATED, res)
 })
 
+// TODO: move this to interface file?
 interface ProbeStatusProcessed {
   probe: Probe
-  statuses?: StatusDetails[]
+  statuses?: ProbeStateDetails[]
   notifications?: Notification[]
   validatedResponseStatuses: ValidateResponse[]
   totalRequests: number
 }
 
+// TODO: move this to interface file?
 interface ProbeSendNotification extends Omit<ProbeStatusProcessed, 'statuses'> {
   index: number
-  status?: StatusDetails
+  probeState?: ProbeStateDetails
 }
 
+// TODO: move this to interface file?
 interface ProbeSaveLogToDatabase
   extends Omit<
     ProbeStatusProcessed,
     'statuses' | 'totalRequests' | 'validatedResponseStatuses'
   > {
   index: number
-  status?: StatusDetails
+  probeState?: ProbeStateDetails
 }
 
 const probeSendNotification = async (data: ProbeSendNotification) => {
   const {
     index,
     probe,
-    status,
+    probeState,
     notifications,
     totalRequests,
     validatedResponseStatuses,
   } = data
 
-  const statusString = status?.isDown ? 'DOWN' : 'UP'
+  const statusString = probeState?.isDown ? 'DOWN' : 'UP'
   const url = probe.requests[totalRequests - 1].url ?? ''
 
   if ((notifications?.length ?? 0) > 0) {
     await sendAlerts({
       url: url,
-      status: statusString,
+      probeState: statusString,
       probeId: probe.id,
       probeName: probe.name,
       incidentThreshold: probe.incidentThreshold,
@@ -539,7 +540,7 @@ const probeSendNotification = async (data: ProbeSendNotification) => {
       validation:
         validatedResponseStatuses.find(
           (validateResponse: ValidateResponse) =>
-            validateResponse.alert === status?.alert
+            validateResponse.alert === probeState?.alert
         ) || validatedResponseStatuses[index],
     })
   }
@@ -549,10 +550,10 @@ const createNotificationLog = (
   data: ProbeSaveLogToDatabase,
   mLog: LogObject
 ): LogObject => {
-  const { index, probe, status, notifications } = data
+  const { index, probe, probeState, notifications } = data
 
   const type =
-    status?.state === 'UP_TRUE_EQUALS_THRESHOLD'
+    probeState?.state === 'UP_TRUE_EQUALS_THRESHOLD'
       ? 'NOTIFY-INCIDENT'
       : 'NOTIFY-RECOVER'
 

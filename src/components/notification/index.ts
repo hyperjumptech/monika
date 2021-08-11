@@ -54,7 +54,7 @@ export async function sendAlerts({
   validation,
   notifications,
   url,
-  status,
+  probeState,
   incidentThreshold,
   probeName,
   probeId,
@@ -62,7 +62,7 @@ export async function sendAlerts({
   validation: ValidateResponse
   notifications: Notification[]
   url: string
-  status: string
+  probeState: string
   incidentThreshold: number
   probeName?: string
   probeId?: string
@@ -78,7 +78,7 @@ export async function sendAlerts({
     alert: validation.alert,
     url,
     ipAddress,
-    status,
+    probeState,
     incidentThreshold,
     responseValue: validation.responseValue,
   })

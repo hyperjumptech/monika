@@ -30,14 +30,14 @@ export function getMessageForAlert({
   alert,
   url,
   ipAddress,
-  status,
+  probeState, // state of the probed target
   incidentThreshold,
   responseValue,
 }: {
   alert: string
   url: string
   ipAddress: string
-  status: string
+  probeState: string
   incidentThreshold: number
   responseValue: number
 }): {
@@ -45,25 +45,28 @@ export function getMessageForAlert({
   body: string
   expected: string
 } {
-  const getSubject = (url: string, status: string) => {
+  const getSubject = (url: string, probeState: string) => {
     const statusAlert = `Target ${url} is not OK`
-    if (alert === 'status-not-2xx' && status === 'UP')
+    if (alert === 'status-not-2xx' && probeState === 'UP')
       return `[RECOVERY] ${statusAlert}`
-    if (alert === 'status-not-2xx' && status === 'DOWN')
+    if (alert === 'status-not-2xx' && probeState === 'DOWN')
       return `[INCIDENT] ${statusAlert}`
 
     const responseAlert = `Target ${url} took too long to respond`
-    if (alert.includes('response-time-greater-than-') && status === 'UP')
+    if (alert.includes('response-time-greater-than-') && probeState === 'UP')
       return `[RECOVERY] ${responseAlert}`
 
     return `[INCIDENT] ${responseAlert}`
   }
 
-  const getBody = (status: string) => {
-    if (alert === 'status-not-2xx' && status === 'DOWN')
+  const getBody = (probeState: string) => {
+    if (alert === 'status-not-2xx' && probeState === 'DOWN')
       return `Target ${url} is not healthy. It has not been returning status code 2xx ${incidentThreshold} times in a row.`
 
-    if (alert.includes('response-time-greater-than-') && status === 'DOWN') {
+    if (
+      alert.includes('response-time-greater-than-') &&
+      probeState === 'DOWN'
+    ) {
       const alertTime = parseAlertStringTime(alert)
       return `Target ${url} is not healthy. The response time has been greater than ${alertTime} ${incidentThreshold} times in a row`
     }
@@ -71,13 +74,13 @@ export function getMessageForAlert({
     return `Target ${url} is back to healthy.`
   }
 
-  const getExpectedMessage = (status: string, responseValue: number) => {
+  const getExpectedMessage = (probeState: string, responseValue: number) => {
     if (alert === 'status-not-2xx') {
-      if (status === 'DOWN') {
+      if (probeState === 'DOWN') {
         return `Status is ${responseValue}, was expecting 200.`
       }
 
-      if (status === 'UP') {
+      if (probeState === 'UP') {
         return `Service is ok. Status now 200`
       }
     }
@@ -85,11 +88,11 @@ export function getMessageForAlert({
     if (alert.includes('response-time-greater-than-')) {
       const alertTime = parseAlertStringTime(alert)
 
-      if (status === 'DOWN') {
+      if (probeState === 'DOWN') {
         return `Response time is ${responseValue}ms expecting a ${alertTime}ms`
       }
 
-      if (status === 'UP') {
+      if (probeState === 'UP') {
         return `Service is ok. Response now is within ${alertTime}ms`
       }
     }
@@ -99,17 +102,17 @@ export function getMessageForAlert({
 
   const today = new Date().toUTCString()
   const message = {
-    subject: getSubject(url, status),
+    subject: getSubject(url, probeState),
     body: `
-      ${getBody(status)}\n\n
-      Alert: ${getExpectedMessage(status, responseValue)}\n
+      ${getBody(probeState)}\n\n
+      Alert: ${getExpectedMessage(probeState, responseValue)}\n
       URL: ${url}\n
       At: ${today}\n
       Monika: ${ipAddress} (local), ${
       publicIpAddress ? `${publicIpAddress} (public)` : ''
     } ${hostname} (hostname)
     `,
-    expected: getExpectedMessage(status, responseValue),
+    expected: getExpectedMessage(probeState, responseValue),
   }
 
   return message
