@@ -38,20 +38,22 @@ const EventEmitter = getEventEmitter()
 
 /**
  * getStatusColor colorizes different statusCode
- * @param {number} statusCode is the httpStatus to colorize
+ * @param {any} responseCode is the httpStatus to colorize
  * @returns {string} color code based on chalk: Chalk & { supportsColor: ColorSupport };
  */
-export function getStatusColor(statusCode: number) {
-  switch (Math.trunc(statusCode / 100)) {
+export function getStatusColor(responseCode: any) {
+  switch (Math.trunc(responseCode / 100)) {
     case 2:
       return 'cyan'
     case 4:
       return 'orange'
     case 5:
       return 'red'
-    default:
-      return 'white'
   }
+  // add colors for timeout and url not found
+  if (responseCode === 'TIMEOUT' || responseCode === 'NOTFOUND') return 'red'
+
+  return 'white'
 }
 
 /**

@@ -69,14 +69,45 @@ export async function probing(
     let errResponseCode
     let errData
     let errHdr
+    let errText
 
     if (error.response) {
+      // 400, 500 get here
       // Axios doesn't always return error response
       errResponseCode = error.response.status
       errData = error.response.data
       errHdr = error.response.headers
+
+      // eslint-disable-next-line no-console
+      // console.log('test 80: error.response: ', error.response)
+    } else if (error.request) {
+      // timeout is here, ECONNABORTED, ENOTFOUND
+
+      switch (error.code) {
+        case 'ECONNABORTED':
+          errText = 'Timed out'
+          errResponseCode = 'TIMEOUT'
+          break
+
+        case 'ENOTFOUND':
+          errResponseCode = 'NOTFOUND'
+          errText = 'Url Not Found'
+          break
+
+        default:
+          errResponseCode = 'unknown'
+          errText = 'unknown error'
+      }
+      errData = ''
+      errHdr = ''
+      // eslint-disable-next-line no-console
+      console.log('test 85: error.code: ', error.code)
     } else {
-      errResponseCode = 500 // TODO: how to detect timeouts?
+      // eslint-disable-next-line no-console
+      console.log('test 91: unknown error: ', error)
+
+      errResponseCode = error.code
+      errText = 'unknown error'
       errData = ''
       errHdr = ''
     }
@@ -84,7 +115,7 @@ export async function probing(
     return {
       data: errData,
       status: errResponseCode,
-      statusText: 'ERROR',
+      statusText: errText,
       headers: errHdr,
       config: error.config, // get the response from error.config instead of error.response.xxx as -
       extraData: error.config.extraData, // the response data lives in the data.config space
