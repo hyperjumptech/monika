@@ -29,6 +29,7 @@ export interface MailData {
 export interface MailgunData extends MailData {
   apiKey: string
   domain: string
+  username?: string
 }
 
 export interface SendgridData extends MailData {
@@ -49,6 +50,7 @@ export interface TeamsData {
 
 export interface TeamsDataBody extends WebhookDataBody {
   status: string
+  expected?: string
 }
 
 export interface WebhookData {
@@ -122,4 +124,5 @@ export interface DesktopDataBody {
   time: string
   alert: string
   status: string
+  expected?: string
 }

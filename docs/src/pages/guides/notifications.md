@@ -343,11 +343,11 @@ You can get a notification from Monika to your Whatsapp number without having a 
 
 ## Desktop Notifications
 
-Monika uses [node-notifier](https://github.com/mikaelbr/node-notifier#readme) to support desktop notifications. Here are the prerequisites for enabling the desktop notifications:
+Monika supports desktop notifications. Here are the prerequisites for enabling the desktop notifications:
 
-- macOS: >= 10.8 for native notifications, or Growl if earlier.
-- Linux: `notify-osd` or `libnotify-bin` installed (Ubuntu should have this by default)
-- Windows: >= 8, or task bar balloons for Windows < 8. Growl as fallback. Growl takes precedence over Windows balloons.
+- macOS: Uses OSAScript (Apple Open Scripting Architecture). AppleScript 2.0 or later and macOS version 10.5 or later required.
+- Linux: Uses `notify-send` command. `notify-osd` or `libnotify-bin` required (Ubuntu should have this by default).
+- Windows: Uses Powershell. Refer to [Microsoft Official Documentation](https://docs.microsoft.com/en-us/powershell/scripting/windows-powershell/install/windows-powershell-system-requirements?view=powershell-7.1) for System Requirements.
 
 ```json
 {

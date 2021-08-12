@@ -52,6 +52,7 @@ describe('send alerts', () => {
       validation: {
         alert: 'status-not-2xx',
         status: false,
+        responseValue: 200,
       },
       notifications: [
         {
@@ -77,6 +78,7 @@ describe('send alerts', () => {
       validation: {
         alert: 'status-not-2xx',
         status: true,
+        responseValue: 500,
       },
       notifications: [
         {
@@ -102,6 +104,35 @@ describe('send alerts', () => {
       validation: {
         alert: 'status-not-2xx',
         status: true,
+        responseValue: 500,
+      },
+      notifications: [
+        {
+          id: 'one',
+          type: 'mailgun',
+          data: {
+            recipients: ['xx@xx'],
+            apiKey: 'xx',
+            domain: 'xxx',
+            username: 'xxxx',
+          },
+        },
+      ],
+      url: 'https://hyperjump.tech',
+      status: 'DOWN',
+      incidentThreshold: 3,
+    })
+    expect(mailgun.sendMailgun).to.have.been.called()
+    expect(sent).to.have.length(1)
+  })
+
+  it('should send mailgun notification without username', async () => {
+    chai.spy.on(mailgun, 'sendMailgun', () => Promise.resolve())
+    const sent = await sendAlerts({
+      validation: {
+        alert: 'status-not-2xx',
+        status: true,
+        responseValue: 500,
       },
       notifications: [
         {
@@ -130,6 +161,7 @@ describe('send alerts', () => {
       validation: {
         alert: 'status-not-2xx',
         status: true,
+        responseValue: 500,
       },
       notifications: [
         {
@@ -163,6 +195,7 @@ describe('send alerts', () => {
       validation: {
         alert: 'status-not-2xx',
         status: true,
+        responseValue: 500,
       },
       notifications: [
         {
@@ -192,6 +225,7 @@ describe('send alerts', () => {
       validation: {
         alert: 'status-not-2xx',
         status: true,
+        responseValue: 500,
       },
       notifications: [
         {
@@ -239,6 +273,7 @@ describe('send alerts', () => {
       validation: {
         alert: 'status-not-2xx',
         status: true,
+        responseValue: 500,
       },
       notifications: [
         {
@@ -269,6 +304,7 @@ describe('send alerts', () => {
       validation: {
         alert: 'status-not-2xx',
         status: true,
+        responseValue: 500,
       },
       notifications: [
         {
@@ -295,6 +331,7 @@ describe('send alerts', () => {
       validation: {
         alert: 'status-not-2xx',
         status: true,
+        responseValue: 500,
       },
       notifications: [
         {

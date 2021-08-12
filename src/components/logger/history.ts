@@ -317,7 +317,7 @@ export async function saveProbeRequestLog({
 export async function saveNotificationLog(
   probe: Probe,
   notification: Notification,
-  type: 'NOTIFY-INCIDENT' | 'NOTIFY-RECOVER',
+  type: 'NOTIFY-INCIDENT' | 'NOTIFY-RECOVER' | 'NOTIFY-TLS',
   alert: string
 ) {
   const insertNotificationSQL = `

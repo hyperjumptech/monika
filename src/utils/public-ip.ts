@@ -22,16 +22,20 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Certificate } from './certificate'
-import { Notification } from './notification'
-import { Probe } from './probe'
-import { SymonConfig } from '../components/reporter'
+import { log } from './pino'
+import stun from 'stun'
 
-export interface Config {
-  certificate?: Certificate
-  interval?: number
-  notifications?: Notification[]
-  probes: Probe[]
-  symon?: SymonConfig
-  version?: string
+export let publicIpAddress = ''
+
+export async function getPublicIp() {
+  try {
+    const response = await stun.request('stun.l.google.com:19302')
+    const address = response?.getXorAddress()?.address
+    if (address) {
+      publicIpAddress = address
+      log.info(`Monika is running on Public IP ${address}`)
+    }
+  } catch (error) {
+    log.info(`Can't obtain Public IP`)
+  }
 }

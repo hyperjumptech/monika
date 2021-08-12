@@ -27,6 +27,7 @@ describe('notificationChecker - mailgunNotification', () => {
           ...notificationConfig,
           data: {
             domain: 'mailgun.com',
+            username: 'mailgunuser',
           } as MailgunData,
         },
       ])
@@ -47,6 +48,7 @@ describe('notificationChecker - mailgunNotification', () => {
           ...notificationConfig,
           data: {
             apiKey: 'ABC-EFG-HIJ-KLM-NOP-QRS-TUV-WXY-Z',
+            username: 'mailgunuser',
           } as MailgunData,
         },
       ])

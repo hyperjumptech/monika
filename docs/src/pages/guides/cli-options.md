@@ -33,20 +33,31 @@ Just starting out? Want to make a new configuration? The `--create-config` flag 
 monika --create-config
 ```
 
-As an alternative, configuration generator is able to read HAR or postman files as input to convert into monika.json configuration files.
+As an alternative, the generator is able to read HAR or postman files as input to convert into monika.json configuration files.
 
-Use the `--har` or the `--postman` in combination with `--create-config` on the command line to convert those files into a monika config.
+Use the `--har` or the `--postman` in combination with `--create-config` on the command line to convert those files.
 
 ```bash
 monika --create-config --har myfile.har
 ```
 
-The above examples creates a monika.json config file from an existing HAR file.
-Use the `-o` output flag to specify the output file.
+The above example creates a config file from an existing HAR archive. Auto generated files defaults to 'monika.json'. Use the `-o` output flag to specify another name.
 
 ```bash
 monika --create-config --postman mypostman.json -o new-monika.json
 ```
+
+When generating config files, if an existing monika.json file already exist, the user is prompted before overwriting. To bypass the user prompt, use the `--force` flag.
+
+## Force
+
+The `--force` flag forces the execution of a command. The force flag will bypass any user prompts with an affirmative. If a Yes/No prompt is normally presented, `--force` will bypass the prompt and assume a Yes.
+
+```bash
+monika --flush --force
+```
+
+The example above flushes the database bypassing without waiting for user confirmation.
 
 ## HAR
 
@@ -80,13 +91,13 @@ All command and responses are stored in an internal log file. You can dump (disp
 monika --logs
 ```
 
-You can flush the log history with the flush option. there is no `-f` short flag for this command.
+You can flush the log history with the `--flush` option. there is no `-f` short flag for this command.
 
 ```bash
 monika --flush
 ```
 
-You must respond with a capital `"Y"` to confirm if you want to flush the logs.
+You must respond with a capital `"Y"` to confirm if you want to flush the logs or use the `--force` flag to force a Yes without prompting.
 
 ## Postman
 
