@@ -27,7 +27,8 @@
     "prod_test": "cross-env NODE_ENV=test nyc --extension .ts mocha --forbid-only \"prod_test/**/*.test.ts\"",
     "version": "oclif-dev readme && git add README.md",
     "format": "prettier --write .",
-    "check-format": "prettier --check ."
+    "check-format": "prettier --check .",
+    "pkg": "pkg --out-path dist/ . --compress brotli"
   },
   "dependencies": {
     "@oclif/command": "^1.8.0",
@@ -53,6 +54,7 @@
     "pako": "^2.0.3",
     "pino": "6.11.2",
     "pino-pretty": "4.7.1",
+    "pkg": "^5.3.1",
     "prom-client": "13.1.0",
     "sinon": "^11.1.2",
     "smtp-server": "^3.8.0",
@@ -125,9 +127,11 @@
     "*.{ts,js,css,md}": "prettier --write"
   },
   "pkg": {
+    "scripts": [
+      "./lib/**/*.js"
+    ],
     "assets": [
-      "./lib/**/*",
-      "./src/**/*"
+      "./db/migrations/*.sql"
     ],
     "targets": [
       "node12-linux-x64",
