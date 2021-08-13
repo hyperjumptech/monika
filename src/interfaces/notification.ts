@@ -23,17 +23,16 @@
  **********************************************************************************/
 
 import {
+  DesktopData,
   MailgunData,
+  MonikaNotifData,
   SendgridData,
   SMTPData,
+  TeamsData,
   TelegramData,
   WebhookData,
   WhatsappData,
-  TeamsData,
-  DiscordData,
-  MonikaNotifData,
   WorkplaceData,
-  DesktopData,
 } from './data'
 
 export interface Notification {
@@ -59,7 +58,6 @@ export interface Notification {
     | WhatsappData
     | TeamsData
     | TelegramData
-    | DiscordData
     | MonikaNotifData
     | WorkplaceData
     | DesktopData

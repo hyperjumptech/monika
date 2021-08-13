@@ -5,7 +5,7 @@ import {
   errorMessage,
   notificationChecker,
 } from '../../../src/components/notification/checker'
-import { DiscordData } from '../../../src/interfaces/data'
+import { WebhookData } from '../../../src/interfaces/data'
 import { Notification } from '../../../src/interfaces/notification'
 
 chai.use(spies)
@@ -25,7 +25,7 @@ describe('notificationChecker - discordNotification', () => {
       await notificationChecker([
         {
           ...notificationConfig,
-          data: {} as DiscordData,
+          data: {} as WebhookData,
         },
       ])
     } catch (error) {
@@ -45,7 +45,7 @@ describe('notificationChecker - discordNotification', () => {
           ...notificationConfig,
           data: {
             url: 'example',
-          } as DiscordData,
+          } as WebhookData,
         },
       ])
     } catch (error) {

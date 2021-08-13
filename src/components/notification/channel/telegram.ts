@@ -28,8 +28,10 @@ import { TelegramData } from '../../../interfaces/data'
 
 export const sendTelegram = async (data: TelegramData) => {
   try {
+    const text = `${data.body.alert}\n\nURL: ${data.body.url}\nTIME: ${data.body.time}\n`
+
     const res = await axios({
-      url: `https://api.telegram.org/bot${data.bot_token}/sendMessage?chat_id=${data.group_id}&text=${data.body}`,
+      url: `https://api.telegram.org/bot${data.bot_token}/sendMessage?chat_id=${data.group_id}&text=${text}`,
     })
 
     return res
