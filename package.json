@@ -21,14 +21,14 @@
     "preinstall": "node scripts/preinstall.js",
     "pretest": "npm run check-format",
     "posttest": "eslint . --ext .ts --config .eslintrc",
-    "prepack": "rm -rf lib && tsc -b && oclif-dev readme",
-    "start": "./bin/run",
+    "prepack": "rm -rf lib tsconfig.tsbuildinfo && tsc -b && oclif-dev readme",
+    "start": "npm run prepack && ./bin/run",
     "test": "cross-env NODE_ENV=test nyc --extension .ts mocha --forbid-only \"{src,test}/**/*.test.ts\"",
     "prod_test": "cross-env NODE_ENV=test nyc --extension .ts mocha --forbid-only \"prod_test/**/*.test.ts\"",
     "version": "oclif-dev readme && git add README.md",
     "format": "prettier --write .",
     "check-format": "prettier --check .",
-    "pkg": "pkg --out-path dist/ . --compress brotli"
+    "pkg": "npm run prepack && pkg --out-path dist/ . --compress brotli"
   },
   "dependencies": {
     "@oclif/command": "^1.8.0",
