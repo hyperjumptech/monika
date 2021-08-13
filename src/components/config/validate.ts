@@ -32,7 +32,6 @@ import {
   MailData,
   WhatsappData,
   TeamsData,
-  DiscordData,
   MonikaNotifData,
   WorkplaceData,
 } from '../../interfaces/data'
@@ -178,7 +177,7 @@ function validateNotification(notifications: Notification[]): Validation {
       }
 
       case 'discord': {
-        if (!(data as DiscordData).url) return DISCORD_NO_URL
+        if (!(data as WebhookData).url) return DISCORD_NO_URL
 
         break
       }
