@@ -182,11 +182,7 @@ export const telegramNotificationSender = async ({
   await sendTelegram({
     group_id: data?.group_id,
     bot_token: data?.bot_token,
-    body: {
-      url: '-',
-      alert: body,
-      time: new Date().toLocaleString(),
-    },
+    body,
   })
 }
 

@@ -22,18 +22,8 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios from 'axios'
-
-import { TelegramData } from '../../../interfaces/data'
-
-export const sendTelegram = async (data: TelegramData) => {
-  try {
-    const res = await axios({
-      url: `https://api.telegram.org/bot${data.bot_token}/sendMessage?chat_id=${data.group_id}&text=${data.body}`,
-    })
-
-    return res
-  } catch (error) {
-    throw error
-  }
+export interface Certificate {
+  domains: string[]
+  // The reminder is the number of days to send notification to user before the domain expires.
+  reminder?: number
 }

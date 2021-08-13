@@ -30,6 +30,7 @@
 // item  : is the "item" that the listener will be processing/handling
 // state : is the state of that item, is it ready? is it received?
 
+export const CONFIG_SANITIZED = 'CONFIG_SANITIZED'
 export const PROBE_RESPONSE_RECEIVED = 'PROBE_RESPONSE_RECEIVED'
 export const PROBE_RESPONSE_VALIDATED = 'PROBE_RESPONSE_VALIDATED'
 export const PROBE_ALERTS_READY = 'PROBE_ALERTS_READY'

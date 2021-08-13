@@ -22,18 +22,18 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios from 'axios'
+import sslChecker from 'ssl-checker'
 
-import { TelegramData } from '../../../interfaces/data'
+export async function checkTLS(url: string, expiryThreshold = 30) {
+  const { valid, validTo, daysRemaining } = await sslChecker(url)
 
-export const sendTelegram = async (data: TelegramData) => {
-  try {
-    const res = await axios({
-      url: `https://api.telegram.org/bot${data.bot_token}/sendMessage?chat_id=${data.group_id}&text=${data.body}`,
-    })
-
-    return res
-  } catch (error) {
-    throw error
+  if (!valid) {
+    throw new Error(`${url} security certificate has expired at ${validTo}!`)
   }
+
+  if (daysRemaining <= expiryThreshold) {
+    throw new Error(`${url} security certificate will expire at ${validTo}!`)
+  }
+
+  return null
 }

@@ -29,6 +29,7 @@ export interface MailData {
 export interface MailgunData extends MailData {
   apiKey: string
   domain: string
+  username?: string
 }
 
 export interface SendgridData extends MailData {
@@ -75,7 +76,7 @@ export interface MonikaNotifDataBody {
 export interface TelegramData {
   group_id: string
   bot_token: string
-  body: WebhookDataBody
+  body: string
 }
 
 export interface WebhookDataBody {
