@@ -23,23 +23,23 @@
  **********************************************************************************/
 
 import chai, { expect } from 'chai'
+
+import { sendAlerts } from '../../src/components/notification'
+import * as discord from '../../src/components/notification/channel/discord'
+import * as mailgun from '../../src/components/notification/channel/mailgun'
+import * as monikaNotif from '../../src/components/notification/channel/monika-notif'
+import * as slack from '../../src/components/notification/channel/slack'
+import * as smtp from '../../src/components/notification/channel/smtp'
+import * as telegram from '../../src/components/notification/channel/telegram'
+import * as webhook from '../../src/components/notification/channel/webhook'
+import * as whatsapp from '../../src/components/notification/channel/whatsapp'
 import {
   MailgunData,
+  MonikaNotifData,
   TelegramData,
   WebhookData,
   WhatsappData,
-  DiscordData,
-  MonikaNotifData,
 } from '../../src/interfaces/data'
-import * as mailgun from '../../src/components/notification/channel/mailgun'
-import * as webhook from '../../src/components/notification/channel/webhook'
-import * as slack from '../../src/components/notification/channel/slack'
-import * as smtp from '../../src/components/notification/channel/smtp'
-import * as whatsapp from '../../src/components/notification/channel/whatsapp'
-import * as telegram from '../../src/components/notification/channel/telegram'
-import * as discord from '../../src/components/notification/channel/discord'
-import * as monikaNotif from '../../src/components/notification/channel/monika-notif'
-import { sendAlerts } from '../../src/components/notification'
 
 describe('send alerts', () => {
   afterEach(() => {
@@ -282,7 +282,9 @@ describe('send alerts', () => {
           data: {
             group_id: '123',
             bot_token: '123',
-            body: `url: 'https://hyperjump.tech'`,
+            body: {
+              url: 'https://hyperjump.tech',
+            },
           } as TelegramData,
         },
       ],
@@ -310,7 +312,7 @@ describe('send alerts', () => {
           type: 'discord',
           data: {
             url: 'xx',
-          } as DiscordData,
+          } as WebhookData,
         },
       ],
       url: 'https://hyperjump.tech',

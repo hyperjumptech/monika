@@ -55,7 +55,7 @@ export interface TeamsDataBody extends WebhookDataBody {
 
 export interface WebhookData {
   url: string
-  body: WebhookDataBody
+  body: string
 }
 
 export interface MonikaNotifData {
@@ -76,7 +76,7 @@ export interface MonikaNotifDataBody {
 export interface TelegramData {
   group_id: string
   bot_token: string
-  body: string
+  body: WebhookDataBody
 }
 
 export interface WebhookDataBody {
@@ -89,17 +89,6 @@ export interface WhatsappData extends MailData {
   url: string
   username: string
   password: string
-}
-
-export interface DiscordData {
-  url: string
-  body: DiscordDataBody
-}
-
-export interface DiscordDataBody {
-  url: string
-  time: string
-  alert: string
 }
 
 export interface WorkplaceData {

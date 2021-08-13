@@ -23,7 +23,6 @@
  **********************************************************************************/
 
 import {
-  DiscordData,
   MailgunData,
   MonikaNotifData,
   SendgridData,
@@ -111,7 +110,7 @@ const sendgridNotificationInitialChecker = async (data: SendgridData) => {
 const webhookNotificationInitialChecker = async (data: WebhookData) => {
   try {
     await dataWebhookSchemaValidator.validateAsync(data)
-    await webhookNotificationSender({ data, body })
+    await webhookNotificationSender({ url: data.url, body })
 
     return 'success'
   } catch (error) {
@@ -122,7 +121,7 @@ const webhookNotificationInitialChecker = async (data: WebhookData) => {
 const discordNotificationInitialChecker = async (data: WebhookData) => {
   try {
     await dataDiscordSchemaValidator.validateAsync(data)
-    await discordNotificationSender({ data, body })
+    await discordNotificationSender({ url: data.url, body })
 
     return 'success'
   } catch (error) {
@@ -133,7 +132,7 @@ const discordNotificationInitialChecker = async (data: WebhookData) => {
 const slackNotificationInitialChecker = async (data: WebhookData) => {
   try {
     await dataSlackSchemaValidator.validateAsync(data)
-    await slackNotificationSender({ data, body })
+    await slackNotificationSender({ url: data.url, body: body })
 
     return 'success'
   } catch (error) {
@@ -218,7 +217,7 @@ export const notificationChecker = async (notifications: Notification[]) => {
 
   const discordNotification = notifications
     .filter((notif) => notif.type === 'discord')
-    .map((notif) => notif.data as DiscordData)
+    .map((notif) => notif.data as WebhookData)
     .map(discordNotificationInitialChecker)
 
   const slackNotification = notifications
