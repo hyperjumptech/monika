@@ -57,7 +57,7 @@ import { Config } from './interfaces/config'
 import { MailData, MailgunData, SMTPData, WebhookData } from './interfaces/data'
 import { Probe } from './interfaces/probe'
 import { AxiosResponseWithExtraData } from './interfaces/request'
-import { idFeeder, isIDValid, loopReport, sanitizeProbe } from './looper'
+import { isIDValid, loopReport, sanitizeProbe } from './looper'
 import {
   PrometheusCollector,
   startPrometheusMetricsServer,
@@ -71,6 +71,7 @@ import { LogObject } from './interfaces/logs'
 import { getLogsAndReport } from './components/reporter'
 import { getPublicIp } from './utils/public-ip'
 import validateResponse, { ValidateResponse } from './plugins/validate-response'
+import './loaders'
 
 const em = getEventEmitter()
 
@@ -281,11 +282,11 @@ class Monika extends Command {
           em.emit(CONFIG_SANITIZED, sanitizedProbe)
         }
 
-        abortCurrentLooper = idFeeder(
-          sanitizedProbe,
-          config.notifications ?? [],
-          Number(flags.repeat)
-        )
+        // abortCurrentLooper = idFeeder(
+        //   sanitizedProbe,
+        //   config.notifications ?? [],
+        //   Number(flags.repeat)
+        // )
       }
     } catch (error) {
       await closeLog()
