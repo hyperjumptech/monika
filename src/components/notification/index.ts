@@ -33,6 +33,7 @@ import {
   WorkplaceData,
   MonikaNotifData,
   DesktopData,
+  SendgridData,
 } from '../../interfaces/data'
 import { Notification } from '../../interfaces/notification'
 import getIp from '../../utils/ip'
@@ -110,14 +111,14 @@ export async function sendAlerts({
         case 'sendgrid': {
           return sendSendgrid(
             {
-              recipients: (notification?.data as MailgunData)?.recipients?.join(
+              recipients: (notification?.data as SendgridData)?.recipients?.join(
                 ','
               ),
               subject: message.subject,
               body: message.body,
               sender: {
                 name: 'Monika',
-                email: 'monika@hyperjump.tech',
+                email: (notification?.data as SendgridData)?.sender,
               },
             },
             notification

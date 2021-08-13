@@ -40,7 +40,9 @@ export const sendSendgrid = async (
     to: recipients,
     from: sender.email,
     subject,
-    text: body,
+    text: body.includes('https://')
+      ? body.replace(/https/g, '<https>')
+      : body.replace(/http/g, '<http>'),
   }
 
   return sgMail.send(msg)
