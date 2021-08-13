@@ -138,11 +138,7 @@ export async function sendAlerts({
         case 'telegram': {
           return sendTelegram({
             ...notification.data,
-            body: {
-              url,
-              alert: validation.alert,
-              time: new Date().toLocaleString(),
-            },
+            body: message.body,
           } as TelegramData).then(() => ({
             notification: 'telegram',
             alert: validation.alert,
@@ -208,11 +204,7 @@ export async function sendAlerts({
         case 'workplace': {
           return sendWorkplace({
             ...notification.data,
-            body: {
-              url,
-              alert: validation.alert,
-              time: new Date().toLocaleString(),
-            },
+            body: message.body,
           } as WorkplaceData).then(() => ({
             notification: 'workplace',
             alert: validation.alert,
