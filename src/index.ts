@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 /**********************************************************************************
  * MIT License                                                                    *
  *                                                                                *
@@ -26,7 +27,7 @@ import { Command, flags } from '@oclif/command'
 import boxen from 'boxen'
 import chalk from 'chalk'
 import cli from 'cli-ux'
-import cron from 'node-cron'
+import cron, { ScheduledTask } from 'node-cron'
 import fs from 'fs'
 import {
   createConfig,
@@ -42,11 +43,13 @@ import {
 import {
   closeLog,
   flushAllLogs,
+  getSummary,
   openLogfile,
 } from './components/logger/history'
 import { notificationChecker } from './components/notification/checker'
 import { terminationNotif } from './components/notification/termination'
 import { resetProbeStatuses } from './components/notification/process-server-status'
+import { sendStatusNotification } from './components/notification/status-notification-sender'
 import {
   CONFIG_SANITIZED,
   PROBE_RESPONSE_RECEIVED,
@@ -177,6 +180,10 @@ class Monika extends Command {
       description: 'force command',
       default: false,
     }),
+
+    'status-notification': flags.string({
+      description: 'cron syntax for status notification schedule',
+    }),
   }
 
   async run() {
@@ -238,7 +245,7 @@ class Monika extends Command {
         loopReport(getConfig)
       }
 
-      // run probes on interval
+      let scheduledTasks: ScheduledTask[] = []
       let abortCurrentLooper: (() => void) | undefined
 
       for await (const config of getConfigIterator()) {
@@ -246,6 +253,12 @@ class Monika extends Command {
           resetProbeStatuses()
           abortCurrentLooper()
         }
+
+        // Stop, destroy, and clear all previous cron tasks
+        scheduledTasks.forEach((task) => {
+          task.destroy()
+        })
+        scheduledTasks = []
 
         if (process.env.NODE_ENV !== 'test') {
           await notificationChecker(config.notifications ?? [])
@@ -305,7 +318,7 @@ class Monika extends Command {
             )
 
             // schedule TLS checker every day at 00:00
-            cron.schedule('0 0 * * *', () => {
+            const scheduledTlsCheckTask = cron.schedule('0 0 * * *', () => {
               log.info(`Running TLS check for ${domain} every day at 00:00`)
 
               this.checkTLSAndSaveNotifIfFail(
@@ -315,7 +328,26 @@ class Monika extends Command {
                 config?.notifications
               )
             })
+
+            scheduledTasks.push(scheduledTlsCheckTask)
           })
+        }
+
+        // schedule status update notification
+        if (flags['status-notification'] !== 'false') {
+          // defaults to 6 AM
+          // default value is not defined in flag configuration,
+          // because the value can also come from config file
+          const schedule =
+            flags['status-notification'] ||
+            config['status-notification'] ||
+            '0 6 * * *'
+
+          const scheduledStatusUpdateTask = cron.schedule(schedule, () => {
+            this.getSummaryAndSendNotif(config)
+          })
+
+          scheduledTasks.push(scheduledStatusUpdateTask)
         }
 
         abortCurrentLooper = idFeeder(
@@ -457,6 +489,15 @@ Please refer to the Monika documentations on how to how to configure notificatio
         })
       }
     }
+  }
+
+  async getSummaryAndSendNotif(config: Config) {
+    const { notifications } = config
+    const summary = await getSummary()
+    return sendStatusNotification({
+      summary,
+      notifications,
+    })
   }
 }
 

@@ -364,18 +364,23 @@ export async function getSummary() {
       (acc, curr) => acc + curr.average_response_time * curr.count,
       0
     ) / totalRequests || 0
-  const numberOfIncidents =
+  const numberOfIncidents: number =
     notificationsSummaryByType.find((notif) => notif.type === 'NOTIFY-INCIDENT')
       ?.count || 0
-  const numberOfRecoveries =
+  const numberOfRecoveries: number =
     notificationsSummaryByType.find((notif) => notif.type === 'NOTIFY-RECOVER')
       ?.count || 0
+  const numberOfSentNotifications: number = notificationsSummaryByType.reduce(
+    (acc, { count }) => acc + count,
+    0
+  )
 
   return {
     numberOfProbes: probesSummary.length,
     averageResponseTime,
     numberOfIncidents,
     numberOfRecoveries,
+    numberOfSentNotifications,
   }
 }
 
