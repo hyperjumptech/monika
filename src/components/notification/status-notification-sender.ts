@@ -34,7 +34,6 @@ import {
   // WorkplaceData,
   // MonikaNotifData,
   DesktopData,
-  WebhookDataBody,
   // WebhookDataBody,
 } from '../../interfaces/data'
 import { Notification } from '../../interfaces/notification'
@@ -89,10 +88,7 @@ ${body}`,
       case 'webhook':
         return sendWebhook({
           ...notification.data,
-          body: ({
-            message: subtitle,
-            data: summary,
-          } as unknown) as WebhookDataBody,
+          body: JSON.stringify(summary),
         } as WebhookData).then(() => {
           // to make typecheck pass
           return undefined
