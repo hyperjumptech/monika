@@ -76,7 +76,7 @@ export interface MonikaNotifDataBody {
 export interface TelegramData {
   group_id: string
   bot_token: string
-  body: WebhookDataBody
+  body: string
 }
 
 export interface WebhookDataBody {

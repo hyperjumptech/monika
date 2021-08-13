@@ -151,11 +151,7 @@ export async function sendAlerts({
         case 'telegram': {
           return sendTelegram({
             ...notification.data,
-            body: {
-              url,
-              alert: validation.alert,
-              time: new Date().toLocaleString(),
-            },
+            body: message.body,
           } as TelegramData).then(() => ({
             notification: 'telegram',
             alert: validation.alert,
