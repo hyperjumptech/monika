@@ -1,21 +1,5 @@
 import {
-  smtpNotificationSender,
-  mailgunNotificationSender,
-  sendgridNotificationSender,
-  webhookNotificationSender,
-  discordNotificationSender,
-  slackNotificationSender,
-  telegramNotificationSender,
-  teamsNotificationSender,
-  monikaNotificationSender,
-  workplaceNotificationSender,
-  desktopNotificationSender,
-} from './sender'
-import { Notification } from '../../interfaces/notification'
-import getIp from '../../utils/ip'
-import {
   DesktopData,
-  DiscordData,
   MailgunData,
   MonikaNotifData,
   SendgridData,
@@ -25,6 +9,21 @@ import {
   WebhookData,
   WorkplaceData,
 } from '../../interfaces/data'
+import { Notification } from '../../interfaces/notification'
+import getIp from '../../utils/ip'
+import {
+  desktopNotificationSender,
+  discordNotificationSender,
+  mailgunNotificationSender,
+  monikaNotificationSender,
+  sendgridNotificationSender,
+  slackNotificationSender,
+  smtpNotificationSender,
+  teamsNotificationSender,
+  telegramNotificationSender,
+  webhookNotificationSender,
+  workplaceNotificationSender,
+} from './sender'
 
 const subject = 'Monika terminated'
 const body = `Monika is no longer running in ${getIp()}`
@@ -58,17 +57,17 @@ export const terminationNotif = async (notifications: Notification[]) => {
   const webhookNotification = notifications
     .filter((notif) => notif.type === 'webhook')
     .map((notif) => notif.data as WebhookData)
-    .map((data) => webhookNotificationSender({ data, body }))
+    .map((data) => webhookNotificationSender({ url: data.url, body }))
 
   const discordNotification = notifications
     .filter((notif) => notif.type === 'discord')
-    .map((notif) => notif.data as DiscordData)
-    .map((data) => discordNotificationSender({ data, body }))
+    .map((notif) => notif.data as WebhookData)
+    .map((data) => discordNotificationSender({ url: data.url, body }))
 
   const slackNotification = notifications
     .filter((notif) => notif.type === 'slack')
     .map((notif) => notif.data as WebhookData)
-    .map((data) => slackNotificationSender({ data, body }))
+    .map((data) => slackNotificationSender({ url: data.url, body }))
 
   const teamsNotification = notifications
     .filter((notif) => notif.type === 'teams')

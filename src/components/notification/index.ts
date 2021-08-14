@@ -23,32 +23,31 @@
  **********************************************************************************/
 
 import {
+  DesktopData,
   MailgunData,
+  MonikaNotifData,
   SMTPData,
   TeamsData,
   TelegramData,
   WebhookData,
   WhatsappData,
-  DiscordData,
   WorkplaceData,
-  MonikaNotifData,
-  DesktopData,
 } from '../../interfaces/data'
 import { Notification } from '../../interfaces/notification'
+import { ValidateResponse } from '../../plugins/validate-response'
 import getIp from '../../utils/ip'
 import { getMessageForAlert } from './alert-message'
+import { sendDesktop } from './channel/desktop'
+import { sendDiscord } from './channel/discord'
 import { sendMailgun } from './channel/mailgun'
+import { sendMonikaNotif } from './channel/monika-notif'
 import { sendSlack } from './channel/slack'
 import { createSmtpTransport, sendSmtpMail } from './channel/smtp'
 import { sendTeams } from './channel/teams'
 import { sendTelegram } from './channel/telegram'
 import { sendWebhook } from './channel/webhook'
 import { sendWhatsapp } from './channel/whatsapp'
-import { sendDiscord } from './channel/discord'
-import { sendMonikaNotif } from './channel/monika-notif'
 import { sendWorkplace } from './channel/workplace'
-import { sendDesktop } from './channel/desktop'
-import { ValidateResponse } from '../../plugins/validate-response'
 
 export async function sendAlerts({
   validation,
@@ -109,11 +108,7 @@ export async function sendAlerts({
         case 'webhook': {
           return sendWebhook({
             ...notification.data,
-            body: {
-              url,
-              alert: validation.alert,
-              time: new Date().toLocaleString(),
-            },
+            body: message.body,
           } as WebhookData).then(() => ({
             notification: 'webhook',
             alert: validation.alert,
@@ -123,12 +118,8 @@ export async function sendAlerts({
         case 'discord': {
           return sendDiscord({
             ...notification.data,
-            body: {
-              url,
-              alert: validation.alert,
-              time: new Date().toLocaleString(),
-            },
-          } as DiscordData).then(() => ({
+            body: message.body,
+          } as WebhookData).then(() => ({
             notification: 'discord',
             alert: validation.alert,
             url,
@@ -137,11 +128,7 @@ export async function sendAlerts({
         case 'slack': {
           return sendSlack({
             ...notification.data,
-            body: {
-              url,
-              alert: validation.alert,
-              time: new Date().toLocaleString(),
-            },
+            body: message.body,
           } as WebhookData).then(() => ({
             notification: 'slack',
             alert: validation.alert,
