@@ -131,7 +131,7 @@ export async function sendAlerts({
         }
         case 'whatsapp': {
           const data = notification.data as WhatsappData
-          return sendWhatsapp(data, validation.alert)
+          return sendWhatsapp(data, message.body)
         }
         case 'teams': {
           return sendTeams({
