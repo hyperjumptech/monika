@@ -35,30 +35,77 @@ import {
   WorkplaceData,
 } from './data'
 
-export interface Notification {
-  id: string
-  type:
-    | 'smtp'
-    | 'mailgun'
-    | 'sendgrid'
-    | 'webhook'
-    | 'slack'
-    | 'whatsapp'
-    | 'teams'
-    | 'telegram'
-    | 'discord'
-    | 'monika-notif'
-    | 'workplace'
-    | 'desktop'
-  data:
-    | MailgunData
-    | SMTPData
-    | SendgridData
-    | WebhookData
-    | WhatsappData
-    | TeamsData
-    | TelegramData
-    | MonikaNotifData
-    | WorkplaceData
-    | DesktopData
+export type Notification = { id: string } & (
+  | SMTPNotification
+  | MailgunNotification
+  | SendgridNotification
+  | WebhookNotification
+  | SlackNotification
+  | WhatsappBusinessNotification
+  | MonikaWhatsappNotification
+  | TeamsNotification
+  | TelegramNotification
+  | DiscordNotification
+  | WorkplaceNotification
+  | DesktopNotification
+)
+
+interface SMTPNotification {
+  type: 'smtp'
+  data: SMTPData
+}
+
+interface MailgunNotification {
+  type: 'mailgun'
+  data: MailgunData
+}
+
+interface SendgridNotification {
+  type: 'sendgrid'
+  data: SendgridData
+}
+
+interface WebhookNotification {
+  type: 'webhook'
+  data: WebhookData
+}
+
+interface SlackNotification {
+  type: 'slack'
+  data: WebhookData
+}
+
+interface WhatsappBusinessNotification {
+  type: 'whatsapp'
+  data: WhatsappData
+}
+
+interface MonikaWhatsappNotification {
+  type: 'monika-notif'
+  data: MonikaNotifData
+}
+
+interface TeamsNotification {
+  type: 'teams'
+  data: TeamsData
+}
+
+interface TelegramNotification {
+  type: 'telegram'
+  data: TelegramData
+}
+
+interface DiscordNotification {
+  type: 'discord'
+  data: WebhookData
+}
+
+interface WorkplaceNotification {
+  type: 'workplace'
+  data: WorkplaceData
+}
+
+interface DesktopNotification {
+  type: 'desktop'
+  data: DesktopData
 }
