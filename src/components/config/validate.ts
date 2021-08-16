@@ -26,7 +26,6 @@
 import { Notification } from '../../interfaces/notification'
 import { Config } from '../../interfaces/config'
 import { ProbeAlert } from '../../interfaces/probe'
-import { RequestConfig } from '../../interfaces/request'
 import { Validation } from '../../interfaces/validation'
 import { isValidURL } from '../../utils/is-valid-url'
 import { parseAlertStringTime } from '../../plugins/validate-response/checkers'
@@ -265,7 +264,7 @@ export const validateConfig = (configuration: Config): Validation => {
 
     // Check probe request properties
     for (const request of requests) {
-      const { url } = request as RequestConfig
+      const { url } = request
 
       if (!url) return PROBE_REQUEST_NO_URL
 
