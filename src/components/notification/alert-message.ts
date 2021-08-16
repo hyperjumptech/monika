@@ -68,7 +68,7 @@ export function getMessageForAlert({
         return `Target ${url} is not healthy. The response time has been greater than ${alertTime} ${incidentThreshold} times in a row`
       }
 
-      return alert.message
+      return 'New INCIDENT from Monika'
     }
 
     return `Target ${url} is back to healthy.`
@@ -97,7 +97,7 @@ export function getMessageForAlert({
       }
     }
 
-    return ''
+    return alert.message
   }
 
   const today = new Date().toUTCString()
