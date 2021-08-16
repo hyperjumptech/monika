@@ -23,7 +23,6 @@
  **********************************************************************************/
 
 import {
-  DesktopData,
   MailgunData,
   MonikaNotifData,
   SendgridData,
@@ -210,21 +209,14 @@ export const workplaceNotificationSender = async ({
 }
 
 export const desktopNotificationSender = async ({
-  data,
   body,
   status,
 }: {
-  data: DesktopData
   body: string
   status: string
 }) => {
   await sendDesktop({
-    url: data?.url,
-    body: {
-      url: '-',
-      alert: body,
-      time: new Date().toLocaleString(),
-      status,
-    },
+    title: status === 'INIT' ? 'Monika is running' : 'Monika terminated',
+    message: body,
   })
 }

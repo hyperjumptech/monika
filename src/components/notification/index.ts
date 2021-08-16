@@ -23,7 +23,6 @@
  **********************************************************************************/
 
 import {
-  DesktopData,
   MailgunData,
   MonikaNotifData,
   SMTPData,
@@ -221,19 +220,9 @@ export async function sendAlerts({
         }
         case 'desktop': {
           return sendDesktop({
-            ...notification.data,
-            body: {
-              url,
-              alert: validation.alert,
-              time: new Date().toLocaleString(),
-              status,
-              expected: message.expected,
-            },
-          } as DesktopData).then(() => ({
-            notification: 'desktop',
-            alert: validation.alert,
-            url,
-          }))
+            title: message.subject,
+            message: message.expected,
+          })
         }
         default: {
           return Promise.resolve({

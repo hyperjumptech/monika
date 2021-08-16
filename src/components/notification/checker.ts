@@ -31,7 +31,6 @@ import {
   TelegramData,
   WebhookData,
   WorkplaceData,
-  DesktopData,
 } from '../../interfaces/data'
 import { Notification } from '../../interfaces/notification'
 import getIp from '../../utils/ip'
@@ -184,9 +183,9 @@ const workplaceNotificationInitialChecker = async (data: WorkplaceData) => {
   }
 }
 
-const desktopNotificationInitialChecker = async (data: TeamsData) => {
+const desktopNotificationInitialChecker = async () => {
   try {
-    desktopNotificationSender({ data, body, status })
+    desktopNotificationSender({ body, status })
 
     return 'success'
   } catch (error) {
@@ -246,7 +245,6 @@ export const notificationChecker = async (notifications: Notification[]) => {
 
   const desktopNotification = notifications
     .filter((notif) => notif.type === 'desktop')
-    .map((notif) => notif.data as DesktopData)
     .map(desktopNotificationInitialChecker)
 
   return Promise.all([

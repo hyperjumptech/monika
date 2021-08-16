@@ -23,7 +23,6 @@
  **********************************************************************************/
 
 import {
-  DesktopData,
   MailgunData,
   MonikaNotifData,
   SendgridData,
@@ -60,5 +59,4 @@ export interface Notification {
     | TelegramData
     | MonikaNotifData
     | WorkplaceData
-    | DesktopData
 }
