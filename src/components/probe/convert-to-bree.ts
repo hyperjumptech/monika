@@ -171,7 +171,7 @@ async function probeWorker() {
 
     return {
       requestURL: request.url,
-      // data: response.data,
+      data: response.data,
       headers: response.headers,
       config: {
         extraData: {

@@ -23,27 +23,65 @@
  **********************************************************************************/
 
 import Bree from 'bree'
-import events from '.'
+import { probeBuildLog } from '../components/logger'
 import { convertToBreeJobs } from '../components/probe/convert-to-bree'
+import { LogObject } from '../interfaces/logs'
 import type { Probe } from '../interfaces/probe'
+import validateResponse from '../plugins/validate-response'
 import { getEventEmitter } from '../utils/events'
 import { log } from '../utils/pino'
+import events from '.'
 
 const eventEmitter = getEventEmitter()
 
 function workerMessageHandler(workerData: any) {
   const { probe, probeResult } = workerData.message
+  let totalRequests = 0 // is the number of requests in  probe.requests[x]
+  let mLog: LogObject = {
+    type: 'PROBE',
+    iteration: 0,
+    id: probe.id,
+    responseCode: 0,
+    url: '',
+    method: 'GET', // GET must be pre-filled here since method '' (empty) is undefined
+    responseTime: 0,
+    alert: {
+      flag: '',
+      message: [],
+    },
+    notification: {
+      flag: '',
+      message: [],
+    },
+  } as LogObject
   // TODO:
-  // 1. Store data to the database, and alert checker to parent?
+  // 1. Notify alert
   // 2. Rebuild and restart the jobs when Monika config change
   // 3. Reimplement --repeat flag?
 
   probeResult.forEach((response: any, requestIndex: number) => {
+    const validatedRes = validateResponse(probe.alerts, response)
+
     eventEmitter.emit(events.probe.response.received, {
       probe,
       requestIndex,
       response,
     })
+
+    mLog.url = response.requestURL
+    mLog = probeBuildLog({
+      checkOrder: requestIndex,
+      probe,
+      totalRequests,
+      probeRes: response,
+      alerts: validatedRes
+        .filter((item) => item.status)
+        .map((item) => item.alert),
+      mLog,
+    })
+
+    // done one request, is there another
+    totalRequests += 1
   })
 
   log.info('parent receives data from worker')
