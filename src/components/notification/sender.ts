@@ -93,7 +93,7 @@ export const mailgunNotificationSender = async ({
         email: 'monika@hyperjump.tech',
       },
     },
-    { id: 'mailgun', type: 'mailgun', data }
+    data
   )
 }
 

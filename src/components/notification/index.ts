@@ -79,7 +79,7 @@ export async function sendAlerts({
               },
               recipients: notification?.data?.recipients?.join(','),
             },
-            notification
+            notification.data
           )
         }
         case 'webhook': {
