@@ -43,6 +43,12 @@ export function getMessageForAlert({
 }): {
   subject: string
   body: string
+  rawBody: {
+    alert: string
+    url: string
+    time: string
+    monika: string
+  }
   expected: string
 } {
   const getSubject = (url: string, status: string) => {
@@ -109,6 +115,14 @@ export function getMessageForAlert({
       publicIpAddress ? `${publicIpAddress} (public)` : ''
     } ${hostname} (hostname)
     `,
+    rawBody: {
+      alert: getExpectedMessage(status, responseValue),
+      url,
+      time: today,
+      monika: `${ipAddress} (local), ${
+        publicIpAddress ? `${publicIpAddress} (public)` : ''
+      } ${hostname} (hostname)`,
+    },
     expected: getExpectedMessage(status, responseValue),
   }
 

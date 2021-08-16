@@ -63,14 +63,21 @@ export interface MonikaNotifData {
   body: MonikaNotifDataBody
 }
 
-export interface MonikaNotifDataBody {
-  type: 'start' | 'incident' | 'recovery' | 'termination'
-  probe_url: string
-  probe_name?: string
-  monika_id?: string
-  ip_address: string
-  response_time: string
+export type MonikaNotifDataBody =
+  | MonikaAlertNotifDataBody
+  | MonikaStartAndTerminationNotifDataBody
+
+interface MonikaAlertNotifDataBody {
+  type: 'incident' | 'recovery'
   alert: string
+  url: string
+  time: string
+  monika: string
+}
+
+interface MonikaStartAndTerminationNotifDataBody {
+  type: 'start' | 'termination'
+  ip_address: string
 }
 
 export interface TelegramData {

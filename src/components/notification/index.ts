@@ -55,23 +55,13 @@ export async function sendAlerts({
   url,
   status,
   incidentThreshold,
-  probeName,
-  probeId,
 }: {
   validation: ValidateResponse
   notifications: Notification[]
   url: string
   status: string
   incidentThreshold: number
-  probeName?: string
-  probeId?: string
-}): Promise<
-  Array<{
-    alert: string
-    notification: string
-    url: string
-  }>
-> {
+}): Promise<Array<void>> {
   const ipAddress = getIp()
   const message = getMessageForAlert({
     alert: validation.alert,
@@ -81,7 +71,7 @@ export async function sendAlerts({
     incidentThreshold,
     responseValue: validation.responseValue,
   })
-  const sent = await Promise.all<any>(
+  return Promise.all<any>(
     notifications.map((notification) => {
       switch (notification.type) {
         case 'mailgun': {
@@ -99,41 +89,25 @@ export async function sendAlerts({
               ),
             },
             notification
-          ).then(() => ({
-            notification: 'mailgun',
-            alert: validation.alert,
-            url,
-          }))
+          )
         }
         case 'webhook': {
           return sendWebhook({
             ...notification.data,
             body: message.body,
-          } as WebhookData).then(() => ({
-            notification: 'webhook',
-            alert: validation.alert,
-            url,
-          }))
+          } as WebhookData)
         }
         case 'discord': {
           return sendDiscord({
             ...notification.data,
             body: message.body,
-          } as WebhookData).then(() => ({
-            notification: 'discord',
-            alert: validation.alert,
-            url,
-          }))
+          } as WebhookData)
         }
         case 'slack': {
           return sendSlack({
             ...notification.data,
             body: message.body,
-          } as WebhookData).then(() => ({
-            notification: 'slack',
-            alert: validation.alert,
-            url,
-          }))
+          } as WebhookData)
         }
         case 'telegram': {
           return sendTelegram({
@@ -143,11 +117,7 @@ export async function sendAlerts({
               alert: validation.alert,
               time: new Date().toLocaleString(),
             },
-          } as TelegramData).then(() => ({
-            notification: 'telegram',
-            alert: validation.alert,
-            url,
-          }))
+          } as TelegramData)
         }
         case 'smtp': {
           const transporter = createSmtpTransport(notification.data as SMTPData)
@@ -157,19 +127,11 @@ export async function sendAlerts({
             to: (notification?.data as SMTPData)?.recipients?.join(','),
             subject: message.subject,
             text: message.body,
-          }).then(() => ({
-            notification: 'smtp',
-            alert: validation.alert,
-            url,
-          }))
+          })
         }
         case 'whatsapp': {
           const data = notification.data as WhatsappData
-          return sendWhatsapp(data, validation.alert).then(() => ({
-            notification: 'whatsapp',
-            alert: validation.alert,
-            url,
-          }))
+          return sendWhatsapp(data, validation.alert)
         }
         case 'teams': {
           return sendTeams({
@@ -181,29 +143,16 @@ export async function sendAlerts({
               status,
               expected: message.expected,
             },
-          } as TeamsData).then(() => ({
-            notification: 'teams',
-            alert: validation.alert,
-            url,
-          }))
+          } as TeamsData)
         }
         case 'monika-notif': {
           return sendMonikaNotif({
             ...notification.data,
             body: {
               type: status === 'DOWN' ? 'incident' : 'recovery',
-              probe_url: url,
-              probe_name: probeName,
-              ip_address: ipAddress,
-              monika_id: probeId,
-              alert: validation.alert,
-              response_time: new Date().toLocaleString(),
+              ...message.rawBody,
             },
-          } as MonikaNotifData).then(() => ({
-            notification: 'monika-notif',
-            alert: validation.alert,
-            url,
-          }))
+          } as MonikaNotifData)
         }
         case 'workplace': {
           return sendWorkplace({
@@ -213,11 +162,7 @@ export async function sendAlerts({
               alert: validation.alert,
               time: new Date().toLocaleString(),
             },
-          } as WorkplaceData).then(() => ({
-            notification: 'workplace',
-            alert: validation.alert,
-            url,
-          }))
+          } as WorkplaceData)
         }
         case 'desktop': {
           return sendDesktop({
@@ -229,22 +174,12 @@ export async function sendAlerts({
               status,
               expected: message.expected,
             },
-          } as DesktopData).then(() => ({
-            notification: 'desktop',
-            alert: validation.alert,
-            url,
-          }))
+          } as DesktopData)
         }
         default: {
-          return Promise.resolve({
-            notification: '',
-            alert: validation.alert,
-            url,
-          })
+          return Promise.resolve()
         }
       }
     })
   )
-
-  return sent
 }
