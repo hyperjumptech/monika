@@ -116,7 +116,7 @@ export const sendgridNotificationSender = async ({
         email: 'monika@hyperjump.tech',
       },
     },
-    { id: 'sendgrid', type: 'sendgrid', data }
+    data
   )
 }
 
