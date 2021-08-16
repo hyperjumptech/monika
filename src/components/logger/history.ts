@@ -239,13 +239,13 @@ export async function saveProbeRequestLog({
   probe,
   totalRequests,
   probeRes,
-  alerts,
+  alertQueries,
   error: errorResp,
 }: {
   probe: Probe
   totalRequests: number
   probeRes: AxiosResponseWithExtraData
-  alerts?: string[]
+  alertQueries?: string[]
   error?: string
 }) {
   const insertProbeRequestSQL = `
@@ -297,7 +297,7 @@ export async function saveProbeRequestLog({
     ])
 
     await Promise.all(
-      (alerts ?? []).map((alert) =>
+      (alertQueries ?? []).map((alert) =>
         db.run(insertAlertSQL, [now, insertProbeRequestResult.lastID, alert])
       )
     )
@@ -312,13 +312,13 @@ export async function saveProbeRequestLog({
  * @param {object} probe is the probe config
  * @param {object} notification is the notification config
  * @param {string} type is the type of notification 'NOTIFY-INCIDENT' | 'NOTIFY-RECOVER'
- * @param {string} alert the alerts triggered
+ * @param {string} alertQuery the alerts triggered
  */
 export async function saveNotificationLog(
   probe: Probe,
   notification: Notification,
   type: 'NOTIFY-INCIDENT' | 'NOTIFY-RECOVER' | 'NOTIFY-TLS',
-  alert: string
+  alertQuery: string
 ) {
   const insertNotificationSQL = `
     INSERT INTO notifications (
@@ -339,7 +339,7 @@ export async function saveNotificationLog(
       now,
       probe.id,
       probe.name,
-      alert,
+      alertQuery,
       type,
       notification.id,
       notification.type,

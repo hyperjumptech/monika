@@ -22,26 +22,32 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-export interface ProbeStatus {
-  id: string
-  name: string
-  details: StatusDetails[]
-}
+import { expect } from 'chai'
+import { sanitizeExpression } from '../../src/utils/expression-parser'
 
-export interface StatusDetails {
-  alertQuery: string
-  state:
-    | 'INIT'
-    | 'UP_TRUE_EQUALS_THRESHOLD'
-    | 'UP_TRUE_BELOW_THRESHOLD'
-    | 'UP_FALSE'
-    | 'DOWN_FALSE_EQUALS_THRESHOLD'
-    | 'DOWN_FALSE_BELOW_THRESHOLD'
-    | 'DOWN_TRUE'
-  isDown: boolean
-  shouldSendNotification: boolean
-  totalTrue: number
-  totalFalse: number
-  consecutiveTrue: number
-  consecutiveFalse: number
-}
+describe('sanitizeExpression', () => {
+  it('sanitize "response.status == 500" expression', () => {
+    const sanitized = sanitizeExpression('response.status == 500', ['response'])
+    expect(sanitized).to.equals('__getValueByPath("response.status") == 500')
+  })
+
+  it('sanitize "response.body.data[0].title == "The Title"" expression', () => {
+    const sanitized = sanitizeExpression(
+      'response.body.data[0].title == "The Title"',
+      ['response']
+    )
+    expect(sanitized).to.equals(
+      '__getValueByPath("response.body.data[0].title") == "The Title"'
+    )
+  })
+
+  it('sanitize "startsWith(lowerCase(response.body.title), "The")" expression', () => {
+    const sanitized = sanitizeExpression(
+      'startsWith(lowerCase(response.body.title), "The")',
+      ['response']
+    )
+    expect(sanitized).to.equals(
+      'startsWith(lowerCase(__getValueByPath("response.body.title")), "The")'
+    )
+  })
+})
