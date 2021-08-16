@@ -21,13 +21,14 @@
     "preinstall": "node scripts/preinstall.js",
     "pretest": "npm run check-format",
     "posttest": "eslint . --ext .ts --config .eslintrc",
-    "prepack": "rm -rf lib && tsc -b && oclif-dev readme",
-    "start": "./bin/run",
+    "prepack": "rm -rf lib tsconfig.tsbuildinfo && tsc -b && oclif-dev readme",
+    "start": "npm run prepack && ./bin/run",
     "test": "cross-env NODE_ENV=test nyc --extension .ts mocha --forbid-only \"{src,test}/**/*.test.ts\"",
     "prod_test": "cross-env NODE_ENV=test nyc --extension .ts mocha --forbid-only \"prod_test/**/*.test.ts\"",
     "version": "oclif-dev readme && git add README.md",
     "format": "prettier --write .",
-    "check-format": "prettier --check ."
+    "check-format": "prettier --check .",
+    "pkg": "npm run prepack && pkg . --compress brotli"
   },
   "dependencies": {
     "@oclif/command": "^1.8.0",
@@ -49,11 +50,11 @@
     "mailgun.js": "^3.5.4",
     "node-cron": "3.0.0",
     "nodemailer": "^6.5.0",
-    "open": "^8.0.6",
     "p-event": "^4.2.0",
     "pako": "^2.0.3",
     "pino": "6.11.2",
     "pino-pretty": "4.7.1",
+    "pkg": "^5.3.1",
     "prom-client": "13.1.0",
     "sinon": "^11.1.2",
     "smtp-server": "^3.8.0",
@@ -124,5 +125,19 @@
       "eslint --cache --fix"
     ],
     "*.{ts,js,css,md}": "prettier --write"
+  },
+  "pkg": {
+    "scripts": [
+      "./lib/**/*.js"
+    ],
+    "assets": [
+      "./db/migrations/*.sql"
+    ],
+    "targets": [
+      "node12-linux-x64",
+      "node12-macos-x64",
+      "node12-win-x64"
+    ],
+    "outputPath": "dist"
   }
 }
