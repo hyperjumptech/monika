@@ -29,13 +29,12 @@ import type {
   RequestConfig,
 } from '../../interfaces/request'
 
-async function probeWorker() {
-  // TODO:
-  // 1. Import code from a file?
-  // 2. Move the event emitter, store data to the database, and alert checker to parent?
-  // 3. Reimplement --repeat flag?
-  // 4. Rebuild and restart the jobs when Monika config change
+export type ProbeResult = {
+  request: RequestConfig
+  response: AxiosResponseWithExtraData
+}
 
+async function probeWorker() {
   // eslint-disable-next-line node/no-unsupported-features/node-builtins
   const { workerData, parentPort } = require('worker_threads')
   const axios = require('axios')
@@ -44,11 +43,11 @@ async function probeWorker() {
   const { job } = workerData
   const { probe } = job
 
-  const doProbe = async (probe: Probe) => {
+  const doProbe = async (probe: Probe): Promise<ProbeResult[]> => {
     const probing = async (
       requestConfig: RequestConfig,
       responses: Array<AxiosResponseWithExtraData>
-    ) => {
+    ): Promise<AxiosResponseWithExtraData> => {
       const responseInterceptor = (
         axiosResponse: AxiosResponseWithExtraData
       ) => {
@@ -68,8 +67,11 @@ async function probeWorker() {
 
         return data
       }
-      const request = async (config: RequestConfig) => {
+      const request = async (
+        config: RequestConfig
+      ): Promise<AxiosResponseWithExtraData> => {
         const axiosInstance = axios.create()
+
         axiosInstance.interceptors.request.use(
           (axiosRequestConfig: AxiosRequestConfigWithExtraData) => {
             const data = {
@@ -79,19 +81,23 @@ async function probeWorker() {
                 requestStartedAt: new Date().getTime(),
               },
             }
+
             return data
           }
         )
         axiosInstance.interceptors.response.use(
           (axiosResponse: AxiosResponseWithExtraData) => {
             const data = responseInterceptor(axiosResponse)
+
             return data
           },
           (axiosResponse: AxiosResponseWithExtraData) => {
             const data = responseInterceptor(axiosResponse)
+
             throw data
           }
         )
+
         return axiosInstance.request({
           ...config,
           data: config.body,
@@ -131,38 +137,25 @@ async function probeWorker() {
           ...requestConfig,
           url: renderedURL,
         })
-        return res as AxiosResponseWithExtraData
+
+        return res
       } catch (error) {
-        let errResponseCode
-        let errData
-        let errHdr
-
-        if (error.response) {
-          // Axios doesn't always return error response
-          errResponseCode = error.response.status
-          errData = error.response.data
-          errHdr = error.response.headers
-        } else {
-          errResponseCode = 500 // TODO: how to detect timeouts?
-          errData = ''
-          errHdr = ''
-        }
-
         return {
-          data: errData,
-          status: errResponseCode,
+          data: error?.response?.data || '',
+          status: error?.response?.status || 500,
           statusText: 'ERROR',
-          headers: errHdr,
-          config: error.config, // get the response from error.config instead of error.response.xxx as -
-          extraData: error.config.extraData, // the response data lives in the data.config space
-        } as AxiosResponseWithExtraData
+          headers: error?.response?.headers || '',
+          // get the response from error.config instead of error.response.xxx as the response data lives in the data.config space
+          config: { ...error.config, extraData: error.config.extraData },
+        }
       }
     }
-    const probeResult: Array<any> = []
+    const responses: Array<AxiosResponseWithExtraData> = []
+    const probeResult: Array<ProbeResult> = []
 
     await Promise.all(
       probe.requests.map(async (request) => {
-        const response = await probing(request, probeResult)
+        const response = await probing(request, responses)
 
         // Add to an array to be accessed by another request
         probeResult.push({ request, response })
@@ -175,16 +168,21 @@ async function probeWorker() {
   const probeResult = await doProbe(probe)
   const cleanProbeResult = probeResult.map((probeResult) => {
     const { request, response } = probeResult
+
     return {
-      probeID: probe.id,
       requestURL: request.url,
       // data: response.data,
+      headers: response.headers,
+      config: {
+        extraData: {
+          responseTime: response.config.extraData?.responseTime,
+        },
+      },
       status: response.status,
-      responseTime: response.config.extraData?.responseTime,
     }
   })
 
-  parentPort.postMessage({ probeResult: cleanProbeResult })
+  parentPort.postMessage({ probe, probeResult: cleanProbeResult })
 }
 
 export function convertToBreeJobs(probes: Probe[]) {

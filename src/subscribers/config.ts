@@ -32,7 +32,19 @@ import { log } from '../utils/pino'
 const eventEmitter = getEventEmitter()
 
 function workerMessageHandler(workerData: any) {
-  const { probeResult } = workerData.message
+  const { probe, probeResult } = workerData.message
+  // TODO:
+  // 1. Store data to the database, and alert checker to parent?
+  // 2. Rebuild and restart the jobs when Monika config change
+  // 3. Reimplement --repeat flag?
+
+  probeResult.forEach((response: any, requestIndex: number) => {
+    eventEmitter.emit(events.probe.response.received, {
+      probe,
+      requestIndex,
+      response,
+    })
+  })
 
   log.info('parent receives data from worker')
   log.info(JSON.stringify(probeResult, null, 2))

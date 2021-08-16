@@ -26,4 +26,9 @@ export default {
   config: {
     sanitized: 'CONFIG_SANITIZED',
   },
+  probe: {
+    response: {
+      received: 'PROBE_RESPONSE_RECEIVED',
+    },
+  },
 }
