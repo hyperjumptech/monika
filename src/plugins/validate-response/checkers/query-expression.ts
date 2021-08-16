@@ -22,26 +22,22 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-export interface ProbeStatus {
-  id: string
-  name: string
-  details: StatusDetails[]
+import { compileExpression } from '../../../utils/expression-parser'
+import { AxiosResponseWithExtraData } from '../../../interfaces/request'
+
+const queryExpression = (res: AxiosResponseWithExtraData, query: string) => {
+  const object = {
+    response: {
+      size: Number(res.headers['content-length']),
+      status: res.status,
+      time: res.config.extraData?.responseTime,
+      body: res.data,
+      headers: res.headers,
+    },
+  }
+  const compiledFn = compileExpression(query, Object.keys(object))
+
+  return Boolean(compiledFn(object))
 }
 
-export interface StatusDetails {
-  alertQuery: string
-  state:
-    | 'INIT'
-    | 'UP_TRUE_EQUALS_THRESHOLD'
-    | 'UP_TRUE_BELOW_THRESHOLD'
-    | 'UP_FALSE'
-    | 'DOWN_FALSE_EQUALS_THRESHOLD'
-    | 'DOWN_FALSE_BELOW_THRESHOLD'
-    | 'DOWN_TRUE'
-  isDown: boolean
-  shouldSendNotification: boolean
-  totalTrue: number
-  totalFalse: number
-  consecutiveTrue: number
-  consecutiveFalse: number
-}
+export default queryExpression

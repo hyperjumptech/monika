@@ -182,6 +182,36 @@ describe('monika', () => {
     .do(() =>
       cmd.run([
         '--config',
+        resolve('./test/testConfigs/probes/stringProbeRequestAlert.json'),
+      ])
+    )
+    .it(
+      'runs with config with probe request alert in defined strings',
+      (ctx) => {
+        expect(ctx.stdout).to.contain('Starting Monika.')
+      }
+    )
+
+  test
+    .stdout()
+    .do(() =>
+      cmd.run([
+        '--config',
+        resolve('./test/testConfigs/probes/objectProbeRequestAlert.json'),
+      ])
+    )
+    .it(
+      'runs with config with probe request alert in object format with flexible query',
+      (ctx) => {
+        expect(ctx.stdout).to.contain('Starting Monika.')
+      }
+    )
+
+  test
+    .stdout()
+    .do(() =>
+      cmd.run([
+        '--config',
         resolve('./test/testConfigs/probes/multipleProbeRequests.json'),
       ])
     )
