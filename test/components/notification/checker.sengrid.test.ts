@@ -6,7 +6,6 @@ import {
   notificationChecker,
 } from '../../../src/components/notification/checker'
 import { SendgridData } from '../../../src/interfaces/data'
-import { Notification } from '../../../src/interfaces/notification'
 
 chai.use(spies)
 
@@ -17,8 +16,8 @@ describe('notificationChecker - sendgridNotification', () => {
 
   const notificationConfig = {
     id: 'sendgrid',
-    type: 'sendgrid',
-  } as Notification
+    type: 'sendgrid' as const,
+  }
 
   it('should handle validation error - without apiKey', async () => {
     try {

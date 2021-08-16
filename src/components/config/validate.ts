@@ -134,7 +134,7 @@ function validateNotification(notifications: Notification[]): Validation {
         notification.type === 'smtp' ||
         notification.type === 'sendgrid' ||
         notification.type === 'whatsapp') &&
-      notification.data.recipients.length === 0
+      (notification.data.recipients?.length ?? 0) === 0
     ) {
       return NOTIFICATION_NO_RECIPIENTS
     }

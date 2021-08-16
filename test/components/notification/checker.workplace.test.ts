@@ -6,7 +6,6 @@ import {
   notificationChecker,
 } from '../../../src/components/notification/checker'
 import { WorkplaceData } from '../../../src/interfaces/data'
-import { Notification } from '../../../src/interfaces/notification'
 
 chai.use(spies)
 
@@ -17,8 +16,8 @@ describe('notificationChecker - workplaceNotification', () => {
 
   const notificationConfig = {
     id: 'workplace',
-    type: 'workplace',
-  } as Notification
+    type: 'workplace' as const,
+  }
 
   it('should handle validation error - without Thread ID', async () => {
     try {
