@@ -153,11 +153,11 @@ export const telegramNotificationSender = async ({
 export const teamsNotificationSender = async ({
   data,
   body,
-  status,
+  currentState,
 }: {
   data: TeamsData
   body: string
-  status: string
+  currentState: string
 }) => {
   await sendTeams({
     url: data?.url,
@@ -165,7 +165,7 @@ export const teamsNotificationSender = async ({
       url: '-',
       alert: body,
       time: new Date().toLocaleString(),
-      status,
+      currentState,
     },
   })
 }
@@ -212,11 +212,11 @@ export const workplaceNotificationSender = async ({
 export const desktopNotificationSender = async ({
   data,
   body,
-  status,
+  currentState,
 }: {
   data: DesktopData
   body: string
-  status: string
+  currentState: string
 }) => {
   await sendDesktop({
     url: data?.url,
@@ -224,7 +224,7 @@ export const desktopNotificationSender = async ({
       url: '-',
       alert: body,
       time: new Date().toLocaleString(),
-      status,
+      currentState,
     },
   })
 }

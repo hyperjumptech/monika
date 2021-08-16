@@ -553,7 +553,7 @@ const createNotificationLog = (
   const { index, probe, probeState, notifications } = data
 
   const type =
-    probeState?.state === 'UP_TRUE_EQUALS_THRESHOLD'
+    probeState?.currentState === 'UP_TRUE_EQUALS_THRESHOLD'
       ? 'NOTIFY-INCIDENT'
       : 'NOTIFY-RECOVER'
 
@@ -590,12 +590,12 @@ em.on(
     } = data
 
     statuses
-      ?.filter((status) => status.shouldSendNotification)
-      ?.forEach((status, index) => {
+      ?.filter((probeState) => probeState.shouldSendNotification)
+      ?.forEach((probeState, index) => {
         probeSendNotification({
           index,
           probe,
-          status,
+          probeState,
           notifications,
           totalRequests,
           validatedResponseStatuses,
@@ -605,7 +605,7 @@ em.on(
           {
             index,
             probe,
-            status,
+            probeState,
             notifications,
           },
           mLog

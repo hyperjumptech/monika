@@ -30,7 +30,7 @@ export interface ProbeStatus {
 
 export interface ProbeStateDetails {
   alert: string
-  state:
+  currentState:
     | 'INIT'
     | 'UP_TRUE_EQUALS_THRESHOLD'
     | 'UP_TRUE_BELOW_THRESHOLD'
