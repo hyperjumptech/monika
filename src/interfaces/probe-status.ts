@@ -28,8 +28,8 @@ export interface ProbeStatus {
   details: ProbeStateDetails[]
 }
 
-export interface ProbeStateDetails {
-  alert: string
+export interface StatusDetails {
+  alertQuery: string
   currentState:
     | 'INIT'
     | 'UP_TRUE_EQUALS_THRESHOLD'

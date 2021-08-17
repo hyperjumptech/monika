@@ -35,8 +35,8 @@ import { getEventEmitter } from '../../utils/events'
 const em = getEventEmitter()
 
 let PROBE_STATUSES: ProbeStatus[] = []
-const INIT_PROBE_STATUS_DETAILS: ProbeStateDetails = {
-  alert: '',
+const INIT_PROBE_STATUS_DETAILS: StatusDetails = {
+  alertQuery: '',
   state: 'INIT',
   isDown: false,
   shouldSendNotification: false,
@@ -199,7 +199,7 @@ export const processThresholds = ({
     if (isAlreadyInProbeStatus.length === 0) {
       const initProbeStatuses = alerts.map((alert) => ({
         ...INIT_PROBE_STATUS_DETAILS,
-        alert,
+        alertQuery: alert.query,
       }))
 
       PROBE_STATUSES.push({
@@ -223,24 +223,12 @@ export const processThresholds = ({
         let updatedStatus: ProbeStateDetails = INIT_PROBE_STATUS_DETAILS
 
         const probeStatusDetail = currentProbe.details.find(
-          (detail) => detail.alert === alert
+          (detail) => detail.alertQuery === alert.query
         )
 
-        if (probeStatusDetail?.alert.includes('status-not')) {
+        if (probeStatusDetail) {
           const state = determineProbeState({
-            errorName: alert,
-            probeStatus: probeStatusDetail,
-            validation,
-            incidentThreshold,
-            recoveryThreshold,
-          })
-          updatedStatus = updateProbeStatus(probeStatusDetail, state)
-        }
-
-        // Handle is response time error
-        if (probeStatusDetail?.alert.includes('response-time-greater')) {
-          const state = determineProbeState({
-            errorName: alert,
+            errorName: alert.query,
             probeStatus: probeStatusDetail,
             validation,
             incidentThreshold,
@@ -251,13 +239,16 @@ export const processThresholds = ({
 
         // Update the Probe Status
         const filteredProbeStatus = currentProbe.details.filter(
-          (item) => item.alert !== alert
+          (item) => item.alertQuery !== alert.query
         )
         currentProbe.details = [...filteredProbeStatus, updatedStatus]
         results.push(updatedStatus)
 
         if (validation.status === true) {
-          setAlert({ flag: 'ALERT', message: updatedStatus.alert as any }, mLog)
+          setAlert(
+            { flag: 'ALERT', message: updatedStatus.alertQuery as any },
+            mLog
+          )
           // done probes, got some alerts & notif.. print log
           em.emit(PROBE_LOGS_BUILT, mLog)
         }

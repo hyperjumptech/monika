@@ -22,28 +22,32 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { ProbeAlert } from '../../interfaces/probe'
-import { AxiosResponseWithExtraData } from '../../interfaces/request'
-import responseChecker, { getResponseValue } from './checkers'
+import { expect } from 'chai'
+import { sanitizeExpression } from '../../src/utils/expression-parser'
 
-export interface ValidateResponse {
-  alert: ProbeAlert
-  status: boolean
-  responseValue: number
-}
-
-const validateResponse = (
-  alerts: ProbeAlert[],
-  response: AxiosResponseWithExtraData
-): ValidateResponse[] => {
-  const checks = alerts.map((alert) => {
-    const status = responseChecker(alert, response)
-    const responseValue = getResponseValue(alert.query, response)
-
-    return { alert, status, responseValue }
+describe('sanitizeExpression', () => {
+  it('sanitize "response.status == 500" expression', () => {
+    const sanitized = sanitizeExpression('response.status == 500', ['response'])
+    expect(sanitized).to.equals('__getValueByPath("response.status") == 500')
   })
 
-  return checks
-}
+  it('sanitize "response.body.data[0].title == "The Title"" expression', () => {
+    const sanitized = sanitizeExpression(
+      'response.body.data[0].title == "The Title"',
+      ['response']
+    )
+    expect(sanitized).to.equals(
+      '__getValueByPath("response.body.data[0].title") == "The Title"'
+    )
+  })
 
-export default validateResponse
+  it('sanitize "startsWith(lowerCase(response.body.title), "The")" expression', () => {
+    const sanitized = sanitizeExpression(
+      'startsWith(lowerCase(response.body.title), "The")',
+      ['response']
+    )
+    expect(sanitized).to.equals(
+      'startsWith(lowerCase(__getValueByPath("response.body.title")), "The")'
+    )
+  })
+})

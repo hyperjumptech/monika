@@ -22,28 +22,22 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { ProbeAlert } from '../../interfaces/probe'
-import { AxiosResponseWithExtraData } from '../../interfaces/request'
-import responseChecker, { getResponseValue } from './checkers'
+import { compileExpression } from '../../../utils/expression-parser'
+import { AxiosResponseWithExtraData } from '../../../interfaces/request'
 
-export interface ValidateResponse {
-  alert: ProbeAlert
-  status: boolean
-  responseValue: number
+const queryExpression = (res: AxiosResponseWithExtraData, query: string) => {
+  const object = {
+    response: {
+      size: Number(res.headers['content-length']),
+      status: res.status,
+      time: res.config.extraData?.responseTime,
+      body: res.data,
+      headers: res.headers,
+    },
+  }
+  const compiledFn = compileExpression(query, Object.keys(object))
+
+  return Boolean(compiledFn(object))
 }
 
-const validateResponse = (
-  alerts: ProbeAlert[],
-  response: AxiosResponseWithExtraData
-): ValidateResponse[] => {
-  const checks = alerts.map((alert) => {
-    const status = responseChecker(alert, response)
-    const responseValue = getResponseValue(alert.query, response)
-
-    return { alert, status, responseValue }
-  })
-
-  return checks
-}
-
-export default validateResponse
+export default queryExpression

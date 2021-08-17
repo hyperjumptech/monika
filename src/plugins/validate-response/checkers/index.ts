@@ -22,9 +22,11 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import { ProbeAlert } from '../../../interfaces/probe'
 import { AxiosResponseWithExtraData } from '../../../interfaces/request'
 import responseTimeGreaterThanX from './res-time-greater-than-x'
 import statusNot2xx from './status-not-2xx'
+import queryExpression from './query-expression'
 
 // parse string like "response-time-greater-than-200-ms" and return the time in ms
 export const parseAlertStringTime = (str: string): number => {
@@ -58,20 +60,20 @@ export const getResponseValue = (
 }
 
 const responseChecker = (
-  alert: string,
+  alert: ProbeAlert,
   res: AxiosResponseWithExtraData
 ): boolean => {
-  if (alert === 'status-not-2xx') {
+  if (alert.query === 'status-not-2xx') {
     return statusNot2xx(res)
   }
 
-  if (alert.startsWith('response-time-greater-than-')) {
-    const alertTime = parseAlertStringTime(alert)
+  if (alert.query.startsWith('response-time-greater-than-')) {
+    const alertTime = parseAlertStringTime(alert.query)
 
     return responseTimeGreaterThanX(res, alertTime)
   }
 
-  return false
+  return queryExpression(res, alert.query)
 }
 
 export default responseChecker

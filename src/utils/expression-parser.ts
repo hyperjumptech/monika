@@ -22,28 +22,48 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { ProbeAlert } from '../../interfaces/probe'
-import { AxiosResponseWithExtraData } from '../../interfaces/request'
-import responseChecker, { getResponseValue } from './checkers'
+import { compileExpression as _compileExpression } from 'filtrex'
+import {
+  get,
+  has,
+  endsWith,
+  startsWith,
+  lowerCase,
+  upperCase,
+  size,
+  includes,
+} from 'lodash'
 
-export interface ValidateResponse {
-  alert: ProbeAlert
-  status: boolean
-  responseValue: number
-}
+// wrap substrings that are object accessor with double quote
+// then wrap again with __getValueByPath function call
+// eg: 'response.body.title' becomes '__getValueByPath("response.body.title")'
+export const sanitizeExpression = (query: string, objectKeys: string[]) => {
+  let sanitizedQuery = query
 
-const validateResponse = (
-  alerts: ProbeAlert[],
-  response: AxiosResponseWithExtraData
-): ValidateResponse[] => {
-  const checks = alerts.map((alert) => {
-    const status = responseChecker(alert, response)
-    const responseValue = getResponseValue(alert.query, response)
-
-    return { alert, status, responseValue }
+  objectKeys.forEach((key) => {
+    const pattern = new RegExp(`(^| |\\()(${key}(\\.|\\[)\\S*[^\\s),])`, 'g')
+    sanitizedQuery = sanitizedQuery.replace(pattern, '$1__getValueByPath("$2")')
   })
 
-  return checks
+  return sanitizedQuery
 }
 
-export default validateResponse
+export const compileExpression = (
+  expression: string,
+  objectKeys: string[] = []
+) => (obj: any) => {
+  const sanitizedExpression = sanitizeExpression(expression, objectKeys)
+
+  return _compileExpression(sanitizedExpression, {
+    extraFunctions: {
+      __getValueByPath: (path: string) => get(obj, path), //  for internal use, not to be exposed to user
+      has,
+      lowerCase,
+      upperCase,
+      startsWith,
+      endsWith,
+      includes,
+      size,
+    },
+  })(obj)
+}

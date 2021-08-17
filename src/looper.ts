@@ -63,7 +63,10 @@ export function sanitizeProbe(probe: Probe, id: string): Probe {
     )
   }
   if ((alerts?.length ?? 0) === 0) {
-    probe.alerts = ['status-not-2xx', 'response-time-greater-than-2-s']
+    probe.alerts = [
+      { query: 'status-not-2xx', subject: '', message: `` },
+      { query: 'response-time-greater-than-2-s', subject: '', message: '' },
+    ]
     log.warn(
       `Warning: Probe ${probe.id} has no Alerts configuration defined. Using the default status-not-2xx and response-time-greater-than-2-s`
     )

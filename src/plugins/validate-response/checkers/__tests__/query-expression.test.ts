@@ -22,28 +22,80 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { ProbeAlert } from '../../interfaces/probe'
-import { AxiosResponseWithExtraData } from '../../interfaces/request'
-import responseChecker, { getResponseValue } from './checkers'
+import { expect } from 'chai'
+import { AxiosResponseWithExtraData } from '../../../../interfaces/request'
+import queryExpression from '../query-expression'
 
-export interface ValidateResponse {
-  alert: ProbeAlert
-  status: boolean
-  responseValue: number
-}
+describe('queryExpression', () => {
+  it('should handle response time query', () => {
+    const res = {
+      headers: {},
+      config: {
+        extraData: {
+          responseTime: 150,
+        },
+      },
+    } as AxiosResponseWithExtraData
 
-const validateResponse = (
-  alerts: ProbeAlert[],
-  response: AxiosResponseWithExtraData
-): ValidateResponse[] => {
-  const checks = alerts.map((alert) => {
-    const status = responseChecker(alert, response)
-    const responseValue = getResponseValue(alert.query, response)
+    const result = queryExpression(res, 'response.time > 1000')
 
-    return { alert, status, responseValue }
+    expect(result).to.be.false
   })
 
-  return checks
-}
+  it('should handle response status query', () => {
+    const res = {
+      status: 200,
+      headers: {},
+      config: {},
+    } as AxiosResponseWithExtraData
 
-export default validateResponse
+    const result = queryExpression(res, 'response.status != 200')
+
+    expect(result).to.be.false
+  })
+
+  it('should handle response size query', () => {
+    const res = {
+      status: 200,
+      headers: { 'content-length': 2000 },
+      config: {},
+    } as AxiosResponseWithExtraData
+
+    const result = queryExpression(res, 'response.size < 1000')
+
+    expect(result).to.be.false
+  })
+
+  it('should handle response headers query', () => {
+    const res = {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+      config: {},
+    } as AxiosResponseWithExtraData
+
+    const result = queryExpression(
+      res,
+      "response.headers['content-type'] != 'application/json'"
+    )
+
+    expect(result).to.be.false
+  })
+
+  it('should handle response body query', () => {
+    const res = {
+      status: 200,
+      headers: {},
+      config: {},
+      data: {
+        message: 'Hello',
+      },
+    } as AxiosResponseWithExtraData
+
+    const result = queryExpression(
+      res,
+      "startsWith(response.body.message, 'Hello')"
+    )
+
+    expect(result).to.be.false
+  })
+})
