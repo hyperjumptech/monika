@@ -35,7 +35,7 @@ import {
   WorkplaceData,
 } from './data'
 
-export type Notification = { id: string } & (
+export type Notification =
   | SMTPNotification
   | MailgunNotification
   | SendgridNotification
@@ -48,64 +48,67 @@ export type Notification = { id: string } & (
   | DiscordNotification
   | WorkplaceNotification
   | DesktopNotification
-)
 
-interface SMTPNotification {
+interface BaseNotification {
+  id: string
+}
+
+interface SMTPNotification extends BaseNotification {
   type: 'smtp'
   data: SMTPData
 }
 
-interface MailgunNotification {
+interface MailgunNotification extends BaseNotification {
   type: 'mailgun'
   data: MailgunData
 }
 
-interface SendgridNotification {
+interface SendgridNotification extends BaseNotification {
   type: 'sendgrid'
   data: SendgridData
 }
 
-interface WebhookNotification {
+interface WebhookNotification extends BaseNotification {
   type: 'webhook'
   data: WebhookData
 }
 
-interface SlackNotification {
+interface SlackNotification extends BaseNotification {
   type: 'slack'
   data: WebhookData
 }
 
-interface WhatsappBusinessNotification {
+interface WhatsappBusinessNotification extends BaseNotification {
   type: 'whatsapp'
   data: WhatsappData
 }
 
-interface MonikaWhatsappNotification {
+interface MonikaWhatsappNotification extends BaseNotification {
   type: 'monika-notif'
   data: MonikaNotifData
 }
 
-interface TeamsNotification {
+interface TeamsNotification extends BaseNotification {
   type: 'teams'
   data: TeamsData
 }
 
-interface TelegramNotification {
+interface TelegramNotification extends BaseNotification {
   type: 'telegram'
   data: TelegramData
 }
 
-interface DiscordNotification {
+interface DiscordNotification extends BaseNotification {
   type: 'discord'
   data: WebhookData
 }
 
-interface WorkplaceNotification {
+interface WorkplaceNotification extends BaseNotification {
   type: 'workplace'
   data: WorkplaceData
 }
 
-interface DesktopNotification {
+interface DesktopNotification extends BaseNotification {
   type: 'desktop'
   data: DesktopData
 }
