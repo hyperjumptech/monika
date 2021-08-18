@@ -42,13 +42,13 @@ export async function sendAlerts({
   validation,
   notifications,
   url,
-  status,
+  probeState,
   incidentThreshold,
 }: {
   validation: ValidateResponse
   notifications: Notification[]
   url: string
-  status: string
+  probeState: string
   incidentThreshold: number
 }): Promise<void> {
   const ipAddress = getIp()
@@ -56,7 +56,7 @@ export async function sendAlerts({
     alert: validation.alert,
     url,
     ipAddress,
-    status,
+    probeState,
     incidentThreshold,
     responseValue: validation.responseValue,
   })
@@ -123,7 +123,7 @@ export async function sendAlerts({
               alert: validation.alert.query,
               url,
               time: new Date().toLocaleString(),
-              status,
+              probeState,
               expected: message.expected,
             },
           })
@@ -132,7 +132,7 @@ export async function sendAlerts({
           return sendMonikaNotif({
             ...notification.data,
             body: {
-              type: status === 'DOWN' ? 'incident' : 'recovery',
+              type: probeState === 'DOWN' ? 'incident' : 'recovery',
               ...message.rawBody,
             },
           })
@@ -150,7 +150,7 @@ export async function sendAlerts({
               url,
               alert: validation.alert.query,
               time: new Date().toLocaleString(),
-              status,
+              probeState,
               expected: message.expected,
             },
           })

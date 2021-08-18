@@ -51,7 +51,7 @@ describe('validateResponse', () => {
       {
         alert: { query: 'status-not-2xx', subject: '', message: '' },
         responseValue: 300,
-        status: true,
+        somethingToReport: true,
       },
       {
         alert: {
@@ -60,7 +60,7 @@ describe('validateResponse', () => {
           message: '',
         },
         responseValue: 20,
-        status: true,
+        somethingToReport: true,
       },
     ])
   })
@@ -73,7 +73,7 @@ describe('validateResponse', () => {
       {
         alert: { query: 'status-not-2xx', subject: '', message: '' },
         responseValue: 200,
-        status: false,
+        somethingToReport: false,
       },
       {
         alert: {
@@ -82,7 +82,7 @@ describe('validateResponse', () => {
           message: '',
         },
         responseValue: 20,
-        status: true,
+        somethingToReport: true,
       },
     ])
   })
@@ -95,7 +95,7 @@ describe('validateResponse', () => {
       {
         alert: { query: 'status-not-2xx', subject: '', message: '' },
         responseValue: 300,
-        status: true,
+        somethingToReport: true,
       },
       {
         alert: {
@@ -104,7 +104,7 @@ describe('validateResponse', () => {
           message: '',
         },
         responseValue: 10,
-        status: false,
+        somethingToReport: false,
       },
     ])
   })
@@ -117,7 +117,7 @@ describe('validateResponse', () => {
       {
         alert: { query: 'status-not-2xx', subject: '', message: '' },
         responseValue: 200,
-        status: false,
+        somethingToReport: false,
       },
       {
         alert: {
@@ -126,7 +126,7 @@ describe('validateResponse', () => {
           message: '',
         },
         responseValue: 10,
-        status: false,
+        somethingToReport: false,
       },
     ])
   })
