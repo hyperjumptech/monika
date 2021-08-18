@@ -446,8 +446,6 @@ Please refer to the Monika documentations on how to how to configure notificatio
           sendAlerts({
             url: domain,
             probeState: 'invalid',
-            probeId: probe.id,
-            probeName: probe.name,
             incidentThreshold: probe.incidentThreshold,
             notifications: notifications ?? [],
             validation: {
@@ -537,8 +535,6 @@ const probeSendNotification = async (data: ProbeSendNotification) => {
     await sendAlerts({
       url: url,
       probeState: statusString,
-      probeId: probe.id,
-      probeName: probe.name,
       incidentThreshold: probe.incidentThreshold,
       notifications: notifications ?? [],
       validation:

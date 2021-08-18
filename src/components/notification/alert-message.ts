@@ -23,9 +23,9 @@
  **********************************************************************************/
 
 import { hostname } from 'os'
+import { ProbeAlert } from '../../interfaces/probe'
 import { parseAlertStringTime } from '../../plugins/validate-response/checkers'
 import { publicIpAddress } from '../../utils/public-ip'
-import { ProbeAlert } from '../../interfaces/probe'
 
 export function getMessageForAlert({
   alert,
@@ -44,6 +44,12 @@ export function getMessageForAlert({
 }): {
   subject: string
   body: string
+  rawBody: {
+    alert: string
+    url: string
+    time: string
+    monika: string
+  }
   expected: string
 } {
   const getSubject = (url: string, probeState: string) => {
@@ -115,6 +121,14 @@ export function getMessageForAlert({
   const message = {
     subject: getSubject(url, probeState),
     body: bodyString,
+    rawBody: {
+      alert: getExpectedMessage(probeState, responseValue),
+      url,
+      time: today,
+      monika: `${ipAddress} (local), ${
+        publicIpAddress ? `${publicIpAddress} (public)` : ''
+      } ${hostname} (hostname)`,
+    },
     expected: getExpectedMessage(probeState, responseValue),
   }
 

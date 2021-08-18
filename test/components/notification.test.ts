@@ -336,8 +336,6 @@ describe('send alerts', () => {
       url: 'https://hyperjump.tech',
       probeState: 'DOWN',
       incidentThreshold: 3,
-      probeName: 'monika-notif test',
-      probeId: 'monika-notif 1',
     })
 
     expect(monikaNotif.sendMonikaNotif).to.have.been.called.exactly(1)
