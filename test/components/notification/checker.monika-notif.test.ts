@@ -6,7 +6,6 @@ import {
   notificationChecker,
 } from '../../../src/components/notification/checker'
 import { MonikaNotifData } from '../../../src/interfaces/data'
-import { Notification } from '../../../src/interfaces/notification'
 
 chai.use(spies)
 
@@ -17,15 +16,17 @@ describe('notificationChecker - MonikaNotification', () => {
 
   const notificationConfig = {
     id: 'monika-notif',
-    type: 'monika-notif',
-  } as Notification
+    type: 'monika-notif' as const,
+  }
 
   it('should handle validation error - without URL', async () => {
     try {
       await notificationChecker([
         {
           ...notificationConfig,
-          data: {} as MonikaNotifData,
+          data: {
+            body: {},
+          } as MonikaNotifData,
         },
       ])
     } catch (error) {

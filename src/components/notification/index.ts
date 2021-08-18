@@ -22,17 +22,6 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import {
-  DesktopData,
-  MailgunData,
-  MonikaNotifData,
-  SMTPData,
-  TeamsData,
-  TelegramData,
-  WebhookData,
-  WhatsappData,
-  WorkplaceData,
-} from '../../interfaces/data'
 import { Notification } from '../../interfaces/notification'
 import { ValidateResponse } from '../../plugins/validate-response'
 import getIp from '../../utils/ip'
@@ -61,7 +50,7 @@ export async function sendAlerts({
   url: string
   status: string
   incidentThreshold: number
-}): Promise<Array<void>> {
+}): Promise<void> {
   const ipAddress = getIp()
   const message = getMessageForAlert({
     alert: validation.alert,
@@ -71,7 +60,7 @@ export async function sendAlerts({
     incidentThreshold,
     responseValue: validation.responseValue,
   })
-  return Promise.all<any>(
+  await Promise.all<any>(
     notifications.map((notification) => {
       switch (notification.type) {
         case 'mailgun': {
@@ -84,49 +73,47 @@ export async function sendAlerts({
                 name: 'Monika',
                 email: 'Monika@hyperjump.tech',
               },
-              recipients: (notification?.data as MailgunData)?.recipients?.join(
-                ','
-              ),
+              recipients: notification?.data?.recipients?.join(','),
             },
-            notification
+            notification.data
           )
         }
         case 'webhook': {
           return sendWebhook({
             ...notification.data,
             body: message.body,
-          } as WebhookData)
+          })
         }
         case 'discord': {
           return sendDiscord({
             ...notification.data,
             body: message.body,
-          } as WebhookData)
+          })
         }
         case 'slack': {
           return sendSlack({
             ...notification.data,
             body: message.body,
-          } as WebhookData)
+          })
         }
         case 'telegram': {
           return sendTelegram({
             ...notification.data,
             body: message.body,
-          } as TelegramData)
+          })
         }
         case 'smtp': {
-          const transporter = createSmtpTransport(notification.data as SMTPData)
+          const transporter = createSmtpTransport(notification.data)
           return sendSmtpMail(transporter, {
             // TODO: Read from ENV Variables
             from: 'http-probe@hyperjump.tech',
-            to: (notification?.data as SMTPData)?.recipients?.join(','),
+            to: notification?.data?.recipients?.join(','),
             subject: message.subject,
             text: message.body,
           })
         }
         case 'whatsapp': {
-          const data = notification.data as WhatsappData
+          const data = notification.data
           return sendWhatsapp(data, message.body)
         }
         case 'teams': {
@@ -139,7 +126,7 @@ export async function sendAlerts({
               status,
               expected: message.expected,
             },
-          } as TeamsData)
+          })
         }
         case 'monika-notif': {
           return sendMonikaNotif({
@@ -148,13 +135,13 @@ export async function sendAlerts({
               type: status === 'DOWN' ? 'incident' : 'recovery',
               ...message.rawBody,
             },
-          } as MonikaNotifData)
+          })
         }
         case 'workplace': {
           return sendWorkplace({
             ...notification.data,
             body: message.body,
-          } as WorkplaceData)
+          })
         }
         case 'desktop': {
           return sendDesktop({
@@ -166,7 +153,7 @@ export async function sendAlerts({
               status,
               expected: message.expected,
             },
-          } as DesktopData)
+          })
         }
         default: {
           return Promise.resolve()
