@@ -101,18 +101,21 @@ export function getMessageForAlert({
   }
 
   const today = new Date().toUTCString()
+
+  const pubIpAddress = publicIpAddress ? `${publicIpAddress} (public)` : ''
+
+  const bodyString = [
+    `${getBody(status)}\n`,
+    `Alert: ${getExpectedMessage(status, responseValue)}`,
+    `URL: ${url}`,
+    `At: ${today}`,
+    `Monika: ${ipAddress} (local), ${pubIpAddress} ${hostname} (hostname)`,
+  ].join('\n\n')
+
   const message = {
     subject: getSubject(url, probeState),
-    body: `
-      ${getBody(probeState)}\n\n
-      Alert: ${getExpectedMessage(probeState, responseValue)}\n
-      URL: ${url}\n
-      At: ${today}\n
-      Monika: ${ipAddress} (local), ${
-      publicIpAddress ? `${publicIpAddress} (public)` : ''
-    } ${hostname} (hostname)
-    `,
-    expected: getExpectedMessage(probeState, responseValue),
+    body: bodyString,
+    expected: getExpectedMessage(status, responseValue),
   }
 
   return message
