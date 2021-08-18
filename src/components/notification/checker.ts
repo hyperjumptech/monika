@@ -63,7 +63,7 @@ import {
 
 const subject = 'Monika is started'
 const body = `Monika is running on ${getIp()}`
-const currentState = 'INIT'
+const probeState = 'INIT'
 
 export const errorMessage = (
   notificationType: string,
@@ -154,7 +154,7 @@ const telegramNotificationInitialChecker = async (data: TelegramData) => {
 const teamsNotificationInitialChecker = async (data: TeamsData) => {
   try {
     await dataTeamsSchemaValidator.validateAsync(data)
-    await teamsNotificationSender({ data, body, currentState })
+    await teamsNotificationSender({ data, body, probeState })
 
     return 'success'
   } catch (error) {
@@ -165,7 +165,7 @@ const teamsNotificationInitialChecker = async (data: TeamsData) => {
 const monikaNotificationInitialChecker = async (data: MonikaNotifData) => {
   try {
     await dataMonikaNotifSchemaValidator.validateAsync(data)
-    await monikaNotificationSender({ data, body, status })
+    await monikaNotificationSender({ data, body, probeState })
 
     return 'success'
   } catch (error) {
@@ -186,7 +186,7 @@ const workplaceNotificationInitialChecker = async (data: WorkplaceData) => {
 
 const desktopNotificationInitialChecker = async (data: TeamsData) => {
   try {
-    desktopNotificationSender({ data, body, currentState })
+    desktopNotificationSender({ data, body, probeState })
 
     return 'success'
   } catch (error) {

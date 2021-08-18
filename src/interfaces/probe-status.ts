@@ -28,9 +28,9 @@ export interface ProbeStatus {
   details: ProbeStateDetails[]
 }
 
-export interface StatusDetails {
+export interface ProbeStateDetails {
   alertQuery: string
-  currentState:
+  probeState:
     | 'INIT'
     | 'UP_TRUE_EQUALS_THRESHOLD'
     | 'UP_TRUE_BELOW_THRESHOLD'

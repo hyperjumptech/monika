@@ -51,7 +51,7 @@ describe('send alerts', () => {
     const sent = await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', subject: '', message: '' },
-        status: false,
+        somethingToReport: false,
         responseValue: 200,
       },
       notifications: [
@@ -66,7 +66,7 @@ describe('send alerts', () => {
         },
       ],
       url: 'https://hyperjump.tech',
-      status: 'UP',
+      probeState: 'UP',
       incidentThreshold: 3,
     })
     expect(sent).to.have.length(1)
@@ -77,7 +77,7 @@ describe('send alerts', () => {
     const sent = await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', subject: '', message: '' },
-        status: true,
+        somethingToReport: true,
         responseValue: 500,
       },
       notifications: [
@@ -92,7 +92,7 @@ describe('send alerts', () => {
         },
       ],
       url: 'https://hyperjump.tech',
-      status: 'DOWN',
+      probeState: 'DOWN',
       incidentThreshold: 3,
     })
     expect(sent).to.have.length(1)
@@ -103,7 +103,7 @@ describe('send alerts', () => {
     const sent = await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', subject: '', message: '' },
-        status: true,
+        somethingToReport: true,
         responseValue: 500,
       },
       notifications: [
@@ -119,7 +119,7 @@ describe('send alerts', () => {
         },
       ],
       url: 'https://hyperjump.tech',
-      status: 'DOWN',
+      probeState: 'DOWN',
       incidentThreshold: 3,
     })
     expect(mailgun.sendMailgun).to.have.been.called()
@@ -131,7 +131,7 @@ describe('send alerts', () => {
     const sent = await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', subject: '', message: '' },
-        status: true,
+        somethingToReport: true,
         responseValue: 500,
       },
       notifications: [
@@ -146,7 +146,7 @@ describe('send alerts', () => {
         },
       ],
       url: 'https://hyperjump.tech',
-      status: 'DOWN',
+      probeState: 'DOWN',
       incidentThreshold: 3,
     })
     expect(mailgun.sendMailgun).to.have.been.called()
@@ -160,7 +160,7 @@ describe('send alerts', () => {
     const sent = await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', subject: '', message: '' },
-        status: true,
+        somethingToReport: true,
         responseValue: 500,
       },
       notifications: [
@@ -180,7 +180,7 @@ describe('send alerts', () => {
         },
       ],
       url: 'https://hyperjump.tech',
-      status: 'DOWN',
+      probeState: 'DOWN',
       incidentThreshold: 3,
     })
 
@@ -194,7 +194,7 @@ describe('send alerts', () => {
     const sent = await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', subject: '', message: '' },
-        status: true,
+        somethingToReport: true,
         responseValue: 500,
       },
       notifications: [
@@ -211,7 +211,7 @@ describe('send alerts', () => {
         },
       ],
       url: 'https://hyperjump.tech',
-      status: 'DOWN',
+      probeState: 'DOWN',
       incidentThreshold: 3,
     })
     expect(smtp.sendSmtpMail).to.have.been.called()
@@ -224,7 +224,7 @@ describe('send alerts', () => {
     const sent = await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', subject: '', message: '' },
-        status: true,
+        somethingToReport: true,
         responseValue: 500,
       },
       notifications: [
@@ -240,7 +240,7 @@ describe('send alerts', () => {
         },
       ],
       url: 'https://hyperjump.tech',
-      status: 'DOWN',
+      probeState: 'DOWN',
       incidentThreshold: 3,
     })
 
@@ -272,7 +272,7 @@ describe('send alerts', () => {
     const sent = await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', subject: '', message: '' },
-        status: true,
+        somethingToReport: true,
         responseValue: 500,
       },
       notifications: [
@@ -289,7 +289,7 @@ describe('send alerts', () => {
         },
       ],
       url: 'https://hyperjump.tech',
-      status: 'DOWN',
+      probeState: 'DOWN',
       incidentThreshold: 3,
     })
 
@@ -303,7 +303,7 @@ describe('send alerts', () => {
     const sent = await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', subject: '', message: '' },
-        status: true,
+        somethingToReport: true,
         responseValue: 500,
       },
       notifications: [
@@ -316,7 +316,7 @@ describe('send alerts', () => {
         },
       ],
       url: 'https://hyperjump.tech',
-      status: 'DOWN',
+      probeState: 'DOWN',
       incidentThreshold: 3,
     })
 
@@ -330,7 +330,7 @@ describe('send alerts', () => {
     const sent = await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', subject: '', message: '' },
-        status: true,
+        somethingToReport: true,
         responseValue: 500,
       },
       notifications: [
@@ -343,7 +343,7 @@ describe('send alerts', () => {
         },
       ],
       url: 'https://hyperjump.tech',
-      status: 'DOWN',
+      probeState: 'DOWN',
       incidentThreshold: 3,
       probeName: 'monika-notif test',
       probeId: 'monika-notif 1',

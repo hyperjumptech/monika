@@ -101,7 +101,7 @@ export async function doProbe(
         totalRequests,
         probeRes,
         alerts: validatedRes
-          .filter((item) => item.status)
+          .filter((item) => item.somethingToReport)
           .map((item) => item.alert),
         mLog,
       })
@@ -110,7 +110,7 @@ export async function doProbe(
       totalRequests += 1
 
       // Exit the loop if there is any triggers triggered
-      if (validatedRes.filter((item) => item.status).length > 0) {
+      if (validatedRes.filter((item) => item.somethingToReport).length > 0) {
         break
       }
 

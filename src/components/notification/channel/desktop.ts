@@ -95,7 +95,7 @@ const notify = (data: NotifyData) => {
 
 export const sendDesktop = async (data: DesktopData) => {
   try {
-    if (data.body.currentState === 'INIT') {
+    if (data.body.probeState === 'INIT') {
       notify({
         title: 'Monika is running',
         message: data.body.alert,
@@ -104,7 +104,7 @@ export const sendDesktop = async (data: DesktopData) => {
       return
     }
 
-    if (data.body.currentState === 'TERMINATE') {
+    if (data.body.probeState === 'TERMINATE') {
       notify({
         title: 'Monika terminated',
         message: data.body.alert,
@@ -113,7 +113,7 @@ export const sendDesktop = async (data: DesktopData) => {
       return
     }
 
-    const notifType = data.body.currentState === 'UP' ? 'RECOVERY' : 'INCIDENT'
+    const notifType = data.body.probeState === 'UP' ? 'RECOVERY' : 'INCIDENT'
     notify({
       title: `New ${notifType} notification from Monika (${data.body.alert})`,
       message: `${data.body.expected} for URL ${data.body.url} at ${

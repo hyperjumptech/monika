@@ -49,7 +49,7 @@ export interface TeamsData {
 }
 
 export interface TeamsDataBody extends WebhookDataBody {
-  currentState: string
+  probeState: string
   expected?: string
 }
 
@@ -112,6 +112,6 @@ export interface DesktopDataBody {
   url: string
   time: string
   alert: string
-  currentState: string
+  probeState: string
   expected?: string
 }

@@ -153,11 +153,11 @@ export const telegramNotificationSender = async ({
 export const teamsNotificationSender = async ({
   data,
   body,
-  currentState,
+  probeState,
 }: {
   data: TeamsData
   body: string
-  currentState: string
+  probeState: string
 }) => {
   await sendTeams({
     url: data?.url,
@@ -165,7 +165,7 @@ export const teamsNotificationSender = async ({
       url: '-',
       alert: body,
       time: new Date().toLocaleString(),
-      currentState,
+      probeState,
     },
   })
 }
@@ -173,16 +173,16 @@ export const teamsNotificationSender = async ({
 export const monikaNotificationSender = async ({
   data,
   body,
-  status,
+  probeState,
 }: {
   data: MonikaNotifData
   body: string
-  status: string
+  probeState: string
 }) => {
   await sendMonikaNotif({
     url: data?.url,
     body: {
-      type: status === 'INIT' ? 'start' : 'termination',
+      type: probeState === 'INIT' ? 'start' : 'termination',
       probe_url: '-',
       ip_address: getIp(),
       response_time: new Date().toLocaleString(),
@@ -212,11 +212,11 @@ export const workplaceNotificationSender = async ({
 export const desktopNotificationSender = async ({
   data,
   body,
-  currentState,
+  probeState,
 }: {
   data: DesktopData
   body: string
-  currentState: string
+  probeState: string
 }) => {
   await sendDesktop({
     url: data?.url,
@@ -224,7 +224,7 @@ export const desktopNotificationSender = async ({
       url: '-',
       alert: body,
       time: new Date().toLocaleString(),
-      currentState,
+      probeState,
     },
   })
 }

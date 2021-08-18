@@ -31,13 +31,13 @@ import { publicIpAddress } from '../../../utils/public-ip'
 
 export const sendTeams = async (data: TeamsData) => {
   try {
-    const notifType = data.body.currentState === 'UP' ? 'RECOVERY' : 'INCIDENT'
-    const notifColor = data.body.currentState === 'UP' ? '8CC152' : 'DF202E'
+    const notifType = data.body.probeState === 'UP' ? 'RECOVERY' : 'INCIDENT'
+    const notifColor = data.body.probeState === 'UP' ? '8CC152' : 'DF202E'
 
     let res: AxiosResponseWithExtraData
     if (
-      data.body.currentState === 'INIT' ||
-      data.body.currentState === 'TERMINATE'
+      data.body.probeState === 'INIT' ||
+      data.body.probeState === 'TERMINATE'
     ) {
       res = await axios({
         method: 'POST',

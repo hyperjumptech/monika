@@ -35,9 +35,9 @@ import { getEventEmitter } from '../../utils/events'
 const em = getEventEmitter()
 
 let PROBE_STATUSES: ProbeStatus[] = []
-const INIT_PROBE_STATUS_DETAILS: StatusDetails = {
+const INIT_PROBE_STATUS_DETAILS: ProbeStateDetails = {
   alertQuery: '',
-  state: 'INIT',
+  probeState: 'INIT',
   isDown: false,
   shouldSendNotification: false,
   totalTrue: 0,
@@ -73,24 +73,28 @@ const determineProbeState = ({
   recoveryThreshold: number
 }) => {
   const { isDown, consecutiveTrue, consecutiveFalse } = probeStatus
-  const { status } = validation
+  const { somethingToReport } = validation
 
-  if (!isDown && status && consecutiveTrue === incidentThreshold - 1)
+  if (!isDown && somethingToReport && consecutiveTrue === incidentThreshold - 1)
     return PROBE_STATE.UP_TRUE_EQUALS_THRESHOLD
 
-  if (!isDown && status && consecutiveTrue < incidentThreshold - 1) {
+  if (!isDown && somethingToReport && consecutiveTrue < incidentThreshold - 1) {
     return PROBE_STATE.UP_TRUE_BELOW_THRESHOLD
   }
 
-  if (!isDown && !status) return PROBE_STATE.UP_FALSE
+  if (!isDown && !somethingToReport) return PROBE_STATE.UP_FALSE
 
-  if (isDown && !status && consecutiveFalse === recoveryThreshold - 1)
+  if (
+    isDown &&
+    !somethingToReport &&
+    consecutiveFalse === recoveryThreshold - 1
+  )
     return PROBE_STATE.DOWN_FALSE_EQUALS_THRESHOLD
 
-  if (isDown && !status && consecutiveFalse < recoveryThreshold - 1)
+  if (isDown && !somethingToReport && consecutiveFalse < recoveryThreshold - 1)
     return PROBE_STATE.DOWN_FALSE_BELOW_THRESHOLD
 
-  if (isDown && status) return PROBE_STATE.DOWN_TRUE
+  if (isDown && somethingToReport) return PROBE_STATE.DOWN_TRUE
 
   return PROBE_STATE.INIT
 }
@@ -104,7 +108,7 @@ const updateProbeStatus = (
     case 'UP_FALSE':
       statusDetails = {
         ...statusDetails,
-        state: 'UP_FALSE',
+        probeState: 'UP_FALSE',
         shouldSendNotification: false,
         consecutiveTrue: 0,
         consecutiveFalse: statusDetails.consecutiveFalse + 1,
@@ -114,7 +118,7 @@ const updateProbeStatus = (
     case 'UP_TRUE_BELOW_THRESHOLD':
       statusDetails = {
         ...statusDetails,
-        state: 'UP_TRUE_BELOW_THRESHOLD',
+        probeState: 'UP_TRUE_BELOW_THRESHOLD',
         shouldSendNotification: false,
         consecutiveFalse: 0,
         totalTrue: statusDetails.totalTrue + 1,
@@ -124,7 +128,7 @@ const updateProbeStatus = (
     case 'UP_TRUE_EQUALS_THRESHOLD':
       statusDetails = {
         ...statusDetails,
-        state: 'UP_TRUE_EQUALS_THRESHOLD',
+        probeState: 'UP_TRUE_EQUALS_THRESHOLD',
         shouldSendNotification: true,
         isDown: true,
         consecutiveFalse: 0,
@@ -135,7 +139,7 @@ const updateProbeStatus = (
     case 'DOWN_TRUE':
       statusDetails = {
         ...statusDetails,
-        state: 'DOWN_TRUE',
+        probeState: 'DOWN_TRUE',
         shouldSendNotification: false,
         consecutiveFalse: 0,
         consecutiveTrue: statusDetails.consecutiveTrue + 1,
@@ -145,7 +149,7 @@ const updateProbeStatus = (
     case 'DOWN_FALSE_BELOW_THRESHOLD':
       statusDetails = {
         ...statusDetails,
-        state: 'DOWN_FALSE_BELOW_THRESHOLD',
+        probeState: 'DOWN_FALSE_BELOW_THRESHOLD',
         shouldSendNotification: false,
         consecutiveTrue: 0,
         totalFalse: statusDetails.totalFalse + 1,
@@ -155,7 +159,7 @@ const updateProbeStatus = (
     case 'DOWN_FALSE_EQUALS_THRESHOLD':
       statusDetails = {
         ...statusDetails,
-        state: 'DOWN_FALSE_EQUALS_THRESHOLD',
+        probeState: 'DOWN_FALSE_EQUALS_THRESHOLD',
         shouldSendNotification: true,
         isDown: false,
         consecutiveTrue: 0,
@@ -244,7 +248,7 @@ export const processThresholds = ({
         currentProbe.details = [...filteredProbeStatus, updatedStatus]
         results.push(updatedStatus)
 
-        if (validation.status === true) {
+        if (validation.somethingToReport === true) {
           setAlert(
             { flag: 'ALERT', message: updatedStatus.alertQuery as any },
             mLog
