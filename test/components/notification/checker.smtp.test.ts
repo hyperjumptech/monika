@@ -7,7 +7,6 @@ import {
   notificationChecker,
 } from '../../../src/components/notification/checker'
 import { SMTPData } from '../../../src/interfaces/data'
-import { Notification } from '../../../src/interfaces/notification'
 
 chai.use(spies)
 
@@ -18,8 +17,8 @@ describe('notificationChecker - smtpNotification', () => {
 
   const smtpNotificationConfig = {
     id: 'smtp',
-    type: 'smtp',
-  } as Notification
+    type: 'smtp' as const,
+  }
 
   it('should handle success', async () => {
     chai.spy.on(smtp, 'createSmtpTransport', () => ({
