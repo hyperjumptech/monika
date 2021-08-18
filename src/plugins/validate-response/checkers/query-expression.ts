@@ -22,26 +22,22 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import sgMail from '@sendgrid/mail'
-import { SendgridData } from '../../../interfaces/data'
-import { SendInput } from '../../../interfaces/mailgun'
+import { compileExpression } from '../../../utils/expression-parser'
+import { AxiosResponseWithExtraData } from '../../../interfaces/request'
 
-export const sendSendgrid = async (
-  inputData: SendInput,
-  sendgridConfigData: SendgridData
-) => {
-  const { subject, body, sender, recipients } = inputData
-  const API_KEY = sendgridConfigData.apiKey
-
-  sgMail.setApiKey(API_KEY)
-  const msg = {
-    to: recipients,
-    from: sender.email,
-    subject,
-    text: body.includes('https://')
-      ? body.replace(/https/g, '<https>')
-      : body.replace(/http/g, '<http>'),
+const queryExpression = (res: AxiosResponseWithExtraData, query: string) => {
+  const object = {
+    response: {
+      size: Number(res.headers['content-length']),
+      status: res.status,
+      time: res.config.extraData?.responseTime,
+      body: res.data,
+      headers: res.headers,
+    },
   }
+  const compiledFn = compileExpression(query, Object.keys(object))
 
-  return sgMail.send(msg)
+  return Boolean(compiledFn(object))
 }
+
+export default queryExpression

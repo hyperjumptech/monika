@@ -22,26 +22,80 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import sgMail from '@sendgrid/mail'
-import { SendgridData } from '../../../interfaces/data'
-import { SendInput } from '../../../interfaces/mailgun'
+import { expect } from 'chai'
+import { AxiosResponseWithExtraData } from '../../../../interfaces/request'
+import queryExpression from '../query-expression'
 
-export const sendSendgrid = async (
-  inputData: SendInput,
-  sendgridConfigData: SendgridData
-) => {
-  const { subject, body, sender, recipients } = inputData
-  const API_KEY = sendgridConfigData.apiKey
+describe('queryExpression', () => {
+  it('should handle response time query', () => {
+    const res = {
+      headers: {},
+      config: {
+        extraData: {
+          responseTime: 150,
+        },
+      },
+    } as AxiosResponseWithExtraData
 
-  sgMail.setApiKey(API_KEY)
-  const msg = {
-    to: recipients,
-    from: sender.email,
-    subject,
-    text: body.includes('https://')
-      ? body.replace(/https/g, '<https>')
-      : body.replace(/http/g, '<http>'),
-  }
+    const result = queryExpression(res, 'response.time > 1000')
 
-  return sgMail.send(msg)
-}
+    expect(result).to.be.false
+  })
+
+  it('should handle response status query', () => {
+    const res = {
+      status: 200,
+      headers: {},
+      config: {},
+    } as AxiosResponseWithExtraData
+
+    const result = queryExpression(res, 'response.status != 200')
+
+    expect(result).to.be.false
+  })
+
+  it('should handle response size query', () => {
+    const res = {
+      status: 200,
+      headers: { 'content-length': 2000 },
+      config: {},
+    } as AxiosResponseWithExtraData
+
+    const result = queryExpression(res, 'response.size < 1000')
+
+    expect(result).to.be.false
+  })
+
+  it('should handle response headers query', () => {
+    const res = {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+      config: {},
+    } as AxiosResponseWithExtraData
+
+    const result = queryExpression(
+      res,
+      "response.headers['content-type'] != 'application/json'"
+    )
+
+    expect(result).to.be.false
+  })
+
+  it('should handle response body query', () => {
+    const res = {
+      status: 200,
+      headers: {},
+      config: {},
+      data: {
+        message: 'Hello',
+      },
+    } as AxiosResponseWithExtraData
+
+    const result = queryExpression(
+      res,
+      "startsWith(response.body.message, 'Hello')"
+    )
+
+    expect(result).to.be.false
+  })
+})

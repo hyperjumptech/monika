@@ -22,26 +22,23 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import sgMail from '@sendgrid/mail'
-import { SendgridData } from '../../../interfaces/data'
-import { SendInput } from '../../../interfaces/mailgun'
+import { spawnSync } from 'child_process'
+import { type } from 'os'
 
-export const sendSendgrid = async (
-  inputData: SendInput,
-  sendgridConfigData: SendgridData
-) => {
-  const { subject, body, sender, recipients } = inputData
-  const API_KEY = sendgridConfigData.apiKey
-
-  sgMail.setApiKey(API_KEY)
-  const msg = {
-    to: recipients,
-    from: sender.email,
-    subject,
-    text: body.includes('https://')
-      ? body.replace(/https/g, '<https>')
-      : body.replace(/http/g, '<http>'),
+export const open = (url: string) => {
+  const operatingSystem = type()
+  switch (operatingSystem) {
+    case 'Darwin':
+      spawnSync('open', [url])
+      break
+    case 'Linux':
+      spawnSync('xdg-open', [url])
+      break
+    case 'Windows NT':
+      spawnSync('start', [url])
+      break
+    default:
+      // TODO: Handle new OS
+      break
   }
-
-  return sgMail.send(msg)
 }

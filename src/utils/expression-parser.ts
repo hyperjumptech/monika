@@ -22,26 +22,48 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import sgMail from '@sendgrid/mail'
-import { SendgridData } from '../../../interfaces/data'
-import { SendInput } from '../../../interfaces/mailgun'
+import { compileExpression as _compileExpression } from 'filtrex'
+import {
+  get,
+  has,
+  endsWith,
+  startsWith,
+  lowerCase,
+  upperCase,
+  size,
+  includes,
+} from 'lodash'
 
-export const sendSendgrid = async (
-  inputData: SendInput,
-  sendgridConfigData: SendgridData
-) => {
-  const { subject, body, sender, recipients } = inputData
-  const API_KEY = sendgridConfigData.apiKey
+// wrap substrings that are object accessor with double quote
+// then wrap again with __getValueByPath function call
+// eg: 'response.body.title' becomes '__getValueByPath("response.body.title")'
+export const sanitizeExpression = (query: string, objectKeys: string[]) => {
+  let sanitizedQuery = query
 
-  sgMail.setApiKey(API_KEY)
-  const msg = {
-    to: recipients,
-    from: sender.email,
-    subject,
-    text: body.includes('https://')
-      ? body.replace(/https/g, '<https>')
-      : body.replace(/http/g, '<http>'),
-  }
+  objectKeys.forEach((key) => {
+    const pattern = new RegExp(`(^| |\\()(${key}(\\.|\\[)\\S*[^\\s),])`, 'g')
+    sanitizedQuery = sanitizedQuery.replace(pattern, '$1__getValueByPath("$2")')
+  })
 
-  return sgMail.send(msg)
+  return sanitizedQuery
+}
+
+export const compileExpression = (
+  expression: string,
+  objectKeys: string[] = []
+) => (obj: any) => {
+  const sanitizedExpression = sanitizeExpression(expression, objectKeys)
+
+  return _compileExpression(sanitizedExpression, {
+    extraFunctions: {
+      __getValueByPath: (path: string) => get(obj, path), //  for internal use, not to be exposed to user
+      has,
+      lowerCase,
+      upperCase,
+      startsWith,
+      endsWith,
+      includes,
+      size,
+    },
+  })(obj)
 }

@@ -22,26 +22,32 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import sgMail from '@sendgrid/mail'
-import { SendgridData } from '../../../interfaces/data'
-import { SendInput } from '../../../interfaces/mailgun'
+import { expect } from 'chai'
+import { sanitizeExpression } from '../../src/utils/expression-parser'
 
-export const sendSendgrid = async (
-  inputData: SendInput,
-  sendgridConfigData: SendgridData
-) => {
-  const { subject, body, sender, recipients } = inputData
-  const API_KEY = sendgridConfigData.apiKey
+describe('sanitizeExpression', () => {
+  it('sanitize "response.status == 500" expression', () => {
+    const sanitized = sanitizeExpression('response.status == 500', ['response'])
+    expect(sanitized).to.equals('__getValueByPath("response.status") == 500')
+  })
 
-  sgMail.setApiKey(API_KEY)
-  const msg = {
-    to: recipients,
-    from: sender.email,
-    subject,
-    text: body.includes('https://')
-      ? body.replace(/https/g, '<https>')
-      : body.replace(/http/g, '<http>'),
-  }
+  it('sanitize "response.body.data[0].title == "The Title"" expression', () => {
+    const sanitized = sanitizeExpression(
+      'response.body.data[0].title == "The Title"',
+      ['response']
+    )
+    expect(sanitized).to.equals(
+      '__getValueByPath("response.body.data[0].title") == "The Title"'
+    )
+  })
 
-  return sgMail.send(msg)
-}
+  it('sanitize "startsWith(lowerCase(response.body.title), "The")" expression', () => {
+    const sanitized = sanitizeExpression(
+      'startsWith(lowerCase(response.body.title), "The")',
+      ['response']
+    )
+    expect(sanitized).to.equals(
+      'startsWith(lowerCase(__getValueByPath("response.body.title")), "The")'
+    )
+  })
+})

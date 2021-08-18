@@ -22,18 +22,6 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import {
-  MailgunData,
-  SMTPData,
-  TeamsData,
-  TelegramData,
-  WebhookData,
-  WhatsappData,
-  WorkplaceData,
-  MonikaNotifData,
-  DesktopData,
-  SendgridData,
-} from '../../interfaces/data'
 import { Notification } from '../../interfaces/notification'
 import getIp from '../../utils/ip'
 import { getMessageForAlert } from './alert-message'
@@ -67,13 +55,7 @@ export async function sendAlerts({
   incidentThreshold: number
   probeName?: string
   probeId?: string
-}): Promise<
-  Array<{
-    alert: string
-    notification: string
-    url: string
-  }>
-> {
+}): Promise<void> {
   const ipAddress = getIp()
   const message = getMessageForAlert({
     alert: validation.alert,
@@ -83,7 +65,7 @@ export async function sendAlerts({
     incidentThreshold,
     responseValue: validation.responseValue,
   })
-  const sent = await Promise.all<any>(
+  await Promise.all<any>(
     notifications.map((notification) => {
       switch (notification.type) {
         case 'mailgun': {
@@ -96,114 +78,74 @@ export async function sendAlerts({
                 name: 'Monika',
                 email: 'Monika@hyperjump.tech',
               },
-              recipients: (notification?.data as MailgunData)?.recipients?.join(
-                ','
-              ),
+              recipients: notification?.data?.recipients?.join(','),
             },
-            notification
-          ).then(() => ({
-            notification: 'mailgun',
-            alert: validation.alert,
-            url,
-          }))
+            notification.data
+          )
         }
         case 'sendgrid': {
           return sendSendgrid(
             {
-              recipients: (notification?.data as SendgridData)?.recipients?.join(
-                ','
-              ),
+              recipients: notification?.data?.recipients?.join(','),
               subject: message.subject,
               body: message.body,
               sender: {
                 name: 'Monika',
-                email: (notification?.data as SendgridData)?.sender,
+                email: notification?.data?.sender,
               },
             },
-            notification
+            notification.data
           )
         }
         case 'webhook': {
           return sendWebhook({
             ...notification.data,
             body: message.body,
-          } as WebhookData).then(() => ({
-            notification: 'webhook',
-            alert: validation.alert,
-            url,
-          }))
+          })
         }
         case 'discord': {
           return sendDiscord({
             ...notification.data,
             body: message.body,
-          } as WebhookData).then(() => ({
-            notification: 'discord',
-            alert: validation.alert,
-            url,
-          }))
+          })
         }
         case 'slack': {
           return sendSlack({
             ...notification.data,
             body: message.body,
-          } as WebhookData).then(() => ({
-            notification: 'slack',
-            alert: validation.alert,
-            url,
-          }))
+          })
         }
         case 'telegram': {
           return sendTelegram({
             ...notification.data,
-            body: {
-              url,
-              alert: validation.alert,
-              time: new Date().toLocaleString(),
-            },
-          } as TelegramData).then(() => ({
-            notification: 'telegram',
-            alert: validation.alert,
-            url,
-          }))
+            body: message.body,
+          })
         }
         case 'smtp': {
-          const transporter = createSmtpTransport(notification.data as SMTPData)
+          const transporter = createSmtpTransport(notification.data)
           return sendSmtpMail(transporter, {
             // TODO: Read from ENV Variables
             from: 'http-probe@hyperjump.tech',
-            to: (notification?.data as SMTPData)?.recipients?.join(','),
+            to: notification?.data?.recipients?.join(','),
             subject: message.subject,
             text: message.body,
-          }).then(() => ({
-            notification: 'smtp',
-            alert: validation.alert,
-            url,
-          }))
+          })
         }
         case 'whatsapp': {
-          const data = notification.data as WhatsappData
-          return sendWhatsapp(data, validation.alert).then(() => ({
-            notification: 'whatsapp',
-            alert: validation.alert,
-            url,
-          }))
+          const data = notification.data
+          return sendWhatsapp(data, validation.alert.query)
         }
         case 'teams': {
           return sendTeams({
             ...notification.data,
             body: {
-              alert: validation.alert,
+              alert: validation.alert.query,
               url,
               time: new Date().toLocaleString(),
               status,
               expected: message.expected,
             },
-          } as TeamsData).then(() => ({
-            notification: 'teams',
-            alert: validation.alert,
-            url,
-          }))
+          })
         }
         case 'monika-notif': {
           return sendMonikaNotif({
@@ -214,55 +156,33 @@ export async function sendAlerts({
               probe_name: probeName,
               ip_address: ipAddress,
               monika_id: probeId,
-              alert: validation.alert,
+              alert: validation.alert.query,
               response_time: new Date().toLocaleString(),
             },
-          } as MonikaNotifData).then(() => ({
-            notification: 'monika-notif',
-            alert: validation.alert,
-            url,
-          }))
+          })
         }
         case 'workplace': {
           return sendWorkplace({
             ...notification.data,
-            body: {
-              url,
-              alert: validation.alert,
-              time: new Date().toLocaleString(),
-            },
-          } as WorkplaceData).then(() => ({
-            notification: 'workplace',
-            alert: validation.alert,
-            url,
-          }))
+            body: message.body,
+          })
         }
         case 'desktop': {
           return sendDesktop({
             ...notification.data,
             body: {
               url,
-              alert: validation.alert,
+              alert: validation.alert.query,
               time: new Date().toLocaleString(),
               status,
               expected: message.expected,
             },
-          } as DesktopData).then(() => ({
-            notification: 'desktop',
-            alert: validation.alert,
-            url,
-          }))
+          })
         }
         default: {
-          return Promise.resolve({
-            notification: '',
-            alert: validation.alert,
-            url,
-          })
+          return Promise.resolve()
         }
       }
     })
   )
-
-  return sent
 }
