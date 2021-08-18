@@ -277,9 +277,7 @@ describe('send alerts', () => {
           data: {
             group_id: '123',
             bot_token: '123',
-            body: {
-              url: 'https://hyperjump.tech',
-            },
+            body: `url: 'https://hyperjump.tech'`,
           } as TelegramData,
         },
       ],

@@ -103,11 +103,7 @@ export async function sendAlerts({
         case 'telegram': {
           return sendTelegram({
             ...notification.data,
-            body: {
-              url,
-              alert: validation.alert.query,
-              time: new Date().toLocaleString(),
-            },
+            body: message.body,
           })
         }
         case 'smtp': {
@@ -153,11 +149,7 @@ export async function sendAlerts({
         case 'workplace': {
           return sendWorkplace({
             ...notification.data,
-            body: {
-              url,
-              alert: validation.alert.query,
-              time: new Date().toLocaleString(),
-            },
+            body: message.body,
           })
         }
         case 'desktop': {
