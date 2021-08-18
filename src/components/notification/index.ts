@@ -187,7 +187,7 @@ export async function sendAlerts({
           return sendMonikaNotif({
             ...notification.data,
             body: {
-              type: status === 'DOWN' ? 'incident' : 'recovery',
+              type: probeState === 'DOWN' ? 'incident' : 'recovery',
               probe_url: url,
               probe_name: probeName,
               ip_address: ipAddress,
