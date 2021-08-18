@@ -32,7 +32,7 @@ import {
   WebhookData,
   WorkplaceData,
 } from '../../interfaces/data'
-import getIp from '../../utils/ip'
+import { publicIpAddress } from '../../utils/public-ip'
 import { sendDesktop } from './channel/desktop'
 import { sendDiscord } from './channel/discord'
 import { sendMailgun } from './channel/mailgun'
@@ -167,7 +167,6 @@ export const teamsNotificationSender = async ({
 
 export const monikaNotificationSender = async ({
   data,
-  body,
   status,
 }: {
   data: MonikaNotifData
@@ -178,10 +177,7 @@ export const monikaNotificationSender = async ({
     url: data?.url,
     body: {
       type: status === 'INIT' ? 'start' : 'termination',
-      probe_url: '-',
-      ip_address: getIp(),
-      response_time: new Date().toLocaleString(),
-      alert: body,
+      ip_address: publicIpAddress,
     },
   })
 }
