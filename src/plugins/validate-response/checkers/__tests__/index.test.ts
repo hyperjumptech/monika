@@ -36,42 +36,60 @@ describe('responseChecker', () => {
 
     it('should handle when response status is 100', () => {
       const res = generateMockedResponse(100)
-      const data = responseChecker('status-not-2xx', res)
+      const data = responseChecker(
+        { query: 'status-not-2xx', subject: '', message: '' },
+        res
+      )
 
       expect(data).to.equals(true)
     })
 
     it('should handle when response status is 200', () => {
       const res = generateMockedResponse(200)
-      const data = responseChecker('status-not-2xx', res)
+      const data = responseChecker(
+        { query: 'status-not-2xx', subject: '', message: '' },
+        res
+      )
 
       expect(data).to.equals(false)
     })
 
     it('should handle when response status is 201', () => {
       const res = generateMockedResponse(201)
-      const data = responseChecker('status-not-2xx', res)
+      const data = responseChecker(
+        { query: 'status-not-2xx', subject: '', message: '' },
+        res
+      )
 
       expect(data).to.equals(false)
     })
 
     it('should handle when response status is 300', () => {
       const res = generateMockedResponse(300)
-      const data = responseChecker('status-not-2xx', res)
+      const data = responseChecker(
+        { query: 'status-not-2xx', subject: '', message: '' },
+        res
+      )
 
       expect(data).to.equals(true)
     })
 
     it('should handle when response status is 400', () => {
       const res = generateMockedResponse(400)
-      const data = responseChecker('status-not-2xx', res)
+      const data = responseChecker(
+        { query: 'status-not-2xx', subject: '', message: '' },
+        res
+      )
 
       expect(data).to.equals(true)
     })
 
     it('should handle when response status is 500', () => {
       const res = generateMockedResponse(500)
-      const data = responseChecker('status-not-2xx', res)
+      const data = responseChecker(
+        { query: 'status-not-2xx', subject: '', message: '' },
+        res
+      )
 
       expect(data).to.equals(true)
     })
@@ -90,28 +108,40 @@ describe('responseChecker', () => {
 
     it('seconds - should handle when response time is greater than alert defined response time', () => {
       const res = generateMockedResponse(20000)
-      const data = responseChecker('response-time-greater-than-10-s', res)
+      const data = responseChecker(
+        { query: 'response-time-greater-than-10-s', subject: '', message: '' },
+        res
+      )
 
       expect(data).to.equals(true)
     })
 
     it('seconds - should handle when response time is less than alert defined response time', () => {
       const res = generateMockedResponse(10000)
-      const data = responseChecker('response-time-greater-than-20-s', res)
+      const data = responseChecker(
+        { query: 'response-time-greater-than-20-s', subject: '', message: '' },
+        res
+      )
 
       expect(data).to.equals(false)
     })
 
     it('milliseconds - should handle when response time is greater than alert defined response time', () => {
       const res = generateMockedResponse(20)
-      const data = responseChecker('response-time-greater-than-10-ms', res)
+      const data = responseChecker(
+        { query: 'response-time-greater-than-10-ms', subject: '', message: '' },
+        res
+      )
 
       expect(data).to.equals(true)
     })
 
     it('milliseconds - should handle when response time is less than alert defined response time', () => {
       const res = generateMockedResponse(10)
-      const data = responseChecker('response-time-greater-than-20-ms', res)
+      const data = responseChecker(
+        { query: 'response-time-greater-than-20-ms', subject: '', message: '' },
+        res
+      )
 
       expect(data).to.equals(false)
     })

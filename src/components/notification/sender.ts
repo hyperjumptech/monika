@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import {
-  DiscordData,
+  DesktopData,
   MailgunData,
   MonikaNotifData,
   SendgridData,
@@ -32,20 +32,19 @@ import {
   TelegramData,
   WebhookData,
   WorkplaceData,
-  DesktopData,
 } from '../../interfaces/data'
-import getIp from '../../utils/ip'
+import { publicIpAddress } from '../../utils/public-ip'
+import { sendDesktop } from './channel/desktop'
 import { sendDiscord } from './channel/discord'
 import { sendMailgun } from './channel/mailgun'
+import { sendMonikaNotif } from './channel/monika-notif'
 import { sendSendgrid } from './channel/sendgrid'
 import { sendSlack } from './channel/slack'
 import { createSmtpTransport, sendSmtpMail } from './channel/smtp'
 import { sendTeams } from './channel/teams'
 import { sendTelegram } from './channel/telegram'
 import { sendWebhook } from './channel/webhook'
-import { sendMonikaNotif } from './channel/monika-notif'
 import { sendWorkplace } from './channel/workplace'
-import { sendDesktop } from './channel/desktop'
 
 export const errorMessage = (
   notificationType: string,
@@ -94,7 +93,7 @@ export const mailgunNotificationSender = async ({
         email: 'monika@hyperjump.tech',
       },
     },
-    { id: 'mailgun', type: 'mailgun', data }
+    data
   )
 }
 
@@ -117,59 +116,20 @@ export const sendgridNotificationSender = async ({
         email: 'monika@hyperjump.tech',
       },
     },
-    { id: 'sendgrid', type: 'sendgrid', data }
+    data
   )
 }
 
-export const webhookNotificationSender = async ({
-  data,
-  body,
-}: {
-  data: WebhookData
-  body: string
-}) => {
-  await sendWebhook({
-    url: data?.url,
-    body: {
-      url: '-',
-      alert: body,
-      time: new Date().toLocaleString(),
-    },
-  })
+export const webhookNotificationSender = async ({ url, body }: WebhookData) => {
+  await sendWebhook({ url, body })
 }
 
-export const discordNotificationSender = async ({
-  data,
-  body,
-}: {
-  data: DiscordData
-  body: string
-}) => {
-  await sendDiscord({
-    url: data?.url,
-    body: {
-      url: '-',
-      alert: body,
-      time: new Date().toLocaleString(),
-    },
-  })
+export const discordNotificationSender = async ({ url, body }: WebhookData) => {
+  await sendDiscord({ url, body })
 }
 
-export const slackNotificationSender = async ({
-  data,
-  body,
-}: {
-  data: WebhookData
-  body: string
-}) => {
-  await sendSlack({
-    url: data?.url,
-    body: {
-      url: '-',
-      alert: body,
-      time: new Date().toLocaleString(),
-    },
-  })
+export const slackNotificationSender = async ({ url, body }: WebhookData) => {
+  await sendSlack({ url, body })
 }
 
 export const telegramNotificationSender = async ({
@@ -182,11 +142,7 @@ export const telegramNotificationSender = async ({
   await sendTelegram({
     group_id: data?.group_id,
     bot_token: data?.bot_token,
-    body: {
-      url: '-',
-      alert: body,
-      time: new Date().toLocaleString(),
-    },
+    body,
   })
 }
 
@@ -212,7 +168,6 @@ export const teamsNotificationSender = async ({
 
 export const monikaNotificationSender = async ({
   data,
-  body,
   status,
 }: {
   data: MonikaNotifData
@@ -223,10 +178,7 @@ export const monikaNotificationSender = async ({
     url: data?.url,
     body: {
       type: status === 'INIT' ? 'start' : 'termination',
-      probe_url: '-',
-      ip_address: getIp(),
-      response_time: new Date().toLocaleString(),
-      alert: body,
+      ip_address: publicIpAddress,
     },
   })
 }
@@ -241,11 +193,7 @@ export const workplaceNotificationSender = async ({
   await sendWorkplace({
     thread_id: data.thread_id,
     access_token: data.access_token,
-    body: {
-      url: '-',
-      alert: body,
-      time: new Date().toLocaleString(),
-    },
+    body,
   })
 }
 

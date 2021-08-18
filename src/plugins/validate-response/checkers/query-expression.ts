@@ -22,22 +22,22 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios from 'axios'
+import { compileExpression } from '../../../utils/expression-parser'
+import { AxiosResponseWithExtraData } from '../../../interfaces/request'
 
-import { WebhookData } from '../../../interfaces/data'
-
-export const sendSlack = async (data: WebhookData) => {
-  try {
-    const res = await axios({
-      method: 'POST',
-      url: data.url,
-      data: {
-        text: data.body,
-      },
-    })
-
-    return res
-  } catch (error) {
-    throw error
+const queryExpression = (res: AxiosResponseWithExtraData, query: string) => {
+  const object = {
+    response: {
+      size: Number(res.headers['content-length']),
+      status: res.status,
+      time: res.config.extraData?.responseTime,
+      body: res.data,
+      headers: res.headers,
+    },
   }
+  const compiledFn = compileExpression(query, Object.keys(object))
+
+  return Boolean(compiledFn(object))
 }
+
+export default queryExpression

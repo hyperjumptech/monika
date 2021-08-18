@@ -22,22 +22,23 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios from 'axios'
+import { spawnSync } from 'child_process'
+import { type } from 'os'
 
-import { WebhookData } from '../../../interfaces/data'
-
-export const sendSlack = async (data: WebhookData) => {
-  try {
-    const res = await axios({
-      method: 'POST',
-      url: data.url,
-      data: {
-        text: data.body,
-      },
-    })
-
-    return res
-  } catch (error) {
-    throw error
+export const open = (url: string) => {
+  const operatingSystem = type()
+  switch (operatingSystem) {
+    case 'Darwin':
+      spawnSync('open', [url])
+      break
+    case 'Linux':
+      spawnSync('xdg-open', [url])
+      break
+    case 'Windows NT':
+      spawnSync('start', [url])
+      break
+    default:
+      // TODO: Handle new OS
+      break
   }
 }

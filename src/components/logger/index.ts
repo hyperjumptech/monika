@@ -24,7 +24,7 @@
 
 import chalk from 'chalk'
 import { AxiosResponseWithExtraData } from '../../interfaces/request'
-import { Probe } from '../../interfaces/probe'
+import { ProbeAlert, Probe } from '../../interfaces/probe'
 import { Notification } from '../../interfaces/notification'
 import { getAllLogs, saveProbeRequestLog } from './history'
 import { log } from '../../utils/pino'
@@ -73,7 +73,7 @@ export function probeBuildLog({
   probe: Probe
   totalRequests: number
   probeRes: AxiosResponseWithExtraData
-  alerts?: string[]
+  alerts?: ProbeAlert[]
   error?: string
   mLog: LogObject
 }): LogObject {
@@ -87,7 +87,7 @@ export function probeBuildLog({
 
   if (alerts?.length) {
     mLog.alert.flag = 'alert'
-    mLog.alert.message = alerts
+    mLog.alert.message = alerts.map((alert) => alert.query)
   }
 
   if (error?.length) log.error('probe error: ', error)
@@ -102,7 +102,7 @@ export function probeBuildLog({
     probe,
     totalRequests,
     probeRes,
-    alerts,
+    alertQueries: (alerts || []).map((alert) => alert.query),
     error,
   })
 
@@ -118,14 +118,14 @@ export function probeBuildLog({
 export function setNotificationLog(
   {
     type,
-    alertMsg,
+    alert,
     notification,
     probe,
   }: {
     probe: Probe
     notification: Notification
     type: 'NOTIFY-INCIDENT' | 'NOTIFY-RECOVER'
-    alertMsg: string
+    alert: ProbeAlert
   },
   mLog: LogObject
 ): LogObject {
@@ -141,7 +141,7 @@ export function setNotificationLog(
 
   mLog.notification.flag = type
   mLog.notification.message[0] = msg
-  saveNotificationLog(probe, notification, type, alertMsg)
+  saveNotificationLog(probe, notification, type, alert.query)
 
   return mLog
 }

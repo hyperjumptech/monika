@@ -27,7 +27,10 @@ import validateResponse from '..'
 import { AxiosResponseWithExtraData } from '../../../interfaces/request'
 
 describe('validateResponse', () => {
-  const mockedAlerts = ['status-not-2xx', 'response-time-greater-than-10-ms']
+  const mockedAlerts = [
+    { query: 'status-not-2xx', subject: '', message: '' },
+    { query: 'response-time-greater-than-10-ms', subject: '', message: '' },
+  ]
 
   const generateMockedResponse = (status: number, responseTime: number) => {
     return {
@@ -45,9 +48,17 @@ describe('validateResponse', () => {
     const data = validateResponse(mockedAlerts, res)
 
     expect(data).to.eql([
-      { alert: 'status-not-2xx', responseValue: 300, status: true },
       {
-        alert: 'response-time-greater-than-10-ms',
+        alert: { query: 'status-not-2xx', subject: '', message: '' },
+        responseValue: 300,
+        status: true,
+      },
+      {
+        alert: {
+          query: 'response-time-greater-than-10-ms',
+          subject: '',
+          message: '',
+        },
         responseValue: 20,
         status: true,
       },
@@ -59,9 +70,17 @@ describe('validateResponse', () => {
     const data = validateResponse(mockedAlerts, res)
 
     expect(data).to.eql([
-      { alert: 'status-not-2xx', responseValue: 200, status: false },
       {
-        alert: 'response-time-greater-than-10-ms',
+        alert: { query: 'status-not-2xx', subject: '', message: '' },
+        responseValue: 200,
+        status: false,
+      },
+      {
+        alert: {
+          query: 'response-time-greater-than-10-ms',
+          subject: '',
+          message: '',
+        },
         responseValue: 20,
         status: true,
       },
@@ -73,9 +92,17 @@ describe('validateResponse', () => {
     const data = validateResponse(mockedAlerts, res)
 
     expect(data).to.eql([
-      { alert: 'status-not-2xx', responseValue: 300, status: true },
       {
-        alert: 'response-time-greater-than-10-ms',
+        alert: { query: 'status-not-2xx', subject: '', message: '' },
+        responseValue: 300,
+        status: true,
+      },
+      {
+        alert: {
+          query: 'response-time-greater-than-10-ms',
+          subject: '',
+          message: '',
+        },
         responseValue: 10,
         status: false,
       },
@@ -87,9 +114,17 @@ describe('validateResponse', () => {
     const data = validateResponse(mockedAlerts, res)
 
     expect(data).to.eql([
-      { alert: 'status-not-2xx', responseValue: 200, status: false },
       {
-        alert: 'response-time-greater-than-10-ms',
+        alert: { query: 'status-not-2xx', subject: '', message: '' },
+        responseValue: 200,
+        status: false,
+      },
+      {
+        alert: {
+          query: 'response-time-greater-than-10-ms',
+          subject: '',
+          message: '',
+        },
         responseValue: 10,
         status: false,
       },

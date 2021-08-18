@@ -80,7 +80,7 @@ export default function NavBar() {
             <li className="nav-item">
               <a
                 className="px-3 py-2 flex items-center text-white font-sans font-bold leading-snug hover:opacity-75"
-                href="https://hyperjumptech.github.io/monika-config-generator"
+                href="https://monika-config.hyperjump.tech/"
               >
                 <span className="ml-2">Config Generator</span>
               </a>
