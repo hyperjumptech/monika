@@ -76,7 +76,7 @@ export interface MonikaNotifDataBody {
 export interface TelegramData {
   group_id: string
   bot_token: string
-  body: WebhookDataBody
+  body: string
 }
 
 export interface WebhookDataBody {
@@ -94,11 +94,5 @@ export interface WhatsappData extends MailData {
 export interface WorkplaceData {
   thread_id: string
   access_token: string
-  body: WorkplaceDataBody
-}
-
-export interface WorkplaceDataBody {
-  url: string
-  time: string
-  alert: string
+  body: string
 }

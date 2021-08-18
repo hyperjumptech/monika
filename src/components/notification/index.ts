@@ -137,11 +137,7 @@ export async function sendAlerts({
         case 'telegram': {
           return sendTelegram({
             ...notification.data,
-            body: {
-              url,
-              alert: validation.alert,
-              time: new Date().toLocaleString(),
-            },
+            body: message.body,
           } as TelegramData).then(() => ({
             notification: 'telegram',
             alert: validation.alert,
@@ -164,7 +160,7 @@ export async function sendAlerts({
         }
         case 'whatsapp': {
           const data = notification.data as WhatsappData
-          return sendWhatsapp(data, validation.alert).then(() => ({
+          return sendWhatsapp(data, validation.alert.query).then(() => ({
             notification: 'whatsapp',
             alert: validation.alert,
             url,
@@ -174,7 +170,7 @@ export async function sendAlerts({
           return sendTeams({
             ...notification.data,
             body: {
-              alert: validation.alert,
+              alert: validation.alert.query,
               url,
               time: new Date().toLocaleString(),
               status,
@@ -195,7 +191,7 @@ export async function sendAlerts({
               probe_name: probeName,
               ip_address: ipAddress,
               monika_id: probeId,
-              alert: validation.alert,
+              alert: validation.alert.query,
               response_time: new Date().toLocaleString(),
             },
           } as MonikaNotifData).then(() => ({
@@ -207,11 +203,7 @@ export async function sendAlerts({
         case 'workplace': {
           return sendWorkplace({
             ...notification.data,
-            body: {
-              url,
-              alert: validation.alert,
-              time: new Date().toLocaleString(),
-            },
+            body: message.body,
           } as WorkplaceData).then(() => ({
             notification: 'workplace',
             alert: validation.alert,
