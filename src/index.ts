@@ -448,7 +448,11 @@ Please refer to the Monika documentations on how to how to configure notificatio
             status: 'invalid',
             incidentThreshold: probe.incidentThreshold,
             notifications: notifications ?? [],
-            validation: { alert: '', status: true, responseValue: 0 },
+            validation: {
+              alert: { query: '', subject: '', message: '' },
+              status: true,
+              responseValue: 0,
+            },
           }).catch((err) => log.error(err.message))
         })
       }
@@ -535,7 +539,7 @@ const probeSendNotification = async (data: ProbeSendNotification) => {
       validation:
         validatedResponseStatuses.find(
           (validateResponse: ValidateResponse) =>
-            validateResponse.alert === status?.alert
+            validateResponse.alert.query === status?.alertQuery
         ) || validatedResponseStatuses[index],
     })
   }
@@ -555,13 +559,13 @@ const createNotificationLog = (
   if ((notifications?.length ?? 0) > 0) {
     Promise.all(
       notifications?.map((notification) => {
-        const alertMsg = probe.alerts[index]
+        const alert = probe.alerts[index]
 
         mLog = setNotificationLog(
           {
             type,
             probe,
-            alertMsg,
+            alert,
             notification,
           },
           mLog

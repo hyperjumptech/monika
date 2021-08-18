@@ -112,11 +112,7 @@ export async function sendAlerts({
         case 'telegram': {
           return sendTelegram({
             ...notification.data,
-            body: {
-              url,
-              alert: validation.alert,
-              time: new Date().toLocaleString(),
-            },
+            body: message.body,
           } as TelegramData)
         }
         case 'smtp': {
@@ -137,7 +133,7 @@ export async function sendAlerts({
           return sendTeams({
             ...notification.data,
             body: {
-              alert: validation.alert,
+              alert: validation.alert.query,
               url,
               time: new Date().toLocaleString(),
               status,
@@ -157,11 +153,7 @@ export async function sendAlerts({
         case 'workplace': {
           return sendWorkplace({
             ...notification.data,
-            body: {
-              url,
-              alert: validation.alert,
-              time: new Date().toLocaleString(),
-            },
+            body: message.body,
           } as WorkplaceData)
         }
         case 'desktop': {
@@ -169,7 +161,7 @@ export async function sendAlerts({
             ...notification.data,
             body: {
               url,
-              alert: validation.alert,
+              alert: validation.alert.query,
               time: new Date().toLocaleString(),
               status,
               expected: message.expected,

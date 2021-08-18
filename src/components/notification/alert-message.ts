@@ -23,6 +23,7 @@
  **********************************************************************************/
 
 import { hostname } from 'os'
+import { ProbeAlert } from '../../interfaces/probe'
 import { parseAlertStringTime } from '../../plugins/validate-response/checkers'
 import { publicIpAddress } from '../../utils/public-ip'
 
@@ -34,7 +35,7 @@ export function getMessageForAlert({
   incidentThreshold,
   responseValue,
 }: {
-  alert: string
+  alert: ProbeAlert
   url: string
   ipAddress: string
   status: string
@@ -52,33 +53,35 @@ export function getMessageForAlert({
   expected: string
 } {
   const getSubject = (url: string, status: string) => {
-    const statusAlert = `Target ${url} is not OK`
-    if (alert === 'status-not-2xx' && status === 'UP')
-      return `[RECOVERY] ${statusAlert}`
-    if (alert === 'status-not-2xx' && status === 'DOWN')
-      return `[INCIDENT] ${statusAlert}`
+    const recoveryOrIncident = status === 'UP' ? 'RECOVERY' : 'INCIDENT'
 
-    const responseAlert = `Target ${url} took too long to respond`
-    if (alert.includes('response-time-greater-than-') && status === 'UP')
-      return `[RECOVERY] ${responseAlert}`
+    if (alert.query === 'status-not-2xx')
+      return `[${recoveryOrIncident}] Target ${url} is not OK`
+    if (alert.query.includes('response-time-greater-than-')) {
+      return `[${recoveryOrIncident}] Target ${url} took too long to respond`
+    }
 
-    return `[INCIDENT] ${responseAlert}`
+    return `[${recoveryOrIncident}] ${alert.subject}`
   }
 
   const getBody = (status: string) => {
-    if (alert === 'status-not-2xx' && status === 'DOWN')
-      return `Target ${url} is not healthy. It has not been returning status code 2xx ${incidentThreshold} times in a row.`
+    if (status === 'DOWN') {
+      if (alert.query === 'status-not-2xx')
+        return `Target ${url} is not healthy. It has not been returning status code 2xx ${incidentThreshold} times in a row.`
 
-    if (alert.includes('response-time-greater-than-') && status === 'DOWN') {
-      const alertTime = parseAlertStringTime(alert)
-      return `Target ${url} is not healthy. The response time has been greater than ${alertTime} ${incidentThreshold} times in a row`
+      if (alert.query.includes('response-time-greater-than-')) {
+        const alertTime = parseAlertStringTime(alert.query)
+        return `Target ${url} is not healthy. The response time has been greater than ${alertTime} ${incidentThreshold} times in a row`
+      }
+
+      return 'New INCIDENT from Monika'
     }
 
     return `Target ${url} is back to healthy.`
   }
 
   const getExpectedMessage = (status: string, responseValue: number) => {
-    if (alert === 'status-not-2xx') {
+    if (alert.query === 'status-not-2xx') {
       if (status === 'DOWN') {
         return `Status is ${responseValue}, was expecting 200.`
       }
@@ -88,8 +91,8 @@ export function getMessageForAlert({
       }
     }
 
-    if (alert.includes('response-time-greater-than-')) {
-      const alertTime = parseAlertStringTime(alert)
+    if (alert.query.includes('response-time-greater-than-')) {
+      const alertTime = parseAlertStringTime(alert.query)
 
       if (status === 'DOWN') {
         return `Response time is ${responseValue}ms expecting a ${alertTime}ms`
@@ -100,21 +103,24 @@ export function getMessageForAlert({
       }
     }
 
-    return ''
+    return alert.message
   }
 
   const today = new Date().toUTCString()
+
+  const pubIpAddress = publicIpAddress ? `${publicIpAddress} (public)` : ''
+
+  const bodyString = [
+    `${getBody(status)}\n`,
+    `Alert: ${getExpectedMessage(status, responseValue)}`,
+    `URL: ${url}`,
+    `At: ${today}`,
+    `Monika: ${ipAddress} (local), ${pubIpAddress} ${hostname} (hostname)`,
+  ].join('\n\n')
+
   const message = {
     subject: getSubject(url, status),
-    body: `
-      ${getBody(status)}\n\n
-      Alert: ${getExpectedMessage(status, responseValue)}\n
-      URL: ${url}\n
-      At: ${today}\n
-      Monika: ${ipAddress} (local), ${
-      publicIpAddress ? `${publicIpAddress} (public)` : ''
-    } ${hostname} (hostname)
-    `,
+    body: bodyString,
     rawBody: {
       alert: getExpectedMessage(status, responseValue),
       url,

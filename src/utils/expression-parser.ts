@@ -22,26 +22,48 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-export interface ProbeStatus {
-  id: string
-  name: string
-  details: StatusDetails[]
+import { compileExpression as _compileExpression } from 'filtrex'
+import {
+  get,
+  has,
+  endsWith,
+  startsWith,
+  lowerCase,
+  upperCase,
+  size,
+  includes,
+} from 'lodash'
+
+// wrap substrings that are object accessor with double quote
+// then wrap again with __getValueByPath function call
+// eg: 'response.body.title' becomes '__getValueByPath("response.body.title")'
+export const sanitizeExpression = (query: string, objectKeys: string[]) => {
+  let sanitizedQuery = query
+
+  objectKeys.forEach((key) => {
+    const pattern = new RegExp(`(^| |\\()(${key}(\\.|\\[)\\S*[^\\s),])`, 'g')
+    sanitizedQuery = sanitizedQuery.replace(pattern, '$1__getValueByPath("$2")')
+  })
+
+  return sanitizedQuery
 }
 
-export interface StatusDetails {
-  alertQuery: string
-  state:
-    | 'INIT'
-    | 'UP_TRUE_EQUALS_THRESHOLD'
-    | 'UP_TRUE_BELOW_THRESHOLD'
-    | 'UP_FALSE'
-    | 'DOWN_FALSE_EQUALS_THRESHOLD'
-    | 'DOWN_FALSE_BELOW_THRESHOLD'
-    | 'DOWN_TRUE'
-  isDown: boolean
-  shouldSendNotification: boolean
-  totalTrue: number
-  totalFalse: number
-  consecutiveTrue: number
-  consecutiveFalse: number
+export const compileExpression = (
+  expression: string,
+  objectKeys: string[] = []
+) => (obj: any) => {
+  const sanitizedExpression = sanitizeExpression(expression, objectKeys)
+
+  return _compileExpression(sanitizedExpression, {
+    extraFunctions: {
+      __getValueByPath: (path: string) => get(obj, path), //  for internal use, not to be exposed to user
+      has,
+      lowerCase,
+      upperCase,
+      startsWith,
+      endsWith,
+      includes,
+      size,
+    },
+  })(obj)
 }

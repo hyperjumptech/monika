@@ -36,9 +36,12 @@ import {
   WorkplaceData,
 } from '../../interfaces/data'
 import { Config } from '../../interfaces/config'
+import { ProbeAlert } from '../../interfaces/probe'
 import { RequestConfig } from '../../interfaces/request'
 import { Validation } from '../../interfaces/validation'
 import { isValidURL } from '../../utils/is-valid-url'
+import { parseAlertStringTime } from '../../plugins/validate-response/checkers'
+import { compileExpression } from '../../utils/expression-parser'
 
 const HTTPMethods = [
   'DELETE',
@@ -229,11 +232,20 @@ function validateNotification(notifications: Notification[]): Validation {
   return VALID_CONFIG
 }
 
-const isValidProbeAlert = (alert: string): boolean => {
-  return (
-    alert === 'status-not-2xx' ||
-    alert.startsWith('response-time-greater-than-')
-  )
+const isValidProbeAlert = (alert: ProbeAlert | string): boolean => {
+  try {
+    if (typeof alert === 'string') {
+      return (
+        alert === 'status-not-2xx' ||
+        (alert.startsWith('response-time-greater-than-') &&
+          Boolean(parseAlertStringTime(alert)))
+      )
+    }
+
+    return Boolean(compileExpression(alert.query))
+  } catch (error) {
+    return false
+  }
 }
 
 export const validateConfig = (configuration: Config): Validation => {
@@ -252,12 +264,9 @@ export const validateConfig = (configuration: Config): Validation => {
 
   // Check probes properties
   for (const probe of probes) {
-    const { alerts, requests } = probe
+    const { alerts = [], requests } = probe
 
     if ((requests?.length ?? 0) === 0) return PROBE_NO_REQUESTS
-    if ((alerts?.length ?? 0) === 0) {
-      probe.alerts = ['status-not-2xx', 'response-time-greater-than-2-s']
-    }
 
     // Check probe request properties
     for (const request of requests) {
@@ -273,14 +282,34 @@ export const validateConfig = (configuration: Config): Validation => {
 
       if (HTTPMethods.indexOf(request.method.toUpperCase()) < 0)
         return PROBE_REQUEST_INVALID_METHOD
+    }
 
-      // Check probe alert properties
-      for (const alert of probe.alerts) {
-        const check = isValidProbeAlert(alert)
-        if (!check) {
-          return PROBE_ALERT_INVALID
+    // Check probe alert properties
+    for (const alert of alerts) {
+      const check = isValidProbeAlert(alert)
+      if (!check) {
+        return PROBE_ALERT_INVALID
+      }
+    }
+
+    // convert old alert format to new format
+    probe.alerts = alerts.map((alert: any) => {
+      if (typeof alert === 'string') {
+        return {
+          query: alert.toLowerCase(),
+          subject: '',
+          message: '',
         }
       }
+
+      return alert
+    })
+
+    if (alerts.length === 0) {
+      probe.alerts = [
+        { query: 'status-not-2xx', subject: '', message: `` },
+        { query: 'response-time-greater-than-2-s', subject: '', message: '' },
+      ]
     }
   }
 
