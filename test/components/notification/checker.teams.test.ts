@@ -6,7 +6,6 @@ import {
   notificationChecker,
 } from '../../../src/components/notification/checker'
 import { TeamsData } from '../../../src/interfaces/data'
-import { Notification } from '../../../src/interfaces/notification'
 
 chai.use(spies)
 
@@ -17,8 +16,8 @@ describe('notificationChecker - teamsNotification', () => {
 
   const notificationConfig = {
     id: 'teams',
-    type: 'teams',
-  } as Notification
+    type: 'teams' as const,
+  }
 
   it('should handle validation error - without URL', async () => {
     try {

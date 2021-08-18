@@ -24,20 +24,8 @@
 
 /* eslint-disable complexity */
 import { Notification } from '../../interfaces/notification'
-import {
-  SMTPData,
-  MailgunData,
-  SendgridData,
-  WebhookData,
-  MailData,
-  WhatsappData,
-  TeamsData,
-  MonikaNotifData,
-  WorkplaceData,
-} from '../../interfaces/data'
 import { Config } from '../../interfaces/config'
 import { ProbeAlert } from '../../interfaces/probe'
-import { RequestConfig } from '../../interfaces/request'
 import { Validation } from '../../interfaces/validation'
 import { isValidURL } from '../../utils/is-valid-url'
 import { parseAlertStringTime } from '../../plugins/validate-response/checkers'
@@ -138,52 +126,57 @@ const WORKPLACE_NO_THREAD_ID = setInvalidResponse(
 function validateNotification(notifications: Notification[]): Validation {
   // Check notifications properties
   for (const notification of notifications) {
-    const { type, data } = notification
-
     // Check if type equals to mailgun, smtp, or sendgrid, and has no recipients
+    // check one-by-one instead of using indexOf or includes so the type is correct without type assertion
     if (
-      ['mailgun', 'smtp', 'sendgrid', 'whatsapp'].indexOf(type) >= 0 &&
-      ((data as MailData)?.recipients?.length ?? 0) === 0
-    )
+      (notification.type === 'mailgun' ||
+        notification.type === 'smtp' ||
+        notification.type === 'sendgrid' ||
+        notification.type === 'whatsapp') &&
+      (notification.data.recipients?.length ?? 0) === 0
+    ) {
       return NOTIFICATION_NO_RECIPIENTS
+    }
 
-    switch (type) {
+    switch (notification.type) {
       case 'smtp': {
-        if (!(data as SMTPData).hostname) return SMTP_NO_HOSTNAME
-        if (!(data as SMTPData).port) return SMTP_NO_PORT
-        if (!(data as SMTPData).username) return SMTP_NO_USERNAME
-        if (!(data as SMTPData).password) return SMTP_NO_PASSWORD
+        const { data } = notification
+        if (!data.hostname) return SMTP_NO_HOSTNAME
+        if (!data.port) return SMTP_NO_PORT
+        if (!data.username) return SMTP_NO_USERNAME
+        if (!data.password) return SMTP_NO_PASSWORD
 
         break
       }
 
       case 'mailgun': {
-        if (!(data as MailgunData).apiKey) return MAILGUN_NO_APIKEY
-        if (!(data as MailgunData).domain) return MAILGUN_NO_DOMAIN
+        const { data } = notification
+        if (!data.apiKey) return MAILGUN_NO_APIKEY
+        if (!data.domain) return MAILGUN_NO_DOMAIN
 
         break
       }
 
       case 'sendgrid': {
-        if (!(data as SendgridData).apiKey) return SENDGRID_NO_APIKEY
+        if (!notification.data.apiKey) return SENDGRID_NO_APIKEY
 
         break
       }
 
       case 'webhook': {
-        if (!(data as WebhookData).url) return WEBHOOK_NO_URL
+        if (!notification.data.url) return WEBHOOK_NO_URL
 
         break
       }
 
       case 'discord': {
-        if (!(data as WebhookData).url) return DISCORD_NO_URL
+        if (!notification.data.url) return DISCORD_NO_URL
 
         break
       }
 
       case 'slack': {
-        if (!(data as WebhookData).url) return WEBHOOK_NO_URL
+        if (!notification.data.url) return WEBHOOK_NO_URL
 
         break
       }
@@ -193,29 +186,30 @@ function validateNotification(notifications: Notification[]): Validation {
       }
 
       case 'whatsapp': {
-        if (!(data as WhatsappData).url) return WHATSAPP_NO_URL
-        if (!(data as WhatsappData).username) return WHATSAPP_NO_USERNAME
-        if (!(data as WhatsappData).password) return WHATSAPP_NO_PASSWORD
+        const { data } = notification
+        if (!data.url) return WHATSAPP_NO_URL
+        if (!data.username) return WHATSAPP_NO_USERNAME
+        if (!data.password) return WHATSAPP_NO_PASSWORD
 
         break
       }
 
       case 'teams': {
-        if (!(data as TeamsData).url) return TEAMS_NO_URL
+        if (!notification.data.url) return TEAMS_NO_URL
 
         break
       }
 
       case 'monika-notif': {
-        if (!(data as MonikaNotifData).url) return MONIKA_NOTIF_NO_URL
+        if (!notification.data.url) return MONIKA_NOTIF_NO_URL
 
         break
       }
 
       case 'workplace': {
-        if (!(data as WorkplaceData).access_token)
-          return WORKPLACE_NO_ACCESS_TOKEN
-        if (!(data as WorkplaceData).thread_id) return WORKPLACE_NO_THREAD_ID
+        const { data } = notification
+        if (!data.access_token) return WORKPLACE_NO_ACCESS_TOKEN
+        if (!data.thread_id) return WORKPLACE_NO_THREAD_ID
 
         break
       }
@@ -270,7 +264,7 @@ export const validateConfig = (configuration: Config): Validation => {
 
     // Check probe request properties
     for (const request of requests) {
-      const { url } = request as RequestConfig
+      const { url } = request
 
       if (!url) return PROBE_REQUEST_NO_URL
 

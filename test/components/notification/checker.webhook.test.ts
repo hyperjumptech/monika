@@ -6,7 +6,6 @@ import {
   notificationChecker,
 } from '../../../src/components/notification/checker'
 import { WebhookData } from '../../../src/interfaces/data'
-import { Notification } from '../../../src/interfaces/notification'
 
 chai.use(spies)
 
@@ -17,8 +16,8 @@ describe('notificationChecker - webhookNotification', () => {
 
   const notificationConfig = {
     id: 'webhook',
-    type: 'webhook',
-  } as Notification
+    type: 'webhook' as const,
+  }
 
   it('should handle validation error - without URL', async () => {
     try {

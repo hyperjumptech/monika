@@ -55,7 +55,6 @@ import {
   PROBE_LOGS_BUILT,
 } from './constants/event-emitter'
 import { Config } from './interfaces/config'
-import { MailData, MailgunData, SMTPData, WebhookData } from './interfaces/data'
 import { Probe } from './interfaces/probe'
 import { AxiosResponseWithExtraData } from './interfaces/request'
 import { idFeeder, isIDValid, loopReport, sanitizeProbe } from './looper'
@@ -388,33 +387,34 @@ Please refer to the Monika documentations on how to how to configure notificatio
     Type: ${item.type}      
 `
           // Only show recipients if type is mailgun, smtp, or sendgrid
-          if (['mailgun', 'smtp', 'sendgrid'].indexOf(item.type) >= 0) {
-            startupMessage += `    Recipients: ${(item.data as MailData).recipients.join(
+          // check one-by-one instead of using indexOf to avoid using type assertion
+          if (
+            item.type === 'mailgun' ||
+            item.type === 'smtp' ||
+            item.type === 'sendgrid'
+          ) {
+            startupMessage += `    Recipients: ${item.data.recipients.join(
               ', '
             )}\n`
           }
 
           switch (item.type) {
             case 'smtp':
-              startupMessage += `    Hostname: ${
-                (item.data as SMTPData).hostname
-              }
-    Port: ${(item.data as SMTPData).port}
-    Username: ${(item.data as SMTPData).username}
+              startupMessage += `    Hostname: ${item.data.hostname}
+    Port: ${item.data.port}
+    Username: ${item.data.username}
 `
               break
             case 'mailgun':
-              startupMessage += `    Domain: ${
-                (item.data as MailgunData).domain
-              }\n`
+              startupMessage += `    Domain: ${item.data.domain}\n`
               break
             case 'sendgrid':
               break
             case 'webhook':
-              startupMessage += `    URL: ${(item.data as WebhookData).url}\n`
+              startupMessage += `    URL: ${item.data.url}\n`
               break
             case 'slack':
-              startupMessage += `    URL: ${(item.data as WebhookData).url}\n`
+              startupMessage += `    URL: ${item.data.url}\n`
               break
           }
         })
