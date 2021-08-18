@@ -6,7 +6,6 @@ import {
   notificationChecker,
 } from '../../../src/components/notification/checker'
 import { TelegramData } from '../../../src/interfaces/data'
-import { Notification } from '../../../src/interfaces/notification'
 
 chai.use(spies)
 
@@ -17,8 +16,8 @@ describe('notificationChecker - telegramNotification', () => {
 
   const notificationConfig = {
     id: 'telegram',
-    type: 'telegram',
-  } as Notification
+    type: 'telegram' as const,
+  }
 
   it('should handle validation error - without Group ID', async () => {
     try {

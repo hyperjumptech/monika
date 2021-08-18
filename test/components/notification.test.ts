@@ -48,7 +48,7 @@ describe('send alerts', () => {
 
   it('should send UP alert', async () => {
     chai.spy.on(mailgun, 'sendMailgun', () => Promise.resolve())
-    const sent = await sendAlerts({
+    await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', subject: '', message: '' },
         status: false,
@@ -69,12 +69,12 @@ describe('send alerts', () => {
       status: 'UP',
       incidentThreshold: 3,
     })
-    expect(sent).to.have.length(1)
+    expect(mailgun.sendMailgun).to.have.been.called.exactly(1)
   })
 
   it('should send DOWN alert', async () => {
     chai.spy.on(mailgun, 'sendMailgun', () => Promise.resolve())
-    const sent = await sendAlerts({
+    await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', subject: '', message: '' },
         status: true,
@@ -95,12 +95,12 @@ describe('send alerts', () => {
       status: 'DOWN',
       incidentThreshold: 3,
     })
-    expect(sent).to.have.length(1)
+    expect(mailgun.sendMailgun).to.have.been.called.exactly(1)
   })
 
   it('should send mailgun notification', async () => {
     chai.spy.on(mailgun, 'sendMailgun', () => Promise.resolve())
-    const sent = await sendAlerts({
+    await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', subject: '', message: '' },
         status: true,
@@ -122,13 +122,12 @@ describe('send alerts', () => {
       status: 'DOWN',
       incidentThreshold: 3,
     })
-    expect(mailgun.sendMailgun).to.have.been.called()
-    expect(sent).to.have.length(1)
+    expect(mailgun.sendMailgun).to.have.been.called.exactly(1)
   })
 
   it('should send mailgun notification without username', async () => {
     chai.spy.on(mailgun, 'sendMailgun', () => Promise.resolve())
-    const sent = await sendAlerts({
+    await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', subject: '', message: '' },
         status: true,
@@ -149,15 +148,14 @@ describe('send alerts', () => {
       status: 'DOWN',
       incidentThreshold: 3,
     })
-    expect(mailgun.sendMailgun).to.have.been.called()
-    expect(sent).to.have.length(1)
+    expect(mailgun.sendMailgun).to.have.been.called.exactly(1)
   })
 
   it('should send webhook & slack notifications', async () => {
     chai.spy.on(webhook, 'sendWebhook', () => Promise.resolve())
     chai.spy.on(slack, 'sendSlack', () => Promise.resolve())
 
-    const sent = await sendAlerts({
+    await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', subject: '', message: '' },
         status: true,
@@ -184,14 +182,13 @@ describe('send alerts', () => {
       incidentThreshold: 3,
     })
 
-    expect(webhook.sendWebhook).to.have.been.called()
-    expect(slack.sendSlack).to.have.been.called()
-    expect(sent).to.have.length(2)
+    expect(webhook.sendWebhook).to.have.been.called.exactly(1)
+    expect(slack.sendSlack).to.have.been.called.exactly(1)
   })
 
   it('should send SMTP notification', async () => {
     chai.spy.on(smtp, 'sendSmtpMail', () => Promise.resolve())
-    const sent = await sendAlerts({
+    await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', subject: '', message: '' },
         status: true,
@@ -214,14 +211,13 @@ describe('send alerts', () => {
       status: 'DOWN',
       incidentThreshold: 3,
     })
-    expect(smtp.sendSmtpMail).to.have.been.called()
-    expect(sent).to.have.length(1)
+    expect(smtp.sendSmtpMail).to.have.been.called.exactly(1)
   })
 
   it('should send whatsapp notifications', async () => {
     chai.spy.on(whatsapp, 'sendWhatsapp', () => Promise.resolve())
 
-    const sent = await sendAlerts({
+    await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', subject: '', message: '' },
         status: true,
@@ -244,8 +240,7 @@ describe('send alerts', () => {
       incidentThreshold: 3,
     })
 
-    expect(whatsapp.sendWhatsapp).to.have.been.called()
-    expect(sent).to.have.length(1)
+    expect(whatsapp.sendWhatsapp).to.have.been.called.exactly(1)
   })
 
   it('should send whatsapp notifications', async () => {
@@ -263,13 +258,13 @@ describe('send alerts', () => {
     )
 
     expect(whatsapp.loginUser).to.have.been.called()
-    expect(whatsapp.sendTextMessage).to.have.been.called()
+    expect(whatsapp.sendTextMessage).to.have.been.called.exactly(1)
   })
 
   it('should send telegram notifications', async () => {
     chai.spy.on(telegram, 'sendTelegram', () => Promise.resolve())
 
-    const sent = await sendAlerts({
+    await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', subject: '', message: '' },
         status: true,
@@ -291,14 +286,13 @@ describe('send alerts', () => {
       incidentThreshold: 3,
     })
 
-    expect(telegram.sendTelegram).to.have.been.called()
-    expect(sent).to.have.length(1)
+    expect(telegram.sendTelegram).to.have.been.called.exactly(1)
   })
 
   it('should send webhook discord', async () => {
     chai.spy.on(discord, 'sendDiscord', () => Promise.resolve())
 
-    const sent = await sendAlerts({
+    await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', subject: '', message: '' },
         status: true,
@@ -318,14 +312,13 @@ describe('send alerts', () => {
       incidentThreshold: 3,
     })
 
-    expect(discord.sendDiscord).to.have.been.called()
-    expect(sent).to.have.length(1)
+    expect(discord.sendDiscord).to.have.been.called.exactly(1)
   })
 
   it('should send webhook monika-notif', async () => {
     chai.spy.on(monikaNotif, 'sendMonikaNotif', () => Promise.resolve())
 
-    const sent = await sendAlerts({
+    await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', subject: '', message: '' },
         status: true,
@@ -347,7 +340,6 @@ describe('send alerts', () => {
       probeId: 'monika-notif 1',
     })
 
-    expect(monikaNotif.sendMonikaNotif).to.have.been.called()
-    expect(sent).to.have.length(1)
+    expect(monikaNotif.sendMonikaNotif).to.have.been.called.exactly(1)
   })
 })
