@@ -105,8 +105,8 @@ export function getMessageForAlert({
   const pubIpAddress = publicIpAddress ? `${publicIpAddress} (public)` : ''
 
   const bodyString = [
-    `${getBody(status)}\n`,
-    `Alert: ${getExpectedMessage(status, responseValue)}`,
+    `${getBody(probeState)}\n`,
+    `Alert: ${getExpectedMessage(probeState, responseValue)}`,
     `URL: ${url}`,
     `At: ${today}`,
     `Monika: ${ipAddress} (local), ${pubIpAddress} ${hostname} (hostname)`,
@@ -115,7 +115,7 @@ export function getMessageForAlert({
   const message = {
     subject: getSubject(url, probeState),
     body: bodyString,
-    expected: getExpectedMessage(status, responseValue),
+    expected: getExpectedMessage(probeState, responseValue),
   }
 
   return message
