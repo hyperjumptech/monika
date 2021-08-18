@@ -27,7 +27,6 @@ import { PROBE_LOGS_BUILT } from '../../constants/event-emitter'
 import { LogObject } from '../../interfaces/logs'
 import { Probe } from '../../interfaces/probe'
 import { ProbeStatus, StatusDetails } from '../../interfaces/probe-status'
-import { AxiosResponseWithExtraData } from '../../interfaces/request'
 import { ValidateResponse } from '../../plugins/validate-response'
 import { log } from '../../utils/pino'
 import { getEventEmitter } from '../../utils/events'
@@ -172,22 +171,15 @@ const updateProbeStatus = (
 export const processThresholds = ({
   probe,
   validatedResp,
-  incidentThreshold,
-  recoveryThreshold,
   mLog,
 }: {
-  checkOrder: number
   probe: Probe
-  probeRes: AxiosResponseWithExtraData
-  totalRequests: number
   validatedResp: ValidateResponse[]
-  incidentThreshold: number
-  recoveryThreshold: number
   mLog: LogObject
 }) => {
   try {
     // Get Probe ID and Name
-    const { id, name, alerts } = probe
+    const { id, name, alerts, incidentThreshold, recoveryThreshold } = probe
     const results: Array<StatusDetails> = []
 
     // Initialize server status

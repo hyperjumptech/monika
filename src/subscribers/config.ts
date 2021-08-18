@@ -24,18 +24,22 @@
 
 import Bree from 'bree'
 import { probeBuildLog } from '../components/logger'
+import { processThresholds } from '../components/notification/process-server-status'
 import { convertToBreeJobs } from '../components/probe/convert-to-bree'
 import { LogObject } from '../interfaces/logs'
+import type { Notification } from '../interfaces/notification'
 import type { Probe } from '../interfaces/probe'
-import validateResponse from '../plugins/validate-response'
+import validateResponse, {
+  ValidateResponse,
+} from '../plugins/validate-response'
 import { getEventEmitter } from '../utils/events'
-import { log } from '../utils/pino'
 import events from '.'
 
 const eventEmitter = getEventEmitter()
 
 function workerMessageHandler(workerData: any) {
-  const { probe, probeResult } = workerData.message
+  const { probe, probeResult, notifications } = workerData.message
+  let validatedResp: Array<ValidateResponse> = []
   let totalRequests = 0 // is the number of requests in  probe.requests[x]
   let mLog: LogObject = {
     type: 'PROBE',
@@ -55,12 +59,11 @@ function workerMessageHandler(workerData: any) {
     },
   } as LogObject
   // TODO:
-  // 1. Notify alert
-  // 2. Rebuild and restart the jobs when Monika config change
-  // 3. Reimplement --repeat flag?
+  // 1. Rebuild and restart the jobs when Monika config change
+  // 2. Reimplement --repeat flag?
 
   probeResult.forEach((response: any, requestIndex: number) => {
-    const validatedRes = validateResponse(probe.alerts, response)
+    validatedResp = validateResponse(probe.alerts, response)
 
     eventEmitter.emit(events.probe.response.received, {
       probe,
@@ -74,7 +77,7 @@ function workerMessageHandler(workerData: any) {
       probe,
       totalRequests,
       probeRes: response,
-      alerts: validatedRes
+      alerts: validatedResp
         .filter((item) => item.status)
         .map((item) => item.alert),
       mLog,
@@ -84,14 +87,34 @@ function workerMessageHandler(workerData: any) {
     totalRequests += 1
   })
 
-  log.info('parent receives data from worker')
-  log.info(JSON.stringify(probeResult, null, 2))
+  // done probing, got some result, process it, check for thresholds and notifications
+  const statuses = processThresholds({
+    probe,
+    validatedResp,
+    mLog,
+  })
+
+  // Done processing results, emit RESULT_READY
+  eventEmitter.emit(
+    events.probe.alerts.ready,
+    {
+      probe,
+      statuses,
+      notifications,
+      totalRequests,
+      validatedResponseStatuses: validatedResp,
+    },
+    mLog
+  )
 }
 
-eventEmitter.on(events.config.sanitized, (probes: Probe[]) => {
-  const root = false
-  const jobs = convertToBreeJobs(probes)
-  const bree = new Bree({ root, jobs, workerMessageHandler })
+eventEmitter.on(
+  events.config.sanitized,
+  (probes: Probe[], notifications: Notification[]) => {
+    const root = false
+    const jobs = convertToBreeJobs(probes, notifications)
+    const bree = new Bree({ root, jobs, workerMessageHandler })
 
-  bree.start()
-})
+    bree.start()
+  }
+)

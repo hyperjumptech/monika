@@ -30,5 +30,8 @@ export default {
     response: {
       received: 'PROBE_RESPONSE_RECEIVED',
     },
+    alerts: {
+      ready: 'PROBE_ALERTS_READY',
+    },
   },
 }

@@ -120,13 +120,8 @@ export async function doProbe(
 
     // done probing, got some result, process it, check for thresholds and notifications
     const statuses = processThresholds({
-      checkOrder,
       probe,
-      probeRes,
-      totalRequests,
       validatedResp: validatedRes,
-      incidentThreshold: probe.incidentThreshold,
-      recoveryThreshold: probe.recoveryThreshold,
       mLog,
     })
 

@@ -279,7 +279,7 @@ class Monika extends Command {
 
         // emit the sanitized probe
         if (sanitizedProbe) {
-          em.emit(CONFIG_SANITIZED, sanitizedProbe)
+          em.emit(CONFIG_SANITIZED, sanitizedProbe, config.notifications ?? [])
         }
 
         // abortCurrentLooper = idFeeder(

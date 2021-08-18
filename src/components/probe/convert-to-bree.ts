@@ -22,6 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import type { Notification } from '../../interfaces/notification'
 import type { Probe } from '../../interfaces/probe'
 import type {
   AxiosResponseWithExtraData,
@@ -41,7 +42,7 @@ async function probeWorker() {
   const Handlebars = require('handlebars')
 
   const { job } = workerData
-  const { probe } = job
+  const { probe, notifications } = job
 
   const doProbe = async (probe: Probe): Promise<ProbeResult[]> => {
     const probing = async (
@@ -165,31 +166,44 @@ async function probeWorker() {
     return probeResult
   }
 
-  const probeResult = await doProbe(probe)
-  const cleanProbeResult = probeResult.map((probeResult) => {
-    const { request, response } = probeResult
+  try {
+    const probeResult = await doProbe(probe)
+    const cleanProbeResult = probeResult.map((probeResult) => {
+      const { request, response } = probeResult
 
-    return {
-      requestURL: request.url,
-      data: response.data,
-      headers: response.headers,
-      config: {
-        extraData: {
-          responseTime: response.config.extraData?.responseTime,
+      return {
+        requestURL: request.url,
+        data: response.data,
+        headers: response.headers,
+        config: {
+          extraData: {
+            responseTime: response.config.extraData?.responseTime,
+          },
         },
-      },
-      status: response.status,
-    }
-  })
+        status: response.status,
+      }
+    })
 
-  parentPort.postMessage({ probe, probeResult: cleanProbeResult })
+    parentPort.postMessage({
+      probe,
+      probeResult: cleanProbeResult,
+      notifications,
+    })
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(error)
+  }
 }
 
-export function convertToBreeJobs(probes: Probe[]) {
+export function convertToBreeJobs(
+  probes: Probe[],
+  notifications: Notification[]
+) {
   return probes.map((probe) => ({
     name: probe.id,
     path: probeWorker,
     interval: `${probe?.interval || 30}s`,
     probe,
+    notifications,
   }))
 }
