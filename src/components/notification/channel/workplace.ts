@@ -23,6 +23,7 @@
  **********************************************************************************/
 
 import axios from 'axios'
+
 import { WorkplaceData } from '../../../interfaces/data'
 
 export const sendWorkplace = async (data: WorkplaceData) => {
@@ -42,7 +43,7 @@ export const sendWorkplace = async (data: WorkplaceData) => {
           thread_key: data.thread_id,
         },
         message: {
-          text: `*${data.body.alert}*\n\n*URL*: ${data.body.url}\n*TIME*: ${data.body.time}\n`,
+          text: data.body,
         },
       },
     })
