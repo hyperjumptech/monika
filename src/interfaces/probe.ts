@@ -24,6 +24,12 @@
 
 import { RequestConfig } from './request'
 
+export interface ProbeAlert {
+  query: string
+  subject: string
+  message: string
+}
+
 export interface Probe {
   id: string
   name: string
@@ -32,5 +38,5 @@ export interface Probe {
   requests: RequestConfig[]
   incidentThreshold: number
   recoveryThreshold: number
-  alerts: string[]
+  alerts: ProbeAlert[]
 }

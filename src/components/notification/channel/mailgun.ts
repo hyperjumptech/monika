@@ -26,25 +26,21 @@ import Mailgun from 'mailgun.js'
 import formData from 'form-data'
 import { MailgunData } from '../../../interfaces/data'
 import { SendInput } from '../../../interfaces/mailgun'
-import { Notification } from '../../../interfaces/notification'
 
 export const sendMailgun = async (
   inputData: SendInput,
-  notifConfigItem: Notification
+  mailgunConfigData: MailgunData
 ) => {
   const { subject, body, sender, recipients } = inputData
-  const { data: mailgunConfigData } = notifConfigItem
-  const USERNAME = (mailgunConfigData as MailgunData)?.username || 'api'
-  const DOMAIN = (mailgunConfigData as MailgunData)?.domain
-  const API_KEY = (mailgunConfigData as MailgunData)?.apiKey
+  const { username = 'api', domain, apiKey: key } = mailgunConfigData
 
   const mailgun = new Mailgun(formData)
-  const mg = mailgun.client({ username: USERNAME, key: API_KEY })
+  const mg = mailgun.client({ username, key })
   const data = {
     from: `${sender.name} <${sender.email}>`,
     to: recipients,
     subject: subject,
     text: body,
   }
-  return mg.messages.create(DOMAIN, data)
+  return mg.messages.create(domain, data)
 }

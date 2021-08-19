@@ -22,22 +22,80 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios from 'axios'
+import { expect } from 'chai'
+import { AxiosResponseWithExtraData } from '../../../../interfaces/request'
+import queryExpression from '../query-expression'
 
-import { WebhookData } from '../../../interfaces/data'
-
-export const sendSlack = async (data: WebhookData) => {
-  try {
-    const res = await axios({
-      method: 'POST',
-      url: data.url,
-      data: {
-        text: data.body,
+describe('queryExpression', () => {
+  it('should handle response time query', () => {
+    const res = {
+      headers: {},
+      config: {
+        extraData: {
+          responseTime: 150,
+        },
       },
-    })
+    } as AxiosResponseWithExtraData
 
-    return res
-  } catch (error) {
-    throw error
-  }
-}
+    const result = queryExpression(res, 'response.time > 1000')
+
+    expect(result).to.be.false
+  })
+
+  it('should handle response status query', () => {
+    const res = {
+      status: 200,
+      headers: {},
+      config: {},
+    } as AxiosResponseWithExtraData
+
+    const result = queryExpression(res, 'response.status != 200')
+
+    expect(result).to.be.false
+  })
+
+  it('should handle response size query', () => {
+    const res = {
+      status: 200,
+      headers: { 'content-length': 2000 },
+      config: {},
+    } as AxiosResponseWithExtraData
+
+    const result = queryExpression(res, 'response.size < 1000')
+
+    expect(result).to.be.false
+  })
+
+  it('should handle response headers query', () => {
+    const res = {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+      config: {},
+    } as AxiosResponseWithExtraData
+
+    const result = queryExpression(
+      res,
+      "response.headers['content-type'] != 'application/json'"
+    )
+
+    expect(result).to.be.false
+  })
+
+  it('should handle response body query', () => {
+    const res = {
+      status: 200,
+      headers: {},
+      config: {},
+      data: {
+        message: 'Hello',
+      },
+    } as AxiosResponseWithExtraData
+
+    const result = queryExpression(
+      res,
+      "startsWith(response.body.message, 'Hello')"
+    )
+
+    expect(result).to.be.false
+  })
+})

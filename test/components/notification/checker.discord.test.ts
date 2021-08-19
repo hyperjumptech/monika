@@ -5,8 +5,7 @@ import {
   errorMessage,
   notificationChecker,
 } from '../../../src/components/notification/checker'
-import { DiscordData } from '../../../src/interfaces/data'
-import { Notification } from '../../../src/interfaces/notification'
+import { WebhookData } from '../../../src/interfaces/data'
 
 chai.use(spies)
 
@@ -17,15 +16,17 @@ describe('notificationChecker - discordNotification', () => {
 
   const notificationConfig = {
     id: 'discord',
-    type: 'discord',
-  } as Notification
+    type: 'discord' as const,
+  }
 
   it('should handle validation error - without URL', async () => {
     try {
       await notificationChecker([
         {
           ...notificationConfig,
-          data: {} as DiscordData,
+          data: {
+            body: '',
+          } as WebhookData,
         },
       ])
     } catch (error) {
@@ -45,7 +46,7 @@ describe('notificationChecker - discordNotification', () => {
           ...notificationConfig,
           data: {
             url: 'example',
-          } as DiscordData,
+          } as WebhookData,
         },
       ])
     } catch (error) {

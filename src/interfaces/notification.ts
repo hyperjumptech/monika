@@ -23,44 +23,92 @@
  **********************************************************************************/
 
 import {
+  DesktopData,
   MailgunData,
+  MonikaNotifData,
   SendgridData,
   SMTPData,
+  TeamsData,
   TelegramData,
   WebhookData,
   WhatsappData,
-  TeamsData,
-  DiscordData,
-  MonikaNotifData,
   WorkplaceData,
-  DesktopData,
 } from './data'
 
-export interface Notification {
+export type Notification =
+  | SMTPNotification
+  | MailgunNotification
+  | SendgridNotification
+  | WebhookNotification
+  | SlackNotification
+  | WhatsappBusinessNotification
+  | MonikaWhatsappNotification
+  | TeamsNotification
+  | TelegramNotification
+  | DiscordNotification
+  | WorkplaceNotification
+  | DesktopNotification
+
+interface BaseNotification {
   id: string
-  type:
-    | 'smtp'
-    | 'mailgun'
-    | 'sendgrid'
-    | 'webhook'
-    | 'slack'
-    | 'whatsapp'
-    | 'teams'
-    | 'telegram'
-    | 'discord'
-    | 'monika-notif'
-    | 'workplace'
-    | 'desktop'
-  data:
-    | MailgunData
-    | SMTPData
-    | SendgridData
-    | WebhookData
-    | WhatsappData
-    | TeamsData
-    | TelegramData
-    | DiscordData
-    | MonikaNotifData
-    | WorkplaceData
-    | DesktopData
+}
+
+interface SMTPNotification extends BaseNotification {
+  type: 'smtp'
+  data: SMTPData
+}
+
+interface MailgunNotification extends BaseNotification {
+  type: 'mailgun'
+  data: MailgunData
+}
+
+interface SendgridNotification extends BaseNotification {
+  type: 'sendgrid'
+  data: SendgridData
+}
+
+interface WebhookNotification extends BaseNotification {
+  type: 'webhook'
+  data: WebhookData
+}
+
+interface SlackNotification extends BaseNotification {
+  type: 'slack'
+  data: WebhookData
+}
+
+interface WhatsappBusinessNotification extends BaseNotification {
+  type: 'whatsapp'
+  data: WhatsappData
+}
+
+interface MonikaWhatsappNotification extends BaseNotification {
+  type: 'monika-notif'
+  data: MonikaNotifData
+}
+
+interface TeamsNotification extends BaseNotification {
+  type: 'teams'
+  data: TeamsData
+}
+
+interface TelegramNotification extends BaseNotification {
+  type: 'telegram'
+  data: TelegramData
+}
+
+interface DiscordNotification extends BaseNotification {
+  type: 'discord'
+  data: WebhookData
+}
+
+interface WorkplaceNotification extends BaseNotification {
+  type: 'workplace'
+  data: WorkplaceData
+}
+
+interface DesktopNotification extends BaseNotification {
+  type: 'desktop'
+  data: DesktopData
 }

@@ -22,22 +22,48 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios from 'axios'
+import { compileExpression as _compileExpression } from 'filtrex'
+import {
+  get,
+  has,
+  endsWith,
+  startsWith,
+  lowerCase,
+  upperCase,
+  size,
+  includes,
+} from 'lodash'
 
-import { WebhookData } from '../../../interfaces/data'
+// wrap substrings that are object accessor with double quote
+// then wrap again with __getValueByPath function call
+// eg: 'response.body.title' becomes '__getValueByPath("response.body.title")'
+export const sanitizeExpression = (query: string, objectKeys: string[]) => {
+  let sanitizedQuery = query
 
-export const sendSlack = async (data: WebhookData) => {
-  try {
-    const res = await axios({
-      method: 'POST',
-      url: data.url,
-      data: {
-        text: data.body,
-      },
-    })
+  objectKeys.forEach((key) => {
+    const pattern = new RegExp(`(^| |\\()(${key}(\\.|\\[)\\S*[^\\s),])`, 'g')
+    sanitizedQuery = sanitizedQuery.replace(pattern, '$1__getValueByPath("$2")')
+  })
 
-    return res
-  } catch (error) {
-    throw error
-  }
+  return sanitizedQuery
+}
+
+export const compileExpression = (
+  expression: string,
+  objectKeys: string[] = []
+) => (obj: any) => {
+  const sanitizedExpression = sanitizeExpression(expression, objectKeys)
+
+  return _compileExpression(sanitizedExpression, {
+    extraFunctions: {
+      __getValueByPath: (path: string) => get(obj, path), //  for internal use, not to be exposed to user
+      has,
+      lowerCase,
+      upperCase,
+      startsWith,
+      endsWith,
+      includes,
+      size,
+    },
+  })(obj)
 }
