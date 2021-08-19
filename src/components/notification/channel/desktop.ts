@@ -22,11 +22,8 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { hostname, type } from 'os'
-import { spawnSync, execSync } from 'child_process'
-import { DesktopData } from './../../../interfaces/data'
-import getIp from '../../../utils/ip'
-import { publicIpAddress } from '../../../utils/public-ip'
+import { execSync, spawnSync } from 'child_process'
+import { type } from 'os'
 
 interface NotifyData {
   title: string
@@ -56,7 +53,7 @@ export const psEscape = (str: string) => {
  * @param {NotifyData} data notification data
  * @return {void}
  */
-const notify = (data: NotifyData) => {
+export const sendDesktop = (data: NotifyData) => {
   const { title, message } = data
   const operatingSystem = type()
 
@@ -90,39 +87,5 @@ const notify = (data: NotifyData) => {
     default:
       // TODO: New operating system?
       break
-  }
-}
-
-export const sendDesktop = async (data: DesktopData) => {
-  try {
-    if (data.body.probeState === 'INIT') {
-      notify({
-        title: 'Monika is running',
-        message: data.body.alert,
-      })
-
-      return
-    }
-
-    if (data.body.probeState === 'TERMINATE') {
-      notify({
-        title: 'Monika terminated',
-        message: data.body.alert,
-      })
-
-      return
-    }
-
-    const notifType = data.body.probeState === 'UP' ? 'RECOVERY' : 'INCIDENT'
-    notify({
-      title: `New ${notifType} notification from Monika (${data.body.alert})`,
-      message: `${data.body.expected} for URL ${data.body.url} at ${
-        data.body.time
-      }.\rMonika: ${getIp()} (local), ${
-        publicIpAddress ? `${publicIpAddress} (public)` : ''
-      } ${hostname} (hostname)`,
-    })
-  } catch (error) {
-    throw error
   }
 }
