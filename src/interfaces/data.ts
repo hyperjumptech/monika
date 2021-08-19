@@ -34,6 +34,7 @@ export interface MailgunData extends MailData {
 
 export interface SendgridData extends MailData {
   apiKey: string
+  sender: string
 }
 
 export interface SMTPData extends MailData {
