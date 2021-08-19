@@ -23,11 +23,14 @@
  **********************************************************************************/
 
 import { Notification } from '../../interfaces/notification'
+import { ValidateResponse } from '../../plugins/validate-response'
 import getIp from '../../utils/ip'
 import { getMessageForAlert } from './alert-message'
+import { sendDesktop } from './channel/desktop'
 import { sendDiscord } from './channel/discord'
 import { sendMailgun } from './channel/mailgun'
 import { sendMonikaNotif } from './channel/monika-notif'
+import { sendSendgrid } from './channel/sendgrid'
 import { sendSlack } from './channel/slack'
 import { createSmtpTransport, sendSmtpMail } from './channel/smtp'
 import { sendTeams } from './channel/teams'
@@ -35,21 +38,18 @@ import { sendTelegram } from './channel/telegram'
 import { sendWebhook } from './channel/webhook'
 import { sendWhatsapp } from './channel/whatsapp'
 import { sendWorkplace } from './channel/workplace'
-import { sendDesktop } from './channel/desktop'
-import { ValidateResponse } from '../../plugins/validate-response'
-import { sendSendgrid } from './channel/sendgrid'
 
 export async function sendAlerts({
   validation,
   notifications,
   url,
-  status,
+  probeState,
   incidentThreshold,
 }: {
   validation: ValidateResponse
   notifications: Notification[]
   url: string
-  status: string
+  probeState: string
   incidentThreshold: number
 }): Promise<void> {
   const ipAddress = getIp()
@@ -57,7 +57,7 @@ export async function sendAlerts({
     alert: validation.alert,
     url,
     ipAddress,
-    status,
+    probeState,
     incidentThreshold,
     responseValue: validation.responseValue,
   })
@@ -138,7 +138,7 @@ export async function sendAlerts({
               alert: validation.alert.query,
               url,
               time: new Date().toLocaleString(),
-              status,
+              probeState,
               expected: message.expected,
             },
           })
@@ -147,7 +147,7 @@ export async function sendAlerts({
           return sendMonikaNotif({
             ...notification.data,
             body: {
-              type: status === 'DOWN' ? 'incident' : 'recovery',
+              type: probeState === 'DOWN' ? 'incident' : 'recovery',
               ...message.rawBody,
             },
           })

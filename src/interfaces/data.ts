@@ -50,7 +50,7 @@ export interface TeamsData {
 }
 
 export interface TeamsDataBody extends WebhookDataBody {
-  status: string
+  probeState: string
   expected?: string
 }
 

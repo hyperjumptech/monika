@@ -51,7 +51,7 @@ describe('send alerts', () => {
     await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', subject: '', message: '' },
-        status: false,
+        somethingToReport: false,
         responseValue: 200,
       },
       notifications: [
@@ -66,7 +66,7 @@ describe('send alerts', () => {
         },
       ],
       url: 'https://hyperjump.tech',
-      status: 'UP',
+      probeState: 'UP',
       incidentThreshold: 3,
     })
     expect(mailgun.sendMailgun).to.have.been.called.exactly(1)
@@ -77,7 +77,7 @@ describe('send alerts', () => {
     await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', subject: '', message: '' },
-        status: true,
+        somethingToReport: true,
         responseValue: 500,
       },
       notifications: [
@@ -92,7 +92,7 @@ describe('send alerts', () => {
         },
       ],
       url: 'https://hyperjump.tech',
-      status: 'DOWN',
+      probeState: 'DOWN',
       incidentThreshold: 3,
     })
     expect(mailgun.sendMailgun).to.have.been.called.exactly(1)
@@ -103,7 +103,7 @@ describe('send alerts', () => {
     await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', subject: '', message: '' },
-        status: true,
+        somethingToReport: true,
         responseValue: 500,
       },
       notifications: [
@@ -119,7 +119,7 @@ describe('send alerts', () => {
         },
       ],
       url: 'https://hyperjump.tech',
-      status: 'DOWN',
+      probeState: 'DOWN',
       incidentThreshold: 3,
     })
     expect(mailgun.sendMailgun).to.have.been.called.exactly(1)
@@ -130,7 +130,7 @@ describe('send alerts', () => {
     await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', subject: '', message: '' },
-        status: true,
+        somethingToReport: true,
         responseValue: 500,
       },
       notifications: [
@@ -145,7 +145,7 @@ describe('send alerts', () => {
         },
       ],
       url: 'https://hyperjump.tech',
-      status: 'DOWN',
+      probeState: 'DOWN',
       incidentThreshold: 3,
     })
     expect(mailgun.sendMailgun).to.have.been.called.exactly(1)
@@ -158,7 +158,7 @@ describe('send alerts', () => {
     await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', subject: '', message: '' },
-        status: true,
+        somethingToReport: true,
         responseValue: 500,
       },
       notifications: [
@@ -178,7 +178,7 @@ describe('send alerts', () => {
         },
       ],
       url: 'https://hyperjump.tech',
-      status: 'DOWN',
+      probeState: 'DOWN',
       incidentThreshold: 3,
     })
 
@@ -191,7 +191,7 @@ describe('send alerts', () => {
     await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', subject: '', message: '' },
-        status: true,
+        somethingToReport: true,
         responseValue: 500,
       },
       notifications: [
@@ -208,7 +208,7 @@ describe('send alerts', () => {
         },
       ],
       url: 'https://hyperjump.tech',
-      status: 'DOWN',
+      probeState: 'DOWN',
       incidentThreshold: 3,
     })
     expect(smtp.sendSmtpMail).to.have.been.called.exactly(1)
@@ -220,7 +220,7 @@ describe('send alerts', () => {
     await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', subject: '', message: '' },
-        status: true,
+        somethingToReport: true,
         responseValue: 500,
       },
       notifications: [
@@ -236,7 +236,7 @@ describe('send alerts', () => {
         },
       ],
       url: 'https://hyperjump.tech',
-      status: 'DOWN',
+      probeState: 'DOWN',
       incidentThreshold: 3,
     })
 
@@ -267,7 +267,7 @@ describe('send alerts', () => {
     await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', subject: '', message: '' },
-        status: true,
+        somethingToReport: true,
         responseValue: 500,
       },
       notifications: [
@@ -282,7 +282,7 @@ describe('send alerts', () => {
         },
       ],
       url: 'https://hyperjump.tech',
-      status: 'DOWN',
+      probeState: 'DOWN',
       incidentThreshold: 3,
     })
 
@@ -295,7 +295,7 @@ describe('send alerts', () => {
     await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', subject: '', message: '' },
-        status: true,
+        somethingToReport: true,
         responseValue: 500,
       },
       notifications: [
@@ -308,7 +308,7 @@ describe('send alerts', () => {
         },
       ],
       url: 'https://hyperjump.tech',
-      status: 'DOWN',
+      probeState: 'DOWN',
       incidentThreshold: 3,
     })
 
@@ -321,7 +321,7 @@ describe('send alerts', () => {
     await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', subject: '', message: '' },
-        status: true,
+        somethingToReport: true,
         responseValue: 500,
       },
       notifications: [
@@ -334,7 +334,7 @@ describe('send alerts', () => {
         },
       ],
       url: 'https://hyperjump.tech',
-      status: 'DOWN',
+      probeState: 'DOWN',
       incidentThreshold: 3,
     })
 

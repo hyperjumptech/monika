@@ -22,8 +22,8 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import { execSync, spawnSync } from 'child_process'
 import { type } from 'os'
-import { spawnSync, execSync } from 'child_process'
 
 interface NotifyData {
   title: string

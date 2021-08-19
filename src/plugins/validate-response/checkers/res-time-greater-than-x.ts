@@ -24,7 +24,12 @@
 
 import { AxiosResponseWithExtraData } from '../../../interfaces/request'
 
-// Check if response time is greater than specified value in milliseconds
+/**
+ *  resTimeGreaterThanX checks if response time is greater than specified value in milliseconds
+ * @param {object} res is  the axios result to compare
+ * @param {number} minResTime is response time in ms to check for
+ * @returns {bool} boolean whether it is greater or not
+ */
 const resTimeGreaterThanX = (
   res: AxiosResponseWithExtraData,
   minResTime: number
