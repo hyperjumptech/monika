@@ -28,7 +28,7 @@
     "version": "oclif-dev readme && git add README.md",
     "format": "prettier --write .",
     "check-format": "prettier --check .",
-    "pkg": "npm run prepack && pkg . --compress brotli"
+    "pkg": "npm run prepack && pkg . --compress gzip"
   },
   "dependencies": {
     "@oclif/command": "^1.8.0",
