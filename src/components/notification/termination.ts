@@ -27,7 +27,7 @@ import {
 
 const subject = 'Monika terminated'
 const body = `Monika is no longer running in ${getIp()}`
-const status = 'TERMINATE'
+const probeState = 'TERMINATE'
 
 export const errorMessage = (
   notificationType: string,
@@ -72,7 +72,7 @@ export const terminationNotif = async (notifications: Notification[]) => {
   const teamsNotification = notifications
     .filter((notif) => notif.type === 'teams')
     .map((notif) => notif.data as TeamsData)
-    .map((data) => teamsNotificationSender({ data, body, status }))
+    .map((data) => teamsNotificationSender({ data, body, probeState }))
 
   const telegramNotification = notifications
     .filter((notif) => notif.type === 'telegram')
@@ -82,7 +82,7 @@ export const terminationNotif = async (notifications: Notification[]) => {
   const monikaNotification = notifications
     .filter((notif) => notif.type === 'monika-notif')
     .map((notif) => notif.data as MonikaNotifData)
-    .map((data) => monikaNotificationSender({ data, body, status }))
+    .map((data) => monikaNotificationSender({ data, body, probeState }))
 
   const workplaceNotification = notifications
     .filter((notif) => notif.type === 'workplace')
@@ -92,7 +92,7 @@ export const terminationNotif = async (notifications: Notification[]) => {
   const desktopNotification = notifications
     .filter((notif) => notif.type === 'desktop')
     .map((notif) => notif.data as DesktopData)
-    .map((data) => desktopNotificationSender({ data, body, status }))
+    .map((data) => desktopNotificationSender({ data, body, probeState }))
 
   return Promise.all([
     Promise.all(smtpNotification),
