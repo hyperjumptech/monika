@@ -23,10 +23,8 @@
  **********************************************************************************/
 
 import { Notification } from '../../interfaces/notification'
-import { ValidateResponse } from '../../plugins/validate-response'
 import getIp from '../../utils/ip'
 import { getMessageForAlert } from './alert-message'
-import { sendDesktop } from './channel/desktop'
 import { sendDiscord } from './channel/discord'
 import { sendMailgun } from './channel/mailgun'
 import { sendMonikaNotif } from './channel/monika-notif'
@@ -37,6 +35,9 @@ import { sendTelegram } from './channel/telegram'
 import { sendWebhook } from './channel/webhook'
 import { sendWhatsapp } from './channel/whatsapp'
 import { sendWorkplace } from './channel/workplace'
+import { sendDesktop } from './channel/desktop'
+import { ValidateResponse } from '../../plugins/validate-response'
+import { sendSendgrid } from './channel/sendgrid'
 
 export async function sendAlerts({
   validation,
@@ -74,6 +75,20 @@ export async function sendAlerts({
                 email: 'Monika@hyperjump.tech',
               },
               recipients: notification?.data?.recipients?.join(','),
+            },
+            notification.data
+          )
+        }
+        case 'sendgrid': {
+          return sendSendgrid(
+            {
+              recipients: notification?.data?.recipients?.join(','),
+              subject: message.subject,
+              body: message.body,
+              sender: {
+                name: 'Monika',
+                email: notification?.data?.sender,
+              },
             },
             notification.data
           )
