@@ -45,16 +45,12 @@ export async function sendAlerts({
   url,
   status,
   incidentThreshold,
-  probeName,
-  probeId,
 }: {
   validation: ValidateResponse
   notifications: Notification[]
   url: string
   status: string
   incidentThreshold: number
-  probeName?: string
-  probeId?: string
 }): Promise<void> {
   const ipAddress = getIp()
   const message = getMessageForAlert({
@@ -133,7 +129,7 @@ export async function sendAlerts({
         }
         case 'whatsapp': {
           const data = notification.data
-          return sendWhatsapp(data, validation.alert.query)
+          return sendWhatsapp(data, message.body)
         }
         case 'teams': {
           return sendTeams({
@@ -152,12 +148,7 @@ export async function sendAlerts({
             ...notification.data,
             body: {
               type: status === 'DOWN' ? 'incident' : 'recovery',
-              probe_url: url,
-              probe_name: probeName,
-              ip_address: ipAddress,
-              monika_id: probeId,
-              alert: validation.alert.query,
-              response_time: new Date().toLocaleString(),
+              ...message.rawBody,
             },
           })
         }
