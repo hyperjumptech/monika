@@ -4,9 +4,8 @@
 name: Upload Binary
 
 on:
-  push:
-    tags:
-      - "*"
+  release:
+    types: [published]
 
 jobs:
   test:
