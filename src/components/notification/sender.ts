@@ -23,7 +23,6 @@
  **********************************************************************************/
 
 import {
-  DesktopData,
   MailgunData,
   MonikaNotifData,
   SendgridData,
@@ -113,7 +112,7 @@ export const sendgridNotificationSender = async ({
       body: body,
       sender: {
         name: 'Monika',
-        email: 'monika@hyperjump.tech',
+        email: data?.sender,
       },
     },
     data
@@ -149,11 +148,11 @@ export const telegramNotificationSender = async ({
 export const teamsNotificationSender = async ({
   data,
   body,
-  status,
+  probeState,
 }: {
   data: TeamsData
   body: string
-  status: string
+  probeState: string
 }) => {
   await sendTeams({
     url: data?.url,
@@ -161,23 +160,23 @@ export const teamsNotificationSender = async ({
       url: '-',
       alert: body,
       time: new Date().toLocaleString(),
-      status,
+      probeState,
     },
   })
 }
 
 export const monikaNotificationSender = async ({
   data,
-  status,
+  probeState,
 }: {
   data: MonikaNotifData
   body: string
-  status: string
+  probeState: string
 }) => {
   await sendMonikaNotif({
     url: data?.url,
     body: {
-      type: status === 'INIT' ? 'start' : 'termination',
+      type: probeState === 'INIT' ? 'start' : 'termination',
       ip_address: publicIpAddress,
     },
   })
@@ -198,21 +197,14 @@ export const workplaceNotificationSender = async ({
 }
 
 export const desktopNotificationSender = async ({
-  data,
   body,
-  status,
+  probeState,
 }: {
-  data: DesktopData
   body: string
-  status: string
+  probeState: string
 }) => {
   await sendDesktop({
-    url: data?.url,
-    body: {
-      url: '-',
-      alert: body,
-      time: new Date().toLocaleString(),
-      status,
-    },
+    title: probeState === 'INIT' ? 'Monika is running' : 'Monika terminated',
+    message: body,
   })
 }

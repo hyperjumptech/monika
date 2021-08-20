@@ -25,6 +25,12 @@
 import { compileExpression } from '../../../utils/expression-parser'
 import { AxiosResponseWithExtraData } from '../../../interfaces/request'
 
+/**
+ * queryExpression runs a query against probe results
+ * @param {object} res is the axios response objet
+ * @param {string} query is the query string to operate on the res object
+ * @returns {boolean} true or false result of the query a
+ */
 const queryExpression = (res: AxiosResponseWithExtraData, query: string) => {
   const object = {
     response: {

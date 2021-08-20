@@ -25,12 +25,12 @@
 export interface ProbeStatus {
   id: string
   name: string
-  details: StatusDetails[]
+  details: ProbeStateDetails[]
 }
 
-export interface StatusDetails {
+export interface ProbeStateDetails {
   alertQuery: string
-  state:
+  probeState:
     | 'INIT'
     | 'UP_TRUE_EQUALS_THRESHOLD'
     | 'UP_TRUE_BELOW_THRESHOLD'

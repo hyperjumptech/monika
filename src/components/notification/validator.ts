@@ -53,6 +53,7 @@ export const dataSendgridSchemaValidator = dataBaseEmailSchemaValidator(
   'Sendgrid'
 ).keys({
   apiKey: Joi.string().required().label('Sendgrid API Key'),
+  sender: Joi.string().required().label('Sendgrid sender email'),
 })
 
 export const dataWebhookSchemaValidator = dataBaseEmailSchemaValidator(

@@ -38,7 +38,7 @@ export const sendSendgrid = async (
     to: recipients,
     from: sender.email,
     subject,
-    text: body,
+    html: body.replace(/\n/g, '<br/>'),
   }
 
   return sgMail.send(msg)

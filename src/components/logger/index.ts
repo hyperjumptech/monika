@@ -210,7 +210,7 @@ export async function printAllLogs() {
   data.forEach((row) => {
     log.info({
       type: 'PLAIN',
-      msg: `${row.id} id: ${row.probe_id} status: ${chalk.keyword(
+      msg: `${row.id} id: ${row.probe_id} responseCode: ${chalk.keyword(
         getStatusColor(row.response_status)
       )(String(row.response_status))} - ${row.request_url}, ${
         row.response_time || '- '
