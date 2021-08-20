@@ -1,0 +1,94 @@
+probes:
+  - id: '1'
+    # name: Example probe
+    # description: Probe
+
+    # Number of probe's interval (in seconds). Default value is 10 seconds.
+    # interval: 60
+
+    requests:
+      - url: http://example.com
+        # Http method such as GET, POST, PUT, DELETE. Default value is GET.
+        # method: POST
+
+        # Request timeout, after which time, Monika will assume timeout (in milliseconds). Default value is 3000.
+        # timeout: 6000
+
+        # saveBody: true
+        # headers:
+        #   Authorization: Bearer token_example
+        # body:
+        #   username: example
+        #   password: password_example
+
+    # Number of times an alert should return true before Monika sends notifications.
+    # For example, when incidentThreshold is 3, Monika will only send notifications when the probed URL returns non-2xx status 3 times in a row.
+    # After sending the notifications, Monika will not send notifications anymore until the alert status changes. Default value is 5.
+    # incidentThreshold: 3
+
+    # Number of times an alert should return false before Monika sends notifications.
+    # For example, when recoveryThreshold is 3, Monika will only send notifications when the probed URL returns status 2xx 3 times in a row.
+    # After sending the notifications, Monika will not send notifications anymore until the alert status changes. Default value is 5.
+    # recoveryThreshold: 3
+
+    # Alerts are the types of condition that will trigger Monika to send notification
+    # alerts: [status-not-2xx, response-time-greater-than-200-ms]
+# Monika will send notifications to you whenever alerts are triggered, e.g., when the response status of a probed URL is not 2xx success code (status-not-2xx).
+# notifications:
+# - id: random-string-monika-notif
+#   type: monika-notif
+#   data:
+#     url: https://YOUR_MONIKA_NOTIF_URL
+# - id: random-string-mailgun
+#   type: mailgun
+#   data:
+#     recipients: [RECIPIENT_EMAIL_ADDRESS]
+#     apiKey: YOUR_API_KEY
+#     domain: YOUR_DOMAIN
+# - id: random-string-sendgrid
+#   type: sendgrid
+#   data:
+#     recipients: [RECIPIENT_EMAIL_ADDRESS]
+#     apiKey: YOUR_API_KEY
+# - id: random-string-smtp
+#   type: smtp
+#   data:
+#     recipients: [RECIPIENT_EMAIL_ADDRESS]
+#     hostname: SMTP_HOSTNAME
+#     port: 587
+#     username: SMTP_USERNAME
+#     password: SMTP_PASSWORD
+# - id: random-string-webhook
+#   type: webhook
+#   data:
+#     method: POST
+#     url: https://WEBHOOK_URL
+# - id: random-string-slack
+#   type: slack
+#   data:
+#     url: https://YOUR_SLACK_INCOMING_WEBHOOK_URL
+# - id: random-string-telegram
+#   type: telegram
+#   data:
+#     group_id: YOUR_GROUP_ID
+#     bot_token: YOUR_BOT_TOKEN
+# - id: random-string-whatsapp
+#   type: whatsapp
+#   data:
+#     recipients: ["1234567890"]
+#     url: http://example.com
+#     username: example
+#     password: password_example
+# - id: random-string-teams
+#   type: teams
+#   data:
+#     url: https://YOUR_TEAMS_WEBHOOK_URL
+# - id: random-string-discord
+#   type: discord
+#   data:
+#     url: https://YOUR_DISCORD_URL
+# - id: random-string-workplace
+#   type: workplace
+#   data:
+#     thread_id: "1234567890"
+#     access_token: YOUR_CUSTOM_INTEGRATION_ACCESS_TOKEN

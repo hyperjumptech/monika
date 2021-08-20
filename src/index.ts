@@ -80,11 +80,16 @@ function getDefaultConfig() {
   const filesArray = fs.readdirSync('./')
   const monikaDotJsonFile = filesArray.find((x) => x === 'monika.json')
   const configDotJsonFile = filesArray.find((x) => x === 'config.json')
+  const monikaDotYamlFile = filesArray.find(
+    (x) => x === 'monika.yml' || x === 'monika.yaml'
+  )
 
   return monikaDotJsonFile
     ? `./${monikaDotJsonFile}`
     : configDotJsonFile
     ? `./${configDotJsonFile}`
+    : monikaDotYamlFile
+    ? `./${monikaDotYamlFile}`
     : './monika.json'
 }
 class Monika extends Command {
