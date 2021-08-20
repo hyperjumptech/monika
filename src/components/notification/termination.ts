@@ -1,5 +1,4 @@
 import {
-  DesktopData,
   MailgunData,
   MonikaNotifData,
   SendgridData,
@@ -91,8 +90,7 @@ export const terminationNotif = async (notifications: Notification[]) => {
 
   const desktopNotification = notifications
     .filter((notif) => notif.type === 'desktop')
-    .map((notif) => notif.data as DesktopData)
-    .map((data) => desktopNotificationSender({ data, body, probeState }))
+    .map(() => desktopNotificationSender({ body, probeState }))
 
   return Promise.all([
     Promise.all(smtpNotification),

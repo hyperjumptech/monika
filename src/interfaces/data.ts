@@ -104,16 +104,3 @@ export interface WorkplaceData {
   access_token: string
   body: string
 }
-
-export interface DesktopData {
-  url: string
-  body: DesktopDataBody
-}
-
-export interface DesktopDataBody {
-  url: string
-  time: string
-  alert: string
-  probeState: string
-  expected?: string
-}

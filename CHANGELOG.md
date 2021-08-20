@@ -5,6 +5,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2021-08-19
+
+### Added
+
+- Added: Alert/Notification messages sent to Sendgrid channel (#324)
+- Added: TLS Checker (#315)
+- Added: Improve Alert/Notification messages sent to SMTP & mailgun channel (#317)
+- Added: Improve Alert/Notification messages sent to channels (#309)
+- Feature(config): [295] return after create configuration file (#302)
+- feature(config): [297] fix monika json generated (#301)
+- Add cli documentations (#298)
+- feat: use native notifications and remove node-notifier (#329)
+- Functional Suitability : Add More Methods to Monika (#299)
+- Feat: Flexible user defined alert trigger (#333)
+- Use vercel/pkg to generate single binaries (#338)
+
+### Fixed
+
+- Fix: 228 mailgun vulnerability (#325)
+- Fix: do not overwrite existing config (#307)
+- Fix issue #304 (#305)
+
+### Changed
+
+- refactor: simplified send desktop notification function (#342)
+- refactor: improves message sent to monika whatsapp notifier (#340)
+- refactor: update typings for notifications data and remove unused codes (#343)
+- refactor: improves message sent to FB workplace (#339)
+- refactor: improves message sent to webhook, slack, and discord (#337)
+- refactor: improves message sent to telegram (#336)
+- update monika config site (#334)
+- chore: update response code (#327)
+- Update Documentation with --force (#312)
+- Chore/308 update status (#341)
+
 ## [1.4.1] - 2021-07-27
 
 ### Added
