@@ -50,7 +50,7 @@ export interface TeamsData {
 }
 
 export interface TeamsDataBody extends WebhookDataBody {
-  status: string
+  probeState: string
   expected?: string
 }
 
@@ -103,17 +103,4 @@ export interface WorkplaceData {
   thread_id: string
   access_token: string
   body: string
-}
-
-export interface DesktopData {
-  url: string
-  body: DesktopDataBody
-}
-
-export interface DesktopDataBody {
-  url: string
-  time: string
-  alert: string
-  status: string
-  expected?: string
 }

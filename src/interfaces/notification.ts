@@ -23,7 +23,6 @@
  **********************************************************************************/
 
 import {
-  DesktopData,
   MailgunData,
   MonikaNotifData,
   SendgridData,
@@ -110,5 +109,7 @@ interface WorkplaceNotification extends BaseNotification {
 
 interface DesktopNotification extends BaseNotification {
   type: 'desktop'
-  data: DesktopData
+  // actually do not need data property
+  // it is here just to make type consistent and does not throw type error in other parts of app
+  data: undefined
 }

@@ -31,22 +31,9 @@ import {
   TelegramData,
   WebhookData,
   WorkplaceData,
-  DesktopData,
 } from '../../interfaces/data'
 import { Notification } from '../../interfaces/notification'
 import getIp from '../../utils/ip'
-import {
-  dataDiscordSchemaValidator,
-  dataMailgunSchemaValidator,
-  dataMonikaNotifSchemaValidator,
-  dataSendgridSchemaValidator,
-  dataSlackSchemaValidator,
-  dataSMTPSchemaValidator,
-  dataTeamsSchemaValidator,
-  dataTelegramSchemaValidator,
-  dataWebhookSchemaValidator,
-  dataWorkplaceSchemaValidator,
-} from './validator'
 import {
   desktopNotificationSender,
   discordNotificationSender,
@@ -60,10 +47,22 @@ import {
   webhookNotificationSender,
   workplaceNotificationSender,
 } from './sender'
+import {
+  dataDiscordSchemaValidator,
+  dataMailgunSchemaValidator,
+  dataMonikaNotifSchemaValidator,
+  dataSendgridSchemaValidator,
+  dataSlackSchemaValidator,
+  dataSMTPSchemaValidator,
+  dataTeamsSchemaValidator,
+  dataTelegramSchemaValidator,
+  dataWebhookSchemaValidator,
+  dataWorkplaceSchemaValidator,
+} from './validator'
 
 const subject = 'Monika is started'
 const body = `Monika is running on ${getIp()}`
-const status = 'INIT'
+const probeState = 'INIT'
 
 export const errorMessage = (
   notificationType: string,
@@ -154,7 +153,7 @@ const telegramNotificationInitialChecker = async (data: TelegramData) => {
 const teamsNotificationInitialChecker = async (data: TeamsData) => {
   try {
     await dataTeamsSchemaValidator.validateAsync(data)
-    await teamsNotificationSender({ data, body, status })
+    await teamsNotificationSender({ data, body, probeState })
 
     return 'success'
   } catch (error) {
@@ -165,7 +164,7 @@ const teamsNotificationInitialChecker = async (data: TeamsData) => {
 const monikaNotificationInitialChecker = async (data: MonikaNotifData) => {
   try {
     await dataMonikaNotifSchemaValidator.validateAsync(data)
-    await monikaNotificationSender({ data, body, status })
+    await monikaNotificationSender({ data, body, probeState })
 
     return 'success'
   } catch (error) {
@@ -184,9 +183,9 @@ const workplaceNotificationInitialChecker = async (data: WorkplaceData) => {
   }
 }
 
-const desktopNotificationInitialChecker = async (data: TeamsData) => {
+const desktopNotificationInitialChecker = async () => {
   try {
-    desktopNotificationSender({ data, body, status })
+    desktopNotificationSender({ body, probeState })
 
     return 'success'
   } catch (error) {
@@ -246,7 +245,6 @@ export const notificationChecker = async (notifications: Notification[]) => {
 
   const desktopNotification = notifications
     .filter((notif) => notif.type === 'desktop')
-    .map((notif) => notif.data as DesktopData)
     .map(desktopNotificationInitialChecker)
 
   return Promise.all([
