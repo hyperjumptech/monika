@@ -23,33 +23,20 @@
  **********************************************************************************/
 
 import { hostname } from 'os'
-import {
-  // MailgunData,
-  // SMTPData,
-  // TeamsData,
-  // TelegramData,
-  WebhookData,
-  // WhatsappData,
-  // DiscordData,
-  // WorkplaceData,
-  // MonikaNotifData,
-  DesktopData,
-  // WebhookDataBody,
-} from '../../interfaces/data'
 import { Notification } from '../../interfaces/notification'
 import getIp from '../../utils/ip'
 import { publicIpAddress } from '../../utils/public-ip'
+// import { sendWhatsapp } from './channel/whatsapp'
+// import { sendDiscord } from './channel/discord'
+// import { sendMonikaNotif } from './channel/monika-notif'
+// import { sendWorkplace } from './channel/workplace'
+import { sendDesktop } from './channel/desktop'
 // import { sendMailgun } from './channel/mailgun'
 // import { sendSlack } from './channel/slack'
 // import { createSmtpTransport, sendSmtpMail } from './channel/smtp'
 // import { sendTeams } from './channel/teams'
 // import { sendTelegram } from './channel/telegram'
 import { sendWebhook } from './channel/webhook'
-// import { sendWhatsapp } from './channel/whatsapp'
-// import { sendDiscord } from './channel/discord'
-// import { sendMonikaNotif } from './channel/monika-notif'
-// import { sendWorkplace } from './channel/workplace'
-import { sendDesktop } from './channel/desktop'
 
 export async function sendStatusNotification({
   summary,
@@ -77,19 +64,14 @@ export async function sendStatusNotification({
     switch (notification.type) {
       case 'desktop':
         return sendDesktop({
-          ...notification.data,
-          body: {
-            alert: `${subtitle}
-
-${body}`,
-            status: 'STATUS-UPDATE',
-          },
-        } as DesktopData)
+          title: subtitle,
+          message: body,
+        })
       case 'webhook':
         return sendWebhook({
           ...notification.data,
           body: JSON.stringify(summary),
-        } as WebhookData).then(() => {
+        }).then(() => {
           // to make typecheck pass
           return undefined
         })
