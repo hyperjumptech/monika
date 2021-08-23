@@ -51,7 +51,6 @@ import {
 import { sendAlerts, sendNotifications } from './components/notification'
 import { notificationChecker } from './components/notification/checker'
 import { resetProbeStatuses } from './components/notification/process-server-status'
-import { sendStatusNotification } from './components/notification/status-notification-sender'
 import { getLogsAndReport } from './components/reporter'
 import { checkTLS } from './components/tls-checker'
 import {
@@ -495,9 +494,25 @@ Please refer to the Monika documentations on how to how to configure notificatio
   async getSummaryAndSendNotif(config: Config) {
     const { notifications } = config
     const summary = await getSummary()
-    return sendStatusNotification({
-      summary,
-      notifications,
+    if (!notifications) return
+
+    await sendNotifications(notifications, {
+      subject: `Status Update ${new Date().toUTCString()}`,
+      body: `Host: ${getIp()} (Local), ${publicIpAddress} (Public), ${hostname()} (Hostname)
+Number of probes: ${summary.numberOfProbes}
+Average response time: ${summary.averageResponseTime} ms in the last 24 hours
+Incidents: ${summary.numberOfIncidents} in the last 24 hours
+Recoveries: ${summary.numberOfRecoveries} in the last 24 hours
+Notifications: ${summary.numberOfSentNotifications}`,
+      summary: `There are ${summary.numberOfIncidents} incidents and ${summary.numberOfRecoveries} recoveries in the last 24 hours.`,
+      meta: {
+        type: 'status-update' as const,
+        time: new Date().toUTCString(),
+        hostname: hostname(),
+        privateIpAddress: getIp(),
+        publicIpAddress,
+        ...summary,
+      },
     })
   }
 }

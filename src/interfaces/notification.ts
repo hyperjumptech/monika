@@ -121,6 +121,7 @@ export interface NotificationMessage {
   meta:
     | NotificationIncidentRecoveryMessageMeta
     | NotificationStartTerminationMessageMeta
+    | NotificationStatusUpdateMessageMeta
 }
 
 interface BaseNotificationMessageMeta {
@@ -140,4 +141,14 @@ interface NotificationIncidentRecoveryMessageMeta
 interface NotificationStartTerminationMessageMeta
   extends BaseNotificationMessageMeta {
   type: 'start' | 'termination'
+}
+
+interface NotificationStatusUpdateMessageMeta
+  extends BaseNotificationMessageMeta {
+  type: 'status-update'
+  numberOfProbes: number
+  averageResponseTime: number
+  numberOfIncidents: number
+  numberOfRecoveries: number
+  numberOfSentNotifications: number
 }
