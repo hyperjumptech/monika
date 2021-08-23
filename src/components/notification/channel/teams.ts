@@ -91,5 +91,50 @@ export const sendTeams = async (
         ],
       },
     })
+  } else if (message.meta.type === 'status-update') {
+    await axios({
+      method: 'POST',
+      url: data.url,
+      data: {
+        '@type': 'MessageCard',
+        summary: message.summary,
+        sections: [
+          {
+            activityTitle: 'Monika Status',
+            activitySubtitle: message.subject,
+            facts: [
+              {
+                name: 'Host',
+                value: `${message.meta.privateIpAddress} (local), ${
+                  message.meta.publicIpAddress
+                    ? `${message.meta.publicIpAddress} (public)`
+                    : ''
+                } ${message.meta.hostname} (hostname)`,
+              },
+              {
+                name: 'Number of Probes',
+                value: message.meta.numberOfProbes,
+              },
+              {
+                name: 'Average Response Time',
+                value: message.meta.averageResponseTime,
+              },
+              {
+                name: 'Incidents',
+                value: message.meta.numberOfIncidents,
+              },
+              {
+                name: 'Recoveries',
+                value: message.meta.numberOfRecoveries,
+              },
+              {
+                name: 'Notifications',
+                value: message.meta.numberOfSentNotifications,
+              },
+            ],
+          },
+        ],
+      },
+    })
   }
 }
