@@ -23,6 +23,7 @@
  **********************************************************************************/
 
 import { hostname } from 'os'
+import { NotificationMessage } from '../../interfaces/notification'
 import { ProbeAlert } from '../../interfaces/probe'
 import { parseAlertStringTime } from '../../plugins/validate-response/checkers'
 import { publicIpAddress } from '../../utils/public-ip'
@@ -41,17 +42,7 @@ export function getMessageForAlert({
   probeState: string
   incidentThreshold: number
   responseValue: number
-}): {
-  subject: string
-  body: string
-  rawBody: {
-    alert: string
-    url: string
-    time: string
-    monika: string
-  }
-  expected: string
-} {
+}): NotificationMessage {
   const getSubject = (url: string, probeState: string) => {
     const recoveryOrIncident = probeState === 'UP' ? 'RECOVERY' : 'INCIDENT'
 
@@ -106,30 +97,30 @@ export function getMessageForAlert({
     return alert.message
   }
 
-  const today = new Date().toUTCString()
-
-  const pubIpAddress = publicIpAddress ? `${publicIpAddress} (public)` : ''
+  const meta = {
+    type: probeState === 'UP' ? ('recovery' as const) : ('incident' as const),
+    url,
+    time: new Date().toUTCString(),
+    hostname: hostname(),
+    privateIpAddress: ipAddress,
+    publicIpAddress,
+  }
 
   const bodyString = [
     `${getBody(probeState)}\n`,
     `Alert: ${getExpectedMessage(probeState, responseValue)}`,
-    `URL: ${url}`,
-    `At: ${today}`,
-    `Monika: ${ipAddress} (local), ${pubIpAddress} ${hostname} (hostname)`,
+    `URL: ${meta.url}`,
+    `At: ${meta.time}`,
+    `Monika: ${ipAddress} (local), ${
+      publicIpAddress ? `${publicIpAddress} (public)` : ''
+    } ${hostname} (hostname)`,
   ].join('\n\n')
 
   const message = {
     subject: getSubject(url, probeState),
     body: bodyString,
-    rawBody: {
-      alert: getExpectedMessage(probeState, responseValue),
-      url,
-      time: today,
-      monika: `${ipAddress} (local), ${
-        publicIpAddress ? `${publicIpAddress} (public)` : ''
-      } ${hostname} (hostname)`,
-    },
-    expected: getExpectedMessage(probeState, responseValue),
+    summary: getExpectedMessage(probeState, responseValue),
+    meta,
   }
 
   return message

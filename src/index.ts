@@ -27,8 +27,9 @@ import { Command, flags } from '@oclif/command'
 import boxen from 'boxen'
 import chalk from 'chalk'
 import cli from 'cli-ux'
-import cron, { ScheduledTask } from 'node-cron'
 import fs from 'fs'
+import cron, { ScheduledTask } from 'node-cron'
+import { hostname } from 'os'
 import {
   createConfig,
   getConfig,
@@ -36,46 +37,46 @@ import {
   setupConfig,
 } from './components/config'
 import {
-  setNotificationLog,
   printAllLogs,
   printProbeLog,
+  setNotificationLog,
 } from './components/logger'
 import {
   closeLog,
   flushAllLogs,
   getSummary,
   openLogfile,
+  saveNotificationLog,
 } from './components/logger/history'
+import { sendAlerts, sendNotifications } from './components/notification'
 import { notificationChecker } from './components/notification/checker'
-import { terminationNotif } from './components/notification/termination'
 import { resetProbeStatuses } from './components/notification/process-server-status'
 import { sendStatusNotification } from './components/notification/status-notification-sender'
+import { getLogsAndReport } from './components/reporter'
+import { checkTLS } from './components/tls-checker'
 import {
   CONFIG_SANITIZED,
-  PROBE_RESPONSE_RECEIVED,
-  PROBE_RESPONSE_VALIDATED,
   PROBE_ALERTS_READY,
   PROBE_LOGS_BUILT,
+  PROBE_RESPONSE_RECEIVED,
+  PROBE_RESPONSE_VALIDATED,
 } from './constants/event-emitter'
 import { Config } from './interfaces/config'
+import { LogObject } from './interfaces/logs'
+import { Notification } from './interfaces/notification'
 import { Probe } from './interfaces/probe'
+import { ProbeStateDetails } from './interfaces/probe-status'
 import { AxiosResponseWithExtraData } from './interfaces/request'
 import { idFeeder, isIDValid, loopReport, sanitizeProbe } from './looper'
 import {
   PrometheusCollector,
   startPrometheusMetricsServer,
 } from './plugins/metrics/prometheus'
-import { getEventEmitter } from './utils/events'
-import { log } from './utils/pino'
-import { ProbeStateDetails } from './interfaces/probe-status'
-import { Notification } from './interfaces/notification'
-import { saveNotificationLog } from './components/logger/history'
-import { sendAlerts } from './components/notification'
-import { LogObject } from './interfaces/logs'
-import { getLogsAndReport } from './components/reporter'
-import { checkTLS } from './components/tls-checker'
-import { getPublicIp } from './utils/public-ip'
 import validateResponse, { ValidateResponse } from './plugins/validate-response'
+import { getEventEmitter } from './utils/events'
+import getIp from './utils/ip'
+import { log } from './utils/pino'
+import { getPublicIp, publicIpAddress } from './utils/public-ip'
 
 const em = getEventEmitter()
 
@@ -506,7 +507,18 @@ em.addListener('TERMINATE_EVENT', async (data) => {
   log.warn(data)
   const config = getConfig()
   if (process.env.NODE_ENV !== 'test') {
-    await terminationNotif(config.notifications ?? [])
+    await sendNotifications(config.notifications ?? [], {
+      subject: 'Monika terminated',
+      body: `Monika is no longer running in ${publicIpAddress}`,
+      summary: `Monika is no longer running in ${publicIpAddress}`,
+      meta: {
+        type: 'termination',
+        time: new Date().toUTCString(),
+        hostname: hostname(),
+        privateIpAddress: getIp(),
+        publicIpAddress,
+      },
+    })
   }
 })
 

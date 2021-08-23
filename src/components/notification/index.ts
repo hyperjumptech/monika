@@ -22,7 +22,11 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Notification } from '../../interfaces/notification'
+import { MonikaNotifDataBody } from '../../interfaces/data'
+import {
+  Notification,
+  NotificationMessage,
+} from '../../interfaces/notification'
 import { ValidateResponse } from '../../plugins/validate-response'
 import getIp from '../../utils/ip'
 import { getMessageForAlert } from './alert-message'
@@ -39,28 +43,10 @@ import { sendWebhook } from './channel/webhook'
 import { sendWhatsapp } from './channel/whatsapp'
 import { sendWorkplace } from './channel/workplace'
 
-export async function sendAlerts({
-  validation,
-  notifications,
-  url,
-  probeState,
-  incidentThreshold,
-}: {
-  validation: ValidateResponse
-  notifications: Notification[]
-  url: string
-  probeState: string
-  incidentThreshold: number
-}): Promise<void> {
-  const ipAddress = getIp()
-  const message = getMessageForAlert({
-    alert: validation.alert,
-    url,
-    ipAddress,
-    probeState,
-    incidentThreshold,
-    responseValue: validation.responseValue,
-  })
+export async function sendNotifications(
+  notifications: Notification[],
+  message: NotificationMessage
+) {
   await Promise.all<any>(
     notifications.map((notification) => {
       switch (notification.type) {
@@ -132,24 +118,39 @@ export async function sendAlerts({
           return sendWhatsapp(data, message.body)
         }
         case 'teams': {
-          return sendTeams({
-            ...notification.data,
-            body: {
-              alert: validation.alert.query,
-              url,
-              time: new Date().toLocaleString(),
-              probeState,
-              expected: message.expected,
-            },
-          })
+          return sendTeams(notification.data, message)
         }
         case 'monika-notif': {
+          let body: MonikaNotifDataBody
+
+          if (
+            message.meta.type === 'start' ||
+            message.meta.type === 'termination'
+          ) {
+            body = {
+              type: message.meta.type,
+              ip_address: message.meta.publicIpAddress,
+            }
+          } else if (
+            message.meta.type === 'incident' ||
+            message.meta.type === 'recovery'
+          ) {
+            body = {
+              type: message.meta.type,
+              alert: message.summary,
+              url: message.meta.url,
+              time: message.meta.time,
+              monika: `${message.meta.privateIpAddress} (local), ${
+                message.meta.publicIpAddress
+                  ? `${message.meta.publicIpAddress} (public)`
+                  : ''
+              } ${message.meta.hostname} (hostname)`,
+            }
+          }
+
           return sendMonikaNotif({
             ...notification.data,
-            body: {
-              type: probeState === 'DOWN' ? 'incident' : 'recovery',
-              ...message.rawBody,
-            },
+            body: body!,
           })
         }
         case 'workplace': {
@@ -161,7 +162,7 @@ export async function sendAlerts({
         case 'desktop': {
           return sendDesktop({
             title: message.subject,
-            message: message.expected,
+            message: message.summary || message.body,
           })
         }
         default: {
@@ -170,4 +171,30 @@ export async function sendAlerts({
       }
     })
   )
+}
+
+export async function sendAlerts({
+  validation,
+  notifications,
+  url,
+  probeState,
+  incidentThreshold,
+}: {
+  validation: ValidateResponse
+  notifications: Notification[]
+  url: string
+  probeState: string
+  incidentThreshold: number
+}): Promise<void> {
+  const ipAddress = getIp()
+  const message = getMessageForAlert({
+    alert: validation.alert,
+    url,
+    ipAddress,
+    probeState,
+    incidentThreshold,
+    responseValue: validation.responseValue,
+  })
+
+  return sendNotifications(notifications, message)
 }

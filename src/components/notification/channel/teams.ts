@@ -23,78 +23,73 @@
  **********************************************************************************/
 
 import axios from 'axios'
+import { NotificationMessage } from '../../../interfaces/notification'
 import { TeamsData } from './../../../interfaces/data'
-import { AxiosResponseWithExtraData } from '../../../interfaces/request'
-import getIp from '../../../utils/ip'
-import { hostname } from 'os'
-import { publicIpAddress } from '../../../utils/public-ip'
 
-export const sendTeams = async (data: TeamsData) => {
-  try {
-    const notifType = data.body.probeState === 'UP' ? 'RECOVERY' : 'INCIDENT'
-    const notifColor = data.body.probeState === 'UP' ? '8CC152' : 'DF202E'
+export const sendTeams = async (
+  data: TeamsData,
+  message: NotificationMessage
+) => {
+  if (message.meta.type === 'start' || message.meta.type === 'termination') {
+    await axios({
+      method: 'POST',
+      url: data.url,
+      data: {
+        '@type': 'MessageCard',
+        themeColor: '3BAFDA',
+        summary: message.summary,
+        sections: [
+          {
+            activityTitle: message.subject,
+            markdown: true,
+          },
+        ],
+      },
+    })
+  } else if (
+    message.meta.type === 'incident' ||
+    message.meta.type === 'recovery'
+  ) {
+    const notifType = message.meta.type.toUpperCase()
+    const notifColor = message.meta.type === 'incident' ? 'DF202E' : '8CC152'
 
-    let res: AxiosResponseWithExtraData
-    if (
-      data.body.probeState === 'INIT' ||
-      data.body.probeState === 'TERMINATE'
-    ) {
-      res = await axios({
-        method: 'POST',
-        url: data.url,
-        data: {
-          '@type': 'MessageCard',
-          themeColor: '3BAFDA',
-          summary: data.body.alert,
-          sections: [
-            {
-              activityTitle: data.body.alert,
-              markdown: true,
-            },
-          ],
-        },
-      })
-    } else {
-      res = await axios({
-        method: 'POST',
-        url: data.url,
-        data: {
-          '@type': 'MessageCard',
-          themeColor: notifColor,
-          summary: `New ${notifType} notification from Monika`,
-          sections: [
-            {
-              activityTitle: `New ${notifType} notification from Monika`,
-              activitySubtitle: `${data.body.alert} for URL [${data.body.url}](${data.body.url}) at ${data.body.time}`,
-              facts: [
-                {
-                  name: 'Alert',
-                  value: data.body.expected,
-                },
-                {
-                  name: 'URL',
-                  value: `[${data.body.url}](${data.body.url})`,
-                },
-                {
-                  name: 'At',
-                  value: data.body.time,
-                },
-                {
-                  name: 'Monika',
-                  value: `${getIp()} (local), ${
-                    publicIpAddress ? `${publicIpAddress} (public)` : ''
-                  } ${hostname} (hostname)`,
-                },
-              ],
-              markdown: true,
-            },
-          ],
-        },
-      })
-    }
-
-    return res
-  } catch (error) {
-    throw error
+    await axios({
+      method: 'POST',
+      url: data.url,
+      data: {
+        '@type': 'MessageCard',
+        themeColor: notifColor,
+        summary: `New ${notifType} notification from Monika`,
+        sections: [
+          {
+            activityTitle: `New ${notifType} notification from Monika`,
+            activitySubtitle: `${message.summary} for URL [${message.meta.url}](${message.meta.url}) at ${message.meta.time}`,
+            facts: [
+              {
+                name: 'Alert',
+                value: message.summary,
+              },
+              {
+                name: 'URL',
+                value: `[${message.meta.url}](${message.meta.url})`,
+              },
+              {
+                name: 'At',
+                value: message.meta.time,
+              },
+              {
+                name: 'Monika',
+                value: `${message.meta.privateIpAddress} (local), ${
+                  message.meta.publicIpAddress
+                    ? `${message.meta.publicIpAddress} (public)`
+                    : ''
+                } ${message.meta.hostname} (hostname)`,
+              },
+            ],
+            markdown: true,
+          },
+        ],
+      },
+    })
   }
 }
