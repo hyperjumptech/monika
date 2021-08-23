@@ -47,7 +47,7 @@ export async function sendNotifications(
   notifications: Notification[],
   message: NotificationMessage
 ) {
-  await Promise.all<any>(
+  return Promise.allSettled(
     notifications.map((notification) => {
       switch (notification.type) {
         case 'mailgun': {
@@ -160,10 +160,13 @@ export async function sendNotifications(
           })
         }
         case 'desktop': {
-          return sendDesktop({
+          sendDesktop({
             title: message.subject,
             message: message.summary || message.body,
           })
+          // for type consitency
+          // because all other functions above return promise
+          return Promise.resolve()
         }
         default: {
           return Promise.resolve()
@@ -185,7 +188,7 @@ export async function sendAlerts({
   url: string
   probeState: string
   incidentThreshold: number
-}): Promise<void> {
+}) {
   const ipAddress = getIp()
   const message = getMessageForAlert({
     alert: validation.alert,

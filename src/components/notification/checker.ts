@@ -22,7 +22,11 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import { hostname } from 'os'
+import { sendNotifications } from '.'
 import { Notification } from '../../interfaces/notification'
+import getIp from '../../utils/ip'
+import { publicIpAddress } from '../../utils/public-ip'
 import {
   dataDiscordSchemaValidator,
   dataMailgunSchemaValidator,
@@ -35,19 +39,6 @@ import {
   dataWebhookSchemaValidator,
   dataWorkplaceSchemaValidator,
 } from './validator'
-
-// const subject = 'Monika is started'
-// const body = `Monika is running on ${publicIpAddress}`
-// const probeState = 'INIT'
-
-export const errorMessage = (
-  notificationType: string,
-  originalErrorMessage?: string
-) => {
-  return new Error(
-    `Failed to send message using ${notificationType}, please check your ${notificationType} notification config.\nMessage: ${originalErrorMessage}`
-  )
-}
 
 export const notificationChecker = async (notifications: Notification[]) => {
   const validators = {
@@ -65,17 +56,48 @@ export const notificationChecker = async (notifications: Notification[]) => {
     workplace: dataWorkplaceSchemaValidator,
   }
 
-  try {
-    await Promise.all(
-      notifications.map((notification) => {
-        const validator = validators[notification.type]
-        if (!validator) return Promise.resolve()
+  await Promise.all(
+    notifications.map(async (notification) => {
+      const validator = validators[notification.type]
+      if (!validator) return Promise.resolve()
+      try {
         return validator.validateAsync(notification.data)
+      } catch (error) {
+        throw new Error(
+          `Please check your ${notification.type} notification config.\nMessage: ${error?.message}`
+        )
+      }
+    })
+  )
+
+  const results = await sendNotifications(notifications, {
+    subject: 'Monika is started',
+    body: `Monika is running on ${publicIpAddress}`,
+    summary: `Monika is running on ${publicIpAddress}`,
+    meta: {
+      type: 'start',
+      time: new Date().toUTCString(),
+      hostname: hostname(),
+      privateIpAddress: getIp(),
+      publicIpAddress,
+    },
+  })
+
+  const sendingErrors = results.reduce((acc, current, index) => {
+    if (current.status === 'rejected') {
+      acc.push([notifications[index].type, current.reason?.message || ''])
+    }
+    return acc
+  }, [] as [Notification['type'], string][])
+
+  if (sendingErrors.length > 0) {
+    const combinedMessage = sendingErrors
+      .map(([type, message]) => {
+        return `- ${type}, reason: ${message}`
       })
-    )
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.log({ error })
-    throw error
+      .join('\n')
+
+    throw new Error(`Failed to send message using following channels, check your connection or your configuration for:'
+${combinedMessage}`)
   }
 }
