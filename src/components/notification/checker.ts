@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import { hostname } from 'os'
-import { sendNotifications } from '.'
+import { NotificationSendingError, sendNotifications } from '.'
 import { Notification } from '../../interfaces/notification'
 import getIp from '../../utils/ip'
 import { publicIpAddress } from '../../utils/public-ip'
@@ -39,6 +39,9 @@ import {
   dataWebhookSchemaValidator,
   dataWorkplaceSchemaValidator,
 } from './validator'
+
+// reexported with alias because this `errorMessage` function is used in test file
+export const errorMessage = NotificationSendingError.create
 
 export const notificationChecker = async (notifications: Notification[]) => {
   const validators = {
@@ -61,16 +64,15 @@ export const notificationChecker = async (notifications: Notification[]) => {
       const validator = validators[notification.type]
       if (!validator) return Promise.resolve()
       try {
-        return validator.validateAsync(notification.data)
+        const validated = await validator.validateAsync(notification.data)
+        return validated
       } catch (error) {
-        throw new Error(
-          `Please check your ${notification.type} notification config.\nMessage: ${error?.message}`
-        )
+        throw NotificationSendingError.create(notification.type, error?.message)
       }
     })
   )
 
-  const results = await sendNotifications(notifications, {
+  await sendNotifications(notifications, {
     subject: 'Monika is started',
     body: `Monika is running on ${publicIpAddress}`,
     summary: `Monika is running on ${publicIpAddress}`,
@@ -82,22 +84,4 @@ export const notificationChecker = async (notifications: Notification[]) => {
       publicIpAddress,
     },
   })
-
-  const sendingErrors = results.reduce((acc, current, index) => {
-    if (current.status === 'rejected') {
-      acc.push([notifications[index].type, current.reason?.message || ''])
-    }
-    return acc
-  }, [] as [Notification['type'], string][])
-
-  if (sendingErrors.length > 0) {
-    const combinedMessage = sendingErrors
-      .map(([type, message]) => {
-        return `- ${type}, reason: ${message}`
-      })
-      .join('\n')
-
-    throw new Error(`Failed to send message using following channels, check your connection or your configuration for:'
-${combinedMessage}`)
-  }
 }
