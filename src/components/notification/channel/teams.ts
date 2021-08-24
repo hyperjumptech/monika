@@ -117,15 +117,15 @@ export const sendTeams = async (
               },
               {
                 name: 'Average Response Time',
-                value: message.meta.averageResponseTime,
+                value: `${message.meta.averageResponseTime} ms in the last 24 hours`,
               },
               {
                 name: 'Incidents',
-                value: message.meta.numberOfIncidents,
+                value: `${message.meta.numberOfIncidents} in the last 24 hours`,
               },
               {
                 name: 'Recoveries',
-                value: message.meta.numberOfRecoveries,
+                value: `${message.meta.numberOfRecoveries} in the last 24 hours`,
               },
               {
                 name: 'Notifications',
