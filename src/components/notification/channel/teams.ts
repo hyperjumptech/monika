@@ -30,111 +30,120 @@ export const sendTeams = async (
   data: TeamsData,
   message: NotificationMessage
 ) => {
-  if (message.meta.type === 'start' || message.meta.type === 'termination') {
-    await axios({
-      method: 'POST',
-      url: data.url,
-      data: {
-        '@type': 'MessageCard',
-        themeColor: '3BAFDA',
-        summary: message.summary,
-        sections: [
-          {
-            activityTitle: message.subject,
-            markdown: true,
-          },
-        ],
-      },
-    })
-  } else if (
-    message.meta.type === 'incident' ||
-    message.meta.type === 'recovery'
-  ) {
-    const notifType = message.meta.type.toUpperCase()
-    const notifColor = message.meta.type === 'incident' ? 'DF202E' : '8CC152'
+  switch (message.meta.type) {
+    case 'start':
+    case 'termination': {
+      await axios({
+        method: 'POST',
+        url: data.url,
+        data: {
+          '@type': 'MessageCard',
+          themeColor: '3BAFDA',
+          summary: message.summary,
+          sections: [
+            {
+              activityTitle: message.subject,
+              markdown: true,
+            },
+          ],
+        },
+      })
+      break
+    }
+    case 'incident':
+    case 'recovery': {
+      const notifType = message.meta.type.toUpperCase()
+      const notifColor = message.meta.type === 'incident' ? 'DF202E' : '8CC152'
 
-    await axios({
-      method: 'POST',
-      url: data.url,
-      data: {
-        '@type': 'MessageCard',
-        themeColor: notifColor,
-        summary: `New ${notifType} notification from Monika`,
-        sections: [
-          {
-            activityTitle: `New ${notifType} notification from Monika`,
-            activitySubtitle: `${message.summary} for URL [${message.meta.url}](${message.meta.url}) at ${message.meta.time}`,
-            facts: [
-              {
-                name: 'Alert',
-                value: message.summary,
-              },
-              {
-                name: 'URL',
-                value: `[${message.meta.url}](${message.meta.url})`,
-              },
-              {
-                name: 'At',
-                value: message.meta.time,
-              },
-              {
-                name: 'Monika',
-                value: `${message.meta.privateIpAddress} (local), ${
-                  message.meta.publicIpAddress
-                    ? `${message.meta.publicIpAddress} (public)`
-                    : ''
-                } ${message.meta.hostname} (hostname)`,
-              },
-            ],
-            markdown: true,
-          },
-        ],
-      },
-    })
-  } else if (message.meta.type === 'status-update') {
-    await axios({
-      method: 'POST',
-      url: data.url,
-      data: {
-        '@type': 'MessageCard',
-        summary: message.summary,
-        sections: [
-          {
-            activityTitle: 'Monika Status',
-            activitySubtitle: message.subject,
-            facts: [
-              {
-                name: 'Host',
-                value: `${message.meta.privateIpAddress} (local), ${
-                  message.meta.publicIpAddress
-                    ? `${message.meta.publicIpAddress} (public)`
-                    : ''
-                } ${message.meta.hostname} (hostname)`,
-              },
-              {
-                name: 'Number of Probes',
-                value: message.meta.numberOfProbes,
-              },
-              {
-                name: 'Average Response Time',
-                value: `${message.meta.averageResponseTime} ms in the last 24 hours`,
-              },
-              {
-                name: 'Incidents',
-                value: `${message.meta.numberOfIncidents} in the last 24 hours`,
-              },
-              {
-                name: 'Recoveries',
-                value: `${message.meta.numberOfRecoveries} in the last 24 hours`,
-              },
-              {
-                name: 'Notifications',
-                value: message.meta.numberOfSentNotifications,
-              },
-            ],
-          },
-        ],
-      },
-    })
+      await axios({
+        method: 'POST',
+        url: data.url,
+        data: {
+          '@type': 'MessageCard',
+          themeColor: notifColor,
+          summary: `New ${notifType} notification from Monika`,
+          sections: [
+            {
+              activityTitle: `New ${notifType} notification from Monika`,
+              activitySubtitle: `${message.summary} for URL [${message.meta.url}](${message.meta.url}) at ${message.meta.time}`,
+              facts: [
+                {
+                  name: 'Alert',
+                  value: message.summary,
+                },
+                {
+                  name: 'URL',
+                  value: `[${message.meta.url}](${message.meta.url})`,
+                },
+                {
+                  name: 'At',
+                  value: message.meta.time,
+                },
+                {
+                  name: 'Monika',
+                  value: `${message.meta.privateIpAddress} (local), ${
+                    message.meta.publicIpAddress
+                      ? `${message.meta.publicIpAddress} (public)`
+                      : ''
+                  } ${message.meta.hostname} (hostname)`,
+                },
+              ],
+              markdown: true,
+            },
+          ],
+        },
+      })
+      break
+    }
+    case 'status-update': {
+      await axios({
+        method: 'POST',
+        url: data.url,
+        data: {
+          '@type': 'MessageCard',
+          summary: message.summary,
+          sections: [
+            {
+              activityTitle: 'Monika Status',
+              activitySubtitle: message.subject,
+              facts: [
+                {
+                  name: 'Host',
+                  value: `${message.meta.privateIpAddress} (local), ${
+                    message.meta.publicIpAddress
+                      ? `${message.meta.publicIpAddress} (public)`
+                      : ''
+                  } ${message.meta.hostname} (hostname)`,
+                },
+                {
+                  name: 'Number of Probes',
+                  value: message.meta.numberOfProbes,
+                },
+                {
+                  name: 'Average Response Time',
+                  value: `${message.meta.averageResponseTime} ms in the last 24 hours`,
+                },
+                {
+                  name: 'Incidents',
+                  value: `${message.meta.numberOfIncidents} in the last 24 hours`,
+                },
+                {
+                  name: 'Recoveries',
+                  value: `${message.meta.numberOfRecoveries} in the last 24 hours`,
+                },
+                {
+                  name: 'Notifications',
+                  value: message.meta.numberOfSentNotifications,
+                },
+              ],
+            },
+          ],
+        },
+      })
+      break
+    }
+
+    default:
+      break
   }
 }
