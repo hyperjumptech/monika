@@ -500,8 +500,10 @@ Please refer to the Monika documentations on how to how to configure notificatio
     if (!notifications) return
 
     await sendNotifications(notifications, {
-      subject: `Status Update ${new Date().toUTCString()}`,
-      body: `Host: ${getIp()} (Local), ${publicIpAddress} (Public), ${hostname()} (Hostname)
+      subject: `Monika Status`,
+      body: `Status Update ${new Date().toUTCString()}
+      
+Host: ${getIp()} (Local), ${publicIpAddress} (Public), ${hostname()} (Hostname)
 Number of probes: ${summary.numberOfProbes}
 Average response time: ${summary.averageResponseTime} ms in the last 24 hours
 Incidents: ${summary.numberOfIncidents} in the last 24 hours
