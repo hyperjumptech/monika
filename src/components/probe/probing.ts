@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import { RequestConfig } from '../../interfaces/request'
-import { request } from './request'
+import { executeRequest } from './request'
 import { AxiosResponseWithExtraData } from '../../interfaces/request'
 import * as Handlebars from 'handlebars'
 
@@ -60,7 +60,7 @@ export async function probing(
     }
 
     // Do the request using compiled URL and compiled headers (if exists)
-    const res = await request({
+    const res = await executeRequest({
       ...requestConfig,
       url: renderedURL,
     })
@@ -73,39 +73,30 @@ export async function probing(
 
     if (error.response) {
       // 400, 500 get here
-      // Axios doesn't always return error response
       errResponseCode = error.response.status
       errData = error.response.data
       errHdr = error.response.headers
-
-      // eslint-disable-next-line no-console
-      // console.log('test 80: error.response: ', error.response)
     } else if (error.request) {
       // timeout is here, ECONNABORTED, ENOTFOUND
-
       switch (error.code) {
         case 'ECONNABORTED':
-          errText = 'Timed out'
-          errResponseCode = 'TIMEOUT'
+          errResponseCode = 599 // https://httpstatuses.com/599
+          errText = 'TIMEDOUT'
           break
 
         case 'ENOTFOUND':
-          errResponseCode = 'NOTFOUND'
-          errText = 'Url Not Found'
+          errResponseCode = 0 // not found, the abyss never returned a statusCode
+          errText = 'NOTFOUND'
           break
 
         default:
-          errResponseCode = 'unknown'
+          errResponseCode = 991
           errText = 'unknown error'
       }
       errData = ''
       errHdr = ''
-      // eslint-disable-next-line no-console
-      console.log('test 85: error.code: ', error.code)
     } else {
-      // eslint-disable-next-line no-console
-      console.log('test 91: unknown error: ', error)
-
+      // other errors
       errResponseCode = error.code
       errText = 'unknown error'
       errData = ''

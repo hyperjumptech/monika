@@ -47,11 +47,10 @@ export function getStatusColor(responseCode: any) {
       return 'cyan'
     case 4:
       return 'orange'
-    case 5:
+    case 5: // all 5xx errrors
+    case 0: // 0 is uri not found
       return 'red'
   }
-  // add colors for timeout and url not found
-  if (responseCode === 'TIMEOUT' || responseCode === 'NOTFOUND') return 'red'
 
   return 'white'
 }
@@ -88,6 +87,11 @@ export function probeBuildLog({
   if (alerts?.length) {
     mLog.alert.flag = 'alert'
     mLog.alert.message = alerts.map((alert) => alert.query)
+  }
+
+  if (mLog.responseCode === 0) {
+    mLog.alert.flag = 'alert'
+    mLog.alert.message = ['URI not found']
   }
 
   if (error?.length) log.error('probe error: ', error)
@@ -173,7 +177,6 @@ export function setNotification(
  * @param {object} flag: type of alert message, ex: not-2xx
  * @param {LogObject} mLog is the log object being updated
  * @returns {LogObject} mLog returned again after being updated
- *
  */
 export function setAlert(
   {

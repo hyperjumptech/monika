@@ -59,10 +59,20 @@ export const getResponseValue = (
   return 0
 }
 
+/**
+ * responseChecker checks the response against notif/alert triggers
+ * @param {obj} alert contains our alerts to look for
+ * @param {obj} res is the probe result
+ * @returns {boolean} flag true if we have something to alert/notify
+ */
 const responseChecker = (
   alert: ProbeAlert,
   res: AxiosResponseWithExtraData
 ): boolean => {
+  if (res.status === 599 || res.status === 0) {
+    return true
+  }
+
   if (alert.query === 'status-not-2xx') {
     return statusNot2xx(res)
   }
