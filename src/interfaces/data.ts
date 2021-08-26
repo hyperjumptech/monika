@@ -46,12 +46,6 @@ export interface SMTPData extends MailData {
 
 export interface TeamsData {
   url: string
-  body: TeamsDataBody
-}
-
-export interface TeamsDataBody extends WebhookDataBody {
-  probeState: string
-  expected?: string
 }
 
 export interface WebhookData {

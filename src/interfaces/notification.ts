@@ -113,3 +113,42 @@ interface DesktopNotification extends BaseNotification {
   // it is here just to make type consistent and does not throw type error in other parts of app
   data: undefined
 }
+
+export interface NotificationMessage {
+  subject: string
+  body: string
+  summary: string
+  meta:
+    | NotificationIncidentRecoveryMessageMeta
+    | NotificationStartTerminationMessageMeta
+    | NotificationStatusUpdateMessageMeta
+}
+
+interface BaseNotificationMessageMeta {
+  type: string
+  time: string
+  hostname: string
+  privateIpAddress: string
+  publicIpAddress: string
+  [key: string]: unknown
+}
+interface NotificationIncidentRecoveryMessageMeta
+  extends BaseNotificationMessageMeta {
+  type: 'incident' | 'recovery'
+  url: string
+}
+
+interface NotificationStartTerminationMessageMeta
+  extends BaseNotificationMessageMeta {
+  type: 'start' | 'termination'
+}
+
+interface NotificationStatusUpdateMessageMeta
+  extends BaseNotificationMessageMeta {
+  type: 'status-update'
+  numberOfProbes: number
+  averageResponseTime: number
+  numberOfIncidents: number
+  numberOfRecoveries: number
+  numberOfSentNotifications: number
+}
