@@ -5,10 +5,8 @@ probes:
   - id: '1'
     requests:
       - url: http://example.com
-
-
 # Configuration example for sending HTML Form Submission
-# Using this configuration Monika will send a POST request to http://www.foo.com/login.php 
+# Using this configuration Monika will send a POST request to http://www.foo.com/login.php
 # with the defined headers and request's body.
 # probes:
 #   - id: '1'
@@ -24,7 +22,6 @@ probes:
 #         body:
 #           username: someusername
 #           password: somepassword
-
 
 # Configuration example for sending Multiple requests
 # Requests could be define in array to run for multiple requests
@@ -42,10 +39,10 @@ probes:
 #         timeout: 7000
 #         saveBody: false
 #       - url: https://github.com/hyperjumptech
-#         method: GET 
+#         method: GET
 #         timeout: 7000
 #         saveBody: true
-#     alerts: 
+#     alerts:
 #       - query: response.status == 500
 #         subject: response status
 #         message: response status message
@@ -55,9 +52,8 @@ probes:
 #     incidentThreshold: 3
 #     recoveryThreshold: 3
 
-
 # Configuration example for enabling notification
-# Using this configuration Monika will check the page every 10 seconds 
+# Using this configuration Monika will check the page every 10 seconds
 # and will send a notification by email when the page response status returns 500 down 3 times in a row.
 # Notifications defined as an array of configuration for sending alerts through the channels defined
 # For a complete notification channel please refer to https://monika.hyperjump.tech/guides/notifications
@@ -70,7 +66,7 @@ probes:
 #       - url: http://example.com
 #         method: POST
 #         timeout: 6000
-#     alerts: 
+#     alerts:
 #       - query: response.status == 500
 #         subject: response status
 #         message: response status message
@@ -79,8 +75,8 @@ probes:
 # notifications:
 #   - id: unique-id-smtp,
 #     type: smtp,
-#     data: 
-#       recipients: 
+#     data:
+#       recipients:
 #         - RECIPIENT_EMAIL_ADDRESS
 #       hostname: smtp.gmail.com
 #       port: 587
