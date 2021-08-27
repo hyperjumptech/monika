@@ -26,12 +26,15 @@ import { Config } from '../../interfaces/config'
 import { readFileSync } from 'fs'
 import { parseConfigFromPostman } from './parse-postman'
 import { parseHarFile } from './parse-har'
+import path from 'path'
+import yml from 'js-yaml'
 
 export const parseConfig = (configPath: string, type: string): Config => {
   // Read file from configPath
   try {
     // Read file from configPath
     const configString = readFileSync(configPath, 'utf-8')
+    const ext = path.extname(configPath)
 
     if (type === 'har') {
       return parseHarFile(configString)
@@ -40,11 +43,16 @@ export const parseConfig = (configPath: string, type: string): Config => {
       return parseConfigFromPostman(configString)
     }
 
+    if (ext === '.yml' || ext === '.yaml') {
+      const cfg = yml.load(configString, { json: true })
+      return (cfg as unknown) as Config
+    }
+
     return JSON.parse(configString)
   } catch (error) {
     if (error.code === 'ENOENT' && error.path === configPath) {
       throw new Error(
-        'Configuration file not found. By default, Monika looks for monika.json configuration file in the current directory.\n\nOtherwise, you can also specify a configuration file using -c flag as follows:\n\nmonika -c <path_to_configuration_file>\n\nYou can create a configuration file via web interface by opening this web app: https://hyperjumptech.github.io/monika-config-generator/'
+        'Configuration file not found. By default, Monika looks for monika.json or monika.yml configuration file in the current directory.\n\nOtherwise, you can also specify a configuration file using -c flag as follows:\n\nmonika -c <path_to_configuration_file>\n\nYou can create a configuration file via web interface by opening this web app: https://hyperjumptech.github.io/monika-config-generator/'
       )
     }
 
