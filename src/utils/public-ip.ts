@@ -26,6 +26,7 @@ import { log } from './pino'
 import stun from 'stun'
 
 export let publicIpAddress = ''
+export let isConnectedToSTUNServer = true
 
 export async function getPublicIp() {
   try {
@@ -33,9 +34,13 @@ export async function getPublicIp() {
     const address = response?.getXorAddress()?.address
     if (address) {
       publicIpAddress = address
-      log.info(`Monika is running on Public IP ${address}`)
+      isConnectedToSTUNServer = true
+      log.info(
+        `Connected to STUN Server. Monika is running on Public IP ${address}`
+      )
     }
   } catch (error) {
-    log.info(`Can't obtain Public IP`)
+    isConnectedToSTUNServer = false
+    log.info(`STUN Server is unreachable. Can't obtain Public IP`)
   }
 }

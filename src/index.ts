@@ -66,7 +66,13 @@ import { Notification } from './interfaces/notification'
 import { Probe } from './interfaces/probe'
 import { ProbeStateDetails } from './interfaces/probe-status'
 import { AxiosResponseWithExtraData } from './interfaces/request'
-import { idFeeder, isIDValid, loopReport, sanitizeProbe } from './looper'
+import {
+  idFeeder,
+  isIDValid,
+  loopCheckSTUNServer,
+  loopReport,
+  sanitizeProbe,
+} from './looper'
 import {
   PrometheusCollector,
   startPrometheusMetricsServer,
@@ -75,7 +81,7 @@ import validateResponse, { ValidateResponse } from './plugins/validate-response'
 import { getEventEmitter } from './utils/events'
 import getIp from './utils/ip'
 import { log } from './utils/pino'
-import { getPublicIp, publicIpAddress } from './utils/public-ip'
+import { publicIpAddress } from './utils/public-ip'
 
 const em = getEventEmitter()
 
@@ -162,6 +168,12 @@ class Monika extends Command {
       multiple: false,
     }),
 
+    stun: flags.string({
+      char: 's', // (s)stun
+      description: 'interval in seconds to check STUN server',
+      multiple: false,
+    }),
+
     id: flags.string({
       char: 'i', // (i)ds to run
       description: 'specific probe ids to run',
@@ -199,7 +211,7 @@ class Monika extends Command {
       return
     }
 
-    await getPublicIp() // calling it here once. So no need to fetch public IP for every alert functions invocation
+    loopCheckSTUNServer(Number(flags.stun)) // check if connected to STUN Server and getting the public IP in the same time
     await openLogfile()
 
     if (flags.logs) {
