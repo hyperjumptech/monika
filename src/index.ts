@@ -261,7 +261,7 @@ class Monika extends Command {
 
         // Stop, destroy, and clear all previous cron tasks
         scheduledTasks.forEach((task) => {
-          task.destroy()
+          task.stop()
         })
         scheduledTasks = []
 
