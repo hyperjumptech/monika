@@ -89,9 +89,17 @@ export function probeBuildLog({
     mLog.alert.message = alerts.map((alert) => alert.query)
   }
 
-  if (mLog.responseCode === 0) {
-    mLog.alert.flag = 'alert'
-    mLog.alert.message = ['URI not found']
+  // specific alerts/notif for http status codes
+  switch (mLog.responseCode) {
+    case 0:
+      mLog.alert.flag = 'alert'
+      mLog.alert.message = ['URI not found']
+      break
+    case 599:
+      mLog.alert.flag = 'alert'
+      mLog.alert.message = ['Request Timed out']
+      break
+    default:
   }
 
   if (error?.length) log.error('probe error: ', error)
