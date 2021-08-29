@@ -22,12 +22,19 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Notification } from '../../interfaces/notification'
+import { MonikaNotifDataBody } from '../../interfaces/data'
+import {
+  Notification,
+  NotificationMessage,
+} from '../../interfaces/notification'
+import { ValidateResponse } from '../../plugins/validate-response'
 import getIp from '../../utils/ip'
 import { getMessageForAlert } from './alert-message'
+import { sendDesktop } from './channel/desktop'
 import { sendDiscord } from './channel/discord'
 import { sendMailgun } from './channel/mailgun'
 import { sendMonikaNotif } from './channel/monika-notif'
+import { sendSendgrid } from './channel/sendgrid'
 import { sendSlack } from './channel/slack'
 import { createSmtpTransport, sendSmtpMail } from './channel/smtp'
 import { sendTeams } from './channel/teams'
@@ -35,9 +42,177 @@ import { sendTelegram } from './channel/telegram'
 import { sendWebhook } from './channel/webhook'
 import { sendWhatsapp } from './channel/whatsapp'
 import { sendWorkplace } from './channel/workplace'
-import { sendDesktop } from './channel/desktop'
-import { ValidateResponse } from '../../plugins/validate-response'
-import { sendSendgrid } from './channel/sendgrid'
+
+export class NotificationSendingError extends Error {
+  notificationType: string
+
+  private constructor(notificationType: string, message: string) {
+    super(message)
+    this.name = 'NotificationSendingError'
+    this.notificationType = notificationType
+  }
+
+  static create(notificationType: string, originalErrorMessage?: string) {
+    // for the sake of passing test
+    const notificationTypeformatted = notificationType
+      .split('-')
+      .map((s) => s[0].toUpperCase() + s.substring(1))
+      .join('-')
+      .replace(/^smtp$/i, 'SMTP')
+
+    return new NotificationSendingError(
+      notificationType,
+      `Failed to send message using ${notificationTypeformatted}, please check your ${notificationTypeformatted} notification config.\nMessage: ${originalErrorMessage}`
+    )
+  }
+}
+
+export async function sendNotifications(
+  notifications: Notification[],
+  message: NotificationMessage
+) {
+  await Promise.all(
+    notifications.map(async (notification) => {
+      // catch and rethrow error to add information about which notification channel errors.
+      try {
+        switch (notification.type) {
+          case 'mailgun': {
+            await sendMailgun(
+              {
+                subject: message.subject,
+                body: message.body,
+                sender: {
+                  // TODO: Read from ENV Variables
+                  name: 'Monika',
+                  email: 'Monika@hyperjump.tech',
+                },
+                recipients: notification?.data?.recipients?.join(','),
+              },
+              notification.data
+            )
+            break
+          }
+          case 'sendgrid': {
+            await sendSendgrid(
+              {
+                recipients: notification?.data?.recipients?.join(','),
+                subject: message.subject,
+                body: message.body,
+                sender: {
+                  name: 'Monika',
+                  email: notification?.data?.sender,
+                },
+              },
+              notification.data
+            )
+            break
+          }
+          case 'webhook': {
+            await sendWebhook({
+              ...notification.data,
+              body: message.body,
+            })
+            break
+          }
+          case 'discord': {
+            await sendDiscord({
+              ...notification.data,
+              body: message.body,
+            })
+            break
+          }
+          case 'slack': {
+            await sendSlack({
+              ...notification.data,
+              body: message.body,
+            })
+            break
+          }
+          case 'telegram': {
+            await sendTelegram({
+              ...notification.data,
+              body: message.body,
+            })
+            break
+          }
+          case 'smtp': {
+            const transporter = createSmtpTransport(notification.data)
+            await sendSmtpMail(transporter, {
+              // TODO: Read from ENV Variables
+              from: 'http-probe@hyperjump.tech',
+              to: notification?.data?.recipients?.join(','),
+              subject: message.subject,
+              text: message.body,
+            })
+            break
+          }
+          case 'whatsapp': {
+            await sendWhatsapp(notification.data, message.body)
+            break
+          }
+          case 'teams': {
+            await sendTeams(notification.data, message)
+            break
+          }
+          case 'monika-notif': {
+            let body: MonikaNotifDataBody
+
+            if (
+              message.meta.type === 'start' ||
+              message.meta.type === 'termination'
+            ) {
+              body = {
+                type: message.meta.type,
+                ip_address: message.meta.publicIpAddress,
+              }
+            } else if (
+              message.meta.type === 'incident' ||
+              message.meta.type === 'recovery'
+            ) {
+              body = {
+                type: message.meta.type,
+                alert: message.summary,
+                url: message.meta.url,
+                time: message.meta.time,
+                monika: `${message.meta.privateIpAddress} (local), ${
+                  message.meta.publicIpAddress
+                    ? `${message.meta.publicIpAddress} (public)`
+                    : ''
+                } ${message.meta.hostname} (hostname)`,
+              }
+            }
+
+            await sendMonikaNotif({
+              ...notification.data,
+              body: body!,
+            })
+            break
+          }
+          case 'workplace': {
+            await sendWorkplace({
+              ...notification.data,
+              body: message.body,
+            })
+            break
+          }
+          case 'desktop': {
+            await sendDesktop({
+              title: message.subject,
+              message: message.summary || message.body,
+            })
+            break
+          }
+          default: {
+            break
+          }
+        }
+        return Promise.resolve()
+      } catch (error) {
+        throw NotificationSendingError.create(notification.type, error?.message)
+      }
+    })
+  )
+}
 
 export async function sendAlerts({
   validation,
@@ -51,7 +226,7 @@ export async function sendAlerts({
   url: string
   probeState: string
   incidentThreshold: number
-}): Promise<void> {
+}) {
   const ipAddress = getIp()
   const message = getMessageForAlert({
     alert: validation.alert,
@@ -61,119 +236,6 @@ export async function sendAlerts({
     incidentThreshold,
     responseValue: validation.responseValue,
   })
-  await Promise.all<any>(
-    notifications.map((notification) => {
-      switch (notification.type) {
-        case 'mailgun': {
-          return sendMailgun(
-            {
-              subject: message.subject,
-              body: message.body,
-              sender: {
-                // TODO: Read from ENV Variables
-                name: 'Monika',
-                email: 'Monika@hyperjump.tech',
-              },
-              recipients: notification?.data?.recipients?.join(','),
-            },
-            notification.data
-          )
-        }
-        case 'sendgrid': {
-          return sendSendgrid(
-            {
-              recipients: notification?.data?.recipients?.join(','),
-              subject: message.subject,
-              body: message.body,
-              sender: {
-                name: 'Monika',
-                email: notification?.data?.sender,
-              },
-            },
-            notification.data
-          )
-        }
-        case 'webhook': {
-          return sendWebhook({
-            ...notification.data,
-            body: message.body,
-          })
-        }
-        case 'discord': {
-          return sendDiscord({
-            ...notification.data,
-            body: message.body,
-          })
-        }
-        case 'slack': {
-          return sendSlack({
-            ...notification.data,
-            body: message.body,
-          })
-        }
-        case 'telegram': {
-          return sendTelegram({
-            ...notification.data,
-            body: message.body,
-          })
-        }
-        case 'smtp': {
-          const transporter = createSmtpTransport(notification.data)
-          return sendSmtpMail(transporter, {
-            // TODO: Read from ENV Variables
-            from: 'http-probe@hyperjump.tech',
-            to: notification?.data?.recipients?.join(','),
-            subject: message.subject,
-            text: message.body,
-          })
-        }
-        case 'whatsapp': {
-          const data = notification.data
-          return sendWhatsapp(data, message.body)
-        }
-        case 'teams': {
-          return sendTeams({
-            ...notification.data,
-            body: {
-              alert: validation.alert.query,
-              url,
-              time: new Date().toLocaleString(),
-              probeState,
-              expected: message.expected,
-            },
-          })
-        }
-        case 'monika-notif': {
-          return sendMonikaNotif({
-            ...notification.data,
-            body: {
-              type: probeState === 'DOWN' ? 'incident' : 'recovery',
-              ...message.rawBody,
-            },
-          })
-        }
-        case 'workplace': {
-          return sendWorkplace({
-            ...notification.data,
-            body: message.body,
-          })
-        }
-        case 'desktop': {
-          return sendDesktop({
-            ...notification.data,
-            body: {
-              url,
-              alert: validation.alert.query,
-              time: new Date().toLocaleString(),
-              probeState,
-              expected: message.expected,
-            },
-          })
-        }
-        default: {
-          return Promise.resolve()
-        }
-      }
-    })
-  )
+
+  return sendNotifications(notifications, message)
 }

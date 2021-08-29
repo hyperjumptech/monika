@@ -32,6 +32,7 @@ export interface Config {
   interval?: number
   notifications?: Notification[]
   probes: Probe[]
+  'status-notification': string
   symon?: SymonConfig
   version?: string
 }

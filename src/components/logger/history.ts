@@ -349,6 +349,41 @@ export async function saveNotificationLog(
   }
 }
 
+export async function getSummary() {
+  const getNotificationsSummaryByTypeSQL = `SELECT type, COUNT(*) as count FROM notifications WHERE created_at > strftime('%s', datetime('now', '-24 hours')) GROUP BY type;`
+  const getProbesSummarySQL = `SELECT probe_id, COUNT(*) as count, AVG(response_time) as average_response_time FROM probe_requests WHERE created_at > strftime('%s', datetime('now', '-24 hours')) GROUP BY probe_id;`
+
+  const [notificationsSummaryByType, probesSummary] = await Promise.all([
+    db.all(getNotificationsSummaryByTypeSQL),
+    db.all(getProbesSummarySQL),
+  ])
+
+  const totalRequests = probesSummary.reduce((acc, { count }) => acc + count, 0)
+  const averageResponseTime =
+    probesSummary.reduce(
+      (acc, curr) => acc + curr.average_response_time * curr.count,
+      0
+    ) / totalRequests || 0
+  const numberOfIncidents: number =
+    notificationsSummaryByType.find((notif) => notif.type === 'NOTIFY-INCIDENT')
+      ?.count || 0
+  const numberOfRecoveries: number =
+    notificationsSummaryByType.find((notif) => notif.type === 'NOTIFY-RECOVER')
+      ?.count || 0
+  const numberOfSentNotifications: number = notificationsSummaryByType.reduce(
+    (acc, { count }) => acc + count,
+    0
+  )
+
+  return {
+    numberOfProbes: probesSummary.length,
+    averageResponseTime,
+    numberOfIncidents,
+    numberOfRecoveries,
+    numberOfSentNotifications,
+  }
+}
+
 /**
  * closeLog closes the database
  */

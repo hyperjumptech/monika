@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 /**********************************************************************************
  * MIT License                                                                    *
  *                                                                                *
@@ -26,8 +27,9 @@ import { Command, flags } from '@oclif/command'
 import boxen from 'boxen'
 import chalk from 'chalk'
 import cli from 'cli-ux'
-import cron from 'node-cron'
 import fs from 'fs'
+import cron, { ScheduledTask } from 'node-cron'
+import { hostname } from 'os'
 import {
   createConfig,
   getConfig,
@@ -35,44 +37,45 @@ import {
   setupConfig,
 } from './components/config'
 import {
-  setNotificationLog,
   printAllLogs,
   printProbeLog,
+  setNotificationLog,
 } from './components/logger'
 import {
   closeLog,
   flushAllLogs,
+  getSummary,
   openLogfile,
+  saveNotificationLog,
 } from './components/logger/history'
+import { sendAlerts, sendNotifications } from './components/notification'
 import { notificationChecker } from './components/notification/checker'
-import { terminationNotif } from './components/notification/termination'
 import { resetProbeStatuses } from './components/notification/process-server-status'
+import { getLogsAndReport } from './components/reporter'
+import { checkTLS } from './components/tls-checker'
 import {
   CONFIG_SANITIZED,
-  PROBE_RESPONSE_RECEIVED,
-  PROBE_RESPONSE_VALIDATED,
   PROBE_ALERTS_READY,
   PROBE_LOGS_BUILT,
+  PROBE_RESPONSE_RECEIVED,
+  PROBE_RESPONSE_VALIDATED,
 } from './constants/event-emitter'
 import { Config } from './interfaces/config'
+import { LogObject } from './interfaces/logs'
+import { Notification } from './interfaces/notification'
 import { Probe } from './interfaces/probe'
+import { ProbeStateDetails } from './interfaces/probe-status'
 import { AxiosResponseWithExtraData } from './interfaces/request'
 import { idFeeder, isIDValid, loopReport, sanitizeProbe } from './looper'
 import {
   PrometheusCollector,
   startPrometheusMetricsServer,
 } from './plugins/metrics/prometheus'
-import { getEventEmitter } from './utils/events'
-import { log } from './utils/pino'
-import { ProbeStateDetails } from './interfaces/probe-status'
-import { Notification } from './interfaces/notification'
-import { saveNotificationLog } from './components/logger/history'
-import { sendAlerts } from './components/notification'
-import { LogObject } from './interfaces/logs'
-import { getLogsAndReport } from './components/reporter'
-import { checkTLS } from './components/tls-checker'
-import { getPublicIp } from './utils/public-ip'
 import validateResponse, { ValidateResponse } from './plugins/validate-response'
+import { getEventEmitter } from './utils/events'
+import getIp from './utils/ip'
+import { log } from './utils/pino'
+import { getPublicIp, publicIpAddress } from './utils/public-ip'
 
 const em = getEventEmitter()
 
@@ -80,11 +83,16 @@ function getDefaultConfig() {
   const filesArray = fs.readdirSync('./')
   const monikaDotJsonFile = filesArray.find((x) => x === 'monika.json')
   const configDotJsonFile = filesArray.find((x) => x === 'config.json')
+  const monikaDotYamlFile = filesArray.find(
+    (x) => x === 'monika.yml' || x === 'monika.yaml'
+  )
 
   return monikaDotJsonFile
     ? `./${monikaDotJsonFile}`
     : configDotJsonFile
     ? `./${configDotJsonFile}`
+    : monikaDotYamlFile
+    ? `./${monikaDotYamlFile}`
     : './monika.json'
 }
 class Monika extends Command {
@@ -177,6 +185,10 @@ class Monika extends Command {
       description: 'force command',
       default: false,
     }),
+
+    'status-notification': flags.string({
+      description: 'cron syntax for status notification schedule',
+    }),
   }
 
   async run() {
@@ -238,7 +250,7 @@ class Monika extends Command {
         loopReport(getConfig)
       }
 
-      // run probes on interval
+      let scheduledTasks: ScheduledTask[] = []
       let abortCurrentLooper: (() => void) | undefined
 
       for await (const config of getConfigIterator()) {
@@ -246,6 +258,12 @@ class Monika extends Command {
           resetProbeStatuses()
           abortCurrentLooper()
         }
+
+        // Stop, destroy, and clear all previous cron tasks
+        scheduledTasks.forEach((task) => {
+          task.stop()
+        })
+        scheduledTasks = []
 
         if (process.env.NODE_ENV !== 'test') {
           await notificationChecker(config.notifications ?? [])
@@ -305,7 +323,7 @@ class Monika extends Command {
             )
 
             // schedule TLS checker every day at 00:00
-            cron.schedule('0 0 * * *', () => {
+            const scheduledTlsCheckTask = cron.schedule('0 0 * * *', () => {
               log.info(`Running TLS check for ${domain} every day at 00:00`)
 
               this.checkTLSAndSaveNotifIfFail(
@@ -315,7 +333,29 @@ class Monika extends Command {
                 config?.notifications
               )
             })
+
+            scheduledTasks.push(scheduledTlsCheckTask)
           })
+        }
+
+        // schedule status update notification
+        if (
+          process.env.NODE_ENV !== 'test' &&
+          flags['status-notification'] !== 'false'
+        ) {
+          // defaults to 6 AM
+          // default value is not defined in flag configuration,
+          // because the value can also come from config file
+          const schedule =
+            flags['status-notification'] ||
+            config['status-notification'] ||
+            '0 6 * * *'
+
+          const scheduledStatusUpdateTask = cron.schedule(schedule, () => {
+            this.getSummaryAndSendNotif(config)
+          })
+
+          scheduledTasks.push(scheduledStatusUpdateTask)
         }
 
         abortCurrentLooper = idFeeder(
@@ -458,6 +498,33 @@ Please refer to the Monika documentations on how to how to configure notificatio
       }
     }
   }
+
+  async getSummaryAndSendNotif(config: Config) {
+    const { notifications } = config
+    const summary = await getSummary()
+    if (!notifications) return
+
+    await sendNotifications(notifications, {
+      subject: `Monika Status`,
+      body: `Status Update ${new Date().toUTCString()}
+      
+Host: ${getIp()} (Local), ${publicIpAddress} (Public), ${hostname()} (Hostname)
+Number of probes: ${summary.numberOfProbes}
+Average response time: ${summary.averageResponseTime} ms in the last 24 hours
+Incidents: ${summary.numberOfIncidents} in the last 24 hours
+Recoveries: ${summary.numberOfRecoveries} in the last 24 hours
+Notifications: ${summary.numberOfSentNotifications}`,
+      summary: `There are ${summary.numberOfIncidents} incidents and ${summary.numberOfRecoveries} recoveries in the last 24 hours.`,
+      meta: {
+        type: 'status-update' as const,
+        time: new Date().toUTCString(),
+        hostname: hostname(),
+        privateIpAddress: getIp(),
+        publicIpAddress,
+        ...summary,
+      },
+    })
+  }
 }
 
 // Subscribe FirstEvent
@@ -465,7 +532,18 @@ em.addListener('TERMINATE_EVENT', async (data) => {
   log.warn(data)
   const config = getConfig()
   if (process.env.NODE_ENV !== 'test') {
-    await terminationNotif(config.notifications ?? [])
+    await sendNotifications(config.notifications ?? [], {
+      subject: 'Monika terminated',
+      body: `Monika is no longer running in ${publicIpAddress}`,
+      summary: `Monika is no longer running in ${publicIpAddress}`,
+      meta: {
+        type: 'termination',
+        time: new Date().toUTCString(),
+        hostname: hostname(),
+        privateIpAddress: getIp(),
+        publicIpAddress,
+      },
+    })
   }
 })
 
