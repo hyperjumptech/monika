@@ -78,7 +78,7 @@ function workerMessageHandler(workerData: any) {
       totalRequests,
       probeRes: response,
       alerts: validatedResp
-        .filter((item) => item.status)
+        .filter((item) => item.somethingToReport)
         .map((item) => item.alert),
       mLog,
     })

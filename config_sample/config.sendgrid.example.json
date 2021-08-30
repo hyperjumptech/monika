@@ -4,6 +4,7 @@
       "id": "unique-id-sendgrid",
       "type": "sendgrid",
       "data": {
+        "sender": "YOUR_VERIFIED_EMAIL_BY_SENDGRID",
         "recipients": ["RECIPIENT_EMAIL_ADDRESS"],
         "apiKey": "YOUR_API_KEY"
       }

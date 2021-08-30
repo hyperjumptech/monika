@@ -24,22 +24,12 @@
 
 /* eslint-disable complexity */
 import { Notification } from '../../interfaces/notification'
-import {
-  SMTPData,
-  MailgunData,
-  SendgridData,
-  WebhookData,
-  MailData,
-  WhatsappData,
-  TeamsData,
-  DiscordData,
-  MonikaNotifData,
-  WorkplaceData,
-} from '../../interfaces/data'
 import { Config } from '../../interfaces/config'
-import { RequestConfig } from '../../interfaces/request'
+import { ProbeAlert } from '../../interfaces/probe'
 import { Validation } from '../../interfaces/validation'
 import { isValidURL } from '../../utils/is-valid-url'
+import { parseAlertStringTime } from '../../plugins/validate-response/checkers'
+import { compileExpression } from '../../utils/expression-parser'
 
 const HTTPMethods = [
   'DELETE',
@@ -136,52 +126,57 @@ const WORKPLACE_NO_THREAD_ID = setInvalidResponse(
 function validateNotification(notifications: Notification[]): Validation {
   // Check notifications properties
   for (const notification of notifications) {
-    const { type, data } = notification
-
     // Check if type equals to mailgun, smtp, or sendgrid, and has no recipients
+    // check one-by-one instead of using indexOf or includes so the type is correct without type assertion
     if (
-      ['mailgun', 'smtp', 'sendgrid', 'whatsapp'].indexOf(type) >= 0 &&
-      ((data as MailData)?.recipients?.length ?? 0) === 0
-    )
+      (notification.type === 'mailgun' ||
+        notification.type === 'smtp' ||
+        notification.type === 'sendgrid' ||
+        notification.type === 'whatsapp') &&
+      (notification.data.recipients?.length ?? 0) === 0
+    ) {
       return NOTIFICATION_NO_RECIPIENTS
+    }
 
-    switch (type) {
+    switch (notification.type) {
       case 'smtp': {
-        if (!(data as SMTPData).hostname) return SMTP_NO_HOSTNAME
-        if (!(data as SMTPData).port) return SMTP_NO_PORT
-        if (!(data as SMTPData).username) return SMTP_NO_USERNAME
-        if (!(data as SMTPData).password) return SMTP_NO_PASSWORD
+        const { data } = notification
+        if (!data.hostname) return SMTP_NO_HOSTNAME
+        if (!data.port) return SMTP_NO_PORT
+        if (!data.username) return SMTP_NO_USERNAME
+        if (!data.password) return SMTP_NO_PASSWORD
 
         break
       }
 
       case 'mailgun': {
-        if (!(data as MailgunData).apiKey) return MAILGUN_NO_APIKEY
-        if (!(data as MailgunData).domain) return MAILGUN_NO_DOMAIN
+        const { data } = notification
+        if (!data.apiKey) return MAILGUN_NO_APIKEY
+        if (!data.domain) return MAILGUN_NO_DOMAIN
 
         break
       }
 
       case 'sendgrid': {
-        if (!(data as SendgridData).apiKey) return SENDGRID_NO_APIKEY
+        if (!notification.data.apiKey) return SENDGRID_NO_APIKEY
 
         break
       }
 
       case 'webhook': {
-        if (!(data as WebhookData).url) return WEBHOOK_NO_URL
+        if (!notification.data.url) return WEBHOOK_NO_URL
 
         break
       }
 
       case 'discord': {
-        if (!(data as DiscordData).url) return DISCORD_NO_URL
+        if (!notification.data.url) return DISCORD_NO_URL
 
         break
       }
 
       case 'slack': {
-        if (!(data as WebhookData).url) return WEBHOOK_NO_URL
+        if (!notification.data.url) return WEBHOOK_NO_URL
 
         break
       }
@@ -191,29 +186,30 @@ function validateNotification(notifications: Notification[]): Validation {
       }
 
       case 'whatsapp': {
-        if (!(data as WhatsappData).url) return WHATSAPP_NO_URL
-        if (!(data as WhatsappData).username) return WHATSAPP_NO_USERNAME
-        if (!(data as WhatsappData).password) return WHATSAPP_NO_PASSWORD
+        const { data } = notification
+        if (!data.url) return WHATSAPP_NO_URL
+        if (!data.username) return WHATSAPP_NO_USERNAME
+        if (!data.password) return WHATSAPP_NO_PASSWORD
 
         break
       }
 
       case 'teams': {
-        if (!(data as TeamsData).url) return TEAMS_NO_URL
+        if (!notification.data.url) return TEAMS_NO_URL
 
         break
       }
 
       case 'monika-notif': {
-        if (!(data as MonikaNotifData).url) return MONIKA_NOTIF_NO_URL
+        if (!notification.data.url) return MONIKA_NOTIF_NO_URL
 
         break
       }
 
       case 'workplace': {
-        if (!(data as WorkplaceData).access_token)
-          return WORKPLACE_NO_ACCESS_TOKEN
-        if (!(data as WorkplaceData).thread_id) return WORKPLACE_NO_THREAD_ID
+        const { data } = notification
+        if (!data.access_token) return WORKPLACE_NO_ACCESS_TOKEN
+        if (!data.thread_id) return WORKPLACE_NO_THREAD_ID
 
         break
       }
@@ -230,11 +226,20 @@ function validateNotification(notifications: Notification[]): Validation {
   return VALID_CONFIG
 }
 
-const isValidProbeAlert = (alert: string): boolean => {
-  return (
-    alert === 'status-not-2xx' ||
-    alert.startsWith('response-time-greater-than-')
-  )
+const isValidProbeAlert = (alert: ProbeAlert | string): boolean => {
+  try {
+    if (typeof alert === 'string') {
+      return (
+        alert === 'status-not-2xx' ||
+        (alert.startsWith('response-time-greater-than-') &&
+          Boolean(parseAlertStringTime(alert)))
+      )
+    }
+
+    return Boolean(compileExpression(alert.query))
+  } catch (error) {
+    return false
+  }
 }
 
 export const validateConfig = (configuration: Config): Validation => {
@@ -253,16 +258,13 @@ export const validateConfig = (configuration: Config): Validation => {
 
   // Check probes properties
   for (const probe of probes) {
-    const { alerts, requests } = probe
+    const { alerts = [], requests } = probe
 
     if ((requests?.length ?? 0) === 0) return PROBE_NO_REQUESTS
-    if ((alerts?.length ?? 0) === 0) {
-      probe.alerts = ['status-not-2xx', 'response-time-greater-than-2-s']
-    }
 
     // Check probe request properties
     for (const request of requests) {
-      const { url } = request as RequestConfig
+      const { url } = request
 
       if (!url) return PROBE_REQUEST_NO_URL
 
@@ -274,14 +276,34 @@ export const validateConfig = (configuration: Config): Validation => {
 
       if (HTTPMethods.indexOf(request.method.toUpperCase()) < 0)
         return PROBE_REQUEST_INVALID_METHOD
+    }
 
-      // Check probe alert properties
-      for (const alert of probe.alerts) {
-        const check = isValidProbeAlert(alert)
-        if (!check) {
-          return PROBE_ALERT_INVALID
+    // Check probe alert properties
+    for (const alert of alerts) {
+      const check = isValidProbeAlert(alert)
+      if (!check) {
+        return PROBE_ALERT_INVALID
+      }
+    }
+
+    // convert old alert format to new format
+    probe.alerts = alerts.map((alert: any) => {
+      if (typeof alert === 'string') {
+        return {
+          query: alert.toLowerCase(),
+          subject: '',
+          message: '',
         }
       }
+
+      return alert
+    })
+
+    if (alerts.length === 0) {
+      probe.alerts = [
+        { query: 'status-not-2xx', subject: '', message: `` },
+        { query: 'response-time-greater-than-2-s', subject: '', message: '' },
+      ]
     }
   }
 

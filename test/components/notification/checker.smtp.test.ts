@@ -7,7 +7,6 @@ import {
   notificationChecker,
 } from '../../../src/components/notification/checker'
 import { SMTPData } from '../../../src/interfaces/data'
-import { Notification } from '../../../src/interfaces/notification'
 
 chai.use(spies)
 
@@ -18,27 +17,28 @@ describe('notificationChecker - smtpNotification', () => {
 
   const smtpNotificationConfig = {
     id: 'smtp',
-    type: 'smtp',
-  } as Notification
+    type: 'smtp' as const,
+  }
 
   it('should handle success', async () => {
     chai.spy.on(smtp, 'createSmtpTransport', () => ({
       sendMail: () => true,
     }))
 
-    const checker = await notificationChecker([
-      {
-        ...smtpNotificationConfig,
-        data: {
-          hostname: 'hostname',
-          port: 1000,
-          username: 'username',
-          password: 'password',
-        } as SMTPData,
-      },
-    ])
+    const fn = () =>
+      notificationChecker([
+        {
+          ...smtpNotificationConfig,
+          data: {
+            hostname: 'hostname',
+            port: 1000,
+            username: 'username',
+            password: 'password',
+          } as SMTPData,
+        },
+      ])
 
-    expect(checker[0][0]).to.equal('success')
+    expect(fn).not.to.throws()
   })
 
   it('should handle validation error - without hostname', async () => {

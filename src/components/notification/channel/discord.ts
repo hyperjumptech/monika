@@ -24,14 +24,10 @@
 
 import axios from 'axios'
 
-import { DiscordData } from '../../../interfaces/data'
+import { WebhookData } from '../../../interfaces/data'
 
-export const sendDiscord = async (data: DiscordData) => {
+export const sendDiscord = async (data: WebhookData) => {
   try {
-    const postData = {
-      content: `${data.body.url} : ${data.body.alert} at ${data.body.time}`,
-    }
-
     const res = await axios({
       method: 'POST',
       url: data.url,
@@ -39,7 +35,9 @@ export const sendDiscord = async (data: DiscordData) => {
         Accept: 'application/json',
         'Content-type': 'application/json',
       },
-      data: postData,
+      data: {
+        content: data.body,
+      },
     })
 
     return res

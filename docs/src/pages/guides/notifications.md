@@ -41,6 +41,7 @@ To use one or more notifications, you need to define the settings in the monika.
       "id": "unique-id-sendgrid",
       "type": "sendgrid",
       "data": {
+        "sender": "YOUR_VERIFIED_EMAIL_BY_SENDGRID",
         "recipients": ["RECIPIENT_EMAIL_ADDRESS"],
         "apiKey": "YOUR_API_KEY"
       }
@@ -148,18 +149,20 @@ Similar to mailgun, sendgrid is also an email delivery service. Make sure you ha
   "id": "unique-id-sendgrid",
   "type": "sendgrid",
   "data": {
+    "sender": "YOUR_VERIFIED_EMAIL_BY_SENDGRID",
     "recipients": ["RECIPIENT_EMAIL_ADDRESS"],
     "apiKey": "YOUR_API_KEY"
   }
 }
 ```
 
-| Key        | Description                                                                | Example                                         |
-| ---------- | -------------------------------------------------------------------------- | ----------------------------------------------- |
-| ID         | Notification identity number                                               | `Sendgrid12345`                                 |
-| Type       | Notification types                                                         | `sendgrid`                                      |
-| Recipients | An array of email addresses that will receive the e-mail from Monika       | `["monika@testmail.com", "symon@testmail.com"]` |
-| Api Key    | Sendgrid account api key, sendgrid registered key to identify your account | `70e34aba-0ea908325`                            |
+| Key        | Description                                                                  | Example                                         |
+| ---------- | ---------------------------------------------------------------------------- | ----------------------------------------------- |
+| ID         | Notification identity number                                                 | `Sendgrid12345`                                 |
+| Type       | Notification types                                                           | `sendgrid`                                      |
+| sender     | An string of email addresses that has been verified in your sendgrid account | `your@email.com`                                |
+| Recipients | An array of email addresses that will receive the e-mail from Monika         | `["monika@testmail.com", "symon@testmail.com"]` |
+| Api Key    | Sendgrid account api key, sendgrid registered key to identify your account   | `70e34aba-0ea908325`                            |
 
 ## Webhook
 
@@ -343,11 +346,11 @@ You can get a notification from Monika to your Whatsapp number without having a 
 
 ## Desktop Notifications
 
-Monika uses [node-notifier](https://github.com/mikaelbr/node-notifier#readme) to support desktop notifications. Here are the prerequisites for enabling the desktop notifications:
+Monika supports desktop notifications. Here are the prerequisites for enabling the desktop notifications:
 
-- macOS: >= 10.8 for native notifications, or Growl if earlier.
-- Linux: `notify-osd` or `libnotify-bin` installed (Ubuntu should have this by default)
-- Windows: >= 8, or task bar balloons for Windows < 8. Growl as fallback. Growl takes precedence over Windows balloons.
+- macOS: Uses OSAScript (Apple Open Scripting Architecture). AppleScript 2.0 or later and macOS version 10.5 or later required.
+- Linux: Uses `notify-send` command. `notify-osd` or `libnotify-bin` required (Ubuntu should have this by default).
+- Windows: Uses Powershell. Refer to [Microsoft Official Documentation](https://docs.microsoft.com/en-us/powershell/scripting/windows-powershell/install/windows-powershell-system-requirements?view=powershell-7.1) for System Requirements.
 
 ```json
 {

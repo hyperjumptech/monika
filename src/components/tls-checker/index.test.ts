@@ -22,22 +22,52 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios from 'axios'
+import { expect } from '@oclif/test'
+import { checkTLS } from '../tls-checker'
 
-import { WebhookData } from '../../../interfaces/data'
+describe('TLS Checker', () => {
+  describe('fail attempt', () => {
+    it('should check expired domain', async () => {
+      // arrange
+      const url = 'expired.badssl.com'
 
-export const sendSlack = async (data: WebhookData) => {
-  try {
-    const res = await axios({
-      method: 'POST',
-      url: data.url,
-      data: {
-        text: data.body,
-      },
+      try {
+        // act
+        await checkTLS(url)
+      } catch (error) {
+        // assert
+        expect(error.message).to.include(
+          `${url} security certificate has expired at`
+        )
+      }
     })
 
-    return res
-  } catch (error) {
-    throw error
-  }
-}
+    it('tests example.com with long cert expiry threshold', async () => {
+      // arrange
+      const url = 'example.com'
+
+      try {
+        // act
+        await checkTLS(url)
+      } catch (error) {
+        // assert
+        expect(error.message).to.include(
+          `${url} security certificate will expire at`
+        )
+      }
+    })
+  })
+
+  describe('success attempt', () => {
+    it('tests example.com', async () => {
+      // arrange
+      const url = 'example.com'
+
+      // act
+      const result = await checkTLS(url)
+
+      // assert
+      expect(result).to.equal(null)
+    })
+  })
+})

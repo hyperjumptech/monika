@@ -22,22 +22,18 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios from 'axios'
+import sslChecker from 'ssl-checker'
 
-import { WebhookData } from '../../../interfaces/data'
+export async function checkTLS(url: string, expiryThreshold = 30) {
+  const { valid, validTo, daysRemaining } = await sslChecker(url)
 
-export const sendSlack = async (data: WebhookData) => {
-  try {
-    const res = await axios({
-      method: 'POST',
-      url: data.url,
-      data: {
-        text: data.body,
-      },
-    })
-
-    return res
-  } catch (error) {
-    throw error
+  if (!valid) {
+    throw new Error(`${url} security certificate has expired at ${validTo}!`)
   }
+
+  if (daysRemaining <= expiryThreshold) {
+    throw new Error(`${url} security certificate will expire at ${validTo}!`)
+  }
+
+  return null
 }

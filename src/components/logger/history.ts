@@ -239,13 +239,13 @@ export async function saveProbeRequestLog({
   probe,
   totalRequests,
   probeRes,
-  alerts,
+  alertQueries,
   error: errorResp,
 }: {
   probe: Probe
   totalRequests: number
   probeRes: AxiosResponseWithExtraData
-  alerts?: string[]
+  alertQueries?: string[]
   error?: string
 }) {
   const insertProbeRequestSQL = `
@@ -297,7 +297,7 @@ export async function saveProbeRequestLog({
     ])
 
     await Promise.all(
-      (alerts ?? []).map((alert) =>
+      (alertQueries ?? []).map((alert) =>
         db.run(insertAlertSQL, [now, insertProbeRequestResult.lastID, alert])
       )
     )
@@ -312,13 +312,13 @@ export async function saveProbeRequestLog({
  * @param {object} probe is the probe config
  * @param {object} notification is the notification config
  * @param {string} type is the type of notification 'NOTIFY-INCIDENT' | 'NOTIFY-RECOVER'
- * @param {string} alert the alerts triggered
+ * @param {string} alertQuery the alerts triggered
  */
 export async function saveNotificationLog(
   probe: Probe,
   notification: Notification,
-  type: 'NOTIFY-INCIDENT' | 'NOTIFY-RECOVER',
-  alert: string
+  type: 'NOTIFY-INCIDENT' | 'NOTIFY-RECOVER' | 'NOTIFY-TLS',
+  alertQuery: string
 ) {
   const insertNotificationSQL = `
     INSERT INTO notifications (
@@ -339,13 +339,48 @@ export async function saveNotificationLog(
       now,
       probe.id,
       probe.name,
-      alert,
+      alertQuery,
       type,
       notification.id,
       notification.type,
     ])
   } catch (error) {
     log.error("Error: Can't insert data into monika-log.db. " + error.message)
+  }
+}
+
+export async function getSummary() {
+  const getNotificationsSummaryByTypeSQL = `SELECT type, COUNT(*) as count FROM notifications WHERE created_at > strftime('%s', datetime('now', '-24 hours')) GROUP BY type;`
+  const getProbesSummarySQL = `SELECT probe_id, COUNT(*) as count, AVG(response_time) as average_response_time FROM probe_requests WHERE created_at > strftime('%s', datetime('now', '-24 hours')) GROUP BY probe_id;`
+
+  const [notificationsSummaryByType, probesSummary] = await Promise.all([
+    db.all(getNotificationsSummaryByTypeSQL),
+    db.all(getProbesSummarySQL),
+  ])
+
+  const totalRequests = probesSummary.reduce((acc, { count }) => acc + count, 0)
+  const averageResponseTime =
+    probesSummary.reduce(
+      (acc, curr) => acc + curr.average_response_time * curr.count,
+      0
+    ) / totalRequests || 0
+  const numberOfIncidents: number =
+    notificationsSummaryByType.find((notif) => notif.type === 'NOTIFY-INCIDENT')
+      ?.count || 0
+  const numberOfRecoveries: number =
+    notificationsSummaryByType.find((notif) => notif.type === 'NOTIFY-RECOVER')
+      ?.count || 0
+  const numberOfSentNotifications: number = notificationsSummaryByType.reduce(
+    (acc, { count }) => acc + count,
+    0
+  )
+
+  return {
+    numberOfProbes: probesSummary.length,
+    averageResponseTime,
+    numberOfIncidents,
+    numberOfRecoveries,
+    numberOfSentNotifications,
   }
 }
 

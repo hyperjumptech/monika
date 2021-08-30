@@ -22,70 +22,23 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { execSync, spawnSync } from 'child_process'
+import { spawnSync } from 'child_process'
 import { type } from 'os'
 
-interface NotifyData {
-  title: string
-  message: string
-}
-
-/**
- * Escape a string for PowerShell.
- * @param {string} str input string
- * @return {string} escape single quote with another
- */
-export const psEscape = (str: string) => {
-  let result = ''
-  for (let i = 0; i < str.length; i++) {
-    const ch = str[i]
-    if (ch.charCodeAt(0) === 39) {
-      // single quote, escape it with another single quote
-      result += ch
-    }
-    result += ch
-  }
-  return result
-}
-
-/**
- * Send notification according to the operating system
- * @param {NotifyData} data notification data
- * @return {void}
- */
-export const sendDesktop = (data: NotifyData) => {
-  const { title, message } = data
+export const open = (url: string) => {
   const operatingSystem = type()
-
-  // OSAScript for OS X
-  const osascript = `display notification "${message}" with title "Monika" subtitle "${title}"`
-
-  // Powershell Script for Windows
-  const powershellScript = `
-  [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] > $null;
-  $templateType = [Windows.UI.Notifications.ToastTemplateType]::ToastText02;
-  $template = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent($templateType);
-  $template.SelectSingleNode("//text[@id=1]").InnerText = '${psEscape(title)}';
-  $template.SelectSingleNode("//text[@id=2]").InnerText = '${psEscape(
-    message
-  )}';
-  $toast = [Windows.UI.Notifications.ToastNotification]::new($template);
-  $notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('Monika');
-  $notifier.Show($toast);
-  `
-
   switch (operatingSystem) {
-    case 'Linux':
-      spawnSync('notify-send', ['-a', 'Monika', title, message])
-      break
     case 'Darwin':
-      spawnSync('osascript', ['-e', osascript])
+      spawnSync('open', [url])
+      break
+    case 'Linux':
+      spawnSync('xdg-open', [url])
       break
     case 'Windows NT':
-      execSync(powershellScript, { shell: 'powershell.exe' })
+      spawnSync('start', [url])
       break
     default:
-      // TODO: New operating system?
+      // TODO: Handle new OS
       break
   }
 }

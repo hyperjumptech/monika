@@ -22,20 +22,11 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import {
-  DiscordData,
-  MailgunData,
-  MonikaNotifData,
-  SendgridData,
-  SMTPData,
-  TeamsData,
-  TelegramData,
-  WebhookData,
-  WorkplaceData,
-  DesktopData,
-} from '../../interfaces/data'
+import { hostname } from 'os'
+import { NotificationSendingError, sendNotifications } from '.'
 import { Notification } from '../../interfaces/notification'
 import getIp from '../../utils/ip'
+import { publicIpAddress } from '../../utils/public-ip'
 import {
   dataDiscordSchemaValidator,
   dataMailgunSchemaValidator,
@@ -48,219 +39,49 @@ import {
   dataWebhookSchemaValidator,
   dataWorkplaceSchemaValidator,
 } from './validator'
-import {
-  desktopNotificationSender,
-  discordNotificationSender,
-  mailgunNotificationSender,
-  monikaNotificationSender,
-  sendgridNotificationSender,
-  slackNotificationSender,
-  smtpNotificationSender,
-  teamsNotificationSender,
-  telegramNotificationSender,
-  webhookNotificationSender,
-  workplaceNotificationSender,
-} from './sender'
 
-const subject = 'Monika is started'
-const body = `Monika is running on ${getIp()}`
-const status = 'INIT'
-
-export const errorMessage = (
-  notificationType: string,
-  originalErrorMessage?: string
-) => {
-  return new Error(
-    `Failed to send message using ${notificationType}, please check your ${notificationType} notification config.\nMessage: ${originalErrorMessage}`
-  )
-}
-
-const smtpNotificationInitialChecker = async (data: SMTPData) => {
-  try {
-    await dataSMTPSchemaValidator.validateAsync(data)
-    await smtpNotificationSender({ data, subject, body })
-
-    return 'success'
-  } catch (error) {
-    throw errorMessage('SMTP', error?.message)
-  }
-}
-
-const mailgunNotificationInitialChecker = async (data: MailgunData) => {
-  try {
-    await dataMailgunSchemaValidator.validateAsync(data)
-    await mailgunNotificationSender({ data, subject, body })
-
-    return 'success'
-  } catch (error) {
-    throw errorMessage('Mailgun', error?.message)
-  }
-}
-
-const sendgridNotificationInitialChecker = async (data: SendgridData) => {
-  try {
-    await dataSendgridSchemaValidator.validateAsync(data)
-    await sendgridNotificationSender({ data, subject, body })
-
-    return 'success'
-  } catch (error) {
-    throw errorMessage('Sendgrid', error?.message)
-  }
-}
-
-const webhookNotificationInitialChecker = async (data: WebhookData) => {
-  try {
-    await dataWebhookSchemaValidator.validateAsync(data)
-    await webhookNotificationSender({ data, body })
-
-    return 'success'
-  } catch (error) {
-    throw errorMessage('Webhook', error?.message)
-  }
-}
-
-const discordNotificationInitialChecker = async (data: WebhookData) => {
-  try {
-    await dataDiscordSchemaValidator.validateAsync(data)
-    await discordNotificationSender({ data, body })
-
-    return 'success'
-  } catch (error) {
-    throw errorMessage('Discord', error?.message)
-  }
-}
-
-const slackNotificationInitialChecker = async (data: WebhookData) => {
-  try {
-    await dataSlackSchemaValidator.validateAsync(data)
-    await slackNotificationSender({ data, body })
-
-    return 'success'
-  } catch (error) {
-    throw errorMessage('Slack', error?.message)
-  }
-}
-
-const telegramNotificationInitialChecker = async (data: TelegramData) => {
-  try {
-    await dataTelegramSchemaValidator.validateAsync(data)
-    await telegramNotificationSender({ data, body })
-
-    return 'success'
-  } catch (error) {
-    throw errorMessage('Telegram', error?.message)
-  }
-}
-
-const teamsNotificationInitialChecker = async (data: TeamsData) => {
-  try {
-    await dataTeamsSchemaValidator.validateAsync(data)
-    await teamsNotificationSender({ data, body, status })
-
-    return 'success'
-  } catch (error) {
-    throw errorMessage('Teams', error?.message)
-  }
-}
-
-const monikaNotificationInitialChecker = async (data: MonikaNotifData) => {
-  try {
-    await dataMonikaNotifSchemaValidator.validateAsync(data)
-    await monikaNotificationSender({ data, body, status })
-
-    return 'success'
-  } catch (error) {
-    throw errorMessage('Monika-Notif', error?.message)
-  }
-}
-
-const workplaceNotificationInitialChecker = async (data: WorkplaceData) => {
-  try {
-    await dataWorkplaceSchemaValidator.validateAsync(data)
-    await workplaceNotificationSender({ data, body })
-
-    return 'success'
-  } catch (error) {
-    throw errorMessage('Workplace', error?.message)
-  }
-}
-
-const desktopNotificationInitialChecker = async (data: TeamsData) => {
-  try {
-    desktopNotificationSender({ data, body, status })
-
-    return 'success'
-  } catch (error) {
-    throw errorMessage('Desktop', error?.message)
-  }
-}
+// reexported with alias because this `errorMessage` function is used in test file
+export const errorMessage = NotificationSendingError.create
 
 export const notificationChecker = async (notifications: Notification[]) => {
-  const smtpNotification = notifications
-    .filter((notif) => notif.type === 'smtp')
-    .map((notif) => notif.data as SMTPData)
-    .map(smtpNotificationInitialChecker)
+  const validators = {
+    desktop: null,
+    discord: dataDiscordSchemaValidator,
+    mailgun: dataMailgunSchemaValidator,
+    'monika-notif': dataMonikaNotifSchemaValidator,
+    sendgrid: dataSendgridSchemaValidator,
+    slack: dataSlackSchemaValidator,
+    smtp: dataSMTPSchemaValidator,
+    teams: dataTeamsSchemaValidator,
+    telegram: dataTelegramSchemaValidator,
+    webhook: dataWebhookSchemaValidator,
+    whatsapp: dataWebhookSchemaValidator,
+    workplace: dataWorkplaceSchemaValidator,
+  }
 
-  const mailgunNotification = notifications
-    .filter((notif) => notif.type === 'mailgun')
-    .map((notif) => notif.data as MailgunData)
-    .map(mailgunNotificationInitialChecker)
+  await Promise.all(
+    notifications.map(async (notification) => {
+      const validator = validators[notification.type]
+      if (!validator) return Promise.resolve()
+      try {
+        const validated = await validator.validateAsync(notification.data)
+        return validated
+      } catch (error) {
+        throw NotificationSendingError.create(notification.type, error?.message)
+      }
+    })
+  )
 
-  const sendgridNotification = notifications
-    .filter((notif) => notif.type === 'sendgrid')
-    .map((notif) => notif.data as SendgridData)
-    .map(sendgridNotificationInitialChecker)
-
-  const webhookNotification = notifications
-    .filter((notif) => notif.type === 'webhook')
-    .map((notif) => notif.data as WebhookData)
-    .map(webhookNotificationInitialChecker)
-
-  const discordNotification = notifications
-    .filter((notif) => notif.type === 'discord')
-    .map((notif) => notif.data as DiscordData)
-    .map(discordNotificationInitialChecker)
-
-  const slackNotification = notifications
-    .filter((notif) => notif.type === 'slack')
-    .map((notif) => notif.data as WebhookData)
-    .map(slackNotificationInitialChecker)
-
-  const teamsNotification = notifications
-    .filter((notif) => notif.type === 'teams')
-    .map((notif) => notif.data as TeamsData)
-    .map(teamsNotificationInitialChecker)
-  const telegramNotification = notifications
-    .filter((notif) => notif.type === 'telegram')
-    .map((notif) => notif.data as TelegramData)
-    .map(telegramNotificationInitialChecker)
-
-  const monikaNotification = notifications
-    .filter((notif) => notif.type === 'monika-notif')
-    .map((notif) => notif.data as MonikaNotifData)
-    .map(monikaNotificationInitialChecker)
-
-  const workplaceNotification = notifications
-    .filter((notif) => notif.type === 'workplace')
-    .map((notif) => notif.data as WorkplaceData)
-    .map(workplaceNotificationInitialChecker)
-
-  const desktopNotification = notifications
-    .filter((notif) => notif.type === 'desktop')
-    .map((notif) => notif.data as DesktopData)
-    .map(desktopNotificationInitialChecker)
-
-  return Promise.all([
-    Promise.all(smtpNotification),
-    Promise.all(mailgunNotification),
-    Promise.all(sendgridNotification),
-    Promise.all(webhookNotification),
-    Promise.all(slackNotification),
-    Promise.all(teamsNotification),
-    Promise.all(telegramNotification),
-    Promise.all(discordNotification),
-    Promise.all(monikaNotification),
-    Promise.all(workplaceNotification),
-    Promise.all(desktopNotification),
-  ])
+  await sendNotifications(notifications, {
+    subject: 'Monika is started',
+    body: `Monika is running on ${publicIpAddress}`,
+    summary: `Monika is running on ${publicIpAddress}`,
+    meta: {
+      type: 'start',
+      time: new Date().toUTCString(),
+      hostname: hostname(),
+      privateIpAddress: getIp(),
+      publicIpAddress,
+    },
+  })
 }

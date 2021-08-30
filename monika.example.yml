@@ -1,0 +1,143 @@
+# Monika runs on configurations, therefor it needs a configuration file to run
+# For complete documentation on configuration check https://monika.hyperjump.tech/guides/probes
+# Monika can run by its minimal configuration such as :
+probes:
+  - id: '1'
+    requests:
+      - url: http://example.com
+# Configuration example for sending HTML Form Submission
+# Using this configuration Monika will send a POST request to http://www.foo.com/login.php
+# with the defined headers and request's body.
+# probes:
+#   - id: '1'
+#     name: HTML form submission
+#     description: simulate html form submission
+#     interval: 10
+#     requests:
+#       - url: http://www.foo.com/login.php
+#         method: POST
+#         timeout: 7000
+#         headers:
+#           Content-Type: application/x-www-form-urlencoded
+#         body:
+#           username: someusername
+#           password: somepassword
+
+# Configuration example for sending Multiple requests
+# Requests could be define in array to run for multiple requests
+# and with this configuration monika will check on github.com first and then https://github.com/hyperjumptech.
+# If the status code of github.com is 500, monika will not check https://github.com/hyperjumptech.
+# Alerts could also be define in array to check on multiple response conditions
+# probes:
+#   - id: '1'
+#     name: Probing Github
+#     description: Multiple
+#     interval: 10
+#     requests:
+#       - url: https://github.com/
+#         method: GET
+#         timeout: 7000
+#         saveBody: false
+#       - url: https://github.com/hyperjumptech
+#         method: GET
+#         timeout: 7000
+#         saveBody: true
+#     alerts:
+#       - query: response.status == 500
+#         subject: response status
+#         message: response status message
+#       - query: response.time > 150
+#         subject: response time
+#         message: response time message
+#     incidentThreshold: 3
+#     recoveryThreshold: 3
+
+# Configuration example for enabling notification
+# Using this configuration Monika will check the page every 10 seconds
+# and will send a notification by email when the page response status returns 500 down 3 times in a row.
+# Notifications defined as an array of configuration for sending alerts through the channels defined
+# For a complete notification channel please refer to https://monika.hyperjump.tech/guides/notifications
+# probes:
+#   - id: '1'
+#     name: Example Probe
+#     description: Probe
+#     interval: 10
+#     requests:
+#       - url: http://example.com
+#         method: POST
+#         timeout: 6000
+#     alerts:
+#       - query: response.status == 500
+#         subject: response status
+#         message: response status message
+#     incidentThreshold: 3
+#     recoveryThreshold: 3
+# notifications:
+#   - id: unique-id-smtp,
+#     type: smtp,
+#     data:
+#       recipients:
+#         - RECIPIENT_EMAIL_ADDRESS
+#       hostname: smtp.gmail.com
+#       port: 587
+#       username: YOUR_GMAIL_ACCOUNT
+#       password: YOUR_GMAIL_PASSWORD_OR_APP_PASSWORD
+
+# Other notifications channel configurations
+#   - id: random-string-monika-notif
+#     type: monika-notif
+#     data:
+#       url: https://YOUR_MONIKA_NOTIF_URL
+#   - id: random-string-mailgun
+#     type: mailgun
+#     data:
+#       recipients: [RECIPIENT_EMAIL_ADDRESS]
+#       apiKey: YOUR_API_KEY
+#       domain: YOUR_DOMAIN
+#   - id: random-string-sendgrid
+#     type: sendgrid
+#     data:
+#       recipients: [RECIPIENT_EMAIL_ADDRESS]
+#       apiKey: YOUR_API_KEY
+#   - id: random-string-smtp
+#     type: smtp
+#     data:
+#       recipients: [RECIPIENT_EMAIL_ADDRESS]
+#       hostname: SMTP_HOSTNAME
+#       port: 587
+#       username: SMTP_USERNAME
+#       password: SMTP_PASSWORD
+#   - id: random-string-webhook
+#     type: webhook
+#     data:
+#       method: POST
+#       url: https://WEBHOOK_URL
+#   - id: random-string-slack
+#     type: slack
+#     data:
+#       url: https://YOUR_SLACK_INCOMING_WEBHOOK_URL
+#   - id: random-string-telegram
+#     type: telegram
+#     data:
+#       group_id: YOUR_GROUP_ID
+#       bot_token: YOUR_BOT_TOKEN
+#   - id: random-string-whatsapp
+#     type: whatsapp
+#     data:
+#       recipients: ["1234567890"]
+#       url: http://example.com
+#       username: example
+#       password: password_example
+#   - id: random-string-teams
+#     type: teams
+#     data:
+#       url: https://YOUR_TEAMS_WEBHOOK_URL
+#   - id: random-string-discord
+#     type: discord
+#     data:
+#       url: https://YOUR_DISCORD_URL
+#   - id: random-string-workplace
+#     type: workplace
+#     data:
+#       thread_id: "1234567890"
+#       access_token: YOUR_CUSTOM_INTEGRATION_ACCESS_TOKEN

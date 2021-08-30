@@ -6,7 +6,6 @@ import {
   notificationChecker,
 } from '../../../src/components/notification/checker'
 import { MailgunData } from '../../../src/interfaces/data'
-import { Notification } from '../../../src/interfaces/notification'
 
 chai.use(spies)
 
@@ -17,17 +16,19 @@ describe('notificationChecker - mailgunNotification', () => {
 
   const notificationConfig = {
     id: 'mailgun',
-    type: 'mailgun',
-  } as Notification
+    type: 'mailgun' as const,
+  }
 
   it('should handle validation error - without apiKey', async () => {
     try {
       await notificationChecker([
         {
           ...notificationConfig,
-          data: {
+          data: ({
             domain: 'mailgun.com',
-          } as MailgunData,
+            username: 'mailgunuser',
+            recipients: [],
+          } as unknown) as MailgunData,
         },
       ])
     } catch (error) {
@@ -47,6 +48,7 @@ describe('notificationChecker - mailgunNotification', () => {
           ...notificationConfig,
           data: {
             apiKey: 'ABC-EFG-HIJ-KLM-NOP-QRS-TUV-WXY-Z',
+            username: 'mailgunuser',
           } as MailgunData,
         },
       ])

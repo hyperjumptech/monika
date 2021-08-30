@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 /**********************************************************************************
  * MIT License                                                                    *
  *                                                                                *
@@ -27,6 +28,8 @@ import boxen from 'boxen'
 import chalk from 'chalk'
 import cli from 'cli-ux'
 import fs from 'fs'
+import cron, { ScheduledTask } from 'node-cron'
+import { hostname } from 'os'
 import {
   createConfig,
   getConfig,
@@ -34,44 +37,46 @@ import {
   setupConfig,
 } from './components/config'
 import {
-  setNotificationLog,
   printAllLogs,
   printProbeLog,
+  setNotificationLog,
 } from './components/logger'
 import {
   closeLog,
   flushAllLogs,
+  getSummary,
   openLogfile,
+  saveNotificationLog,
 } from './components/logger/history'
+import { sendAlerts, sendNotifications } from './components/notification'
 import { notificationChecker } from './components/notification/checker'
-import { terminationNotif } from './components/notification/termination'
 import { resetProbeStatuses } from './components/notification/process-server-status'
+import { getLogsAndReport } from './components/reporter'
+import { checkTLS } from './components/tls-checker'
 import {
   CONFIG_SANITIZED,
-  PROBE_RESPONSE_RECEIVED,
-  PROBE_RESPONSE_VALIDATED,
   PROBE_ALERTS_READY,
   PROBE_LOGS_BUILT,
+  PROBE_RESPONSE_RECEIVED,
+  PROBE_RESPONSE_VALIDATED,
 } from './constants/event-emitter'
 import { Config } from './interfaces/config'
-import { MailData, MailgunData, SMTPData, WebhookData } from './interfaces/data'
+import { LogObject } from './interfaces/logs'
+import { Notification } from './interfaces/notification'
 import { Probe } from './interfaces/probe'
+import { ProbeStateDetails } from './interfaces/probe-status'
 import { AxiosResponseWithExtraData } from './interfaces/request'
 import { isIDValid, loopReport, sanitizeProbe } from './looper'
 import {
   PrometheusCollector,
   startPrometheusMetricsServer,
 } from './plugins/metrics/prometheus'
-import { getEventEmitter } from './utils/events'
-import { log } from './utils/pino'
-import { StatusDetails } from './interfaces/probe-status'
-import { Notification } from './interfaces/notification'
-import { sendAlerts } from './components/notification'
-import { LogObject } from './interfaces/logs'
-import { getLogsAndReport } from './components/reporter'
-import { getPublicIp } from './utils/public-ip'
 import validateResponse, { ValidateResponse } from './plugins/validate-response'
+import { getEventEmitter } from './utils/events'
+import getIp from './utils/ip'
+import { log } from './utils/pino'
 import './loaders'
+import { getPublicIp, publicIpAddress } from './utils/public-ip'
 
 const em = getEventEmitter()
 
@@ -79,11 +84,16 @@ function getDefaultConfig() {
   const filesArray = fs.readdirSync('./')
   const monikaDotJsonFile = filesArray.find((x) => x === 'monika.json')
   const configDotJsonFile = filesArray.find((x) => x === 'config.json')
+  const monikaDotYamlFile = filesArray.find(
+    (x) => x === 'monika.yml' || x === 'monika.yaml'
+  )
 
   return monikaDotJsonFile
     ? `./${monikaDotJsonFile}`
     : configDotJsonFile
     ? `./${configDotJsonFile}`
+    : monikaDotYamlFile
+    ? `./${monikaDotYamlFile}`
     : './monika.json'
 }
 class Monika extends Command {
@@ -176,6 +186,10 @@ class Monika extends Command {
       description: 'force command',
       default: false,
     }),
+
+    'status-notification': flags.string({
+      description: 'cron syntax for status notification schedule',
+    }),
   }
 
   async run() {
@@ -237,7 +251,7 @@ class Monika extends Command {
         loopReport(getConfig)
       }
 
-      // run probes on interval
+      let scheduledTasks: ScheduledTask[] = []
       let abortCurrentLooper: (() => void) | undefined
 
       for await (const config of getConfigIterator()) {
@@ -245,6 +259,12 @@ class Monika extends Command {
           resetProbeStatuses()
           abortCurrentLooper()
         }
+
+        // Stop, destroy, and clear all previous cron tasks
+        scheduledTasks.forEach((task) => {
+          task.stop()
+        })
+        scheduledTasks = []
 
         if (process.env.NODE_ENV !== 'test') {
           await notificationChecker(config.notifications ?? [])
@@ -280,6 +300,63 @@ class Monika extends Command {
         // emit the sanitized probe
         if (sanitizedProbe) {
           em.emit(CONFIG_SANITIZED, sanitizedProbe, config.notifications ?? [])
+        }
+
+        // run TLS checker
+        if (config?.certificate && config.certificate.domains.length > 0) {
+          config.certificate?.domains.forEach((domain) => {
+            // TODO: Remove probe below
+            // probe is used because probe detail is needed to save the notification log
+            const probe = {
+              id: '',
+              name: '',
+              requests: [],
+              incidentThreshold: 0,
+              recoveryThreshold: 0,
+              alerts: [],
+            }
+            // check TLS when Monika starts
+            this.checkTLSAndSaveNotifIfFail(
+              domain,
+              config.certificate?.reminder ?? 30,
+              probe,
+              config?.notifications
+            )
+
+            // schedule TLS checker every day at 00:00
+            const scheduledTlsCheckTask = cron.schedule('0 0 * * *', () => {
+              log.info(`Running TLS check for ${domain} every day at 00:00`)
+
+              this.checkTLSAndSaveNotifIfFail(
+                domain,
+                config.certificate?.reminder ?? 30,
+                probe,
+                config?.notifications
+              )
+            })
+
+            scheduledTasks.push(scheduledTlsCheckTask)
+          })
+        }
+
+        // schedule status update notification
+        if (
+          process.env.NODE_ENV !== 'test' &&
+          flags['status-notification'] !== 'false'
+        ) {
+          // defaults to 6 AM
+          // default value is not defined in flag configuration,
+          // because the value can also come from config file
+          const schedule =
+            flags['status-notification'] ||
+            config['status-notification'] ||
+            '0 6 * * *'
+
+          const scheduledStatusUpdateTask = cron.schedule(schedule, () => {
+            this.getSummaryAndSendNotif(config)
+          })
+
+          scheduledTasks.push(scheduledStatusUpdateTask)
         }
 
         // abortCurrentLooper = idFeeder(
@@ -351,33 +428,34 @@ Please refer to the Monika documentations on how to how to configure notificatio
     Type: ${item.type}      
 `
           // Only show recipients if type is mailgun, smtp, or sendgrid
-          if (['mailgun', 'smtp', 'sendgrid'].indexOf(item.type) >= 0) {
-            startupMessage += `    Recipients: ${(item.data as MailData).recipients.join(
+          // check one-by-one instead of using indexOf to avoid using type assertion
+          if (
+            item.type === 'mailgun' ||
+            item.type === 'smtp' ||
+            item.type === 'sendgrid'
+          ) {
+            startupMessage += `    Recipients: ${item.data.recipients.join(
               ', '
             )}\n`
           }
 
           switch (item.type) {
             case 'smtp':
-              startupMessage += `    Hostname: ${
-                (item.data as SMTPData).hostname
-              }
-    Port: ${(item.data as SMTPData).port}
-    Username: ${(item.data as SMTPData).username}
+              startupMessage += `    Hostname: ${item.data.hostname}
+    Port: ${item.data.port}
+    Username: ${item.data.username}
 `
               break
             case 'mailgun':
-              startupMessage += `    Domain: ${
-                (item.data as MailgunData).domain
-              }\n`
+              startupMessage += `    Domain: ${item.data.domain}\n`
               break
             case 'sendgrid':
               break
             case 'webhook':
-              startupMessage += `    URL: ${(item.data as WebhookData).url}\n`
+              startupMessage += `    URL: ${item.data.url}\n`
               break
             case 'slack':
-              startupMessage += `    URL: ${(item.data as WebhookData).url}\n`
+              startupMessage += `    URL: ${item.data.url}\n`
               break
           }
         })
@@ -386,6 +464,68 @@ Please refer to the Monika documentations on how to how to configure notificatio
 
     return startupMessage
   }
+
+  async checkTLSAndSaveNotifIfFail(
+    domain: string,
+    reminder: number,
+    probe: Probe,
+    notifications?: Notification[]
+  ) {
+    try {
+      await checkTLS(domain, reminder)
+    } catch (error) {
+      log.error(error.message)
+
+      if (notifications && notifications?.length > 0) {
+        notifications.map(async (notification: Notification) => {
+          saveNotificationLog(
+            probe,
+            notification,
+            'NOTIFY-TLS',
+            error.message
+          ).catch((err) => log.error(err.message))
+          sendAlerts({
+            url: domain,
+            probeState: 'invalid',
+            incidentThreshold: probe.incidentThreshold,
+            notifications: notifications ?? [],
+            validation: {
+              alert: { query: '', subject: '', message: '' },
+              somethingToReport: true,
+              responseValue: 0,
+            },
+          }).catch((err) => log.error(err.message))
+        })
+      }
+    }
+  }
+
+  async getSummaryAndSendNotif(config: Config) {
+    const { notifications } = config
+    const summary = await getSummary()
+    if (!notifications) return
+
+    await sendNotifications(notifications, {
+      subject: `Monika Status`,
+      body: `Status Update ${new Date().toUTCString()}
+
+Host: ${hostname()} (${[publicIpAddress, getIp()].filter(Boolean).join('/')})
+Number of probes: ${summary.numberOfProbes}
+Average response time: ${summary.averageResponseTime} ms in the last 24 hours
+Incidents: ${summary.numberOfIncidents} in the last 24 hours
+Recoveries: ${summary.numberOfRecoveries} in the last 24 hours
+Notifications: ${summary.numberOfSentNotifications}`,
+      summary: `There are ${summary.numberOfIncidents} incidents and ${summary.numberOfRecoveries} recoveries in the last 24 hours.`,
+      meta: {
+        type: 'status-update' as const,
+        time: new Date().toUTCString(),
+        hostname: hostname(),
+        privateIpAddress: getIp(),
+        publicIpAddress,
+        ...summary,
+      },
+    })
+  }
 }
 
 // Subscribe FirstEvent
@@ -393,7 +533,18 @@ em.addListener('TERMINATE_EVENT', async (data) => {
   log.warn(data)
   const config = getConfig()
   if (process.env.NODE_ENV !== 'test') {
-    await terminationNotif(config.notifications ?? [])
+    await sendNotifications(config.notifications ?? [], {
+      subject: 'Monika terminated',
+      body: `Monika is no longer running in ${publicIpAddress}`,
+      summary: `Monika is no longer running in ${publicIpAddress}`,
+      meta: {
+        type: 'termination',
+        time: new Date().toUTCString(),
+        hostname: hostname(),
+        privateIpAddress: getIp(),
+        publicIpAddress,
+      },
+    })
   }
 })
 
@@ -404,8 +555,6 @@ em.addListener(CONFIG_SANITIZED, function () {
 
 em.addListener(PROBE_LOGS_BUILT, async (mLog: LogObject) => {
   printProbeLog(mLog)
-
-  // em.emit(LOGS_READY_TO_SAVE, data, mLog)
 })
 
 // EVENT EMITTER - PROBE_RESPONSE_RECEIVED
@@ -423,53 +572,54 @@ em.on(PROBE_RESPONSE_RECEIVED, function (data: ProbeResponseReceived) {
   em.emit(PROBE_RESPONSE_VALIDATED, res)
 })
 
+// TODO: move this to interface file?
 interface ProbeStatusProcessed {
   probe: Probe
-  statuses?: StatusDetails[]
+  statuses?: ProbeStateDetails[]
   notifications?: Notification[]
   validatedResponseStatuses: ValidateResponse[]
   totalRequests: number
 }
 
+// TODO: move this to interface file?
 interface ProbeSendNotification extends Omit<ProbeStatusProcessed, 'statuses'> {
   index: number
-  status?: StatusDetails
+  probeState?: ProbeStateDetails
 }
 
+// TODO: move this to interface file?
 interface ProbeSaveLogToDatabase
   extends Omit<
     ProbeStatusProcessed,
     'statuses' | 'totalRequests' | 'validatedResponseStatuses'
   > {
   index: number
-  status?: StatusDetails
+  probeState?: ProbeStateDetails
 }
 
 const probeSendNotification = async (data: ProbeSendNotification) => {
   const {
     index,
     probe,
-    status,
+    probeState,
     notifications,
     totalRequests,
     validatedResponseStatuses,
   } = data
 
-  const statusString = status?.isDown ? 'DOWN' : 'UP'
+  const statusString = probeState?.isDown ? 'DOWN' : 'UP'
   const url = probe.requests[totalRequests - 1].url ?? ''
 
   if ((notifications?.length ?? 0) > 0) {
     await sendAlerts({
       url: url,
-      status: statusString,
-      probeId: probe.id,
-      probeName: probe.name,
+      probeState: statusString,
       incidentThreshold: probe.incidentThreshold,
       notifications: notifications ?? [],
       validation:
         validatedResponseStatuses.find(
           (validateResponse: ValidateResponse) =>
-            validateResponse.alert === status?.alert
+            validateResponse.alert.query === probeState?.alertQuery
         ) || validatedResponseStatuses[index],
     })
   }
@@ -479,23 +629,23 @@ const createNotificationLog = (
   data: ProbeSaveLogToDatabase,
   mLog: LogObject
 ): LogObject => {
-  const { index, probe, status, notifications } = data
+  const { index, probe, probeState, notifications } = data
 
   const type =
-    status?.state === 'UP_TRUE_EQUALS_THRESHOLD'
+    probeState?.probeState === 'UP_TRUE_EQUALS_THRESHOLD'
       ? 'NOTIFY-INCIDENT'
       : 'NOTIFY-RECOVER'
 
   if ((notifications?.length ?? 0) > 0) {
     Promise.all(
       notifications?.map((notification) => {
-        const alertMsg = probe.alerts[index]
+        const alert = probe.alerts[index]
 
         mLog = setNotificationLog(
           {
             type,
             probe,
-            alertMsg,
+            alert,
             notification,
           },
           mLog
@@ -519,12 +669,12 @@ em.on(
     } = data
 
     statuses
-      ?.filter((status) => status.shouldSendNotification)
-      ?.forEach((status, index) => {
+      ?.filter((probeState) => probeState.shouldSendNotification)
+      ?.forEach((probeState, index) => {
         probeSendNotification({
           index,
           probe,
-          status,
+          probeState,
           notifications,
           totalRequests,
           validatedResponseStatuses,
@@ -534,7 +684,7 @@ em.on(
           {
             index,
             probe,
-            status,
+            probeState,
             notifications,
           },
           mLog

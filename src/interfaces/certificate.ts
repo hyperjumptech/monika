@@ -22,22 +22,8 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios from 'axios'
-
-import { WebhookData } from '../../../interfaces/data'
-
-export const sendSlack = async (data: WebhookData) => {
-  try {
-    const res = await axios({
-      method: 'POST',
-      url: data.url,
-      data: {
-        text: data.body,
-      },
-    })
-
-    return res
-  } catch (error) {
-    throw error
-  }
+export interface Certificate {
+  domains: string[]
+  // The reminder is the number of days to send notification to user before the domain expires.
+  reminder?: number
 }

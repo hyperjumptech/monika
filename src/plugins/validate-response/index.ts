@@ -22,28 +22,32 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Probe } from '../../interfaces/probe'
+import { ProbeAlert } from '../../interfaces/probe'
 import { AxiosResponseWithExtraData } from '../../interfaces/request'
 import responseChecker, { getResponseValue } from './checkers'
 
 export interface ValidateResponse {
-  alert: string
-  status: boolean
+  alert: ProbeAlert
+  somethingToReport: boolean
   responseValue: number
 }
 
+/**
+ * validateResponse will check the response against alerts. If an alert is set, and the response demands it, will setup to send alert/notification
+ * @param {object} alerts is the alerts setup to trigger
+ * @param {object} response is the raw response from axios
+ * @returns {object} checks which contains alert type, flag to response time
+ */
 const validateResponse = (
-  alerts: Probe['alerts'],
+  alerts: ProbeAlert[],
   response: AxiosResponseWithExtraData
 ): ValidateResponse[] => {
-  const checks = alerts
-    .map((alert) => alert.toLowerCase())
-    .map((alert) => {
-      const status = responseChecker(alert, response)
-      const responseValue = getResponseValue(alert, response)
+  const checks = alerts.map((alert) => {
+    const somethingToReport = responseChecker(alert, response)
+    const responseValue = getResponseValue(alert.query, response)
 
-      return { alert, status, responseValue }
-    })
+    return { alert, somethingToReport, responseValue }
+  })
 
   return checks
 }

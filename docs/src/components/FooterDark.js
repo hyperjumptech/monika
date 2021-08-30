@@ -51,7 +51,7 @@ export default function FooterDark(props) {
         <a
           className="text-xs pt-1"
           target="_blank"
-          href="https://hyperjumptech.github.io/monika-config-generator"
+          href="https://monika-config.hyperjump.tech/"
           rel="noopener noreferrer"
         >
           Config Generator

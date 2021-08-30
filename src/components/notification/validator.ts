@@ -46,12 +46,14 @@ export const dataMailgunSchemaValidator = dataBaseEmailSchemaValidator(
 ).keys({
   apiKey: Joi.string().required().label('Mailgun API Key'),
   domain: Joi.string().required().label('Mailgun Domain'),
+  username: Joi.string().label('Mailgun Username'),
 })
 
 export const dataSendgridSchemaValidator = dataBaseEmailSchemaValidator(
   'Sendgrid'
 ).keys({
   apiKey: Joi.string().required().label('Sendgrid API Key'),
+  sender: Joi.string().required().label('Sendgrid sender email'),
 })
 
 export const dataWebhookSchemaValidator = dataBaseEmailSchemaValidator(

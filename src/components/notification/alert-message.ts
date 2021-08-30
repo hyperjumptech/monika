@@ -22,7 +22,10 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import { format } from 'date-fns'
 import { hostname } from 'os'
+import { NotificationMessage } from '../../interfaces/notification'
+import { ProbeAlert } from '../../interfaces/probe'
 import { parseAlertStringTime } from '../../plugins/validate-response/checkers'
 import { publicIpAddress } from '../../utils/public-ip'
 
@@ -30,86 +33,66 @@ export function getMessageForAlert({
   alert,
   url,
   ipAddress,
-  status,
-  incidentThreshold,
+  probeState, // state of the probed target
   responseValue,
 }: {
-  alert: string
+  alert: ProbeAlert
   url: string
   ipAddress: string
-  status: string
+  probeState: string
   incidentThreshold: number
   responseValue: number
-}): {
-  subject: string
-  body: string
-  expected: string
-} {
-  const getSubject = (url: string, status: string) => {
-    const statusAlert = `Target ${url} is not OK`
-    if (alert === 'status-not-2xx' && status === 'UP')
-      return `[RECOVERY] ${statusAlert}`
-    if (alert === 'status-not-2xx' && status === 'DOWN')
-      return `[INCIDENT] ${statusAlert}`
+}): NotificationMessage {
+  const getSubject = (probeState: string) => {
+    const recoveryOrIncident = probeState === 'UP' ? 'Recovery' : 'Incident'
 
-    const responseAlert = `Target ${url} took too long to respond`
-    if (alert.includes('response-time-greater-than-') && status === 'UP')
-      return `[RECOVERY] ${responseAlert}`
+    if (alert.subject)
+      return `[${recoveryOrIncident.toUpperCase()}] ${alert.subject}`
 
-    return `[INCIDENT] ${responseAlert}`
+    return `New ${recoveryOrIncident} from Monika`
   }
 
-  const getBody = (status: string) => {
-    if (alert === 'status-not-2xx' && status === 'DOWN')
-      return `Target ${url} is not healthy. It has not been returning status code 2xx ${incidentThreshold} times in a row.`
-
-    if (alert.includes('response-time-greater-than-') && status === 'DOWN') {
-      const alertTime = parseAlertStringTime(alert)
-      return `Target ${url} is not healthy. The response time has been greater than ${alertTime} ${incidentThreshold} times in a row`
+  const getExpectedMessage = (responseValue: number) => {
+    if (alert.query === 'status-not-2xx') {
+      return `HTTP Status is ${responseValue}, expecting 200.`
     }
 
-    return `Target ${url} is back to healthy.`
+    if (alert.query.includes('response-time-greater-than-')) {
+      const alertTime = parseAlertStringTime(alert.query)
+      return `Response time is ${responseValue}ms, expecting less than ${alertTime}ms`
+    }
+
+    return alert.message
   }
 
-  const getExpectedMessage = (status: string, responseValue: number) => {
-    if (alert === 'status-not-2xx') {
-      if (status === 'DOWN') {
-        return `Status is ${responseValue}, was expecting 200.`
-      }
-
-      if (status === 'UP') {
-        return `Service is ok. Status now 200`
-      }
-    }
-
-    if (alert.includes('response-time-greater-than-')) {
-      const alertTime = parseAlertStringTime(alert)
-
-      if (status === 'DOWN') {
-        return `Response time is ${responseValue}ms expecting a ${alertTime}ms`
-      }
-
-      if (status === 'UP') {
-        return `Service is ok. Response now is within ${alertTime}ms`
-      }
-    }
-
-    return ''
+  const getMonikaInstance = () => {
+    return `${hostname()} (${[publicIpAddress, ipAddress]
+      .filter(Boolean)
+      .join('/')})`
   }
 
-  const today = new Date().toUTCString()
+  const meta = {
+    type: probeState === 'UP' ? ('recovery' as const) : ('incident' as const),
+    url,
+    time: format(new Date(), 'yyyy-MM-dd HH:mm:ss XXX'),
+    hostname: hostname(),
+    privateIpAddress: ipAddress,
+    publicIpAddress,
+  }
+
+  const bodyString = `Message: ${getExpectedMessage(responseValue)}
+
+URL: ${meta.url}
+
+Time: ${meta.time}
+
+From: ${getMonikaInstance()}`
+
   const message = {
-    subject: getSubject(url, status),
-    body: `
-      ${getBody(status)}\n\n
-      Alert: ${getExpectedMessage(status, responseValue)}\n
-      URL: ${url}\n
-      At: ${today}\n
-      Monika: ${ipAddress} (local), ${
-      publicIpAddress ? `${publicIpAddress} (public)` : ''
-    } ${hostname} (hostname)
-    `,
-    expected: getExpectedMessage(status, responseValue),
+    subject: getSubject(probeState),
+    body: bodyString,
+    summary: getExpectedMessage(responseValue),
+    meta,
   }
 
   return message
