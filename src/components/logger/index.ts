@@ -41,7 +41,7 @@ const EventEmitter = getEventEmitter()
  * @param {any} responseCode is the httpStatus to colorize
  * @returns {string} color code based on chalk: Chalk & { supportsColor: ColorSupport };
  */
-export function getStatusColor(responseCode: any) {
+export function getStatusColor(responseCode: number) {
   switch (Math.trunc(responseCode / 100)) {
     case 2:
       return 'cyan'
