@@ -69,6 +69,7 @@ const responseChecker = (
   alert: ProbeAlert,
   res: AxiosResponseWithExtraData
 ): boolean => {
+  // if status is 599 : timeout or uri is not found (0), worth reporting so return true
   if (res.status === 599 || res.status === 0) {
     return true
   }
