@@ -52,7 +52,8 @@ export const sendTeams = async (
     }
     case 'incident':
     case 'recovery': {
-      const notifType = message.meta.type.toUpperCase()
+      const notifType =
+        message.meta.type[0].toUpperCase() + message.meta.type.substring(1)
       const notifColor = message.meta.type === 'incident' ? 'DF202E' : '8CC152'
 
       await axios({
@@ -61,14 +62,13 @@ export const sendTeams = async (
         data: {
           '@type': 'MessageCard',
           themeColor: notifColor,
-          summary: `New ${notifType} notification from Monika`,
+          summary: `New ${notifType} from Monika`,
           sections: [
             {
-              activityTitle: `New ${notifType} notification from Monika`,
-              activitySubtitle: `${message.summary} for URL [${message.meta.url}](${message.meta.url}) at ${message.meta.time}`,
+              activityTitle: `New ${notifType} from Monika`,
               facts: [
                 {
-                  name: 'Alert',
+                  name: 'Message',
                   value: message.summary,
                 },
                 {
@@ -76,16 +76,17 @@ export const sendTeams = async (
                   value: `[${message.meta.url}](${message.meta.url})`,
                 },
                 {
-                  name: 'At',
+                  name: 'Time',
                   value: message.meta.time,
                 },
                 {
-                  name: 'Monika',
-                  value: `${message.meta.privateIpAddress} (local), ${
-                    message.meta.publicIpAddress
-                      ? `${message.meta.publicIpAddress} (public)`
-                      : ''
-                  } ${message.meta.hostname} (hostname)`,
+                  name: 'From',
+                  value: `${message.meta.hostname} (${[
+                    message.meta.publicIpAddress,
+                    message.meta.privateIpAddress,
+                  ]
+                    .filter(Boolean)
+                    .join('/')})`,
                 },
               ],
               markdown: true,
@@ -109,11 +110,12 @@ export const sendTeams = async (
               facts: [
                 {
                   name: 'Host',
-                  value: `${message.meta.privateIpAddress} (local), ${
-                    message.meta.publicIpAddress
-                      ? `${message.meta.publicIpAddress} (public)`
-                      : ''
-                  } ${message.meta.hostname} (hostname)`,
+                  value: `${message.meta.hostname} (${[
+                    message.meta.publicIpAddress,
+                    message.meta.privateIpAddress,
+                  ]
+                    .filter(Boolean)
+                    .join('/')})`,
                 },
                 {
                   name: 'Number of Probes',
