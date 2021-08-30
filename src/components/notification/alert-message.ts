@@ -22,6 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import { format } from 'date-fns'
 import { hostname } from 'os'
 import { NotificationMessage } from '../../interfaces/notification'
 import { ProbeAlert } from '../../interfaces/probe'
@@ -33,7 +34,6 @@ export function getMessageForAlert({
   url,
   ipAddress,
   probeState, // state of the probed target
-  incidentThreshold,
   responseValue,
 }: {
   alert: ProbeAlert
@@ -43,83 +43,55 @@ export function getMessageForAlert({
   incidentThreshold: number
   responseValue: number
 }): NotificationMessage {
-  const getSubject = (url: string, probeState: string) => {
-    const recoveryOrIncident = probeState === 'UP' ? 'RECOVERY' : 'INCIDENT'
+  const getSubject = (probeState: string) => {
+    const recoveryOrIncident = probeState === 'UP' ? 'Recovery' : 'Incident'
 
-    if (alert.query === 'status-not-2xx')
-      return `[${recoveryOrIncident}] Target ${url} is not OK`
-    if (alert.query.includes('response-time-greater-than-')) {
-      return `[${recoveryOrIncident}] Target ${url} took too long to respond`
-    }
+    if (alert.subject)
+      return `[${recoveryOrIncident.toUpperCase()}] ${alert.subject}`
 
-    return `[${recoveryOrIncident}] ${alert.subject}`
+    return `New ${recoveryOrIncident} from Monika`
   }
 
-  const getBody = (probeState: string) => {
-    if (probeState === 'DOWN') {
-      if (alert.query === 'status-not-2xx')
-        return `Target ${url} is not healthy. It has not been returning status code 2xx ${incidentThreshold} times in a row.`
-
-      if (alert.query.includes('response-time-greater-than-')) {
-        const alertTime = parseAlertStringTime(alert.query)
-        return `Target ${url} is not healthy. The response time has been greater than ${alertTime} ${incidentThreshold} times in a row`
-      }
-
-      return 'New INCIDENT from Monika'
-    }
-
-    return `Target ${url} is back to healthy.`
-  }
-
-  const getExpectedMessage = (probeState: string, responseValue: number) => {
+  const getExpectedMessage = (responseValue: number) => {
     if (alert.query === 'status-not-2xx') {
-      if (probeState === 'DOWN') {
-        return `Status is ${responseValue}, was expecting 200.`
-      }
-
-      if (probeState === 'UP') {
-        return `Service is ok. Status now 200`
-      }
+      return `HTTP Status is ${responseValue}, expecting 200.`
     }
 
     if (alert.query.includes('response-time-greater-than-')) {
       const alertTime = parseAlertStringTime(alert.query)
-
-      if (probeState === 'DOWN') {
-        return `Response time is ${responseValue}ms expecting a ${alertTime}ms`
-      }
-
-      if (probeState === 'UP') {
-        return `Service is ok. Response now is within ${alertTime}ms`
-      }
+      return `Response time is ${responseValue}ms, expecting less than ${alertTime}ms`
     }
 
     return alert.message
   }
 
+  const getMonikaInstance = () => {
+    return `${hostname()} (${[publicIpAddress, ipAddress]
+      .filter(Boolean)
+      .join('/')})`
+  }
+
   const meta = {
     type: probeState === 'UP' ? ('recovery' as const) : ('incident' as const),
     url,
-    time: new Date().toUTCString(),
+    time: format(new Date(), 'yyyy-MM-dd HH:mm:ss XXX'),
     hostname: hostname(),
     privateIpAddress: ipAddress,
     publicIpAddress,
   }
 
-  const bodyString = [
-    `${getBody(probeState)}\n`,
-    `Alert: ${getExpectedMessage(probeState, responseValue)}`,
-    `URL: ${meta.url}`,
-    `At: ${meta.time}`,
-    `Monika: ${ipAddress} (local), ${
-      publicIpAddress ? `${publicIpAddress} (public)` : ''
-    } ${hostname} (hostname)`,
-  ].join('\n\n')
+  const bodyString = `Message: ${getExpectedMessage(responseValue)}
+
+URL: ${meta.url}
+
+Time: ${meta.time}
+
+From: ${getMonikaInstance()}`
 
   const message = {
-    subject: getSubject(url, probeState),
+    subject: getSubject(probeState),
     body: bodyString,
-    summary: getExpectedMessage(probeState, responseValue),
+    summary: getExpectedMessage(responseValue),
     meta,
   }
 
