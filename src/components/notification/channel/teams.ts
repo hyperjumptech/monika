@@ -110,11 +110,12 @@ export const sendTeams = async (
               facts: [
                 {
                   name: 'Host',
-                  value: `${message.meta.privateIpAddress} (local), ${
-                    message.meta.publicIpAddress
-                      ? `${message.meta.publicIpAddress} (public)`
-                      : ''
-                  } ${message.meta.hostname} (hostname)`,
+                  value: `${message.meta.hostname} (${[
+                    message.meta.publicIpAddress,
+                    message.meta.privateIpAddress,
+                  ]
+                    .filter(Boolean)
+                    .join('/')})`,
                 },
                 {
                   name: 'Number of Probes',
