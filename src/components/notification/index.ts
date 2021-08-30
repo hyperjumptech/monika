@@ -174,11 +174,30 @@ export async function sendNotifications(
                 alert: message.summary,
                 url: message.meta.url,
                 time: message.meta.time,
-                monika: `${message.meta.privateIpAddress} (local), ${
-                  message.meta.publicIpAddress
-                    ? `${message.meta.publicIpAddress} (public)`
-                    : ''
-                } ${message.meta.hostname} (hostname)`,
+                monika: `${message.meta.hostname} (${[
+                  message.meta.publicIpAddress,
+                  message.meta.privateIpAddress,
+                ]
+                  .filter(Boolean)
+                  .join('/')})`,
+              }
+            } else if (message.meta.type === 'status-update') {
+              body = {
+                type: message.meta.type,
+                time: message.meta.time,
+                monika: `${message.meta.hostname} (${[
+                  message.meta.publicIpAddress,
+                  message.meta.privateIpAddress,
+                ]
+                  .filter(Boolean)
+                  .join('/')})`,
+                numberOfProbes: String(message.meta.numberOfProbes),
+                averageResponseTime: String(message.meta.averageResponseTime),
+                numberOfIncidents: String(message.meta.numberOfIncidents),
+                numberOfRecoveries: String(message.meta.numberOfRecoveries),
+                numberOfSentNotifications: String(
+                  message.meta.numberOfSentNotifications
+                ),
               }
             }
 
