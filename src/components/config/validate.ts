@@ -75,9 +75,7 @@ const PROBE_REQUEST_INVALID_URL = setInvalidResponse(
 const PROBE_REQUEST_INVALID_METHOD = setInvalidResponse(
   'Probe request method is invalid! Valid methods are GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS, PURGE, LINK, and UNLINK'
 )
-const PROBE_ALERT_INVALID = setInvalidResponse(
-  `Probe alert should be 'status-not-2xx' or 'response-time-greater-than-<number>-(m)s`
-)
+const PROBE_ALERT_INVALID = setInvalidResponse(`Probe alert format is invalid!`)
 
 const PROBE_REQUEST_NO_URL = setInvalidResponse(
   'Probe request URL does not exists'
@@ -289,22 +287,24 @@ export const validateConfig = (configuration: Config): Validation => {
     // convert old alert format to new format
     probe.alerts = alerts.map((alert: any) => {
       if (typeof alert === 'string') {
-        return {
-          query: alert.toLowerCase(),
-          subject: '',
-          message: '',
+        let query = ''
+        let message = ''
+        const subject = ''
+
+        if (alert === 'status-not-2xx') {
+          query = 'response.status < 200 or response.status > 299'
+          message = 'HTTP Status is {{ response.status }}, expecting 200'
+        } else if (alert.startsWith('response-time-greater-than-')) {
+          const expectedTime = parseAlertStringTime(alert)
+          query = `response.time > ${expectedTime}`
+          message = `Response time is {{ response.time }}ms, expecting less than ${expectedTime}ms`
         }
+
+        return { query, subject, message }
       }
 
       return alert
     })
-
-    if (alerts.length === 0) {
-      probe.alerts = [
-        { query: 'status-not-2xx', subject: '', message: `` },
-        { query: 'response-time-greater-than-2-s', subject: '', message: '' },
-      ]
-    }
   }
 
   return VALID_CONFIG
