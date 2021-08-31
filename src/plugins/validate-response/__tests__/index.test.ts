@@ -59,8 +59,16 @@ describe('validateResponse', () => {
           subject: '',
           message: '',
         },
-        responseValue: 300,
-        somethingToReport: true,
+        hasSomethingToReport: true,
+        response: {
+          config: {
+            extraData: {
+              responseTime: 20,
+            },
+          },
+          headers: {},
+          status: 300,
+        },
       },
       {
         alert: {
@@ -68,8 +76,16 @@ describe('validateResponse', () => {
           subject: '',
           message: '',
         },
-        responseValue: 20,
-        somethingToReport: true,
+        response: {
+          config: {
+            extraData: {
+              responseTime: 20,
+            },
+          },
+          headers: {},
+          status: 300,
+        },
+        hasSomethingToReport: true,
       },
     ])
   })
@@ -85,8 +101,16 @@ describe('validateResponse', () => {
           subject: '',
           message: '',
         },
-        responseValue: 200,
-        somethingToReport: false,
+        response: {
+          config: {
+            extraData: {
+              responseTime: 20,
+            },
+          },
+          headers: {},
+          status: 200,
+        },
+        hasSomethingToReport: false,
       },
       {
         alert: {
@@ -94,8 +118,16 @@ describe('validateResponse', () => {
           subject: '',
           message: '',
         },
-        responseValue: 20,
-        somethingToReport: true,
+        response: {
+          config: {
+            extraData: {
+              responseTime: 20,
+            },
+          },
+          headers: {},
+          status: 200,
+        },
+        hasSomethingToReport: true,
       },
     ])
   })
@@ -111,8 +143,16 @@ describe('validateResponse', () => {
           subject: '',
           message: '',
         },
-        responseValue: 300,
-        somethingToReport: true,
+        response: {
+          config: {
+            extraData: {
+              responseTime: 10,
+            },
+          },
+          headers: {},
+          status: 300,
+        },
+        hasSomethingToReport: true,
       },
       {
         alert: {
@@ -120,8 +160,16 @@ describe('validateResponse', () => {
           subject: '',
           message: '',
         },
-        responseValue: 10,
-        somethingToReport: false,
+        response: {
+          config: {
+            extraData: {
+              responseTime: 10,
+            },
+          },
+          headers: {},
+          status: 300,
+        },
+        hasSomethingToReport: false,
       },
     ])
   })
@@ -137,8 +185,16 @@ describe('validateResponse', () => {
           subject: '',
           message: '',
         },
-        responseValue: 200,
-        somethingToReport: false,
+        response: {
+          config: {
+            extraData: {
+              responseTime: 10,
+            },
+          },
+          headers: {},
+          status: 200,
+        },
+        hasSomethingToReport: false,
       },
       {
         alert: {
@@ -146,8 +202,16 @@ describe('validateResponse', () => {
           subject: '',
           message: '',
         },
-        responseValue: 10,
-        somethingToReport: false,
+        response: {
+          config: {
+            extraData: {
+              responseTime: 10,
+            },
+          },
+          headers: {},
+          status: 200,
+        },
+        hasSomethingToReport: false,
       },
     ])
   })
