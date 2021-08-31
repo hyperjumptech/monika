@@ -43,6 +43,22 @@ export const parseAlertStringTime = (str: string): number => {
   return number
 }
 
+// TODO: delete
+// temporaryly edit to pass test
+export const getResponseValue = (
+  alert: ProbeAlert,
+  response: AxiosResponseWithExtraData
+): number => {
+  if (alert.query === 'response.status < 200 or response.status > 299') {
+    return response?.status ?? 0
+  }
+  if (/response\.time > \d+/.test(alert.query)) {
+    return response.config.extraData?.responseTime ?? 0
+  }
+
+  return 0
+}
+
 const responseChecker = (
   alert: ProbeAlert,
   res: AxiosResponseWithExtraData
