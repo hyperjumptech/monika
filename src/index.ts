@@ -27,6 +27,7 @@ import { Command, flags } from '@oclif/command'
 import boxen from 'boxen'
 import chalk from 'chalk'
 import cli from 'cli-ux'
+import format from 'date-fns/format'
 import fs from 'fs'
 import cron, { ScheduledTask } from 'node-cron'
 import { hostname } from 'os'
@@ -261,7 +262,7 @@ class Monika extends Command {
 
         // Stop, destroy, and clear all previous cron tasks
         scheduledTasks.forEach((task) => {
-          task.destroy()
+          task.stop()
         })
         scheduledTasks = []
 
@@ -506,9 +507,9 @@ Please refer to the Monika documentations on how to how to configure notificatio
 
     await sendNotifications(notifications, {
       subject: `Monika Status`,
-      body: `Status Update ${new Date().toUTCString()}
-      
-Host: ${getIp()} (Local), ${publicIpAddress} (Public), ${hostname()} (Hostname)
+      body: `Status Update ${format(new Date(), 'yyyy-MM-dd HH:mm:ss XXX')}
+
+Host: ${hostname()} (${[publicIpAddress, getIp()].filter(Boolean).join('/')})
 Number of probes: ${summary.numberOfProbes}
 Average response time: ${summary.averageResponseTime} ms in the last 24 hours
 Incidents: ${summary.numberOfIncidents} in the last 24 hours
@@ -517,7 +518,7 @@ Notifications: ${summary.numberOfSentNotifications}`,
       summary: `There are ${summary.numberOfIncidents} incidents and ${summary.numberOfRecoveries} recoveries in the last 24 hours.`,
       meta: {
         type: 'status-update' as const,
-        time: new Date().toUTCString(),
+        time: format(new Date(), 'yyyy-MM-dd HH:mm:ss XXX'),
         hostname: hostname(),
         privateIpAddress: getIp(),
         publicIpAddress,
