@@ -38,20 +38,21 @@ const EventEmitter = getEventEmitter()
 
 /**
  * getStatusColor colorizes different statusCode
- * @param {number} statusCode is the httpStatus to colorize
+ * @param {any} responseCode is the httpStatus to colorize
  * @returns {string} color code based on chalk: Chalk & { supportsColor: ColorSupport };
  */
-export function getStatusColor(statusCode: number) {
-  switch (Math.trunc(statusCode / 100)) {
+export function getStatusColor(responseCode: number) {
+  switch (Math.trunc(responseCode / 100)) {
     case 2:
       return 'cyan'
     case 4:
       return 'orange'
-    case 5:
+    case 5: // all 5xx errrors
+    case 0: // 0 is uri not found
       return 'red'
-    default:
-      return 'white'
   }
+
+  return 'white'
 }
 
 /**
@@ -86,6 +87,19 @@ export function probeBuildLog({
   if (alerts?.length) {
     mLog.alert.flag = 'alert'
     mLog.alert.message = alerts.map((alert) => alert.query)
+  }
+
+  // specific alerts/notif for http status codes
+  switch (mLog.responseCode) {
+    case 0:
+      mLog.alert.flag = 'alert'
+      mLog.alert.message = ['URI not found']
+      break
+    case 599:
+      mLog.alert.flag = 'alert'
+      mLog.alert.message = ['Request Timed out']
+      break
+    default:
   }
 
   if (error?.length) log.error('probe error: ', error)
@@ -171,7 +185,6 @@ export function setNotification(
  * @param {object} flag: type of alert message, ex: not-2xx
  * @param {LogObject} mLog is the log object being updated
  * @returns {LogObject} mLog returned again after being updated
- *
  */
 export function setAlert(
   {
