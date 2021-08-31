@@ -47,7 +47,7 @@ const responseInterceptor = (axiosResponse: AxiosResponseWithExtraData) => {
   return data
 }
 
-export const request = async (config: RequestConfig) => {
+export const executeRequest = async (config: RequestConfig) => {
   const axiosInstance = axios.create()
   axiosInstance.interceptors.request.use(
     (axiosRequestConfig: AxiosRequestConfigWithExtraData) => {

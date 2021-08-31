@@ -125,12 +125,10 @@ export async function doProbe(
       probeRes,
       totalRequests,
       validatedResp: validatedRes,
-      incidentThreshold: probe.incidentThreshold,
-      recoveryThreshold: probe.recoveryThreshold,
       mLog,
     })
 
-    // Done processing results, emit RESULT_READY
+    // Done processing results, check if need to send out alerts
     EventEmitter.emit(
       PROBE_ALERTS_READY,
       {
