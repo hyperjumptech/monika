@@ -33,6 +33,7 @@ import validateResponse, {
   ValidateResponse,
 } from '../plugins/validate-response'
 import { getEventEmitter } from '../utils/events'
+import { log } from '../utils/pino'
 import events from '.'
 
 const eventEmitter = getEventEmitter()
@@ -85,6 +86,12 @@ function workerMessageHandler(workerData: any) {
 
     // done one request, is there another
     totalRequests += 1
+
+    log.info(
+      `id:${probe.id} ${response.status} ${response.requestMethod} ${
+        response.requestURL
+      } ${response.config.extraData?.responseTime ?? 0}ms`
+    )
   })
 
   // done probing, got some result, process it, check for thresholds and notifications
@@ -113,7 +120,13 @@ eventEmitter.on(
   (probes: Probe[], notifications: Notification[]) => {
     const root = false
     const jobs = convertToBreeJobs(probes, notifications)
-    const bree = new Bree({ root, jobs, workerMessageHandler })
+    const bree = new Bree({
+      root,
+      jobs,
+      workerMessageHandler,
+      // disable worker created and worker deleted log
+      logger: { info: () => false },
+    })
 
     bree.start()
   }

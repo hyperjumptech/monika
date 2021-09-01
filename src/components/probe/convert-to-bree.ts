@@ -52,7 +52,7 @@ async function probeWorker() {
       const responseInterceptor = (
         axiosResponse: AxiosResponseWithExtraData
       ) => {
-        const start = axiosResponse?.config.extraData?.requestStartedAt!
+        const start = axiosResponse?.config?.extraData?.requestStartedAt!
         const responseTime = new Date().getTime() - start
 
         const data = {
@@ -147,7 +147,7 @@ async function probeWorker() {
           statusText: 'ERROR',
           headers: error?.response?.headers || '',
           // get the response from error.config instead of error.response.xxx as the response data lives in the data.config space
-          config: { ...error.config, extraData: error.config.extraData },
+          config: { ...error.config, extraData: error.config?.extraData },
         }
       }
     }
@@ -173,11 +173,12 @@ async function probeWorker() {
 
       return {
         requestURL: request.url,
+        requestMethod: request.method,
         data: response.data,
         headers: response.headers,
         config: {
           extraData: {
-            responseTime: response.config.extraData?.responseTime,
+            responseTime: response.config?.extraData?.responseTime,
           },
         },
         status: response.status,
