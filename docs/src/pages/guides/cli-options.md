@@ -146,11 +146,13 @@ monika -r 3 -i 1,3,1
 
 ## STUN
 
-By default monika will continuously checking the STUN server in 20 seconds interval. You can specify the number of interval using `-s` or `--stun` flags followed by a number. For example to set the interval to 10 seconds type the command below:
+By default monika will continuously checking the [STUN](https://en.wikipedia.org/wiki/STUN) server in 20 seconds interval. You can specify the number of interval using `-s` or `--stun` flags followed by a number in seconds. For example to set the interval to 10 seconds type the command below:
 
 ```bash
 monika -s 10
 ```
+
+If the number is zero or less, monika will not check the STUN server.
 
 ## Verbose
 
