@@ -60,18 +60,18 @@ export const resetProbeStatuses = () => {
 
 // Function to determine probe state
 const determineProbeState = ({
-  probeStatus,
+  probeStatusDetail,
   validation,
   incidentThreshold,
   recoveryThreshold,
 }: {
   errorName: string
-  probeStatus: ProbeStateDetails
+  probeStatusDetail: ProbeStateDetails
   validation: ValidateResponse
   incidentThreshold: number
   recoveryThreshold: number
 }) => {
-  const { isDown, consecutiveTrue, consecutiveFalse } = probeStatus
+  const { isDown, consecutiveTrue, consecutiveFalse } = probeStatusDetail
   const { somethingToReport } = validation
 
   if (!isDown && somethingToReport && consecutiveTrue === incidentThreshold - 1)
@@ -98,12 +98,12 @@ const determineProbeState = ({
   return PROBE_STATE.INIT
 }
 
-// Function to update probe status according to the state
+// updateProbeStatus updates probe status according to the state
 const updateProbeStatus = (
   statusDetails: ProbeStateDetails,
-  state: PROBE_STATE
+  probeState: PROBE_STATE
 ) => {
-  switch (state) {
+  switch (probeState) {
     case 'UP_FALSE':
       statusDetails = {
         ...statusDetails,
@@ -225,7 +225,7 @@ export const processThresholds = ({
         if (probeStatusDetail) {
           const state = determineProbeState({
             errorName: alert.query,
-            probeStatus: probeStatusDetail,
+            probeStatusDetail: probeStatusDetail,
             validation,
             incidentThreshold,
             recoveryThreshold,
@@ -241,7 +241,14 @@ export const processThresholds = ({
         results.push(updatedStatus)
 
         if (validation.somethingToReport === true) {
-          setAlert({ flag: 'ALERT', message: updatedStatus.alertQuery }, mLog)
+          // set alert flag, concate alert message
+          setAlert(
+            {
+              flag: 'ALERT',
+              message: mLog.alert.message + ', ' + updatedStatus.alertQuery,
+            },
+            mLog
+          )
           // done probes, got some alerts & notif.. print log
           em.emit(PROBE_LOGS_BUILT, mLog)
         }

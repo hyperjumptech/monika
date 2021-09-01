@@ -125,7 +125,7 @@ export async function doProbe(
       mLog,
     })
 
-    // Done processing results, emit RESULT_READY
+    // Done processing results, check if need to send out alerts
     EventEmitter.emit(
       PROBE_ALERTS_READY,
       {

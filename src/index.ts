@@ -27,6 +27,7 @@ import { Command, flags } from '@oclif/command'
 import boxen from 'boxen'
 import chalk from 'chalk'
 import cli from 'cli-ux'
+import format from 'date-fns/format'
 import fs from 'fs'
 import cron, { ScheduledTask } from 'node-cron'
 import { hostname } from 'os'
@@ -507,7 +508,7 @@ Please refer to the Monika documentations on how to how to configure notificatio
 
     await sendNotifications(notifications, {
       subject: `Monika Status`,
-      body: `Status Update ${new Date().toUTCString()}
+      body: `Status Update ${format(new Date(), 'yyyy-MM-dd HH:mm:ss XXX')}
 
 Host: ${hostname()} (${[publicIpAddress, getIp()].filter(Boolean).join('/')})
 Number of probes: ${summary.numberOfProbes}
@@ -518,7 +519,7 @@ Notifications: ${summary.numberOfSentNotifications}`,
       summary: `There are ${summary.numberOfIncidents} incidents and ${summary.numberOfRecoveries} recoveries in the last 24 hours.`,
       meta: {
         type: 'status-update' as const,
-        time: new Date().toUTCString(),
+        time: format(new Date(), 'yyyy-MM-dd HH:mm:ss XXX'),
         hostname: hostname(),
         privateIpAddress: getIp(),
         publicIpAddress,
