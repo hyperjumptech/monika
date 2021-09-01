@@ -133,11 +133,8 @@ function loopProbe(
   const probeInterval = setInterval(() => {
     if (counter === repeats) {
       clearInterval(probeInterval)
-    } else {
-      // eslint-disable-next-line no-lonely-if
-      if (isConnectedToSTUNServer) {
-        doProbe(++counter, probe, notifications)
-      }
+    } else if (isConnectedToSTUNServer) {
+      doProbe(++counter, probe, notifications)
     }
   }, (probe.interval ?? 10) * MILLISECONDS)
 
