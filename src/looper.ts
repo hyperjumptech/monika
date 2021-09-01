@@ -103,13 +103,19 @@ export function isIDValid(config: Config, ids: string): boolean {
   return true
 }
 
-export function loopCheckSTUNServer(interval: number) {
-  const checkSTUNinterval = setInterval(async () => {
-    await getPublicIp()
-  }, interval * MILLISECONDS)
+export async function loopCheckSTUNServer(interval: number) {
+  let checkSTUNinterval
+  if (interval <= 0) {
+    // need to check 1 time only to get public IP
+    checkSTUNinterval = await getPublicIp()
+  } else {
+    checkSTUNinterval = setInterval(async () => {
+      await getPublicIp()
+    }, interval * MILLISECONDS)
 
-  if (process.env.CI || process.env.NODE_ENV === 'test') {
-    clearInterval(checkSTUNinterval)
+    if (process.env.CI || process.env.NODE_ENV === 'test') {
+      clearInterval(checkSTUNinterval)
+    }
   }
 
   return checkSTUNinterval
