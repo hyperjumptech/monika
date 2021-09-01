@@ -152,7 +152,7 @@ By default monika will continuously checking the [STUN](https://en.wikipedia.org
 monika -s 10
 ```
 
-If the number is zero or less, monika will not check the STUN server.
+If the number is zero or less, monika will check the STUN server just once, not repeteadly, to get public IP.
 
 ## Verbose
 
