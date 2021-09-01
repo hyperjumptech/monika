@@ -86,11 +86,16 @@ export async function probing(
 
         case 'ENOTFOUND':
           errResponseCode = 0 // not found, the abyss never returned a statusCode
-          errText = 'NOTFOUND'
+          errText = 'NOTFOUND' // assign some unique errResponseCode for decoding later.
+          break
+
+        case 'ECONNRESET':
+          errResponseCode = 1 // connection reset from target, assign some unique number responsecCode
+          errText = 'ECONNRESET'
           break
 
         default:
-          errResponseCode = 991
+          errResponseCode = 991 // unknown error, set some wierd response code
           errText = 'unknown error'
       }
       errData = ''
