@@ -56,6 +56,8 @@ export function getMessageForAlert({
     alert: ProbeAlert,
     response: AxiosResponseWithExtraData
   ) => {
+    if (!alert.message) return ''
+
     return Handlebars.compile(alert.message)({
       response: {
         size: Number(response.headers['content-length']),
