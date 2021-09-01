@@ -169,10 +169,11 @@ class Monika extends Command {
       multiple: false,
     }),
 
-    stun: flags.string({
+    stun: flags.integer({
       char: 's', // (s)stun
       description: 'interval in seconds to check STUN server',
       multiple: false,
+      default: 20,
     }),
 
     id: flags.string({
@@ -212,7 +213,7 @@ class Monika extends Command {
       return
     }
 
-    loopCheckSTUNServer(Number(flags.stun)) // check if connected to STUN Server and getting the public IP in the same time
+    loopCheckSTUNServer(flags.stun) // check if connected to STUN Server and getting the public IP in the same time
     await openLogfile()
 
     if (flags.logs) {
