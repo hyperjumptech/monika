@@ -40,6 +40,7 @@ import {
   WebhookData,
   WhatsappData,
 } from '../../src/interfaces/data'
+import { AxiosResponseWithExtraData } from '../../src/interfaces/request'
 
 describe('send alerts', () => {
   afterEach(() => {
@@ -51,8 +52,16 @@ describe('send alerts', () => {
     await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', subject: '', message: '' },
-        somethingToReport: false,
-        responseValue: 200,
+        hasSomethingToReport: false,
+        response: {
+          status: 500,
+          config: {
+            extraData: {
+              responseTime: 0,
+            },
+          },
+          headers: {},
+        } as AxiosResponseWithExtraData,
       },
       notifications: [
         {
@@ -67,7 +76,6 @@ describe('send alerts', () => {
       ],
       url: 'https://hyperjump.tech',
       probeState: 'UP',
-      incidentThreshold: 3,
     })
     expect(mailgun.sendMailgun).to.have.been.called.exactly(1)
   })
@@ -77,8 +85,16 @@ describe('send alerts', () => {
     await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', subject: '', message: '' },
-        somethingToReport: true,
-        responseValue: 500,
+        hasSomethingToReport: true,
+        response: {
+          status: 500,
+          config: {
+            extraData: {
+              responseTime: 0,
+            },
+          },
+          headers: {},
+        } as AxiosResponseWithExtraData,
       },
       notifications: [
         {
@@ -93,7 +109,6 @@ describe('send alerts', () => {
       ],
       url: 'https://hyperjump.tech',
       probeState: 'DOWN',
-      incidentThreshold: 3,
     })
     expect(mailgun.sendMailgun).to.have.been.called.exactly(1)
   })
@@ -103,8 +118,16 @@ describe('send alerts', () => {
     await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', subject: '', message: '' },
-        somethingToReport: true,
-        responseValue: 500,
+        hasSomethingToReport: true,
+        response: {
+          status: 500,
+          config: {
+            extraData: {
+              responseTime: 0,
+            },
+          },
+          headers: {},
+        } as AxiosResponseWithExtraData,
       },
       notifications: [
         {
@@ -120,7 +143,6 @@ describe('send alerts', () => {
       ],
       url: 'https://hyperjump.tech',
       probeState: 'DOWN',
-      incidentThreshold: 3,
     })
     expect(mailgun.sendMailgun).to.have.been.called.exactly(1)
   })
@@ -130,8 +152,16 @@ describe('send alerts', () => {
     await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', subject: '', message: '' },
-        somethingToReport: true,
-        responseValue: 500,
+        hasSomethingToReport: true,
+        response: {
+          status: 500,
+          config: {
+            extraData: {
+              responseTime: 0,
+            },
+          },
+          headers: {},
+        } as AxiosResponseWithExtraData,
       },
       notifications: [
         {
@@ -146,7 +176,6 @@ describe('send alerts', () => {
       ],
       url: 'https://hyperjump.tech',
       probeState: 'DOWN',
-      incidentThreshold: 3,
     })
     expect(mailgun.sendMailgun).to.have.been.called.exactly(1)
   })
@@ -158,8 +187,16 @@ describe('send alerts', () => {
     await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', subject: '', message: '' },
-        somethingToReport: true,
-        responseValue: 500,
+        hasSomethingToReport: true,
+        response: {
+          status: 500,
+          config: {
+            extraData: {
+              responseTime: 0,
+            },
+          },
+          headers: {},
+        } as AxiosResponseWithExtraData,
       },
       notifications: [
         {
@@ -179,7 +216,6 @@ describe('send alerts', () => {
       ],
       url: 'https://hyperjump.tech',
       probeState: 'DOWN',
-      incidentThreshold: 3,
     })
 
     expect(webhook.sendWebhook).to.have.been.called.exactly(1)
@@ -191,8 +227,16 @@ describe('send alerts', () => {
     await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', subject: '', message: '' },
-        somethingToReport: true,
-        responseValue: 500,
+        hasSomethingToReport: true,
+        response: {
+          status: 500,
+          config: {
+            extraData: {
+              responseTime: 0,
+            },
+          },
+          headers: {},
+        } as AxiosResponseWithExtraData,
       },
       notifications: [
         {
@@ -209,7 +253,6 @@ describe('send alerts', () => {
       ],
       url: 'https://hyperjump.tech',
       probeState: 'DOWN',
-      incidentThreshold: 3,
     })
     expect(smtp.sendSmtpMail).to.have.been.called.exactly(1)
   })
@@ -220,8 +263,16 @@ describe('send alerts', () => {
     await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', subject: '', message: '' },
-        somethingToReport: true,
-        responseValue: 500,
+        hasSomethingToReport: true,
+        response: {
+          status: 500,
+          config: {
+            extraData: {
+              responseTime: 0,
+            },
+          },
+          headers: {},
+        } as AxiosResponseWithExtraData,
       },
       notifications: [
         {
@@ -237,7 +288,6 @@ describe('send alerts', () => {
       ],
       url: 'https://hyperjump.tech',
       probeState: 'DOWN',
-      incidentThreshold: 3,
     })
 
     expect(whatsapp.sendWhatsapp).to.have.been.called.exactly(1)
@@ -267,8 +317,16 @@ describe('send alerts', () => {
     await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', subject: '', message: '' },
-        somethingToReport: true,
-        responseValue: 500,
+        hasSomethingToReport: true,
+        response: {
+          status: 500,
+          config: {
+            extraData: {
+              responseTime: 0,
+            },
+          },
+          headers: {},
+        } as AxiosResponseWithExtraData,
       },
       notifications: [
         {
@@ -283,7 +341,6 @@ describe('send alerts', () => {
       ],
       url: 'https://hyperjump.tech',
       probeState: 'DOWN',
-      incidentThreshold: 3,
     })
 
     expect(telegram.sendTelegram).to.have.been.called.exactly(1)
@@ -295,8 +352,16 @@ describe('send alerts', () => {
     await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', subject: '', message: '' },
-        somethingToReport: true,
-        responseValue: 500,
+        hasSomethingToReport: true,
+        response: {
+          status: 500,
+          config: {
+            extraData: {
+              responseTime: 0,
+            },
+          },
+          headers: {},
+        } as AxiosResponseWithExtraData,
       },
       notifications: [
         {
@@ -309,7 +374,6 @@ describe('send alerts', () => {
       ],
       url: 'https://hyperjump.tech',
       probeState: 'DOWN',
-      incidentThreshold: 3,
     })
 
     expect(discord.sendDiscord).to.have.been.called.exactly(1)
@@ -321,8 +385,16 @@ describe('send alerts', () => {
     await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', subject: '', message: '' },
-        somethingToReport: true,
-        responseValue: 500,
+        hasSomethingToReport: true,
+        response: {
+          status: 500,
+          config: {
+            extraData: {
+              responseTime: 0,
+            },
+          },
+          headers: {},
+        } as AxiosResponseWithExtraData,
       },
       notifications: [
         {
@@ -335,7 +407,6 @@ describe('send alerts', () => {
       ],
       url: 'https://hyperjump.tech',
       probeState: 'DOWN',
-      incidentThreshold: 3,
     })
 
     expect(monikaNotif.sendMonikaNotif).to.have.been.called.exactly(1)

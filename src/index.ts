@@ -484,15 +484,25 @@ Please refer to the Monika documentations on how to how to configure notificatio
             'NOTIFY-TLS',
             error.message
           ).catch((err) => log.error(err.message))
+
+          // TODO: invoke sendNotifications function instead
+          // looks like the sendAlerts function does not handle this
           sendAlerts({
             url: domain,
             probeState: 'invalid',
-            incidentThreshold: probe.incidentThreshold,
             notifications: notifications ?? [],
             validation: {
               alert: { query: '', subject: '', message: '' },
-              somethingToReport: true,
-              responseValue: 0,
+              hasSomethingToReport: true,
+              response: {
+                status: 500,
+                config: {
+                  extraData: {
+                    responseTime: 0,
+                  },
+                },
+                headers: {},
+              } as AxiosResponseWithExtraData,
             },
           }).catch((err) => log.error(err.message))
         })
@@ -614,7 +624,6 @@ const probeSendNotification = async (data: ProbeSendNotification) => {
     await sendAlerts({
       url: url,
       probeState: statusString,
-      incidentThreshold: probe.incidentThreshold,
       notifications: notifications ?? [],
       validation:
         validatedResponseStatuses.find(

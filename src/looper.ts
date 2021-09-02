@@ -62,10 +62,19 @@ export function sanitizeProbe(probe: Probe, id: string): Probe {
       `Warning: Probe ${probe.id} has no recoveryThreshold configuration defined. Using the default threshold: 5`
     )
   }
-  if ((alerts?.length ?? 0) === 0) {
+  if (alerts.length === 0) {
     probe.alerts = [
-      { query: 'status-not-2xx', subject: '', message: `` },
-      { query: 'response-time-greater-than-2-s', subject: '', message: '' },
+      {
+        query: 'response.status < 200 or response.status > 299',
+        subject: '',
+        message: 'HTTP Status is {{ response.status }}, expecting 200',
+      },
+      {
+        query: 'response.time > 2000',
+        subject: '',
+        message:
+          'Response time is {{ response.time }}ms, expecting less than 2000ms',
+      },
     ]
     log.warn(
       `Warning: Probe ${probe.id} has no Alerts configuration defined. Using the default status-not-2xx and response-time-greater-than-2-s`

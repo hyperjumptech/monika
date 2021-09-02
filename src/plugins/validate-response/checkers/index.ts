@@ -24,8 +24,6 @@
 
 import { ProbeAlert } from '../../../interfaces/probe'
 import { AxiosResponseWithExtraData } from '../../../interfaces/request'
-import responseTimeGreaterThanX from './res-time-greater-than-x'
-import statusNot2xx from './status-not-2xx'
 import queryExpression from './query-expression'
 
 // parse string like "response-time-greater-than-200-ms" and return the time in ms
@@ -45,26 +43,6 @@ export const parseAlertStringTime = (str: string): number => {
   return number
 }
 
-export const getResponseValue = (
-  alert: string,
-  response: AxiosResponseWithExtraData
-): number => {
-  if (alert === 'status-not-2xx') {
-    return response?.status ?? 0
-  }
-  if (alert.startsWith('response-time-greater-than-')) {
-    return response.config.extraData?.responseTime ?? 0
-  }
-
-  return 0
-}
-
-/**
- * responseChecker checks the response against notif/alert triggers
- * @param {obj} alert contains our alerts to look for
- * @param {obj} res is the probe result
- * @returns {boolean} flag true if we have something to alert/notify
- */
 const responseChecker = (
   alert: ProbeAlert,
   res: AxiosResponseWithExtraData
@@ -72,16 +50,6 @@ const responseChecker = (
   // if status is 599 : timeout or uri is not found (0), worth reporting so return true
   if (res.status === 599 || res.status === 0) {
     return true
-  }
-
-  if (alert.query === 'status-not-2xx') {
-    return statusNot2xx(res)
-  }
-
-  if (alert.query.startsWith('response-time-greater-than-')) {
-    const alertTime = parseAlertStringTime(alert.query)
-
-    return responseTimeGreaterThanX(res, alertTime)
   }
 
   return queryExpression(res, alert.query)
