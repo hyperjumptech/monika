@@ -82,7 +82,11 @@ import validateResponse, { ValidateResponse } from './plugins/validate-response'
 import { getEventEmitter } from './utils/events'
 import getIp from './utils/ip'
 import { log } from './utils/pino'
-import { publicIpAddress } from './utils/public-ip'
+import {
+  getPublicIp,
+  publicIpAddress,
+  publicNetworkInfo,
+} from './utils/public-ip'
 
 const em = getEventEmitter()
 
@@ -280,6 +284,11 @@ class Monika extends Command {
         scheduledTasks = []
 
         if (process.env.NODE_ENV !== 'test') {
+          const machineInfo = `${
+            publicNetworkInfo && publicIpAddress
+              ? `${publicNetworkInfo.city} - ${publicNetworkInfo.isp} (${publicIpAddress}) - `
+              : ''
+          }${hostname} (${getIp()})`
           await notificationChecker(config.notifications ?? [])
         }
 

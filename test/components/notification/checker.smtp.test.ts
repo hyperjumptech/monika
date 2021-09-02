@@ -63,6 +63,28 @@ describe('notificationChecker - smtpNotification', () => {
     }
   })
 
+  it('should handle validation error - without hostname', async () => {
+    try {
+      await notificationChecker([
+        {
+          ...smtpNotificationConfig,
+          data: {
+            port: 1000,
+            username: 'username',
+            password: 'password',
+          } as SMTPData,
+        },
+      ])
+    } catch (error) {
+      const originalErrorMessage = '"SMTP Hostname" is required'
+      const { message } = errorMessage('SMTP', originalErrorMessage)
+
+      expect(() => {
+        throw error
+      }).to.throw(message)
+    }
+  })
+
   it('should handle validation error - without port', async () => {
     try {
       await notificationChecker([

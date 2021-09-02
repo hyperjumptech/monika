@@ -24,9 +24,25 @@
 
 import { log } from './pino'
 import stun from 'stun'
+import axios from 'axios'
+import { hostname } from 'os'
+import getIp from './ip'
 
 export let publicIpAddress = ''
 export let isConnectedToSTUNServer = true
+export let publicNetworkInfo: { city: string; isp: string }
+
+async function getPublicNetworkInfo() {
+  try {
+    const response = await axios.get(
+      `http://ip-api.com/json/${publicIpAddress}`
+    )
+    const { city, isp } = response.data
+    publicNetworkInfo = { city, isp }
+  } catch (error) {
+    log.info(`Failed to obtain location/ISP info`)
+  }
+}
 
 export async function getPublicIp() {
   try {
@@ -35,8 +51,13 @@ export async function getPublicIp() {
     if (address) {
       publicIpAddress = address
       isConnectedToSTUNServer = true
+      await getPublicNetworkInfo()
       log.info(
-        `Connected to STUN Server. Monika is running on Public IP ${address}`
+        `Connected to STUN Server. Monika is running from: ${
+          publicNetworkInfo
+            ? `${publicNetworkInfo.city} - ${publicNetworkInfo.isp} (${address}) - `
+            : ''
+        }${hostname} (${getIp()})`
       )
     }
   } catch (error) {
