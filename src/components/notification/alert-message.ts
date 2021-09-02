@@ -23,10 +23,11 @@
  **********************************************************************************/
 
 import { format } from 'date-fns'
+import * as Handlebars from 'handlebars'
 import { hostname } from 'os'
 import { NotificationMessage } from '../../interfaces/notification'
+import { AxiosResponseWithExtraData } from '../../interfaces/request'
 import { ProbeAlert } from '../../interfaces/probe'
-import { parseAlertStringTime } from '../../plugins/validate-response/checkers'
 import { publicIpAddress } from '../../utils/public-ip'
 
 export function getMessageForAlert({
@@ -34,16 +35,15 @@ export function getMessageForAlert({
   url,
   ipAddress,
   probeState, // state of the probed target
-  responseValue,
+  response,
 }: {
   alert: ProbeAlert
   url: string
   ipAddress: string
   probeState: string
-  incidentThreshold: number
-  responseValue: number
+  response: AxiosResponseWithExtraData
 }): NotificationMessage {
-  const getSubject = (probeState: string) => {
+  const getSubject = (alert: ProbeAlert, probeState: string) => {
     const recoveryOrIncident = probeState === 'UP' ? 'Recovery' : 'Incident'
 
     if (alert.subject)
@@ -52,17 +52,21 @@ export function getMessageForAlert({
     return `New ${recoveryOrIncident} from Monika`
   }
 
-  const getExpectedMessage = (responseValue: number) => {
-    if (alert.query === 'status-not-2xx') {
-      return `HTTP Status is ${responseValue}, expecting 200.`
-    }
+  const getExpectedMessage = (
+    alert: ProbeAlert,
+    response: AxiosResponseWithExtraData
+  ) => {
+    if (!alert.message) return ''
 
-    if (alert.query.includes('response-time-greater-than-')) {
-      const alertTime = parseAlertStringTime(alert.query)
-      return `Response time is ${responseValue}ms, expecting less than ${alertTime}ms`
-    }
-
-    return alert.message
+    return Handlebars.compile(alert.message)({
+      response: {
+        size: Number(response.headers['content-length']),
+        status: response.status,
+        time: response.config.extraData?.responseTime,
+        body: response.data,
+        headers: response.headers,
+      },
+    })
   }
 
   const getMonikaInstance = () => {
@@ -80,7 +84,7 @@ export function getMessageForAlert({
     publicIpAddress,
   }
 
-  const bodyString = `Message: ${getExpectedMessage(responseValue)}
+  const bodyString = `Message: ${getExpectedMessage(alert, response)}
 
 URL: ${meta.url}
 
@@ -89,9 +93,9 @@ Time: ${meta.time}
 From: ${getMonikaInstance()}`
 
   const message = {
-    subject: getSubject(probeState),
+    subject: getSubject(alert, probeState),
     body: bodyString,
-    summary: getExpectedMessage(responseValue),
+    summary: getExpectedMessage(alert, response),
     meta,
   }
 
