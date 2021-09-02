@@ -144,6 +144,16 @@ You can combine this flag with the `--id` flag to repeat custom sequences.
 monika -r 3 -i 1,3,1
 ```
 
+## STUN
+
+By default monika will continuously checking the [STUN](https://en.wikipedia.org/wiki/STUN) server in 20 seconds interval. You can specify the number of interval using `-s` or `--stun` flags followed by a number in seconds. For example to set the interval to 10 seconds type the command below:
+
+```bash
+monika -s 10
+```
+
+If the number is zero or less, monika will check the STUN server just once, not repeteadly, to get public IP.
+
 ## Verbose
 
 Like your app to be more chatty and honest revealing all its internal details? Use the `--verbose` flag.

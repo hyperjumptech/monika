@@ -29,6 +29,7 @@ import { doProbe } from './components/probe'
 import { log } from './utils/pino'
 import { Notification } from './interfaces/notification'
 import { getUnreportedLogsCount } from './components/logger/history'
+import { getPublicIp, isConnectedToSTUNServer } from './utils/public-ip'
 
 const MILLISECONDS = 1000
 export const DEFAULT_THRESHOLD = 5
@@ -111,6 +112,24 @@ export function isIDValid(config: Config, ids: string): boolean {
   return true
 }
 
+export async function loopCheckSTUNServer(interval: number) {
+  let checkSTUNinterval
+  if (interval <= 0) {
+    // need to check 1 time only to get public IP
+    checkSTUNinterval = await getPublicIp()
+  } else {
+    checkSTUNinterval = setInterval(async () => {
+      await getPublicIp()
+    }, interval * MILLISECONDS)
+
+    if (process.env.CI || process.env.NODE_ENV === 'test') {
+      clearInterval(checkSTUNinterval)
+    }
+  }
+
+  return checkSTUNinterval
+}
+
 /**
  * loopProbes fires off the probe requests after every x interval, and handles repeats.
  * This function receives the probe id from idFeeder.
@@ -129,7 +148,7 @@ function loopProbe(
   const probeInterval = setInterval(() => {
     if (counter === repeats) {
       clearInterval(probeInterval)
-    } else {
+    } else if (isConnectedToSTUNServer) {
       doProbe(++counter, probe, notifications)
     }
   }, (probe.interval ?? 10) * MILLISECONDS)
