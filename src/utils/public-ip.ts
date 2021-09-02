@@ -32,7 +32,7 @@ export let publicIpAddress = ''
 export let isConnectedToSTUNServer = true
 export let publicNetworkInfo: { city: string; isp: string }
 
-async function getPublicNetworkInfo() {
+export async function getPublicNetworkInfo() {
   try {
     const response = await axios.get(
       `http://ip-api.com/json/${publicIpAddress}`
@@ -51,13 +51,12 @@ export async function getPublicIp() {
     if (address) {
       publicIpAddress = address
       isConnectedToSTUNServer = true
-      await getPublicNetworkInfo()
       log.info(
         `Connected to STUN Server. Monika is running from: ${
-          publicNetworkInfo
-            ? `${publicNetworkInfo.city} - ${publicNetworkInfo.isp} (${address}) - `
-            : ''
-        }${hostname} (${getIp()})`
+          publicNetworkInfo.city
+        } - ${
+          publicNetworkInfo.isp
+        } (${publicIpAddress}) - ${hostname()} (${getIp()})`
       )
     }
   } catch (error) {

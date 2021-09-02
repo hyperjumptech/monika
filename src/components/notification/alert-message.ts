@@ -28,7 +28,7 @@ import { hostname } from 'os'
 import { NotificationMessage } from '../../interfaces/notification'
 import { AxiosResponseWithExtraData } from '../../interfaces/request'
 import { ProbeAlert } from '../../interfaces/probe'
-import { publicIpAddress, publicNetworkInfo } from '../../utils/public-ip'
+import { publicIpAddress } from '../../utils/public-ip'
 
 export function getMessageForAlert({
   alert,
