@@ -94,8 +94,13 @@ export async function probing(
           errText = 'ECONNRESET'
           break
 
+        case 'ECONNREFUSED':
+          errResponseCode = 2 // got rejected, again
+          errText = 'ECONNREFUSED'
+          break
+
         default:
-          errResponseCode = 991 // unknown error, set some wierd response code
+          errResponseCode = error.code // just return the error code
           errText = 'unknown error'
       }
       errData = ''
