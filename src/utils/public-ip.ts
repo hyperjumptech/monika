@@ -49,7 +49,7 @@ export async function getPublicNetworkInfo() {
       } (${ip}) - ${hostname()} (${getIp()})`
     )
   } catch (error) {
-    log.info(`Failed to obtain location/ISP info`)
+    log.error(`Failed to obtain location/ISP info`)
   }
 }
 
@@ -63,6 +63,6 @@ export async function getPublicIp() {
     }
   } catch (error) {
     isConnectedToSTUNServer = false
-    log.info(`STUN Server is unreachable. Can't obtain Public IP`)
+    log.error(`STUN Server is unreachable. Can't obtain Public IP`)
   }
 }
