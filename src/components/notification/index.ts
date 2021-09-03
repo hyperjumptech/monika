@@ -238,13 +238,11 @@ export async function sendAlerts({
   notifications,
   url,
   probeState,
-  incidentThreshold,
 }: {
   validation: ValidateResponse
   notifications: Notification[]
   url: string
   probeState: string
-  incidentThreshold: number
 }) {
   const ipAddress = getIp()
   const message = getMessageForAlert({
@@ -252,8 +250,7 @@ export async function sendAlerts({
     url,
     ipAddress,
     probeState,
-    incidentThreshold,
-    responseValue: validation.responseValue,
+    response: validation.response,
   })
 
   return sendNotifications(notifications, message)

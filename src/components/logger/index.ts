@@ -112,12 +112,6 @@ export function probeBuildLog({
 
   if (error?.length) log.error('probe error: ', error)
 
-  for (const rq of probe.requests) {
-    if (rq?.saveBody !== true ?? undefined) {
-      probeRes.data = '' // if not saved, flush .data
-    }
-  }
-
   saveProbeRequestLog({
     probe,
     totalRequests,
