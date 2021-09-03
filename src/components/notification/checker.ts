@@ -92,6 +92,7 @@ export const notificationChecker = async (notifications: Notification[]) => {
       hostname: hostname(),
       privateIpAddress: getIp(),
       publicIpAddress,
+      machineInfo,
     },
   })
 }
