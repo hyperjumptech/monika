@@ -82,7 +82,7 @@ import validateResponse, { ValidateResponse } from './plugins/validate-response'
 import { getEventEmitter } from './utils/events'
 import getIp from './utils/ip'
 import { log } from './utils/pino'
-import { publicIpAddress } from './utils/public-ip'
+import { getPublicNetworkInfo, publicIpAddress } from './utils/public-ip'
 
 const em = getEventEmitter()
 
@@ -213,6 +213,7 @@ class Monika extends Command {
       return
     }
 
+    await getPublicNetworkInfo() // cache location & ISP info
     loopCheckSTUNServer(flags.stun) // check if connected to STUN Server and getting the public IP in the same time
     await openLogfile()
 
