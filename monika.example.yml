@@ -44,10 +44,8 @@ probes:
 #         saveBody: true
 #     alerts:
 #       - query: response.status == 500
-#         subject: response status
 #         message: response status message
 #       - query: response.time > 150
-#         subject: response time
 #         message: response time message
 #     incidentThreshold: 3
 #     recoveryThreshold: 3
@@ -68,7 +66,6 @@ probes:
 #         timeout: 6000
 #     alerts:
 #       - query: response.status == 500
-#         subject: response status
 #         message: response status message
 #     incidentThreshold: 3
 #     recoveryThreshold: 3
