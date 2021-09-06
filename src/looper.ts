@@ -67,12 +67,10 @@ export function sanitizeProbe(probe: Probe, id: string): Probe {
     probe.alerts = [
       {
         query: 'response.status < 200 or response.status > 299',
-        subject: '',
         message: 'HTTP Status is {{ response.status }}, expecting 200',
       },
       {
         query: 'response.time > 2000',
-        subject: '',
         message:
           'Response time is {{ response.time }}ms, expecting less than 2000ms',
       },
