@@ -140,6 +140,7 @@ interface NotificationIncidentRecoveryMessageMeta
 
 interface NotificationStartTerminationMessageMeta
   extends BaseNotificationMessageMeta {
+  machineInfo: string
   type: 'start' | 'termination'
 }
 

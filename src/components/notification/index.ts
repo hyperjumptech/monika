@@ -163,7 +163,9 @@ export async function sendNotifications(
             ) {
               body = {
                 type: message.meta.type,
-                ip_address: message.meta.publicIpAddress,
+                ip_address: message.meta.machineInfo
+                  ? message.meta.machineInfo
+                  : message.meta.publicIpAddress,
               }
             } else if (
               message.meta.type === 'incident' ||
