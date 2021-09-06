@@ -29,6 +29,7 @@ import { doProbe } from './components/probe'
 import { log } from './utils/pino'
 import { Notification } from './interfaces/notification'
 import { getUnreportedLogsCount } from './components/logger/history'
+import { getPublicIp, isConnectedToSTUNServer } from './utils/public-ip'
 
 const MILLISECONDS = 1000
 export const DEFAULT_THRESHOLD = 5
@@ -62,10 +63,19 @@ export function sanitizeProbe(probe: Probe, id: string): Probe {
       `Warning: Probe ${probe.id} has no recoveryThreshold configuration defined. Using the default threshold: 5`
     )
   }
-  if ((alerts?.length ?? 0) === 0) {
+  if (alerts.length === 0) {
     probe.alerts = [
-      { query: 'status-not-2xx', subject: '', message: `` },
-      { query: 'response-time-greater-than-2-s', subject: '', message: '' },
+      {
+        query: 'response.status < 200 or response.status > 299',
+        subject: '',
+        message: 'HTTP Status is {{ response.status }}, expecting 200',
+      },
+      {
+        query: 'response.time > 2000',
+        subject: '',
+        message:
+          'Response time is {{ response.time }}ms, expecting less than 2000ms',
+      },
     ]
     log.warn(
       `Warning: Probe ${probe.id} has no Alerts configuration defined. Using the default status-not-2xx and response-time-greater-than-2-s`
@@ -102,6 +112,24 @@ export function isIDValid(config: Config, ids: string): boolean {
   return true
 }
 
+export async function loopCheckSTUNServer(interval: number) {
+  let checkSTUNinterval
+  if (interval <= 0) {
+    // need to check 1 time only to get public IP
+    checkSTUNinterval = await getPublicIp()
+  } else {
+    checkSTUNinterval = setInterval(async () => {
+      await getPublicIp()
+    }, interval * MILLISECONDS)
+
+    if (process.env.CI || process.env.NODE_ENV === 'test') {
+      clearInterval(checkSTUNinterval)
+    }
+  }
+
+  return checkSTUNinterval
+}
+
 /**
  * loopProbes fires off the probe requests after every x interval, and handles repeats.
  * This function receives the probe id from idFeeder.
@@ -120,7 +148,7 @@ function loopProbe(
   const probeInterval = setInterval(() => {
     if (counter === repeats) {
       clearInterval(probeInterval)
-    } else {
+    } else if (isConnectedToSTUNServer) {
       doProbe(++counter, probe, notifications)
     }
   }, (probe.interval ?? 10) * MILLISECONDS)
