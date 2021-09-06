@@ -43,7 +43,6 @@ describe('responseChecker', () => {
       const data = responseChecker(
         {
           query: 'response.status < 200 or response.status > 299',
-          subject: '',
           message: '',
         },
         res
@@ -57,7 +56,6 @@ describe('responseChecker', () => {
       const data = responseChecker(
         {
           query: 'response.status < 200 or response.status > 299',
-          subject: '',
           message: '',
         },
         res
@@ -71,7 +69,6 @@ describe('responseChecker', () => {
       const data = responseChecker(
         {
           query: 'response.status < 200 or response.status > 299',
-          subject: '',
           message: '',
         },
         res
@@ -85,7 +82,6 @@ describe('responseChecker', () => {
       const data = responseChecker(
         {
           query: 'response.status < 200 or response.status > 299',
-          subject: '',
           message: '',
         },
         res
@@ -99,7 +95,6 @@ describe('responseChecker', () => {
       const data = responseChecker(
         {
           query: 'response.status < 200 or response.status > 299',
-          subject: '',
           message: '',
         },
         res
@@ -113,7 +108,6 @@ describe('responseChecker', () => {
       const data = responseChecker(
         {
           query: 'response.status < 200 or response.status > 299',
-          subject: '',
           message: '',
         },
         res
@@ -138,7 +132,7 @@ describe('responseChecker', () => {
     it('seconds - should handle when response time is greater than alert defined response time', () => {
       const res = generateMockedResponse(20000)
       const data = responseChecker(
-        { query: 'response.time > 10000', subject: '', message: '' },
+        { query: 'response.time > 10000', message: '' },
         res
       )
 
@@ -148,7 +142,7 @@ describe('responseChecker', () => {
     it('seconds - should handle when response time is less than alert defined response time', () => {
       const res = generateMockedResponse(10000)
       const data = responseChecker(
-        { query: 'response.time > 20000', subject: '', message: '' },
+        { query: 'response.time > 20000', message: '' },
         res
       )
 
@@ -158,7 +152,7 @@ describe('responseChecker', () => {
     it('milliseconds - should handle when response time is greater than alert defined response time', () => {
       const res = generateMockedResponse(20)
       const data = responseChecker(
-        { query: 'response.time > 10', subject: '', message: '' },
+        { query: 'response.time > 10', message: '' },
         res
       )
 
@@ -168,7 +162,7 @@ describe('responseChecker', () => {
     it('milliseconds - should handle when response time is less than alert defined response time', () => {
       const res = generateMockedResponse(10)
       const data = responseChecker(
-        { query: 'response.time > 20', subject: '', message: '' },
+        { query: 'response.time > 20', message: '' },
         res
       )
 
