@@ -35,6 +35,8 @@ const MILLISECONDS = 1000
 export const DEFAULT_THRESHOLD = 5
 const DEFAULT_REPORT_INTERVAL = 180000 // 3 minutes
 
+let probeCounter = 0
+
 /**
  * sanitizeProbe sanitize currently mapped probe name, alerts, and threshold
  * @param {object} probe is the probe configuration
@@ -112,19 +114,20 @@ export function isIDValid(config: Config, ids: string): boolean {
   return true
 }
 
-export async function loopCheckSTUNServer(interval: number) {
-  let checkSTUNinterval
-  if (interval <= 0) {
-    // need to check 1 time only to get public IP
-    checkSTUNinterval = await getPublicIp()
-  } else {
-    checkSTUNinterval = setInterval(async () => {
-      await getPublicIp()
-    }, interval * MILLISECONDS)
-
-    if (process.env.CI || process.env.NODE_ENV === 'test') {
+export async function loopCheckSTUNServer(interval: number, repeats: number) {
+  const checkSTUNinterval = setInterval(async () => {
+    if (probeCounter === repeats) {
       clearInterval(checkSTUNinterval)
+    } else if (interval <= 0) {
+      await getPublicIp()
+      clearInterval(checkSTUNinterval)
+    } else if (isConnectedToSTUNServer) {
+      await getPublicIp()
     }
+  }, interval * MILLISECONDS)
+
+  if (process.env.CI || process.env.NODE_ENV === 'test') {
+    clearInterval(checkSTUNinterval)
   }
 
   return checkSTUNinterval
@@ -143,13 +146,11 @@ function loopProbe(
   notifications: Notification[],
   repeats: number
 ) {
-  let counter = 0
-
   const probeInterval = setInterval(() => {
-    if (counter === repeats) {
+    if (probeCounter === repeats) {
       clearInterval(probeInterval)
     } else if (isConnectedToSTUNServer) {
-      doProbe(++counter, probe, notifications)
+      doProbe(++probeCounter, probe, notifications)
     }
   }, (probe.interval ?? 10) * MILLISECONDS)
 

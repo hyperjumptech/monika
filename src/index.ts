@@ -214,7 +214,7 @@ class Monika extends Command {
     }
 
     await getPublicNetworkInfo() // cache location & ISP info
-    loopCheckSTUNServer(flags.stun) // check if connected to STUN Server and getting the public IP in the same time
+    loopCheckSTUNServer(flags.stun, Number(flags.repeat)) // check if connected to STUN Server and getting the public IP in the same time
     await openLogfile()
 
     if (flags.logs) {
