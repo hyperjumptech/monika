@@ -34,6 +34,21 @@ import {
   publicNetworkInfo,
 } from '../../utils/public-ip'
 
+let monikaInstance = ''
+
+const getMonikaInstance = async (ipAddress: string) => {
+  await getPublicIp()
+  monikaInstance = `${hostname()} (${[publicIpAddress, ipAddress]
+    .filter(Boolean)
+    .join('/')})`
+
+  if (publicNetworkInfo) {
+    monikaInstance = `${publicNetworkInfo.city} - ${
+      publicNetworkInfo.isp
+    } (${publicIpAddress}) - ${hostname()} (${ipAddress})`
+  }
+}
+
 export async function getMessageForAlert({
   alert,
   url,
@@ -73,17 +88,6 @@ export async function getMessageForAlert({
     })
   }
 
-  await getPublicIp()
-  let monikaInstance = `${hostname()} (${[publicIpAddress, ipAddress]
-    .filter(Boolean)
-    .join('/')})`
-
-  if (publicNetworkInfo) {
-    monikaInstance = `${publicNetworkInfo.city} - ${
-      publicNetworkInfo.isp
-    } (${publicIpAddress}) - ${hostname()} (${ipAddress})`
-  }
-
   const meta = {
     type: probeState === 'UP' ? ('recovery' as const) : ('incident' as const),
     url,
@@ -91,6 +95,11 @@ export async function getMessageForAlert({
     hostname: hostname(),
     privateIpAddress: ipAddress,
     publicIpAddress,
+    monikaInstance,
+  }
+
+  if (monikaInstance.length === 0) {
+    await getMonikaInstance(ipAddress)
   }
 
   const bodyString = `Message: ${getExpectedMessage(alert, response)}
@@ -109,4 +118,48 @@ From: ${monikaInstance}`
   }
 
   return message
+}
+
+export const getMessageForStart = async (
+  hostname: string,
+  ip: string
+): Promise<NotificationMessage> => {
+  if (monikaInstance.length === 0) {
+    await getMonikaInstance(ip)
+  }
+
+  return {
+    subject: 'Monika is started',
+    body: `Monika is running on ${monikaInstance}`,
+    summary: `Monika is running on ${monikaInstance}`,
+    meta: {
+      type: 'start',
+      time: new Date().toUTCString(),
+      hostname: hostname,
+      privateIpAddress: ip,
+      publicIpAddress,
+    },
+  }
+}
+
+export const getMessageForTerminate = async (
+  hostname: string,
+  ip: string
+): Promise<NotificationMessage> => {
+  if (monikaInstance.length === 0) {
+    await getMonikaInstance(ip)
+  }
+
+  return {
+    subject: 'Monika terminated',
+    body: `Monika is no longer running in ${monikaInstance}`,
+    summary: `Monika is no longer running in ${monikaInstance}`,
+    meta: {
+      type: 'termination',
+      time: new Date().toUTCString(),
+      hostname: hostname,
+      privateIpAddress: ip,
+      publicIpAddress,
+    },
+  }
 }

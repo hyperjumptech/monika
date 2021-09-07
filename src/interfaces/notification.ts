@@ -131,6 +131,7 @@ interface BaseNotificationMessageMeta {
   privateIpAddress: string
   publicIpAddress: string
   [key: string]: unknown
+  monikaInstance?: any
 }
 interface NotificationIncidentRecoveryMessageMeta
   extends BaseNotificationMessageMeta {

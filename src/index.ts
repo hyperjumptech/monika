@@ -50,6 +50,7 @@ import {
   saveNotificationLog,
 } from './components/logger/history'
 import { sendAlerts, sendNotifications } from './components/notification'
+import { getMessageForTerminate } from './components/notification/alert-message'
 import { notificationChecker } from './components/notification/checker'
 import { resetProbeStatuses } from './components/notification/process-server-status'
 import { getLogsAndReport } from './components/reporter'
@@ -296,7 +297,6 @@ class Monika extends Command {
         let probesToRun = config.probes
         if (flags.id) {
           if (!isIDValid(config, flags.id)) {
-            em.emit('TERMINATE_EVENT', 'Monika is terminating')
             throw new Error('Input error') // can't continue, exit from app
           }
           // doing custom sequences if list of ids is declared
@@ -532,13 +532,16 @@ Please refer to the Monika documentations on how to how to configure notificatio
     await sendNotifications(notifications, {
       subject: `Monika Status`,
       body: `Status Update ${format(new Date(), 'yyyy-MM-dd HH:mm:ss XXX')}
-
-Host: ${hostname()} (${[publicIpAddress, getIp()].filter(Boolean).join('/')})
-Number of probes: ${summary.numberOfProbes}
-Average response time: ${summary.averageResponseTime} ms in the last 24 hours
-Incidents: ${summary.numberOfIncidents} in the last 24 hours
-Recoveries: ${summary.numberOfRecoveries} in the last 24 hours
-Notifications: ${summary.numberOfSentNotifications}`,
+            Host: ${hostname()} (${[publicIpAddress, getIp()]
+        .filter(Boolean)
+        .join('/')})
+            Number of probes: ${summary.numberOfProbes}
+            Average response time: ${
+              summary.averageResponseTime
+            } ms in the last 24 hours
+            Incidents: ${summary.numberOfIncidents} in the last 24 hours
+            Recoveries: ${summary.numberOfRecoveries} in the last 24 hours
+            Notifications: ${summary.numberOfSentNotifications}`,
       summary: `There are ${summary.numberOfIncidents} incidents and ${summary.numberOfRecoveries} recoveries in the last 24 hours.`,
       meta: {
         type: 'status-update' as const,
@@ -551,26 +554,6 @@ Notifications: ${summary.numberOfSentNotifications}`,
     })
   }
 }
-
-// Subscribe FirstEvent
-em.addListener('TERMINATE_EVENT', async (data) => {
-  log.warn(data)
-  const config = getConfig()
-  if (process.env.NODE_ENV !== 'test') {
-    await sendNotifications(config.notifications ?? [], {
-      subject: 'Monika terminated',
-      body: `Monika is no longer running in ${publicIpAddress}`,
-      summary: `Monika is no longer running in ${publicIpAddress}`,
-      meta: {
-        type: 'termination',
-        time: new Date().toUTCString(),
-        hostname: hostname(),
-        privateIpAddress: getIp(),
-        publicIpAddress,
-      },
-    })
-  }
-})
 
 // Subscribe to Sanitize Config
 em.addListener(CONFIG_SANITIZED, function () {
@@ -721,7 +704,7 @@ em.on(
 /**
  * Show Exit Message
  */
-process.on('SIGINT', () => {
+process.on('SIGINT', async () => {
   if (!process.env.DISABLE_EXIT_MESSAGE) {
     log.info('Thank you for using Monika!')
     log.info('We need your help to make Monika better.')
@@ -729,7 +712,12 @@ process.on('SIGINT', () => {
       'Can you give us some feedback by clicking this link https://github.com/hyperjumptech/monika/discussions?\n'
     )
   }
-  em.emit('TERMINATE_EVENT', 'Monika is terminating')
+
+  if (process.env.NODE_ENV !== 'test') {
+    const message = await getMessageForTerminate(hostname(), getIp())
+    await sendNotifications(getConfig().notifications ?? [], message)
+  }
+
   process.exit(process.exitCode)
 })
 
