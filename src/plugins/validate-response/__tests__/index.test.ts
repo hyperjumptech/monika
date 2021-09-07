@@ -30,10 +30,9 @@ describe('validateResponse', () => {
   const mockedAlerts = [
     {
       query: 'response.status < 200 or response.status > 299',
-      subject: '',
       message: '',
     },
-    { query: 'response.time > 10', subject: '', message: '' },
+    { query: 'response.time > 10', message: '' },
   ]
 
   const generateMockedResponse = (status: number, responseTime: number) => {
@@ -56,7 +55,6 @@ describe('validateResponse', () => {
       {
         alert: {
           query: 'response.status < 200 or response.status > 299',
-          subject: '',
           message: '',
         },
         hasSomethingToReport: true,
@@ -73,7 +71,6 @@ describe('validateResponse', () => {
       {
         alert: {
           query: 'response.time > 10',
-          subject: '',
           message: '',
         },
         response: {
@@ -98,7 +95,6 @@ describe('validateResponse', () => {
       {
         alert: {
           query: 'response.status < 200 or response.status > 299',
-          subject: '',
           message: '',
         },
         response: {
@@ -115,7 +111,6 @@ describe('validateResponse', () => {
       {
         alert: {
           query: 'response.time > 10',
-          subject: '',
           message: '',
         },
         response: {
@@ -140,7 +135,6 @@ describe('validateResponse', () => {
       {
         alert: {
           query: 'response.status < 200 or response.status > 299',
-          subject: '',
           message: '',
         },
         response: {
@@ -157,7 +151,6 @@ describe('validateResponse', () => {
       {
         alert: {
           query: 'response.time > 10',
-          subject: '',
           message: '',
         },
         response: {
@@ -182,7 +175,6 @@ describe('validateResponse', () => {
       {
         alert: {
           query: 'response.status < 200 or response.status > 299',
-          subject: '',
           message: '',
         },
         response: {
@@ -199,7 +191,6 @@ describe('validateResponse', () => {
       {
         alert: {
           query: 'response.time > 10',
-          subject: '',
           message: '',
         },
         response: {

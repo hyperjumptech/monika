@@ -51,7 +51,7 @@ describe('send alerts', () => {
     chai.spy.on(mailgun, 'sendMailgun', () => Promise.resolve())
     await sendAlerts({
       validation: {
-        alert: { query: 'status-not-2xx', subject: '', message: '' },
+        alert: { query: 'status-not-2xx', message: '' },
         hasSomethingToReport: false,
         response: {
           status: 500,
@@ -84,7 +84,7 @@ describe('send alerts', () => {
     chai.spy.on(mailgun, 'sendMailgun', () => Promise.resolve())
     await sendAlerts({
       validation: {
-        alert: { query: 'status-not-2xx', subject: '', message: '' },
+        alert: { query: 'status-not-2xx', message: '' },
         hasSomethingToReport: true,
         response: {
           status: 500,
@@ -117,7 +117,7 @@ describe('send alerts', () => {
     chai.spy.on(mailgun, 'sendMailgun', () => Promise.resolve())
     await sendAlerts({
       validation: {
-        alert: { query: 'status-not-2xx', subject: '', message: '' },
+        alert: { query: 'status-not-2xx', message: '' },
         hasSomethingToReport: true,
         response: {
           status: 500,
@@ -151,7 +151,7 @@ describe('send alerts', () => {
     chai.spy.on(mailgun, 'sendMailgun', () => Promise.resolve())
     await sendAlerts({
       validation: {
-        alert: { query: 'status-not-2xx', subject: '', message: '' },
+        alert: { query: 'status-not-2xx', message: '' },
         hasSomethingToReport: true,
         response: {
           status: 500,
@@ -186,7 +186,7 @@ describe('send alerts', () => {
 
     await sendAlerts({
       validation: {
-        alert: { query: 'status-not-2xx', subject: '', message: '' },
+        alert: { query: 'status-not-2xx', message: '' },
         hasSomethingToReport: true,
         response: {
           status: 500,
@@ -226,7 +226,7 @@ describe('send alerts', () => {
     chai.spy.on(smtp, 'sendSmtpMail', () => Promise.resolve())
     await sendAlerts({
       validation: {
-        alert: { query: 'status-not-2xx', subject: '', message: '' },
+        alert: { query: 'status-not-2xx', message: '' },
         hasSomethingToReport: true,
         response: {
           status: 500,
@@ -262,7 +262,7 @@ describe('send alerts', () => {
 
     await sendAlerts({
       validation: {
-        alert: { query: 'status-not-2xx', subject: '', message: '' },
+        alert: { query: 'status-not-2xx', message: '' },
         hasSomethingToReport: true,
         response: {
           status: 500,
@@ -316,7 +316,7 @@ describe('send alerts', () => {
 
     await sendAlerts({
       validation: {
-        alert: { query: 'status-not-2xx', subject: '', message: '' },
+        alert: { query: 'status-not-2xx', message: '' },
         hasSomethingToReport: true,
         response: {
           status: 500,
@@ -351,7 +351,7 @@ describe('send alerts', () => {
 
     await sendAlerts({
       validation: {
-        alert: { query: 'status-not-2xx', subject: '', message: '' },
+        alert: { query: 'status-not-2xx', message: '' },
         hasSomethingToReport: true,
         response: {
           status: 500,
@@ -384,7 +384,7 @@ describe('send alerts', () => {
 
     await sendAlerts({
       validation: {
-        alert: { query: 'status-not-2xx', subject: '', message: '' },
+        alert: { query: 'status-not-2xx', message: '' },
         hasSomethingToReport: true,
         response: {
           status: 500,

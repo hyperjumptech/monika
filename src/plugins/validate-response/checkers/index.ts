@@ -48,7 +48,7 @@ const responseChecker = (
   res: AxiosResponseWithExtraData
 ): boolean => {
   // if status is 599 : timeout or uri is not found (0), worth reporting so return true
-  if (res.status === 599 || res.status === 0) {
+  if (res.status === 599 || res.status === 0 || res.status === 1) {
     return true
   }
 

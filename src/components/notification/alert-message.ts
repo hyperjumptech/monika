@@ -62,11 +62,8 @@ export async function getMessageForAlert({
   probeState: string
   response: AxiosResponseWithExtraData
 }): Promise<NotificationMessage> {
-  const getSubject = (alert: ProbeAlert, probeState: string) => {
+  const getSubject = (probeState: string) => {
     const recoveryOrIncident = probeState === 'UP' ? 'Recovery' : 'Incident'
-
-    if (alert.subject)
-      return `[${recoveryOrIncident.toUpperCase()}] ${alert.subject}`
 
     return `New ${recoveryOrIncident} from Monika`
   }
@@ -111,7 +108,7 @@ Time: ${meta.time}
 From: ${monikaInstance}`
 
   const message = {
-    subject: getSubject(alert, probeState),
+    subject: getSubject(probeState),
     body: bodyString,
     summary: getExpectedMessage(alert, response),
     meta,

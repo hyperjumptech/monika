@@ -95,9 +95,17 @@ export function probeBuildLog({
       mLog.alert.flag = 'alert'
       mLog.alert.message = ['URI not found']
       break
+    case 1:
+      mLog.alert.flag = 'alert'
+      mLog.alert.message = ['Connection reset']
+      break
+    case 2:
+      mLog.alert.flag = 'alert'
+      mLog.alert.message = ['Connection refused']
+      break
     case 599:
       mLog.alert.flag = 'alert'
-      mLog.alert.message = ['Request Timed out']
+      mLog.alert.message = ['Request timed out']
       break
     default:
   }
