@@ -510,7 +510,7 @@ Please refer to the Monika documentations on how to how to configure notificatio
             probeState: 'invalid',
             notifications: notifications ?? [],
             validation: {
-              alert: { query: '', message: '' },
+              alert: { query: '', message: error.message },
               hasSomethingToReport: true,
               response: {
                 status: 500,
