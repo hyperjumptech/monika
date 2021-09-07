@@ -35,15 +35,22 @@ export interface ValidateResponse {
 /**
  * validateResponse will check the response against alerts. If an alert is set, and the response demands it, will setup to send alert/notification
  * @param {object} alerts is the alerts setup to trigger
- * @param {object} response is the raw response from axios
+ * @param {Array} responses is the raw responses from axios
+ * @param {number} responseIndex is the index of current response in responses array
  * @returns {object} checks which contains alert type, flag to response time
  */
 const validateResponse = (
   alerts: ProbeAlert[],
-  response: AxiosResponseWithExtraData
+  responses: AxiosResponseWithExtraData[],
+  responseIndex: number
 ): ValidateResponse[] => {
+  const response = responses[responseIndex]
   const checks = alerts.map((alert) => {
-    const hasSomethingToReport = responseChecker(alert, response)
+    const hasSomethingToReport = responseChecker(
+      alert,
+      responses,
+      responseIndex
+    )
 
     return { alert, hasSomethingToReport, response }
   })

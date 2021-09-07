@@ -85,14 +85,14 @@ export async function doProbe(
       mLog.url = request.url
       probeRes = await probing(request, responses)
 
+      // Add to an array to be accessed by another request
+      responses.push(probeRes)
+
       EventEmitter.emit(PROBE_RESPONSE_RECEIVED, {
         probe,
         requestIndex: totalRequests,
-        response: probeRes,
+        responses,
       })
-
-      // Add to an array to be accessed by another request
-      responses.push(probeRes)
 
       // done probing, got the results, build logs
       mLog = probeBuildLog({
