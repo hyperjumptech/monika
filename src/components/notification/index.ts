@@ -245,7 +245,7 @@ export async function sendAlerts({
   probeState: string
 }) {
   const ipAddress = getIp()
-  const message = getMessageForAlert({
+  const message = await getMessageForAlert({
     alert: validation.alert,
     url,
     ipAddress,

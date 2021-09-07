@@ -28,9 +28,13 @@ import { hostname } from 'os'
 import { NotificationMessage } from '../../interfaces/notification'
 import { AxiosResponseWithExtraData } from '../../interfaces/request'
 import { ProbeAlert } from '../../interfaces/probe'
-import { publicIpAddress } from '../../utils/public-ip'
+import {
+  getPublicIp,
+  publicIpAddress,
+  publicNetworkInfo,
+} from '../../utils/public-ip'
 
-export function getMessageForAlert({
+export async function getMessageForAlert({
   alert,
   url,
   ipAddress,
@@ -42,7 +46,7 @@ export function getMessageForAlert({
   ipAddress: string
   probeState: string
   response: AxiosResponseWithExtraData
-}): NotificationMessage {
+}): Promise<NotificationMessage> {
   const getSubject = (alert: ProbeAlert, probeState: string) => {
     const recoveryOrIncident = probeState === 'UP' ? 'Recovery' : 'Incident'
 
@@ -69,10 +73,15 @@ export function getMessageForAlert({
     })
   }
 
-  const getMonikaInstance = () => {
-    return `${hostname()} (${[publicIpAddress, ipAddress]
-      .filter(Boolean)
-      .join('/')})`
+  await getPublicIp()
+  let monikaInstance = `${hostname()} (${[publicIpAddress, ipAddress]
+    .filter(Boolean)
+    .join('/')})`
+
+  if (publicNetworkInfo) {
+    monikaInstance = `${publicNetworkInfo.city} - ${
+      publicNetworkInfo.isp
+    } (${publicIpAddress}) - ${hostname()} (${ipAddress})`
   }
 
   const meta = {
@@ -90,7 +99,7 @@ URL: ${meta.url}
 
 Time: ${meta.time}
 
-From: ${getMonikaInstance()}`
+From: ${monikaInstance}`
 
   const message = {
     subject: getSubject(alert, probeState),
