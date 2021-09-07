@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0] - 2021-09-07
+
+### Added
+
+- Send Monika's status periodically (#354, #363)
+- YAML file config support (#353)
+- Templating feature for alert message configuration, and improvement in handling of alert in old format (#366)
+- Secondary proof by periodically checking to STUN server (#357)
+- City and ISP information on sent notifications (#369)
+- ECONNRESET event detection (#368)
+- Detect timeout and uri not found (#358)
+- Add project and organization ID for symon configuration (#376)
+
+### Changed
+
+- alert notification message wording (#359)
+
+### Fixed
+
+- fatal error when config is updated because of wrong cron task destroy (#356)
+- whatsapp.hyperjump.tech notification (#371)
+
+### Removed
+
+- `subject` property from alert config (#374)
+
 ## [1.5.1] - 2021-08-20
 
 ## Added
