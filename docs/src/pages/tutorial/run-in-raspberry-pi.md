@@ -51,13 +51,14 @@ For now, the way to install Monika in Raspbian is to install from source code.
 
 There are two ways to get Monika in Raspbian, from archive file and via Git.
 
-- Download Monika archived installer
+- Download Monika source code archive
 
 ```bash
 cd ~
-wget https://github.com/hyperjumptech/monika/archive/refs/tags/v1.5.1.tar.gz
-tar xf v1.5.1.tar.gz
-cd monika-v1.5.1
+mkdir monika-src
+cd monika-src
+# Download latest tarball and directly extract it to current directory
+wget -c `wget -S -O - https://api.github.com/repos/hyperjumptech/monika/releases/latest | grep -o -E "https://(.*)tarball(.*)/([^\"]+)"` -O - | tar -xz --strip-components=1
 
 ```
 
@@ -65,9 +66,8 @@ cd monika-v1.5.1
 
 ```bash
 cd ~
-git clone https://github.com/hyperjumptech/monika.git
+git clone --depth 1 --branch `git -c 'versionsort.suffix=-' ls-remote --exit-code --refs --sort='version:refname' --tags https://github.com/hyperjumptech/monika.git '*.*.*' | tail -1 | cut -d'/' -f 3` https://github.com/hyperjumptech/monika.git
 cd monika/
-git checkout tags/v1.5.1 -b release-v1.5.1
 ```
 
 Looking for **other versions?** Check [here](https://github.com/hyperjumptech/monika/releases)
