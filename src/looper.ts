@@ -113,9 +113,9 @@ export function isIDValid(config: Config, ids: string): boolean {
 }
 
 export async function loopCheckSTUNServer(interval: number, repeats: number) {
-  const checkSTUNinterval = setInterval(async () => {
-    let counter = 0
+  let counter = 0
 
+  const checkSTUNinterval = setInterval(async () => {
     if (counter === repeats) {
       clearInterval(checkSTUNinterval)
     } else if (interval <= 0) {
@@ -147,9 +147,9 @@ function loopProbe(
   notifications: Notification[],
   repeats: number
 ) {
-  const probeInterval = setInterval(() => {
-    let counter = 0
+  let counter = 0
 
+  const probeInterval = setInterval(() => {
     if (counter === repeats) {
       clearInterval(probeInterval)
     } else if (isConnectedToSTUNServer) {
