@@ -35,8 +35,6 @@ const MILLISECONDS = 1000
 export const DEFAULT_THRESHOLD = 5
 const DEFAULT_REPORT_INTERVAL = 180000 // 3 minutes
 
-let probeCounter = 0
-
 /**
  * sanitizeProbe sanitize currently mapped probe name, alerts, and threshold
  * @param {object} probe is the probe configuration
@@ -116,13 +114,16 @@ export function isIDValid(config: Config, ids: string): boolean {
 
 export async function loopCheckSTUNServer(interval: number, repeats: number) {
   const checkSTUNinterval = setInterval(async () => {
-    if (probeCounter === repeats) {
+    let counter = 0
+
+    if (counter === repeats) {
       clearInterval(checkSTUNinterval)
     } else if (interval <= 0) {
       await getPublicIp()
       clearInterval(checkSTUNinterval)
-    } else if (isConnectedToSTUNServer) {
+    } else {
       await getPublicIp()
+      counter++
     }
   }, interval * MILLISECONDS)
 
@@ -147,10 +148,12 @@ function loopProbe(
   repeats: number
 ) {
   const probeInterval = setInterval(() => {
-    if (probeCounter === repeats) {
+    let counter = 0
+
+    if (counter === repeats) {
       clearInterval(probeInterval)
     } else if (isConnectedToSTUNServer) {
-      doProbe(++probeCounter, probe, notifications)
+      doProbe(++counter, probe, notifications)
     }
   }, (probe.interval ?? 10) * MILLISECONDS)
 
