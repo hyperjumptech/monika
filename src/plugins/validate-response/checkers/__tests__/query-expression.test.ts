@@ -37,7 +37,7 @@ describe('queryExpression', () => {
       },
     } as AxiosResponseWithExtraData
 
-    const result = queryExpression(res, 'response.time > 1000')
+    const result = queryExpression([res], 0, 'response.time > 1000')
 
     expect(result).to.be.false
   })
@@ -49,7 +49,7 @@ describe('queryExpression', () => {
       config: {},
     } as AxiosResponseWithExtraData
 
-    const result = queryExpression(res, 'response.status != 200')
+    const result = queryExpression([res], 0, 'response.status != 200')
 
     expect(result).to.be.false
   })
@@ -61,7 +61,7 @@ describe('queryExpression', () => {
       config: {},
     } as AxiosResponseWithExtraData
 
-    const result = queryExpression(res, 'response.size < 1000')
+    const result = queryExpression([res], 0, 'response.size < 1000')
 
     expect(result).to.be.false
   })
@@ -74,7 +74,8 @@ describe('queryExpression', () => {
     } as AxiosResponseWithExtraData
 
     const result = queryExpression(
-      res,
+      [res],
+      0,
       "response.headers['content-type'] != 'application/json'"
     )
 
@@ -92,7 +93,8 @@ describe('queryExpression', () => {
     } as AxiosResponseWithExtraData
 
     const result = queryExpression(
-      res,
+      [res],
+      0,
       "startsWith(response.body.message, 'Hello')"
     )
 
