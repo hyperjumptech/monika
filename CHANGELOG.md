@@ -12,11 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Send Monika's status periodically (#354, #363)
 - YAML file config support (#353)
 - Templating feature for alert message configuration, and improvement in handling of alert in old format (#366)
-- Secondary proof by checking to STUN server (#357)
-- City and isp information on sent notifications (#369)
+- Secondary proof by periodically checking to STUN server (#357)
+- City and ISP information on sent notifications (#369)
 - ECONNRESET event detection (#368)
 - Detect timeout and uri not found (#358)
-- Add project and organization id for symon configuration (#376)
+- Add project and organization ID for symon configuration (#376)
 
 ### Changed
 
