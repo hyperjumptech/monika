@@ -82,7 +82,11 @@ import validateResponse, { ValidateResponse } from './plugins/validate-response'
 import { getEventEmitter } from './utils/events'
 import getIp from './utils/ip'
 import { log } from './utils/pino'
-import { getPublicNetworkInfo, publicIpAddress } from './utils/public-ip'
+import {
+  getPublicNetworkInfo,
+  publicIpAddress,
+  publicNetworkInfo,
+} from './utils/public-ip'
 
 const em = getEventEmitter()
 
@@ -506,7 +510,7 @@ Please refer to the Monika documentations on how to how to configure notificatio
             probeState: 'invalid',
             notifications: notifications ?? [],
             validation: {
-              alert: { query: '', subject: '', message: '' },
+              alert: { query: '', message: '' },
               hasSomethingToReport: true,
               response: {
                 status: 500,
@@ -556,6 +560,10 @@ Notifications: ${summary.numberOfSentNotifications}`,
 em.addListener('TERMINATE_EVENT', async (data) => {
   log.warn(data)
   const config = getConfig()
+  let machineInfo = `${hostname()} (${getIp()})`
+  if (publicNetworkInfo) {
+    machineInfo = `${publicNetworkInfo.city} - ${publicNetworkInfo.isp} (${publicIpAddress}) - ${machineInfo}`
+  }
   if (process.env.NODE_ENV !== 'test') {
     await sendNotifications(config.notifications ?? [], {
       subject: 'Monika terminated',
@@ -567,6 +575,7 @@ em.addListener('TERMINATE_EVENT', async (data) => {
         hostname: hostname(),
         privateIpAddress: getIp(),
         publicIpAddress,
+        machineInfo,
       },
     })
   }
