@@ -42,12 +42,19 @@ export interface SymonConfig {
   id: string
   url: string
   key: string
+  projectID: string
+  organizationID: string
   interval?: number
 }
 
 export type SymonResponse = {
   result: string
   message: string
+}
+
+type SymonRequestLog = Omit<UnreportedRequestsLog, 'id'> & {
+  projectID: string
+  organizationID: string
 }
 
 export const handshake = (config: Config): Promise<SymonResponse> => {
@@ -79,7 +86,7 @@ export const report = ({
   instanceId: string
   configVersion: string
   data: {
-    requests: Omit<UnreportedRequestsLog, 'id'>[]
+    requests: SymonRequestLog[]
     notifications: Omit<UnreportedNotificationsLog, 'id'>[]
   }
 }): Promise<SymonResponse> => {
@@ -107,13 +114,14 @@ export const getLogsAndReport = async () => {
   const config = getConfig()
 
   if (config.symon) {
-    const { url, key, id: instanceId } = config.symon
-
+    const { url, key, id: instanceId, projectID, organizationID } = config.symon
     const limit = parseInt(process.env.MONIKA_REPORT_LIMIT || '100', 10)
 
     try {
       const unreportedLog = await getUnreportedLogs(limit)
-      const requests = unreportedLog.requests.map(({ id: _, ...rest }) => rest)
+      const requests = unreportedLog.requests.map(({ id: _, ...rest }) => {
+        return { ...rest, projectID, organizationID }
+      })
       const notifications = unreportedLog.notifications.map(
         ({ id: _, ...rest }) => rest
       )
