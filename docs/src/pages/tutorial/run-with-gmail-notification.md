@@ -1,4 +1,7 @@
-# Run Monika with GMail Notification
+---
+id: run-with-gmail-notification
+title: Run with GMail Notification
+---
 
 1. Create a `monika.json` file and fill it out with the following
 

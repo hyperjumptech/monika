@@ -1,4 +1,7 @@
-# Background Run
+---
+id: run-in-background
+title: Run Monika in Background
+---
 
 By default Monika will run in the foreground. Like other Node.js applications, there are several ways to run Monika in the background on Unix, Linux, and macOS.
 

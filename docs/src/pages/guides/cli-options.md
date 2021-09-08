@@ -1,4 +1,7 @@
-# Command Line Options
+---
+id: cli-options
+title: Command-line Options
+---
 
 Monika can be run with the single command `monika` typed into the command shell. However to fully enjoy its flexibility, there are several options and arguments that can be used.
 

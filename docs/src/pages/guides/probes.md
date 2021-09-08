@@ -1,4 +1,7 @@
-# Probes
+---
+id: probes
+title: Probes
+---
 
 Probes are the heart of the monitoring requests. Probes are arrays of request objects defined in the config file `monika.json` like so.
 

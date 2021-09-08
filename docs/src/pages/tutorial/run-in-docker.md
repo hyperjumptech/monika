@@ -1,4 +1,7 @@
-# Run in Docker
+---
+id: run-monika-in-docker
+title: Run Monika in Docker
+---
 
 Monika is available as a docker image. Paste a copy of your configuration file `monika.json` into the current directory.
 From the same directory, you can run:
