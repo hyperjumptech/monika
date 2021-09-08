@@ -25,16 +25,10 @@
 import sslChecker from 'ssl-checker'
 
 export async function checkTLS(host: any, expiryThreshold = 30) {
-  const hostIsObject = typeof host === "object" &&
-    Object.prototype.hasOwnProperty.call(host, 'domain')
-  const hostOptions = hostIsObject &&
-    Object.prototype.hasOwnProperty.call(host, 'options')
-    ? host.options : undefined
-  const domain = hostIsObject ? host.domain : host
+  const hostOptions = host?.options! ?? {}
+  const domain = host?.domain! ?? host
 
-  const { valid, validTo, daysRemaining } = hostIsObject
-    ? await sslChecker(domain, hostOptions)
-    : await sslChecker(domain)
+  const { valid, validTo, daysRemaining } = await sslChecker(domain, hostOptions)
 
   if (!valid) {
     throw new Error(`${domain} security certificate has expired at ${validTo}!`)
