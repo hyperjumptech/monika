@@ -34,6 +34,7 @@ import { getPublicIp, isConnectedToSTUNServer } from './utils/public-ip'
 const MILLISECONDS = 1000
 export const DEFAULT_THRESHOLD = 5
 const DEFAULT_REPORT_INTERVAL = 180000 // 3 minutes
+let checkSTUNinterval: NodeJS.Timeout
 
 /**
  * sanitizeProbe sanitize currently mapped probe name, alerts, and threshold
@@ -110,18 +111,12 @@ export function isIDValid(config: Config, ids: string): boolean {
   return true
 }
 
-export async function loopCheckSTUNServer(interval: number, repeats: number) {
-  let counter = 0
+export async function loopCheckSTUNServer(interval: number) {
+  checkSTUNinterval = setInterval(async () => {
+    await getPublicIp()
 
-  const checkSTUNinterval = setInterval(async () => {
-    if (counter === repeats) {
+    if (interval <= 0) {
       clearInterval(checkSTUNinterval)
-    } else if (interval <= 0) {
-      await getPublicIp()
-      clearInterval(checkSTUNinterval)
-    } else {
-      await getPublicIp()
-      counter++
     }
   }, interval * MILLISECONDS)
 
@@ -150,6 +145,7 @@ function loopProbe(
   const probeInterval = setInterval(() => {
     if (counter === repeats) {
       clearInterval(probeInterval)
+      clearInterval(checkSTUNinterval)
     } else if (isConnectedToSTUNServer) {
       doProbe(++counter, probe, notifications)
     }
