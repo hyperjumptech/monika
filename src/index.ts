@@ -598,12 +598,19 @@ interface ProbeResponseReceived {
 }
 
 // 1. PROBE_RESPONSE_READY - probing done, validate response
-em.on(PROBE_RESPONSE_RECEIVED, function (data: ProbeResponseReceived) {
-  const res = validateResponse(data.probe.alerts, data.response)
+em.on(
+  PROBE_RESPONSE_RECEIVED,
+  function ({ probe, requestIndex, response }: ProbeResponseReceived) {
+    // combine global probe alerts with individual request alert
+    const combinedAlerts = probe.alerts.concat(
+      probe.requests[requestIndex].alerts || []
+    )
+    const res = validateResponse(combinedAlerts, response)
 
-  // 2. responses processed, and validated
-  em.emit(PROBE_RESPONSE_VALIDATED, res)
-})
+    // 2. responses processed, and validated
+    em.emit(PROBE_RESPONSE_VALIDATED, res)
+  }
+)
 
 // TODO: move this to interface file?
 interface ProbeStatusProcessed {
@@ -661,7 +668,7 @@ const createNotificationLog = (
   data: ProbeSaveLogToDatabase,
   mLog: LogObject
 ): LogObject => {
-  const { index, probe, probeState, notifications } = data
+  const { probe, probeState, notifications } = data
 
   const type =
     probeState?.probeState === 'UP_TRUE_EQUALS_THRESHOLD'
@@ -671,13 +678,11 @@ const createNotificationLog = (
   if ((notifications?.length ?? 0) > 0) {
     Promise.all(
       notifications?.map((notification) => {
-        const alert = probe.alerts[index]
-
         mLog = setNotificationLog(
           {
             type,
             probe,
-            alert,
+            alertQuery: probeState?.alertQuery || '',
             notification,
           },
           mLog

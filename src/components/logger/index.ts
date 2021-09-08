@@ -132,14 +132,14 @@ export function probeBuildLog({
 export function setNotificationLog(
   {
     type,
-    alert,
+    alertQuery,
     notification,
     probe,
   }: {
     probe: Probe
     notification: Notification
     type: 'NOTIFY-INCIDENT' | 'NOTIFY-RECOVER'
-    alert: ProbeAlert
+    alertQuery: string
   },
   mLog: LogObject
 ): LogObject {
@@ -155,7 +155,7 @@ export function setNotificationLog(
 
   mLog.notification.flag = type
   mLog.notification.message[0] = msg
-  saveNotificationLog(probe, notification, type, alert.query)
+  saveNotificationLog(probe, notification, type, alertQuery)
 
   return mLog
 }

@@ -198,9 +198,20 @@ export const processThresholds = ({
   mLog: LogObject
 }) => {
   try {
-    // Get Probe ID and Name
-    const { id, name, alerts, incidentThreshold, recoveryThreshold } = probe
+    const {
+      id,
+      name,
+      requests,
+      alerts,
+      incidentThreshold,
+      recoveryThreshold,
+    } = probe
     const results: Array<ProbeStateDetails> = []
+
+    // combine global probe alerts with all individual request alerts
+    const combinedAlerts = alerts.concat(
+      ...requests.map((request) => request.alerts || [])
+    )
 
     // Initialize server status
     // This checks if there are no item in PROBE_STATUSES
@@ -209,7 +220,7 @@ export const processThresholds = ({
       (item) => item.id === id
     )
     if (isAlreadyInProbeStatus.length === 0) {
-      const initProbeStatuses = alerts.map((alert) => ({
+      const initProbeStatuses = combinedAlerts.map((alert) => ({
         ...INIT_PROBE_STATUS_DETAILS,
         alertQuery: alert.query,
       }))
