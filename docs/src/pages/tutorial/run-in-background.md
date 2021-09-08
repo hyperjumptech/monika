@@ -36,4 +36,4 @@ By default Monika will run in the foreground. Like other Node.js applications, t
   `9049.pts-0.the-server` is the name of the screen.
 
 - Then run `screen -r <name_of_the_screen>`.
-- To stop Monika, hit Ctrl+c then Ctrl+d.
+- To stop Monika, hit CTRL+C and then CTRL+D to exit/terminate Screen.

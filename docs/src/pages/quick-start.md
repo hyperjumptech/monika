@@ -7,7 +7,7 @@ At the center of Monika is a configuration file. Follow the following steps to q
 
 ## Installation
 
-You can install Monika two methods:
+There are two ways to install Monika::
 
 1. Install using [npm](https://npmjs.com) or [yarn](https://yarnpkg.com).
 
@@ -55,4 +55,4 @@ Congratulations, you have successfully run Monika in your machine!
 
 ## Next Step
 
-For advanced configuration such as configuring notifications, probes, and alerts, you can find them on the sidebar menu for more details.
+For advanced configuration such as configuring notifications, probes, and alerts, you can find them on the sidebar menu.
