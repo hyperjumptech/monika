@@ -70,8 +70,7 @@ export class PrometheusCollector {
   }
 
   collectProbeRequestMetrics(probeResult: Record<string, any>) {
-    const { probe, requestIndex, responses } = probeResult
-    const response = responses[requestIndex]
+    const { probe, requestIndex, response } = probeResult
     const { id, name, requests } = probe
     const request = requests[requestIndex]
     const { method, url } = request

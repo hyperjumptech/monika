@@ -594,16 +594,12 @@ em.addListener(PROBE_LOGS_BUILT, async (mLog: LogObject) => {
 interface ProbeResponseReceived {
   probe: Probe
   requestIndex: number
-  responses: AxiosResponseWithExtraData[]
+  response: AxiosResponseWithExtraData
 }
 
 // 1. PROBE_RESPONSE_READY - probing done, validate response
 em.on(PROBE_RESPONSE_RECEIVED, function (data: ProbeResponseReceived) {
-  const res = validateResponse(
-    data.probe.alerts,
-    data.responses,
-    data.requestIndex
-  )
+  const res = validateResponse(data.probe.alerts, data.response)
 
   // 2. responses processed, and validated
   em.emit(PROBE_RESPONSE_VALIDATED, res)

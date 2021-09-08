@@ -45,21 +45,14 @@ export const parseAlertStringTime = (str: string): number => {
 
 const responseChecker = (
   alert: ProbeAlert,
-  responses: AxiosResponseWithExtraData[],
-  responseIndex: number
+  res: AxiosResponseWithExtraData
 ): boolean => {
-  const response = responses[responseIndex]
-
   // if status is 599 : timeout or uri is not found (0), worth reporting so return true
-  if (
-    response.status === 599 ||
-    response.status === 0 ||
-    response.status === 1
-  ) {
+  if (res.status === 599 || res.status === 0 || res.status === 1) {
     return true
   }
 
-  return queryExpression(responses, responseIndex, alert.query)
+  return queryExpression(res, alert.query)
 }
 
 export default responseChecker

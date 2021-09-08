@@ -27,24 +27,18 @@ import { AxiosResponseWithExtraData } from '../../../interfaces/request'
 
 /**
  * queryExpression runs a query against probe results
- * @param {Array} responses is the axios response objects
- * @param {number} responseIndex is the index of current response in responses array
+ * @param {object} res is the axios response objet
  * @param {string} query is the query string to operate on the res object
  * @returns {boolean} true or false result of the query a
  */
-const queryExpression = (
-  responses: AxiosResponseWithExtraData[],
-  responseIndex: number,
-  query: string
-) => {
-  const response = responses[responseIndex]
+const queryExpression = (res: AxiosResponseWithExtraData, query: string) => {
   const object = {
     response: {
-      size: Number(response.headers['content-length']),
-      status: response.status,
-      time: response.config.extraData?.responseTime,
-      body: response.data,
-      headers: response.headers,
+      size: Number(res.headers['content-length']),
+      status: res.status,
+      time: res.config.extraData?.responseTime,
+      body: res.data,
+      headers: res.headers,
     },
   }
   const compiledFn = compileExpression(query, Object.keys(object))
