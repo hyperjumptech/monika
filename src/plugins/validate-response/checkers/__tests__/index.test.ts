@@ -31,13 +31,20 @@ describe('responseChecker', () => {
     const generateMockedResponse = (status: number) => {
       return {
         status,
+        headers: {},
+        config: {
+          extraData: {},
+        },
       } as AxiosResponseWithExtraData
     }
 
     it('should handle when response status is 100', () => {
       const res = generateMockedResponse(100)
       const data = responseChecker(
-        { query: 'status-not-2xx', subject: '', message: '' },
+        {
+          query: 'response.status < 200 or response.status > 299',
+          message: '',
+        },
         res
       )
 
@@ -47,7 +54,10 @@ describe('responseChecker', () => {
     it('should handle when response status is 200', () => {
       const res = generateMockedResponse(200)
       const data = responseChecker(
-        { query: 'status-not-2xx', subject: '', message: '' },
+        {
+          query: 'response.status < 200 or response.status > 299',
+          message: '',
+        },
         res
       )
 
@@ -57,7 +67,10 @@ describe('responseChecker', () => {
     it('should handle when response status is 201', () => {
       const res = generateMockedResponse(201)
       const data = responseChecker(
-        { query: 'status-not-2xx', subject: '', message: '' },
+        {
+          query: 'response.status < 200 or response.status > 299',
+          message: '',
+        },
         res
       )
 
@@ -67,7 +80,10 @@ describe('responseChecker', () => {
     it('should handle when response status is 300', () => {
       const res = generateMockedResponse(300)
       const data = responseChecker(
-        { query: 'status-not-2xx', subject: '', message: '' },
+        {
+          query: 'response.status < 200 or response.status > 299',
+          message: '',
+        },
         res
       )
 
@@ -77,7 +93,10 @@ describe('responseChecker', () => {
     it('should handle when response status is 400', () => {
       const res = generateMockedResponse(400)
       const data = responseChecker(
-        { query: 'status-not-2xx', subject: '', message: '' },
+        {
+          query: 'response.status < 200 or response.status > 299',
+          message: '',
+        },
         res
       )
 
@@ -87,7 +106,10 @@ describe('responseChecker', () => {
     it('should handle when response status is 500', () => {
       const res = generateMockedResponse(500)
       const data = responseChecker(
-        { query: 'status-not-2xx', subject: '', message: '' },
+        {
+          query: 'response.status < 200 or response.status > 299',
+          message: '',
+        },
         res
       )
 
@@ -103,13 +125,14 @@ describe('responseChecker', () => {
             responseTime, // milliseconds
           },
         },
+        headers: {},
       } as AxiosResponseWithExtraData
     }
 
     it('seconds - should handle when response time is greater than alert defined response time', () => {
       const res = generateMockedResponse(20000)
       const data = responseChecker(
-        { query: 'response-time-greater-than-10-s', subject: '', message: '' },
+        { query: 'response.time > 10000', message: '' },
         res
       )
 
@@ -119,7 +142,7 @@ describe('responseChecker', () => {
     it('seconds - should handle when response time is less than alert defined response time', () => {
       const res = generateMockedResponse(10000)
       const data = responseChecker(
-        { query: 'response-time-greater-than-20-s', subject: '', message: '' },
+        { query: 'response.time > 20000', message: '' },
         res
       )
 
@@ -129,7 +152,7 @@ describe('responseChecker', () => {
     it('milliseconds - should handle when response time is greater than alert defined response time', () => {
       const res = generateMockedResponse(20)
       const data = responseChecker(
-        { query: 'response-time-greater-than-10-ms', subject: '', message: '' },
+        { query: 'response.time > 10', message: '' },
         res
       )
 
@@ -139,7 +162,7 @@ describe('responseChecker', () => {
     it('milliseconds - should handle when response time is less than alert defined response time', () => {
       const res = generateMockedResponse(10)
       const data = responseChecker(
-        { query: 'response-time-greater-than-20-ms', subject: '', message: '' },
+        { query: 'response.time > 20', message: '' },
         res
       )
 

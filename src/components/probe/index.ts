@@ -101,7 +101,7 @@ export async function doProbe(
         totalRequests,
         probeRes,
         alerts: validatedRes
-          .filter((item) => item.somethingToReport)
+          .filter((item) => item.hasSomethingToReport)
           .map((item) => item.alert),
         mLog,
       })
@@ -110,7 +110,7 @@ export async function doProbe(
       totalRequests += 1
 
       // Exit the loop if there is any triggers triggered
-      if (validatedRes.filter((item) => item.somethingToReport).length > 0) {
+      if (validatedRes.filter((item) => item.hasSomethingToReport).length > 0) {
         break
       }
 
@@ -125,12 +125,10 @@ export async function doProbe(
       probeRes,
       totalRequests,
       validatedResp: validatedRes,
-      incidentThreshold: probe.incidentThreshold,
-      recoveryThreshold: probe.recoveryThreshold,
       mLog,
     })
 
-    // Done processing results, emit RESULT_READY
+    // Done processing results, check if need to send out alerts
     EventEmitter.emit(
       PROBE_ALERTS_READY,
       {

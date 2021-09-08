@@ -28,8 +28,11 @@ import { AxiosResponseWithExtraData } from '../../../interfaces/request'
 
 describe('validateResponse', () => {
   const mockedAlerts = [
-    { query: 'status-not-2xx', subject: '', message: '' },
-    { query: 'response-time-greater-than-10-ms', subject: '', message: '' },
+    {
+      query: 'response.status < 200 or response.status > 299',
+      message: '',
+    },
+    { query: 'response.time > 10', message: '' },
   ]
 
   const generateMockedResponse = (status: number, responseTime: number) => {
@@ -40,6 +43,7 @@ describe('validateResponse', () => {
           responseTime,
         },
       },
+      headers: {},
     } as AxiosResponseWithExtraData
   }
 
@@ -49,18 +53,36 @@ describe('validateResponse', () => {
 
     expect(data).to.eql([
       {
-        alert: { query: 'status-not-2xx', subject: '', message: '' },
-        responseValue: 300,
-        somethingToReport: true,
+        alert: {
+          query: 'response.status < 200 or response.status > 299',
+          message: '',
+        },
+        hasSomethingToReport: true,
+        response: {
+          config: {
+            extraData: {
+              responseTime: 20,
+            },
+          },
+          headers: {},
+          status: 300,
+        },
       },
       {
         alert: {
-          query: 'response-time-greater-than-10-ms',
-          subject: '',
+          query: 'response.time > 10',
           message: '',
         },
-        responseValue: 20,
-        somethingToReport: true,
+        response: {
+          config: {
+            extraData: {
+              responseTime: 20,
+            },
+          },
+          headers: {},
+          status: 300,
+        },
+        hasSomethingToReport: true,
       },
     ])
   })
@@ -71,18 +93,36 @@ describe('validateResponse', () => {
 
     expect(data).to.eql([
       {
-        alert: { query: 'status-not-2xx', subject: '', message: '' },
-        responseValue: 200,
-        somethingToReport: false,
+        alert: {
+          query: 'response.status < 200 or response.status > 299',
+          message: '',
+        },
+        response: {
+          config: {
+            extraData: {
+              responseTime: 20,
+            },
+          },
+          headers: {},
+          status: 200,
+        },
+        hasSomethingToReport: false,
       },
       {
         alert: {
-          query: 'response-time-greater-than-10-ms',
-          subject: '',
+          query: 'response.time > 10',
           message: '',
         },
-        responseValue: 20,
-        somethingToReport: true,
+        response: {
+          config: {
+            extraData: {
+              responseTime: 20,
+            },
+          },
+          headers: {},
+          status: 200,
+        },
+        hasSomethingToReport: true,
       },
     ])
   })
@@ -93,18 +133,36 @@ describe('validateResponse', () => {
 
     expect(data).to.eql([
       {
-        alert: { query: 'status-not-2xx', subject: '', message: '' },
-        responseValue: 300,
-        somethingToReport: true,
+        alert: {
+          query: 'response.status < 200 or response.status > 299',
+          message: '',
+        },
+        response: {
+          config: {
+            extraData: {
+              responseTime: 10,
+            },
+          },
+          headers: {},
+          status: 300,
+        },
+        hasSomethingToReport: true,
       },
       {
         alert: {
-          query: 'response-time-greater-than-10-ms',
-          subject: '',
+          query: 'response.time > 10',
           message: '',
         },
-        responseValue: 10,
-        somethingToReport: false,
+        response: {
+          config: {
+            extraData: {
+              responseTime: 10,
+            },
+          },
+          headers: {},
+          status: 300,
+        },
+        hasSomethingToReport: false,
       },
     ])
   })
@@ -115,18 +173,36 @@ describe('validateResponse', () => {
 
     expect(data).to.eql([
       {
-        alert: { query: 'status-not-2xx', subject: '', message: '' },
-        responseValue: 200,
-        somethingToReport: false,
+        alert: {
+          query: 'response.status < 200 or response.status > 299',
+          message: '',
+        },
+        response: {
+          config: {
+            extraData: {
+              responseTime: 10,
+            },
+          },
+          headers: {},
+          status: 200,
+        },
+        hasSomethingToReport: false,
       },
       {
         alert: {
-          query: 'response-time-greater-than-10-ms',
-          subject: '',
+          query: 'response.time > 10',
           message: '',
         },
-        responseValue: 10,
-        somethingToReport: false,
+        response: {
+          config: {
+            extraData: {
+              responseTime: 10,
+            },
+          },
+          headers: {},
+          status: 200,
+        },
+        hasSomethingToReport: false,
       },
     ])
   })

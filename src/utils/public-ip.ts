@@ -24,18 +24,45 @@
 
 import { log } from './pino'
 import stun from 'stun'
+import axios from 'axios'
+import { hostname } from 'os'
+import getIp from './ip'
 
 export let publicIpAddress = ''
+export let isConnectedToSTUNServer = true
+export let publicNetworkInfo: { city: string; isp: string }
+
+async function testStun(): Promise<string> {
+  const response = await stun.request('stun.l.google.com:19302')
+  return response?.getXorAddress()?.address
+}
+
+export async function getPublicNetworkInfo() {
+  try {
+    const ip = await testStun()
+    const response = await axios.get(`http://ip-api.com/json/${ip}`)
+    const { city, isp } = response.data
+    publicNetworkInfo = { city, isp }
+    log.info(
+      `Monika is running from: ${publicNetworkInfo.city} - ${
+        publicNetworkInfo.isp
+      } (${ip}) - ${hostname()} (${getIp()})`
+    )
+  } catch (error) {
+    log.error(`Failed to obtain location/ISP info`)
+  }
+}
 
 export async function getPublicIp() {
   try {
-    const response = await stun.request('stun.l.google.com:19302')
-    const address = response?.getXorAddress()?.address
+    const address = await testStun()
     if (address) {
       publicIpAddress = address
-      log.info(`Monika is running on Public IP ${address}`)
+      isConnectedToSTUNServer = true
+      log.info(`Connected to STUN Server. Monika is running from: ${address}`)
     }
   } catch (error) {
-    log.info(`Can't obtain Public IP`)
+    isConnectedToSTUNServer = false
+    log.error(`STUN Server is unreachable. Can't obtain Public IP`)
   }
 }

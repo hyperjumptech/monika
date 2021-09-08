@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import { RequestConfig } from '../../interfaces/request'
-import { request } from './request'
+import { executeRequest } from './request'
 import { AxiosResponseWithExtraData } from '../../interfaces/request'
 import * as Handlebars from 'handlebars'
 
@@ -60,7 +60,7 @@ export async function probing(
     }
 
     // Do the request using compiled URL and compiled headers (if exists)
-    const res = await request({
+    const res = await executeRequest({
       ...requestConfig,
       url: renderedURL,
     })
@@ -69,14 +69,46 @@ export async function probing(
     let errResponseCode
     let errData
     let errHdr
+    let errText
 
     if (error.response) {
-      // Axios doesn't always return error response
+      // 400, 500 get here
       errResponseCode = error.response.status
       errData = error.response.data
       errHdr = error.response.headers
+    } else if (error.request) {
+      // timeout is here, ECONNABORTED, ENOTFOUND
+      switch (error.code) {
+        case 'ECONNABORTED':
+          errResponseCode = 599 // https://httpstatuses.com/599
+          errText = 'TIMEDOUT'
+          break
+
+        case 'ENOTFOUND':
+          errResponseCode = 0 // not found, the abyss never returned a statusCode
+          errText = 'NOTFOUND' // assign some unique errResponseCode for decoding later.
+          break
+
+        case 'ECONNRESET':
+          errResponseCode = 1 // connection reset from target, assign some unique number responsecCode
+          errText = 'ECONNRESET'
+          break
+
+        case 'ECONNREFUSED':
+          errResponseCode = 2 // got rejected, again
+          errText = 'ECONNREFUSED'
+          break
+
+        default:
+          errResponseCode = error.code // just return the error code
+          errText = 'unknown error'
+      }
+      errData = ''
+      errHdr = ''
     } else {
-      errResponseCode = 500 // TODO: how to detect timeouts?
+      // other errors
+      errResponseCode = error.code
+      errText = 'unknown error'
       errData = ''
       errHdr = ''
     }
@@ -84,7 +116,7 @@ export async function probing(
     return {
       data: errData,
       status: errResponseCode,
-      statusText: 'ERROR',
+      statusText: errText,
       headers: errHdr,
       config: error.config, // get the response from error.config instead of error.response.xxx as -
       extraData: error.config.extraData, // the response data lives in the data.config space

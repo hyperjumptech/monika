@@ -61,6 +61,7 @@ export interface MonikaNotifData {
 export type MonikaNotifDataBody =
   | MonikaAlertNotifDataBody
   | MonikaStartAndTerminationNotifDataBody
+  | MonikaStatusUpdateNotifDataBody
 
 interface MonikaAlertNotifDataBody {
   type: 'incident' | 'recovery'
@@ -73,6 +74,17 @@ interface MonikaAlertNotifDataBody {
 interface MonikaStartAndTerminationNotifDataBody {
   type: 'start' | 'termination'
   ip_address: string
+}
+
+interface MonikaStatusUpdateNotifDataBody {
+  type: 'status-update'
+  time: string
+  monika: string
+  numberOfProbes: string
+  averageResponseTime: string
+  numberOfIncidents: string
+  numberOfRecoveries: string
+  numberOfSentNotifications: string
 }
 
 export interface TelegramData {
