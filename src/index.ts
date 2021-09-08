@@ -489,7 +489,7 @@ Please refer to the Monika documentations on how to how to configure notificatio
     probe: Probe,
     notifications?: Notification[]
   ) {
-    const hostIsObject = typeof host !== "string"
+    const hostIsObject = typeof host !== 'string'
     const domain = hostIsObject ? host.domain : host
 
     try {

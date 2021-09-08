@@ -28,7 +28,10 @@ export async function checkTLS(host: any, expiryThreshold = 30) {
   const hostOptions = host?.options! ?? {}
   const domain = host?.domain! ?? host
 
-  const { valid, validTo, daysRemaining } = await sslChecker(domain, hostOptions)
+  const { valid, validTo, daysRemaining } = await sslChecker(
+    domain,
+    hostOptions
+  )
 
   if (!valid) {
     throw new Error(`${domain} security certificate has expired at ${validTo}!`)
