@@ -45,8 +45,7 @@ describe('responseChecker', () => {
           query: 'response.status < 200 or response.status > 299',
           message: '',
         },
-        [res],
-        0
+        res
       )
 
       expect(data).to.equals(true)
@@ -59,8 +58,7 @@ describe('responseChecker', () => {
           query: 'response.status < 200 or response.status > 299',
           message: '',
         },
-        [res],
-        0
+        res
       )
 
       expect(data).to.equals(false)
@@ -73,8 +71,7 @@ describe('responseChecker', () => {
           query: 'response.status < 200 or response.status > 299',
           message: '',
         },
-        [res],
-        0
+        res
       )
 
       expect(data).to.equals(false)
@@ -87,8 +84,7 @@ describe('responseChecker', () => {
           query: 'response.status < 200 or response.status > 299',
           message: '',
         },
-        [res],
-        0
+        res
       )
 
       expect(data).to.equals(true)
@@ -101,8 +97,7 @@ describe('responseChecker', () => {
           query: 'response.status < 200 or response.status > 299',
           message: '',
         },
-        [res],
-        0
+        res
       )
 
       expect(data).to.equals(true)
@@ -115,8 +110,7 @@ describe('responseChecker', () => {
           query: 'response.status < 200 or response.status > 299',
           message: '',
         },
-        [res],
-        0
+        res
       )
 
       expect(data).to.equals(true)
@@ -139,8 +133,7 @@ describe('responseChecker', () => {
       const res = generateMockedResponse(20000)
       const data = responseChecker(
         { query: 'response.time > 10000', message: '' },
-        [res],
-        0
+        res
       )
 
       expect(data).to.equals(true)
@@ -150,8 +143,7 @@ describe('responseChecker', () => {
       const res = generateMockedResponse(10000)
       const data = responseChecker(
         { query: 'response.time > 20000', message: '' },
-        [res],
-        0
+        res
       )
 
       expect(data).to.equals(false)
@@ -161,8 +153,7 @@ describe('responseChecker', () => {
       const res = generateMockedResponse(20)
       const data = responseChecker(
         { query: 'response.time > 10', message: '' },
-        [res],
-        0
+        res
       )
 
       expect(data).to.equals(true)
@@ -172,8 +163,7 @@ describe('responseChecker', () => {
       const res = generateMockedResponse(10)
       const data = responseChecker(
         { query: 'response.time > 20', message: '' },
-        [res],
-        0
+        res
       )
 
       expect(data).to.equals(false)
