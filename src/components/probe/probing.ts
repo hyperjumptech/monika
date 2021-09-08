@@ -52,9 +52,7 @@ export async function probing(
             ...requestConfig.headers,
             [header]: renderedHeader,
           }
-        } catch (_) {
-          requestConfig.headers = { ...requestConfig.headers }
-        }
+        } catch (_) {}
       }
     }
 
