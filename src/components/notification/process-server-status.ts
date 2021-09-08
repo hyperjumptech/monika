@@ -61,50 +61,62 @@ export const resetProbeStatuses = () => {
 
 // Function to determine probe state
 const determineProbeState = ({
-  probeStatus,
+  probeStatusDetail,
   validation,
   incidentThreshold,
   recoveryThreshold,
 }: {
   errorName: string
-  probeStatus: ProbeStateDetails
+  probeStatusDetail: ProbeStateDetails
   validation: ValidateResponse
   incidentThreshold: number
   recoveryThreshold: number
 }) => {
-  const { isDown, consecutiveTrue, consecutiveFalse } = probeStatus
-  const { somethingToReport } = validation
+  const { isDown, consecutiveTrue, consecutiveFalse } = probeStatusDetail
+  const { hasSomethingToReport } = validation
 
-  if (!isDown && somethingToReport && consecutiveTrue === incidentThreshold - 1)
+  if (
+    !isDown &&
+    hasSomethingToReport &&
+    consecutiveTrue === incidentThreshold - 1
+  )
     return PROBE_STATE.UP_TRUE_EQUALS_THRESHOLD
 
-  if (!isDown && somethingToReport && consecutiveTrue < incidentThreshold - 1) {
+  if (
+    !isDown &&
+    hasSomethingToReport &&
+    consecutiveTrue < incidentThreshold - 1
+  ) {
     return PROBE_STATE.UP_TRUE_BELOW_THRESHOLD
   }
 
-  if (!isDown && !somethingToReport) return PROBE_STATE.UP_FALSE
+  if (!isDown && !hasSomethingToReport) return PROBE_STATE.UP_FALSE
 
   if (
     isDown &&
-    !somethingToReport &&
+    !hasSomethingToReport &&
     consecutiveFalse === recoveryThreshold - 1
   )
     return PROBE_STATE.DOWN_FALSE_EQUALS_THRESHOLD
 
-  if (isDown && !somethingToReport && consecutiveFalse < recoveryThreshold - 1)
+  if (
+    isDown &&
+    !hasSomethingToReport &&
+    consecutiveFalse < recoveryThreshold - 1
+  )
     return PROBE_STATE.DOWN_FALSE_BELOW_THRESHOLD
 
-  if (isDown && somethingToReport) return PROBE_STATE.DOWN_TRUE
+  if (isDown && hasSomethingToReport) return PROBE_STATE.DOWN_TRUE
 
   return PROBE_STATE.INIT
 }
 
-// Function to update probe status according to the state
+// updateProbeStatus updates probe status according to the state
 const updateProbeStatus = (
   statusDetails: ProbeStateDetails,
-  state: PROBE_STATE
+  probeState: PROBE_STATE
 ) => {
-  switch (state) {
+  switch (probeState) {
     case 'UP_FALSE':
       statusDetails = {
         ...statusDetails,
@@ -176,8 +188,6 @@ const updateProbeStatus = (
 export const processThresholds = ({
   probe,
   validatedResp,
-  incidentThreshold,
-  recoveryThreshold,
   mLog,
 }: {
   checkOrder: number
@@ -185,13 +195,11 @@ export const processThresholds = ({
   probeRes: AxiosResponseWithExtraData
   totalRequests: number
   validatedResp: ValidateResponse[]
-  incidentThreshold: number
-  recoveryThreshold: number
   mLog: LogObject
 }) => {
   try {
     // Get Probe ID and Name
-    const { id, name, alerts } = probe
+    const { id, name, alerts, incidentThreshold, recoveryThreshold } = probe
     const results: Array<ProbeStateDetails> = []
 
     // Initialize server status
@@ -233,7 +241,7 @@ export const processThresholds = ({
         if (probeStatusDetail) {
           const state = determineProbeState({
             errorName: alert.query,
-            probeStatus: probeStatusDetail,
+            probeStatusDetail: probeStatusDetail,
             validation,
             incidentThreshold,
             recoveryThreshold,
@@ -248,8 +256,15 @@ export const processThresholds = ({
         currentProbe.details = [...filteredProbeStatus, updatedStatus]
         results.push(updatedStatus)
 
-        if (validation.somethingToReport === true) {
-          setAlert({ flag: 'ALERT', message: updatedStatus.alertQuery }, mLog)
+        if (validation.hasSomethingToReport === true) {
+          // set alert flag, concate alert message
+          setAlert(
+            {
+              flag: 'ALERT',
+              message: mLog.alert.message + ', ' + updatedStatus.alertQuery,
+            },
+            mLog
+          )
           // done probes, got some alerts & notif.. print log
           em.emit(PROBE_LOGS_BUILT, mLog)
         }

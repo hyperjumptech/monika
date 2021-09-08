@@ -27,6 +27,7 @@ import { Command, flags } from '@oclif/command'
 import boxen from 'boxen'
 import chalk from 'chalk'
 import cli from 'cli-ux'
+import format from 'date-fns/format'
 import fs from 'fs'
 import cron, { ScheduledTask } from 'node-cron'
 import { hostname } from 'os'
@@ -66,7 +67,13 @@ import { Notification } from './interfaces/notification'
 import { Probe } from './interfaces/probe'
 import { ProbeStateDetails } from './interfaces/probe-status'
 import { AxiosResponseWithExtraData } from './interfaces/request'
-import { idFeeder, isIDValid, loopReport, sanitizeProbe } from './looper'
+import {
+  idFeeder,
+  isIDValid,
+  loopCheckSTUNServer,
+  loopReport,
+  sanitizeProbe,
+} from './looper'
 import {
   PrometheusCollector,
   startPrometheusMetricsServer,
@@ -75,7 +82,11 @@ import validateResponse, { ValidateResponse } from './plugins/validate-response'
 import { getEventEmitter } from './utils/events'
 import getIp from './utils/ip'
 import { log } from './utils/pino'
-import { getPublicIp, publicIpAddress } from './utils/public-ip'
+import {
+  getPublicNetworkInfo,
+  publicIpAddress,
+  publicNetworkInfo,
+} from './utils/public-ip'
 
 const em = getEventEmitter()
 
@@ -162,6 +173,13 @@ class Monika extends Command {
       multiple: false,
     }),
 
+    stun: flags.integer({
+      char: 's', // (s)stun
+      description: 'interval in seconds to check STUN server',
+      multiple: false,
+      default: 20,
+    }),
+
     id: flags.string({
       char: 'i', // (i)ds to run
       description: 'specific probe ids to run',
@@ -199,7 +217,8 @@ class Monika extends Command {
       return
     }
 
-    await getPublicIp() // calling it here once. So no need to fetch public IP for every alert functions invocation
+    await getPublicNetworkInfo() // cache location & ISP info
+    loopCheckSTUNServer(flags.stun) // check if connected to STUN Server and getting the public IP in the same time
     await openLogfile()
 
     if (flags.logs) {
@@ -483,15 +502,25 @@ Please refer to the Monika documentations on how to how to configure notificatio
             'NOTIFY-TLS',
             error.message
           ).catch((err) => log.error(err.message))
+
+          // TODO: invoke sendNotifications function instead
+          // looks like the sendAlerts function does not handle this
           sendAlerts({
             url: domain,
             probeState: 'invalid',
-            incidentThreshold: probe.incidentThreshold,
             notifications: notifications ?? [],
             validation: {
-              alert: { query: '', subject: '', message: '' },
-              somethingToReport: true,
-              responseValue: 0,
+              alert: { query: '', message: '' },
+              hasSomethingToReport: true,
+              response: {
+                status: 500,
+                config: {
+                  extraData: {
+                    responseTime: 0,
+                  },
+                },
+                headers: {},
+              } as AxiosResponseWithExtraData,
             },
           }).catch((err) => log.error(err.message))
         })
@@ -506,7 +535,7 @@ Please refer to the Monika documentations on how to how to configure notificatio
 
     await sendNotifications(notifications, {
       subject: `Monika Status`,
-      body: `Status Update ${new Date().toUTCString()}
+      body: `Status Update ${format(new Date(), 'yyyy-MM-dd HH:mm:ss XXX')}
 
 Host: ${hostname()} (${[publicIpAddress, getIp()].filter(Boolean).join('/')})
 Number of probes: ${summary.numberOfProbes}
@@ -517,7 +546,7 @@ Notifications: ${summary.numberOfSentNotifications}`,
       summary: `There are ${summary.numberOfIncidents} incidents and ${summary.numberOfRecoveries} recoveries in the last 24 hours.`,
       meta: {
         type: 'status-update' as const,
-        time: new Date().toUTCString(),
+        time: format(new Date(), 'yyyy-MM-dd HH:mm:ss XXX'),
         hostname: hostname(),
         privateIpAddress: getIp(),
         publicIpAddress,
@@ -531,6 +560,10 @@ Notifications: ${summary.numberOfSentNotifications}`,
 em.addListener('TERMINATE_EVENT', async (data) => {
   log.warn(data)
   const config = getConfig()
+  let machineInfo = `${hostname()} (${getIp()})`
+  if (publicNetworkInfo) {
+    machineInfo = `${publicNetworkInfo.city} - ${publicNetworkInfo.isp} (${publicIpAddress}) - ${machineInfo}`
+  }
   if (process.env.NODE_ENV !== 'test') {
     await sendNotifications(config.notifications ?? [], {
       subject: 'Monika terminated',
@@ -542,6 +575,7 @@ em.addListener('TERMINATE_EVENT', async (data) => {
         hostname: hostname(),
         privateIpAddress: getIp(),
         publicIpAddress,
+        machineInfo,
       },
     })
   }
@@ -613,7 +647,6 @@ const probeSendNotification = async (data: ProbeSendNotification) => {
     await sendAlerts({
       url: url,
       probeState: statusString,
-      incidentThreshold: probe.incidentThreshold,
       notifications: notifications ?? [],
       validation:
         validatedResponseStatuses.find(

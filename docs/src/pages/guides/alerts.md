@@ -11,63 +11,30 @@ Alerts are the types of condition that will trigger Monika to send notification.
       "id": "1",
       "name": "Name of the probe",
       ...
-      "alerts": ["status-not-2xx", "response-time-greater-than-200-ms"]
+      "alerts": [
+        {
+          "query": "response.status != 200",
+          "message": "HTTP Status code is {{ response.status }}, expecting 200"
+        }
+      ]
     },
   ]
 ```
 
-## Alerts formats
+## Alert Query
 
-You can configure alerts either in string format or object format for more advanced case and flexible use:
-
-### 1. Alert in string format
-
-This is the initial format used by Monika. It supports 2 types of alerts conditions:
-
-**HTTP Code**
-
-To measure returned HTTP code.
-
-| Value          | Description                                                                                   |
-| :------------- | --------------------------------------------------------------------------------------------- |
-| status-not-2xx | Condition met if the returned http code from the probes is less than 200 or greater than 299. |
-
-**Response Time**
-
-To measure response time. The time value and unit can be changed.
-
-| Value                                 | Description                                                                              |
-| :------------------------------------ | ---------------------------------------------------------------------------------------- |
-| response-time-greater-than-`200`-`ms` | Condition met if the response time from the probes URL is greater than 200 milliseconds. |
-
-- The time value can be changed to any positive integer value. In above example, the value is `200`.
-- The time unit can be changed to `s` second. In above example, the unit is `ms` for milliseconds.
-
-Example changed time value and unit:
-
-```
-response-time-greater-than-1-s
-```
-
-means Monika will send notification if the response of the probes URL is received after 1 second.
-
-### 2. Alert in object format
-
-This is the new format for more complex condition. Use this one if the previous format doesn't cater to your need.
-
-Define alert like so
+Query contains any arbitrary expression that will trigger alert when it returns a truthy value
 
 ```json
   "alerts" : [
     {
       "query": "response.status == 500",
-      "subject": "Subject for notification purpose",
-      "message": "Message for notification purpose"
+      ...
     }
   ]
 ```
 
-The response object can be queried in the `query` property of the alert. Alert will be triggered when the query is returning truthy value.
+Inside the query expression you can get the response object.
 
 These are values that are available:
 
@@ -85,8 +52,7 @@ For example, to trigger alert when content-type is not json you may use
   "alerts" : [
     {
       "query": "response.headers['content-type'] != \"application/json\"",
-      "subject": "Invalid Content-Type",
-      "message": "The url does not return response with expected content-type."
+      ...
     }
   ]
 ```
@@ -98,8 +64,7 @@ Or to query value inside the body
   "alerts" : [
     {
       "query": "response.body.data.todos[0].title != \"Drink water\"",
-      "subject": "Invalid order of data",
-      "message": "'Drink water' should always be the first in the list"
+      ...
     }
   ]
 ```
@@ -166,6 +131,21 @@ There are also several helper functions available:
 - **size(collection)**: Gets length of array or string values.
 
   example: `size(response.body.data.items)` gets the count of items.
+
+## Alert Message
+
+```json
+  "alerts": [
+    {
+      "query": "response.status != 200",
+      "message": "HTTP Status code is {{ response.status }}, expecting 200"
+    }
+  ]
+```
+
+This is the message that is used in the sent notification.
+
+Inside the message string, you can also get the response object similar to query by surrounding the expression with double curly braces like the example above.
 
 ## Further reading
 

@@ -277,6 +277,13 @@ export async function saveProbeRequestLog({
   const now = Math.round(Date.now() / 1000)
   const requestConfig = probe.requests[totalRequests]
 
+  // TODO: limit data stored.
+  const responseBody = requestConfig.saveBody
+    ? typeof probeRes.data === 'string'
+      ? probeRes.data
+      : JSON.stringify(probeRes.data)
+    : ''
+
   try {
     const insertProbeRequestResult = await db.run(insertProbeRequestSQL, [
       now,
@@ -288,9 +295,7 @@ export async function saveProbeRequestLog({
       JSON.stringify(requestConfig.body),
       probeRes.status,
       JSON.stringify(probeRes.headers),
-      typeof probeRes.data === 'string'
-        ? probeRes.data
-        : JSON.stringify(probeRes.data), // TODO: limit data stored.
+      responseBody,
       probeRes.config.extraData?.responseTime ?? 0,
       probeRes.headers['content-length'],
       errorResp,
