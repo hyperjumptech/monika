@@ -7,13 +7,25 @@ At the center of Monika is a configuration file. Follow the following steps to q
 
 ## Installation
 
-You can install Monika using [npm](https://npmjs.com) or [yarn](https://yarnpkg.com).
+You can install Monika two methods:
 
-```bash
-$ npm i -g @hyperjumptech/monika
-# or
-$ yarn global add @hyperjumptech/monika
-```
+1. Install using [npm](https://npmjs.com) or [yarn](https://yarnpkg.com).
+
+   If you're using NPM or Yarn, you can simply run this command in your terminal:
+
+   ```bash
+   $ npm i -g @hyperjumptech/monika
+   # or
+   $ yarn global add @hyperjumptech/monika
+   ```
+
+2. Download and run standalone binary
+
+   Head over to [Monika Release](https://github.com/hyperjumptech/monika/releases) page, download the Monika file according to your operating system, and rename it to `monika`.
+
+   UNIX-based users may have to run `sudo chmod +x monika` in order to execute Monika binary file.
+
+   In order to run Monika binary file, you must download the node_sqlite3-<os>-<arch>.node file according to your OS, rename it as node_sqlite3.node and put it in one folder with the Monika binary file.
 
 ## Download the configuration file
 
