@@ -369,7 +369,7 @@ export async function getSummary() {
       (acc, curr) => acc + curr.average_response_time * curr.count,
       0
     ) / totalRequests || 0
-  const averageResponseTime = parseFloat(rawAverageResponseTime.toFixed(3))
+  const averageResponseTime = Math.round(rawAverageResponseTime)
   const numberOfIncidents: number =
     notificationsSummaryByType.find((notif) => notif.type === 'NOTIFY-INCIDENT')
       ?.count || 0
