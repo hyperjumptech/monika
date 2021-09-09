@@ -29,22 +29,19 @@ jobs:
   upload:
     needs: test
     name: Publish for ${{ matrix.os }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.runs_on }}
     strategy:
       matrix:
         include:
           - os: Linux
-            artifact_name: monika
+            runs_on: ubuntu-latest
             platform: linux-x64
-            file_suffix: linux-x64
           - os: Windows
-            artifact_name: monika.exe
+            runs_on: windows-latest
             platform: win-x64
-            file_suffix: win-x64.exe
           - os: MacOS
-            artifact_name: monika
+            runs_on: macos-latest
             platform: macos-x64
-            file_suffix: macos-x64
 
     steps:
       - uses: actions/checkout@v2
@@ -58,12 +55,29 @@ jobs:
         name: Install dependencies
       - run: npm run pkg -- -t node12-${{ matrix.platform }}
         name: Pack the binary using vercel/pkg
+      - run: |
+          echo "::set-output name=NODE_SQLITE_PATH::$(find ./node_modules -name node_sqlite3.node)"
+        name: Find SQLite binary
+        id: find-node-sqlite
+        shell: bash
+      - run: echo ${{ steps.find-node-sqlite.outputs.NODE_SQLITE_PATH }}
+        name: Check if the SQLite binary is exists
+        shell: bash
+      - run: cp ${{ steps.find-node-sqlite.outputs.NODE_SQLITE_PATH }} ./dist
+        name: Copy the node sqlite binary
+        shell: bash
       - run: file ./dist/*
-        name: Check the binary
+        name: List all the files to be compressed
+        shell: bash
+      - name: Compress all binaries to one zip
+        uses: papeloto/action-zip@v1
+        with:
+          files: dist/monika dist/node_sqlite3.node 
+          dest: monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}.zip
       - name: Upload binary to release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: dist/${{ matrix.artifact_name }}
-          asset_name: monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.file_suffix }}
+          file: monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}.zip
+          asset_name: monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}.zip
           tag: ${{ github.ref }}
