@@ -36,12 +36,15 @@ jobs:
           - os: Linux
             runs_on: ubuntu-latest
             platform: linux-x64
+            file_name: monika
           - os: Windows
             runs_on: windows-latest
             platform: win-x64
+            file_name: monika.exe
           - os: MacOS
             runs_on: macos-latest
             platform: macos-x64
+            file_name: monika
 
     steps:
       - uses: actions/checkout@v2
@@ -51,6 +54,7 @@ jobs:
       - run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
         name: Get version
         id: get_version
+        shell: bash
       - run: npm ci
         name: Install dependencies
       - run: npm run pkg -- -t node12-${{ matrix.platform }}
@@ -72,7 +76,7 @@ jobs:
       - name: Compress all binaries to one zip
         uses: papeloto/action-zip@v1
         with:
-          files: dist/monika dist/node_sqlite3.node 
+          files: dist/${{ matrix.file_name }} dist/node_sqlite3.node 
           dest: monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}.zip
       - name: Upload binary to release
         uses: svenstaro/upload-release-action@v2
