@@ -31,12 +31,7 @@ import format from 'date-fns/format'
 import fs from 'fs'
 import cron, { ScheduledTask } from 'node-cron'
 import { hostname } from 'os'
-import {
-  createConfig,
-  getConfig,
-  getConfigIterator,
-  setupConfig,
-} from './components/config'
+import { createConfig, getConfig, getConfigIterator } from './components/config'
 import {
   printAllLogs,
   printProbeLog,
@@ -46,7 +41,6 @@ import {
   closeLog,
   flushAllLogs,
   getSummary,
-  openLogfile,
   saveNotificationLog,
 } from './components/logger/history'
 import { sendAlerts, sendNotifications } from './components/notification'
@@ -67,26 +61,13 @@ import { Notification } from './interfaces/notification'
 import { Probe } from './interfaces/probe'
 import { ProbeStateDetails } from './interfaces/probe-status'
 import { AxiosResponseWithExtraData } from './interfaces/request'
-import {
-  idFeeder,
-  isIDValid,
-  loopCheckSTUNServer,
-  loopReport,
-  sanitizeProbe,
-} from './looper'
-import {
-  PrometheusCollector,
-  startPrometheusMetricsServer,
-} from './plugins/metrics/prometheus'
+import { idFeeder, isIDValid, sanitizeProbe } from './looper'
 import validateResponse, { ValidateResponse } from './plugins/validate-response'
 import { getEventEmitter } from './utils/events'
 import getIp from './utils/ip'
 import { log } from './utils/pino'
-import {
-  getPublicNetworkInfo,
-  publicIpAddress,
-  publicNetworkInfo,
-} from './utils/public-ip'
+import { publicIpAddress, publicNetworkInfo } from './utils/public-ip'
+import initLoaders from './loaders'
 
 const em = getEventEmitter()
 
@@ -212,61 +193,37 @@ class Monika extends Command {
   async run() {
     const { flags } = this.parse(Monika)
 
-    if (flags['create-config']) {
-      await createConfig(flags)
-      return
-    }
-
-    await getPublicNetworkInfo() // cache location & ISP info
-    loopCheckSTUNServer(flags.stun) // check if connected to STUN Server and getting the public IP in the same time
-    await openLogfile()
-
-    if (flags.logs) {
-      await printAllLogs()
-      await closeLog()
-      return
-    }
-
-    if (flags.flush) {
-      let ans
-
-      if (!flags.force) {
-        ans = await cli.prompt(
-          'Are you sure you want to flush all logs in monika-logs.db (Y/n)?'
-        )
-      }
-
-      if (ans === 'Y' || flags.force) {
-        await flushAllLogs()
-        log.warn('Records flushed, thank you.')
-      } else {
-        log.info('Cancelled. Thank you.')
-      }
-      await closeLog()
-      return
-    }
-
-    // start Promotheus server
-    if (flags.prometheus) {
-      const {
-        registerCollectorFromProbes,
-        collectProbeRequestMetrics,
-      } = new PrometheusCollector()
-
-      // register prometheus metric collectors
-      em.on(CONFIG_SANITIZED, registerCollectorFromProbes)
-      // collect prometheus metrics
-      em.on(PROBE_RESPONSE_RECEIVED, collectProbeRequestMetrics)
-
-      startPrometheusMetricsServer(flags.prometheus)
-    }
-
     try {
-      await setupConfig(flags)
+      if (flags['create-config']) {
+        await createConfig(flags)
+        return
+      }
 
-      // Run report on interval if symon configuration exists
-      if (!(process.env.CI || process.env.NODE_ENV === 'test')) {
-        loopReport(getConfig)
+      await initLoaders(flags)
+
+      if (flags.logs) {
+        await printAllLogs()
+        await closeLog()
+        return
+      }
+
+      if (flags.flush) {
+        let ans
+
+        if (!flags.force) {
+          ans = await cli.prompt(
+            'Are you sure you want to flush all logs in monika-logs.db (Y/n)?'
+          )
+        }
+
+        if (ans === 'Y' || flags.force) {
+          await flushAllLogs()
+          log.warn('Records flushed, thank you.')
+        } else {
+          log.info('Cancelled. Thank you.')
+        }
+        await closeLog()
+        return
       }
 
       let scheduledTasks: ScheduledTask[] = []
