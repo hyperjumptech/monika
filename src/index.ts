@@ -111,7 +111,7 @@ class Monika extends Command {
     }),
 
     'create-config': flags.boolean({
-      description: 'open Monika Configuration Generator using default browser',
+      description: 'Open Monika Configuration Generator using default browser',
     }),
 
     'config-interval': flags.integer({
@@ -130,15 +130,15 @@ class Monika extends Command {
 
     logs: flags.boolean({
       char: 'l', // prints the (l)ogs
-      description: 'print all logs.',
+      description: 'Print all logs.',
     }),
 
     flush: flags.boolean({
-      description: 'flush logs',
+      description: 'Flush logs',
     }),
 
     verbose: flags.boolean({
-      description: 'show verbose log messages',
+      description: 'Show verbose log messages',
       default: false,
     }),
 
@@ -150,20 +150,20 @@ class Monika extends Command {
 
     repeat: flags.string({
       char: 'r', // (r)epeat
-      description: 'repeats the test run n times',
+      description: 'Repeats the test run n times',
       multiple: false,
     }),
 
     stun: flags.integer({
       char: 's', // (s)stun
-      description: 'interval in seconds to check STUN server',
+      description: 'Interval in seconds to check STUN server',
       multiple: false,
       default: 20,
     }),
 
     id: flags.string({
       char: 'i', // (i)ds to run
-      description: 'specific probe ids to run',
+      description: 'Specific probe ids to run',
       multiple: false,
     }),
 
@@ -181,12 +181,18 @@ class Monika extends Command {
     }),
 
     force: flags.boolean({
-      description: 'force command',
+      description: 'Force command',
       default: false,
     }),
 
     'status-notification': flags.string({
-      description: 'cron syntax for status notification schedule',
+      description: 'Cron syntax for status notification schedule',
+    }),
+
+    notification: flags.string({
+      description:
+        'Override notification(s) provided by config (-c/--config) with a separate file',
+      dependsOn: ['config'],
     }),
   }
 

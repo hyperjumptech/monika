@@ -29,7 +29,7 @@ import isUrl from 'is-url'
 import { open } from './../../utils/open-website'
 import { Config } from '../../interfaces/config'
 import { fetchConfig } from './fetch'
-import { parseConfig } from './parse'
+import { parseConfig, parseNotificationFile } from './parse'
 import { validateConfig } from './validate'
 import { handshake } from '../reporter'
 import { log } from '../../utils/pino'
@@ -38,7 +38,6 @@ import { existsSync, writeFileSync } from 'fs'
 import { cli } from 'cli-ux'
 
 const emitter = new EventEmitter()
-
 const CONFIG_UPDATED = 'CONFIG_UPDATED_EVENT'
 
 let cfg: Config
@@ -109,7 +108,7 @@ const getPathAndTypeFromFlag = (flags: any) => {
 export const setupConfigFromFile = async (flags: any, watch: boolean) => {
   const { path, type } = getPathAndTypeFromFlag(flags)
 
-  const parsed = parseConfig(path, type)
+  const parsed = parseConfig(path, type, flags.notification !== undefined)
   await handshakeAndValidate(parsed)
   cfg = parsed
   cfg.version = cfg.version || md5Hash(cfg)
@@ -117,7 +116,7 @@ export const setupConfigFromFile = async (flags: any, watch: boolean) => {
   if (watch) {
     const fileWatcher = chokidar.watch(path)
     fileWatcher.on('change', async () => {
-      const parsed = parseConfig(path, type)
+      const parsed = parseConfig(path, type, flags.notification !== undefined)
       await handshakeAndValidate(parsed)
       updateConfig(parsed)
     })
@@ -140,6 +139,11 @@ export const setupConfigFromUrl = async (
   }, checkingInterval * 1000)
 }
 
+const parseNotification = async (path: string) => {
+  const notifications = parseNotificationFile(path)
+  cfg.notifications = notifications
+}
+
 export const setupConfig = async (flags: any) => {
   if (isUrl(flags.config)) {
     await setupConfigFromUrl(flags.config, flags['config-interval'])
@@ -152,6 +156,7 @@ export const setupConfig = async (flags: any) => {
 
     await setupConfigFromFile(flags, watchConfigFile)
   }
+  if (flags.notification) await parseNotification(flags.notification)
 }
 
 export const createConfig = async (flags: any) => {
@@ -168,7 +173,7 @@ export const createConfig = async (flags: any) => {
       return
     }
 
-    const parsed = parseConfig(path, type)
+    const parsed = parseConfig(path, type, false)
     const file = flags.output || 'monika.json'
 
     if (existsSync(file) && !flags.force) {

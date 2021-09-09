@@ -28,8 +28,13 @@ import { parseConfigFromPostman } from './parse-postman'
 import { parseHarFile } from './parse-har'
 import path from 'path'
 import yml from 'js-yaml'
+import { Notification } from '../../interfaces/notification'
 
-export const parseConfig = (configPath: string, type: string): Config => {
+export const parseConfig = (
+  configPath: string,
+  type: string,
+  omitNotifications: boolean
+): Config => {
   // Read file from configPath
   try {
     // Read file from configPath
@@ -48,7 +53,11 @@ export const parseConfig = (configPath: string, type: string): Config => {
       return (cfg as unknown) as Config
     }
 
-    return JSON.parse(configString)
+    if (omitNotifications) {
+      return JSON.parse(configString) as Omit<Config, 'notifications'>
+    }
+
+    return JSON.parse(configString) as Config
   } catch (error) {
     if (error.code === 'ENOENT' && error.path === configPath) {
       throw new Error(
@@ -60,6 +69,22 @@ export const parseConfig = (configPath: string, type: string): Config => {
       throw new Error('JSON configuration file is in invalid JSON format!')
     }
 
+    throw new Error(error.message)
+  }
+}
+
+export const parseNotificationFile = (path: string): Notification[] => {
+  try {
+    const configString = readFileSync(path, 'utf-8')
+    return JSON.parse(configString) as Notification[]
+  } catch (error) {
+    if (error.code === 'ENOENT' && error.path === path) {
+      throw new Error('--notification: error, file not found.')
+    }
+
+    if (error.name === 'SyntaxError') {
+      throw new Error('--notification: error, invalid JSON')
+    }
     throw new Error(error.message)
   }
 }
