@@ -243,7 +243,6 @@ class Monika extends Command {
         let probesToRun = config.probes
         if (flags.id) {
           if (!isIDValid(config, flags.id)) {
-            em.emit(events.application.terminated)
             throw new Error('Input error') // can't continue, exit from app
           }
           // doing custom sequences if list of ids is declared
@@ -479,13 +478,16 @@ Please refer to the Monika documentations on how to how to configure notificatio
     await sendNotifications(notifications, {
       subject: `Monika Status`,
       body: `Status Update ${format(new Date(), 'yyyy-MM-dd HH:mm:ss XXX')}
-
-Host: ${hostname()} (${[publicIpAddress, getIp()].filter(Boolean).join('/')})
-Number of probes: ${summary.numberOfProbes}
-Average response time: ${summary.averageResponseTime} ms in the last 24 hours
-Incidents: ${summary.numberOfIncidents} in the last 24 hours
-Recoveries: ${summary.numberOfRecoveries} in the last 24 hours
-Notifications: ${summary.numberOfSentNotifications}`,
+            Host: ${hostname()} (${[publicIpAddress, getIp()]
+        .filter(Boolean)
+        .join('/')})
+            Number of probes: ${summary.numberOfProbes}
+            Average response time: ${
+              summary.averageResponseTime
+            } ms in the last 24 hours
+            Incidents: ${summary.numberOfIncidents} in the last 24 hours
+            Recoveries: ${summary.numberOfRecoveries} in the last 24 hours
+            Notifications: ${summary.numberOfSentNotifications}`,
       summary: `There are ${summary.numberOfIncidents} incidents and ${summary.numberOfRecoveries} recoveries in the last 24 hours.`,
       meta: {
         type: 'status-update' as const,
@@ -502,7 +504,7 @@ Notifications: ${summary.numberOfSentNotifications}`,
 /**
  * Show Exit Message
  */
-process.on('SIGINT', () => {
+process.on('SIGINT', async () => {
   if (!process.env.DISABLE_EXIT_MESSAGE) {
     log.info('Thank you for using Monika!')
     log.info('We need your help to make Monika better.')
@@ -510,7 +512,9 @@ process.on('SIGINT', () => {
       'Can you give us some feedback by clicking this link https://github.com/hyperjumptech/monika/discussions?\n'
     )
   }
+
   em.emit(events.application.terminated)
+
   process.exit(process.exitCode)
 })
 

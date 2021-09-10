@@ -25,37 +25,23 @@
 import { hostname } from 'os'
 import { getConfig } from '../../components/config'
 import { sendNotifications } from '../../components/notification'
+import { getMessageForTerminate } from '../../components/notification/alert-message'
 import events from '../../events'
 import { getEventEmitter } from '../../utils/events'
 import getIp from '../../utils/ip'
 import { log } from '../../utils/pino'
-import { publicIpAddress, publicNetworkInfo } from '../../utils/public-ip'
 
 const eventEmitter = getEventEmitter()
 
-eventEmitter.on(events.application.terminated, () => {
-  const config = getConfig()
-  const hostNameAndLocalIP = `${hostname()} (${getIp()})`
-  const machineInfo = publicNetworkInfo
-    ? `${publicNetworkInfo.city} - ${publicNetworkInfo.isp} (${publicIpAddress}) - ${hostNameAndLocalIP}`
-    : hostNameAndLocalIP
+eventEmitter.on(events.application.terminated, async () => {
   const isTestEnvironment = process.env.NODE_ENV === 'test'
 
-  log.warn('Monika is terminating')
-
   if (!isTestEnvironment) {
-    sendNotifications(config.notifications ?? [], {
-      subject: 'Monika terminated',
-      body: `Monika is no longer running in ${publicIpAddress}`,
-      summary: `Monika is no longer running in ${publicIpAddress}`,
-      meta: {
-        type: 'termination',
-        time: new Date().toUTCString(),
-        hostname: hostname(),
-        privateIpAddress: getIp(),
-        publicIpAddress,
-        machineInfo,
-      },
-    }).catch((error) => log.error(error))
+    const message = await getMessageForTerminate(hostname(), getIp())
+    const config = getConfig()
+
+    sendNotifications(config.notifications ?? [], message).catch((error) =>
+      log.error(error)
+    )
   }
 })
