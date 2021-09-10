@@ -131,6 +131,7 @@ interface BaseNotificationMessageMeta {
   privateIpAddress: string
   publicIpAddress: string
   [key: string]: unknown
+  monikaInstance?: any
 }
 interface NotificationIncidentRecoveryMessageMeta
   extends BaseNotificationMessageMeta {
@@ -140,7 +141,6 @@ interface NotificationIncidentRecoveryMessageMeta
 
 interface NotificationStartTerminationMessageMeta
   extends BaseNotificationMessageMeta {
-  machineInfo: string
   type: 'start' | 'termination'
 }
 
