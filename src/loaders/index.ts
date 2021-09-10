@@ -22,56 +22,49 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { hostname } from 'os'
-import { NotificationSendingError, sendNotifications } from '.'
-import { Notification } from '../../interfaces/notification'
-import getIp from '../../utils/ip'
-import { getMessageForStart } from './alert-message'
+import { getConfig, setupConfig } from '../components/config'
+import { openLogfile } from '../components/logger/history'
 import {
-  dataDiscordSchemaValidator,
-  dataMailgunSchemaValidator,
-  dataMonikaNotifSchemaValidator,
-  dataSendgridSchemaValidator,
-  dataSlackSchemaValidator,
-  dataSMTPSchemaValidator,
-  dataTeamsSchemaValidator,
-  dataTelegramSchemaValidator,
-  dataWebhookSchemaValidator,
-  dataWorkplaceSchemaValidator,
-} from './validator'
+  CONFIG_SANITIZED,
+  PROBE_RESPONSE_RECEIVED,
+} from '../constants/event-emitter'
+import { loopCheckSTUNServer, loopReport } from '../looper'
+import {
+  PrometheusCollector,
+  startPrometheusMetricsServer,
+} from '../plugins/metrics/prometheus'
+import { getEventEmitter } from '../utils/events'
+import { getPublicNetworkInfo } from '../utils/public-ip'
 
-// reexported with alias because this `errorMessage` function is used in test file
-export const errorMessage = NotificationSendingError.create
+export default async function init(flags: any) {
+  const eventEmitter = getEventEmitter()
+  const isTestEnvironment = process.env.CI || process.env.NODE_ENV === 'test'
 
-export const notificationChecker = async (notifications: Notification[]) => {
-  const validators = {
-    desktop: null,
-    discord: dataDiscordSchemaValidator,
-    mailgun: dataMailgunSchemaValidator,
-    'monika-notif': dataMonikaNotifSchemaValidator,
-    sendgrid: dataSendgridSchemaValidator,
-    slack: dataSlackSchemaValidator,
-    smtp: dataSMTPSchemaValidator,
-    teams: dataTeamsSchemaValidator,
-    telegram: dataTelegramSchemaValidator,
-    webhook: dataWebhookSchemaValidator,
-    whatsapp: dataWebhookSchemaValidator,
-    workplace: dataWorkplaceSchemaValidator,
+  // cache location & ISP info
+  await getPublicNetworkInfo()
+  // check if connected to STUN Server and getting the public IP in the same time
+  loopCheckSTUNServer(flags.stun)
+  await openLogfile()
+
+  // start Promotheus server
+  if (flags.prometheus) {
+    const {
+      registerCollectorFromProbes,
+      collectProbeRequestMetrics,
+    } = new PrometheusCollector()
+
+    // register prometheus metric collectors
+    eventEmitter.on(CONFIG_SANITIZED, registerCollectorFromProbes)
+    // collect prometheus metrics
+    eventEmitter.on(PROBE_RESPONSE_RECEIVED, collectProbeRequestMetrics)
+
+    startPrometheusMetricsServer(flags.prometheus)
   }
 
-  await Promise.all(
-    notifications.map(async (notification) => {
-      const validator = validators[notification.type]
-      if (!validator) return Promise.resolve()
-      try {
-        const validated = await validator.validateAsync(notification.data)
-        return validated
-      } catch (error) {
-        throw NotificationSendingError.create(notification.type, error?.message)
-      }
-    })
-  )
+  await setupConfig(flags)
 
-  const message = await getMessageForStart(hostname(), getIp())
-  await sendNotifications(notifications, message)
+  // Run report on interval if symon configuration exists
+  if (!isTestEnvironment) {
+    loopReport(getConfig)
+  }
 }

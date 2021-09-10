@@ -31,12 +31,7 @@ import format from 'date-fns/format'
 import fs from 'fs'
 import cron, { ScheduledTask } from 'node-cron'
 import { hostname } from 'os'
-import {
-  createConfig,
-  getConfig,
-  getConfigIterator,
-  setupConfig,
-} from './components/config'
+import { createConfig, getConfig, getConfigIterator } from './components/config'
 import {
   printAllLogs,
   printProbeLog,
@@ -46,10 +41,10 @@ import {
   closeLog,
   flushAllLogs,
   getSummary,
-  openLogfile,
   saveNotificationLog,
 } from './components/logger/history'
 import { sendAlerts, sendNotifications } from './components/notification'
+import { getMessageForTerminate } from './components/notification/alert-message'
 import { notificationChecker } from './components/notification/checker'
 import { resetProbeStatuses } from './components/notification/process-server-status'
 import { getLogsAndReport } from './components/reporter'
@@ -67,26 +62,13 @@ import { Notification } from './interfaces/notification'
 import { Probe } from './interfaces/probe'
 import { ProbeStateDetails } from './interfaces/probe-status'
 import { AxiosResponseWithExtraData } from './interfaces/request'
-import {
-  idFeeder,
-  isIDValid,
-  loopCheckSTUNServer,
-  loopReport,
-  sanitizeProbe,
-} from './looper'
-import {
-  PrometheusCollector,
-  startPrometheusMetricsServer,
-} from './plugins/metrics/prometheus'
+import { idFeeder, isIDValid, sanitizeProbe } from './looper'
 import validateResponse, { ValidateResponse } from './plugins/validate-response'
 import { getEventEmitter } from './utils/events'
 import getIp from './utils/ip'
 import { log } from './utils/pino'
-import {
-  getPublicNetworkInfo,
-  publicIpAddress,
-  publicNetworkInfo,
-} from './utils/public-ip'
+import { publicIpAddress } from './utils/public-ip'
+import initLoaders from './loaders'
 
 const em = getEventEmitter()
 
@@ -212,61 +194,37 @@ class Monika extends Command {
   async run() {
     const { flags } = this.parse(Monika)
 
-    if (flags['create-config']) {
-      await createConfig(flags)
-      return
-    }
-
-    await getPublicNetworkInfo() // cache location & ISP info
-    loopCheckSTUNServer(flags.stun) // check if connected to STUN Server and getting the public IP in the same time
-    await openLogfile()
-
-    if (flags.logs) {
-      await printAllLogs()
-      await closeLog()
-      return
-    }
-
-    if (flags.flush) {
-      let ans
-
-      if (!flags.force) {
-        ans = await cli.prompt(
-          'Are you sure you want to flush all logs in monika-logs.db (Y/n)?'
-        )
-      }
-
-      if (ans === 'Y' || flags.force) {
-        await flushAllLogs()
-        log.warn('Records flushed, thank you.')
-      } else {
-        log.info('Cancelled. Thank you.')
-      }
-      await closeLog()
-      return
-    }
-
-    // start Promotheus server
-    if (flags.prometheus) {
-      const {
-        registerCollectorFromProbes,
-        collectProbeRequestMetrics,
-      } = new PrometheusCollector()
-
-      // register prometheus metric collectors
-      em.on(CONFIG_SANITIZED, registerCollectorFromProbes)
-      // collect prometheus metrics
-      em.on(PROBE_RESPONSE_RECEIVED, collectProbeRequestMetrics)
-
-      startPrometheusMetricsServer(flags.prometheus)
-    }
-
     try {
-      await setupConfig(flags)
+      if (flags['create-config']) {
+        await createConfig(flags)
+        return
+      }
 
-      // Run report on interval if symon configuration exists
-      if (!(process.env.CI || process.env.NODE_ENV === 'test')) {
-        loopReport(getConfig)
+      await initLoaders(flags)
+
+      if (flags.logs) {
+        await printAllLogs()
+        await closeLog()
+        return
+      }
+
+      if (flags.flush) {
+        let ans
+
+        if (!flags.force) {
+          ans = await cli.prompt(
+            'Are you sure you want to flush all logs in monika-logs.db (Y/n)?'
+          )
+        }
+
+        if (ans === 'Y' || flags.force) {
+          await flushAllLogs()
+          log.warn('Records flushed, thank you.')
+        } else {
+          log.info('Cancelled. Thank you.')
+        }
+        await closeLog()
+        return
       }
 
       let scheduledTasks: ScheduledTask[] = []
@@ -300,7 +258,6 @@ class Monika extends Command {
         let probesToRun = config.probes
         if (flags.id) {
           if (!isIDValid(config, flags.id)) {
-            em.emit('TERMINATE_EVENT', 'Monika is terminating')
             throw new Error('Input error') // can't continue, exit from app
           }
           // doing custom sequences if list of ids is declared
@@ -510,7 +467,7 @@ Please refer to the Monika documentations on how to how to configure notificatio
             probeState: 'invalid',
             notifications: notifications ?? [],
             validation: {
-              alert: { query: '', message: '' },
+              alert: { query: '', message: error.message },
               hasSomethingToReport: true,
               response: {
                 status: 500,
@@ -536,13 +493,16 @@ Please refer to the Monika documentations on how to how to configure notificatio
     await sendNotifications(notifications, {
       subject: `Monika Status`,
       body: `Status Update ${format(new Date(), 'yyyy-MM-dd HH:mm:ss XXX')}
-
-Host: ${hostname()} (${[publicIpAddress, getIp()].filter(Boolean).join('/')})
-Number of probes: ${summary.numberOfProbes}
-Average response time: ${summary.averageResponseTime} ms in the last 24 hours
-Incidents: ${summary.numberOfIncidents} in the last 24 hours
-Recoveries: ${summary.numberOfRecoveries} in the last 24 hours
-Notifications: ${summary.numberOfSentNotifications}`,
+            Host: ${hostname()} (${[publicIpAddress, getIp()]
+        .filter(Boolean)
+        .join('/')})
+            Number of probes: ${summary.numberOfProbes}
+            Average response time: ${
+              summary.averageResponseTime
+            } ms in the last 24 hours
+            Incidents: ${summary.numberOfIncidents} in the last 24 hours
+            Recoveries: ${summary.numberOfRecoveries} in the last 24 hours
+            Notifications: ${summary.numberOfSentNotifications}`,
       summary: `There are ${summary.numberOfIncidents} incidents and ${summary.numberOfRecoveries} recoveries in the last 24 hours.`,
       meta: {
         type: 'status-update' as const,
@@ -555,31 +515,6 @@ Notifications: ${summary.numberOfSentNotifications}`,
     })
   }
 }
-
-// Subscribe FirstEvent
-em.addListener('TERMINATE_EVENT', async (data) => {
-  log.warn(data)
-  const config = getConfig()
-  let machineInfo = `${hostname()} (${getIp()})`
-  if (publicNetworkInfo) {
-    machineInfo = `${publicNetworkInfo.city} - ${publicNetworkInfo.isp} (${publicIpAddress}) - ${machineInfo}`
-  }
-  if (process.env.NODE_ENV !== 'test') {
-    await sendNotifications(config.notifications ?? [], {
-      subject: 'Monika terminated',
-      body: `Monika is no longer running in ${publicIpAddress}`,
-      summary: `Monika is no longer running in ${publicIpAddress}`,
-      meta: {
-        type: 'termination',
-        time: new Date().toUTCString(),
-        hostname: hostname(),
-        privateIpAddress: getIp(),
-        publicIpAddress,
-        machineInfo,
-      },
-    })
-  }
-})
 
 // Subscribe to Sanitize Config
 em.addListener(CONFIG_SANITIZED, function () {
@@ -730,7 +665,7 @@ em.on(
 /**
  * Show Exit Message
  */
-process.on('SIGINT', () => {
+process.on('SIGINT', async () => {
   if (!process.env.DISABLE_EXIT_MESSAGE) {
     log.info('Thank you for using Monika!')
     log.info('We need your help to make Monika better.')
@@ -738,7 +673,12 @@ process.on('SIGINT', () => {
       'Can you give us some feedback by clicking this link https://github.com/hyperjumptech/monika/discussions?\n'
     )
   }
-  em.emit('TERMINATE_EVENT', 'Monika is terminating')
+
+  if (process.env.NODE_ENV !== 'test') {
+    const message = await getMessageForTerminate(hostname(), getIp())
+    await sendNotifications(getConfig().notifications ?? [], message)
+  }
+
   process.exit(process.exitCode)
 })
 
