@@ -36,11 +36,13 @@ import { log } from '../../utils/pino'
 import { md5Hash } from '../../utils/hash'
 import { existsSync, writeFileSync } from 'fs'
 import { cli } from 'cli-ux'
+import { Notification } from '../../interfaces/notification'
 
 const emitter = new EventEmitter()
 const CONFIG_UPDATED = 'CONFIG_UPDATED_EVENT'
 
 let cfg: Config
+let splitNotifications: Notification[] = []
 
 export const getConfig = () => {
   if (!cfg) throw new Error('Configuration setup has not been run yet')
@@ -59,7 +61,7 @@ export async function* getConfigIterator() {
 
 export const updateConfig = (data: Config) => {
   const lastVersion = cfg?.version
-
+  data.notifications = splitNotifications
   cfg = data
   cfg.version = cfg.version || md5Hash(cfg)
 
@@ -125,9 +127,15 @@ export const setupConfigFromFile = async (flags: any, watch: boolean) => {
 
 export const setupConfigFromUrl = async (
   url: string,
-  checkingInterval: number
+  checkingInterval: number,
+  omitNotifications: boolean
 ) => {
-  const fetched = await fetchConfig(url)
+  let fetched: Config
+  if (omitNotifications) {
+    fetched = (await fetchConfig(url)) as Omit<Config, 'notifications'>
+  } else {
+    fetched = await fetchConfig(url)
+  }
   await handshakeAndValidate(fetched)
   cfg = fetched
   cfg.version = cfg.version || md5Hash(cfg)
@@ -139,14 +147,19 @@ export const setupConfigFromUrl = async (
   }, checkingInterval * 1000)
 }
 
-const parseNotification = async (path: string) => {
-  const notifications = parseNotificationFile(path)
-  cfg.notifications = notifications
+const parseNotification = async (flags: any) => {
+  if (flags.notification === undefined) return
+  splitNotifications = parseNotificationFile(flags.notification)
+  cfg.notifications = splitNotifications
 }
 
 export const setupConfig = async (flags: any) => {
   if (isUrl(flags.config)) {
-    await setupConfigFromUrl(flags.config, flags['config-interval'])
+    await setupConfigFromUrl(
+      flags.config,
+      flags['config-interval'],
+      flags.notification !== undefined
+    )
   } else {
     const watchConfigFile = !(
       process.env.CI ||
@@ -156,7 +169,7 @@ export const setupConfig = async (flags: any) => {
 
     await setupConfigFromFile(flags, watchConfigFile)
   }
-  if (flags.notification) await parseNotification(flags.notification)
+  await parseNotification(flags)
 }
 
 export const createConfig = async (flags: any) => {

@@ -25,6 +25,14 @@ monika -c https://raw.githubusercontent.com/hyperjumptech/monika/main/config_sam
 
 A neat feature is that the configuration file will be re-read and monitoring updated if Monika detects any changes to it.
 
+## Overriding default notifications
+
+You may override the notifications provided from the configuration above with `--notification` flag
+
+```bash
+monika --notification path/to/notifications/array.json
+```
+
 ## Create Config
 
 Just starting out? Want to make a new configuration? The `--create-config` flag will spin up an easy Web based configuration file generator.

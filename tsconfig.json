@@ -10,8 +10,7 @@
     "target": "es2017",
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "typeRoots": ["node_modules/@types", "custom_types"],
-    "useUnknownInCatchVariables": false
+    "typeRoots": ["node_modules/@types", "custom_types"]
   },
   "include": ["src/**/*", "src/**/*.json"]
 }
