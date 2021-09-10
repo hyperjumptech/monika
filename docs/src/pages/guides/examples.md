@@ -1,4 +1,7 @@
-# Examples
+---
+id: examples
+title: Examples
+---
 
 ## Minimal Configuration
 
