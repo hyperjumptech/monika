@@ -192,6 +192,7 @@ class Monika extends Command {
     notification: flags.string({
       description:
         'Override notification(s) provided by config (-c/--config) with a separate file',
+      dependsOn: ['config'],
     }),
   }
 
