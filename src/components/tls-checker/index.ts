@@ -24,9 +24,16 @@
 
 import sslChecker from 'ssl-checker'
 
-export async function checkTLS(host: any, expiryThreshold = 30) {
-  const hostOptions = host?.options! ?? {}
-  const domain = host?.domain! ?? host
+type TLSHostArg = {
+  domain: string
+  options?: Record<string, any>
+}
+export async function checkTLS(
+  host: string | TLSHostArg,
+  expiryThreshold = 30
+) {
+  const hostOptions = (host as TLSHostArg)?.options ?? {}
+  const domain = (host as TLSHostArg)?.domain ?? (host as string)
 
   const { valid, validTo, daysRemaining } = await sslChecker(
     domain,
