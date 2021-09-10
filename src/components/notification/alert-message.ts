@@ -127,8 +127,8 @@ export const getMessageForStart = async (
 
   return {
     subject: 'Monika is started',
-    body: `Monika is running on ${monikaInstance}`,
-    summary: `Monika is running on ${monikaInstance}`,
+    body: `Monika is running from ${monikaInstance}`,
+    summary: `Monika is running from ${monikaInstance}`,
     meta: {
       type: 'start',
       time: new Date().toUTCString(),
@@ -149,8 +149,8 @@ export const getMessageForTerminate = async (
 
   return {
     subject: 'Monika terminated',
-    body: `Monika is no longer running in ${monikaInstance}`,
-    summary: `Monika is no longer running in ${monikaInstance}`,
+    body: `Monika is no longer running from ${monikaInstance}`,
+    summary: `Monika is no longer running from ${monikaInstance}`,
     meta: {
       type: 'termination',
       time: new Date().toUTCString(),
