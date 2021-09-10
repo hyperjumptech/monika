@@ -22,16 +22,21 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-// Note: Loose standard on event names. not really enforced
-// but if done right, should be clear and self documenting.
-
 // format is: SCOPE_ITEM_STATE
 // scope : is where it came from ie: probe, or config or maybe timer
 // item  : is the "item" that the listener will be processing/handling
 // state : is the state of that item, is it ready? is it received?
-
-export const CONFIG_SANITIZED = 'CONFIG_SANITIZED'
-export const PROBE_RESPONSE_RECEIVED = 'PROBE_RESPONSE_RECEIVED'
-export const PROBE_RESPONSE_VALIDATED = 'PROBE_RESPONSE_VALIDATED'
-export const PROBE_ALERTS_READY = 'PROBE_ALERTS_READY'
-export const PROBE_LOGS_BUILT = 'PROBE_LOGS_BUILT'
+export default {
+  application: {
+    terminated: 'APPLICATION_TERMINATED',
+  },
+  config: {
+    sanitized: 'CONFIG_SANITIZED',
+    updated: 'CONFIG_UPDATED',
+  },
+  probe: {
+    response: {
+      received: 'PROBE_RESPONSE_RECEIVED',
+    },
+  },
+}

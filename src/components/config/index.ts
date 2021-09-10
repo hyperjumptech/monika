@@ -26,6 +26,7 @@ import EventEmitter from 'events'
 import chokidar from 'chokidar'
 import pEvent from 'p-event'
 import isUrl from 'is-url'
+import events from './../../events'
 import { open } from './../../utils/open-website'
 import { Config } from '../../interfaces/config'
 import { fetchConfig } from './fetch'
@@ -38,8 +39,6 @@ import { existsSync, writeFileSync } from 'fs'
 import { cli } from 'cli-ux'
 
 const emitter = new EventEmitter()
-
-const CONFIG_UPDATED = 'CONFIG_UPDATED_EVENT'
 
 let cfg: Config
 
@@ -54,7 +53,7 @@ export async function* getConfigIterator() {
   yield cfg
 
   if (!(process.env.CI || process.env.NODE_ENV === 'test')) {
-    yield* pEvent.iterator<string, Config>(emitter, CONFIG_UPDATED)
+    yield* pEvent.iterator<string, Config>(emitter, events.config.updated)
   }
 }
 
@@ -65,7 +64,7 @@ export const updateConfig = (data: Config) => {
   cfg.version = cfg.version || md5Hash(cfg)
 
   if (cfg.version !== lastVersion) {
-    emitter.emit(CONFIG_UPDATED, cfg)
+    emitter.emit(events.config.updated, cfg)
     log.warn('config file update detected')
   }
 }
