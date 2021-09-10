@@ -192,7 +192,6 @@ class Monika extends Command {
     notification: flags.string({
       description:
         'Override notification(s) provided by config (-c/--config) with a separate file',
-      dependsOn: ['config'],
     }),
   }
 
@@ -473,7 +472,7 @@ Please refer to the Monika documentations on how to how to configure notificatio
             probeState: 'invalid',
             notifications: notifications ?? [],
             validation: {
-              alert: { query: '', message: error.message },
+              alert: { query: '', message: '' },
               hasSomethingToReport: true,
               response: {
                 status: 500,
