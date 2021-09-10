@@ -23,7 +23,7 @@ There are two ways to install Monika::
 
    Head over to [Monika Release](https://github.com/hyperjumptech/monika/releases) page, download the Monika file according to your operating system, and rename it to `monika`.
 
-   UNIX-based users may have to run `sudo chmod +x monika` in order to execute Monika binary file.
+   UNIX-based users may have to run `sudo chmod +x monika` in order to execute Monika binary file. Please note that currently, only x64 architecture is supported.
 
    In order to run Monika binary file, you must download the node_sqlite3-<os>-<arch>.node file according to your OS, rename it as node_sqlite3.node and put it in one folder with the Monika binary file.
 
