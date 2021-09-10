@@ -31,12 +31,8 @@ import format from 'date-fns/format'
 import fs from 'fs'
 import cron, { ScheduledTask } from 'node-cron'
 import { hostname } from 'os'
-import { createConfig, getConfig, getConfigIterator } from './components/config'
-import {
-  printAllLogs,
-  printProbeLog,
-  setNotificationLog,
-} from './components/logger'
+import { createConfig, getConfigIterator } from './components/config'
+import { printAllLogs } from './components/logger'
 import {
   closeLog,
   flushAllLogs,
@@ -46,27 +42,17 @@ import {
 import { sendAlerts, sendNotifications } from './components/notification'
 import { notificationChecker } from './components/notification/checker'
 import { resetProbeStatuses } from './components/notification/process-server-status'
-import { getLogsAndReport } from './components/reporter'
 import { checkTLS } from './components/tls-checker'
-import {
-  CONFIG_SANITIZED,
-  PROBE_ALERTS_READY,
-  PROBE_LOGS_BUILT,
-  PROBE_RESPONSE_RECEIVED,
-  PROBE_RESPONSE_VALIDATED,
-} from './constants/event-emitter'
+import events from './events'
 import { Config } from './interfaces/config'
-import { LogObject } from './interfaces/logs'
 import { Notification } from './interfaces/notification'
 import { Probe } from './interfaces/probe'
-import { ProbeStateDetails } from './interfaces/probe-status'
 import { AxiosResponseWithExtraData } from './interfaces/request'
 import { idFeeder, isIDValid, sanitizeProbe } from './looper'
-import validateResponse, { ValidateResponse } from './plugins/validate-response'
 import { getEventEmitter } from './utils/events'
 import getIp from './utils/ip'
 import { log } from './utils/pino'
-import { publicIpAddress, publicNetworkInfo } from './utils/public-ip'
+import { publicIpAddress } from './utils/public-ip'
 import initLoaders from './loaders'
 
 const em = getEventEmitter()
@@ -257,7 +243,7 @@ class Monika extends Command {
         let probesToRun = config.probes
         if (flags.id) {
           if (!isIDValid(config, flags.id)) {
-            em.emit('TERMINATE_EVENT', 'Monika is terminating')
+            em.emit(events.application.terminated)
             throw new Error('Input error') // can't continue, exit from app
           }
           // doing custom sequences if list of ids is declared
@@ -274,7 +260,7 @@ class Monika extends Command {
 
         // emit the sanitized probe
         if (sanitizedProbe) {
-          em.emit(CONFIG_SANITIZED, sanitizedProbe)
+          em.emit(events.config.sanitized, sanitizedProbe)
         }
 
         // run TLS checker
@@ -513,177 +499,6 @@ Notifications: ${summary.numberOfSentNotifications}`,
   }
 }
 
-// Subscribe FirstEvent
-em.addListener('TERMINATE_EVENT', async (data) => {
-  log.warn(data)
-  const config = getConfig()
-  let machineInfo = `${hostname()} (${getIp()})`
-  if (publicNetworkInfo) {
-    machineInfo = `${publicNetworkInfo.city} - ${publicNetworkInfo.isp} (${publicIpAddress}) - ${machineInfo}`
-  }
-  if (process.env.NODE_ENV !== 'test') {
-    await sendNotifications(config.notifications ?? [], {
-      subject: 'Monika terminated',
-      body: `Monika is no longer running in ${publicIpAddress}`,
-      summary: `Monika is no longer running in ${publicIpAddress}`,
-      meta: {
-        type: 'termination',
-        time: new Date().toUTCString(),
-        hostname: hostname(),
-        privateIpAddress: getIp(),
-        publicIpAddress,
-        machineInfo,
-      },
-    })
-  }
-})
-
-// Subscribe to Sanitize Config
-em.addListener(CONFIG_SANITIZED, function () {
-  // TODO: Add function here
-})
-
-em.addListener(PROBE_LOGS_BUILT, async (mLog: LogObject) => {
-  printProbeLog(mLog)
-})
-
-// EVENT EMITTER - PROBE_RESPONSE_RECEIVED
-interface ProbeResponseReceived {
-  probe: Probe
-  requestIndex: number
-  response: AxiosResponseWithExtraData
-}
-
-// 1. PROBE_RESPONSE_READY - probing done, validate response
-em.on(PROBE_RESPONSE_RECEIVED, function (data: ProbeResponseReceived) {
-  const res = validateResponse(data.probe.alerts, data.response)
-
-  // 2. responses processed, and validated
-  em.emit(PROBE_RESPONSE_VALIDATED, res)
-})
-
-// TODO: move this to interface file?
-interface ProbeStatusProcessed {
-  probe: Probe
-  statuses?: ProbeStateDetails[]
-  notifications?: Notification[]
-  validatedResponseStatuses: ValidateResponse[]
-  totalRequests: number
-}
-
-// TODO: move this to interface file?
-interface ProbeSendNotification extends Omit<ProbeStatusProcessed, 'statuses'> {
-  index: number
-  probeState?: ProbeStateDetails
-}
-
-// TODO: move this to interface file?
-interface ProbeSaveLogToDatabase
-  extends Omit<
-    ProbeStatusProcessed,
-    'statuses' | 'totalRequests' | 'validatedResponseStatuses'
-  > {
-  index: number
-  probeState?: ProbeStateDetails
-}
-
-const probeSendNotification = async (data: ProbeSendNotification) => {
-  const {
-    index,
-    probe,
-    probeState,
-    notifications,
-    totalRequests,
-    validatedResponseStatuses,
-  } = data
-
-  const statusString = probeState?.isDown ? 'DOWN' : 'UP'
-  const url = probe.requests[totalRequests - 1].url ?? ''
-
-  if ((notifications?.length ?? 0) > 0) {
-    await sendAlerts({
-      url: url,
-      probeState: statusString,
-      notifications: notifications ?? [],
-      validation:
-        validatedResponseStatuses.find(
-          (validateResponse: ValidateResponse) =>
-            validateResponse.alert.query === probeState?.alertQuery
-        ) || validatedResponseStatuses[index],
-    })
-  }
-}
-
-const createNotificationLog = (
-  data: ProbeSaveLogToDatabase,
-  mLog: LogObject
-): LogObject => {
-  const { index, probe, probeState, notifications } = data
-
-  const type =
-    probeState?.probeState === 'UP_TRUE_EQUALS_THRESHOLD'
-      ? 'NOTIFY-INCIDENT'
-      : 'NOTIFY-RECOVER'
-
-  if ((notifications?.length ?? 0) > 0) {
-    Promise.all(
-      notifications?.map((notification) => {
-        const alert = probe.alerts[index]
-
-        mLog = setNotificationLog(
-          {
-            type,
-            probe,
-            alert,
-            notification,
-          },
-          mLog
-        )
-      })!
-    )
-  }
-  return mLog
-}
-
-// 3. Probes Thresholds processed, Send out notifications/alerts.
-em.on(
-  PROBE_ALERTS_READY,
-  async (data: ProbeStatusProcessed, mLog: LogObject) => {
-    const {
-      probe,
-      statuses,
-      notifications,
-      totalRequests,
-      validatedResponseStatuses,
-    } = data
-
-    statuses
-      ?.filter((probeState) => probeState.shouldSendNotification)
-      ?.forEach((probeState, index) => {
-        probeSendNotification({
-          index,
-          probe,
-          probeState,
-          notifications,
-          totalRequests,
-          validatedResponseStatuses,
-        }).catch((error: Error) => log.error(error.message))
-
-        mLog = createNotificationLog(
-          {
-            index,
-            probe,
-            probeState,
-            notifications,
-          },
-          mLog
-        )
-        em.emit(PROBE_LOGS_BUILT, mLog)
-        getLogsAndReport()
-      })
-  }
-)
-
 /**
  * Show Exit Message
  */
@@ -695,7 +510,7 @@ process.on('SIGINT', () => {
       'Can you give us some feedback by clicking this link https://github.com/hyperjumptech/monika/discussions?\n'
     )
   }
-  em.emit('TERMINATE_EVENT', 'Monika is terminating')
+  em.emit(events.application.terminated)
   process.exit(process.exitCode)
 })
 
