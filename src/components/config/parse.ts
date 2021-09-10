@@ -33,11 +33,9 @@ import { Notification } from '../../interfaces/notification'
 export const parseConfig = (
   configPath: string,
   type: string,
-  omitNotifications: boolean
+  omitNotifications?: boolean
 ): Config => {
-  // Read file from configPath
   try {
-    // Read file from configPath
     const configString = readFileSync(configPath, 'utf-8')
     const ext = path.extname(configPath)
 
@@ -53,11 +51,10 @@ export const parseConfig = (
       return (cfg as unknown) as Config
     }
 
-    if (omitNotifications) {
-      return JSON.parse(configString) as Omit<Config, 'notifications'>
-    }
+    const parsedConfig = JSON.parse(configString) as Config
+    if (omitNotifications) delete parsedConfig.notifications
 
-    return JSON.parse(configString) as Config
+    return parsedConfig
   } catch (error) {
     if (error.code === 'ENOENT' && error.path === configPath) {
       throw new Error(

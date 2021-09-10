@@ -109,7 +109,6 @@ const getPathAndTypeFromFlag = (flags: any) => {
 
 export const setupConfigFromFile = async (flags: any, watch: boolean) => {
   const { path, type } = getPathAndTypeFromFlag(flags)
-
   const parsed = parseConfig(path, type, flags.notification !== undefined)
   await handshakeAndValidate(parsed)
   cfg = parsed
@@ -130,11 +129,9 @@ export const setupConfigFromUrl = async (
   checkingInterval: number,
   omitNotifications: boolean
 ) => {
-  let fetched: Config
+  const fetched = await fetchConfig(url)
   if (omitNotifications) {
-    fetched = (await fetchConfig(url)) as Omit<Config, 'notifications'>
-  } else {
-    fetched = await fetchConfig(url)
+    delete fetched.notifications
   }
   await handshakeAndValidate(fetched)
   cfg = fetched
@@ -186,7 +183,7 @@ export const createConfig = async (flags: any) => {
       return
     }
 
-    const parsed = parseConfig(path, type, false)
+    const parsed = parseConfig(path, type)
     const file = flags.output || 'monika.json'
 
     if (existsSync(file) && !flags.force) {
