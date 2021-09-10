@@ -44,6 +44,12 @@ export const sendTeams = async (
             {
               activityTitle: message.subject,
               markdown: true,
+              facts: [
+                {
+                  name: 'Message',
+                  value: message.body,
+                },
+              ],
             },
           ],
         },
@@ -81,12 +87,7 @@ export const sendTeams = async (
                 },
                 {
                   name: 'From',
-                  value: `${message.meta.hostname} (${[
-                    message.meta.publicIpAddress,
-                    message.meta.privateIpAddress,
-                  ]
-                    .filter(Boolean)
-                    .join('/')})`,
+                  value: message.meta.monikaInstance,
                 },
               ],
               markdown: true,
@@ -110,12 +111,7 @@ export const sendTeams = async (
               facts: [
                 {
                   name: 'Host',
-                  value: `${message.meta.hostname} (${[
-                    message.meta.publicIpAddress,
-                    message.meta.privateIpAddress,
-                  ]
-                    .filter(Boolean)
-                    .join('/')})`,
+                  value: message.meta.monikaInstance,
                 },
                 {
                   name: 'Number of Probes',
