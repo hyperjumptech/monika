@@ -22,48 +22,26 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { getConfig, setupConfig } from '../components/config'
-import { openLogfile } from '../components/logger/history'
-import events from '../events'
-import { loopCheckSTUNServer, loopReport } from '../looper'
-import {
-  PrometheusCollector,
-  startPrometheusMetricsServer,
-} from '../plugins/metrics/prometheus'
-import { getEventEmitter } from '../utils/events'
-import { getPublicNetworkInfo } from '../utils/public-ip'
-// import to activate all the application event emitter subscribers
-import '../events/subscribers/application'
+import { hostname } from 'os'
+import { getConfig } from '../../components/config'
+import { sendNotifications } from '../../components/notification'
+import { getMessageForTerminate } from '../../components/notification/alert-message'
+import events from '../../events'
+import { getEventEmitter } from '../../utils/events'
+import getIp from '../../utils/ip'
+import { log } from '../../utils/pino'
 
-export default async function init(flags: any) {
-  const eventEmitter = getEventEmitter()
-  const isTestEnvironment = process.env.CI || process.env.NODE_ENV === 'test'
+const eventEmitter = getEventEmitter()
 
-  // cache location & ISP info
-  await getPublicNetworkInfo()
-  // check if connected to STUN Server and getting the public IP in the same time
-  loopCheckSTUNServer(flags.stun)
-  await openLogfile()
+eventEmitter.on(events.application.terminated, async () => {
+  const isTestEnvironment = process.env.NODE_ENV === 'test'
 
-  // start Promotheus server
-  if (flags.prometheus) {
-    const {
-      registerCollectorFromProbes,
-      collectProbeRequestMetrics,
-    } = new PrometheusCollector()
-
-    // register prometheus metric collectors
-    eventEmitter.on(events.config.sanitized, registerCollectorFromProbes)
-    // collect prometheus metrics
-    eventEmitter.on(events.probe.response.received, collectProbeRequestMetrics)
-
-    startPrometheusMetricsServer(flags.prometheus)
-  }
-
-  await setupConfig(flags)
-
-  // Run report on interval if symon configuration exists
   if (!isTestEnvironment) {
-    loopReport(getConfig)
+    const message = await getMessageForTerminate(hostname(), getIp())
+    const config = getConfig()
+
+    sendNotifications(config.notifications ?? [], message).catch((error) =>
+      log.error(error)
+    )
   }
-}
+})
