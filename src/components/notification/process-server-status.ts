@@ -22,17 +22,13 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { setAlert } from '../../components/logger'
-import { PROBE_LOGS_BUILT } from '../../constants/event-emitter'
+import { printProbeLog, setAlert } from '../../components/logger'
 import { LogObject } from '../../interfaces/logs'
 import { Probe } from '../../interfaces/probe'
 import { ProbeStatus, ProbeStateDetails } from '../../interfaces/probe-status'
 import { AxiosResponseWithExtraData } from '../../interfaces/request'
 import { ValidateResponse } from '../../plugins/validate-response'
 import { log } from '../../utils/pino'
-import { getEventEmitter } from '../../utils/events'
-
-const em = getEventEmitter()
 
 let PROBE_STATUSES: ProbeStatus[] = []
 const INIT_PROBE_STATUS_DETAILS: ProbeStateDetails = {
@@ -266,7 +262,7 @@ export const processThresholds = ({
             mLog
           )
           // done probes, got some alerts & notif.. print log
-          em.emit(PROBE_LOGS_BUILT, mLog)
+          printProbeLog(mLog)
         }
       })
     }
