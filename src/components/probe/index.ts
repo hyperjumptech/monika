@@ -67,8 +67,6 @@ interface ProbeSendNotification extends Omit<ProbeStatusProcessed, 'statuses'> {
   probeState?: ProbeStateDetails
 }
 
-let validatedRes: ValidateResponse[] = []
-
 // Probes Thresholds processed, Send out notifications/alerts.
 async function checkThresholdsAndSendAlert(
   data: ProbeStatusProcessed,
@@ -176,6 +174,8 @@ export async function doProbe(
   notifications?: Notification[]
 ) {
   const eventEmitter = getEventEmitter()
+  const responses = []
+  let validatedRes: ValidateResponse[] = []
   let probeRes: AxiosResponseWithExtraData = {} as AxiosResponseWithExtraData
   let totalRequests = 0 // is the number of requests in  probe.requests[x]
   let mLog: LogObject = {
@@ -197,8 +197,6 @@ export async function doProbe(
   } as LogObject
 
   try {
-    const responses: Array<AxiosResponseWithExtraData> = []
-
     for await (const request of probe.requests) {
       mLog.url = request.url
       probeRes = await probing(request, responses)
