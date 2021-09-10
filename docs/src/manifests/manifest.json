@@ -10,11 +10,6 @@
           "editUrl": "/overview.md"
         },
         {
-          "title": "Installation",
-          "path": "/installation",
-          "editUrl": "/installation.md"
-        },
-        {
           "title": "Quick Start",
           "path": "/quick-start",
           "editUrl": "/quick-start.md"
@@ -49,6 +44,11 @@
           "title": "CLI Options",
           "path": "/guides/cli-options",
           "editUrl": "/guides/cli-options.md"
+        },
+        {
+          "title": "Troubleshoot",
+          "path": "/guides/troubleshoot",
+          "editUrl": "/guides/troubleshoot.md"
         }
       ]
     },
@@ -87,6 +87,21 @@
       "title": "Tutorial",
       "heading": true,
       "routes": [
+        {
+          "title": "Run with GMail Notification",
+          "path": "/tutorial/run-with-gmail-notification",
+          "editUrl": "/tutorial/run-with-gmail-notification.md"
+        },
+        {
+          "title": "Run Monika in Docker",
+          "path": "/tutorial/run-in-docker",
+          "editUrl": "/tutorial/run-in-docker.md"
+        },
+        {
+          "title": "Run Monika in Background",
+          "path": "/tutorial/run-in-background",
+          "editUrl": "/tutorial/run-in-background.md"
+        },
         {
           "title": "Run Monika in Raspberry Pi",
           "path": "/tutorial/run-in-raspberry-pi",
