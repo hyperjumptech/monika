@@ -22,22 +22,26 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { AxiosResponseWithExtraData } from '../../../interfaces/request'
+import { hostname } from 'os'
+import { getConfig } from '../../components/config'
+import { sendNotifications } from '../../components/notification'
+import { getMessageForTerminate } from '../../components/notification/alert-message'
+import events from '../../events'
+import { getEventEmitter } from '../../utils/events'
+import getIp from '../../utils/ip'
+import { log } from '../../utils/pino'
 
-/**
- *  resTimeGreaterThanX checks if response time is greater than specified value in milliseconds
- * @param {object} res is  the axios result to compare
- * @param {number} minResTime is response time in ms to check for
- * @returns {bool} boolean whether it is greater or not
- */
-const resTimeGreaterThanX = (
-  res: AxiosResponseWithExtraData,
-  minResTime: number
-) => {
-  const resTime = res.config.extraData?.responseTime ?? 0
-  const isGreaterThan = resTime > minResTime
+const eventEmitter = getEventEmitter()
 
-  return isGreaterThan
-}
+eventEmitter.on(events.application.terminated, async () => {
+  const isTestEnvironment = process.env.NODE_ENV === 'test'
 
-export default resTimeGreaterThanX
+  if (!isTestEnvironment) {
+    const message = await getMessageForTerminate(hostname(), getIp())
+    const config = getConfig()
+
+    sendNotifications(config.notifications ?? [], message).catch((error) =>
+      log.error(error)
+    )
+  }
+})

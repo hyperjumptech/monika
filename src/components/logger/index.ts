@@ -30,11 +30,7 @@ import { getAllLogs, saveProbeRequestLog } from './history'
 import { log } from '../../utils/pino'
 
 import { LogObject } from '../../interfaces/logs'
-import { getEventEmitter } from '../../utils/events'
-import { PROBE_LOGS_BUILT } from '../../constants/event-emitter'
 import { saveNotificationLog } from '../logger/history'
-
-const EventEmitter = getEventEmitter()
 
 /**
  * getStatusColor colorizes different statusCode
@@ -90,6 +86,14 @@ export function probeBuildLog({
       mLog.alert.flag = 'alert'
       mLog.alert.message.push('URI not found')
       break
+    case 1:
+      mLog.alert.flag = 'alert'
+      mLog.alert.message = ['Connection reset']
+      break
+    case 2:
+      mLog.alert.flag = 'alert'
+      mLog.alert.message = ['Connection refused']
+      break
     case 599:
       mLog.alert.flag = 'alert'
       mLog.alert.message.push('Request Timed out')
@@ -98,12 +102,6 @@ export function probeBuildLog({
   }
 
   if (error?.length) log.error('probe error: ', error)
-
-  for (const rq of probe.requests) {
-    if (rq?.saveBody !== true ?? undefined) {
-      probeRes.data = '' // if not saved, flush .data
-    }
-  }
 
   saveProbeRequestLog({
     probe,
@@ -226,8 +224,3 @@ export async function printAllLogs() {
     })
   })
 }
-
-// TODO: Handle event when probe logs has been built
-EventEmitter.on(PROBE_LOGS_BUILT, async () => {
-  // TODO: put saving to db in one spot
-})

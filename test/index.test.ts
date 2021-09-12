@@ -171,9 +171,7 @@ describe('monika', () => {
       ])
     )
     .catch((error) => {
-      expect(error.message).to.contain(
-        "Probe alert should be 'status-not-2xx' or 'response-time-greater-than-<number>-(m)s"
-      )
+      expect(error.message).to.contain('Probe alert format is invalid!')
     })
     .it('runs with config with invalid probe request alert')
 

@@ -26,7 +26,7 @@ import { hostname } from 'os'
 import { NotificationSendingError, sendNotifications } from '.'
 import { Notification } from '../../interfaces/notification'
 import getIp from '../../utils/ip'
-import { publicIpAddress } from '../../utils/public-ip'
+import { getMessageForStart } from './alert-message'
 import {
   dataDiscordSchemaValidator,
   dataMailgunSchemaValidator,
@@ -72,16 +72,6 @@ export const notificationChecker = async (notifications: Notification[]) => {
     })
   )
 
-  await sendNotifications(notifications, {
-    subject: 'Monika is started',
-    body: `Monika is running on ${publicIpAddress}`,
-    summary: `Monika is running on ${publicIpAddress}`,
-    meta: {
-      type: 'start',
-      time: new Date().toUTCString(),
-      hostname: hostname(),
-      privateIpAddress: getIp(),
-      publicIpAddress,
-    },
-  })
+  const message = await getMessageForStart(hostname(), getIp())
+  await sendNotifications(notifications, message)
 }

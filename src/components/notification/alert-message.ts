@@ -23,52 +23,66 @@
  **********************************************************************************/
 
 import { format } from 'date-fns'
+import * as Handlebars from 'handlebars'
 import { hostname } from 'os'
 import { NotificationMessage } from '../../interfaces/notification'
+import { AxiosResponseWithExtraData } from '../../interfaces/request'
 import { ProbeAlert } from '../../interfaces/probe'
-import { parseAlertStringTime } from '../../plugins/validate-response/checkers'
-import { publicIpAddress } from '../../utils/public-ip'
+import {
+  getPublicIp,
+  publicIpAddress,
+  publicNetworkInfo,
+} from '../../utils/public-ip'
 
-export function getMessageForAlert({
+let monikaInstance = ''
+
+const getMonikaInstance = async (ipAddress: string) => {
+  await getPublicIp()
+  monikaInstance = `${hostname()} (${[publicIpAddress, ipAddress]
+    .filter(Boolean)
+    .join('/')})`
+
+  if (publicNetworkInfo) {
+    monikaInstance = `${publicNetworkInfo.city} - ${
+      publicNetworkInfo.isp
+    } (${publicIpAddress}) - ${hostname()} (${ipAddress})`
+  }
+}
+
+export async function getMessageForAlert({
   alert,
   url,
   ipAddress,
   probeState, // state of the probed target
-  responseValue,
+  response,
 }: {
   alert: ProbeAlert
   url: string
   ipAddress: string
   probeState: string
-  incidentThreshold: number
-  responseValue: number
-}): NotificationMessage {
+  response: AxiosResponseWithExtraData
+}): Promise<NotificationMessage> {
   const getSubject = (probeState: string) => {
     const recoveryOrIncident = probeState === 'UP' ? 'Recovery' : 'Incident'
-
-    if (alert.subject)
-      return `[${recoveryOrIncident.toUpperCase()}] ${alert.subject}`
 
     return `New ${recoveryOrIncident} from Monika`
   }
 
-  const getExpectedMessage = (responseValue: number) => {
-    if (alert.query === 'status-not-2xx') {
-      return `HTTP Status is ${responseValue}, expecting 200.`
-    }
+  const getExpectedMessage = (
+    alert: ProbeAlert,
+    response: AxiosResponseWithExtraData
+  ) => {
+    if (!alert.message) return ''
 
-    if (alert.query.includes('response-time-greater-than-')) {
-      const alertTime = parseAlertStringTime(alert.query)
-      return `Response time is ${responseValue}ms, expecting less than ${alertTime}ms`
-    }
-
-    return alert.message
-  }
-
-  const getMonikaInstance = () => {
-    return `${hostname()} (${[publicIpAddress, ipAddress]
-      .filter(Boolean)
-      .join('/')})`
+    return Handlebars.compile(alert.message)({
+      response: {
+        size: Number(response.headers['content-length']),
+        status: response.status,
+        time: response.config.extraData?.responseTime,
+        body: response.data,
+        headers: response.headers,
+      },
+    })
   }
 
   const meta = {
@@ -78,22 +92,71 @@ export function getMessageForAlert({
     hostname: hostname(),
     privateIpAddress: ipAddress,
     publicIpAddress,
+    monikaInstance,
   }
 
-  const bodyString = `Message: ${getExpectedMessage(responseValue)}
+  if (monikaInstance.length === 0) {
+    await getMonikaInstance(ipAddress)
+  }
+
+  const bodyString = `Message: ${getExpectedMessage(alert, response)}
 
 URL: ${meta.url}
 
 Time: ${meta.time}
 
-From: ${getMonikaInstance()}`
+From: ${monikaInstance}`
 
   const message = {
     subject: getSubject(probeState),
     body: bodyString,
-    summary: getExpectedMessage(responseValue),
+    summary: getExpectedMessage(alert, response),
     meta,
   }
 
   return message
+}
+
+export const getMessageForStart = async (
+  hostname: string,
+  ip: string
+): Promise<NotificationMessage> => {
+  if (monikaInstance.length === 0) {
+    await getMonikaInstance(ip)
+  }
+
+  return {
+    subject: 'Monika is started',
+    body: `Monika is running from ${monikaInstance}`,
+    summary: `Monika is running from ${monikaInstance}`,
+    meta: {
+      type: 'start',
+      time: new Date().toUTCString(),
+      hostname: hostname,
+      privateIpAddress: ip,
+      publicIpAddress,
+    },
+  }
+}
+
+export const getMessageForTerminate = async (
+  hostname: string,
+  ip: string
+): Promise<NotificationMessage> => {
+  if (monikaInstance.length === 0) {
+    await getMonikaInstance(ip)
+  }
+
+  return {
+    subject: 'Monika terminated',
+    body: `Monika is no longer running from ${monikaInstance}`,
+    summary: `Monika is no longer running from ${monikaInstance}`,
+    meta: {
+      type: 'termination',
+      time: new Date().toUTCString(),
+      hostname: hostname,
+      privateIpAddress: ip,
+      publicIpAddress,
+    },
+  }
 }

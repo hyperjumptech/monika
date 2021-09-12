@@ -22,11 +22,48 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { AxiosResponseWithExtraData } from '../../../interfaces/request'
+import { getConfig, setupConfig } from '../components/config'
+import { openLogfile } from '../components/logger/history'
+import events from '../events'
+import { loopCheckSTUNServer, loopReport } from '../looper'
+import {
+  PrometheusCollector,
+  startPrometheusMetricsServer,
+} from '../plugins/metrics/prometheus'
+import { getEventEmitter } from '../utils/events'
+import { getPublicNetworkInfo } from '../utils/public-ip'
+// import to activate all the application event emitter subscribers
+import '../events/subscribers/application'
 
-// Check if response status is not 2xx
-const statusNot2xx = (res: AxiosResponseWithExtraData) => {
-  return res.status < 200 || res.status >= 300
+export default async function init(flags: any) {
+  const eventEmitter = getEventEmitter()
+  const isTestEnvironment = process.env.CI || process.env.NODE_ENV === 'test'
+
+  // cache location & ISP info
+  await getPublicNetworkInfo()
+  // check if connected to STUN Server and getting the public IP in the same time
+  loopCheckSTUNServer(flags.stun)
+  await openLogfile()
+
+  // start Promotheus server
+  if (flags.prometheus) {
+    const {
+      registerCollectorFromProbes,
+      collectProbeRequestMetrics,
+    } = new PrometheusCollector()
+
+    // register prometheus metric collectors
+    eventEmitter.on(events.config.sanitized, registerCollectorFromProbes)
+    // collect prometheus metrics
+    eventEmitter.on(events.probe.response.received, collectProbeRequestMetrics)
+
+    startPrometheusMetricsServer(flags.prometheus)
+  }
+
+  await setupConfig(flags)
+
+  // Run report on interval if symon configuration exists
+  if (!isTestEnvironment) {
+    loopReport(getConfig)
+  }
 }
-
-export default statusNot2xx

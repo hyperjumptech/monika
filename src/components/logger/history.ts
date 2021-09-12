@@ -277,6 +277,13 @@ export async function saveProbeRequestLog({
   const now = Math.round(Date.now() / 1000)
   const requestConfig = probe.requests[totalRequests]
 
+  // TODO: limit data stored.
+  const responseBody = requestConfig.saveBody
+    ? typeof probeRes.data === 'string'
+      ? probeRes.data
+      : JSON.stringify(probeRes.data)
+    : ''
+
   try {
     const insertProbeRequestResult = await db.run(insertProbeRequestSQL, [
       now,
@@ -288,9 +295,7 @@ export async function saveProbeRequestLog({
       JSON.stringify(requestConfig.body),
       probeRes.status,
       JSON.stringify(probeRes.headers),
-      typeof probeRes.data === 'string'
-        ? probeRes.data
-        : JSON.stringify(probeRes.data), // TODO: limit data stored.
+      responseBody,
       probeRes.config.extraData?.responseTime ?? 0,
       probeRes.headers['content-length'],
       errorResp,
@@ -359,11 +364,12 @@ export async function getSummary() {
   ])
 
   const totalRequests = probesSummary.reduce((acc, { count }) => acc + count, 0)
-  const averageResponseTime =
+  const rawAverageResponseTime =
     probesSummary.reduce(
       (acc, curr) => acc + curr.average_response_time * curr.count,
       0
     ) / totalRequests || 0
+  const averageResponseTime = Math.round(rawAverageResponseTime)
   const numberOfIncidents: number =
     notificationsSummaryByType.find((notif) => notif.type === 'NOTIFY-INCIDENT')
       ?.count || 0

@@ -163,7 +163,7 @@ export async function sendNotifications(
             ) {
               body = {
                 type: message.meta.type,
-                ip_address: message.meta.publicIpAddress,
+                ip_address: message.body,
               }
             } else if (
               message.meta.type === 'incident' ||
@@ -174,23 +174,13 @@ export async function sendNotifications(
                 alert: message.summary,
                 url: message.meta.url,
                 time: message.meta.time,
-                monika: `${message.meta.hostname} (${[
-                  message.meta.publicIpAddress,
-                  message.meta.privateIpAddress,
-                ]
-                  .filter(Boolean)
-                  .join('/')})`,
+                monika: message.meta.monikaInstance,
               }
             } else if (message.meta.type === 'status-update') {
               body = {
                 type: message.meta.type,
                 time: message.meta.time,
-                monika: `${message.meta.hostname} (${[
-                  message.meta.publicIpAddress,
-                  message.meta.privateIpAddress,
-                ]
-                  .filter(Boolean)
-                  .join('/')})`,
+                monika: message.meta.monikaInstance,
                 numberOfProbes: String(message.meta.numberOfProbes),
                 averageResponseTime: String(message.meta.averageResponseTime),
                 numberOfIncidents: String(message.meta.numberOfIncidents),
@@ -238,22 +228,19 @@ export async function sendAlerts({
   notifications,
   url,
   probeState,
-  incidentThreshold,
 }: {
   validation: ValidateResponse
   notifications: Notification[]
   url: string
   probeState: string
-  incidentThreshold: number
 }) {
   const ipAddress = getIp()
-  const message = getMessageForAlert({
+  const message = await getMessageForAlert({
     alert: validation.alert,
     url,
     ipAddress,
     probeState,
-    incidentThreshold,
-    responseValue: validation.responseValue,
+    response: validation.response,
   })
 
   return sendNotifications(notifications, message)
