@@ -115,7 +115,7 @@ export async function doProbe(
       }
 
       // done probes, no alerts, no notification.. now print log
-      EventEmitter.emit(PROBE_LOGS_BUILT, mLog)
+      // EventEmitter.emit(PROBE_LOGS_BUILT, mLog)
     }
 
     // done probing, got some result, process it, check for thresholds and notifications
@@ -127,6 +127,9 @@ export async function doProbe(
       validatedResp: validatedRes,
       mLog,
     })
+
+    // done probes, got some alerts & notif.. print log
+    EventEmitter.emit(PROBE_LOGS_BUILT, mLog)
 
     // Done processing results, check if need to send out alerts
     EventEmitter.emit(

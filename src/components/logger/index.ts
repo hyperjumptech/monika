@@ -84,20 +84,15 @@ export function probeBuildLog({
   mLog.responseCode = probeRes.status
   mLog.responseTime = probeRes.config.extraData?.responseTime ?? 0
 
-  if (alerts?.length) {
-    mLog.alert.flag = 'alert'
-    mLog.alert.message = alerts.map((alert) => alert.query)
-  }
-
   // specific alerts/notif for http status codes
   switch (mLog.responseCode) {
     case 0:
       mLog.alert.flag = 'alert'
-      mLog.alert.message = ['URI not found']
+      mLog.alert.message.push('URI not found')
       break
     case 599:
       mLog.alert.flag = 'alert'
-      mLog.alert.message = ['Request Timed out']
+      mLog.alert.message.push('Request Timed out')
       break
     default:
   }
@@ -175,7 +170,7 @@ export function setNotification(
   mLog: LogObject
 ): LogObject {
   mLog.notification.flag = flag
-  mLog.notification.message[0] = message
+  mLog.notification.message.push(message)
 
   return mLog
 }
@@ -197,7 +192,7 @@ export function setAlert(
   mLog: LogObject
 ): LogObject {
   mLog.alert.flag = flag
-  mLog.alert.message[0] = message
+  mLog.alert.message.push(message)
 
   return mLog
 }
