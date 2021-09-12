@@ -3,7 +3,7 @@ id: alerts
 title: Alerts
 ---
 
-Alerts are the types of condition that will trigger Monika to send notification. It is an array located on probes defined in the config file `monika.json` like so.
+Alerts are the types of condition that will trigger Monika to send notification. It is an array located on probes defined in the config file `monika.yml` like so.
 
 ```json
   "probes": [

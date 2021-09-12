@@ -1,0 +1,10 @@
+probes:
+  - requests:
+      - url: http://github.com
+
+notifications:
+  - id: unique-id-webhook
+    type: webhook
+    data:
+      thread_id: 12345678910
+      access_token: your_custom_integration_access_token

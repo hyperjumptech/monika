@@ -1,0 +1,9 @@
+probes:
+    - requests:
+          - url: http://github.com
+
+notifications:
+    - id: unique-id-webhook
+      type: webhook
+      data:
+          url: https://YOUR_WEBHOOK_URL

@@ -13,7 +13,7 @@ monika -h
 
 ## Configuration
 
-Monika by default will look for the `monika.json` config file.
+Monika by default will look for the `monika.yaml` config file.
 You may want to store different configurations for different environments or projects. This is straight forward by using the `-c` or `--config` flag followed by the filename.
 
 ```bash
@@ -23,7 +23,7 @@ monika --config staging-set.json
 Configuration files may be placed remotely which you can specify using the same flag and using a URI.
 
 ```bash
-monika -c https://raw.githubusercontent.com/hyperjumptech/monika/main/config_sample/config.desktop.example.json
+monika -c https://raw.githubusercontent.com/hyperjumptech/monika/main/config_sample/config.desktop.example.yaml
 ```
 
 A neat feature is that the configuration file will be re-read and monitoring updated if Monika detects any changes to it.
@@ -36,7 +36,7 @@ Just starting out? Want to make a new configuration? The `--create-config` flag 
 monika --create-config
 ```
 
-As an alternative, the generator is able to read HAR or postman files as input to convert into monika.json configuration files.
+As an alternative, the generator is able to read HAR or postman files as input to convert into monika.yml. configuration files.
 
 Use the `--har` or the `--postman` in combination with `--create-config` on the command line to convert those files.
 
@@ -44,13 +44,13 @@ Use the `--har` or the `--postman` in combination with `--create-config` on the 
 monika --create-config --har myfile.har
 ```
 
-The above example creates a config file from an existing HAR archive. Auto generated files defaults to 'monika.json'. Use the `-o` output flag to specify another name.
+The above example creates a config file from an existing HAR archive. Auto generated files defaults to 'monika.yaml'. Use the `-o` output flag to specify another name.
 
 ```bash
-monika --create-config --postman mypostman.json -o new-monika.json
+monika --create-config --postman mypostman.json -o new-monika.yaml
 ```
 
-When generating config files, if an existing monika.json file already exist, the user is prompted before overwriting. To bypass the user prompt, use the `--force` flag.
+When generating config files, if an existing monika.yaml file already exist, the user is prompted before overwriting. To bypass the user prompt, use the `--force` flag.
 
 ## Force
 
@@ -72,7 +72,7 @@ You use the `-H` or `--har` to specify a HAR file.
 monika -H my-file.har
 ```
 
-You can use the combination of --create-config and --har flags to convert the HAR archive into to a monika.json configuration file.
+You can use the combination of --create-config and --har flags to convert the HAR archive into to a monika.yml configuration file.
 
 Please note, HAR files may contain sensitive information, use caution when distributing HAR filles.
 
@@ -110,7 +110,7 @@ Have an existing request on postman you want to automate? Monika supports readin
 monika -p postman.json
 ```
 
-You can use the combination of `--create-config` and `--postman` flags to convert the postman files to a monika.json config file.
+You can use the combination of `--create-config` and `--postman` flags to convert the postman files to a monika.yml config file.
 
 ## Prometheus
 

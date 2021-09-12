@@ -52,7 +52,7 @@ export const parseConfig = (configPath: string, type: string): Config => {
   } catch (error) {
     if (error.code === 'ENOENT' && error.path === configPath) {
       throw new Error(
-        'Configuration file not found. By default, Monika looks for monika.json or monika.yml configuration file in the current directory.\n\nOtherwise, you can also specify a configuration file using -c flag as follows:\n\nmonika -c <path_to_configuration_file>\n\nYou can create a configuration file via web interface by opening this web app: https://hyperjumptech.github.io/monika-config-generator/'
+        'Configuration file not found. By default, Monika looks for monika.yml or monika.json configuration file in the current directory.\n\nOtherwise, you can also specify a configuration file using -c flag as follows:\n\nmonika -c <path_to_configuration_file>\n\nYou can create a configuration file via web interface by opening this web app: https://hyperjumptech.github.io/monika-config-generator/'
       )
     }
 

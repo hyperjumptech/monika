@@ -24,68 +24,56 @@ At this moment, Monika support these channel of notifications (You can use just 
 
 ## Configurations
 
-To use one or more notifications, you need to define the settings in the monika.json file as shown below.
+To use one or more notifications, you need to define the settings in the monika.yml file as shown below.
 
-```json
-"notifications": [
-    {
-      "id": "unique-id-mailgun",
-      "type": "mailgun",
-      "data": {
-        "recipients": ["RECIPIENT_EMAIL_ADDRESS"],
-        "apiKey": "YOUR_API_KEY",
-        "domain": "YOUR_DOMAIN"
-      }
-    },
-    {
-      "id": "unique-id-sendgrid",
-      "type": "sendgrid",
-      "data": {
-        "sender": "YOUR_VERIFIED_EMAIL_BY_SENDGRID",
-        "recipients": ["RECIPIENT_EMAIL_ADDRESS"],
-        "apiKey": "YOUR_API_KEY"
-      }
-    },
-    {
-      "id": "unique-id-smtp",
-      "type": "smtp",
-      "data": {
-        "recipients": ["RECIPIENT_EMAIL_ADDRESS"],
-        "hostname": "SMTP_HOSTNAME",
-        "port": 587,
-        "username": "SMTP_USERNAME",
-        "password": "SMTP_PASSWORD"
-      }
-    },
-    {
-      "id": "unique-id-webhook",
-      "type": "webhook",
-      "data": {
-        "method": "POST",
-        "url": "https://WEBHOOK_URL"
-      }
-    }
-  ],
+```yml
+notifications: [
+    - id: unique-id-mailgun
+      type: mailgun
+      data:
+        recipients: [RECIPIENT_EMAIL_ADDRESS]
+        apiKey: YOUR_API_KEY
+        domain: YOUR_DOMAIN
+
+    - id: unique-id-sendgrid
+      type: sendgrid
+      data:
+        sender: YOUR_VERIFIED_EMAIL_BY_SENDGRID
+        recipients: [RECIPIENT_EMAIL_ADDRESS]
+        apiKey: YOUR_API_KEY
+
+    - id: unique-id-smtp
+      type: smtp
+      data:
+        recipients: [RECIPIENT_EMAIL_ADDRESS]
+        hostname: SMTP_HOSTNAME
+        port: 587
+        username: SMTP_USERNAME
+        password: SMTP_PASSWORD
+
+    - id: unique-id-webhook
+      type: webhook
+      data:
+        method: POST
+        url: https://WEBHOOK_URL
+  ]
 ```
 
-Note that every triggered alert will be sent to you through all the notifications you defined in the monika.json, e.g., if you added `webhook` and `smtp` settings, you will receive the alert messages through both.
+Note that every triggered alert will be sent to you through all the notifications you defined in the configuration file, e.g., if you added `webhook` and `smtp` settings, you will receive the alert messages through both.
 
 ## SMTP
 
 [SMTP (Simple Mail Transfer Protocol)](https://en.wikipedia.org/wiki/Simple_Mail_Transfer_Protocol) is a way to send email using the TCP/IP protocol. This is the easiest way to get notified when alerts are triggered. Use the following configuration to set up SMTP notification.
 
-```json
-{
-  "id": "unique-id-smtp",
-  "type": "smtp",
-  "data": {
-    "recipients": ["RECIPIENT_EMAIL_ADDRESS"],
-    "hostname": "smtp.mail.com",
-    "port": 587,
-    "username": "SMTP_USERNAME",
-    "password": "SMTP_PASSWORD"
-  }
-}
+```yaml
+- id: unique-id-smtp
+  type: smtp
+  data:
+    recipients: [RECIPIENT_EMAIL_ADDRESS]
+    hostname: smtp.mail.com
+    port: 587
+    username: SMTP_USERNAME
+    password: SMTP_PASSWORD
 ```
 
 | Key        | Description                                                          | Example                                         |
@@ -118,7 +106,7 @@ Mailgun is an email notification delivery provided by Mailgun email service. To 
 3. For your **domain**
    - • If you are on the free plan, add authorized recipients as instructed [here](https://help.mailgun.com/hc/en-us/articles/217531258-Authorized-Recipients).
    - • If you want to use your own domain, refer [here](https://help.mailgun.com/hc/en-us/articles/203637190-How-Do-I-Add-or-Delete-a-Domain) to add it.
-4. After that, put them in `monika.json` configuration as follows:
+4. After that, put them in `monika.yml` configuration as follows:
 
 ```json
 {
