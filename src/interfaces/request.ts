@@ -43,5 +43,5 @@ export interface RequestConfig extends Omit<AxiosRequestConfig, 'data'> {
   url: string
   body: JSON
   timeout: number
-  alerts?: ProbeAlert
+  alerts?: ProbeAlert[]
 }

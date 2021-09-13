@@ -205,8 +205,11 @@ export async function doProbe(
         response: probeRes,
       })
 
+      // combine global probe alerts with all individual request alerts
+      const combinedAlerts = probe.alerts.concat(...(request.alerts || []))
+
       // Responses have been processed and validated
-      const res = validateResponse(probe.alerts, probeRes)
+      const res = validateResponse(combinedAlerts, probeRes)
       validatedRes = res
 
       // Add to an array to be accessed by another request
