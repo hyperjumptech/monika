@@ -72,12 +72,29 @@ export async function getMessageForAlert({
     alert: ProbeAlert,
     response: AxiosResponseWithExtraData
   ) => {
+    const { statusText, status } = response
+    const isHTTPStatusCode = status >= 100 && status <= 599
+
     if (!alert.message) return ''
+
+    if (!isHTTPStatusCode) {
+      switch (status) {
+        case 0:
+          return 'URI not found'
+        case 1:
+          return 'Connection reset'
+        case 2:
+          return 'Connection refused'
+
+        default:
+          return statusText
+      }
+    }
 
     return Handlebars.compile(alert.message)({
       response: {
         size: Number(response.headers['content-length']),
-        status: response.status,
+        status,
         time: response.config.extraData?.responseTime,
         body: response.data,
         headers: response.headers,
