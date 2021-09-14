@@ -69,40 +69,24 @@ const determineProbeState = ({
   recoveryThreshold: number
 }) => {
   const { isDown, consecutiveTrue, consecutiveFalse } = probeStatusDetail
-  const { hasSomethingToReport } = validation
+  const { isAlertTriggered } = validation
 
-  if (
-    !isDown &&
-    hasSomethingToReport &&
-    consecutiveTrue === incidentThreshold - 1
-  )
+  if (!isDown && isAlertTriggered && consecutiveTrue === incidentThreshold - 1)
     return PROBE_STATE.UP_TRUE_EQUALS_THRESHOLD
 
-  if (
-    !isDown &&
-    hasSomethingToReport &&
-    consecutiveTrue < incidentThreshold - 1
-  ) {
+  if (!isDown && isAlertTriggered && consecutiveTrue < incidentThreshold - 1) {
     return PROBE_STATE.UP_TRUE_BELOW_THRESHOLD
   }
 
-  if (!isDown && !hasSomethingToReport) return PROBE_STATE.UP_FALSE
+  if (!isDown && !isAlertTriggered) return PROBE_STATE.UP_FALSE
 
-  if (
-    isDown &&
-    !hasSomethingToReport &&
-    consecutiveFalse === recoveryThreshold - 1
-  )
+  if (isDown && !isAlertTriggered && consecutiveFalse === recoveryThreshold - 1)
     return PROBE_STATE.DOWN_FALSE_EQUALS_THRESHOLD
 
-  if (
-    isDown &&
-    !hasSomethingToReport &&
-    consecutiveFalse < recoveryThreshold - 1
-  )
+  if (isDown && !isAlertTriggered && consecutiveFalse < recoveryThreshold - 1)
     return PROBE_STATE.DOWN_FALSE_BELOW_THRESHOLD
 
-  if (isDown && hasSomethingToReport) return PROBE_STATE.DOWN_TRUE
+  if (isDown && isAlertTriggered) return PROBE_STATE.DOWN_TRUE
 
   return PROBE_STATE.INIT
 }
@@ -263,7 +247,7 @@ export const processThresholds = ({
         currentProbe.details = [...filteredProbeStatus, updatedStatus]
         results.push(updatedStatus)
 
-        if (validation.hasSomethingToReport === true) {
+        if (validation.isAlertTriggered === true) {
           // set alert flag, concate alert message
           setAlert(
             {

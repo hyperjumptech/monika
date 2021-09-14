@@ -27,9 +27,9 @@ import { AxiosResponseWithExtraData } from '../../interfaces/request'
 import responseChecker from './checkers'
 
 export interface ValidatedResponse {
-  alert: ProbeAlert
-  hasSomethingToReport: boolean
   response: AxiosResponseWithExtraData
+  alert: ProbeAlert
+  isAlertTriggered: boolean
 }
 
 /**
@@ -43,9 +43,9 @@ const validateResponse = (
   response: AxiosResponseWithExtraData
 ): ValidatedResponse[] => {
   const checks = alerts.map((alert) => {
-    const hasSomethingToReport = responseChecker(alert, response)
+    const isAlertTriggered = responseChecker(alert, response)
 
-    return { alert, hasSomethingToReport, response }
+    return { alert, isAlertTriggered, response }
   })
 
   return checks

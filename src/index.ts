@@ -456,7 +456,7 @@ Please refer to the Monika documentations on how to how to configure notificatio
             notifications: notifications ?? [],
             validation: {
               alert: { query: '', message: error.message },
-              hasSomethingToReport: true,
+              isAlertTriggered: true,
               response: {
                 status: 500,
                 config: {
