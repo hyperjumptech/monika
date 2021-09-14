@@ -34,11 +34,17 @@ chai.use(spies)
 
 describe('monika', () => {
   let getPublicIPStub: any
+  let getPublicNetworkInfoStub: any
   beforeEach(() => {
     getPublicIPStub = sinon.stub(IpUtil, 'getPublicIp' as never)
+    getPublicNetworkInfoStub = sinon.stub(
+      IpUtil,
+      'getPublicNetworkInfo' as never
+    )
   })
   afterEach(() => {
     getPublicIPStub.restore()
+    getPublicNetworkInfoStub.restore()
   })
 
   // General Test
