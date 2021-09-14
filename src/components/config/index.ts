@@ -84,7 +84,7 @@ export const updateConfig = (data: Config) => {
   }
 }
 
-const mergeAndUpdateConfigs = () => {
+const mergeAndUpdateConfig = () => {
   const mergedConfig = configs.reduce((prev, current) => {
     return {
       certificate: current?.certificate
@@ -170,7 +170,7 @@ const watchConfigFile = (
     const watcher = chokidar.watch(path)
     watcher.on('change', async () => {
       setupConfigFromFile(path, type, index)
-      mergeAndUpdateConfigs()
+      if (index !== undefined) mergeAndUpdateConfig()
     })
   }
 }
@@ -182,7 +182,7 @@ const scheduleRemoteConfigFetcher = (
 ) => {
   setInterval(async () => {
     setupRemoteConfig(url, index)
-    mergeAndUpdateConfigs()
+    if (index !== undefined) mergeAndUpdateConfig()
   }, interval * 1000)
 }
 
@@ -195,7 +195,7 @@ export const setupConfig = async (flags: any, index?: number) => {
       return setupConfig(newFlags, index)
     })
     await Promise.all(setupConfigs)
-    mergeAndUpdateConfigs()
+    mergeAndUpdateConfig()
   } else if (isUrl(flags.config)) {
     await setupRemoteConfig(flags.config, index)
     scheduleRemoteConfigFetcher(flags.config, flags['config-interval'], index)
