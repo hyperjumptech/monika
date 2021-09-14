@@ -23,8 +23,7 @@
  **********************************************************************************/
 
 export interface ProbeStatus {
-  id: string
-  name: string
+  id: string // in format probeid_requestindex
   details: ProbeStateDetails[]
 }
 

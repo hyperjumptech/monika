@@ -174,14 +174,7 @@ export const processThresholds = ({
   mLog: LogObject
 }) => {
   try {
-    const {
-      id,
-      name,
-      requests,
-      alerts,
-      incidentThreshold,
-      recoveryThreshold,
-    } = probe
+    const { id, alerts, requests, incidentThreshold, recoveryThreshold } = probe
     const results: Array<ProbeStateDetails> = []
 
     // combine global probe alerts with all individual request alerts
@@ -203,7 +196,6 @@ export const processThresholds = ({
 
       PROBE_STATUSES.push({
         id,
-        name,
         details: initProbeStatuses,
       })
     }
