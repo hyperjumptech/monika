@@ -26,7 +26,6 @@ import { setAlert } from '../../components/logger'
 import { LogObject } from '../../interfaces/logs'
 import { Probe } from '../../interfaces/probe'
 import { ProbeStateDetails, ProbeStatus } from '../../interfaces/probe-status'
-import { AxiosResponseWithExtraData } from '../../interfaces/request'
 import { ValidatedResponse } from '../../plugins/validate-response'
 import { log } from '../../utils/pino'
 
@@ -167,14 +166,11 @@ const updateProbeStatus = (
 
 export const processThresholds = ({
   probe,
-  validatedResp,
+  validatedResponse,
   mLog,
 }: {
-  checkOrder: number
   probe: Probe
-  probeRes: AxiosResponseWithExtraData
-  totalRequests: number
-  validatedResp: ValidatedResponse[]
+  validatedResponse: ValidatedResponse[]
   mLog: LogObject
 }) => {
   try {
@@ -220,8 +216,8 @@ export const processThresholds = ({
     )!
 
     // Calculate the count for successes and failures
-    if (validatedResp.length > 0) {
-      validatedResp.forEach(async (validation) => {
+    if (validatedResponse.length > 0) {
+      validatedResponse.forEach(async (validation) => {
         const { alert } = validation
         let updatedStatus: ProbeStateDetails = INIT_PROBE_STATUS_DETAILS
 

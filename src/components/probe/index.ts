@@ -195,8 +195,10 @@ export async function doProbe(
   } as LogObject
 
   try {
-    for await (const request of probe.requests) {
+    for (const request of probe.requests) {
       mLog.url = request.url
+      // intentionally wait for a request to finish before processing next request in loop
+      // eslint-disable-next-line no-await-in-loop
       probeRes = await probing(request, responses)
 
       eventEmitter.emit(events.probe.response.received, {
@@ -230,20 +232,15 @@ export async function doProbe(
       totalRequests += 1
 
       // Exit the loop if there is any alert triggered
-      if (
-        validatedResponse.filter((item) => item.isAlertTriggered).length > 0
-      ) {
+      if (validatedResponse.some((item) => item.isAlertTriggered)) {
         break
       }
     }
 
     // done probing, got some result, process it, check for thresholds and notifications
     const statuses = processThresholds({
-      checkOrder,
       probe,
-      probeRes,
-      totalRequests,
-      validatedResp: validatedResponse,
+      validatedResponse,
       mLog,
     })
 
