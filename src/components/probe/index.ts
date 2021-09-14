@@ -173,7 +173,7 @@ export async function doProbe(
 ) {
   const eventEmitter = getEventEmitter()
   const responses = []
-  let validatedRes: ValidatedResponse[] = []
+  let validatedResponse: ValidatedResponse[] = []
   let probeRes: AxiosResponseWithExtraData = {} as AxiosResponseWithExtraData
   let totalRequests = 0 // is the number of requests in  probe.requests[x]
   let mLog: LogObject = {
@@ -209,8 +209,7 @@ export async function doProbe(
       const combinedAlerts = probe.alerts.concat(...(request.alerts || []))
 
       // Responses have been processed and validated
-      const res = validateResponse(combinedAlerts, probeRes)
-      validatedRes = res
+      validatedResponse = validateResponse(combinedAlerts, probeRes)
 
       // Add to an array to be accessed by another request
       responses.push(probeRes)
@@ -221,7 +220,7 @@ export async function doProbe(
         probe,
         totalRequests,
         probeRes,
-        alerts: validatedRes
+        alerts: validatedResponse
           .filter((item) => item.isAlertTriggered)
           .map((item) => item.alert),
         mLog,
@@ -231,7 +230,9 @@ export async function doProbe(
       totalRequests += 1
 
       // Exit the loop if there is any alert triggered
-      if (validatedRes.filter((item) => item.isAlertTriggered).length > 0) {
+      if (
+        validatedResponse.filter((item) => item.isAlertTriggered).length > 0
+      ) {
         break
       }
     }
@@ -242,7 +243,7 @@ export async function doProbe(
       probe,
       probeRes,
       totalRequests,
-      validatedResp: validatedRes,
+      validatedResp: validatedResponse,
       mLog,
     })
 
@@ -257,7 +258,7 @@ export async function doProbe(
         statuses,
         notifications,
         totalRequests,
-        validatedResponseStatuses: validatedRes,
+        validatedResponseStatuses: validatedResponse,
       },
       mLog
     ).catch((error) => {
