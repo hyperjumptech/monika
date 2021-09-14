@@ -137,22 +137,22 @@ const setupConfigFromFile = async (
   index?: number
 ) => {
   const parsed = parseConfig(path, type)
-  if (index === undefined) {
-    cfg.version = cfg.version || md5Hash(parsed)
-    updateConfig(parsed as Config)
+  if (index !== undefined) {
+    configs[index] = parsed
     return
   }
-  configs[index] = parsed
+  cfg.version = cfg.version || md5Hash(parsed)
+  updateConfig(parsed as Config)
 }
 
 const setupRemoteConfig = async (url: string, index?: number) => {
   const fetched = await fetchConfig(url)
-  if (index === undefined) {
-    cfg.version = cfg.version || md5Hash(fetched)
-    updateConfig(fetched as Config)
+  if (index !== undefined) {
+    configs[index] = fetched
     return
   }
-  configs[index] = fetched
+  cfg.version = cfg.version || md5Hash(fetched)
+  updateConfig(fetched as Config)
 }
 
 const watchConfigFile = (
@@ -170,7 +170,7 @@ const watchConfigFile = (
     const watcher = chokidar.watch(path)
     watcher.on('change', async () => {
       setupConfigFromFile(path, type, index)
-      if (index !== undefined) mergeAndUpdateConfig()
+      if (index !== undefined) mergeAndUpdateConfig() // only run merge if running on indexed config
     })
   }
 }
@@ -182,7 +182,7 @@ const scheduleRemoteConfigFetcher = (
 ) => {
   setInterval(async () => {
     setupRemoteConfig(url, index)
-    if (index !== undefined) mergeAndUpdateConfig()
+    if (index !== undefined) mergeAndUpdateConfig() // only run merge if running on indexed config
   }, interval * 1000)
 }
 
