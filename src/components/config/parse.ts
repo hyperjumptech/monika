@@ -22,14 +22,18 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Config } from '../../interfaces/config'
+import { Config, ConfigOptional } from '../../interfaces/config'
 import { readFileSync } from 'fs'
 import { parseConfigFromPostman } from './parse-postman'
 import { parseHarFile } from './parse-har'
 import path from 'path'
 import yml from 'js-yaml'
+import { log } from '../../utils/pino'
 
-export const parseConfig = (configPath: string, type: string): Config => {
+export const parseConfig = (
+  configPath: string,
+  type: string
+): ConfigOptional => {
   // Read file from configPath
   try {
     // Read file from configPath
@@ -48,6 +52,7 @@ export const parseConfig = (configPath: string, type: string): Config => {
       return (cfg as unknown) as Config
     }
 
+    log.info(`TESTTT ${configPath} ${configString}`)
     return JSON.parse(configString)
   } catch (error) {
     if (error.code === 'ENOENT' && error.path === configPath) {

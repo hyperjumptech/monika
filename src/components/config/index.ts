@@ -28,7 +28,7 @@ import pEvent from 'p-event'
 import isUrl from 'is-url'
 import events from './../../events'
 import { open } from './../../utils/open-website'
-import { Config } from '../../interfaces/config'
+import { Config, ConfigOptional } from '../../interfaces/config'
 import { fetchConfig } from './fetch'
 import { parseConfig } from './parse'
 import { validateConfig } from './validate'
@@ -41,6 +41,7 @@ import { cli } from 'cli-ux'
 const emitter = new EventEmitter()
 
 let cfg: Config
+let configs: ConfigOptional[]
 
 export const getConfig = () => {
   if (!cfg) throw new Error('Configuration setup has not been run yet')
@@ -59,10 +60,8 @@ export async function* getConfigIterator() {
 
 export const updateConfig = (data: Config) => {
   const lastVersion = cfg?.version
-
   cfg = data
   cfg.version = cfg.version || md5Hash(cfg)
-
   if (cfg.version !== lastVersion) {
     emitter.emit(events.config.updated, cfg)
     log.warn('config file update detected')
@@ -82,6 +81,34 @@ const handshakeAndValidate = async (config: Config) => {
 
   if (!validated.valid) {
     throw new Error(validated.message)
+  }
+}
+
+const mergeAndUpdateConfigs = () => {
+  const mergedConfig = configs.reduce((prev, current) => {
+    return {
+      certificate: current?.certificate
+        ? current.certificate
+        : prev.certificate,
+      interval: current?.interval ? current.interval : prev.interval,
+      notifications: current?.notifications
+        ? current.notifications
+        : prev.notifications,
+      probes: current?.probes ? current.probes : prev.probes,
+      symon: current?.symon ? current.symon : prev.symon,
+      'status-notification': current?.['status-notification']
+        ? current['status-notification']
+        : prev['status-notification'],
+    }
+  })
+  log.info(`test ${JSON.stringify(mergedConfig)}`)
+  handshakeAndValidate(mergedConfig as Config)
+  cfg = mergedConfig as Config
+  cfg.version = cfg.version || md5Hash(mergedConfig)
+  const lastConfig = cfg.version
+  if (lastConfig !== cfg.version) {
+    emitter.emit(events.config.updated, cfg)
+    log.warn('config file update detected')
   }
 }
 
@@ -105,51 +132,77 @@ const getPathAndTypeFromFlag = (flags: any) => {
   }
 }
 
-export const setupConfigFromFile = async (flags: any, watch: boolean) => {
-  const { path, type } = getPathAndTypeFromFlag(flags)
-
+const setupConfigFromFile = async (
+  path: string,
+  type: string,
+  index?: number
+) => {
   const parsed = parseConfig(path, type)
-  await handshakeAndValidate(parsed)
-  cfg = parsed
-  cfg.version = cfg.version || md5Hash(cfg)
+  if (index === undefined) {
+    cfg.version = cfg.version || md5Hash(parsed)
+    updateConfig(parsed as Config)
+    return
+  }
+  configs[index] = parsed
+  mergeAndUpdateConfigs()
+}
 
-  if (watch) {
-    const fileWatcher = chokidar.watch(path)
-    fileWatcher.on('change', async () => {
-      const parsed = parseConfig(path, type)
-      await handshakeAndValidate(parsed)
-      updateConfig(parsed)
+const setupRemoteConfig = async (url: string, index?: number) => {
+  const fetched = await fetchConfig(url)
+  if (index === undefined) {
+    cfg.version = cfg.version || md5Hash(fetched)
+    updateConfig(fetched as Config)
+    return
+  }
+  configs[index] = fetched
+  mergeAndUpdateConfigs()
+}
+
+const watchConfigFile = (
+  path: string,
+  type: string,
+  repeat?: number,
+  index?: number
+) => {
+  const watchConfigFile = !(
+    process.env.CI ||
+    process.env.NODE_ENV === 'test' ||
+    repeat !== undefined
+  )
+  if (watchConfigFile) {
+    const watcher = chokidar.watch(path)
+    watcher.on('change', async () => {
+      setupConfigFromFile(path, type, index)
     })
   }
 }
 
-export const setupConfigFromUrl = async (
+const scheduleRemoteConfigFetcher = (
   url: string,
-  checkingInterval: number
+  interval: number,
+  index?: number
 ) => {
-  const fetched = await fetchConfig(url)
-  await handshakeAndValidate(fetched)
-  cfg = fetched
-  cfg.version = cfg.version || md5Hash(cfg)
-
   setInterval(async () => {
-    const fetched = await fetchConfig(url)
-    await handshakeAndValidate(fetched)
-    updateConfig(fetched)
-  }, checkingInterval * 1000)
+    setupRemoteConfig(url, index)
+  }, interval * 1000)
 }
 
-export const setupConfig = async (flags: any) => {
-  if (isUrl(flags.config)) {
-    await setupConfigFromUrl(flags.config, flags['config-interval'])
+export const setupConfig = async (flags: any, index?: number) => {
+  if (Array.isArray(flags.config)) {
+    configs = new Array((flags.config as Array<string>).length)
+    const setupConfigs = (flags.config as Array<string>).map((value, index) => {
+      delete flags.config
+      const newFlags = { config: value, ...flags }
+      return setupConfig(newFlags, index)
+    })
+    await Promise.all(setupConfigs)
+  } else if (isUrl(flags.config)) {
+    await setupRemoteConfig(flags.config, index)
+    scheduleRemoteConfigFetcher(flags.config, flags['config-interval'], index)
   } else {
-    const watchConfigFile = !(
-      process.env.CI ||
-      process.env.NODE_ENV === 'test' ||
-      flags.repeat
-    )
-
-    await setupConfigFromFile(flags, watchConfigFile)
+    const { path, type } = getPathAndTypeFromFlag(flags)
+    await setupConfigFromFile(path, type, index)
+    watchConfigFile(path, type, flags.repeat, index)
   }
 }
 

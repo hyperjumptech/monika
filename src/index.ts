@@ -91,6 +91,7 @@ class Monika extends Command {
         'JSON configuration filename or URL. If none is supplied, will look for monika.json in the current directory',
       default: () => getDefaultConfig(),
       env: 'MONIKA_JSON_CONFIG',
+      multiple: true,
     }),
 
     'create-config': flags.boolean({
