@@ -109,7 +109,7 @@ async function checkThresholdsAndSendAlert(
     data: ProbeSaveLogToDatabase,
     mLog: LogObject
   ): LogObject => {
-    const { index, probe, probeState, notifications } = data
+    const { probe, probeState, notifications } = data
 
     const type =
       probeState?.probeState === 'UP_TRUE_EQUALS_THRESHOLD'
@@ -119,13 +119,11 @@ async function checkThresholdsAndSendAlert(
     if ((notifications?.length ?? 0) > 0) {
       Promise.all(
         notifications?.map((notification) => {
-          const alert = probe.alerts[index]
-
           mLog = setNotificationLog(
             {
               type,
               probe,
-              alert,
+              alertQuery: probeState?.alertQuery || '',
               notification,
             },
             mLog
@@ -207,8 +205,11 @@ export async function doProbe(
         response: probeRes,
       })
 
+      // combine global probe alerts with all individual request alerts
+      const combinedAlerts = probe.alerts.concat(...(request.alerts || []))
+
       // Responses have been processed and validated
-      const res = validateResponse(probe.alerts, probeRes)
+      const res = validateResponse(combinedAlerts, probeRes)
       validatedRes = res
 
       // Add to an array to be accessed by another request
