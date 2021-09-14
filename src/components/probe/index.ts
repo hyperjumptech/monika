@@ -173,7 +173,6 @@ export async function doProbe(
 ) {
   const eventEmitter = getEventEmitter()
   const responses = []
-  let validatedResponse: ValidatedResponse[] = []
   let probeRes: AxiosResponseWithExtraData = {} as AxiosResponseWithExtraData
   let totalRequests = 0 // is the number of requests in  probe.requests[x]
   let mLog: LogObject = {
@@ -211,7 +210,7 @@ export async function doProbe(
       const combinedAlerts = probe.alerts.concat(...(request.alerts || []))
 
       // Responses have been processed and validated
-      validatedResponse = validateResponse(combinedAlerts, probeRes)
+      const validatedResponse = validateResponse(combinedAlerts, probeRes)
 
       // Add to an array to be accessed by another request
       responses.push(probeRes)
@@ -231,37 +230,33 @@ export async function doProbe(
       // done one request, is there another
       totalRequests += 1
 
+      // done probing, got some result, process it, check for thresholds and notifications
+      const statuses = processThresholds({
+        probe,
+        validatedResponse,
+        mLog,
+      })
+
+      // Done processing results, check if need to send out alerts
+      checkThresholdsAndSendAlert(
+        {
+          probe,
+          statuses,
+          notifications,
+          totalRequests,
+          validatedResponseStatuses: validatedResponse,
+        },
+        mLog
+      ).catch((error) => {
+        mLog = setAlert({ flag: 'error', message: error }, mLog)
+        printProbeLog(mLog)
+      })
+
       // Exit the loop if there is any alert triggered
       if (validatedResponse.some((item) => item.isAlertTriggered)) {
         break
       }
     }
-
-    // done probing, got some result, process it, check for thresholds and notifications
-    const statuses = processThresholds({
-      probe,
-      validatedResponse,
-      mLog,
-    })
-
-    // done probes, got some alerts & notif.. print log
-
-    printProbeLog(mLog)
-
-    // Done processing results, check if need to send out alerts
-    checkThresholdsAndSendAlert(
-      {
-        probe,
-        statuses,
-        notifications,
-        totalRequests,
-        validatedResponseStatuses: validatedResponse,
-      },
-      mLog
-    ).catch((error) => {
-      mLog = setAlert({ flag: 'error', message: error }, mLog)
-      printProbeLog(mLog)
-    })
   } catch (error) {
     mLog = setAlert({ flag: 'error', message: error }, mLog)
     printProbeLog(mLog)
