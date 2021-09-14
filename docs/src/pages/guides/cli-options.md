@@ -26,7 +26,18 @@ Configuration files may be placed remotely which you can specify using the same 
 monika -c https://raw.githubusercontent.com/hyperjumptech/monika/main/config_sample/config.desktop.example.yml
 ```
 
-A neat feature is that the configuration file will be re-read and monitoring updated if Monika detects any changes to it.
+A neat feature is that the configuration file will watch any changes to the file and update running config on-the-fly.
+
+### Multiple configurations
+
+Monika also supports multiple sources of configuration at the same time.
+**Any top-level** keys from the first argument will be overridden by the later source(s).
+
+```bash
+# assuming only-notif.json content is {"notifications":[<your-notifications-here>]}
+# any notification(s) foo-monitoring.json has will be overridden by only-notif.json's notifications
+monika -c foo-monitoring.json only-notif.json
+```
 
 ## Create Config
 

@@ -76,6 +76,7 @@ const handshakeAndValidate = async (config: Config) => {
 
 export const updateConfig = (data: Config) => {
   const lastVersion = cfg.version
+  handshakeAndValidate(data)
   cfg = data
   cfg.version = lastVersion || md5Hash(cfg)
   if (cfg.version !== lastVersion) {
@@ -91,10 +92,14 @@ const mergeAndUpdateConfig = () => {
         ? current.certificate
         : prev.certificate,
       interval: current?.interval ? current.interval : prev.interval,
-      notifications: current?.notifications
-        ? current.notifications
-        : prev.notifications,
-      probes: current?.probes ? current.probes : prev.probes,
+      notifications:
+        current?.notifications && current.notifications.length > 0
+          ? current.notifications
+          : prev.notifications,
+      probes:
+        current?.probes && current.probes.length > 0
+          ? current.probes
+          : prev.probes,
       symon: current?.symon ? current.symon : prev.symon,
       'status-notification': current?.['status-notification']
         ? current['status-notification']
