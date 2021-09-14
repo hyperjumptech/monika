@@ -28,7 +28,6 @@ import { parseConfigFromPostman } from './parse-postman'
 import { parseHarFile } from './parse-har'
 import path from 'path'
 import yml from 'js-yaml'
-import { log } from '../../utils/pino'
 
 export const parseConfig = (
   configPath: string,
@@ -51,8 +50,6 @@ export const parseConfig = (
       const cfg = yml.load(configString, { json: true })
       return (cfg as unknown) as Config
     }
-
-    log.info(`TESTTT ${configPath} ${configString}`)
     return JSON.parse(configString)
   } catch (error) {
     if (error.code === 'ENOENT' && error.path === configPath) {

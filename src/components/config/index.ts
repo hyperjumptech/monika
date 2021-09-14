@@ -58,16 +58,6 @@ export async function* getConfigIterator() {
   }
 }
 
-export const updateConfig = (data: Config) => {
-  const lastVersion = cfg?.version
-  cfg = data
-  cfg.version = cfg.version || md5Hash(cfg)
-  if (cfg.version !== lastVersion) {
-    emitter.emit(events.config.updated, cfg)
-    log.warn('config file update detected')
-  }
-}
-
 const handshakeAndValidate = async (config: Config) => {
   if (config.symon?.url && config.symon?.key) {
     try {
@@ -81,6 +71,16 @@ const handshakeAndValidate = async (config: Config) => {
 
   if (!validated.valid) {
     throw new Error(validated.message)
+  }
+}
+
+export const updateConfig = (data: Config) => {
+  const lastVersion = cfg?.version
+  cfg = data
+  cfg.version = lastVersion || md5Hash(cfg)
+  if (cfg.version !== lastVersion) {
+    emitter.emit(events.config.updated, cfg)
+    log.warn('config file update detected')
   }
 }
 
@@ -101,11 +101,10 @@ const mergeAndUpdateConfigs = () => {
         : prev['status-notification'],
     }
   })
-  log.info(`test ${JSON.stringify(mergedConfig)}`)
   handshakeAndValidate(mergedConfig as Config)
+  const lastConfig = cfg?.version
   cfg = mergedConfig as Config
-  cfg.version = cfg.version || md5Hash(mergedConfig)
-  const lastConfig = cfg.version
+  cfg.version = lastConfig || md5Hash(mergedConfig)
   if (lastConfig !== cfg.version) {
     emitter.emit(events.config.updated, cfg)
     log.warn('config file update detected')
@@ -144,7 +143,6 @@ const setupConfigFromFile = async (
     return
   }
   configs[index] = parsed
-  mergeAndUpdateConfigs()
 }
 
 const setupRemoteConfig = async (url: string, index?: number) => {
@@ -155,7 +153,6 @@ const setupRemoteConfig = async (url: string, index?: number) => {
     return
   }
   configs[index] = fetched
-  mergeAndUpdateConfigs()
 }
 
 const watchConfigFile = (
@@ -173,6 +170,7 @@ const watchConfigFile = (
     const watcher = chokidar.watch(path)
     watcher.on('change', async () => {
       setupConfigFromFile(path, type, index)
+      mergeAndUpdateConfigs()
     })
   }
 }
@@ -184,6 +182,7 @@ const scheduleRemoteConfigFetcher = (
 ) => {
   setInterval(async () => {
     setupRemoteConfig(url, index)
+    mergeAndUpdateConfigs()
   }, interval * 1000)
 }
 
@@ -196,6 +195,7 @@ export const setupConfig = async (flags: any, index?: number) => {
       return setupConfig(newFlags, index)
     })
     await Promise.all(setupConfigs)
+    mergeAndUpdateConfigs()
   } else if (isUrl(flags.config)) {
     await setupRemoteConfig(flags.config, index)
     scheduleRemoteConfigFetcher(flags.config, flags['config-interval'], index)
