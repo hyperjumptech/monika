@@ -23,13 +23,13 @@
  **********************************************************************************/
 
 /* eslint-disable complexity */
-import { Config } from '../../interfaces/config'
 import { Notification } from '../../interfaces/notification'
+import { Config } from '../../interfaces/config'
 import { ProbeAlert } from '../../interfaces/probe'
 import { Validation } from '../../interfaces/validation'
+import { isValidURL } from '../../utils/is-valid-url'
 import { parseAlertStringTime } from '../../plugins/validate-response/checkers'
 import { compileExpression } from '../../utils/expression-parser'
-import { isValidURL } from '../../utils/is-valid-url'
 
 const HTTPMethods = [
   'DELETE',
@@ -284,31 +284,26 @@ export const validateConfig = (configuration: Config): Validation => {
       }
     }
 
-    // attach alert to each request
-    probe.requests.forEach((request) => {
-      // convert old alert format to new format
-      const convertedAlerts = alerts.map((alert: any) => {
-        if (typeof alert === 'string') {
-          let query = ''
-          let message = ''
-          const subject = ''
+    // convert old alert format to new format
+    probe.alerts = alerts.map((alert: any) => {
+      if (typeof alert === 'string') {
+        let query = ''
+        let message = ''
+        const subject = ''
 
-          if (alert === 'status-not-2xx') {
-            query = 'response.status < 200 or response.status > 299'
-            message = 'HTTP Status is {{ response.status }}, expecting 200'
-          } else if (alert.startsWith('response-time-greater-than-')) {
-            const expectedTime = parseAlertStringTime(alert)
-            query = `response.time > ${expectedTime}`
-            message = `Response time is {{ response.time }}ms, expecting less than ${expectedTime}ms`
-          }
-
-          return { query, subject, message }
+        if (alert === 'status-not-2xx') {
+          query = 'response.status < 200 or response.status > 299'
+          message = 'HTTP Status is {{ response.status }}, expecting 200'
+        } else if (alert.startsWith('response-time-greater-than-')) {
+          const expectedTime = parseAlertStringTime(alert)
+          query = `response.time > ${expectedTime}`
+          message = `Response time is {{ response.time }}ms, expecting less than ${expectedTime}ms`
         }
 
-        return alert
-      })
+        return { query, subject, message }
+      }
 
-      request.alerts = convertedAlerts
+      return alert
     })
   }
 

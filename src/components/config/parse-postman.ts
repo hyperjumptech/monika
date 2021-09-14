@@ -50,7 +50,6 @@ const getConvertedProbeFromPostmanItem = (item: any) => {
         ),
         body: req?.body?.raw || JSON.parse('{}'),
         timeout: 10000,
-        alerts: [],
       },
     ],
     incidentThreshold: DEFAULT_THRESHOLD,
