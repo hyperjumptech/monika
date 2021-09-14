@@ -25,9 +25,9 @@
 import { setAlert } from '../../components/logger'
 import { LogObject } from '../../interfaces/logs'
 import { Probe } from '../../interfaces/probe'
-import { ProbeStatus, ProbeStateDetails } from '../../interfaces/probe-status'
+import { ProbeStateDetails, ProbeStatus } from '../../interfaces/probe-status'
 import { AxiosResponseWithExtraData } from '../../interfaces/request'
-import { ValidateResponse } from '../../plugins/validate-response'
+import { ValidatedResponse } from '../../plugins/validate-response'
 import { log } from '../../utils/pino'
 
 let PROBE_STATUSES: ProbeStatus[] = []
@@ -64,7 +64,7 @@ const determineProbeState = ({
 }: {
   errorName: string
   probeStatusDetail: ProbeStateDetails
-  validation: ValidateResponse
+  validation: ValidatedResponse
   incidentThreshold: number
   recoveryThreshold: number
 }) => {
@@ -190,7 +190,7 @@ export const processThresholds = ({
   probe: Probe
   probeRes: AxiosResponseWithExtraData
   totalRequests: number
-  validatedResp: ValidateResponse[]
+  validatedResp: ValidatedResponse[]
   mLog: LogObject
 }) => {
   try {

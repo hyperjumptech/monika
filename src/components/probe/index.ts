@@ -28,28 +28,28 @@ import { Notification } from '../../interfaces/notification'
 import { Probe } from '../../interfaces/probe'
 import type { ProbeStateDetails } from '../../interfaces/probe-status'
 import { AxiosResponseWithExtraData } from '../../interfaces/request'
+import validateResponse, {
+  ValidatedResponse,
+} from '../../plugins/validate-response'
+import { getEventEmitter } from '../../utils/events'
+import { log } from '../../utils/pino'
 import {
   printProbeLog,
   probeBuildLog,
-  setNotificationLog,
   setAlert,
+  setNotificationLog,
 } from '../logger'
 import { sendAlerts } from '../notification'
-import validateResponse, {
-  ValidateResponse,
-} from '../../plugins/validate-response'
-import { getLogsAndReport } from '../reporter'
-import { getEventEmitter } from '../../utils/events'
 import { processThresholds } from '../notification/process-server-status'
+import { getLogsAndReport } from '../reporter'
 import { probing } from './probing'
-import { log } from '../../utils/pino'
 
 // TODO: move this to interface file?
 interface ProbeStatusProcessed {
   probe: Probe
   statuses?: ProbeStateDetails[]
   notifications?: Notification[]
-  validatedResponseStatuses: ValidateResponse[]
+  validatedResponseStatuses: ValidatedResponse[]
   totalRequests: number
 }
 
@@ -99,7 +99,7 @@ async function checkThresholdsAndSendAlert(
         notifications: notifications ?? [],
         validation:
           validatedResponseStatuses.find(
-            (validateResponse: ValidateResponse) =>
+            (validateResponse: ValidatedResponse) =>
               validateResponse.alert.query === probeState?.alertQuery
           ) || validatedResponseStatuses[index],
       })
@@ -173,7 +173,7 @@ export async function doProbe(
 ) {
   const eventEmitter = getEventEmitter()
   const responses = []
-  let validatedRes: ValidateResponse[] = []
+  let validatedRes: ValidatedResponse[] = []
   let probeRes: AxiosResponseWithExtraData = {} as AxiosResponseWithExtraData
   let totalRequests = 0 // is the number of requests in  probe.requests[x]
   let mLog: LogObject = {
