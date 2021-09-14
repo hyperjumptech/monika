@@ -75,7 +75,7 @@ const handshakeAndValidate = async (config: Config) => {
 }
 
 export const updateConfig = (data: Config) => {
-  const lastVersion = cfg?.version
+  const lastVersion = cfg.version
   cfg = data
   cfg.version = lastVersion || md5Hash(cfg)
   if (cfg.version !== lastVersion) {
@@ -141,7 +141,7 @@ const setupConfigFromFile = async (
     configs[index] = parsed
     return
   }
-  cfg.version = cfg.version || md5Hash(parsed)
+  if (cfg === undefined) cfg = parsed as Config
   updateConfig(parsed as Config)
 }
 
@@ -151,7 +151,7 @@ const setupRemoteConfig = async (url: string, index?: number) => {
     configs[index] = fetched
     return
   }
-  cfg.version = cfg.version || md5Hash(fetched)
+  if (cfg === undefined) cfg = fetched as Config
   updateConfig(fetched as Config)
 }
 
