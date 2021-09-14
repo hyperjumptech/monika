@@ -48,12 +48,12 @@ import { Config } from './interfaces/config'
 import { Notification } from './interfaces/notification'
 import { Probe } from './interfaces/probe'
 import { AxiosResponseWithExtraData } from './interfaces/request'
+import initLoaders from './loaders'
 import { idFeeder, isIDValid, sanitizeProbe } from './looper'
 import { getEventEmitter } from './utils/events'
 import getIp from './utils/ip'
 import { log } from './utils/pino'
 import { publicIpAddress } from './utils/public-ip'
-import initLoaders from './loaders'
 
 const em = getEventEmitter()
 
