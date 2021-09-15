@@ -27,7 +27,6 @@ import { Probe } from '../../interfaces/probe'
 import { ServerAlertState } from '../../interfaces/probe-status'
 import { RequestConfig } from '../../interfaces/request'
 import { ValidatedResponse } from '../../plugins/validate-response'
-import { log } from '../../utils/pino'
 
 type ServerAlertStateContext = {
   incidentThreshold: number
@@ -125,60 +124,53 @@ export const processThresholds = ({
   const { requests, incidentThreshold, recoveryThreshold } = probe
   const request = requests[requestIndex]
 
-  try {
-    const results: Array<ServerAlertState> = []
+  const results: Array<ServerAlertState> = []
 
-    if (!serverAlertStateInterpreters.has(request)) {
-      const interpreters: Record<
-        string,
-        Interpreter<ServerAlertStateContext>
-      > = {}
+  if (!serverAlertStateInterpreters.has(request)) {
+    const interpreters: Record<
+      string,
+      Interpreter<ServerAlertStateContext>
+    > = {}
 
-      validatedResponse
-        .map((r) => r.alert)
-        .forEach((alert) => {
-          const stateMachine = serverAlertStateMachine.withContext({
-            incidentThreshold,
-            recoveryThreshold,
-            consecutiveFailures: 0,
-            consecutiveSuccesses: 0,
-            hasBeenDownAtLeastOnce: false,
-          })
-
-          interpreters[alert.query] = interpret(stateMachine).start()
+    validatedResponse
+      .map((r) => r.alert)
+      .forEach((alert) => {
+        const stateMachine = serverAlertStateMachine.withContext({
+          incidentThreshold,
+          recoveryThreshold,
+          consecutiveFailures: 0,
+          consecutiveSuccesses: 0,
+          hasBeenDownAtLeastOnce: false,
         })
 
-      serverAlertStateInterpreters.set(request, interpreters)
-    }
-
-    // Send event for successes and failures to state interpreter
-    // then get latest state for each alert
-    validatedResponse.forEach((validation) => {
-      const { alert, isAlertTriggered } = validation
-
-      const interpreter = serverAlertStateInterpreters.get(request)![
-        alert.query
-      ]
-
-      interpreter.send(isAlertTriggered ? 'FAILURE' : 'SUCCESS')
-
-      const state = interpreter.state
-
-      results.push({
-        alertQuery: alert.query,
-        state: state.value as 'UP' | 'DOWN',
-        shouldSendNotification:
-          (state.value === 'DOWN' &&
-            state.context.consecutiveFailures === incidentThreshold) ||
-          (state.value === 'UP' &&
-            state.context.consecutiveSuccesses === recoveryThreshold &&
-            state.context.hasBeenDownAtLeastOnce),
+        interpreters[alert.query] = interpret(stateMachine).start()
       })
-    })
 
-    return results
-  } catch (error) {
-    log.error(error.message)
-    return []
+    serverAlertStateInterpreters.set(request, interpreters)
   }
+
+  // Send event for successes and failures to state interpreter
+  // then get latest state for each alert
+  validatedResponse.forEach((validation) => {
+    const { alert, isAlertTriggered } = validation
+
+    const interpreter = serverAlertStateInterpreters.get(request)![alert.query]
+
+    interpreter.send(isAlertTriggered ? 'FAILURE' : 'SUCCESS')
+
+    const state = interpreter.state
+
+    results.push({
+      alertQuery: alert.query,
+      state: state.value as 'UP' | 'DOWN',
+      shouldSendNotification:
+        (state.value === 'DOWN' &&
+          state.context.consecutiveFailures === incidentThreshold) ||
+        (state.value === 'UP' &&
+          state.context.consecutiveSuccesses === recoveryThreshold &&
+          state.context.hasBeenDownAtLeastOnce),
+    })
+  })
+
+  return results
 }
