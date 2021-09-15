@@ -33,9 +33,10 @@ A neat feature is that the configuration file will watch any changes to the file
 Monika also supports multiple sources of configuration at the same time.
 **Any top-level** keys from the first argument will be overridden by the later source(s).
 
+For example, assuming you have a file named `only-notif.json` whose content `{"notifications":[<your-notifications-here>]}`
+
 ```bash
-# assuming only-notif.json content is {"notifications":[<your-notifications-here>]}
-# any notification(s) foo-monitoring.json has will be overridden by only-notif.json's notifications
+# only-notif.json's notifications will override notifications foo-monitoring.json has
 monika -c foo-monitoring.json only-notif.json
 ```
 
