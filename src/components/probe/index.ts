@@ -111,10 +111,7 @@ async function checkThresholdsAndSendAlert(
   ): LogObject => {
     const { probe, probeState, notifications } = data
 
-    const type =
-      probeState?.probeState === 'UP_TRUE_EQUALS_THRESHOLD'
-        ? 'NOTIFY-INCIDENT'
-        : 'NOTIFY-RECOVER'
+    const type = probeState?.isDown ? 'NOTIFY-INCIDENT' : 'NOTIFY-RECOVER'
 
     if ((notifications?.length ?? 0) > 0) {
       Promise.all(
@@ -133,6 +130,21 @@ async function checkThresholdsAndSendAlert(
     }
     return mLog
   }
+
+  validatedResponseStatuses.forEach((validation) => {
+    if (validation.isAlertTriggered === true) {
+      // set alert flag, concate alert message
+      setAlert(
+        {
+          flag: 'ALERT',
+          message: mLog.alert.message + ', ' + validation.alert.query,
+        },
+        mLog
+      )
+      // done probes, got some alerts & notif.. print log
+      printProbeLog(mLog)
+    }
+  })
 
   statuses
     ?.filter((probeState) => probeState.shouldSendNotification)
@@ -233,8 +245,8 @@ export async function doProbe(
       // done probing, got some result, process it, check for thresholds and notifications
       const statuses = processThresholds({
         probe,
+        requestIndex: totalRequests - 1,
         validatedResponse,
-        mLog,
       })
 
       // Done processing results, check if need to send out alerts
