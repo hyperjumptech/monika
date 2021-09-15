@@ -219,8 +219,8 @@ Monika supports Whatsapp notification. To enable notification via whatsapp, you 
     data:
       recipients: [628123456789],
       url: https://yourwhatsappapiserver.com,
-    username: whatsappusername,
-    password: whatsapppassword
+      username: whatsappusername,
+      password: whatsapppassword
 
 ```
 
