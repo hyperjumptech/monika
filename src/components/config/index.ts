@@ -74,46 +74,109 @@ const handshakeAndValidate = async (config: Config) => {
   }
 }
 
-export const updateConfig = (data: Config) => {
-  const lastVersion = cfg.version
-  handshakeAndValidate(data)
-  cfg = data
-  cfg.version = lastVersion || md5Hash(cfg)
-  if (cfg.version !== lastVersion) {
+const updateConfig = (config: Config) => {
+  handshakeAndValidate(config)
+  const lastConfig = cfg?.version
+  cfg = config
+  cfg.version = lastConfig || md5Hash(config)
+  if (lastConfig !== cfg.version) {
     emitter.emit(events.config.updated, cfg)
     log.warn('config file update detected')
   }
 }
 
-const mergeAndUpdateConfig = () => {
-  const mergedConfig = configs.reduce((prev, current) => {
-    return {
-      certificate: current?.certificate
-        ? current.certificate
-        : prev.certificate,
-      interval: current?.interval ? current.interval : prev.interval,
-      notifications:
-        current?.notifications && current.notifications.length > 0
-          ? current.notifications
-          : prev.notifications,
-      probes:
-        current?.probes && current.probes.length > 0
-          ? current.probes
-          : prev.probes,
-      symon: current?.symon ? current.symon : prev.symon,
-      'status-notification': current?.['status-notification']
-        ? current['status-notification']
-        : prev['status-notification'],
-    }
-  })
-  handshakeAndValidate(mergedConfig as Config)
-  const lastConfig = cfg?.version
-  cfg = mergedConfig as Config
-  cfg.version = lastConfig || md5Hash(mergedConfig)
-  if (lastConfig !== cfg.version) {
-    emitter.emit(events.config.updated, cfg)
-    log.warn('config file update detected')
+const mergeConfigs = (): Config => {
+  const mergedConfig =
+    configs.length === 1
+      ? configs[0]
+      : configs.reduce((prev, current) => {
+          return {
+            certificate: current?.certificate
+              ? current.certificate
+              : prev.certificate,
+            interval: current?.interval ? current.interval : prev.interval,
+            notifications:
+              current?.notifications && current.notifications.length > 0
+                ? current.notifications
+                : prev.notifications,
+            probes:
+              current?.probes && current.probes.length > 0
+                ? current.probes
+                : prev.probes,
+            symon: current?.symon ? current.symon : prev.symon,
+            'status-notification': current?.['status-notification']
+              ? current['status-notification']
+              : prev['status-notification'],
+          }
+        })
+  return mergedConfig as Config
+}
+
+const watchConfigFile = (
+  path: string,
+  type: string,
+  index: number,
+  repeat?: number
+) => {
+  const watchConfigFile = !(
+    process.env.CI ||
+    process.env.NODE_ENV === 'test' ||
+    repeat !== undefined
+  )
+  if (watchConfigFile) {
+    const watcher = chokidar.watch(path)
+    watcher.on('change', async () => {
+      const config = parseConfig(path, type)
+      configs[index] = config
+      const mergedConfig = mergeConfigs()
+      updateConfig(mergedConfig)
+    })
   }
+}
+
+const scheduleRemoteConfigFetcher = (
+  url: string,
+  interval: number,
+  index: number
+) => {
+  setInterval(async () => {
+    const config = await fetchConfig(url)
+    configs[index] = config
+    const mergedConfig = mergeConfigs()
+    updateConfig(mergedConfig)
+  }, interval * 1000)
+}
+
+const setupConfigFromJson = (flags: any): Promise<ConfigOptional>[] => {
+  return (flags.config as Array<string>).map((source, i) => {
+    if (isUrl(source)) {
+      scheduleRemoteConfigFetcher(source, flags['config-interval'], i)
+      return fetchConfig(source)
+    }
+    delete flags.config
+    watchConfigFile(source, 'monika', i, flags.repeat)
+    return Promise.resolve(parseConfig(source, 'monika'))
+  })
+}
+
+export const setupConfig = async (flags: any) => {
+  const promises = new Array<Promise<ConfigOptional>>(0)
+  if (Array.isArray(flags.config) && flags.config.length > 0) {
+    const json = setupConfigFromJson(flags)
+    promises.concat(json)
+  }
+  if (flags.har) {
+    const config = parseConfig(flags.har, 'har')
+    promises.push(Promise.resolve(config))
+  }
+  if (flags.postman) {
+    const config = parseConfig(flags.postman, 'postman')
+    promises.push(Promise.resolve(config))
+  }
+  configs = await Promise.all(promises)
+  log.info(JSON.stringify(configs))
+  const mergedConfig = mergeConfigs()
+  updateConfig(mergedConfig)
 }
 
 const getPathAndTypeFromFlag = (flags: any) => {
@@ -133,81 +196,6 @@ const getPathAndTypeFromFlag = (flags: any) => {
   return {
     path,
     type,
-  }
-}
-
-const setupConfigFromFile = async (
-  path: string,
-  type: string,
-  index?: number
-) => {
-  const parsed = parseConfig(path, type)
-  if (index !== undefined) {
-    configs[index] = parsed
-    return
-  }
-  if (cfg === undefined) cfg = parsed as Config
-  updateConfig(parsed as Config)
-}
-
-const setupRemoteConfig = async (url: string, index?: number) => {
-  const fetched = await fetchConfig(url)
-  if (index !== undefined) {
-    configs[index] = fetched
-    return
-  }
-  if (cfg === undefined) cfg = fetched as Config
-  updateConfig(fetched as Config)
-}
-
-const watchConfigFile = (
-  path: string,
-  type: string,
-  repeat?: number,
-  index?: number
-) => {
-  const watchConfigFile = !(
-    process.env.CI ||
-    process.env.NODE_ENV === 'test' ||
-    repeat !== undefined
-  )
-  if (watchConfigFile) {
-    const watcher = chokidar.watch(path)
-    watcher.on('change', async () => {
-      setupConfigFromFile(path, type, index)
-      if (index !== undefined) mergeAndUpdateConfig() // only run merge if running on indexed config
-    })
-  }
-}
-
-const scheduleRemoteConfigFetcher = (
-  url: string,
-  interval: number,
-  index?: number
-) => {
-  setInterval(async () => {
-    setupRemoteConfig(url, index)
-    if (index !== undefined) mergeAndUpdateConfig() // only run merge if running on indexed config
-  }, interval * 1000)
-}
-
-export const setupConfig = async (flags: any, index?: number) => {
-  if (Array.isArray(flags.config)) {
-    configs = new Array((flags.config as Array<string>).length)
-    const setupConfigs = (flags.config as Array<string>).map((value, index) => {
-      delete flags.config
-      const newFlags = { config: value, ...flags }
-      return setupConfig(newFlags, index)
-    })
-    await Promise.all(setupConfigs)
-    mergeAndUpdateConfig()
-  } else if (isUrl(flags.config)) {
-    await setupRemoteConfig(flags.config, index)
-    scheduleRemoteConfigFetcher(flags.config, flags['config-interval'], index)
-  } else {
-    const { path, type } = getPathAndTypeFromFlag(flags)
-    await setupConfigFromFile(path, type, index)
-    watchConfigFile(path, type, flags.repeat, index)
   }
 }
 
