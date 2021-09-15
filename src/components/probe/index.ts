@@ -89,7 +89,7 @@ async function checkThresholdsAndSendAlert(
       validatedResponseStatuses,
     } = data
 
-    const statusString = probeState?.isDown ? 'DOWN' : 'UP'
+    const statusString = probeState?.state ?? 'UP'
     const url = probe.requests[totalRequests - 1].url ?? ''
 
     if ((notifications?.length ?? 0) > 0) {
@@ -111,7 +111,8 @@ async function checkThresholdsAndSendAlert(
   ): LogObject => {
     const { probe, probeState, notifications } = data
 
-    const type = probeState?.isDown ? 'NOTIFY-INCIDENT' : 'NOTIFY-RECOVER'
+    const type =
+      probeState?.state === 'DOWN' ? 'NOTIFY-INCIDENT' : 'NOTIFY-RECOVER'
 
     if ((notifications?.length ?? 0) > 0) {
       Promise.all(

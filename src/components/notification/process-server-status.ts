@@ -32,8 +32,8 @@ import { log } from '../../utils/pino'
 type ServerAlertStateContext = {
   incidentThreshold: number
   recoveryThreshold: number
-  consecutiveIncident: number
-  consecutiveRecovery: number
+  consecutiveFailures: number
+  consecutiveSuccesses: number
   hasBeenDownAtLeastOnce: boolean
 }
 
@@ -53,35 +53,35 @@ const serverAlertStateMachine = createMachine<ServerAlertStateContext>(
     states: {
       UP: {
         on: {
-          INCIDENT: [
+          FAILURE: [
             {
               target: 'DOWN',
-              cond: 'reachIncidentThreshold',
-              actions: 'handleIncident',
+              cond: 'incidentThresholdReached',
+              actions: 'handleFailure',
             },
             {
-              actions: 'handleIncident',
+              actions: 'handleFailure',
             },
           ],
-          RECOVERY: {
-            actions: 'handleRecovery',
+          SUCCESS: {
+            actions: 'handleSuccess',
           },
         },
       },
       DOWN: {
         entry: 'handleDownState',
         on: {
-          INCIDENT: {
-            actions: 'handleIncident',
+          FAILURE: {
+            actions: 'handleFailure',
           },
-          RECOVERY: [
+          SUCCESS: [
             {
               target: 'UP',
-              cond: 'reachRecoveryThreshold',
-              actions: 'handleRecovery',
+              cond: 'recoveryThresholdReached',
+              actions: 'handleSuccess',
             },
             {
-              actions: 'handleRecovery',
+              actions: 'handleSuccess',
             },
           ],
         },
@@ -90,24 +90,24 @@ const serverAlertStateMachine = createMachine<ServerAlertStateContext>(
   },
   {
     actions: {
-      handleIncident: assign({
-        consecutiveIncident: (context) => context.consecutiveIncident + 1,
-        consecutiveRecovery: (_context) => 0,
+      handleFailure: assign({
+        consecutiveFailures: (context) => context.consecutiveFailures + 1,
+        consecutiveSuccesses: (_context) => 0,
       }),
-      handleRecovery: assign({
-        consecutiveIncident: (_context) => 0,
-        consecutiveRecovery: (context) => context.consecutiveRecovery + 1,
+      handleSuccess: assign({
+        consecutiveFailures: (_context) => 0,
+        consecutiveSuccesses: (context) => context.consecutiveSuccesses + 1,
       }),
       handleDownState: assign({
         hasBeenDownAtLeastOnce: (_context) => true,
       }),
     },
     guards: {
-      reachIncidentThreshold: (context) => {
-        return context.consecutiveIncident + 1 >= context.incidentThreshold
+      incidentThresholdReached: (context) => {
+        return context.consecutiveFailures + 1 >= context.incidentThreshold
       },
-      reachRecoveryThreshold: (context) => {
-        return context.consecutiveRecovery + 1 >= context.recoveryThreshold
+      recoveryThresholdReached: (context) => {
+        return context.consecutiveSuccesses + 1 >= context.recoveryThreshold
       },
     },
   }
@@ -140,8 +140,8 @@ export const processThresholds = ({
           const stateMachine = serverAlertStateMachine.withContext({
             incidentThreshold,
             recoveryThreshold,
-            consecutiveIncident: 0,
-            consecutiveRecovery: 0,
+            consecutiveFailures: 0,
+            consecutiveSuccesses: 0,
             hasBeenDownAtLeastOnce: false,
           })
 
@@ -160,18 +160,18 @@ export const processThresholds = ({
         alert.query
       ]
 
-      interpreter.send(isAlertTriggered ? 'INCIDENT' : 'RECOVERY')
+      interpreter.send(isAlertTriggered ? 'FAILURE' : 'SUCCESS')
 
       const state = interpreter.state
 
       results.push({
         alertQuery: alert.query,
-        isDown: state.value === 'DOWN',
+        state: state.value as 'UP' | 'DOWN',
         shouldSendNotification:
           (state.value === 'DOWN' &&
-            state.context.consecutiveIncident === incidentThreshold) ||
+            state.context.consecutiveFailures === incidentThreshold) ||
           (state.value === 'UP' &&
-            state.context.consecutiveRecovery === recoveryThreshold &&
+            state.context.consecutiveSuccesses === recoveryThreshold &&
             state.context.hasBeenDownAtLeastOnce),
       })
     })

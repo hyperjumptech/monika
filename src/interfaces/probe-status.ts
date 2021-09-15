@@ -24,6 +24,6 @@
 
 export interface ServerAlertState {
   alertQuery: string
-  isDown: boolean
+  state: 'UP' | 'DOWN'
   shouldSendNotification: boolean
 }
