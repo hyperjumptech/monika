@@ -22,26 +22,48 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { AxiosRequestConfig, AxiosResponse } from 'axios'
-import { ProbeAlert } from './probe'
+import { getConfig, setupConfig } from '../components/config'
+import { openLogfile } from '../components/logger/history'
+import events from '../events'
+import { loopCheckSTUNServer, loopReport } from '../looper'
+import {
+  PrometheusCollector,
+  startPrometheusMetricsServer,
+} from '../plugins/metrics/prometheus'
+import { getEventEmitter } from '../utils/events'
+import { getPublicNetworkInfo } from '../utils/public-ip'
+// import to activate all the application event emitter subscribers
+import '../events/subscribers/application'
 
-export interface ExtraData {
-  requestStartedAt: number
-  responseTime: number
-}
+export default async function init(flags: any) {
+  const eventEmitter = getEventEmitter()
+  const isTestEnvironment = process.env.CI || process.env.NODE_ENV === 'test'
 
-export interface AxiosRequestConfigWithExtraData extends AxiosRequestConfig {
-  extraData?: ExtraData
-}
+  // cache location & ISP info
+  await getPublicNetworkInfo()
+  // check if connected to STUN Server and getting the public IP in the same time
+  loopCheckSTUNServer(flags.stun)
+  await openLogfile()
 
-export interface AxiosResponseWithExtraData extends AxiosResponse {
-  config: AxiosRequestConfigWithExtraData
-}
+  // start Promotheus server
+  if (flags.prometheus) {
+    const {
+      registerCollectorFromProbes,
+      collectProbeRequestMetrics,
+    } = new PrometheusCollector()
 
-export interface RequestConfig extends Omit<AxiosRequestConfig, 'data'> {
-  saveBody?: boolean
-  url: string
-  body: JSON
-  timeout: number
-  alerts?: ProbeAlert[]
+    // register prometheus metric collectors
+    eventEmitter.on(events.config.sanitized, registerCollectorFromProbes)
+    // collect prometheus metrics
+    eventEmitter.on(events.probe.response.received, collectProbeRequestMetrics)
+
+    startPrometheusMetricsServer(flags.prometheus)
+  }
+
+  await setupConfig(flags)
+
+  // Run report on interval if symon configuration exists
+  if (!isTestEnvironment) {
+    loopReport(getConfig)
+  }
 }

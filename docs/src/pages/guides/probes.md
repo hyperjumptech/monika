@@ -1,4 +1,7 @@
-# Probes
+---
+id: probes
+title: Probes
+---
 
 Probes are the heart of the monitoring requests. Probes are arrays of request objects defined in the config file `monika.json` like so.
 
@@ -47,11 +50,15 @@ An actual probe request may be something like below.
         "body": {
           "username": "someusername",
           "password": "somepassword"
-        }
+        },
+        "alerts": []
       }],
       "incidentThreshold": 3,
       "recoveryThreshold": 3,
-      "alerts": ["status-not-2xx", "response-time-greater-than-200-ms"]
+      "alerts": [{
+        "query": "response.status != 200",
+        "message": "HTTP response status is {{ response.status }}, expecting 200"
+      }]
     },
   ]
 ```
@@ -70,6 +77,7 @@ Details of the field are give in the table below.
 | recoveryThreshold (optional) | Number of times an alert should return false before Monika sends notifications. For example, when recoveryThreshold is 3, Monika will only send notifications when the probed URL returns status 2xx 3 times in a row. After sending the notifications, Monika will not send notifications anymore until the alert status changes. Default value is 5.    |
 | alerts                       | The condition which will trigger an alert, and the subsequent notification method to send out the alert. See below for further details on alerts and notifications.                                                                                                                                                                                       |
 | saveBody (optional)          | When set to true, the response body of the request is stored in the internal database. The default is off when not defined. This is to keep the log files size small as some responses can be sizeable. The setting is for each probe request.                                                                                                            |
+| alerts (optional)            | See [alerts](./alerts) section for detailed information                                                                                                                                                                                                                                                                                                   |
 
 ## Probe Response Anatomy
 

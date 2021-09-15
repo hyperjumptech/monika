@@ -1,4 +1,7 @@
-# Alerts
+---
+id: alerts
+title: Alerts
+---
 
 Alerts are the types of condition that will trigger Monika to send notification. It is an array located on probes defined in the config file `monika.json` like so.
 
@@ -7,7 +10,18 @@ Alerts are the types of condition that will trigger Monika to send notification.
     {
       "id": "1",
       "name": "Name of the probe",
-      ...
+      "requests": [
+        ...
+        {
+          ...
+          "alerts": [
+            {
+              "query": "response.size >= 10000",
+              "message": "Response size is {{ response.size }}, expecting less than 10000"
+            }
+          ]
+        }
+      ],
       "alerts": [
         {
           "query": "response.status != 200",
@@ -17,6 +31,8 @@ Alerts are the types of condition that will trigger Monika to send notification.
     },
   ]
 ```
+
+The `alerts` configuration can be put under `probe` or under each `requests` as displayed above. Alerts defined under `probe` will run for all requests, while the alerts defined under specific request will run for that request only.
 
 ## Alert Query
 

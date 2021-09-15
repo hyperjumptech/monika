@@ -30,11 +30,7 @@ import { getAllLogs, saveProbeRequestLog } from './history'
 import { log } from '../../utils/pino'
 
 import { LogObject } from '../../interfaces/logs'
-import { getEventEmitter } from '../../utils/events'
-import { PROBE_LOGS_BUILT } from '../../constants/event-emitter'
 import { saveNotificationLog } from '../logger/history'
-
-const EventEmitter = getEventEmitter()
 
 /**
  * getStatusColor colorizes different statusCode
@@ -132,14 +128,14 @@ export function probeBuildLog({
 export function setNotificationLog(
   {
     type,
-    alert,
+    alertQuery,
     notification,
     probe,
   }: {
     probe: Probe
     notification: Notification
     type: 'NOTIFY-INCIDENT' | 'NOTIFY-RECOVER'
-    alert: ProbeAlert
+    alertQuery: string
   },
   mLog: LogObject
 ): LogObject {
@@ -155,7 +151,7 @@ export function setNotificationLog(
 
   mLog.notification.flag = type
   mLog.notification.message[0] = msg
-  saveNotificationLog(probe, notification, type, alert.query)
+  saveNotificationLog(probe, notification, type, alertQuery)
 
   return mLog
 }
@@ -233,8 +229,3 @@ export async function printAllLogs() {
     })
   })
 }
-
-// TODO: Handle event when probe logs has been built
-EventEmitter.on(PROBE_LOGS_BUILT, async () => {
-  // TODO: put saving to db in one spot
-})

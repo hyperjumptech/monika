@@ -22,17 +22,13 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { setAlert } from '../../components/logger'
-import { PROBE_LOGS_BUILT } from '../../constants/event-emitter'
+import { printProbeLog, setAlert } from '../../components/logger'
 import { LogObject } from '../../interfaces/logs'
 import { Probe } from '../../interfaces/probe'
 import { ProbeStatus, ProbeStateDetails } from '../../interfaces/probe-status'
 import { AxiosResponseWithExtraData } from '../../interfaces/request'
 import { ValidateResponse } from '../../plugins/validate-response'
 import { log } from '../../utils/pino'
-import { getEventEmitter } from '../../utils/events'
-
-const em = getEventEmitter()
 
 let PROBE_STATUSES: ProbeStatus[] = []
 const INIT_PROBE_STATUS_DETAILS: ProbeStateDetails = {
@@ -198,9 +194,20 @@ export const processThresholds = ({
   mLog: LogObject
 }) => {
   try {
-    // Get Probe ID and Name
-    const { id, name, alerts, incidentThreshold, recoveryThreshold } = probe
+    const {
+      id,
+      name,
+      requests,
+      alerts,
+      incidentThreshold,
+      recoveryThreshold,
+    } = probe
     const results: Array<ProbeStateDetails> = []
+
+    // combine global probe alerts with all individual request alerts
+    const combinedAlerts = alerts.concat(
+      ...requests.map((request) => request.alerts || [])
+    )
 
     // Initialize server status
     // This checks if there are no item in PROBE_STATUSES
@@ -209,7 +216,7 @@ export const processThresholds = ({
       (item) => item.id === id
     )
     if (isAlreadyInProbeStatus.length === 0) {
-      const initProbeStatuses = alerts.map((alert) => ({
+      const initProbeStatuses = combinedAlerts.map((alert) => ({
         ...INIT_PROBE_STATUS_DETAILS,
         alertQuery: alert.query,
       }))
@@ -266,7 +273,7 @@ export const processThresholds = ({
             mLog
           )
           // done probes, got some alerts & notif.. print log
-          em.emit(PROBE_LOGS_BUILT, mLog)
+          printProbeLog(mLog)
         }
       })
     }

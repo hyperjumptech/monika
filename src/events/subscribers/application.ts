@@ -22,26 +22,26 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { AxiosRequestConfig, AxiosResponse } from 'axios'
-import { ProbeAlert } from './probe'
+import { hostname } from 'os'
+import { getConfig } from '../../components/config'
+import { sendNotifications } from '../../components/notification'
+import { getMessageForTerminate } from '../../components/notification/alert-message'
+import events from '../../events'
+import { getEventEmitter } from '../../utils/events'
+import getIp from '../../utils/ip'
+import { log } from '../../utils/pino'
 
-export interface ExtraData {
-  requestStartedAt: number
-  responseTime: number
-}
+const eventEmitter = getEventEmitter()
 
-export interface AxiosRequestConfigWithExtraData extends AxiosRequestConfig {
-  extraData?: ExtraData
-}
+eventEmitter.on(events.application.terminated, async () => {
+  const isTestEnvironment = process.env.NODE_ENV === 'test'
 
-export interface AxiosResponseWithExtraData extends AxiosResponse {
-  config: AxiosRequestConfigWithExtraData
-}
+  if (!isTestEnvironment) {
+    const message = await getMessageForTerminate(hostname(), getIp())
+    const config = getConfig()
 
-export interface RequestConfig extends Omit<AxiosRequestConfig, 'data'> {
-  saveBody?: boolean
-  url: string
-  body: JSON
-  timeout: number
-  alerts?: ProbeAlert[]
-}
+    sendNotifications(config.notifications ?? [], message).catch((error) =>
+      log.error(error)
+    )
+  }
+})
