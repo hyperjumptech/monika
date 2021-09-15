@@ -37,6 +37,8 @@ export const parseConfig = async (
   try {
     // Read file from configPath
     const configString = readFileSync(configPath, 'utf-8')
+    if (configString.length === 0)
+      throw new Error(`Failed to read ${configPath}, got empty.`)
     const ext = path.extname(configPath)
 
     if (type === 'har') {

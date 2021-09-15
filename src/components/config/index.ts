@@ -153,15 +153,16 @@ const setupConfigFromJson = (flags: any): Promise<ConfigOptional>[] => {
 }
 
 export const setupConfig = async (flags: any) => {
-  const promises = new Array<Promise<ConfigOptional>>(0)
+  const configParse = new Array<Promise<ConfigOptional>>(0)
   if (Array.isArray(flags.config) && flags.config.length > 0) {
     const json = setupConfigFromJson(flags)
-    promises.concat(json)
+    configParse.push(...json)
   }
-  if (flags.har) promises.push(parseConfig(flags.har, 'har'))
-  if (flags.postman) promises.push(parseConfig(flags.postman, 'postman'))
-  configs = await Promise.all(promises)
-  log.info(JSON.stringify(configs))
+  if (flags.har) configParse.push(parseConfig(flags.har, 'har'))
+  if (flags.postman) configParse.push(parseConfig(flags.postman, 'postman'))
+  if (configParse.length === 0)
+    throw new Error('Failed to recognize configuration(s)')
+  configs = await Promise.all(configParse)
   updateConfig(mergeConfigs())
 }
 
