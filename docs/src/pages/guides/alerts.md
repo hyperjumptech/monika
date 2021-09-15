@@ -61,7 +61,7 @@ Or to query value inside the body
 
 ```yml
   alerts : [
-    - query: response.body.data.todos[0].title != \"Drink wate"r\
+    - query: response.body.data.todos[0].title != "Drink water"
       ...
   ]
 ```
