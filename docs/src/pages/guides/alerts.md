@@ -12,14 +12,14 @@ Alerts are the types of condition that will trigger Monika to send notification.
       requests: [
         ...
           ...
-          alerts: [
+        - alerts: [
               query: response.size >= 10000
               message: Response size is {{ response.size }} expecting less than 10000
           ]
       ]
-      alerts: [
+    - alerts: [
           query: response.status != 200
-          message: HTTP Status code is  response.status  expecting 200
+          message: HTTP Status code is {{ response.status }} expecting 200
       ]
   ]
 ```
@@ -31,8 +31,8 @@ The `alerts` configuration can be put under `probe` or under each `requests` as 
 Query contains any arbitrary expression that will trigger alert when it returns a truthy value
 
 ```yml
-alerts: [query: response.status == 500
-      ...]
+- alerts: [query: response.status == 500
+        ...]
 ```
 
 Inside the query expression you can get the response object.
@@ -51,7 +51,7 @@ For example, to trigger alert when content-type is not json you may use
 
 ```yml
   alerts : [
-    -  query: response.headers['content-type'] != \application/json\
+    - query: response.headers['content-type'] != \application/json\
       ...
 
   ]
