@@ -51,7 +51,7 @@ For example, to trigger alert when content-type is not json you may use
 
 ```yml
   alerts : [
-    - query: response.headers['content-type'] != \application/json\
+    - query: response.headers['content-type'] != "application/json"
       ...
 
   ]
