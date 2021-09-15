@@ -426,13 +426,16 @@ Please refer to the Monika documentations on how to how to configure notificatio
   }
 
   async checkTLSAndSaveNotifIfFail(
-    domain: string,
+    host: any,
     reminder: number,
     probe: Probe,
     notifications?: Notification[]
   ) {
+    const hostIsObject = typeof host !== 'string'
+    const domain = hostIsObject ? host.domain : host
+
     try {
-      await checkTLS(domain, reminder)
+      await checkTLS(host, reminder)
     } catch (error) {
       log.error(error.message)
 
