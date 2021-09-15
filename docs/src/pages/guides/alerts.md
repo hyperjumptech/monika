@@ -7,17 +7,24 @@ Alerts are the types of condition that will trigger Monika to send notification.
 
 ```yml
   probes: [
-    - id: 1,
+    - id: 1
       name: Name of the probe
-      ...
-      alerts: [
-        - query: response.status != 200
-          message: HTTP Status code is not 200
-
+      requests: [
+        ...
+          ...
+          alerts: [
+              query: response.size >= 10000
+              message: Response size is {{ response.size }} expecting less than 10000
+          ]
       ]
-    ,
+      alerts: [
+          query: response.status != 200
+          message: HTTP Status code is  response.status  expecting 200
+      ]
   ]
 ```
+
+The `alerts` configuration can be put under `probe` or under each `requests` as displayed above. Alerts defined under `probe` will run for all requests, while the alerts defined under specific request will run for that request only.
 
 ## Alert Query
 

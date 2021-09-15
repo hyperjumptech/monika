@@ -23,6 +23,7 @@
  **********************************************************************************/
 
 import { AxiosRequestConfig, AxiosResponse } from 'axios'
+import { ProbeAlert } from './probe'
 
 export interface ExtraData {
   requestStartedAt: number
@@ -42,4 +43,5 @@ export interface RequestConfig extends Omit<AxiosRequestConfig, 'data'> {
   url: string
   body: JSON
   timeout: number
+  alerts?: ProbeAlert[]
 }
