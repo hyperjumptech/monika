@@ -26,7 +26,7 @@ import events from '../../events'
 import { LogObject } from '../../interfaces/logs'
 import { Notification } from '../../interfaces/notification'
 import { Probe } from '../../interfaces/probe'
-import type { ServerStateDetails } from '../../interfaces/probe-status'
+import type { ServerAlertState } from '../../interfaces/probe-status'
 import { AxiosResponseWithExtraData } from '../../interfaces/request'
 import validateResponse, {
   ValidatedResponse,
@@ -47,7 +47,7 @@ import { probing } from './probing'
 // TODO: move this to interface file?
 interface ProbeStatusProcessed {
   probe: Probe
-  statuses?: ServerStateDetails[]
+  statuses?: ServerAlertState[]
   notifications?: Notification[]
   validatedResponseStatuses: ValidatedResponse[]
   totalRequests: number
@@ -59,12 +59,12 @@ interface ProbeSaveLogToDatabase
     'statuses' | 'totalRequests' | 'validatedResponseStatuses'
   > {
   index: number
-  probeState?: ServerStateDetails
+  probeState?: ServerAlertState
 }
 
 interface ProbeSendNotification extends Omit<ProbeStatusProcessed, 'statuses'> {
   index: number
-  probeState?: ServerStateDetails
+  probeState?: ServerAlertState
 }
 
 // Probes Thresholds processed, Send out notifications/alerts.

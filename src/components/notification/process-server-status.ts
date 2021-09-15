@@ -25,13 +25,13 @@
 import { setAlert } from '../../components/logger'
 import { LogObject } from '../../interfaces/logs'
 import { Probe } from '../../interfaces/probe'
-import { ServerState, ServerStateDetails } from '../../interfaces/probe-status'
+import { ServerAlertState } from '../../interfaces/probe-status'
 import { ValidatedResponse } from '../../plugins/validate-response'
 import { log } from '../../utils/pino'
 
-let SERVER_STATES: ServerState[] = []
+const serverStates = new Map<string, ServerAlertState[]>()
 
-const INIT_SERVER_STATE_DETAILS: ServerStateDetails = {
+const INIT_SERVER_STATE_DETAILS: ServerAlertState = {
   alertQuery: '',
   probeState: 'INIT',
   isDown: false,
@@ -41,6 +41,7 @@ const INIT_SERVER_STATE_DETAILS: ServerStateDetails = {
   consecutiveTrue: 0,
   consecutiveFalse: 0,
 }
+
 enum PROBE_STATE {
   INIT = 'INIT',
   UP_TRUE_EQUALS_THRESHOLD = 'UP_TRUE_EQUALS_THRESHOLD',
@@ -52,7 +53,7 @@ enum PROBE_STATE {
 }
 
 export const resetProbeStatuses = () => {
-  SERVER_STATES = []
+  serverStates.clear()
 }
 
 // Function to determine probe state
@@ -63,7 +64,7 @@ const determineProbeState = ({
   recoveryThreshold,
 }: {
   errorName: string
-  probeStatusDetail: ServerStateDetails
+  probeStatusDetail: ServerAlertState
   validation: ValidatedResponse
   incidentThreshold: number
   recoveryThreshold: number
@@ -93,7 +94,7 @@ const determineProbeState = ({
 
 // updateProbeStatus updates probe status according to the state
 const updateProbeStatus = (
-  statusDetails: ServerStateDetails,
+  statusDetails: ServerAlertState,
   probeState: PROBE_STATE
 ) => {
   switch (probeState) {
@@ -176,7 +177,7 @@ export const processThresholds = ({
 }) => {
   try {
     const { id, alerts, requests, incidentThreshold, recoveryThreshold } = probe
-    const results: Array<ServerStateDetails> = []
+    const results: Array<ServerAlertState> = []
 
     // combine global probe alerts with all individual request alerts
     const combinedAlerts = alerts.concat(
@@ -186,35 +187,27 @@ export const processThresholds = ({
     // Initialize server status
     // This checks if there are no item in PROBE_STATUSES
     // that doesn't have item with ID === id, push new ProbeStatus
-    const isAlreadyInProbeStatus = SERVER_STATES.filter(
-      (item) => item.id === id
-    )
-    if (isAlreadyInProbeStatus.length === 0) {
+    if (!serverStates.has(id)) {
       const initProbeStatuses = combinedAlerts.map((alert) => ({
         ...INIT_SERVER_STATE_DETAILS,
         alertQuery: alert.query,
       }))
 
-      SERVER_STATES.push({
-        id,
-        details: initProbeStatuses,
-      })
+      serverStates.set(id, initProbeStatuses)
     }
 
     // Check if there is any alert that is triggered
     // If the alert is being triggered <threshold> times, send alert and
     // change the server status respectively.
-    const currentProbe = SERVER_STATES.find(
-      (probeStatus) => probeStatus.id === id
-    )!
+    const currentProbe = serverStates.get(id)!
 
     // Calculate the count for successes and failures
     if (validatedResponse.length > 0) {
       validatedResponse.forEach(async (validation) => {
         const { alert } = validation
-        let updatedStatus: ServerStateDetails = INIT_SERVER_STATE_DETAILS
+        let updatedStatus: ServerAlertState = INIT_SERVER_STATE_DETAILS
 
-        const probeStatusDetail = currentProbe.details.find(
+        const probeStatusDetail = currentProbe.find(
           (detail) => detail.alertQuery === alert.query
         )
 
@@ -230,10 +223,10 @@ export const processThresholds = ({
         }
 
         // Update the Probe Status
-        const filteredProbeStatus = currentProbe.details.filter(
+        const filteredProbeStatus = currentProbe.filter(
           (item) => item.alertQuery !== alert.query
         )
-        currentProbe.details = [...filteredProbeStatus, updatedStatus]
+        serverStates.set(id, [...filteredProbeStatus, updatedStatus])
         results.push(updatedStatus)
 
         if (validation.isAlertTriggered === true) {

@@ -22,12 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-export interface ServerState {
-  id: string // in format probeid_requestindex
-  details: ServerStateDetails[]
-}
-
-export interface ServerStateDetails {
+export interface ServerAlertState {
   alertQuery: string
   probeState:
     | 'INIT'
