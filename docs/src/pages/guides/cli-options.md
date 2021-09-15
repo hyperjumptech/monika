@@ -36,7 +36,7 @@ Just starting out? Want to make a new configuration? The `--create-config` flag 
 monika --create-config
 ```
 
-As an alternative, the generator is able to read HAR or postman files as input to convert into monika.yml. configuration files.
+As an alternative, the generator is able to read HAR or postman files as input to convert into monika.yml configuration files.
 
 Use the `--har` or the `--postman` in combination with `--create-config` on the command line to convert those files.
 
