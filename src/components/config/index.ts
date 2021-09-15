@@ -86,29 +86,26 @@ const updateConfig = (config: Config) => {
 }
 
 const mergeConfigs = (): Config => {
-  const mergedConfig =
-    configs.length === 1
-      ? configs[0]
-      : configs.reduce((prev, current) => {
-          return {
-            certificate: current?.certificate
-              ? current.certificate
-              : prev.certificate,
-            interval: current?.interval ? current.interval : prev.interval,
-            notifications:
-              current?.notifications && current.notifications.length > 0
-                ? current.notifications
-                : prev.notifications,
-            probes:
-              current?.probes && current.probes.length > 0
-                ? current.probes
-                : prev.probes,
-            symon: current?.symon ? current.symon : prev.symon,
-            'status-notification': current?.['status-notification']
-              ? current['status-notification']
-              : prev['status-notification'],
-          }
-        })
+  const mergedConfig = configs.reduce((prev, current) => {
+    return {
+      certificate: current?.certificate
+        ? current.certificate
+        : prev.certificate,
+      interval: current?.interval ? current.interval : prev.interval,
+      notifications:
+        current?.notifications && current.notifications.length > 0
+          ? current.notifications
+          : prev.notifications,
+      probes:
+        current?.probes && current.probes.length > 0
+          ? current.probes
+          : prev.probes,
+      symon: current?.symon ? current.symon : prev.symon,
+      'status-notification': current?.['status-notification']
+        ? current['status-notification']
+        : prev['status-notification'],
+    }
+  })
   return mergedConfig as Config
 }
 
@@ -126,10 +123,8 @@ const watchConfigFile = (
   if (watchConfigFile) {
     const watcher = chokidar.watch(path)
     watcher.on('change', async () => {
-      const config = parseConfig(path, type)
-      configs[index] = config
-      const mergedConfig = mergeConfigs()
-      updateConfig(mergedConfig)
+      configs[index] = await parseConfig(path, type)
+      updateConfig(mergeConfigs())
     })
   }
 }
@@ -140,10 +135,8 @@ const scheduleRemoteConfigFetcher = (
   index: number
 ) => {
   setInterval(async () => {
-    const config = await fetchConfig(url)
-    configs[index] = config
-    const mergedConfig = mergeConfigs()
-    updateConfig(mergedConfig)
+    configs[index] = await fetchConfig(url)
+    updateConfig(mergeConfigs())
   }, interval * 1000)
 }
 
@@ -155,7 +148,7 @@ const setupConfigFromJson = (flags: any): Promise<ConfigOptional>[] => {
     }
     delete flags.config
     watchConfigFile(source, 'monika', i, flags.repeat)
-    return Promise.resolve(parseConfig(source, 'monika'))
+    return parseConfig(source, 'monika')
   })
 }
 
@@ -165,18 +158,11 @@ export const setupConfig = async (flags: any) => {
     const json = setupConfigFromJson(flags)
     promises.concat(json)
   }
-  if (flags.har) {
-    const config = parseConfig(flags.har, 'har')
-    promises.push(Promise.resolve(config))
-  }
-  if (flags.postman) {
-    const config = parseConfig(flags.postman, 'postman')
-    promises.push(Promise.resolve(config))
-  }
+  if (flags.har) promises.push(parseConfig(flags.har, 'har'))
+  if (flags.postman) promises.push(parseConfig(flags.postman, 'postman'))
   configs = await Promise.all(promises)
   log.info(JSON.stringify(configs))
-  const mergedConfig = mergeConfigs()
-  updateConfig(mergedConfig)
+  updateConfig(mergeConfigs())
 }
 
 const getPathAndTypeFromFlag = (flags: any) => {
