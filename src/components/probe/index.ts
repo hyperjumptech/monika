@@ -234,9 +234,6 @@ export async function doProbe(
       if (validatedRes.filter((item) => item.hasSomethingToReport).length > 0) {
         break
       }
-
-      // done probes, no alerts, no notification.. now print log
-      printProbeLog(mLog)
     }
 
     // done probing, got some result, process it, check for thresholds and notifications
@@ -248,6 +245,10 @@ export async function doProbe(
       validatedResp: validatedRes,
       mLog,
     })
+
+    // done probes, got some alerts & notif.. print log
+
+    printProbeLog(mLog)
 
     // Done processing results, check if need to send out alerts
     checkThresholdsAndSendAlert(
