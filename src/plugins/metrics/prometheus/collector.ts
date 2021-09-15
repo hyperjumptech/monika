@@ -75,7 +75,9 @@ export class PrometheusCollector {
     const request = requests[requestIndex]
     const { method, url } = request
     const { config, headers } = response
-    const responseTimeInSecond = config.extraData?.responseTime ?? 0
+    const milliSecond = 1000
+    const responseTimeInSecond =
+      config.extraData?.responseTime / milliSecond ?? 0
     const responseSizeBytes = Number(headers['content-length'])
     const labels = {
       id,
