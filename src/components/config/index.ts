@@ -74,8 +74,8 @@ const handshakeAndValidate = async (config: Config) => {
   }
 }
 
-const updateConfig = (config: Config) => {
-  handshakeAndValidate(config)
+const updateConfig = async (config: Config) => {
+  await handshakeAndValidate(config)
   const lastConfig = cfg?.version
   cfg = config
   cfg.version = lastConfig || md5Hash(config)
@@ -154,16 +154,18 @@ const setupConfigFromJson = (flags: any): Promise<ConfigOptional>[] => {
 
 export const setupConfig = async (flags: any) => {
   const configParse = new Array<Promise<ConfigOptional>>(0)
-  if (Array.isArray(flags.config) && flags.config.length > 0) {
+  if (flags.har) {
+    configParse.push(parseConfig(flags.har, 'har'))
+  } else if (flags.postman) {
+    configParse.push(parseConfig(flags.postman, 'postman'))
+  } else if (Array.isArray(flags.config) && flags.config.length > 0) {
     const json = setupConfigFromJson(flags)
     configParse.push(...json)
   }
-  if (flags.har) configParse.push(parseConfig(flags.har, 'har'))
-  if (flags.postman) configParse.push(parseConfig(flags.postman, 'postman'))
   if (configParse.length === 0)
     throw new Error('Failed to recognize configuration(s)')
   configs = await Promise.all(configParse)
-  updateConfig(mergeConfigs())
+  await updateConfig(mergeConfigs())
 }
 
 const getPathAndTypeFromFlag = (flags: any) => {
@@ -200,7 +202,7 @@ export const createConfig = async (flags: any) => {
       return
     }
 
-    const parsed = parseConfig(path, type)
+    const parsed = await parseConfig(path, type)
     const file = flags.output || 'monika.json'
 
     if (existsSync(file) && !flags.force) {
