@@ -54,7 +54,7 @@ const prettyPrint = {
       let alertMsg = ''
       let notifMsg = ''
 
-      const probeMsg = `${log.iteration} id:${log.id} ${log.responseCode} ${log.method} ${log.url} ${log.responseTime}ms`
+      const probeMsg = `${log.iteration} id:${log.probeId} ${log.responseCode} ${log.method} ${log.url} ${log.responseTime}ms`
 
       if (log.notification?.flag) {
         notifMsg = `, NOTIF: ${log.notification.messages.join(', ')}`

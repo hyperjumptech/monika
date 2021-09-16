@@ -186,7 +186,7 @@ export async function doProbe(
   const mLog: LogObject = {
     type: 'PROBE',
     iteration: 0,
-    id: probe.id,
+    probeId: probe.id,
     responseCode: 0,
     url: '',
     method: 'GET', // GET must be pre-filled here since method '' (empty) is undefined

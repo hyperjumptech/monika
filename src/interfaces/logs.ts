@@ -32,7 +32,7 @@ interface Alerts {
 export interface LogObject {
   type: 'PROBE'
   iteration: number
-  id: string
+  probeId: string
   responseCode: number
   url: string
   responseTime: number
