@@ -69,5 +69,21 @@ describe('TLS Checker', () => {
       // assert
       expect(result).to.equal(null)
     })
+
+    it('tests example.com with custom options', async () => {
+      // arrange
+      const domainDef = {
+        domain: 'example.com',
+        options: {
+          path: '/foo',
+        },
+      }
+
+      // act
+      const result = await checkTLS(domainDef)
+
+      // assert
+      expect(result).to.equal(null)
+    })
   })
 })

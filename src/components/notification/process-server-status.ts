@@ -22,7 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { printProbeLog, setAlert } from '../../components/logger'
+import { setAlert } from '../../components/logger'
 import { LogObject } from '../../interfaces/logs'
 import { Probe } from '../../interfaces/probe'
 import { ProbeStatus, ProbeStateDetails } from '../../interfaces/probe-status'
@@ -268,12 +268,10 @@ export const processThresholds = ({
           setAlert(
             {
               flag: 'ALERT',
-              message: mLog.alert.message + ', ' + updatedStatus.alertQuery,
+              message: updatedStatus.alertQuery,
             },
             mLog
           )
-          // done probes, got some alerts & notif.. print log
-          printProbeLog(mLog)
         }
       })
     }
