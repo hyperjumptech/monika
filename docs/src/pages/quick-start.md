@@ -29,26 +29,26 @@ There are two ways to install Monika
 
 ## Download the configuration file
 
-Download the example configuration that uses Desktop notification [here](https://raw.githubusercontent.com/hyperjumptech/monika/main/config_sample/config.desktop.example.json) and rename it as monika.json
+Download the example configuration that uses Desktop notification [here](https://raw.githubusercontent.com/hyperjumptech/monika/main/config_sample/config.desktop.example.yml) and rename it as monika.yml
 
 ## Run Monika
 
-Monika by default reads a configuration file called `monika.json` in the current working directory if it exists. To run monika with the configuration file that you have downloaded before, run this command in the Terminal from the directory that contains the monika.json file:
+Monika by default reads a yaml configuration file called `monika.yml` in the current working directory if it exists. To run monika with the configuration file that you have downloaded before, run this command in the Terminal from the directory that contains the monika.yml file:
 
 ```bash
 monika
 ```
 
-You can specify a path to a JSON configuration file with `-c` flag if you didn't rename your configuration file as monika.json, as follows
+You can specify a path to a YAML configuration file with `-c` flag if you didn't rename your configuration file as monika.yml, as follows
 
 ```bash
-monika -c <path_to_configuration_json_file>
+monika -c <path_to_configuration_file>
 ```
 
 Better yet, you can provide a URL that contains monika configuration
 
 ```bash
-monika -c https://domain.com/path/to/your/configuration.json
+monika -c https://domain.com/path/to/your/configuration.yml
 ```
 
 Congratulations, you have successfully run Monika in your machine!

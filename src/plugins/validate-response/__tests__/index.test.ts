@@ -57,7 +57,7 @@ describe('validateResponse', () => {
           query: 'response.status < 200 or response.status > 299',
           message: '',
         },
-        hasSomethingToReport: true,
+        isAlertTriggered: true,
         response: {
           config: {
             extraData: {
@@ -82,7 +82,7 @@ describe('validateResponse', () => {
           headers: {},
           status: 300,
         },
-        hasSomethingToReport: true,
+        isAlertTriggered: true,
       },
     ])
   })
@@ -106,7 +106,7 @@ describe('validateResponse', () => {
           headers: {},
           status: 200,
         },
-        hasSomethingToReport: false,
+        isAlertTriggered: false,
       },
       {
         alert: {
@@ -122,7 +122,7 @@ describe('validateResponse', () => {
           headers: {},
           status: 200,
         },
-        hasSomethingToReport: true,
+        isAlertTriggered: true,
       },
     ])
   })
@@ -146,7 +146,7 @@ describe('validateResponse', () => {
           headers: {},
           status: 300,
         },
-        hasSomethingToReport: true,
+        isAlertTriggered: true,
       },
       {
         alert: {
@@ -162,7 +162,7 @@ describe('validateResponse', () => {
           headers: {},
           status: 300,
         },
-        hasSomethingToReport: false,
+        isAlertTriggered: false,
       },
     ])
   })
@@ -186,7 +186,7 @@ describe('validateResponse', () => {
           headers: {},
           status: 200,
         },
-        hasSomethingToReport: false,
+        isAlertTriggered: false,
       },
       {
         alert: {
@@ -202,7 +202,7 @@ describe('validateResponse', () => {
           headers: {},
           status: 200,
         },
-        hasSomethingToReport: false,
+        isAlertTriggered: false,
       },
     ])
   })
