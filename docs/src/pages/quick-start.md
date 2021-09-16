@@ -39,7 +39,7 @@ Monika by default reads a yaml configuration file called `monika.yml` in the cur
 monika
 ```
 
-You can specify a path to a YAML configuration file with `-c` flag if you didn't rename your configuration file as monika.yaml, as follows
+You can specify a path to a YAML configuration file with `-c` flag if you didn't rename your configuration file as monika.yml, as follows
 
 ```bash
 monika -c <path_to_configuration_file>
@@ -48,7 +48,7 @@ monika -c <path_to_configuration_file>
 Better yet, you can provide a URL that contains monika configuration
 
 ```bash
-monika -c https://domain.com/path/to/your/configuration.yaml
+monika -c https://domain.com/path/to/your/configuration.yml
 ```
 
 Congratulations, you have successfully run Monika in your machine!
