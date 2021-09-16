@@ -183,7 +183,7 @@ export async function doProbe(
   const responses = []
   let probeRes: AxiosResponseWithExtraData = {} as AxiosResponseWithExtraData
   let totalRequests = 0 // is the number of requests in  probe.requests[x]
-  let mLog: LogObject = {
+  const mLog: LogObject = {
     type: 'PROBE',
     iteration: 0,
     id: probe.id,
@@ -199,7 +199,7 @@ export async function doProbe(
       flag: '',
       message: [],
     },
-  } as LogObject
+  }
 
   try {
     for (const request of probe.requests) {
@@ -224,7 +224,7 @@ export async function doProbe(
       responses.push(probeRes)
 
       // done probing, got the results, build logs
-      mLog = probeBuildLog({
+      probeBuildLog({
         checkOrder,
         probe,
         totalRequests,
@@ -256,7 +256,7 @@ export async function doProbe(
         },
         mLog
       ).catch((error) => {
-        mLog = setAlert({ flag: 'error', message: error }, mLog)
+        setAlert({ flag: 'error', message: error }, mLog)
       })
 
       printProbeLog(mLog)
@@ -267,7 +267,7 @@ export async function doProbe(
       }
     }
   } catch (error) {
-    mLog = setAlert({ flag: 'error', message: error }, mLog)
+    setAlert({ flag: 'error', message: error }, mLog)
     printProbeLog(mLog)
   }
 }
