@@ -20,4 +20,4 @@ docker-rm: docker-stop
 	-docker rm $(IMAGE_NAME)
 
 docker-run: docker-rm docker
-	docker run --name $(IMAGE_NAME) -v $(PWD)/monika.example.json:/config/monika.json --detach $(IMAGE_NAMESPACE)/$(IMAGE_NAME):$(COMMIT_ID)
+	docker run --name $(IMAGE_NAME) -v $(PWD)/monika.example.yml:/config/monika.yml --detach $(IMAGE_NAMESPACE)/$(IMAGE_NAME):$(COMMIT_ID)

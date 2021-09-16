@@ -1,0 +1,12 @@
+probes:
+  - requests:
+      - url: http://github.com
+
+notifications:
+  - id: unique-id-webhook
+    type: webhook
+    data:
+      recipients: [628123456789]
+      url: https://yourwhatsappapiserver.com
+      username: whatsappusername
+      password: whatsapppassword

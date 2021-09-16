@@ -1,0 +1,11 @@
+probes:
+  - requests:
+      - url: http://github.com
+
+notifications:
+  - id: unique-id-mailgun
+    type: mailgun
+    data:
+      recipients: [RECIPIENT_EMAIL_ADDRESS]
+      apiKey: YOUR_API_KEY
+      domain: YOUR_DOMAIN
