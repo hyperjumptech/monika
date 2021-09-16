@@ -24,7 +24,11 @@
 
 import { expect } from 'chai'
 import { interpret, Interpreter } from 'xstate'
+import { Probe } from '../../../interfaces/probe'
+import { ValidatedResponse } from '../../../plugins/validate-response'
 import {
+  processThresholds,
+  resetServerAlertStates,
   ServerAlertStateContext,
   serverAlertStateMachine,
 } from '../process-server-status'
@@ -117,5 +121,61 @@ describe('serverAlertStateMachine', () => {
       'SUCCESS',
     ])
     expect(interpreter.state.value).to.equals('DOWN')
+  })
+})
+
+describe('processThresholds', () => {
+  beforeEach(() => {
+    resetServerAlertStates()
+  })
+
+  it('should attach threshold calculation to each request', () => {
+    const probe = {
+      requests: [
+        {
+          method: 'GET',
+          url: 'https://httpbin.org/status/200',
+        },
+        {
+          method: 'POST',
+          url: 'https://httpbin.org/status/201',
+        },
+      ],
+      incidentThreshold: 2,
+      recoveryThreshold: 2,
+    } as Probe
+
+    const validatedResponse = [
+      {
+        alert: { query: 'response.time > 1000' },
+        isAlertTriggered: true,
+      },
+    ] as ValidatedResponse[]
+
+    // failure happened first for request with index 0
+    processThresholds({
+      probe,
+      requestIndex: 0,
+      validatedResponse,
+    })
+
+    // processing request with index 1
+    const result1 = processThresholds({
+      probe,
+      requestIndex: 1,
+      validatedResponse,
+    })
+
+    // failure happened only once for request with index 1, it does not reach threshold yet
+    expect(result1[0].state).to.equals('UP')
+
+    const result2 = processThresholds({
+      probe,
+      requestIndex: 1,
+      validatedResponse,
+    })
+
+    // second time failure happened for request with index 1, it reaches threshold
+    expect(result2[0].state).to.equals('DOWN')
   })
 })
