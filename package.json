@@ -66,7 +66,8 @@
     "sqlite3": "^5.0.2",
     "ssl-checker": "2.0.7",
     "stun": "^2.1.0",
-    "tslib": "^1.14.1"
+    "tslib": "^1.14.1",
+    "xstate": "^4.24.0"
   },
   "devDependencies": {
     "@oclif/dev-cli": "^1.26.0",

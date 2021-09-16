@@ -7,7 +7,7 @@ At the center of Monika is a configuration file. Follow the steps below to quick
 
 ## Installation
 
-There are two ways to install Monika::
+There are two ways to install Monika
 
 1. Install using [npm](https://npmjs.com) or [yarn](https://yarnpkg.com).
 
@@ -25,7 +25,7 @@ There are two ways to install Monika::
 
    UNIX-based users may have to run `sudo chmod +x monika` in order to execute Monika binary file. Please note that currently, only x64 architecture is supported.
 
-   In order to run Monika binary file, you must download the node_sqlite3-<os>-<arch>.node file according to your OS, rename it as node_sqlite3.node and put it in one folder with the Monika binary file.
+   In order to run Monika binary file, you must download the `node_sqlite3-<os>-<arch>.node` file according to your OS, rename it to `node_sqlite3.node` and put it in one folder with the Monika binary file.
 
 ## Download the configuration file
 
