@@ -152,28 +152,6 @@ export function setNotificationLog(
 }
 
 /**
- * setNotification sets notification message
- * @param {object} flag: type of notification message, ex: disruption
- * @param {LogObject} mLog is the log to be updated
- * @returns {LogObject} mLog is returned again after updating
- */
-export function setNotification(
-  {
-    flag,
-    message,
-  }: {
-    flag: string
-    message: string
-  },
-  mLog: LogObject
-): LogObject {
-  mLog.notification.flag = flag
-  mLog.notification.messages.push(message)
-
-  return mLog
-}
-
-/**
  * setAlert populates the mLog.alert{} object with flag and message string in the input
  * @param {object} flag: type of alert message, ex: not-2xx
  * @param {LogObject} mLog is the log object being updated
