@@ -192,13 +192,12 @@ export async function printAllLogs() {
   const data = await getAllLogs()
 
   data.forEach((row) => {
-    log.info({
-      type: 'PLAIN',
-      msg: `${row.id} id: ${row.probe_id} responseCode: ${chalk.keyword(
+    log.info(
+      `${row.id} id: ${row.probe_id} responseCode: ${chalk.keyword(
         getStatusColor(row.response_status)
       )(String(row.response_status))} - ${row.request_url}, ${
         row.response_time || '- '
-      }ms`,
-    })
+      }ms`
+    )
   })
 }

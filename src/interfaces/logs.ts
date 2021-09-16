@@ -40,8 +40,3 @@ export interface LogObject {
   notification: Alerts
   method: Method | undefined
 }
-
-export interface PlainLogObject {
-  type: 'PLAIN' | ''
-  msg?: string
-}

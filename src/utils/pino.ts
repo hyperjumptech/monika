@@ -25,17 +25,13 @@
 import fs from 'fs'
 import path from 'path'
 import pino, { LoggerOptions, LogDescriptor } from 'pino'
-import { LogObject, PlainLogObject } from '../interfaces/logs'
+import { LogObject } from '../interfaces/logs'
 
 const project = path.join(__dirname, '../../tsconfig.json')
 const dev = fs.existsSync(project)
 
 const isLogObject = (obj: any): obj is LogObject => {
   return obj?.type === 'PROBE'
-}
-
-const isPlainLog = (obj: any): obj is PlainLogObject => {
-  return obj?.type?.startsWith('PLAIN')
 }
 
 const prettyPrint = {
@@ -45,10 +41,6 @@ const prettyPrint = {
   sync: false, // async mode for better performance
   messageFormat(log: LogDescriptor) {
     const time = new Date(log.time).toISOString()
-
-    if (isPlainLog(log)) {
-      return `${log.msg}`
-    }
 
     if (isLogObject(log)) {
       let alertMsg = ''
@@ -65,7 +57,8 @@ const prettyPrint = {
 
       return `${time} ${probeMsg}${alertMsg}${notifMsg}`
     }
-    return `${log.msg}`
+
+    return log.msg
   },
 }
 
