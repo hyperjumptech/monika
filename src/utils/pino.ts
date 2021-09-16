@@ -57,10 +57,10 @@ const prettyPrint = {
       const probeMsg = `${log.iteration} id:${log.id} ${log.responseCode} ${log.method} ${log.url} ${log.responseTime}ms`
 
       if (log.notification?.flag) {
-        notifMsg = `, NOTIF: ${log.notification.message}`
+        notifMsg = `, NOTIF: ${log.notification.messages.join(', ')}`
       }
       if (log.alert?.flag) {
-        alertMsg = `, ${log.alert.flag}: ${log.alert.message}`
+        alertMsg = `, ${log.alert.flag}: ${log.alert.messages.join(', ')}`
       }
 
       return `${time} ${probeMsg}${alertMsg}${notifMsg}`

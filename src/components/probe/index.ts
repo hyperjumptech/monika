@@ -193,11 +193,11 @@ export async function doProbe(
     responseTime: 0,
     alert: {
       flag: '',
-      message: [],
+      messages: [],
     },
     notification: {
       flag: '',
-      message: [],
+      messages: [],
     },
   }
 

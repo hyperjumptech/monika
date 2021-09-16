@@ -84,19 +84,19 @@ export function probeBuildLog({
   switch (mLog.responseCode) {
     case 0:
       mLog.alert.flag = 'alert'
-      mLog.alert.message.push('URI not found')
+      mLog.alert.messages.push('URI not found')
       break
     case 1:
       mLog.alert.flag = 'alert'
-      mLog.alert.message = ['Connection reset']
+      mLog.alert.messages = ['Connection reset']
       break
     case 2:
       mLog.alert.flag = 'alert'
-      mLog.alert.message = ['Connection refused']
+      mLog.alert.messages = ['Connection refused']
       break
     case 599:
       mLog.alert.flag = 'alert'
-      mLog.alert.message.push('Request Timed out')
+      mLog.alert.messages.push('Request Timed out')
       break
     default:
   }
@@ -145,7 +145,7 @@ export function setNotificationLog(
   }
 
   mLog.notification.flag = type
-  mLog.notification.message[0] = msg
+  mLog.notification.messages[0] = msg
   saveNotificationLog(probe, notification, type, alertQuery)
 
   return mLog
@@ -168,7 +168,7 @@ export function setNotification(
   mLog: LogObject
 ): LogObject {
   mLog.notification.flag = flag
-  mLog.notification.message.push(message)
+  mLog.notification.messages.push(message)
 
   return mLog
 }
@@ -190,7 +190,7 @@ export function setAlert(
   mLog: LogObject
 ): LogObject {
   mLog.alert.flag = flag
-  mLog.alert.message.push(message)
+  mLog.alert.messages.push(message)
 
   return mLog
 }

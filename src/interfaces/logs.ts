@@ -24,9 +24,9 @@
 
 import { Method } from 'axios'
 
-export interface Alerts {
+interface Alerts {
   flag: string
-  message: string[]
+  messages: string[]
 }
 
 export interface LogObject {
