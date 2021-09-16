@@ -41,7 +41,7 @@ import {
 } from './components/logger/history'
 import { sendAlerts, sendNotifications } from './components/notification'
 import { notificationChecker } from './components/notification/checker'
-import { resetProbeStatuses } from './components/notification/process-server-status'
+import { resetServerAlertStates } from './components/notification/process-server-status'
 import { checkTLS } from './components/tls-checker'
 import events from './events'
 import { Config } from './interfaces/config'
@@ -217,7 +217,7 @@ class Monika extends Command {
 
       for await (const config of getConfigIterator()) {
         if (abortCurrentLooper) {
-          resetProbeStatuses()
+          resetServerAlertStates()
           abortCurrentLooper()
         }
 
@@ -456,7 +456,7 @@ Please refer to the Monika documentations on how to how to configure notificatio
             notifications: notifications ?? [],
             validation: {
               alert: { query: '', message: error.message },
-              hasSomethingToReport: true,
+              isAlertTriggered: true,
               response: {
                 status: 500,
                 config: {
