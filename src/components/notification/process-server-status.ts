@@ -28,7 +28,7 @@ import { ServerAlertState } from '../../interfaces/probe-status'
 import { RequestConfig } from '../../interfaces/request'
 import { ValidatedResponse } from '../../plugins/validate-response'
 
-type ServerAlertStateContext = {
+export type ServerAlertStateContext = {
   incidentThreshold: number
   recoveryThreshold: number
   consecutiveFailures: number
@@ -45,7 +45,7 @@ export const resetServerAlertStates = () => {
   serverAlertStateInterpreters.clear()
 }
 
-const serverAlertStateMachine = createMachine<ServerAlertStateContext>(
+export const serverAlertStateMachine = createMachine<ServerAlertStateContext>(
   {
     id: 'server-alerts-state',
     initial: 'UP',
