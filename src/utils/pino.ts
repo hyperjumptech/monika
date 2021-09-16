@@ -25,13 +25,13 @@
 import fs from 'fs'
 import path from 'path'
 import pino, { LoggerOptions, LogDescriptor } from 'pino'
-import { LogObject } from '../interfaces/logs'
+import { ProbeRequestLogObject } from '../interfaces/logs'
 
 const project = path.join(__dirname, '../../tsconfig.json')
 const dev = fs.existsSync(project)
 
-const isLogObject = (obj: any): obj is LogObject => {
-  return obj?.type === 'PROBE'
+const isLogObject = (obj: any): obj is ProbeRequestLogObject => {
+  return obj?.type === 'PROBE-REQUEST'
 }
 
 const prettyPrint = {

@@ -29,7 +29,7 @@ import { Notification } from '../../interfaces/notification'
 import { getAllLogs, saveProbeRequestLog } from './history'
 import { log } from '../../utils/pino'
 
-import { LogObject } from '../../interfaces/logs'
+import { ProbeRequestLogObject } from '../../interfaces/logs'
 import { saveNotificationLog } from '../logger/history'
 
 /**
@@ -53,7 +53,7 @@ export function getStatusColor(responseCode: number) {
 
 /**
  * probeBuildLog builds the last probe results for logging (through history.ts)
- * @returns {LogObject} mLog built log
+ * @returns {ProbeRequestLogObject} mLog built log
  */
 export function probeBuildLog({
   checkOrder,
@@ -70,9 +70,9 @@ export function probeBuildLog({
   probeRes: AxiosResponseWithExtraData
   alerts?: ProbeAlert[]
   error?: string
-  mLog: LogObject
-}): LogObject {
-  mLog.type = 'PROBE'
+  mLog: ProbeRequestLogObject
+}): ProbeRequestLogObject {
+  mLog.type = 'PROBE-REQUEST'
   mLog.iteration = checkOrder
   mLog.probeId = probe.id
   mLog.method = probe.requests[totalRequests].method
@@ -117,8 +117,8 @@ export function probeBuildLog({
 /**
  * notificationLog just prints notifications for the user and to persistent log (through history.ts)
  * @param {object} contain notification fields
- * @param {LogObject} mLog to update and return
- * @returns {LogObject} mLog is returned once updated
+ * @param {ProbeRequestLogObject} mLog to update and return
+ * @returns {ProbeRequestLogObject} mLog is returned once updated
  */
 export function setNotificationLog(
   {
@@ -132,8 +132,8 @@ export function setNotificationLog(
     type: 'NOTIFY-INCIDENT' | 'NOTIFY-RECOVER'
     alertQuery: string
   },
-  mLog: LogObject
-): LogObject {
+  mLog: ProbeRequestLogObject
+): ProbeRequestLogObject {
   let msg: string
 
   switch (type) {
@@ -154,8 +154,8 @@ export function setNotificationLog(
 /**
  * setAlert populates the mLog.alert{} object with flag and message string in the input
  * @param {object} flag: type of alert message, ex: not-2xx
- * @param {LogObject} mLog is the log object being updated
- * @returns {LogObject} mLog returned again after being updated
+ * @param {ProbeRequestLogObject} mLog is the log object being updated
+ * @returns {ProbeRequestLogObject} mLog returned again after being updated
  */
 export function setAlert(
   {
@@ -165,8 +165,8 @@ export function setAlert(
     flag: string
     message: string
   },
-  mLog: LogObject
-): LogObject {
+  mLog: ProbeRequestLogObject
+): ProbeRequestLogObject {
   mLog.alert.flag = flag
   mLog.alert.messages.push(message)
 
@@ -175,9 +175,9 @@ export function setAlert(
 
 /**
  * printLogs prints the monika logs and clear buffers
- * @param {LogObject} mLog that is displayed
+ * @param {ProbeRequestLogObject} mLog that is displayed
  */
-export function printProbeLog(mLog: LogObject) {
+export function printProbeLog(mLog: ProbeRequestLogObject) {
   if (mLog.alert.flag.length > 0) {
     log.warn(mLog)
   } else {

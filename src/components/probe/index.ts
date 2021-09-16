@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import events from '../../events'
-import { LogObject } from '../../interfaces/logs'
+import { ProbeRequestLogObject } from '../../interfaces/logs'
 import { Notification } from '../../interfaces/notification'
 import { Probe } from '../../interfaces/probe'
 import type { ServerAlertState } from '../../interfaces/probe-status'
@@ -70,7 +70,7 @@ interface ProbeSendNotification extends Omit<ProbeStatusProcessed, 'statuses'> {
 // Probes Thresholds processed, Send out notifications/alerts.
 async function checkThresholdsAndSendAlert(
   data: ProbeStatusProcessed,
-  mLog: LogObject
+  mLog: ProbeRequestLogObject
 ) {
   const {
     probe,
@@ -108,7 +108,7 @@ async function checkThresholdsAndSendAlert(
 
   const createNotificationLog = (
     data: ProbeSaveLogToDatabase,
-    mLog: LogObject
+    mLog: ProbeRequestLogObject
   ) => {
     const { probe, probeState, notifications } = data
 
@@ -183,8 +183,8 @@ export async function doProbe(
   const responses = []
   let probeRes: AxiosResponseWithExtraData = {} as AxiosResponseWithExtraData
   let totalRequests = 0 // is the number of requests in  probe.requests[x]
-  const mLog: LogObject = {
-    type: 'PROBE',
+  const mLog: ProbeRequestLogObject = {
+    type: 'PROBE-REQUEST',
     iteration: 0,
     probeId: probe.id,
     responseCode: 0,

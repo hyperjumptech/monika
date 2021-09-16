@@ -29,8 +29,8 @@ interface Alerts {
   messages: string[]
 }
 
-export interface LogObject {
-  type: 'PROBE'
+export interface ProbeRequestLogObject {
+  type: 'PROBE-REQUEST'
   iteration: number
   probeId: string
   responseCode: number
