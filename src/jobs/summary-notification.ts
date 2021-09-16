@@ -22,56 +22,48 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { getConfig, setupConfig } from '../components/config'
-import { openLogfile } from '../components/logger/history'
-import events from '../events'
-import { tlsChecker } from '../jobs/tls-check'
-import { loopCheckSTUNServer, loopReport } from '../looper'
-import {
-  PrometheusCollector,
-  startPrometheusMetricsServer,
-} from '../plugins/metrics/prometheus'
-import { getEventEmitter } from '../utils/events'
-import { getPublicNetworkInfo } from '../utils/public-ip'
-// import to activate all the application event emitter subscribers
-import '../events/subscribers/application'
-import { jobsLoader } from './jobs'
+import { hostname } from 'os'
+import format from 'date-fns/format'
+import { getConfig } from '../components/config'
+import { getSummary } from '../components/logger/history'
+import { sendNotifications } from '../components/notification'
+import getIp from '../utils/ip'
+import { log } from '../utils/pino'
+import { publicIpAddress } from '../utils/public-ip'
 
-export default async function init(flags: any) {
-  const eventEmitter = getEventEmitter()
-  const isTestEnvironment = process.env.CI || process.env.NODE_ENV === 'test'
+export async function getSummaryAndSendNotif() {
+  const config = getConfig()
+  const { notifications } = config
 
-  // cache location & ISP info
-  await getPublicNetworkInfo()
-  // check if connected to STUN Server and getting the public IP in the same time
-  loopCheckSTUNServer(flags.stun)
-  await openLogfile()
+  if (!notifications) return
 
-  // start Promotheus server
-  if (flags.prometheus) {
-    const {
-      registerCollectorFromProbes,
-      collectProbeRequestMetrics,
-    } = new PrometheusCollector()
+  try {
+    const summary = await getSummary()
 
-    // register prometheus metric collectors
-    eventEmitter.on(events.config.sanitized, registerCollectorFromProbes)
-    // collect prometheus metrics
-    eventEmitter.on(events.probe.response.received, collectProbeRequestMetrics)
-
-    startPrometheusMetricsServer(flags.prometheus)
-  }
-
-  await setupConfig(flags)
-
-  // check TLS when Monika starts
-  tlsChecker()
-
-  // load cron jobs
-  jobsLoader()
-
-  // Run report on interval if symon configuration exists
-  if (!isTestEnvironment) {
-    loopReport(getConfig)
+    sendNotifications(notifications, {
+      subject: `Monika Status`,
+      body: `Status Update ${format(new Date(), 'yyyy-MM-dd HH:mm:ss XXX')}
+              Host: ${hostname()} (${[publicIpAddress, getIp()]
+        .filter(Boolean)
+        .join('/')})
+              Number of probes: ${summary.numberOfProbes}
+              Average response time: ${
+                summary.averageResponseTime
+              } ms in the last 24 hours
+              Incidents: ${summary.numberOfIncidents} in the last 24 hours
+              Recoveries: ${summary.numberOfRecoveries} in the last 24 hours
+              Notifications: ${summary.numberOfSentNotifications}`,
+      summary: `There are ${summary.numberOfIncidents} incidents and ${summary.numberOfRecoveries} recoveries in the last 24 hours.`,
+      meta: {
+        type: 'status-update' as const,
+        time: format(new Date(), 'yyyy-MM-dd HH:mm:ss XXX'),
+        hostname: hostname(),
+        privateIpAddress: getIp(),
+        publicIpAddress,
+        ...summary,
+      },
+    }).catch((error) => log.error(`Summary notification: ${error.message}`))
+  } catch (error) {
+    log.error(`Summary notification: ${error.message}`)
   }
 }
