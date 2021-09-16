@@ -50,13 +50,13 @@ interface ProbeStatusProcessed {
   statuses?: ServerAlertState[]
   notifications?: Notification[]
   validatedResponseStatuses: ValidatedResponse[]
-  totalRequests: number
+  requestIndex: number
 }
 
 interface ProbeSaveLogToDatabase
   extends Omit<
     ProbeStatusProcessed,
-    'statuses' | 'totalRequests' | 'validatedResponseStatuses'
+    'statuses' | 'requestIndex' | 'validatedResponseStatuses'
   > {
   index: number
   probeState?: ServerAlertState
@@ -76,7 +76,7 @@ async function checkThresholdsAndSendAlert(
     probe,
     statuses,
     notifications,
-    totalRequests,
+    requestIndex,
     validatedResponseStatuses,
   } = data
   const probeSendNotification = async (data: ProbeSendNotification) => {
@@ -85,12 +85,12 @@ async function checkThresholdsAndSendAlert(
       probe,
       probeState,
       notifications,
-      totalRequests,
+      requestIndex,
       validatedResponseStatuses,
     } = data
 
     const statusString = probeState?.state ?? 'UP'
-    const url = probe.requests[totalRequests - 1].url ?? ''
+    const url = probe.requests[requestIndex].url ?? ''
 
     if ((notifications?.length ?? 0) > 0) {
       await sendAlerts({
@@ -150,7 +150,7 @@ async function checkThresholdsAndSendAlert(
         probe,
         probeState,
         notifications,
-        totalRequests,
+        requestIndex,
         validatedResponseStatuses,
       }).catch((error: Error) => log.error(error.message))
 
@@ -181,8 +181,6 @@ export async function doProbe(
 ) {
   const eventEmitter = getEventEmitter()
   const responses = []
-  let probeRes: AxiosResponseWithExtraData = {} as AxiosResponseWithExtraData
-  let totalRequests = 0 // is the number of requests in  probe.requests[x]
   const mLog: ProbeRequestLogObject = {
     type: 'PROBE-REQUEST',
     iteration: 0,
@@ -202,15 +200,25 @@ export async function doProbe(
   }
 
   try {
-    for (const request of probe.requests) {
+    for (
+      let requestIndex = 0;
+      requestIndex < probe.requests.length;
+      requestIndex++
+    ) {
+      const request = probe.requests[requestIndex]
+
       mLog.url = request.url
+
       // intentionally wait for a request to finish before processing next request in loop
       // eslint-disable-next-line no-await-in-loop
-      probeRes = await probing(request, responses)
+      const probeRes: AxiosResponseWithExtraData = await probing(
+        request,
+        responses
+      )
 
       eventEmitter.emit(events.probe.response.received, {
         probe,
-        requestIndex: totalRequests,
+        requestIndex,
         response: probeRes,
       })
 
@@ -227,21 +235,18 @@ export async function doProbe(
       probeBuildLog({
         checkOrder,
         probe,
-        totalRequests,
-        probeRes,
+        requestIndex,
+        probeRes: probeRes,
         alerts: validatedResponse
           .filter((item) => item.isAlertTriggered)
           .map((item) => item.alert),
         mLog,
       })
 
-      // done one request, is there another
-      totalRequests += 1
-
       // done probing, got some result, process it, check for thresholds and notifications
       const statuses = processThresholds({
         probe,
-        requestIndex: totalRequests - 1,
+        requestIndex,
         validatedResponse,
       })
 
@@ -251,7 +256,7 @@ export async function doProbe(
           probe,
           statuses,
           notifications,
-          totalRequests,
+          requestIndex,
           validatedResponseStatuses: validatedResponse,
         },
         mLog
