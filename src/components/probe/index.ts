@@ -105,47 +105,42 @@ async function checkThresholdsAndSendAlert(
       })
     }
   }
+
   const createNotificationLog = (
     data: ProbeSaveLogToDatabase,
     mLog: LogObject
-  ): LogObject => {
+  ) => {
     const { probe, probeState, notifications } = data
 
     const type =
       probeState?.state === 'DOWN' ? 'NOTIFY-INCIDENT' : 'NOTIFY-RECOVER'
 
-    if ((notifications?.length ?? 0) > 0) {
-      Promise.all(
-        notifications?.map((notification) => {
-          mLog = setNotificationLog(
-            {
-              type,
-              probe,
-              alertQuery: probeState?.alertQuery || '',
-              notification,
-            },
-            mLog
-          )
-        })!
-      )
+    if (notifications?.length) {
+      notifications.forEach((notification) => {
+        setNotificationLog(
+          {
+            type,
+            probe,
+            alertQuery: probeState?.alertQuery || '',
+            notification,
+          },
+          mLog
+        )
+      })
     }
-    return mLog
   }
 
-  validatedResponseStatuses.forEach((validation) => {
-    if (validation.isAlertTriggered === true) {
-      // set alert flag, concate alert message
+  validatedResponseStatuses
+    .filter((validation) => validation.isAlertTriggered)
+    .forEach((validation) => {
       setAlert(
         {
           flag: 'ALERT',
-          message: mLog.alert.message + ', ' + validation.alert.query,
+          message: validation.alert.query,
         },
         mLog
       )
-      // done probes, got some alerts & notif.. print log
-      printProbeLog(mLog)
-    }
-  })
+    })
 
   statuses
     ?.filter((probeState) => probeState.shouldSendNotification)
@@ -159,7 +154,7 @@ async function checkThresholdsAndSendAlert(
         validatedResponseStatuses,
       }).catch((error: Error) => log.error(error.message))
 
-      mLog = createNotificationLog(
+      createNotificationLog(
         {
           index,
           probe,
@@ -168,7 +163,7 @@ async function checkThresholdsAndSendAlert(
         },
         mLog
       )
-      printProbeLog(mLog)
+
       getLogsAndReport()
     })
 }
@@ -262,8 +257,9 @@ export async function doProbe(
         mLog
       ).catch((error) => {
         mLog = setAlert({ flag: 'error', message: error }, mLog)
-        printProbeLog(mLog)
       })
+
+      printProbeLog(mLog)
 
       // Exit the loop if there is any alert triggered
       if (validatedResponse.some((item) => item.isAlertTriggered)) {
