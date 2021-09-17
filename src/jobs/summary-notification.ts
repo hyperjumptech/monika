@@ -43,16 +43,12 @@ export async function getSummaryAndSendNotif() {
     sendNotifications(notifications, {
       subject: `Monika Status`,
       body: `Status Update ${format(new Date(), 'yyyy-MM-dd HH:mm:ss XXX')}
-              Host: ${hostname()} (${[publicIpAddress, getIp()]
-        .filter(Boolean)
-        .join('/')})
-              Number of probes: ${summary.numberOfProbes}
-              Average response time: ${
-                summary.averageResponseTime
-              } ms in the last 24 hours
-              Incidents: ${summary.numberOfIncidents} in the last 24 hours
-              Recoveries: ${summary.numberOfRecoveries} in the last 24 hours
-              Notifications: ${summary.numberOfSentNotifications}`,
+Host: ${hostname()} (${[publicIpAddress, getIp()].filter(Boolean).join('/')})
+Number of probes: ${summary.numberOfProbes}
+Average response time: ${summary.averageResponseTime} ms in the last 24 hours
+Incidents: ${summary.numberOfIncidents} in the last 24 hours
+Recoveries: ${summary.numberOfRecoveries} in the last 24 hours
+Notifications: ${summary.numberOfSentNotifications}`,
       summary: `There are ${summary.numberOfIncidents} incidents and ${summary.numberOfRecoveries} recoveries in the last 24 hours.`,
       meta: {
         type: 'status-update' as const,
