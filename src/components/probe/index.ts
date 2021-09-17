@@ -159,9 +159,21 @@ export async function doProbe(
       // Add to an array to be accessed by another request
       responses.push(probeRes)
 
-      // done probing, got the results, build logs
       requestLogger.setResponse(probeRes)
-      requestLogger.setAlerts(
+
+      // store request error log
+      if ([0, 1, 2, 599].includes(probeRes.status)) {
+        const errorMessageMap: Record<number, string> = {
+          0: 'URI not found',
+          1: 'Connection reset',
+          2: 'Connection refused',
+          599: 'Request Timed out',
+        }
+
+        requestLogger.addError(errorMessageMap[probeRes.status])
+      }
+
+      requestLogger.addAlerts(
         validatedResponse
           .filter((item) => item.isAlertTriggered)
           .map((item) => item.alert)

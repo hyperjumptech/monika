@@ -65,8 +65,8 @@ export default class RequestLogger {
     this.response = response
   }
 
-  setAlerts(alerts: ProbeAlert[]) {
-    this.triggeredAlerts = alerts
+  addAlerts(alerts: ProbeAlert[]) {
+    this.triggeredAlerts.push(...alerts)
   }
 
   addNotifications(
@@ -91,34 +91,42 @@ export default class RequestLogger {
       ) ||
       reversedSentNotifications.find((notif) => notif.type === 'NOTIFY-RECOVER')
 
-    const logObject = {
-      type: 'PROBE-REQUEST',
-      iteration: this.iteration,
-      probeId: this.probe.id,
-      url: this.request.url,
-      method: this.request.method,
-      responseCode: this.response?.status,
-      responseTime: this.response?.config.extraData?.responseTime,
-      alert: {
-        flag: this.triggeredAlerts.length > 0 ? 'ALERT' : '',
-        messages: this.triggeredAlerts.map((alert) => alert.query),
-      },
-      notification: {
-        flag: printedNotification ? printedNotification.type : '',
-        messages: printedNotification
-          ? [
-              printedNotification.type === 'NOTIFY-INCIDENT'
-                ? 'service probably down'
-                : 'service is back up',
-            ]
-          : [],
-      },
+    const time = new Date().toISOString()
+
+    let alertMsg = ''
+    let errorMsg = ''
+    let notifMsg = ''
+
+    const probeMsg = `${this.iteration} id:${this.probe.id} ${
+      this.response?.status || '-'
+    } ${this.request.method} ${this.request.url} ${
+      this.response?.config.extraData?.responseTime || '-'
+    }ms`
+
+    if (printedNotification) {
+      notifMsg = `, NOTIF: ${
+        printedNotification.type === 'NOTIFY-INCIDENT'
+          ? 'service probably down'
+          : 'service is back up'
+      }`
+    }
+
+    if (this.errors.length > 0) {
+      errorMsg = `, ERROR: ${this.errors.join(', ')}`
     }
 
     if (this.triggeredAlerts.length > 0) {
-      log.warn(logObject)
+      alertMsg = `, ALERT: ${this.triggeredAlerts
+        .map((alert) => alert.query)
+        .join(', ')}`
+    }
+
+    const logMsg = `${time} ${probeMsg}${errorMsg || alertMsg}${notifMsg}`
+
+    if (this.errors.length > 0 || this.triggeredAlerts.length > 0) {
+      log.warn(logMsg)
     } else {
-      log.info(logObject)
+      log.info(logMsg)
     }
   }
 
