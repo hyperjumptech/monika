@@ -32,7 +32,7 @@ import validateResponse, {
 } from '../../plugins/validate-response'
 import { getEventEmitter } from '../../utils/events'
 import { log } from '../../utils/pino'
-import { RequestLogger } from '../logger'
+import { RequestLog } from '../logger'
 import { sendAlerts } from '../notification'
 import { processThresholds } from '../notification/process-server-status'
 import { getLogsAndReport } from '../reporter'
@@ -55,7 +55,7 @@ interface ProbeSendNotification extends Omit<ProbeStatusProcessed, 'statuses'> {
 // Probes Thresholds processed, Send out notifications/alerts.
 async function checkThresholdsAndSendAlert(
   data: ProbeStatusProcessed,
-  requestLogger: RequestLogger
+  requestLog: RequestLog
 ) {
   const {
     probe,
@@ -103,7 +103,7 @@ async function checkThresholdsAndSendAlert(
         validatedResponseStatuses,
       }).catch((error: Error) => log.error(error.message))
 
-      requestLogger.addNotifications(
+      requestLog.addNotifications(
         (notifications ?? []).map((notification) => ({
           notification,
           type:
@@ -134,7 +134,7 @@ export async function doProbe(
     requestIndex++
   ) {
     const request = probe.requests[requestIndex]
-    const requestLogger = new RequestLogger(probe, requestIndex, checkOrder)
+    const requestLog = new RequestLog(probe, requestIndex, checkOrder)
 
     try {
       // intentionally wait for a request to finish before processing next request in loop
@@ -153,7 +153,7 @@ export async function doProbe(
       // Add to an array to be accessed by another request
       responses.push(probeRes)
 
-      requestLogger.setResponse(probeRes)
+      requestLog.setResponse(probeRes)
 
       // store request error log
       if ([0, 1, 2, 599].includes(probeRes.status)) {
@@ -164,7 +164,7 @@ export async function doProbe(
           599: 'Request Timed out',
         }
 
-        requestLogger.addError(errorMessageMap[probeRes.status])
+        requestLog.addError(errorMessageMap[probeRes.status])
       }
 
       // combine global probe alerts with all individual request alerts
@@ -173,7 +173,7 @@ export async function doProbe(
       // Responses have been processed and validated
       const validatedResponse = validateResponse(combinedAlerts, probeRes)
 
-      requestLogger.addAlerts(
+      requestLog.addAlerts(
         validatedResponse
           .filter((item) => item.isAlertTriggered)
           .map((item) => item.alert)
@@ -195,9 +195,9 @@ export async function doProbe(
           requestIndex,
           validatedResponseStatuses: validatedResponse,
         },
-        requestLogger
+        requestLog
       ).catch((error) => {
-        requestLogger.addError(error.message)
+        requestLog.addError(error.message)
       })
 
       // Exit the loop if there is any alert triggered
@@ -205,14 +205,14 @@ export async function doProbe(
         break
       }
     } catch (error) {
-      requestLogger.addError(error.message)
+      requestLog.addError(error.message)
       break
     } finally {
-      requestLogger.print()
-      requestLogger
+      requestLog.print()
+      requestLog
         .saveToDatabase()
         .then(() => {
-          if (requestLogger.hasIncidentOrRecovery) {
+          if (requestLog.hasIncidentOrRecovery) {
             return getLogsAndReport()
           }
         })

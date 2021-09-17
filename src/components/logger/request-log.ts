@@ -28,7 +28,7 @@ import { AxiosResponseWithExtraData } from '../../interfaces/request'
 import { log } from '../../utils/pino'
 import { saveProbeRequestLog, saveNotificationLog } from './history'
 
-export default class RequestLogger {
+export class RequestLog {
   private iteration: number
 
   private probe: Probe
