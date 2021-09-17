@@ -1,0 +1,13 @@
+notifications:
+  - id: unique-id
+    type: webhook
+    data:
+      url: http://www.example.com
+      method: GET
+probes:
+  - id: '1'
+    name: Example
+    description: Probe
+    alerts:
+      - status-not-2xx
+      - response-time-greater-than-200-ms
