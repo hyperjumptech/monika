@@ -30,7 +30,11 @@ import fs from 'fs'
 import cron, { ScheduledTask } from 'node-cron'
 import { createConfig, getConfigIterator } from './components/config'
 import { printAllLogs } from './components/logger'
-import { closeLog, flushAllLogs } from './components/logger/history'
+import {
+  closeLog,
+  flushAllLogs,
+  openLogfile,
+} from './components/logger/history'
 import { notificationChecker } from './components/notification/checker'
 import { resetServerAlertStates } from './components/notification/process-server-status'
 import events from './events'
@@ -169,7 +173,7 @@ class Monika extends Command {
         return
       }
 
-      await initLoaders(flags)
+      await openLogfile()
 
       if (flags.logs) {
         await printAllLogs()
@@ -195,6 +199,8 @@ class Monika extends Command {
         await closeLog()
         return
       }
+
+      await initLoaders(flags)
 
       let scheduledTasks: ScheduledTask[] = []
       let abortCurrentLooper: (() => void) | undefined
