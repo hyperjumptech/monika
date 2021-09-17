@@ -22,54 +22,10 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { getConfig, setupConfig } from '../components/config'
-import events from '../events'
+import cron from 'node-cron'
 import { tlsChecker } from '../jobs/tls-check'
-import { loopCheckSTUNServer, loopReport } from '../looper'
-import {
-  PrometheusCollector,
-  startPrometheusMetricsServer,
-} from '../plugins/metrics/prometheus'
-import { getEventEmitter } from '../utils/events'
-import { getPublicNetworkInfo } from '../utils/public-ip'
-// import to activate all the application event emitter subscribers
-import '../events/subscribers/application'
-import { jobsLoader } from './jobs'
 
-export default async function init(flags: any) {
-  const eventEmitter = getEventEmitter()
-  const isTestEnvironment = process.env.CI || process.env.NODE_ENV === 'test'
-
-  // cache location & ISP info
-  await getPublicNetworkInfo()
-  // check if connected to STUN Server and getting the public IP in the same time
-  loopCheckSTUNServer(flags.stun)
-
-  // start Promotheus server
-  if (flags.prometheus) {
-    const {
-      registerCollectorFromProbes,
-      collectProbeRequestMetrics,
-    } = new PrometheusCollector()
-
-    // register prometheus metric collectors
-    eventEmitter.on(events.config.sanitized, registerCollectorFromProbes)
-    // collect prometheus metrics
-    eventEmitter.on(events.probe.response.received, collectProbeRequestMetrics)
-
-    startPrometheusMetricsServer(flags.prometheus)
-  }
-
-  await setupConfig(flags)
-
-  // check TLS when Monika starts
-  tlsChecker()
-
-  if (!isTestEnvironment) {
-    // load cron jobs
-    jobsLoader()
-
-    // Run report on interval if symon configuration exists
-    loopReport(getConfig)
-  }
+export function jobsLoader() {
+  // schedule TLS checker every day at 00:00
+  cron.schedule('0 0 * * *', tlsChecker)
 }
