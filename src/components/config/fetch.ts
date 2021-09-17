@@ -23,9 +23,9 @@
  **********************************************************************************/
 
 import axios from 'axios'
-import { ConfigOptional } from '../../interfaces/config'
+import { Config } from '../../interfaces/config'
 
-export const fetchConfig = async (url: string): Promise<ConfigOptional> => {
+export const fetchConfig = async (url: string): Promise<Partial<Config>> => {
   try {
     const { data } = await axios.get(url)
     return data

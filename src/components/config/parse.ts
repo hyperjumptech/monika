@@ -22,7 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Config, ConfigOptional } from '../../interfaces/config'
+import { Config } from '../../interfaces/config'
 import { readFileSync } from 'fs'
 import { parseConfigFromPostman } from './parse-postman'
 import { parseHarFile } from './parse-har'
@@ -32,7 +32,7 @@ import yml from 'js-yaml'
 export const parseConfig = async (
   configPath: string,
   type: string
-): Promise<ConfigOptional> => {
+): Promise<Partial<Config>> => {
   // Read file from configPath
   try {
     // Read file from configPath

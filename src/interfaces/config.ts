@@ -36,16 +36,3 @@ export interface Config {
   symon?: SymonConfig
   version?: string
 }
-
-/**
- * Allow configurations with optional probes for merging purposes
- */
-export interface ConfigOptional {
-  certificate?: Certificate
-  interval?: number
-  notifications?: Notification[]
-  probes?: Probe[]
-  'status-notification'?: string
-  symon?: SymonConfig
-  version?: string
-}

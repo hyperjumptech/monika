@@ -28,7 +28,7 @@ import pEvent from 'p-event'
 import isUrl from 'is-url'
 import events from './../../events'
 import { open } from './../../utils/open-website'
-import { Config, ConfigOptional } from '../../interfaces/config'
+import { Config } from '../../interfaces/config'
 import { fetchConfig } from './fetch'
 import { parseConfig } from './parse'
 import { validateConfig } from './validate'
@@ -41,7 +41,7 @@ import { cli } from 'cli-ux'
 const emitter = new EventEmitter()
 
 let cfg: Config
-let configs: ConfigOptional[]
+let configs: Partial<Config>[]
 
 export const getConfig = () => {
   if (!cfg) throw new Error('Configuration setup has not been run yet')
@@ -87,24 +87,7 @@ const updateConfig = async (config: Config) => {
 
 const mergeConfigs = (): Config => {
   const mergedConfig = configs.reduce((prev, current) => {
-    return {
-      certificate: current?.certificate
-        ? current.certificate
-        : prev.certificate,
-      interval: current?.interval ? current.interval : prev.interval,
-      notifications:
-        current?.notifications && current.notifications.length > 0
-          ? current.notifications
-          : prev.notifications,
-      probes:
-        current?.probes && current.probes.length > 0
-          ? current.probes
-          : prev.probes,
-      symon: current?.symon ? current.symon : prev.symon,
-      'status-notification': current?.['status-notification']
-        ? current['status-notification']
-        : prev['status-notification'],
-    }
+    return { ...prev, ...current }
   })
   return mergedConfig as Config
 }
@@ -140,7 +123,7 @@ const scheduleRemoteConfigFetcher = (
   }, interval * 1000)
 }
 
-const setupConfigFromJson = (flags: any): Promise<ConfigOptional>[] => {
+const setupConfigFromJson = (flags: any): Promise<Partial<Config>>[] => {
   return (flags.config as Array<string>).map((source, i) => {
     if (isUrl(source)) {
       scheduleRemoteConfigFetcher(source, flags['config-interval'], i)
@@ -153,7 +136,7 @@ const setupConfigFromJson = (flags: any): Promise<ConfigOptional>[] => {
 }
 
 export const setupConfig = async (flags: any) => {
-  const configParse = new Array<Promise<ConfigOptional>>(0)
+  const configParse = new Array<Promise<Partial<Config>>>(0)
   if (flags.har) {
     configParse.push(parseConfig(flags.har, 'har'))
   } else if (flags.postman) {

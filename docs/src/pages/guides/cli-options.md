@@ -26,7 +26,7 @@ Configuration files may be placed remotely which you can specify using the same 
 monika -c https://raw.githubusercontent.com/hyperjumptech/monika/main/config_sample/config.desktop.example.yml
 ```
 
-A neat feature is that the configuration file will watch any changes to the file and update running config on-the-fly.
+A neat feature is that the configuration file is watched and any changes will cause Monika to reload.
 
 ### Multiple configurations
 
