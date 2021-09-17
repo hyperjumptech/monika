@@ -32,10 +32,10 @@ import { log } from '../utils/pino'
 
 export function tlsChecker() {
   const config = getConfig()
-  const isCertificationConfigEmpty =
+  const isCertificateConfigEmpty =
     config?.certificate && config?.certificate?.domains.length > 0
 
-  if (isCertificationConfigEmpty) {
+  if (isCertificateConfigEmpty) {
     const { certificate } = config
     const defaultExpiryReminder = 30
 
