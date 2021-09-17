@@ -65,7 +65,7 @@ const NOTIFICATION_NO_RECIPIENTS = setInvalidResponse(
   'Recipients does not exists or has length lower than 1!'
 )
 const NOTIFICATION_INVALID_TYPE = setInvalidResponse(
-  'Notifications type is not allowed'
+  'Notification type is not allowed'
 )
 
 const PROBE_NO_REQUESTS = setInvalidResponse(
@@ -215,6 +215,10 @@ function validateNotification(notifications: Notification[]): Validation {
       }
 
       case 'desktop': {
+        break
+      }
+
+      case 'lark': {
         break
       }
 
