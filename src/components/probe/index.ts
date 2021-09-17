@@ -47,15 +47,6 @@ interface ProbeStatusProcessed {
   requestIndex: number
 }
 
-interface ProbeSaveLogToDatabase
-  extends Omit<
-    ProbeStatusProcessed,
-    'statuses' | 'requestIndex' | 'validatedResponseStatuses'
-  > {
-  index: number
-  probeState?: ServerAlertState
-}
-
 interface ProbeSendNotification extends Omit<ProbeStatusProcessed, 'statuses'> {
   index: number
   probeState?: ServerAlertState
@@ -100,30 +91,10 @@ async function checkThresholdsAndSendAlert(
     }
   }
 
-  const createNotificationLog = (
-    data: ProbeSaveLogToDatabase,
-    requestLogger: RequestLogger
-  ) => {
-    const { probeState, notifications } = data
-
-    const type =
-      probeState?.state === 'DOWN' ? 'NOTIFY-INCIDENT' : 'NOTIFY-RECOVER'
-
-    if (notifications?.length) {
-      requestLogger.setNotifications(
-        notifications.map((notification) => ({
-          notification,
-          type,
-          alertQuery: probeState?.alertQuery || '',
-        }))
-      )
-    }
-  }
-
   statuses
     ?.filter((probeState) => probeState.shouldSendNotification)
-    ?.forEach((probeState, index) => {
-      probeSendNotification({
+    ?.forEach(async (probeState, index) => {
+      await probeSendNotification({
         index,
         probe,
         probeState,
@@ -132,14 +103,13 @@ async function checkThresholdsAndSendAlert(
         validatedResponseStatuses,
       }).catch((error: Error) => log.error(error.message))
 
-      createNotificationLog(
-        {
-          index,
-          probe,
-          probeState,
-          notifications,
-        },
-        requestLogger
+      requestLogger.addNotifications(
+        (notifications ?? []).map((notification) => ({
+          notification,
+          type:
+            probeState?.state === 'DOWN' ? 'NOTIFY-INCIDENT' : 'NOTIFY-RECOVER',
+          alertQuery: probeState?.alertQuery || '',
+        }))
       )
 
       getLogsAndReport()
@@ -159,17 +129,16 @@ export async function doProbe(
 ) {
   const eventEmitter = getEventEmitter()
   const responses = []
-  let requestLogger: RequestLogger
 
-  try {
-    for (
-      let requestIndex = 0;
-      requestIndex < probe.requests.length;
-      requestIndex++
-    ) {
-      const request = probe.requests[requestIndex]
-      requestLogger = new RequestLogger(probe, requestIndex, checkOrder)
+  for (
+    let requestIndex = 0;
+    requestIndex < probe.requests.length;
+    requestIndex++
+  ) {
+    const request = probe.requests[requestIndex]
+    const requestLogger = new RequestLogger(probe, requestIndex, checkOrder)
 
+    try {
       // intentionally wait for a request to finish before processing next request in loop
       // eslint-disable-next-line no-await-in-loop
       const probeRes: AxiosResponseWithExtraData = await probing(
@@ -221,15 +190,15 @@ export async function doProbe(
         requestLogger.addError(error.message)
       })
 
-      requestLogger.print()
-
       // Exit the loop if there is any alert triggered
       if (validatedResponse.some((item) => item.isAlertTriggered)) {
         break
       }
+    } catch (error) {
+      requestLogger.addError(error.message)
+    } finally {
+      requestLogger.print()
+      requestLogger.saveToDatabase().catch((error) => log.error(error.message))
     }
-  } catch (error) {
-    requestLogger!.addError(error.message)
-    requestLogger!.print()
   }
 }
