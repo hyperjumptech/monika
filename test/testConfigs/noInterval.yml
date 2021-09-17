@@ -5,14 +5,14 @@ notifications:
       url: http://www.example.com
       method: GET
 probes:
-  - id: "1"
+  - id: '1'
     name: Example
     description: Probe
     requests:
       - method: POST
         url: https://something/login
         headers:
-          Authorization: ""
+          Authorization: ''
         body:
           username: someusername
           password: somepassword

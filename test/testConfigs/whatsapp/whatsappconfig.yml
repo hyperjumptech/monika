@@ -4,19 +4,19 @@ notifications:
     type: whatsapp
     data:
       recipients:
-        - "08123456789"
+        - '08123456789'
       url: http://www.example.com
       username: someusername
       password: somepassword
 probes:
-  - id: "1"
+  - id: '1'
     name: Example
     description: Probe
     requests:
       - method: POST
         url: https://something/login
         headers:
-          Authorization: ""
+          Authorization: ''
         body:
           username: someusername
           password: somepassword

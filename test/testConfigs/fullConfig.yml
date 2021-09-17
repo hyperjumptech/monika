@@ -34,7 +34,7 @@ notifications:
     type: whatsapp
     data:
       recipients:
-        - "08123456789"
+        - '08123456789'
       url: http://www.example.com
       username: someusername
       password: somepassword
@@ -43,7 +43,7 @@ notifications:
     data:
       url: http://www.example.com
 probes:
-  - id: "1"
+  - id: '1'
     name: something
     description: some description
     interval: 0
@@ -51,7 +51,7 @@ probes:
       - method: POST
         url: https://something/login
         headers:
-          Authorization: ""
+          Authorization: ''
         body:
           username: someusername
           password: somepassword

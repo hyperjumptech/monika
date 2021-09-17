@@ -1,5 +1,5 @@
 probes:
-  - id: "1"
+  - id: '1'
     name: something
     description: some description
     interval: 0
@@ -7,7 +7,7 @@ probes:
       - method: POST
         url: https://something/login
         headers:
-          Authorization: ""
+          Authorization: ''
         body:
           username: someusername
           password: somepassword

@@ -1,6 +1,6 @@
 notifications: []
 probes:
-  - id: "1"
+  - id: '1'
     name: Probing Github
     description: simulate html form submission
     interval: 10

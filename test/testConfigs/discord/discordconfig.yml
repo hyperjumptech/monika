@@ -4,7 +4,7 @@ notifications:
     data:
       url: http://www.example.com
 probes:
-  - id: "1"
+  - id: '1'
     name: Example
     description: Probe
     interval: 0
