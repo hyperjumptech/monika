@@ -39,11 +39,17 @@ export default async function init(flags: any) {
   const eventEmitter = getEventEmitter()
   const isTestEnvironment = process.env.CI || process.env.NODE_ENV === 'test'
 
+  await openLogfile()
+
+  // the logs and flush flag only needs to load openLogfile
+  if (flags.logs || flags.flush) {
+    return
+  }
+
   // cache location & ISP info
   await getPublicNetworkInfo()
   // check if connected to STUN Server and getting the public IP in the same time
   loopCheckSTUNServer(flags.stun)
-  await openLogfile()
 
   // start Promotheus server
   if (flags.prometheus) {
