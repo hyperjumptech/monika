@@ -23,7 +23,6 @@
  **********************************************************************************/
 
 import chai, { expect } from 'chai'
-
 import { sendAlerts } from '../../src/components/notification'
 import * as discord from '../../src/components/notification/channel/discord'
 import * as mailgun from '../../src/components/notification/channel/mailgun'
@@ -52,7 +51,7 @@ describe('send alerts', () => {
     await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', message: '' },
-        hasSomethingToReport: false,
+        isAlertTriggered: false,
         response: {
           status: 500,
           config: {
@@ -85,7 +84,7 @@ describe('send alerts', () => {
     await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', message: '' },
-        hasSomethingToReport: true,
+        isAlertTriggered: true,
         response: {
           status: 500,
           config: {
@@ -118,7 +117,7 @@ describe('send alerts', () => {
     await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', message: '' },
-        hasSomethingToReport: true,
+        isAlertTriggered: true,
         response: {
           status: 500,
           config: {
@@ -152,7 +151,7 @@ describe('send alerts', () => {
     await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', message: '' },
-        hasSomethingToReport: true,
+        isAlertTriggered: true,
         response: {
           status: 500,
           config: {
@@ -187,7 +186,7 @@ describe('send alerts', () => {
     await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', message: '' },
-        hasSomethingToReport: true,
+        isAlertTriggered: true,
         response: {
           status: 500,
           config: {
@@ -227,7 +226,7 @@ describe('send alerts', () => {
     await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', message: '' },
-        hasSomethingToReport: true,
+        isAlertTriggered: true,
         response: {
           status: 500,
           config: {
@@ -263,7 +262,7 @@ describe('send alerts', () => {
     await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', message: '' },
-        hasSomethingToReport: true,
+        isAlertTriggered: true,
         response: {
           status: 500,
           config: {
@@ -317,7 +316,7 @@ describe('send alerts', () => {
     await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', message: '' },
-        hasSomethingToReport: true,
+        isAlertTriggered: true,
         response: {
           status: 500,
           config: {
@@ -352,7 +351,7 @@ describe('send alerts', () => {
     await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', message: '' },
-        hasSomethingToReport: true,
+        isAlertTriggered: true,
         response: {
           status: 500,
           config: {
@@ -385,7 +384,7 @@ describe('send alerts', () => {
     await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', message: '' },
-        hasSomethingToReport: true,
+        isAlertTriggered: true,
         response: {
           status: 500,
           config: {

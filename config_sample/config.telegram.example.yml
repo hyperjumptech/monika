@@ -1,0 +1,10 @@
+probes:
+  - requests:
+      - url: http://github.com
+
+notifications:
+  - id: unique-id-telegram
+    type: telegram
+    data:
+      group_id: YOUR_GROUP_ID
+      bot_token: YOUR_BOT_TOKEN

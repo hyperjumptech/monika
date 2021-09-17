@@ -32,7 +32,7 @@ import { createConfig, getConfigIterator } from './components/config'
 import { printAllLogs } from './components/logger'
 import { closeLog, flushAllLogs } from './components/logger/history'
 import { notificationChecker } from './components/notification/checker'
-import { resetProbeStatuses } from './components/notification/process-server-status'
+import { resetServerAlertStates } from './components/notification/process-server-status'
 import events from './events'
 import { Config } from './interfaces/config'
 import { Probe } from './interfaces/probe'
@@ -47,18 +47,15 @@ const em = getEventEmitter()
 function getDefaultConfig() {
   const filesArray = fs.readdirSync('./')
   const monikaDotJsonFile = filesArray.find((x) => x === 'monika.json')
-  const configDotJsonFile = filesArray.find((x) => x === 'config.json')
   const monikaDotYamlFile = filesArray.find(
     (x) => x === 'monika.yml' || x === 'monika.yaml'
   )
 
-  return monikaDotJsonFile
-    ? `./${monikaDotJsonFile}`
-    : configDotJsonFile
-    ? `./${configDotJsonFile}`
-    : monikaDotYamlFile
+  return monikaDotYamlFile
     ? `./${monikaDotYamlFile}`
-    : './monika.json'
+    : monikaDotJsonFile
+    ? `./${monikaDotJsonFile}`
+    : './monika.yml'
 }
 class Monika extends Command {
   static description = 'Monika command line monitoring tool'
@@ -204,7 +201,7 @@ class Monika extends Command {
 
       for await (const config of getConfigIterator()) {
         if (abortCurrentLooper) {
-          resetProbeStatuses()
+          resetServerAlertStates()
           abortCurrentLooper()
         }
 

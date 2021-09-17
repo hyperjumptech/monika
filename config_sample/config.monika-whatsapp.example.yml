@@ -1,0 +1,9 @@
+probes:
+  - requests:
+      - url: http://github.com
+
+notifications:
+  - id: monika-webhook
+    type: monika-notif
+    data:
+      url: YOUR_MONIKA_WHATSAPP_WEBHOOK

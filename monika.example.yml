@@ -4,7 +4,7 @@
 probes:
   - id: '1'
     requests:
-      - url: http://example.com
+      - url: http://github.com
 # Configuration example for sending HTML Form Submission
 # Using this configuration Monika will send a POST request to http://www.foo.com/login.php
 # with the defined headers and request's body.
