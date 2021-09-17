@@ -37,6 +37,7 @@ import {
   closeLog,
   flushAllLogs,
   getSummary,
+  openLogfile,
   saveNotificationLog,
 } from './components/logger/history'
 import { sendAlerts, sendNotifications } from './components/notification'
@@ -182,7 +183,7 @@ class Monika extends Command {
         return
       }
 
-      await initLoaders(flags)
+      await openLogfile()
 
       if (flags.logs) {
         await printAllLogs()
@@ -208,6 +209,8 @@ class Monika extends Command {
         await closeLog()
         return
       }
+
+      await initLoaders(flags)
 
       let scheduledTasks: ScheduledTask[] = []
       let abortCurrentLooper: (() => void) | undefined

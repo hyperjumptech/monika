@@ -23,7 +23,6 @@
  **********************************************************************************/
 
 import { getConfig, setupConfig } from '../components/config'
-import { openLogfile } from '../components/logger/history'
 import events from '../events'
 import { loopCheckSTUNServer, loopReport } from '../looper'
 import {
@@ -38,13 +37,6 @@ import '../events/subscribers/application'
 export default async function init(flags: any) {
   const eventEmitter = getEventEmitter()
   const isTestEnvironment = process.env.CI || process.env.NODE_ENV === 'test'
-
-  await openLogfile()
-
-  // the logs and flush flag only needs to load openLogfile
-  if (flags.logs || flags.flush) {
-    return
-  }
 
   // cache location & ISP info
   await getPublicNetworkInfo()
