@@ -150,12 +150,6 @@ export async function doProbe(
         response: probeRes,
       })
 
-      // combine global probe alerts with all individual request alerts
-      const combinedAlerts = probe.alerts.concat(...(request.alerts || []))
-
-      // Responses have been processed and validated
-      const validatedResponse = validateResponse(combinedAlerts, probeRes)
-
       // Add to an array to be accessed by another request
       responses.push(probeRes)
 
@@ -172,6 +166,12 @@ export async function doProbe(
 
         requestLogger.addError(errorMessageMap[probeRes.status])
       }
+
+      // combine global probe alerts with all individual request alerts
+      const combinedAlerts = probe.alerts.concat(...(request.alerts || []))
+
+      // Responses have been processed and validated
+      const validatedResponse = validateResponse(combinedAlerts, probeRes)
 
       requestLogger.addAlerts(
         validatedResponse
