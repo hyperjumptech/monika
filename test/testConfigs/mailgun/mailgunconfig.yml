@@ -1,0 +1,26 @@
+notifications:
+  - id: unique-id
+    type: mailgun
+    data:
+      recipients:
+        - a@example.com
+      apiKey: adfsafdsadfdsafsafds
+      domain: api.mailgun.net
+probes:
+  - id: "1"
+    name: Example
+    description: Probe
+    interval: 0
+    requests:
+      - method: POST
+        url: https://something/login
+        headers:
+          Authorization: ""
+        body:
+          username: someusername
+          password: somepassword
+    incidentThreshold: 2
+    recoveryThreshold: 2
+    alerts:
+      - status-not-2xx
+      - response-time-greater-than-200-ms

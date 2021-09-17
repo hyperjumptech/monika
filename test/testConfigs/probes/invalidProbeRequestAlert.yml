@@ -1,0 +1,23 @@
+notifications:
+  - id: unique-id
+    type: webhook
+    data:
+      url: http://www.example.com
+      method: GET
+probes:
+  - id: "1"
+    name: Example
+    description: Probe
+    requests:
+      - method: GET
+        url: https://something/something
+        headers:
+          Authorization: ""
+        body:
+          username: someusername
+          password: somepassword
+    incidentThreshold: 2
+    recoveryThreshold: 2
+    alerts:
+      - status-not-2xx
+      - response-time-lower-than-200-ms

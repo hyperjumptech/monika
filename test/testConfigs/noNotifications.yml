@@ -1,0 +1,18 @@
+probes:
+  - id: "1"
+    name: something
+    description: some description
+    interval: 0
+    requests:
+      - method: POST
+        url: https://something/login
+        headers:
+          Authorization: ""
+        body:
+          username: someusername
+          password: somepassword
+    incidentThreshold: 2
+    recoveryThreshold: 2
+    alerts:
+      - status-not-2xx
+      - response-time-greater-than-200-ms

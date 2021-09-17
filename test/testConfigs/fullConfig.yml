@@ -1,0 +1,62 @@
+notifications:
+  - id: unique-id
+    type: mailgun
+    data:
+      recipients:
+        - a@example.com
+      apiKey: adfsafdsadfdsafsafds
+      domain: api.mailgun.net
+  - id: unique-id
+    type: sendgrid
+    data:
+      recipients:
+        - a@example.com
+      apiKey: adfsafdsadfdsafsafds
+  - id: unique-id
+    type: smtp
+    data:
+      recipients:
+        - a@example.com
+      hostname: https://www.example.com
+      port: 8080
+      username: dennypradipta
+      password: bismillah
+  - id: unique-id
+    type: webhook
+    data:
+      url: http://www.example.com
+      method: GET
+  - id: unique-id
+    type: discord
+    data:
+      url: http://www.example.com
+  - id: unique-id-whatsapp
+    type: whatsapp
+    data:
+      recipients:
+        - "08123456789"
+      url: http://www.example.com
+      username: someusername
+      password: somepassword
+  - id: unique-id-monika-notif
+    type: monika-notif
+    data:
+      url: http://www.example.com
+probes:
+  - id: "1"
+    name: something
+    description: some description
+    interval: 0
+    requests:
+      - method: POST
+        url: https://something/login
+        headers:
+          Authorization: ""
+        body:
+          username: someusername
+          password: somepassword
+    incidentThreshold: 2
+    recoveryThreshold: 2
+    alerts:
+      - status-not-2xx
+      - response-time-greater-than-200-ms

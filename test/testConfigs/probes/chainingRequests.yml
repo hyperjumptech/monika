@@ -1,0 +1,21 @@
+notifications: []
+probes:
+  - id: "1"
+    name: Probing Github
+    description: simulate html form submission
+    interval: 10
+    requests:
+      - method: GET
+        url: https://reqres.in/api/users
+        timeout: 7000
+      - method: GET
+        url: https://reqres.in/api/users/{{ responses.[0].data.data.[0].id }}
+        timeout: 7000
+      - method: GET
+        url: https://reqres.in/api/users/{{ responses.[0].data.data.[1].id }}
+        timeout: 7000
+    incidentThreshold: 3
+    recoveryThreshold: 3
+    alerts:
+      - status-not-2xx
+      - response-time-greater-than-2000-ms
