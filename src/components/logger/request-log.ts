@@ -137,7 +137,7 @@ export class RequestLog {
         requestIndex: this.requestIndex,
         probeRes: this.response!,
         alertQueries: this.triggeredAlerts.map((alert) => alert.query),
-        error: this.errors.join(''),
+        error: this.errors.join(', '),
       }),
       ...this.sentNotifications.map((sent) =>
         saveNotificationLog(
