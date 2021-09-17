@@ -35,10 +35,6 @@ export default class RequestLogger {
 
   private requestIndex: number
 
-  private get request() {
-    return this.probe.requests[this.requestIndex]
-  }
-
   private response?: AxiosResponseWithExtraData
 
   private triggeredAlerts: ProbeAlert[] = []
@@ -50,6 +46,14 @@ export default class RequestLogger {
   }[] = []
 
   private errors: string[] = []
+
+  private get request() {
+    return this.probe.requests[this.requestIndex]
+  }
+
+  get hasIncidentOrRecovery() {
+    return this.sentNotifications.length > 0
+  }
 
   constructor(probe: Probe, requestIndex: number, iteration: number) {
     this.iteration = iteration

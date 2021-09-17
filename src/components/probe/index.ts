@@ -93,8 +93,8 @@ async function checkThresholdsAndSendAlert(
 
   statuses
     ?.filter((probeState) => probeState.shouldSendNotification)
-    ?.forEach(async (probeState, index) => {
-      await probeSendNotification({
+    ?.forEach((probeState, index) => {
+      probeSendNotification({
         index,
         probe,
         probeState,
@@ -111,8 +111,6 @@ async function checkThresholdsAndSendAlert(
           alertQuery: probeState?.alertQuery || '',
         }))
       )
-
-      getLogsAndReport()
     })
 }
 
@@ -198,7 +196,14 @@ export async function doProbe(
       requestLogger.addError(error.message)
     } finally {
       requestLogger.print()
-      requestLogger.saveToDatabase().catch((error) => log.error(error.message))
+      requestLogger
+        .saveToDatabase()
+        .then(() => {
+          if (requestLogger.hasIncidentOrRecovery) {
+            return getLogsAndReport()
+          }
+        })
+        .catch((error) => log.error(error.message))
     }
   }
 }
