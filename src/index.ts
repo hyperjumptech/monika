@@ -49,7 +49,11 @@ import { Notification } from './interfaces/notification'
 import { Probe } from './interfaces/probe'
 import { AxiosResponseWithExtraData } from './interfaces/request'
 import initLoaders from './loaders'
-import { idFeeder, isIDValid, sanitizeProbe } from './looper'
+import {
+  /* loopCheckSTUNServer */ idFeeder,
+  isIDValid,
+  sanitizeProbe,
+} from './looper'
 import { getEventEmitter } from './utils/events'
 import getIp from './utils/ip'
 import { log } from './utils/pino'
@@ -76,9 +80,9 @@ class Monika extends Command {
   static examples = [
     'monika',
     'monika --logs',
-    'monika -r 1 --id 1,2,5,7',
+    'monika -r 1 --id "weather, stocks, 5, 7"',
     'monika --create-config',
-    'monika --config https://raw.githubusercontent.com/hyperjumptech/monika/main/monika.example.json --config-interval 900',
+    'monika --config https://raw.githubusercontent.com/hyperjumptech/monika/main/monika.example.yml --config-interval 900',
   ]
 
   static flags = {
@@ -113,15 +117,15 @@ class Monika extends Command {
 
     logs: flags.boolean({
       char: 'l', // prints the (l)ogs
-      description: 'print all logs.',
+      description: 'Print all logs.',
     }),
 
     flush: flags.boolean({
-      description: 'flush logs',
+      description: 'Flush logs',
     }),
 
     verbose: flags.boolean({
-      description: 'show verbose log messages',
+      description: 'Show verbose log messages',
       default: false,
     }),
 
@@ -133,20 +137,20 @@ class Monika extends Command {
 
     repeat: flags.string({
       char: 'r', // (r)epeat
-      description: 'repeats the test run n times',
+      description: 'Repeats the test run n times',
       multiple: false,
     }),
 
     stun: flags.integer({
-      char: 's', // (s)stun
-      description: 'interval in seconds to check STUN server',
-      multiple: false,
-      default: 20,
+      // char: 's', // (s)stun
+      //   description: 'Interval in seconds to check STUN server',
+      //   multiple: false,
+      //   default: 20,
     }),
 
     id: flags.string({
       char: 'i', // (i)ds to run
-      description: 'specific probe ids to run',
+      description: 'Define specific probe ids to run',
       multiple: false,
     }),
 
@@ -164,7 +168,12 @@ class Monika extends Command {
     }),
 
     force: flags.boolean({
-      description: 'force command',
+      description: 'Force commands with a yes whenever Y/n is prompted.',
+      default: false,
+    }),
+
+    summary: flags.boolean({
+      description: 'Display a summay of monika running stats',
       default: false,
     }),
 
@@ -190,6 +199,10 @@ class Monika extends Command {
         return
       }
 
+      if (flags.summary) {
+        return
+      }
+
       if (flags.flush) {
         let ans
 
@@ -206,6 +219,7 @@ class Monika extends Command {
           log.info('Cancelled. Thank you.')
         }
         await closeLog()
+
         return
       }
 
