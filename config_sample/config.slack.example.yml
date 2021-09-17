@@ -1,0 +1,9 @@
+probes:
+  - requests:
+      - url: http://github.com
+
+notifications:
+  - id: unique-id-slack
+    type: slack
+    data:
+      url: https://YOUR_SLACK_INCOMING_WEBHOOK_URL

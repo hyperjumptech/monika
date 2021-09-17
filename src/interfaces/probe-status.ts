@@ -22,26 +22,8 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-export interface ProbeStatus {
-  id: string
-  name: string
-  details: ProbeStateDetails[]
-}
-
-export interface ProbeStateDetails {
+export interface ServerAlertState {
   alertQuery: string
-  probeState:
-    | 'INIT'
-    | 'UP_TRUE_EQUALS_THRESHOLD'
-    | 'UP_TRUE_BELOW_THRESHOLD'
-    | 'UP_FALSE'
-    | 'DOWN_FALSE_EQUALS_THRESHOLD'
-    | 'DOWN_FALSE_BELOW_THRESHOLD'
-    | 'DOWN_TRUE'
-  isDown: boolean
+  state: 'UP' | 'DOWN'
   shouldSendNotification: boolean
-  totalTrue: number
-  totalFalse: number
-  consecutiveTrue: number
-  consecutiveFalse: number
 }

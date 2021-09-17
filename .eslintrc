@@ -2,7 +2,9 @@
     "extends": ["oclif", "oclif-typescript", "prettier"],
     "rules": {
         "no-warning-comments": "off",
-        "no-process-exit": "off"
+        "no-process-exit": "off",
+        "no-use-before-define": ["error", "nofunc"],
+        "@typescript-eslint/no-use-before-define": "off",
     },
     "overrides": [
         {

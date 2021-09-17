@@ -1,0 +1,13 @@
+probes:
+  - requests:
+      - url: http://github.com
+
+notifications:
+  - id: unique-id-smtp
+    type: smtp
+    data:
+      recipients: [YOUR_EMAIL_ADDRESS_HERE]
+      hostname: smtp.gmail.com
+      port: 587
+      username: YOUR_GMAIL_ACCOUNT
+      password: YOUR_GMAIL_PASSWORD_OR_APP_PASSWORD

@@ -26,30 +26,30 @@ import events from '../../events'
 import { LogObject } from '../../interfaces/logs'
 import { Notification } from '../../interfaces/notification'
 import { Probe } from '../../interfaces/probe'
-import type { ProbeStateDetails } from '../../interfaces/probe-status'
+import type { ServerAlertState } from '../../interfaces/probe-status'
 import { AxiosResponseWithExtraData } from '../../interfaces/request'
+import validateResponse, {
+  ValidatedResponse,
+} from '../../plugins/validate-response'
+import { getEventEmitter } from '../../utils/events'
+import { log } from '../../utils/pino'
 import {
   printProbeLog,
   probeBuildLog,
-  setNotificationLog,
   setAlert,
+  setNotificationLog,
 } from '../logger'
 import { sendAlerts } from '../notification'
-import validateResponse, {
-  ValidateResponse,
-} from '../../plugins/validate-response'
-import { getLogsAndReport } from '../reporter'
-import { getEventEmitter } from '../../utils/events'
 import { processThresholds } from '../notification/process-server-status'
+import { getLogsAndReport } from '../reporter'
 import { probing } from './probing'
-import { log } from '../../utils/pino'
 
 // TODO: move this to interface file?
 interface ProbeStatusProcessed {
   probe: Probe
-  statuses?: ProbeStateDetails[]
+  statuses?: ServerAlertState[]
   notifications?: Notification[]
-  validatedResponseStatuses: ValidateResponse[]
+  validatedResponseStatuses: ValidatedResponse[]
   totalRequests: number
 }
 
@@ -59,12 +59,12 @@ interface ProbeSaveLogToDatabase
     'statuses' | 'totalRequests' | 'validatedResponseStatuses'
   > {
   index: number
-  probeState?: ProbeStateDetails
+  probeState?: ServerAlertState
 }
 
 interface ProbeSendNotification extends Omit<ProbeStatusProcessed, 'statuses'> {
   index: number
-  probeState?: ProbeStateDetails
+  probeState?: ServerAlertState
 }
 
 // Probes Thresholds processed, Send out notifications/alerts.
@@ -89,7 +89,7 @@ async function checkThresholdsAndSendAlert(
       validatedResponseStatuses,
     } = data
 
-    const statusString = probeState?.isDown ? 'DOWN' : 'UP'
+    const statusString = probeState?.state ?? 'UP'
     const url = probe.requests[totalRequests - 1].url ?? ''
 
     if ((notifications?.length ?? 0) > 0) {
@@ -99,40 +99,48 @@ async function checkThresholdsAndSendAlert(
         notifications: notifications ?? [],
         validation:
           validatedResponseStatuses.find(
-            (validateResponse: ValidateResponse) =>
+            (validateResponse: ValidatedResponse) =>
               validateResponse.alert.query === probeState?.alertQuery
           ) || validatedResponseStatuses[index],
       })
     }
   }
+
   const createNotificationLog = (
     data: ProbeSaveLogToDatabase,
     mLog: LogObject
-  ): LogObject => {
+  ) => {
     const { probe, probeState, notifications } = data
 
     const type =
-      probeState?.probeState === 'UP_TRUE_EQUALS_THRESHOLD'
-        ? 'NOTIFY-INCIDENT'
-        : 'NOTIFY-RECOVER'
+      probeState?.state === 'DOWN' ? 'NOTIFY-INCIDENT' : 'NOTIFY-RECOVER'
 
-    if ((notifications?.length ?? 0) > 0) {
-      Promise.all(
-        notifications?.map((notification) => {
-          mLog = setNotificationLog(
-            {
-              type,
-              probe,
-              alertQuery: probeState?.alertQuery || '',
-              notification,
-            },
-            mLog
-          )
-        })!
-      )
+    if (notifications?.length) {
+      notifications.forEach((notification) => {
+        setNotificationLog(
+          {
+            type,
+            probe,
+            alertQuery: probeState?.alertQuery || '',
+            notification,
+          },
+          mLog
+        )
+      })
     }
-    return mLog
   }
+
+  validatedResponseStatuses
+    .filter((validation) => validation.isAlertTriggered)
+    .forEach((validation) => {
+      setAlert(
+        {
+          flag: 'ALERT',
+          message: validation.alert.query,
+        },
+        mLog
+      )
+    })
 
   statuses
     ?.filter((probeState) => probeState.shouldSendNotification)
@@ -146,7 +154,7 @@ async function checkThresholdsAndSendAlert(
         validatedResponseStatuses,
       }).catch((error: Error) => log.error(error.message))
 
-      mLog = createNotificationLog(
+      createNotificationLog(
         {
           index,
           probe,
@@ -155,7 +163,7 @@ async function checkThresholdsAndSendAlert(
         },
         mLog
       )
-      printProbeLog(mLog)
+
       getLogsAndReport()
     })
 }
@@ -173,10 +181,9 @@ export async function doProbe(
 ) {
   const eventEmitter = getEventEmitter()
   const responses = []
-  let validatedRes: ValidateResponse[] = []
   let probeRes: AxiosResponseWithExtraData = {} as AxiosResponseWithExtraData
   let totalRequests = 0 // is the number of requests in  probe.requests[x]
-  let mLog: LogObject = {
+  const mLog: LogObject = {
     type: 'PROBE',
     iteration: 0,
     id: probe.id,
@@ -192,11 +199,13 @@ export async function doProbe(
       flag: '',
       message: [],
     },
-  } as LogObject
+  }
 
   try {
-    for await (const request of probe.requests) {
+    for (const request of probe.requests) {
       mLog.url = request.url
+      // intentionally wait for a request to finish before processing next request in loop
+      // eslint-disable-next-line no-await-in-loop
       probeRes = await probing(request, responses)
 
       eventEmitter.emit(events.probe.response.received, {
@@ -209,20 +218,19 @@ export async function doProbe(
       const combinedAlerts = probe.alerts.concat(...(request.alerts || []))
 
       // Responses have been processed and validated
-      const res = validateResponse(combinedAlerts, probeRes)
-      validatedRes = res
+      const validatedResponse = validateResponse(combinedAlerts, probeRes)
 
       // Add to an array to be accessed by another request
       responses.push(probeRes)
 
       // done probing, got the results, build logs
-      mLog = probeBuildLog({
+      probeBuildLog({
         checkOrder,
         probe,
         totalRequests,
         probeRes,
-        alerts: validatedRes
-          .filter((item) => item.hasSomethingToReport)
+        alerts: validatedResponse
+          .filter((item) => item.isAlertTriggered)
           .map((item) => item.alert),
         mLog,
       })
@@ -230,41 +238,36 @@ export async function doProbe(
       // done one request, is there another
       totalRequests += 1
 
-      // Exit the loop if there is any triggers triggered
-      if (validatedRes.filter((item) => item.hasSomethingToReport).length > 0) {
+      // done probing, got some result, process it, check for thresholds and notifications
+      const statuses = processThresholds({
+        probe,
+        requestIndex: totalRequests - 1,
+        validatedResponse,
+      })
+
+      // Done processing results, check if need to send out alerts
+      checkThresholdsAndSendAlert(
+        {
+          probe,
+          statuses,
+          notifications,
+          totalRequests,
+          validatedResponseStatuses: validatedResponse,
+        },
+        mLog
+      ).catch((error) => {
+        setAlert({ flag: 'error', message: error }, mLog)
+      })
+
+      printProbeLog(mLog)
+
+      // Exit the loop if there is any alert triggered
+      if (validatedResponse.some((item) => item.isAlertTriggered)) {
         break
       }
-
-      // done probes, no alerts, no notification.. now print log
-      printProbeLog(mLog)
     }
-
-    // done probing, got some result, process it, check for thresholds and notifications
-    const statuses = processThresholds({
-      checkOrder,
-      probe,
-      probeRes,
-      totalRequests,
-      validatedResp: validatedRes,
-      mLog,
-    })
-
-    // Done processing results, check if need to send out alerts
-    checkThresholdsAndSendAlert(
-      {
-        probe,
-        statuses,
-        notifications,
-        totalRequests,
-        validatedResponseStatuses: validatedRes,
-      },
-      mLog
-    ).catch((error) => {
-      mLog = setAlert({ flag: 'error', message: error }, mLog)
-      printProbeLog(mLog)
-    })
   } catch (error) {
-    mLog = setAlert({ flag: 'error', message: error }, mLog)
+    setAlert({ flag: 'error', message: error }, mLog)
     printProbeLog(mLog)
   }
 }

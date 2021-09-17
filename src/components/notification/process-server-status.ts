@@ -22,264 +22,155 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { printProbeLog, setAlert } from '../../components/logger'
-import { LogObject } from '../../interfaces/logs'
+import { assign, createMachine, interpret, Interpreter } from 'xstate'
 import { Probe } from '../../interfaces/probe'
-import { ProbeStatus, ProbeStateDetails } from '../../interfaces/probe-status'
-import { AxiosResponseWithExtraData } from '../../interfaces/request'
-import { ValidateResponse } from '../../plugins/validate-response'
-import { log } from '../../utils/pino'
+import { ServerAlertState } from '../../interfaces/probe-status'
+import { RequestConfig } from '../../interfaces/request'
+import { ValidatedResponse } from '../../plugins/validate-response'
 
-let PROBE_STATUSES: ProbeStatus[] = []
-const INIT_PROBE_STATUS_DETAILS: ProbeStateDetails = {
-  alertQuery: '',
-  probeState: 'INIT',
-  isDown: false,
-  shouldSendNotification: false,
-  totalTrue: 0,
-  totalFalse: 0,
-  consecutiveTrue: 0,
-  consecutiveFalse: 0,
-}
-enum PROBE_STATE {
-  INIT = 'INIT',
-  UP_TRUE_EQUALS_THRESHOLD = 'UP_TRUE_EQUALS_THRESHOLD',
-  UP_TRUE_BELOW_THRESHOLD = 'UP_TRUE_BELOW_THRESHOLD',
-  UP_FALSE = 'UP_FALSE',
-  DOWN_FALSE_EQUALS_THRESHOLD = 'DOWN_FALSE_EQUALS_THRESHOLD',
-  DOWN_FALSE_BELOW_THRESHOLD = 'DOWN_FALSE_BELOW_THRESHOLD',
-  DOWN_TRUE = 'DOWN_TRUE',
-}
-
-export const resetProbeStatuses = () => {
-  PROBE_STATUSES = []
-}
-
-// Function to determine probe state
-const determineProbeState = ({
-  probeStatusDetail,
-  validation,
-  incidentThreshold,
-  recoveryThreshold,
-}: {
-  errorName: string
-  probeStatusDetail: ProbeStateDetails
-  validation: ValidateResponse
+export type ServerAlertStateContext = {
   incidentThreshold: number
   recoveryThreshold: number
-}) => {
-  const { isDown, consecutiveTrue, consecutiveFalse } = probeStatusDetail
-  const { hasSomethingToReport } = validation
-
-  if (
-    !isDown &&
-    hasSomethingToReport &&
-    consecutiveTrue === incidentThreshold - 1
-  )
-    return PROBE_STATE.UP_TRUE_EQUALS_THRESHOLD
-
-  if (
-    !isDown &&
-    hasSomethingToReport &&
-    consecutiveTrue < incidentThreshold - 1
-  ) {
-    return PROBE_STATE.UP_TRUE_BELOW_THRESHOLD
-  }
-
-  if (!isDown && !hasSomethingToReport) return PROBE_STATE.UP_FALSE
-
-  if (
-    isDown &&
-    !hasSomethingToReport &&
-    consecutiveFalse === recoveryThreshold - 1
-  )
-    return PROBE_STATE.DOWN_FALSE_EQUALS_THRESHOLD
-
-  if (
-    isDown &&
-    !hasSomethingToReport &&
-    consecutiveFalse < recoveryThreshold - 1
-  )
-    return PROBE_STATE.DOWN_FALSE_BELOW_THRESHOLD
-
-  if (isDown && hasSomethingToReport) return PROBE_STATE.DOWN_TRUE
-
-  return PROBE_STATE.INIT
+  consecutiveFailures: number
+  consecutiveSuccesses: number
+  hasBeenDownAtLeastOnce: boolean
 }
 
-// updateProbeStatus updates probe status according to the state
-const updateProbeStatus = (
-  statusDetails: ProbeStateDetails,
-  probeState: PROBE_STATE
-) => {
-  switch (probeState) {
-    case 'UP_FALSE':
-      statusDetails = {
-        ...statusDetails,
-        probeState: 'UP_FALSE',
-        shouldSendNotification: false,
-        consecutiveTrue: 0,
-        consecutiveFalse: statusDetails.consecutiveFalse + 1,
-        totalFalse: statusDetails.totalFalse + 1,
-      }
-      return statusDetails
-    case 'UP_TRUE_BELOW_THRESHOLD':
-      statusDetails = {
-        ...statusDetails,
-        probeState: 'UP_TRUE_BELOW_THRESHOLD',
-        shouldSendNotification: false,
-        consecutiveFalse: 0,
-        totalTrue: statusDetails.totalTrue + 1,
-        consecutiveTrue: statusDetails.consecutiveTrue + 1,
-      }
-      return statusDetails
-    case 'UP_TRUE_EQUALS_THRESHOLD':
-      statusDetails = {
-        ...statusDetails,
-        probeState: 'UP_TRUE_EQUALS_THRESHOLD',
-        shouldSendNotification: true,
-        isDown: true,
-        consecutiveFalse: 0,
-        totalTrue: statusDetails.totalTrue + 1,
-        consecutiveTrue: statusDetails.consecutiveTrue + 1,
-      }
-      return statusDetails
-    case 'DOWN_TRUE':
-      statusDetails = {
-        ...statusDetails,
-        probeState: 'DOWN_TRUE',
-        shouldSendNotification: false,
-        consecutiveFalse: 0,
-        consecutiveTrue: statusDetails.consecutiveTrue + 1,
-        totalTrue: statusDetails.totalTrue + 1,
-      }
-      return statusDetails
-    case 'DOWN_FALSE_BELOW_THRESHOLD':
-      statusDetails = {
-        ...statusDetails,
-        probeState: 'DOWN_FALSE_BELOW_THRESHOLD',
-        shouldSendNotification: false,
-        consecutiveTrue: 0,
-        totalFalse: statusDetails.totalFalse + 1,
-        consecutiveFalse: statusDetails.consecutiveFalse + 1,
-      }
-      return statusDetails
-    case 'DOWN_FALSE_EQUALS_THRESHOLD':
-      statusDetails = {
-        ...statusDetails,
-        probeState: 'DOWN_FALSE_EQUALS_THRESHOLD',
-        shouldSendNotification: true,
-        isDown: false,
-        consecutiveTrue: 0,
-        totalFalse: statusDetails.totalFalse + 1,
-        consecutiveFalse: statusDetails.consecutiveFalse + 1,
-      }
-      return statusDetails
-    default:
-      statusDetails = INIT_PROBE_STATUS_DETAILS
-      return statusDetails
-  }
+const serverAlertStateInterpreters = new Map<
+  RequestConfig,
+  Record<string, Interpreter<ServerAlertStateContext>>
+>()
+
+export const resetServerAlertStates = () => {
+  serverAlertStateInterpreters.clear()
 }
+
+export const serverAlertStateMachine = createMachine<ServerAlertStateContext>(
+  {
+    id: 'server-alerts-state',
+    initial: 'UP',
+    states: {
+      UP: {
+        on: {
+          FAILURE: [
+            {
+              target: 'DOWN',
+              cond: 'incidentThresholdReached',
+              actions: 'handleFailure',
+            },
+            {
+              actions: 'handleFailure',
+            },
+          ],
+          SUCCESS: {
+            actions: 'handleSuccess',
+          },
+        },
+      },
+      DOWN: {
+        entry: 'handleDownState',
+        on: {
+          FAILURE: {
+            actions: 'handleFailure',
+          },
+          SUCCESS: [
+            {
+              target: 'UP',
+              cond: 'recoveryThresholdReached',
+              actions: 'handleSuccess',
+            },
+            {
+              actions: 'handleSuccess',
+            },
+          ],
+        },
+      },
+    },
+  },
+  {
+    actions: {
+      handleFailure: assign({
+        consecutiveFailures: (context) => context.consecutiveFailures + 1,
+        consecutiveSuccesses: (_context) => 0,
+      }),
+      handleSuccess: assign({
+        consecutiveFailures: (_context) => 0,
+        consecutiveSuccesses: (context) => context.consecutiveSuccesses + 1,
+      }),
+      handleDownState: assign({
+        hasBeenDownAtLeastOnce: (_context) => true,
+      }),
+    },
+    guards: {
+      incidentThresholdReached: (context) => {
+        return context.consecutiveFailures + 1 >= context.incidentThreshold
+      },
+      recoveryThresholdReached: (context) => {
+        return context.consecutiveSuccesses + 1 >= context.recoveryThreshold
+      },
+    },
+  }
+)
 
 export const processThresholds = ({
   probe,
-  validatedResp,
-  mLog,
+  requestIndex,
+  validatedResponse,
 }: {
-  checkOrder: number
   probe: Probe
-  probeRes: AxiosResponseWithExtraData
-  totalRequests: number
-  validatedResp: ValidateResponse[]
-  mLog: LogObject
+  requestIndex: number
+  validatedResponse: ValidatedResponse[]
 }) => {
-  try {
-    const {
-      id,
-      name,
-      requests,
-      alerts,
-      incidentThreshold,
-      recoveryThreshold,
-    } = probe
-    const results: Array<ProbeStateDetails> = []
+  const { requests, incidentThreshold, recoveryThreshold } = probe
+  const request = requests[requestIndex]
 
-    // combine global probe alerts with all individual request alerts
-    const combinedAlerts = alerts.concat(
-      ...requests.map((request) => request.alerts || [])
-    )
+  const results: Array<ServerAlertState> = []
 
-    // Initialize server status
-    // This checks if there are no item in PROBE_STATUSES
-    // that doesn't have item with ID === id, push new ProbeStatus
-    const isAlreadyInProbeStatus = PROBE_STATUSES.filter(
-      (item) => item.id === id
-    )
-    if (isAlreadyInProbeStatus.length === 0) {
-      const initProbeStatuses = combinedAlerts.map((alert) => ({
-        ...INIT_PROBE_STATUS_DETAILS,
-        alertQuery: alert.query,
-      }))
+  if (!serverAlertStateInterpreters.has(request)) {
+    const interpreters: Record<
+      string,
+      Interpreter<ServerAlertStateContext>
+    > = {}
 
-      PROBE_STATUSES.push({
-        id,
-        name,
-        details: initProbeStatuses,
+    validatedResponse
+      .map((r) => r.alert)
+      .forEach((alert) => {
+        const stateMachine = serverAlertStateMachine.withContext({
+          incidentThreshold,
+          recoveryThreshold,
+          consecutiveFailures: 0,
+          consecutiveSuccesses: 0,
+          hasBeenDownAtLeastOnce: false,
+        })
+
+        interpreters[alert.query] = interpret(stateMachine).start()
       })
-    }
 
-    // Check if there is any alert that is triggered
-    // If the alert is being triggered <threshold> times, send alert and
-    // change the server status respectively.
-    const currentProbe = PROBE_STATUSES.find(
-      (probeStatus) => probeStatus.id === id
-    )!
-
-    // Calculate the count for successes and failures
-    if (validatedResp.length > 0) {
-      validatedResp.forEach(async (validation) => {
-        const { alert } = validation
-        let updatedStatus: ProbeStateDetails = INIT_PROBE_STATUS_DETAILS
-
-        const probeStatusDetail = currentProbe.details.find(
-          (detail) => detail.alertQuery === alert.query
-        )
-
-        if (probeStatusDetail) {
-          const state = determineProbeState({
-            errorName: alert.query,
-            probeStatusDetail: probeStatusDetail,
-            validation,
-            incidentThreshold,
-            recoveryThreshold,
-          })
-          updatedStatus = updateProbeStatus(probeStatusDetail, state)
-        }
-
-        // Update the Probe Status
-        const filteredProbeStatus = currentProbe.details.filter(
-          (item) => item.alertQuery !== alert.query
-        )
-        currentProbe.details = [...filteredProbeStatus, updatedStatus]
-        results.push(updatedStatus)
-
-        if (validation.hasSomethingToReport === true) {
-          // set alert flag, concate alert message
-          setAlert(
-            {
-              flag: 'ALERT',
-              message: mLog.alert.message + ', ' + updatedStatus.alertQuery,
-            },
-            mLog
-          )
-          // done probes, got some alerts & notif.. print log
-          printProbeLog(mLog)
-        }
-      })
-    }
-    return results
-  } catch (error) {
-    log.error(error.message)
-    return []
+    serverAlertStateInterpreters.set(request, interpreters)
   }
+
+  // Send event for successes and failures to state interpreter
+  // then get latest state for each alert
+  validatedResponse.forEach((validation) => {
+    const { alert, isAlertTriggered } = validation
+
+    const interpreter = serverAlertStateInterpreters.get(request)![alert.query]
+
+    interpreter.send(isAlertTriggered ? 'FAILURE' : 'SUCCESS')
+
+    const state = interpreter.state
+
+    results.push({
+      alertQuery: alert.query,
+      state: state.value as 'UP' | 'DOWN',
+      shouldSendNotification:
+        (state.value === 'DOWN' &&
+          state.context.consecutiveFailures === incidentThreshold) ||
+        (state.value === 'UP' &&
+          state.context.consecutiveSuccesses === recoveryThreshold &&
+          state.context.hasBeenDownAtLeastOnce),
+    })
+  })
+
+  return results
 }

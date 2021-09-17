@@ -27,7 +27,7 @@ import {
   Notification,
   NotificationMessage,
 } from '../../interfaces/notification'
-import { ValidateResponse } from '../../plugins/validate-response'
+import { ValidatedResponse } from '../../plugins/validate-response'
 import getIp from '../../utils/ip'
 import { getMessageForAlert } from './alert-message'
 import { sendDesktop } from './channel/desktop'
@@ -229,7 +229,7 @@ export async function sendAlerts({
   url,
   probeState,
 }: {
-  validation: ValidateResponse
+  validation: ValidatedResponse
   notifications: Notification[]
   url: string
   probeState: string

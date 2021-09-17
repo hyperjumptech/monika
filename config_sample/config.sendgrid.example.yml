@@ -1,0 +1,11 @@
+probes:
+  - requests:
+      - url: http://github.com
+
+notifications:
+  - id: unique-id-mailgun
+    type: mailgun
+    data:
+      recipients: [RECIPIENT_EMAIL_ADDRESS]
+      apiKey: YOUR_API_KEY
+      sender: YOUR_VERIFIED_EMAIL_BY_SENDGRID
