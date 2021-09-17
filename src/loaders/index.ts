@@ -67,11 +67,11 @@ export default async function init(flags: any) {
   // check TLS when Monika starts
   tlsChecker()
 
-  // load cron jobs
-  jobsLoader()
-
-  // Run report on interval if symon configuration exists
   if (!isTestEnvironment) {
+    // load cron jobs
+    jobsLoader()
+
+    // Run report on interval if symon configuration exists
     loopReport(getConfig)
   }
 }
