@@ -206,6 +206,7 @@ export async function doProbe(
       }
     } catch (error) {
       requestLogger.addError(error.message)
+      break
     } finally {
       requestLogger.print()
       requestLogger
