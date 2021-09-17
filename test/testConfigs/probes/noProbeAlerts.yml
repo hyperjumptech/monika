@@ -1,0 +1,18 @@
+notifications:
+  - id: unique-id
+    type: webhook
+    data:
+      url: http://www.example.com
+      method: GET
+probes:
+  - id: '1'
+    name: Example
+    description: Probe
+    requests:
+      - method: POST
+        url: https://something/login
+        headers:
+          Authorization: ''
+        body:
+          username: someusername
+          password: somepassword
