@@ -23,7 +23,6 @@
  **********************************************************************************/
 
 import { getConfig, setupConfig } from '../components/config'
-import { openLogfile } from '../components/logger/history'
 import events from '../events'
 import { tlsChecker } from '../jobs/tls-check'
 import { loopCheckSTUNServer, loopReport } from '../looper'
@@ -45,7 +44,6 @@ export default async function init(flags: any) {
   await getPublicNetworkInfo()
   // check if connected to STUN Server and getting the public IP in the same time
   loopCheckSTUNServer(flags.stun)
-  await openLogfile()
 
   // start Promotheus server
   if (flags.prometheus) {
