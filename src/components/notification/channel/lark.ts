@@ -85,7 +85,7 @@ export const sendLark = async (
                   },
                   {
                     tag: 'text',
-                    text: `*Time*: ${message.meta.time}\n`,
+                    text: `Time: ${message.meta.time}\n`,
                   },
                   {
                     tag: 'text',
@@ -104,7 +104,7 @@ export const sendLark = async (
         content: {
           post: {
             en_us: {
-              title: 'Monika Notification',
+              title: 'Monika Status Update',
               content: [
                 {
                   tag: 'a',
