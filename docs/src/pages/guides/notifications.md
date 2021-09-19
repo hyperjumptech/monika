@@ -21,6 +21,7 @@ At this moment, Monika support these channel of notifications (You can use just 
 10. [Monika Whatsapp Notifier](https://hyperjumptech.github.io/monika/guides/notifications#monika-whatsapp-notifier)
 11. [Facebook Workplace](https://hyperjumptech.github.io/monika/guides/notifications#facebook-workplace)
 12. [Desktop Notifications](https://hyperjumptech.github.io/monika/guides/notifications#desktop-notifications)
+13. [Lark Suite](https://hyperjumptech.github.io/monika/guides/notifications#larksuite-notifications)
 
 ## Configurations
 
@@ -318,6 +319,22 @@ Monika supports desktop notifications. Here are the prerequisites for enabling t
 ```yml
 id: unique-id-monika-notif,
 type: desktop
+```
+
+## Larksuite Notifications
+
+If you use Larksuite, you can get Monika to send notifications to the Larksuite bots. You can create a webhook url, and then use it in the monika configuration.
+
+You can find more information on creating [webhooks here.](https://www.larksuite.com/hc/en-US/articles/360048487775-Workplace-Use-Lark-Flow-Webhook-Triggers)
+
+The Yaml config setup may look something like this:
+
+```yml
+notifications:
+  - id: lark-group-message
+    type: lark
+    data:
+      url: https://open.larksuite.com/open-apis/bot/v2/hook/your-webhook-key-here
 ```
 
 Keep watch on these pages, new notification methods are being developed.
