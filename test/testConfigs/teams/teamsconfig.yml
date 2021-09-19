@@ -1,0 +1,8 @@
+notifications:
+  - id: unique-id-teams
+    type: teams
+    data:
+      url: https://YOUR_TEAMS_WEBHOOK_URL
+probes:
+  - requests:
+      - url: https://github.com

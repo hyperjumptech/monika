@@ -51,7 +51,7 @@ describe('monika', () => {
   test
     .stdout()
     .do(() =>
-      cmd.run(['--config', resolve('./test/testConfigs/fullConfig.json')])
+      cmd.run(['--config', resolve('./test/testConfigs/fullConfig.yml')])
     )
     .it('runs with full config', (ctx) => {
       expect(ctx.stdout).to.contain('Starting Monika.')
@@ -67,7 +67,7 @@ describe('monika', () => {
   test
     .stdout()
     .do(() =>
-      cmd.run(['--config', resolve('./test/testConfigs/noInterval.json')])
+      cmd.run(['--config', resolve('./test/testConfigs/noInterval.yml')])
     )
     .it('runs with config without interval', (ctx) => {
       expect(ctx.stdout).to.contain('Starting Monika.')
@@ -78,7 +78,7 @@ describe('monika', () => {
     .do(() =>
       cmd.run([
         '--config',
-        resolve('./test/testConfigs/invalidNotificationType.json'),
+        resolve('./test/testConfigs/invalidNotificationType.yml'),
       ])
     )
     .catch((error) => {
@@ -90,7 +90,7 @@ describe('monika', () => {
   test
     .stderr()
     .do(() =>
-      cmd.run(['--config', resolve('./test/testConfigs/probes/noProbes.json')])
+      cmd.run(['--config', resolve('./test/testConfigs/probes/noProbes.yml')])
     )
     .catch((error) => {
       expect(error.message).to.contain(
@@ -104,7 +104,7 @@ describe('monika', () => {
     .do(() =>
       cmd.run([
         '--config',
-        resolve('./test/testConfigs/probes/noProbeName.json'),
+        resolve('./test/testConfigs/probes/noProbeName.yml'),
       ])
     )
     .it('runs with config without probe name', (ctx) => {
@@ -116,7 +116,7 @@ describe('monika', () => {
     .do(() =>
       cmd.run([
         '--config',
-        resolve('./test/testConfigs/probes/noProbeRequest.json'),
+        resolve('./test/testConfigs/probes/noProbeRequest.yml'),
       ])
     )
     .catch((error) => {
@@ -131,7 +131,7 @@ describe('monika', () => {
     .do(() =>
       cmd.run([
         '--config',
-        resolve('./test/testConfigs/probes/noProbeAlerts.json'),
+        resolve('./test/testConfigs/probes/noProbeAlerts.yml'),
       ])
     )
     .it('runs with config without probe alerts', (ctx) => {
@@ -143,7 +143,7 @@ describe('monika', () => {
     .do(() =>
       cmd.run([
         '--config',
-        resolve('./test/testConfigs/probes/invalidProbeRequestMethod.json'),
+        resolve('./test/testConfigs/probes/invalidProbeRequestMethod.yml'),
       ])
     )
     .catch((error) => {
@@ -158,7 +158,7 @@ describe('monika', () => {
     .do(() =>
       cmd.run([
         '--config',
-        resolve('./test/testConfigs/probes/invalidProbeRequestURL.json'),
+        resolve('./test/testConfigs/probes/invalidProbeRequestURL.yml'),
       ])
     )
     .catch((error) => {
@@ -173,7 +173,7 @@ describe('monika', () => {
     .do(() =>
       cmd.run([
         '--config',
-        resolve('./test/testConfigs/probes/invalidProbeRequestAlert.json'),
+        resolve('./test/testConfigs/probes/invalidProbeRequestAlert.yml'),
       ])
     )
     .catch((error) => {
@@ -186,7 +186,7 @@ describe('monika', () => {
     .do(() =>
       cmd.run([
         '--config',
-        resolve('./test/testConfigs/probes/stringProbeRequestAlert.json'),
+        resolve('./test/testConfigs/probes/stringProbeRequestAlert.yml'),
       ])
     )
     .it(
@@ -201,7 +201,7 @@ describe('monika', () => {
     .do(() =>
       cmd.run([
         '--config',
-        resolve('./test/testConfigs/probes/objectProbeRequestAlert.json'),
+        resolve('./test/testConfigs/probes/objectProbeRequestAlert.yml'),
       ])
     )
     .it(
@@ -216,7 +216,7 @@ describe('monika', () => {
     .do(() =>
       cmd.run([
         '--config',
-        resolve('./test/testConfigs/probes/multipleProbeRequests.json'),
+        resolve('./test/testConfigs/probes/multipleProbeRequests.yml'),
       ])
     )
     .it('runs with multiple probe requests config', (ctx) => {
@@ -228,7 +228,7 @@ describe('monika', () => {
     .do(() =>
       cmd.run([
         '--config',
-        resolve('./test/testConfigs/probes/chainingRequests.json'),
+        resolve('./test/testConfigs/probes/chainingRequests.yml'),
       ])
     )
     .it('runs with chaining probe requests config', (ctx) => {
@@ -241,7 +241,7 @@ describe('monika', () => {
     .do(() =>
       cmd.run([
         '--config',
-        resolve('./test/testConfigs/mailgun/mailgunconfig.json'),
+        resolve('./test/testConfigs/mailgun/mailgunconfig.yml'),
         '--verbose',
       ])
     )
@@ -255,7 +255,7 @@ describe('monika', () => {
     .do(() =>
       cmd.run([
         '--config',
-        resolve('./test/testConfigs/mailgun/mailgunconfigNoRecipients.json'),
+        resolve('./test/testConfigs/mailgun/mailgunconfigNoRecipients.yml'),
       ])
     )
     .catch((error) => {
@@ -271,7 +271,7 @@ describe('monika', () => {
     .do(() =>
       cmd.run([
         '--config',
-        resolve('./test/testConfigs/sendgrid/sendgridconfig.json'),
+        resolve('./test/testConfigs/sendgrid/sendgridconfig.yml'),
         '--verbose',
       ])
     )
@@ -284,7 +284,7 @@ describe('monika', () => {
     .do(() =>
       cmd.run([
         '--config',
-        resolve('./test/testConfigs/sendgrid/sendgridconfigNoRecipients.json'),
+        resolve('./test/testConfigs/sendgrid/sendgridconfigNoRecipients.yml'),
       ])
     )
     .catch((error) => {
@@ -300,7 +300,7 @@ describe('monika', () => {
     .do(() =>
       cmd.run([
         '--config',
-        resolve('./test/testConfigs/smtp/smtpconfig.json'),
+        resolve('./test/testConfigs/smtp/smtpconfig.yml'),
         '--verbose',
       ])
     )
@@ -316,7 +316,7 @@ describe('monika', () => {
     .do(() =>
       cmd.run([
         '--config',
-        resolve('./test/testConfigs/smtp/smtpconfigNoRecipients.json'),
+        resolve('./test/testConfigs/smtp/smtpconfigNoRecipients.yml'),
       ])
     )
     .catch((error) => {
@@ -332,7 +332,7 @@ describe('monika', () => {
     .do(() =>
       cmd.run([
         '--config',
-        resolve('./test/testConfigs/webhook/webhookconfig.json'),
+        resolve('./test/testConfigs/webhook/webhookconfig.yml'),
         '--verbose',
       ])
     )
@@ -347,7 +347,7 @@ describe('monika', () => {
     .do(() =>
       cmd.run([
         '--config',
-        resolve('./test/testConfigs/discord/discordconfig.json'),
+        resolve('./test/testConfigs/discord/discordconfig.yml'),
         '--verbose',
       ])
     )
@@ -361,7 +361,7 @@ describe('monika', () => {
     .do(() =>
       cmd.run([
         '--config',
-        resolve('./test/testConfigs/teams/teamsconfig.json'),
+        resolve('./test/testConfigs/teams/teamsconfig.yml'),
         '--verbose',
       ])
     )
@@ -375,7 +375,7 @@ describe('monika', () => {
     .do(() =>
       cmd.run([
         '--config',
-        resolve('./test/testConfigs/teams/teamsconfigNoURL.json'),
+        resolve('./test/testConfigs/teams/teamsconfigNoURL.yml'),
       ])
     )
     .catch((error) => {
@@ -388,7 +388,7 @@ describe('monika', () => {
     .do(() =>
       cmd.run([
         '--config',
-        resolve('./test/testConfigs/monika-notif/monikaNotifconfig.json'),
+        resolve('./test/testConfigs/monika-notif/monikaNotifconfig.yml'),
         '--verbose',
       ])
     )
