@@ -62,8 +62,8 @@ describe('monika', () => {
     .do(() =>
       cmd.run([
         '--config',
-        resolve('./test/testConfigs/fullConfig.json'),
-        resolve('./test/testConfigs/manyProbes.json'),
+        resolve('./test/testConfigs/fullConfig.yml'),
+        resolve('./test/testConfigs/manyProbes.yml'),
       ])
     )
     .it('runs multiple config override', (ctx) => {
@@ -76,8 +76,8 @@ describe('monika', () => {
     .do(() =>
       cmd.run([
         '--config',
-        resolve('./test/testConfigs/fullConfig.json'),
-        resolve('./test/testConfigs/manyNotif.json'),
+        resolve('./test/testConfigs/fullConfig.yml'),
+        resolve('./test/testConfigs/manyNotif.yml'),
       ])
     )
     .it('runs multiple config override', (ctx) => {
