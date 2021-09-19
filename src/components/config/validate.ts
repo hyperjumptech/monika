@@ -219,6 +219,7 @@ function validateNotification(notifications: Notification[]): Validation {
       }
 
       case 'lark': {
+        if (!notification.data.url) return WEBHOOK_NO_URL
         break
       }
 
