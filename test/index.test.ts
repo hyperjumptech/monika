@@ -95,6 +95,71 @@ describe('monika', () => {
   test
     .stdout()
     .do(() =>
+      cmd.run([
+        '-c',
+        resolve('./test/testConfigs/manyNotif.yml'),
+        resolve('./test/testConfigs/manyProbes.yml'),
+        '--har',
+        resolve('./test/testConfigs/harTest.har'),
+      ])
+    )
+    .it('merge har file with with other config', (ctx) => {
+      expect(ctx.stdout).to.contain('Notifications: 2').and.contain('Probes: 1')
+    })
+
+  test
+    .stdout()
+    .do(() =>
+      cmd.run([
+        '--har',
+        resolve('./test/testConfigs/harTest.har'),
+        '-c',
+        resolve('./test/testConfigs/manyNotif.yml'),
+        resolve('./test/testConfigs/manyProbes.yml'),
+      ])
+    )
+    .it('probes from har file will override regardless flag order', (ctx) => {
+      expect(ctx.stdout).to.contain('Notifications: 2').and.contain('Probes: 1')
+    })
+
+  test
+    .stdout()
+    .do(() =>
+      cmd.run([
+        '-c',
+        resolve('./test/testConfigs/manyNotif.yml'),
+        resolve('./test/testConfigs/manyProbes.yml'),
+        '--postman',
+        resolve('./test/testConfigs/simple.postman_collection.json'),
+      ])
+    )
+    .it('merge postman file with with other config', (ctx) => {
+      expect(ctx.stdout).to.contain('Notifications: 2').and.contain('Probes: 1')
+    })
+
+  test
+    .stdout()
+    .do(() =>
+      cmd.run([
+        '--postman',
+        resolve('./test/testConfigs/simple.postman_collection.json'),
+        '-c',
+        resolve('./test/testConfigs/manyNotif.yml'),
+        resolve('./test/testConfigs/manyProbes.yml'),
+      ])
+    )
+    .it(
+      'probes from postman file will override regardless flag order',
+      (ctx) => {
+        expect(ctx.stdout)
+          .to.contain('Notifications: 2')
+          .and.contain('Probes: 1')
+      }
+    )
+
+  test
+    .stdout()
+    .do(() =>
       cmd.run(['--config', resolve('./test/testConfigs/noInterval.yml')])
     )
     .it('runs with config without interval', (ctx) => {

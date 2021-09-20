@@ -207,8 +207,10 @@ export const createConfig = async (flags: any) => {
       return
     }
 
-    const parsed = await parseConfig(path, type)
+    const parse = parseConfig(path, type)
+    const result = await addDefaultNotifications(parse)
     const file = flags.output || 'monika.json'
+    log.info(JSON.stringify(result))
 
     if (existsSync(file) && !flags.force) {
       const ans = await cli.prompt(
@@ -223,7 +225,7 @@ export const createConfig = async (flags: any) => {
       }
     }
 
-    writeFileSync(file, JSON.stringify(parsed), 'utf8')
+    writeFileSync(file, JSON.stringify(result), 'utf8')
     log.info(`${file} file has been created.`)
   }
 }

@@ -1,5 +1,5 @@
 {
-  "notifications": [{ "id": "har-desktop-notif", "type": "desktop" }],
+  "notifications": [{ "id": "default", "type": "desktop" }],
   "probes": [
     {
       "requests": [
