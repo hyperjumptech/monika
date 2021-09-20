@@ -107,7 +107,7 @@ const watchConfigFile = (
     const watcher = chokidar.watch(path)
     watcher.on('change', async () => {
       configs[index] = await parseConfig(path, type)
-      updateConfig(mergeConfigs())
+      await updateConfig(mergeConfigs())
     })
   }
 }
@@ -119,7 +119,7 @@ const scheduleRemoteConfigFetcher = (
 ) => {
   setInterval(async () => {
     configs[index] = await fetchConfig(url)
-    updateConfig(mergeConfigs())
+    await updateConfig(mergeConfigs())
   }, interval * 1000)
 }
 
@@ -135,15 +135,34 @@ const setupConfigFromJson = (flags: any): Promise<Partial<Config>>[] => {
   })
 }
 
+const addDefaultNotifications = (
+  parse: Promise<Partial<Config>>
+): Promise<Partial<Config>> => {
+  return parse.then((config) => {
+    log.info('Notifications not found, using desktop as default...')
+    config.notifications = [{ id: 'default', type: 'desktop', data: undefined }]
+    return config
+  })
+}
+
 export const setupConfig = async (flags: any) => {
   const configParse = new Array<Promise<Partial<Config>>>(0)
-  if (flags.har) {
-    configParse.push(parseConfig(flags.har, 'har'))
-  } else if (flags.postman) {
-    configParse.push(parseConfig(flags.postman, 'postman'))
-  } else if (Array.isArray(flags.config) && flags.config.length > 0) {
+  if (Array.isArray(flags.config) && flags.config.length > 0) {
     const json = setupConfigFromJson(flags)
     configParse.push(...json)
+  }
+  if (flags.har) {
+    let parsed = parseConfig(flags.har, 'har')
+    if (configParse.length === 0) {
+      parsed = addDefaultNotifications(parsed)
+    }
+    configParse.push(parsed)
+  } else if (flags.postman) {
+    let parsed = parseConfig(flags.postman, 'postman')
+    if (configParse.length === 0) {
+      parsed = addDefaultNotifications(parsed)
+    }
+    configParse.push(parsed)
   }
   if (configParse.length === 0) {
     throw new Error(
