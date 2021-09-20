@@ -40,7 +40,7 @@ import { resetServerAlertStates } from './components/notification/process-server
 import events from './events'
 import { Config } from './interfaces/config'
 import { Probe } from './interfaces/probe'
-import { getSummaryAndSendNotif } from './jobs/summary-notification'
+import { printSummary, getSummaryAndSendNotif } from './jobs/summary-notification'
 import initLoaders from './loaders'
 import {
   /* loopCheckSTUNServer */ idFeeder,
@@ -133,10 +133,10 @@ class Monika extends Command {
     }),
 
     stun: flags.integer({
-      // char: 's', // (s)stun
-      //   description: 'Interval in seconds to check STUN server',
-      //   multiple: false,
-      //   default: 20,
+      char: 's', // (s)stun
+        description: 'Interval in seconds to check STUN server',
+        multiple: false,
+        default: 20,
     }),
 
     id: flags.string({
@@ -190,10 +190,6 @@ class Monika extends Command {
         return
       }
 
-      if (flags.summary) {
-        return
-      }
-
       if (flags.flush) {
         let ans
 
@@ -214,6 +210,11 @@ class Monika extends Command {
         return
       }
 
+      if (flags.summary) {
+        printSummary(flags)
+        return
+      }
+      
       await initLoaders(flags)
 
       let scheduledTasks: ScheduledTask[] = []

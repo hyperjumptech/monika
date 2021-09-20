@@ -24,12 +24,13 @@
 
 import { hostname } from 'os'
 import format from 'date-fns/format'
-import { getConfig } from '../components/config'
+import { getConfig, setupConfig } from '../components/config'
 import { getSummary } from '../components/logger/history'
 import { sendNotifications } from '../components/notification'
 import getIp from '../utils/ip'
 import { log } from '../utils/pino'
 import { publicIpAddress } from '../utils/public-ip'
+
 
 export async function getSummaryAndSendNotif() {
   const config = getConfig()
@@ -62,4 +63,46 @@ Notifications: ${summary.numberOfSentNotifications}`,
   } catch (error) {
     log.error(`Summary notification: ${error.message}`)
   }
+}
+
+// eslint-disable-no-console
+export async function printSummary(flags: any) {
+
+  await setupConfig(flags)
+
+  const config = getConfig()
+
+  const { notifications } = config
+  if(!notifications)
+    log.info("No notifications have been set")
+  
+ 
+  try {
+    const summary = await getSummary()
+   
+   const host = `${hostname()} (${[publicIpAddress, getIp()].filter(Boolean).join('/')})`
+
+    /* eslint-disable no-console */  
+    console.log("config file: ", flags.config)
+    console.log("current dir: ", process.cwd())
+
+    console.log("Number of probes set: ", summary.numberOfProbes)
+    console.log("Number of notifications set: ", notifications? notifications.length : 0)
+    
+
+    console.log("Number of incidents: ", summary.numberOfIncidents)
+    console.log("Number of recoveries: ", summary.numberOfRecoveries)
+    console.log("Number of notification: ", summary.numberOfSentNotifications)
+
+    console.log("host: ", host)
+    console.log("version: ", config.version)
+    console.log("uptime (s): ", process.uptime())
+
+
+  } catch (error) {
+    log.error(`Summary notification: ${error.message}`)
+  }
+
+
+
 }
