@@ -76,7 +76,7 @@ The example above flushes the database bypassing without waiting for user confir
 
 ## HAR
 
-Monika supports HAR files as input. HAR are JSON formatted HTTP ARchive file. Generate a HAR file from the site you've visited then use Monika to refetch the pages and ensure they still work.
+Monika supports HAR files as input. HAR are JSON formatted HTTP ARchive file. Follow the steps [here](https://medium.com/hyperjump-tech/generate-your-monika-configuration-using-http-archive-har-764944cbb9e6) to generate your own HAR file from the site you've visited then use Monika to refetch the pages and ensure they still work.
 
 You use the `-H` or `--har` to specify a HAR file.
 
@@ -84,9 +84,24 @@ You use the `-H` or `--har` to specify a HAR file.
 monika -H my-file.har
 ```
 
-You can use the combination of --create-config and --har flags to convert the HAR archive into to a monika.yml configuration file.
+### Create config from HAR file
 
-Please note, HAR files may contain sensitive information, use caution when distributing HAR filles.
+You can use the combination of `--create-config` and `--har` flags to convert the HAR archive into to a monika.yml configuration file.
+
+```bash
+# default to monika.json
+monika --create-config -H my-file.har
+```
+
+### Merge HAR file to existing configurations
+
+You can also use `-c/--config` to merge properties with them. Note that using `--har` will override probes passed to `-c/--config`.
+
+```bash
+monika --config monika-notifications.json -H my-file.har
+```
+
+**P.S.**: HAR files may contain sensitive information, use caution when distributing HAR filles.
 
 ## Id
 
@@ -128,7 +143,17 @@ Have an existing request on postman you want to automate? Monika supports readin
 monika -p postman.json
 ```
 
+### Create config from Postman file
+
 You can use the combination of `--create-config` and `--postman` flags to convert the postman files to a monika.yml config file.
+
+### Merge Postman file to existing configurations
+
+You can also use `-c/--config` to merge properties with them. Note that using `--postman` will override probes passed to `-c/--config`.
+
+```bash
+monika --config monika-notifications.json --postman my-file.har
+```
 
 ## Prometheus
 
