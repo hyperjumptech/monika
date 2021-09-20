@@ -42,7 +42,7 @@ import { probing } from './probing'
 interface ProbeStatusProcessed {
   probe: Probe
   statuses?: ServerAlertState[]
-  notifications?: Notification[]
+  notifications: Notification[]
   validatedResponseStatuses: ValidatedResponse[]
   requestIndex: number
 }
@@ -119,11 +119,13 @@ async function checkThresholdsAndSendAlert(
  * @param {number} checkOrder the order of probe being processed
  * @param {object} probe contains all the probes
  * @param {array} notifications contains all the notifications
+ * @param {boolean} verboseLogs store all requests to database
  */
 export async function doProbe(
   checkOrder: number,
   probe: Probe,
-  notifications?: Notification[]
+  notifications: Notification[],
+  verboseLogs: boolean
 ) {
   const eventEmitter = getEventEmitter()
   const responses = []
@@ -209,14 +211,16 @@ export async function doProbe(
       break
     } finally {
       requestLog.print()
-      requestLog
-        .saveToDatabase()
-        .then(() => {
-          if (requestLog.hasIncidentOrRecovery) {
-            return getLogsAndReport()
-          }
-        })
-        .catch((error) => log.error(error.message))
+      if (verboseLogs || requestLog.hasIncidentOrRecovery) {
+        requestLog
+          .saveToDatabase()
+          .then(() => {
+            if (requestLog.hasIncidentOrRecovery) {
+              return getLogsAndReport()
+            }
+          })
+          .catch((error) => log.error(error.message))
+      }
     }
   }
 }
