@@ -64,7 +64,7 @@ export function sanitizeProbe(probe: Probe, id: string): Probe {
       `Warning: Probe ${probe.id} has no recoveryThreshold configuration defined. Using the default threshold: 5`
     )
   }
-  if (alerts.length === 0) {
+  if (alerts === undefined || alerts.length === 0) {
     probe.alerts = [
       {
         query: 'response.status < 200 or response.status > 299',
