@@ -210,7 +210,6 @@ export const createConfig = async (flags: any) => {
     const parse = parseConfig(path, type)
     const result = await addDefaultNotifications(parse)
     const file = flags.output || 'monika.json'
-    log.info(JSON.stringify(result))
 
     if (existsSync(file) && !flags.force) {
       const ans = await cli.prompt(
