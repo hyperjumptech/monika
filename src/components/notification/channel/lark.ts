@@ -25,6 +25,7 @@ import axios from 'axios'
 
 import { NotificationMessage } from '../../../interfaces/notification'
 import { LarkData } from '../../../interfaces/data'
+import { log } from '../../../utils/pino'
 
 export const sendLark = async (
   data: LarkData,
@@ -154,6 +155,9 @@ export const sendLark = async (
 
     return res
   } catch (error) {
-    throw error
+    log.error(
+      "Couldn't send notification to Lark Suite. Got this error: " +
+        error.message
+    )
   }
 }
