@@ -59,6 +59,34 @@ describe('monika', () => {
 
   test
     .stdout()
+    .do(() =>
+      cmd.run([
+        '--config',
+        resolve('./test/testConfigs/fullConfig.yml'),
+        resolve('./test/testConfigs/manyProbes.yml'),
+      ])
+    )
+    .it('runs multiple config override', (ctx) => {
+      expect(ctx.stdout).to.contain('Probes: 2.')
+      expect(ctx.stdout).to.contain('Notifications: 7')
+    })
+
+  test
+    .stdout()
+    .do(() =>
+      cmd.run([
+        '--config',
+        resolve('./test/testConfigs/fullConfig.yml'),
+        resolve('./test/testConfigs/manyNotif.yml'),
+      ])
+    )
+    .it('runs multiple config override', (ctx) => {
+      expect(ctx.stdout).to.contain('Probes: 1.')
+      expect(ctx.stdout).to.contain('Notifications: 2')
+    })
+
+  test
+    .stdout()
     .do(() => cmd.run(['--har', resolve('./test/testConfigs/harTest.har')]))
     .it('runs with har file config', (ctx) => {
       expect(ctx.stdout).to.contain('Starting Monika.')
