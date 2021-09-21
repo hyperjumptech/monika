@@ -24,7 +24,7 @@
 
 import { format } from 'date-fns'
 import * as Handlebars from 'handlebars'
-import { hostname } from 'os'
+import { arch, hostname, platform, release } from 'os'
 import { NotificationMessage } from '../../interfaces/notification'
 import { AxiosResponseWithExtraData } from '../../interfaces/request'
 import { ProbeAlert } from '../../interfaces/probe'
@@ -62,6 +62,9 @@ export async function getMessageForAlert({
   probeState: string
   response: AxiosResponseWithExtraData
 }): Promise<NotificationMessage> {
+  const appVersion = `@hyperjumptech/monika/${
+    process.env.npm_package_version
+  } ${platform()}-${arch()} ${release()} node-${process.version}`
   const getSubject = (probeState: string) => {
     const recoveryOrIncident = probeState === 'UP' ? 'Recovery' : 'Incident'
 
@@ -122,7 +125,9 @@ URL: ${meta.url}
 
 Time: ${meta.time}
 
-From: ${monikaInstance}`
+From: ${monikaInstance}
+
+Version: ${appVersion}`
 
   const message = {
     subject: getSubject(probeState),
