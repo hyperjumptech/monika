@@ -26,7 +26,19 @@ Configuration files may be placed remotely which you can specify using the same 
 monika -c https://raw.githubusercontent.com/hyperjumptech/monika/main/config_sample/config.desktop.example.yml
 ```
 
-A neat feature is that the configuration file will be re-read and monitoring updated if Monika detects any changes to it.
+A neat feature is that the configuration file is watched and any changes will cause Monika to reload.
+
+### Multiple configurations
+
+Monika also supports multiple sources of configuration at the same time.
+**Any top-level** keys from the first argument will be overridden by the later source(s).
+
+For example, assuming you have a file named `only-notif.json` whose content `{"notifications":[<your-notifications-here>]}`
+
+```bash
+# only-notif.json's notifications will override notifications foo-monitoring.json has
+monika -c foo-monitoring.json only-notif.json
+```
 
 ## Create Config
 
@@ -88,7 +100,13 @@ The above example will run probe id 1, 3, 1, 2, 4, 5, 7, 7 in that order just on
 
 ## Logging
 
-All command and responses are stored in an internal log file. You can dump (display) all the logs using the `-l` or `--logs` flag.
+Monika stores requests and responses data in an internal log file. By default, it only stores data when incident or recovery happens. You may choose to store all requests using `--keep-verbose-logs` flag.
+
+```bash
+monika --keep-verbose-logs
+```
+
+To dump (display) all the logs, use the `-l` or `--logs` flag.
 
 ```bash
 monika --logs

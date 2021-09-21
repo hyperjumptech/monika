@@ -23,8 +23,8 @@
  **********************************************************************************/
 
 import { getConfig, setupConfig } from '../components/config'
-import { openLogfile } from '../components/logger/history'
 import events from '../events'
+import { tlsChecker } from '../jobs/tls-check'
 import { loopCheckSTUNServer, loopReport } from '../looper'
 import {
   PrometheusCollector,
@@ -34,6 +34,7 @@ import { getEventEmitter } from '../utils/events'
 import { getPublicNetworkInfo } from '../utils/public-ip'
 // import to activate all the application event emitter subscribers
 import '../events/subscribers/application'
+import { jobsLoader } from './jobs'
 
 export default async function init(flags: any) {
   const eventEmitter = getEventEmitter()
@@ -43,7 +44,6 @@ export default async function init(flags: any) {
   await getPublicNetworkInfo()
   // check if connected to STUN Server and getting the public IP in the same time
   loopCheckSTUNServer(flags.stun)
-  await openLogfile()
 
   // start Promotheus server
   if (flags.prometheus) {
@@ -62,8 +62,14 @@ export default async function init(flags: any) {
 
   await setupConfig(flags)
 
-  // Run report on interval if symon configuration exists
+  // check TLS when Monika starts
+  tlsChecker()
+
   if (!isTestEnvironment) {
+    // load cron jobs
+    jobsLoader()
+
+    // Run report on interval if symon configuration exists
     loopReport(getConfig)
   }
 }

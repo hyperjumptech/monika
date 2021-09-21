@@ -1,4 +1,3 @@
-/* eslint-disable complexity */
 /**********************************************************************************
  * MIT License                                                                    *
  *                                                                                *
@@ -27,33 +26,25 @@ import { Command, flags } from '@oclif/command'
 import boxen from 'boxen'
 import chalk from 'chalk'
 import cli from 'cli-ux'
-import format from 'date-fns/format'
 import fs from 'fs'
 import cron, { ScheduledTask } from 'node-cron'
-import { hostname } from 'os'
 import { createConfig, getConfigIterator } from './components/config'
 import { printAllLogs } from './components/logger'
 import {
   closeLog,
   flushAllLogs,
-  getSummary,
-  saveNotificationLog,
+  openLogfile,
 } from './components/logger/history'
-import { sendAlerts, sendNotifications } from './components/notification'
 import { notificationChecker } from './components/notification/checker'
 import { resetServerAlertStates } from './components/notification/process-server-status'
-import { checkTLS } from './components/tls-checker'
 import events from './events'
 import { Config } from './interfaces/config'
-import { Notification } from './interfaces/notification'
 import { Probe } from './interfaces/probe'
-import { AxiosResponseWithExtraData } from './interfaces/request'
+import { getSummaryAndSendNotif } from './jobs/summary-notification'
 import initLoaders from './loaders'
 import { idFeeder, isIDValid, sanitizeProbe } from './looper'
 import { getEventEmitter } from './utils/events'
-import getIp from './utils/ip'
 import { log } from './utils/pino'
-import { publicIpAddress } from './utils/public-ip'
 
 const em = getEventEmitter()
 
@@ -91,6 +82,7 @@ class Monika extends Command {
         'JSON configuration filename or URL. If none is supplied, will look for monika.json in the current directory',
       default: () => getDefaultConfig(),
       env: 'MONIKA_JSON_CONFIG',
+      multiple: true,
     }),
 
     'create-config': flags.boolean({
@@ -171,6 +163,11 @@ class Monika extends Command {
     'status-notification': flags.string({
       description: 'cron syntax for status notification schedule',
     }),
+
+    'keep-verbose-logs': flags.boolean({
+      description: 'store all requests logs to database',
+      default: false,
+    }),
   }
 
   async run() {
@@ -182,7 +179,7 @@ class Monika extends Command {
         return
       }
 
-      await initLoaders(flags)
+      await openLogfile()
 
       if (flags.logs) {
         await printAllLogs()
@@ -208,6 +205,8 @@ class Monika extends Command {
         await closeLog()
         return
       }
+
+      await initLoaders(flags)
 
       let scheduledTasks: ScheduledTask[] = []
       let abortCurrentLooper: (() => void) | undefined
@@ -259,43 +258,6 @@ class Monika extends Command {
           em.emit(events.config.sanitized, sanitizedProbe)
         }
 
-        // run TLS checker
-        if (config?.certificate && config.certificate.domains.length > 0) {
-          config.certificate?.domains.forEach((domain) => {
-            // TODO: Remove probe below
-            // probe is used because probe detail is needed to save the notification log
-            const probe = {
-              id: '',
-              name: '',
-              requests: [],
-              incidentThreshold: 0,
-              recoveryThreshold: 0,
-              alerts: [],
-            }
-            // check TLS when Monika starts
-            this.checkTLSAndSaveNotifIfFail(
-              domain,
-              config.certificate?.reminder ?? 30,
-              probe,
-              config?.notifications
-            )
-
-            // schedule TLS checker every day at 00:00
-            const scheduledTlsCheckTask = cron.schedule('0 0 * * *', () => {
-              log.info(`Running TLS check for ${domain} every day at 00:00`)
-
-              this.checkTLSAndSaveNotifIfFail(
-                domain,
-                config.certificate?.reminder ?? 30,
-                probe,
-                config?.notifications
-              )
-            })
-
-            scheduledTasks.push(scheduledTlsCheckTask)
-          })
-        }
-
         // schedule status update notification
         if (
           process.env.NODE_ENV !== 'test' &&
@@ -309,17 +271,21 @@ class Monika extends Command {
             config['status-notification'] ||
             '0 6 * * *'
 
-          const scheduledStatusUpdateTask = cron.schedule(schedule, () => {
-            this.getSummaryAndSendNotif(config)
-          })
+          const scheduledStatusUpdateTask = cron.schedule(
+            schedule,
+            getSummaryAndSendNotif
+          )
 
           scheduledTasks.push(scheduledStatusUpdateTask)
         }
 
+        const verboseLogs = Boolean(config.symon) || flags['keep-verbose-logs']
+
         abortCurrentLooper = idFeeder(
           sanitizedProbe,
           config.notifications ?? [],
-          Number(flags.repeat)
+          Number(flags.repeat),
+          verboseLogs
         )
       }
     } catch (error) {
@@ -420,84 +386,6 @@ Please refer to the Monika documentations on how to how to configure notificatio
     }
 
     return startupMessage
-  }
-
-  async checkTLSAndSaveNotifIfFail(
-    host: any,
-    reminder: number,
-    probe: Probe,
-    notifications?: Notification[]
-  ) {
-    const hostIsObject = typeof host !== 'string'
-    const domain = hostIsObject ? host.domain : host
-
-    try {
-      await checkTLS(host, reminder)
-    } catch (error) {
-      log.error(error.message)
-
-      if (notifications && notifications?.length > 0) {
-        notifications.map(async (notification: Notification) => {
-          saveNotificationLog(
-            probe,
-            notification,
-            'NOTIFY-TLS',
-            error.message
-          ).catch((err) => log.error(err.message))
-
-          // TODO: invoke sendNotifications function instead
-          // looks like the sendAlerts function does not handle this
-          sendAlerts({
-            url: domain,
-            probeState: 'invalid',
-            notifications: notifications ?? [],
-            validation: {
-              alert: { query: '', message: error.message },
-              isAlertTriggered: true,
-              response: {
-                status: 500,
-                config: {
-                  extraData: {
-                    responseTime: 0,
-                  },
-                },
-                headers: {},
-              } as AxiosResponseWithExtraData,
-            },
-          }).catch((err) => log.error(err.message))
-        })
-      }
-    }
-  }
-
-  async getSummaryAndSendNotif(config: Config) {
-    const { notifications } = config
-    const summary = await getSummary()
-    if (!notifications) return
-
-    await sendNotifications(notifications, {
-      subject: `Monika Status`,
-      body: `Status Update ${format(new Date(), 'yyyy-MM-dd HH:mm:ss XXX')}
-            Host: ${hostname()} (${[publicIpAddress, getIp()]
-        .filter(Boolean)
-        .join('/')})
-            Number of probes: ${summary.numberOfProbes}
-            Average response time: ${
-              summary.averageResponseTime
-            } ms in the last 24 hours
-            Incidents: ${summary.numberOfIncidents} in the last 24 hours
-            Recoveries: ${summary.numberOfRecoveries} in the last 24 hours
-            Notifications: ${summary.numberOfSentNotifications}`,
-      summary: `There are ${summary.numberOfIncidents} incidents and ${summary.numberOfRecoveries} recoveries in the last 24 hours.`,
-      meta: {
-        type: 'status-update' as const,
-        time: format(new Date(), 'yyyy-MM-dd HH:mm:ss XXX'),
-        hostname: hostname(),
-        privateIpAddress: getIp(),
-        publicIpAddress,
-        ...summary,
-      },
-    })
   }
 }
 

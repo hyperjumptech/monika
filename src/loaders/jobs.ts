@@ -22,44 +22,10 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import chalk from 'chalk'
-import { getAllLogs } from './history'
-import { log } from '../../utils/pino'
+import cron from 'node-cron'
+import { tlsChecker } from '../jobs/tls-check'
 
-export { RequestLog } from './request-log'
-
-/**
- * getStatusColor colorizes different statusCode
- * @param {any} responseCode is the httpStatus to colorize
- * @returns {string} color code based on chalk: Chalk & { supportsColor: ColorSupport };
- */
-function getStatusColor(responseCode: number) {
-  switch (Math.trunc(responseCode / 100)) {
-    case 2:
-      return 'cyan'
-    case 4:
-      return 'orange'
-    case 5: // all 5xx errrors
-    case 0: // 0 is uri not found
-      return 'red'
-  }
-
-  return 'white'
-}
-
-/**
- * printAllLogs dumps the content of monika-logs.db onto the screen
- */
-export async function printAllLogs() {
-  const data = await getAllLogs()
-
-  data.forEach((row) => {
-    log.info(
-      `${row.id} id: ${row.probe_id} responseCode: ${chalk.keyword(
-        getStatusColor(row.response_status)
-      )(String(row.response_status))} - ${row.request_url}, ${
-        row.response_time || '- '
-      }ms`
-    )
-  })
+export function jobsLoader() {
+  // schedule TLS checker every day at 00:00
+  cron.schedule('0 0 * * *', tlsChecker)
 }

@@ -22,26 +22,44 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Method } from 'axios'
+import { hostname } from 'os'
+import format from 'date-fns/format'
+import { getConfig } from '../components/config'
+import { getSummary } from '../components/logger/history'
+import { sendNotifications } from '../components/notification'
+import getIp from '../utils/ip'
+import { log } from '../utils/pino'
+import { publicIpAddress } from '../utils/public-ip'
 
-export interface Alerts {
-  flag: string
-  message: string[]
-}
+export async function getSummaryAndSendNotif() {
+  const config = getConfig()
+  const { notifications } = config
 
-export interface LogObject {
-  type: 'PROBE'
-  iteration: number
-  id: string
-  responseCode: number
-  url: string
-  responseTime: number
-  alert: Alerts
-  notification: Alerts
-  method: Method | undefined
-}
+  if (!notifications) return
 
-export interface PlainLogObject {
-  type: 'PLAIN' | ''
-  msg?: string
+  try {
+    const summary = await getSummary()
+
+    sendNotifications(notifications, {
+      subject: `Monika Status`,
+      body: `Status Update ${format(new Date(), 'yyyy-MM-dd HH:mm:ss XXX')}
+Host: ${hostname()} (${[publicIpAddress, getIp()].filter(Boolean).join('/')})
+Number of probes: ${summary.numberOfProbes}
+Average response time: ${summary.averageResponseTime} ms in the last 24 hours
+Incidents: ${summary.numberOfIncidents} in the last 24 hours
+Recoveries: ${summary.numberOfRecoveries} in the last 24 hours
+Notifications: ${summary.numberOfSentNotifications}`,
+      summary: `There are ${summary.numberOfIncidents} incidents and ${summary.numberOfRecoveries} recoveries in the last 24 hours.`,
+      meta: {
+        type: 'status-update' as const,
+        time: format(new Date(), 'yyyy-MM-dd HH:mm:ss XXX'),
+        hostname: hostname(),
+        privateIpAddress: getIp(),
+        publicIpAddress,
+        ...summary,
+      },
+    }).catch((error) => log.error(`Summary notification: ${error.message}`))
+  } catch (error) {
+    log.error(`Summary notification: ${error.message}`)
+  }
 }

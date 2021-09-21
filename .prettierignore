@@ -1,6 +1,7 @@
 build
 coverage
 .nyc_output
+lib
 package-lock.json
 .eslintrc 
 .github
@@ -8,4 +9,3 @@ docs/out
 docs/.next
 docs/.cache
 docs/node_modules
-lib
