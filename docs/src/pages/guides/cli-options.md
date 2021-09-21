@@ -100,7 +100,13 @@ The above example will run probe id 1, 3, 1, 2, 4, 5, 7, 7 in that order just on
 
 ## Logging
 
-All command and responses are stored in an internal log file. You can dump (display) all the logs using the `-l` or `--logs` flag.
+Monika stores requests and responses data in an internal log file. By default, it only stores data when incident or recovery happens. You may choose to store all requests using `--keep-verbose-logs` flag.
+
+```bash
+monika --keep-verbose-logs
+```
+
+To dump (display) all the logs, use the `-l` or `--logs` flag.
 
 ```bash
 monika --logs
