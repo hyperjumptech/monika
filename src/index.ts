@@ -163,6 +163,11 @@ class Monika extends Command {
     'status-notification': flags.string({
       description: 'cron syntax for status notification schedule',
     }),
+
+    'keep-verbose-logs': flags.boolean({
+      description: 'store all requests logs to database',
+      default: false,
+    }),
   }
 
   async run() {
@@ -274,10 +279,13 @@ class Monika extends Command {
           scheduledTasks.push(scheduledStatusUpdateTask)
         }
 
+        const verboseLogs = Boolean(config.symon) || flags['keep-verbose-logs']
+
         abortCurrentLooper = idFeeder(
           sanitizedProbe,
           config.notifications ?? [],
-          Number(flags.repeat)
+          Number(flags.repeat),
+          verboseLogs
         )
       }
     } catch (error) {
