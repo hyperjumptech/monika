@@ -123,7 +123,7 @@ const scheduleRemoteConfigFetcher = (
   }, interval * 1000)
 }
 
-const setupConfigFromJson = (flags: any): Promise<Partial<Config>>[] => {
+const parseDefaultConfig = (flags: any): Promise<Partial<Config>>[] => {
   return (flags.config as Array<string>).map((source, i) => {
     if (isUrl(source)) {
       scheduleRemoteConfigFetcher(source, flags['config-interval'], i)
@@ -148,22 +148,19 @@ const addDefaultNotifications = (
 export const setupConfig = async (flags: any) => {
   const configParse = new Array<Promise<Partial<Config>>>(0)
   if (Array.isArray(flags.config) && flags.config.length > 0) {
-    const json = setupConfigFromJson(flags)
+    const json = parseDefaultConfig(flags)
     configParse.push(...json)
   }
+  let nonDefaultConfig
   if (flags.har) {
-    let parsed = parseConfig(flags.har, 'har')
-    if (configParse.length === 0) {
-      parsed = addDefaultNotifications(parsed)
-    }
-    configParse.push(parsed)
+    nonDefaultConfig = parseConfig(flags.har, 'har')
   } else if (flags.postman) {
-    let parsed = parseConfig(flags.postman, 'postman')
-    if (configParse.length === 0) {
-      parsed = addDefaultNotifications(parsed)
-    }
-    configParse.push(parsed)
+    nonDefaultConfig = parseConfig(flags.postman, 'postman')
   }
+  if (configParse.length === 0 && nonDefaultConfig !== undefined) {
+    nonDefaultConfig = addDefaultNotifications(nonDefaultConfig)
+  }
+  if (nonDefaultConfig !== undefined) configParse.push(nonDefaultConfig)
   if (configParse.length === 0) {
     throw new Error(
       'Configuration file not found. By default, Monika looks for monika.json or monika.yml configuration file in the current directory.\n\nOtherwise, you can also specify a configuration file using -c flag as follows:\n\nmonika -c <path_to_configuration_file>\n\nYou can create a configuration file via web interface by opening this web app: https://hyperjumptech.github.io/monika-config-generator/'
