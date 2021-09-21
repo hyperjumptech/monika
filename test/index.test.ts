@@ -103,7 +103,7 @@ describe('monika', () => {
         resolve('./test/testConfigs/harTest.har'),
       ])
     )
-    .it('merge har file with with other config', (ctx) => {
+    .it('merge har file with other config', (ctx) => {
       expect(ctx.stdout).to.contain('Notifications: 2').and.contain('Probes: 1')
     })
 
@@ -133,7 +133,7 @@ describe('monika', () => {
         resolve('./test/testConfigs/simple.postman_collection.json'),
       ])
     )
-    .it('merge postman file with with other config', (ctx) => {
+    .it('merge postman file with other config', (ctx) => {
       expect(ctx.stdout).to.contain('Notifications: 2').and.contain('Probes: 1')
     })
 
