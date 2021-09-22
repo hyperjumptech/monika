@@ -32,6 +32,7 @@ import {
   WebhookData,
   WhatsappData,
   WorkplaceData,
+  LarkData,
 } from './data'
 
 export type Notification =
@@ -47,6 +48,7 @@ export type Notification =
   | DiscordNotification
   | WorkplaceNotification
   | DesktopNotification
+  | LarkNotification
 
 interface BaseNotification {
   id: string
@@ -112,6 +114,11 @@ interface DesktopNotification extends BaseNotification {
   // actually do not need data property
   // it is here just to make type consistent and does not throw type error in other parts of app
   data: undefined
+}
+
+interface LarkNotification extends BaseNotification {
+  type: 'lark'
+  data: LarkData
 }
 
 export interface NotificationMessage {

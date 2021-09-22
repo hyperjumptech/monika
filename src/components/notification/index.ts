@@ -42,6 +42,7 @@ import { sendTelegram } from './channel/telegram'
 import { sendWebhook } from './channel/webhook'
 import { sendWhatsapp } from './channel/whatsapp'
 import { sendWorkplace } from './channel/workplace'
+import { sendLark } from './channel/lark'
 
 export class NotificationSendingError extends Error {
   notificationType: string
@@ -72,6 +73,7 @@ export async function sendNotifications(
   message: NotificationMessage
 ) {
   await Promise.all(
+    // eslint-disable-next-line complexity
     notifications.map(async (notification) => {
       // catch and rethrow error to add information about which notification channel errors.
       try {
@@ -211,6 +213,12 @@ export async function sendNotifications(
             })
             break
           }
+
+          case 'lark': {
+            await sendLark(notification.data, message)
+            break
+          }
+
           default: {
             break
           }
