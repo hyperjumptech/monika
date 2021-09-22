@@ -34,19 +34,19 @@ import {
   publicNetworkInfo,
 } from '../../utils/public-ip'
 
-let monikaInstance = ''
-
 const getMonikaInstance = async (ipAddress: string) => {
+  const osHostname = hostname()
   await getPublicIp()
-  monikaInstance = `${hostname()} (${[publicIpAddress, ipAddress]
-    .filter(Boolean)
-    .join('/')})`
 
   if (publicNetworkInfo) {
-    monikaInstance = `${publicNetworkInfo.city} - ${
-      publicNetworkInfo.isp
-    } (${publicIpAddress}) - ${hostname()} (${ipAddress})`
+    const { city, isp } = publicNetworkInfo
+
+    return `${city} - ${isp} (${publicIpAddress}) - ${osHostname} (${ipAddress})`
   }
+
+  return `${osHostname} (${[publicIpAddress, ipAddress]
+    .filter(Boolean)
+    .join('/')})`
 }
 
 export async function getMessageForAlert({
@@ -62,15 +62,22 @@ export async function getMessageForAlert({
   probeState: string
   response: AxiosResponseWithExtraData
 }): Promise<NotificationMessage> {
-  const appVersion = `@hyperjumptech/monika/${
-    process.env.npm_package_version
-  } ${platform()}-${arch()} ${release()} node-${process.version}`
+  const appVersion = getAppVersionDetail()
+  const monikaInstance = await getMonikaInstance(ipAddress)
+  const meta = {
+    type: probeState === 'UP' ? ('recovery' as const) : ('incident' as const),
+    url,
+    time: format(new Date(), 'yyyy-MM-dd HH:mm:ss XXX'),
+    hostname: hostname(),
+    privateIpAddress: ipAddress,
+    publicIpAddress,
+    monikaInstance,
+  }
   const getSubject = (probeState: string) => {
     const recoveryOrIncident = probeState === 'UP' ? 'Recovery' : 'Incident'
 
     return `New ${recoveryOrIncident} from Monika`
   }
-
   const getExpectedMessage = (
     alert: ProbeAlert,
     response: AxiosResponseWithExtraData
@@ -104,22 +111,8 @@ export async function getMessageForAlert({
       },
     })
   }
-
-  const meta = {
-    type: probeState === 'UP' ? ('recovery' as const) : ('incident' as const),
-    url,
-    time: format(new Date(), 'yyyy-MM-dd HH:mm:ss XXX'),
-    hostname: hostname(),
-    privateIpAddress: ipAddress,
-    publicIpAddress,
-    monikaInstance,
-  }
-
-  if (monikaInstance.length === 0) {
-    await getMonikaInstance(ipAddress)
-  }
-
-  const bodyString = `Message: ${getExpectedMessage(alert, response)}
+  const expectedMessage = getExpectedMessage(alert, response)
+  const bodyString = `Message: ${expectedMessage}
 
 URL: ${meta.url}
 
@@ -132,7 +125,7 @@ Version: ${appVersion}`
   const message = {
     subject: getSubject(probeState),
     body: bodyString,
-    summary: getExpectedMessage(alert, response),
+    summary: `${expectedMessage} - ${appVersion}`,
     meta,
   }
 
@@ -143,14 +136,13 @@ export const getMessageForStart = async (
   hostname: string,
   ip: string
 ): Promise<NotificationMessage> => {
-  if (monikaInstance.length === 0) {
-    await getMonikaInstance(ip)
-  }
+  const appVersion = getAppVersionDetail()
+  const monikaInstance = await getMonikaInstance(ip)
 
   return {
     subject: 'Monika is started',
-    body: `Monika is running from ${monikaInstance}`,
-    summary: `Monika is running from ${monikaInstance}`,
+    body: `Monika is running from ${monikaInstance} - ${appVersion}`,
+    summary: `Monika is running from ${monikaInstance} - ${appVersion}`,
     meta: {
       type: 'start',
       time: new Date().toUTCString(),
@@ -165,14 +157,13 @@ export const getMessageForTerminate = async (
   hostname: string,
   ip: string
 ): Promise<NotificationMessage> => {
-  if (monikaInstance.length === 0) {
-    await getMonikaInstance(ip)
-  }
+  const appVersion = getAppVersionDetail()
+  const monikaInstance = await getMonikaInstance(ip)
 
   return {
     subject: 'Monika terminated',
-    body: `Monika is no longer running from ${monikaInstance}`,
-    summary: `Monika is no longer running from ${monikaInstance}`,
+    body: `Monika is no longer running from ${monikaInstance} - ${appVersion}`,
+    summary: `Monika is no longer running from ${monikaInstance} - ${appVersion}`,
     meta: {
       type: 'termination',
       time: new Date().toUTCString(),
@@ -181,4 +172,12 @@ export const getMessageForTerminate = async (
       publicIpAddress,
     },
   }
+}
+
+export function getAppVersionDetail() {
+  const { env, version } = process
+
+  return `@hyperjumptech/monika/${
+    env.npm_package_version
+  } ${platform()}-${arch()} ${release()} node-${version}`
 }

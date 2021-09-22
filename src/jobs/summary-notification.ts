@@ -27,6 +27,7 @@ import format from 'date-fns/format'
 import { getConfig } from '../components/config'
 import { getSummary } from '../components/logger/history'
 import { sendNotifications } from '../components/notification'
+import { getAppVersionDetail } from '../components/notification/alert-message'
 import getIp from '../utils/ip'
 import { log } from '../utils/pino'
 import { publicIpAddress } from '../utils/public-ip'
@@ -34,6 +35,7 @@ import { publicIpAddress } from '../utils/public-ip'
 export async function getSummaryAndSendNotif() {
   const config = getConfig()
   const { notifications } = config
+  const appVersion = getAppVersionDetail()
 
   if (!notifications) return
 
@@ -48,8 +50,9 @@ Number of probes: ${summary.numberOfProbes}
 Average response time: ${summary.averageResponseTime} ms in the last 24 hours
 Incidents: ${summary.numberOfIncidents} in the last 24 hours
 Recoveries: ${summary.numberOfRecoveries} in the last 24 hours
-Notifications: ${summary.numberOfSentNotifications}`,
-      summary: `There are ${summary.numberOfIncidents} incidents and ${summary.numberOfRecoveries} recoveries in the last 24 hours.`,
+Notifications: ${summary.numberOfSentNotifications}
+Version: ${appVersion}`,
+      summary: `There are ${summary.numberOfIncidents} incidents and ${summary.numberOfRecoveries} recoveries in the last 24 hours. - ${appVersion}`,
       meta: {
         type: 'status-update' as const,
         time: format(new Date(), 'yyyy-MM-dd HH:mm:ss XXX'),
