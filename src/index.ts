@@ -100,7 +100,14 @@ class Monika extends Command {
       char: 'p', // (p)ostman
       description: 'Run Monika using a Postman json file.',
       multiple: false,
-      exclusive: ['config', 'har'],
+      exclusive: ['har'],
+    }),
+
+    har: flags.string({
+      char: 'H', // (H)ar file to
+      description: 'Run Monika using a HAR file',
+      multiple: false,
+      exclusive: ['postman'],
     }),
 
     logs: flags.boolean({
@@ -140,13 +147,6 @@ class Monika extends Command {
       char: 'i', // (i)ds to run
       description: 'specific probe ids to run',
       multiple: false,
-    }),
-
-    har: flags.string({
-      char: 'H', // (H)ar file to
-      description: 'Run Monika using a HAR file',
-      multiple: false,
-      exclusive: ['config', 'postman'],
     }),
 
     output: flags.string({

@@ -1,7 +1,5 @@
 {
-  "notifications": [
-    { "type": "desktop", "id": "unique-id-desktop-monika-notif" }
-  ],
+  "notifications": [{ "type": "desktop", "id": "default" }],
   "probes": [
     {
       "id": "Get Request",
