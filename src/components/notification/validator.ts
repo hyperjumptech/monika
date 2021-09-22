@@ -110,3 +110,9 @@ export const dataWorkplaceSchemaValidator = dataBaseEmailSchemaValidator(
   thread_id: Joi.string().required().label('Workplace Thread ID'),
   access_token: Joi.string().required().label('Workplace Access Token'),
 })
+
+export const dataLarkSchemaValidator = dataBaseEmailSchemaValidator(
+  'lark'
+).keys({
+  url: Joi.string().uri().required().label('Lark URL'),
+})

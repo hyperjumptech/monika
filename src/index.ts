@@ -380,6 +380,8 @@ Please refer to the Monika documentations on how to how to configure notificatio
             case 'slack':
               startupMessage += `    URL: ${item.data.url}\n`
               break
+            case 'lark':
+              startupMessage += `    URL: ${item.data.url}\n`
           }
         })
       }
