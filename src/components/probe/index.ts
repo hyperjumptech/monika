@@ -22,126 +22,205 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import {
-  PROBE_RESPONSE_RECEIVED,
-  PROBE_RESPONSE_VALIDATED,
-  PROBE_ALERTS_READY,
-  PROBE_LOGS_BUILT,
-} from '../../constants/event-emitter'
-import { LogObject } from '../../interfaces/logs'
+import events from '../../events'
 import { Notification } from '../../interfaces/notification'
 import { Probe } from '../../interfaces/probe'
+import type { ServerAlertState } from '../../interfaces/probe-status'
 import { AxiosResponseWithExtraData } from '../../interfaces/request'
-import { ValidateResponse } from '../../plugins/validate-response'
+import validateResponse, {
+  ValidatedResponse,
+} from '../../plugins/validate-response'
 import { getEventEmitter } from '../../utils/events'
-import { probeBuildLog, setAlert } from '../logger'
+import { log } from '../../utils/pino'
+import { RequestLog } from '../logger'
+import { sendAlerts } from '../notification'
 import { processThresholds } from '../notification/process-server-status'
+import { getLogsAndReport } from '../reporter'
 import { probing } from './probing'
 
-const EventEmitter = getEventEmitter()
+// TODO: move this to interface file?
+interface ProbeStatusProcessed {
+  probe: Probe
+  statuses?: ServerAlertState[]
+  notifications: Notification[]
+  validatedResponseStatuses: ValidatedResponse[]
+  requestIndex: number
+}
 
-let validatedRes: ValidateResponse[] = []
+interface ProbeSendNotification extends Omit<ProbeStatusProcessed, 'statuses'> {
+  index: number
+  probeState?: ServerAlertState
+}
 
-// Responses have been processed and validated
-EventEmitter.on(PROBE_RESPONSE_VALIDATED, (data: ValidateResponse[]) => {
-  validatedRes = data
-})
+// Probes Thresholds processed, Send out notifications/alerts.
+async function checkThresholdsAndSendAlert(
+  data: ProbeStatusProcessed,
+  requestLog: RequestLog
+) {
+  const {
+    probe,
+    statuses,
+    notifications,
+    requestIndex,
+    validatedResponseStatuses,
+  } = data
+  const probeSendNotification = async (data: ProbeSendNotification) => {
+    const {
+      index,
+      probe,
+      probeState,
+      notifications,
+      requestIndex,
+      validatedResponseStatuses,
+    } = data
+
+    const statusString = probeState?.state ?? 'UP'
+    const url = probe.requests[requestIndex].url ?? ''
+
+    if ((notifications?.length ?? 0) > 0) {
+      await sendAlerts({
+        url: url,
+        probeState: statusString,
+        notifications: notifications ?? [],
+        validation:
+          validatedResponseStatuses.find(
+            (validateResponse: ValidatedResponse) =>
+              validateResponse.alert.query === probeState?.alertQuery
+          ) || validatedResponseStatuses[index],
+      })
+    }
+  }
+
+  statuses
+    ?.filter((probeState) => probeState.shouldSendNotification)
+    ?.forEach((probeState, index) => {
+      probeSendNotification({
+        index,
+        probe,
+        probeState,
+        notifications,
+        requestIndex,
+        validatedResponseStatuses,
+      }).catch((error: Error) => log.error(error.message))
+
+      requestLog.addNotifications(
+        (notifications ?? []).map((notification) => ({
+          notification,
+          type:
+            probeState?.state === 'DOWN' ? 'NOTIFY-INCIDENT' : 'NOTIFY-RECOVER',
+          alertQuery: probeState?.alertQuery || '',
+        }))
+      )
+    })
+}
 
 /**
  * doProbe sends out the http request
  * @param {number} checkOrder the order of probe being processed
  * @param {object} probe contains all the probes
  * @param {array} notifications contains all the notifications
+ * @param {boolean} verboseLogs store all requests to database
  */
 export async function doProbe(
   checkOrder: number,
   probe: Probe,
-  notifications?: Notification[]
+  notifications: Notification[],
+  verboseLogs: boolean
 ) {
-  let probeRes: AxiosResponseWithExtraData = {} as AxiosResponseWithExtraData
-  let totalRequests = 0 // is the number of requests in  probe.requests[x]
-  let mLog: LogObject = {
-    type: 'PROBE',
-    iteration: 0,
-    id: probe.id,
-    responseCode: 0,
-    url: '',
-    method: 'GET', // GET must be pre-filled here since method '' (empty) is undefined
-    responseTime: 0,
-    alert: {
-      flag: '',
-      message: [],
-    },
-    notification: {
-      flag: '',
-      message: [],
-    },
-  } as LogObject
+  const eventEmitter = getEventEmitter()
+  const responses = []
 
-  try {
-    const responses: Array<AxiosResponseWithExtraData> = []
+  for (
+    let requestIndex = 0;
+    requestIndex < probe.requests.length;
+    requestIndex++
+  ) {
+    const request = probe.requests[requestIndex]
+    const requestLog = new RequestLog(probe, requestIndex, checkOrder)
 
-    for await (const request of probe.requests) {
-      mLog.url = request.url
-      probeRes = await probing(request, responses)
+    try {
+      // intentionally wait for a request to finish before processing next request in loop
+      // eslint-disable-next-line no-await-in-loop
+      const probeRes: AxiosResponseWithExtraData = await probing(
+        request,
+        responses
+      )
 
-      EventEmitter.emit(PROBE_RESPONSE_RECEIVED, {
+      eventEmitter.emit(events.probe.response.received, {
         probe,
-        requestIndex: totalRequests,
+        requestIndex,
         response: probeRes,
       })
 
       // Add to an array to be accessed by another request
       responses.push(probeRes)
 
-      // done probing, got the results, build logs
-      mLog = probeBuildLog({
-        checkOrder,
-        probe,
-        totalRequests,
-        probeRes,
-        alerts: validatedRes
-          .filter((item) => item.hasSomethingToReport)
-          .map((item) => item.alert),
-        mLog,
-      })
+      requestLog.setResponse(probeRes)
 
-      // done one request, is there another
-      totalRequests += 1
+      // store request error log
+      if ([0, 1, 2, 599].includes(probeRes.status)) {
+        const errorMessageMap: Record<number, string> = {
+          0: 'URI not found',
+          1: 'Connection reset',
+          2: 'Connection refused',
+          599: 'Request Timed out',
+        }
 
-      // Exit the loop if there is any triggers triggered
-      if (validatedRes.filter((item) => item.hasSomethingToReport).length > 0) {
-        break
+        requestLog.addError(errorMessageMap[probeRes.status])
       }
 
-      // done probes, no alerts, no notification.. now print log
-      EventEmitter.emit(PROBE_LOGS_BUILT, mLog)
-    }
+      // combine global probe alerts with all individual request alerts
+      const combinedAlerts = probe.alerts.concat(...(request.alerts || []))
 
-    // done probing, got some result, process it, check for thresholds and notifications
-    const statuses = processThresholds({
-      checkOrder,
-      probe,
-      probeRes,
-      totalRequests,
-      validatedResp: validatedRes,
-      mLog,
-    })
+      // Responses have been processed and validated
+      const validatedResponse = validateResponse(combinedAlerts, probeRes)
 
-    // Done processing results, check if need to send out alerts
-    EventEmitter.emit(
-      PROBE_ALERTS_READY,
-      {
+      requestLog.addAlerts(
+        validatedResponse
+          .filter((item) => item.isAlertTriggered)
+          .map((item) => item.alert)
+      )
+
+      // done probing, got some result, process it, check for thresholds and notifications
+      const statuses = processThresholds({
         probe,
-        statuses,
-        notifications,
-        totalRequests,
-        validatedResponseStatuses: validatedRes,
-      },
-      mLog
-    )
-  } catch (error) {
-    mLog = setAlert({ flag: 'error', message: error }, mLog)
-    EventEmitter.emit(PROBE_LOGS_BUILT, mLog)
+        requestIndex,
+        validatedResponse,
+      })
+
+      // Done processing results, check if need to send out alerts
+      checkThresholdsAndSendAlert(
+        {
+          probe,
+          statuses,
+          notifications,
+          requestIndex,
+          validatedResponseStatuses: validatedResponse,
+        },
+        requestLog
+      ).catch((error) => {
+        requestLog.addError(error.message)
+      })
+
+      // Exit the loop if there is any alert triggered
+      if (validatedResponse.some((item) => item.isAlertTriggered)) {
+        break
+      }
+    } catch (error) {
+      requestLog.addError(error.message)
+      break
+    } finally {
+      requestLog.print()
+      if (verboseLogs || requestLog.hasIncidentOrRecovery) {
+        requestLog
+          .saveToDatabase()
+          .then(() => {
+            if (requestLog.hasIncidentOrRecovery) {
+              return getLogsAndReport()
+            }
+          })
+          .catch((error) => log.error(error.message))
+      }
+    }
   }
 }

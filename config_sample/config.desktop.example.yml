@@ -1,0 +1,7 @@
+probes:
+  - requests:
+      - url: http://github.com
+
+notifications:
+  - id: desktop-notification
+    type: desktop

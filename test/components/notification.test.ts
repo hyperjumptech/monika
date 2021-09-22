@@ -23,7 +23,6 @@
  **********************************************************************************/
 
 import chai, { expect } from 'chai'
-
 import { sendAlerts } from '../../src/components/notification'
 import * as discord from '../../src/components/notification/channel/discord'
 import * as mailgun from '../../src/components/notification/channel/mailgun'
@@ -33,12 +32,14 @@ import * as smtp from '../../src/components/notification/channel/smtp'
 import * as telegram from '../../src/components/notification/channel/telegram'
 import * as webhook from '../../src/components/notification/channel/webhook'
 import * as whatsapp from '../../src/components/notification/channel/whatsapp'
+import * as lark from '../../src/components/notification/channel/lark'
 import {
   MailgunData,
   MonikaNotifData,
   TelegramData,
   WebhookData,
   WhatsappData,
+  LarkData,
 } from '../../src/interfaces/data'
 import { AxiosResponseWithExtraData } from '../../src/interfaces/request'
 
@@ -52,7 +53,7 @@ describe('send alerts', () => {
     await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', message: '' },
-        hasSomethingToReport: false,
+        isAlertTriggered: false,
         response: {
           status: 500,
           config: {
@@ -85,7 +86,7 @@ describe('send alerts', () => {
     await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', message: '' },
-        hasSomethingToReport: true,
+        isAlertTriggered: true,
         response: {
           status: 500,
           config: {
@@ -118,7 +119,7 @@ describe('send alerts', () => {
     await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', message: '' },
-        hasSomethingToReport: true,
+        isAlertTriggered: true,
         response: {
           status: 500,
           config: {
@@ -152,7 +153,7 @@ describe('send alerts', () => {
     await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', message: '' },
-        hasSomethingToReport: true,
+        isAlertTriggered: true,
         response: {
           status: 500,
           config: {
@@ -187,7 +188,7 @@ describe('send alerts', () => {
     await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', message: '' },
-        hasSomethingToReport: true,
+        isAlertTriggered: true,
         response: {
           status: 500,
           config: {
@@ -227,7 +228,7 @@ describe('send alerts', () => {
     await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', message: '' },
-        hasSomethingToReport: true,
+        isAlertTriggered: true,
         response: {
           status: 500,
           config: {
@@ -263,7 +264,7 @@ describe('send alerts', () => {
     await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', message: '' },
-        hasSomethingToReport: true,
+        isAlertTriggered: true,
         response: {
           status: 500,
           config: {
@@ -317,7 +318,7 @@ describe('send alerts', () => {
     await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', message: '' },
-        hasSomethingToReport: true,
+        isAlertTriggered: true,
         response: {
           status: 500,
           config: {
@@ -352,7 +353,7 @@ describe('send alerts', () => {
     await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', message: '' },
-        hasSomethingToReport: true,
+        isAlertTriggered: true,
         response: {
           status: 500,
           config: {
@@ -385,7 +386,7 @@ describe('send alerts', () => {
     await sendAlerts({
       validation: {
         alert: { query: 'status-not-2xx', message: '' },
-        hasSomethingToReport: true,
+        isAlertTriggered: true,
         response: {
           status: 500,
           config: {
@@ -410,5 +411,38 @@ describe('send alerts', () => {
     })
 
     expect(monikaNotif.sendMonikaNotif).to.have.been.called.exactly(1)
+  })
+
+  it('should send larksuite notification ', async () => {
+    chai.spy.on(lark, 'sendLark', () => Promise.resolve())
+
+    await sendAlerts({
+      validation: {
+        alert: { query: 'status-not-2xx', message: '' },
+        isAlertTriggered: true,
+        response: {
+          status: 500,
+          config: {
+            extraData: {
+              responseTime: 0,
+            },
+          },
+          headers: {},
+        } as AxiosResponseWithExtraData,
+      },
+      notifications: [
+        {
+          id: 'one',
+          type: 'lark',
+          data: {
+            url: 'xx',
+          } as LarkData,
+        },
+      ],
+      url: 'https://hyperjump.tech',
+      probeState: 'DOWN',
+    })
+
+    expect(lark.sendLark).to.have.been.called.exactly(1)
   })
 })

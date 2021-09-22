@@ -237,13 +237,13 @@ export async function flushAllLogs() {
  */
 export async function saveProbeRequestLog({
   probe,
-  totalRequests,
+  requestIndex,
   probeRes,
   alertQueries,
   error: errorResp,
 }: {
   probe: Probe
-  totalRequests: number
+  requestIndex: number
   probeRes: AxiosResponseWithExtraData
   alertQueries?: string[]
   error?: string
@@ -275,7 +275,7 @@ export async function saveProbeRequestLog({
     VALUES (?, ?, ?);`
 
   const now = Math.round(Date.now() / 1000)
-  const requestConfig = probe.requests[totalRequests]
+  const requestConfig = probe.requests[requestIndex]
 
   // TODO: limit data stored.
   const responseBody = requestConfig.saveBody

@@ -23,11 +23,8 @@
  **********************************************************************************/
 
 import { getConfig, setupConfig } from '../components/config'
-import { openLogfile } from '../components/logger/history'
-import {
-  CONFIG_SANITIZED,
-  PROBE_RESPONSE_RECEIVED,
-} from '../constants/event-emitter'
+import events from '../events'
+import { tlsChecker } from '../jobs/tls-check'
 import { loopCheckSTUNServer, loopReport } from '../looper'
 import {
   PrometheusCollector,
@@ -35,6 +32,9 @@ import {
 } from '../plugins/metrics/prometheus'
 import { getEventEmitter } from '../utils/events'
 import { getPublicNetworkInfo } from '../utils/public-ip'
+// import to activate all the application event emitter subscribers
+import '../events/subscribers/application'
+import { jobsLoader } from './jobs'
 
 export default async function init(flags: any) {
   const eventEmitter = getEventEmitter()
@@ -44,7 +44,6 @@ export default async function init(flags: any) {
   await getPublicNetworkInfo()
   // check if connected to STUN Server and getting the public IP in the same time
   loopCheckSTUNServer(flags.stun)
-  await openLogfile()
 
   // start Promotheus server
   if (flags.prometheus) {
@@ -54,17 +53,23 @@ export default async function init(flags: any) {
     } = new PrometheusCollector()
 
     // register prometheus metric collectors
-    eventEmitter.on(CONFIG_SANITIZED, registerCollectorFromProbes)
+    eventEmitter.on(events.config.sanitized, registerCollectorFromProbes)
     // collect prometheus metrics
-    eventEmitter.on(PROBE_RESPONSE_RECEIVED, collectProbeRequestMetrics)
+    eventEmitter.on(events.probe.response.received, collectProbeRequestMetrics)
 
     startPrometheusMetricsServer(flags.prometheus)
   }
 
   await setupConfig(flags)
 
-  // Run report on interval if symon configuration exists
+  // check TLS when Monika starts
+  tlsChecker()
+
   if (!isTestEnvironment) {
+    // load cron jobs
+    jobsLoader()
+
+    // Run report on interval if symon configuration exists
     loopReport(getConfig)
   }
 }

@@ -23,6 +23,7 @@
  **********************************************************************************/
 
 /* eslint-disable complexity */
+import Joi from 'joi'
 import { Notification } from '../../interfaces/notification'
 import { Config } from '../../interfaces/config'
 import { ProbeAlert } from '../../interfaces/probe'
@@ -30,6 +31,7 @@ import { Validation } from '../../interfaces/validation'
 import { isValidURL } from '../../utils/is-valid-url'
 import { parseAlertStringTime } from '../../plugins/validate-response/checkers'
 import { compileExpression } from '../../utils/expression-parser'
+import type { SymonConfig } from '../reporter'
 
 const HTTPMethods = [
   'DELETE',
@@ -216,6 +218,11 @@ function validateNotification(notifications: Notification[]): Validation {
         break
       }
 
+      case 'lark': {
+        if (!notification.data.url) return WEBHOOK_NO_URL
+        break
+      }
+
       default:
         return NOTIFICATION_INVALID_TYPE
     }
@@ -241,7 +248,8 @@ const isValidProbeAlert = (alert: ProbeAlert | string): boolean => {
 }
 
 export const validateConfig = (configuration: Config): Validation => {
-  const { notifications, probes } = configuration
+  const { notifications, probes, symon } = configuration
+  const symonConfigError = validateSymonConfig(symon)
 
   // validate notification
   if (notifications && notifications.length > 0) {
@@ -307,5 +315,28 @@ export const validateConfig = (configuration: Config): Validation => {
     })
   }
 
+  // validate symon config
+  if (symonConfigError) {
+    return setInvalidResponse(`Monika configuration: symon ${symonConfigError}`)
+  }
+
   return VALID_CONFIG
+}
+
+function validateSymonConfig(symonConfig?: SymonConfig) {
+  if (!symonConfig) {
+    return ''
+  }
+
+  const schema = Joi.object({
+    id: Joi.string().required(),
+    url: Joi.string().uri().required(),
+    key: Joi.string().required(),
+    projectID: Joi.string().required(),
+    organizationID: Joi.string().required(),
+    interval: Joi.number(),
+  })
+  const validationError = schema.validate(symonConfig)
+
+  return validationError?.error?.message
 }

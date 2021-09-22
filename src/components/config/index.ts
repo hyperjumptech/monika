@@ -26,6 +26,7 @@ import EventEmitter from 'events'
 import chokidar from 'chokidar'
 import pEvent from 'p-event'
 import isUrl from 'is-url'
+import events from './../../events'
 import { open } from './../../utils/open-website'
 import { Config } from '../../interfaces/config'
 import { fetchConfig } from './fetch'
@@ -39,9 +40,8 @@ import { cli } from 'cli-ux'
 
 const emitter = new EventEmitter()
 
-const CONFIG_UPDATED = 'CONFIG_UPDATED_EVENT'
-
 let cfg: Config
+let configs: Partial<Config>[]
 
 export const getConfig = () => {
   if (!cfg) throw new Error('Configuration setup has not been run yet')
@@ -54,19 +54,7 @@ export async function* getConfigIterator() {
   yield cfg
 
   if (!(process.env.CI || process.env.NODE_ENV === 'test')) {
-    yield* pEvent.iterator<string, Config>(emitter, CONFIG_UPDATED)
-  }
-}
-
-export const updateConfig = (data: Config) => {
-  const lastVersion = cfg?.version
-
-  cfg = data
-  cfg.version = cfg.version || md5Hash(cfg)
-
-  if (cfg.version !== lastVersion) {
-    emitter.emit(CONFIG_UPDATED, cfg)
-    log.warn('config file update detected')
+    yield* pEvent.iterator<string, Config>(emitter, events.config.updated)
   }
 }
 
@@ -84,6 +72,102 @@ const handshakeAndValidate = async (config: Config) => {
   if (!validated.valid) {
     throw new Error(validated.message)
   }
+}
+
+const updateConfig = async (config: Config) => {
+  await handshakeAndValidate(config)
+  const lastConfig = cfg?.version
+  cfg = config
+  cfg.version = lastConfig || md5Hash(config)
+  if (lastConfig !== cfg.version) {
+    emitter.emit(events.config.updated, cfg)
+    log.warn('config file update detected')
+  }
+}
+
+const mergeConfigs = (): Config => {
+  const mergedConfig = configs.reduce((prev, current) => {
+    return { ...prev, ...current }
+  })
+  return mergedConfig as Config
+}
+
+const watchConfigFile = (
+  path: string,
+  type: string,
+  index: number,
+  repeat?: number
+) => {
+  const watchConfigFile = !(
+    process.env.CI ||
+    process.env.NODE_ENV === 'test' ||
+    repeat !== undefined
+  )
+  if (watchConfigFile) {
+    const watcher = chokidar.watch(path)
+    watcher.on('change', async () => {
+      configs[index] = await parseConfig(path, type)
+      await updateConfig(mergeConfigs())
+    })
+  }
+}
+
+const scheduleRemoteConfigFetcher = (
+  url: string,
+  interval: number,
+  index: number
+) => {
+  setInterval(async () => {
+    configs[index] = await fetchConfig(url)
+    await updateConfig(mergeConfigs())
+  }, interval * 1000)
+}
+
+const parseDefaultConfig = (flags: any): Promise<Partial<Config>>[] => {
+  return (flags.config as Array<string>).map((source, i) => {
+    if (isUrl(source)) {
+      scheduleRemoteConfigFetcher(source, flags['config-interval'], i)
+      return fetchConfig(source)
+    }
+    delete flags.config
+    watchConfigFile(source, 'monika', i, flags.repeat)
+    return parseConfig(source, 'monika')
+  })
+}
+
+const addDefaultNotifications = (
+  parse: Promise<Partial<Config>>
+): Promise<Partial<Config>> => {
+  return parse.then((config) => {
+    log.info('Notifications not found, using desktop as default...')
+    config.notifications = [{ id: 'default', type: 'desktop', data: undefined }]
+    return config
+  })
+}
+
+export const setupConfig = async (flags: any) => {
+  const configParse = new Array<Promise<Partial<Config>>>(0)
+  if (Array.isArray(flags.config) && flags.config.length > 0) {
+    const json = parseDefaultConfig(flags)
+    configParse.push(...json)
+  }
+  let nonDefaultConfig
+  if (flags.har) {
+    nonDefaultConfig = parseConfig(flags.har, 'har')
+  } else if (flags.postman) {
+    nonDefaultConfig = parseConfig(flags.postman, 'postman')
+  }
+  if (configParse.length === 0 && nonDefaultConfig !== undefined) {
+    nonDefaultConfig = addDefaultNotifications(nonDefaultConfig)
+  }
+  if (nonDefaultConfig !== undefined) configParse.push(nonDefaultConfig)
+  if (configParse.length === 0) {
+    throw new Error(
+      'Configuration file not found. By default, Monika looks for monika.json or monika.yml configuration file in the current directory.\n\nOtherwise, you can also specify a configuration file using -c flag as follows:\n\nmonika -c <path_to_configuration_file>\n\nYou can create a configuration file via web interface by opening this web app: https://hyperjumptech.github.io/monika-config-generator/'
+    )
+  }
+  configs = await Promise.all(configParse)
+  await updateConfig(mergeConfigs())
 }
 
 const getPathAndTypeFromFlag = (flags: any) => {
@@ -106,54 +190,6 @@ const getPathAndTypeFromFlag = (flags: any) => {
   }
 }
 
-export const setupConfigFromFile = async (flags: any, watch: boolean) => {
-  const { path, type } = getPathAndTypeFromFlag(flags)
-
-  const parsed = parseConfig(path, type)
-  await handshakeAndValidate(parsed)
-  cfg = parsed
-  cfg.version = cfg.version || md5Hash(cfg)
-
-  if (watch) {
-    const fileWatcher = chokidar.watch(path)
-    fileWatcher.on('change', async () => {
-      const parsed = parseConfig(path, type)
-      await handshakeAndValidate(parsed)
-      updateConfig(parsed)
-    })
-  }
-}
-
-export const setupConfigFromUrl = async (
-  url: string,
-  checkingInterval: number
-) => {
-  const fetched = await fetchConfig(url)
-  await handshakeAndValidate(fetched)
-  cfg = fetched
-  cfg.version = cfg.version || md5Hash(cfg)
-
-  setInterval(async () => {
-    const fetched = await fetchConfig(url)
-    await handshakeAndValidate(fetched)
-    updateConfig(fetched)
-  }, checkingInterval * 1000)
-}
-
-export const setupConfig = async (flags: any) => {
-  if (isUrl(flags.config)) {
-    await setupConfigFromUrl(flags.config, flags['config-interval'])
-  } else {
-    const watchConfigFile = !(
-      process.env.CI ||
-      process.env.NODE_ENV === 'test' ||
-      flags.repeat
-    )
-
-    await setupConfigFromFile(flags, watchConfigFile)
-  }
-}
-
 export const createConfig = async (flags: any) => {
   if (!flags.har && !flags.postman) {
     log.info(
@@ -168,7 +204,8 @@ export const createConfig = async (flags: any) => {
       return
     }
 
-    const parsed = parseConfig(path, type)
+    const parse = parseConfig(path, type)
+    const result = await addDefaultNotifications(parse)
     const file = flags.output || 'monika.json'
 
     if (existsSync(file) && !flags.force) {
@@ -184,7 +221,7 @@ export const createConfig = async (flags: any) => {
       }
     }
 
-    writeFileSync(file, JSON.stringify(parsed), 'utf8')
+    writeFileSync(file, JSON.stringify(result), 'utf8')
     log.info(`${file} file has been created.`)
   }
 }

@@ -1,6 +1,7 @@
 build
 coverage
 .nyc_output
+lib
 package-lock.json
 .eslintrc 
 .github

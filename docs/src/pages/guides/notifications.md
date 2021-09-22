@@ -21,71 +21,60 @@ At this moment, Monika support these channel of notifications (You can use just 
 10. [Monika Whatsapp Notifier](https://hyperjumptech.github.io/monika/guides/notifications#monika-whatsapp-notifier)
 11. [Facebook Workplace](https://hyperjumptech.github.io/monika/guides/notifications#facebook-workplace)
 12. [Desktop Notifications](https://hyperjumptech.github.io/monika/guides/notifications#desktop-notifications)
+13. [Lark Suite](https://hyperjumptech.github.io/monika/guides/notifications#larksuite-notifications)
 
 ## Configurations
 
-To use one or more notifications, you need to define the settings in the monika.json file as shown below.
+To use one or more notifications, you need to define the settings in the monika.yml file as shown below.
 
-```json
-"notifications": [
-    {
-      "id": "unique-id-mailgun",
-      "type": "mailgun",
-      "data": {
-        "recipients": ["RECIPIENT_EMAIL_ADDRESS"],
-        "apiKey": "YOUR_API_KEY",
-        "domain": "YOUR_DOMAIN"
-      }
-    },
-    {
-      "id": "unique-id-sendgrid",
-      "type": "sendgrid",
-      "data": {
-        "sender": "YOUR_VERIFIED_EMAIL_BY_SENDGRID",
-        "recipients": ["RECIPIENT_EMAIL_ADDRESS"],
-        "apiKey": "YOUR_API_KEY"
-      }
-    },
-    {
-      "id": "unique-id-smtp",
-      "type": "smtp",
-      "data": {
-        "recipients": ["RECIPIENT_EMAIL_ADDRESS"],
-        "hostname": "SMTP_HOSTNAME",
-        "port": 587,
-        "username": "SMTP_USERNAME",
-        "password": "SMTP_PASSWORD"
-      }
-    },
-    {
-      "id": "unique-id-webhook",
-      "type": "webhook",
-      "data": {
-        "method": "POST",
-        "url": "https://WEBHOOK_URL"
-      }
-    }
-  ],
+```yml
+notifications: [
+    - id: unique-id-mailgun
+      type: mailgun
+      data:
+        recipients: [RECIPIENT_EMAIL_ADDRESS]
+        apiKey: YOUR_API_KEY
+        domain: YOUR_DOMAIN
+
+    - id: unique-id-sendgrid
+      type: sendgrid
+      data:
+        sender: YOUR_VERIFIED_EMAIL_BY_SENDGRID
+        recipients: [RECIPIENT_EMAIL_ADDRESS]
+        apiKey: YOUR_API_KEY
+
+    - id: unique-id-smtp
+      type: smtp
+      data:
+        recipients: [RECIPIENT_EMAIL_ADDRESS]
+        hostname: SMTP_HOSTNAME
+        port: 587
+        username: SMTP_USERNAME
+        password: SMTP_PASSWORD
+
+    - id: unique-id-webhook
+      type: webhook
+      data:
+        method: POST
+        url: https://WEBHOOK_URL
+  ]
 ```
 
-Note that every triggered alert will be sent to you through all the notifications you defined in the monika.json, e.g., if you added `webhook` and `smtp` settings, you will receive the alert messages through both.
+Note that every triggered alert will be sent to you through all the notifications you defined in the configuration file, e.g., if you added `webhook` and `smtp` settings, you will receive the alert messages through both.
 
 ## SMTP
 
 [SMTP (Simple Mail Transfer Protocol)](https://en.wikipedia.org/wiki/Simple_Mail_Transfer_Protocol) is a way to send email using the TCP/IP protocol. This is the easiest way to get notified when alerts are triggered. Use the following configuration to set up SMTP notification.
 
-```json
-{
-  "id": "unique-id-smtp",
-  "type": "smtp",
-  "data": {
-    "recipients": ["RECIPIENT_EMAIL_ADDRESS"],
-    "hostname": "smtp.mail.com",
-    "port": 587,
-    "username": "SMTP_USERNAME",
-    "password": "SMTP_PASSWORD"
-  }
-}
+```yml
+- id: unique-id-smtp
+  type: smtp
+  data:
+    recipients: [RECIPIENT_EMAIL_ADDRESS]
+    hostname: smtp.mail.com
+    port: 587
+    username: SMTP_USERNAME
+    password: SMTP_PASSWORD
 ```
 
 | Key        | Description                                                          | Example                                         |
@@ -118,18 +107,15 @@ Mailgun is an email notification delivery provided by Mailgun email service. To 
 3. For your **domain**
    - • If you are on the free plan, add authorized recipients as instructed [here](https://help.mailgun.com/hc/en-us/articles/217531258-Authorized-Recipients).
    - • If you want to use your own domain, refer [here](https://help.mailgun.com/hc/en-us/articles/203637190-How-Do-I-Add-or-Delete-a-Domain) to add it.
-4. After that, put them in `monika.json` configuration as follows:
+4. After that, put them in `monika.yml` configuration as follows:
 
-```json
-{
-  "id": "unique-id-mailgun",
-  "type": "mailgun",
-  "data": {
-    "recipients": ["RECIPIENT_EMAIL_ADDRESS"],
-    "apiKey": "YOUR_API_KEY",
-    "domain": "YOUR_DOMAIN"
-  }
-}
+```yml
+- id: unique-id-mailgun
+  type: mailgun
+  data:
+    recipients: [RECIPIENT_EMAIL_ADDRESS]
+    apiKey: YOUR_API_KEY
+    domain: YOUR_DOMAIN
 ```
 
 | Key        | Description                                                              | Example                                         |
@@ -144,16 +130,13 @@ Mailgun is an email notification delivery provided by Mailgun email service. To 
 
 Similar to mailgun, sendgrid is also an email delivery service. Make sure you have a [sendgrid account](https://app.sendgrid.com/). To obtain your API key, refer to [sendgrid documentation](https://sendgrid.com/docs/ui/account-and-settings/api-keys/). Then put the API key in Monika's configuration as follows:
 
-```json
-{
-  "id": "unique-id-sendgrid",
-  "type": "sendgrid",
-  "data": {
-    "sender": "YOUR_VERIFIED_EMAIL_BY_SENDGRID",
-    "recipients": ["RECIPIENT_EMAIL_ADDRESS"],
-    "apiKey": "YOUR_API_KEY"
-  }
-}
+```yml
+- id: unique-id-sendgrid
+  type: sendgrid
+  data:
+    sender: YOUR_VERIFIED_EMAIL_BY_SENDGRID
+    recipients: [RECIPIENT_EMAIL_ADDRESS]
+    apiKey: YOUR_API_KEY
 ```
 
 | Key        | Description                                                                  | Example                                         |
@@ -168,14 +151,11 @@ Similar to mailgun, sendgrid is also an email delivery service. Make sure you ha
 
 Monika supports Webhook. To enable notification via Webhook.
 
-```json
-{
-  "id": "unique-id-webhook",
-  "type": "webhook",
-  "data": {
-    "url": "https://YOUR_WEBHOOK_URL"
-  }
-}
+```yml
+- id: unique-id-webhook
+  type: webhook
+  data:
+    url: https://YOUR_WEBHOOK_URL
 ```
 
 | Key  | Description                                                      | Example                           |
@@ -198,14 +178,11 @@ body: {
 
 Monika supports Slack Incoming Webhook. To enable notification via Slack, you must have a `Slack's Incoming Webhook URL`. Please consult to [Sending messages using Incoming Webhooks](https://api.slack.com/messaging/webhooks) documentation.
 
-```json
-{
-  "id": "unique-id-slack",
-  "type": "slack",
-  "data": {
-    "url": "https://YOUR_SLACK_INCOMING_WEBHOOK_URL"
-  }
-}
+```yml
+id: unique-id-slack
+type: slack
+data:
+  url: https://YOUR_SLACK_INCOMING_WEBHOOK_URL
 ```
 
 | Key  | Description                            | Example                            |
@@ -218,15 +195,12 @@ Monika supports Slack Incoming Webhook. To enable notification via Slack, you mu
 
 Monika supports Telegram. To enable notification via Telegram, you must have a Telegram bot. Please consult to [Bots: An introduction for developers](https://core.telegram.org/bots).
 
-```json
-{
-  "id": "unique-id-telegram",
-  "type": "telegram",
-  "data": {
-    "group_id": "YOUR_GROUP_ID",
-    "bot_token": "YOUR_BOT_TOKEN"
-  }
-}
+```yml
+- id: unique-id-telegram
+  type: telegram
+  data:
+    group_id: YOUR_GROUP_ID
+    bot_token: YOUR_BOT_TOKEN
 ```
 
 | Key       | Description                                            | Example                       |
@@ -240,17 +214,15 @@ Monika supports Telegram. To enable notification via Telegram, you must have a T
 
 Monika supports Whatsapp notification. To enable notification via whatsapp, you must have a registered user in whatsapp business api server. Please refer to [WhatsApp Business API](https://developers.facebook.com/docs/whatsapp) documentation.
 
-```json
-{
-  "id": "unique-id-whatsapp",
-  "type": "whatsapp",
-  "data": {
-    "recipients": ["628123456789"],
-    "url": "https://yourwhatsappapiserver.com",
-    "username": "whatsappusername",
-    "password": "whatsapppassword"
-  }
-}
+```yml
+  - id: unique-id-whatsapp,
+    type: whatsapp,
+    data:
+      recipients: [628123456789],
+      url: https://yourwhatsappapiserver.com,
+      username: whatsappusername,
+      password: whatsapppassword
+
 ```
 
 | Key          | Description                                                                               | Example                             |
@@ -266,14 +238,11 @@ Monika supports Whatsapp notification. To enable notification via whatsapp, you 
 
 Monika supports sending notifications via Microsoft Teams. In order to be able to send notifications via Microsoft Teams, you may need to add Connectors and webhooks to your channel. Please refer to [Microsoft Teams Documentation](https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/connectors-using) to enable connectors and webhooks.
 
-```json
-{
-  "id": "unique-id-teams",
-  "type": "teams",
-  "data": {
-    "url": "https://YOUR_TEAMS_WEBHOOK_URL"
-  }
-}
+```yml
+id: unique-id-teams
+type: teams
+data:
+  url: https://YOUR_TEAMS_WEBHOOK_URL
 ```
 
 | Key  | Description                             | Example                                 |
@@ -286,14 +255,11 @@ Monika supports sending notifications via Microsoft Teams. In order to be able t
 
 Monika supports Discord. To enable notification via Discord, you must create a discord webhook first. More info at [Discord webhook documentation](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks)
 
-```json
-{
-  "id": "unique-id-webhook",
-  "type": "discord",
-  "data": {
-    "url": "https://YOUR_DISCORD_URL"
-  }
-}
+```yml
+id: unique-id-webhook,
+type: discord,
+data:
+  url: https://YOUR_DISCORD_URL
 ```
 
 | Key  | Description                                                   | Example                                                        |
@@ -306,14 +272,15 @@ Monika supports Discord. To enable notification via Discord, you must create a d
 
 Monika supports Facebook Workplace. To enable notification via Workplace, you must create custom integration first. More info at [Facebook Workplace Custom Integrations](https://developers.facebook.com/docs/workplace/custom-integrations-new/)
 
-```json
+```yml
 {
-  "id": "unique-workplace-id",
-  "type": "workplace",
-  "data": {
-    "thread_id": "12345678910",
-    "access_token": "your_custom_integration_access_token"
-  }
+  'id': 'unique-workplace-id',
+  'type': 'workplace',
+  'data':
+    {
+      'thread_id': '12345678910',
+      'access_token': 'your_custom_integration_access_token',
+    },
 }
 ```
 
@@ -328,14 +295,11 @@ Monika supports Facebook Workplace. To enable notification via Workplace, you mu
 
 You can get a notification from Monika to your Whatsapp number without having a Whatsapp Business account. First, you must create a [Monika Whatsapp Notifier account](https://whatsapp.hyperjump.tech).
 
-```json
-{
-  "id": "unique-id-monika-notif",
-  "type": "monika-notif",
-  "data": {
-    "url": "https://YOUR_MONIKA_NOTIF_URL"
-  }
-}
+```yml
+id: unique-id-monika-notif
+type: monika-notif
+data:
+  url: https://YOUR_MONIKA_NOTIF_URL
 ```
 
 | Key  | Description                              | Example                                                            |
@@ -352,11 +316,25 @@ Monika supports desktop notifications. Here are the prerequisites for enabling t
 - Linux: Uses `notify-send` command. `notify-osd` or `libnotify-bin` required (Ubuntu should have this by default).
 - Windows: Uses Powershell. Refer to [Microsoft Official Documentation](https://docs.microsoft.com/en-us/powershell/scripting/windows-powershell/install/windows-powershell-system-requirements?view=powershell-7.1) for System Requirements.
 
-```json
-{
-  "id": "unique-id-monika-notif",
-  "type": "desktop"
-}
+```yml
+id: unique-id-monika-notif,
+type: desktop
+```
+
+## Larksuite Notifications
+
+If you use Larksuite, you can get Monika to send notifications to the Larksuite bots. You can create a webhook url, and then use it in the monika configuration.
+
+You can find more information on creating [webhooks here.](https://www.larksuite.com/hc/en-US/articles/360048487775-Workplace-Use-Lark-Flow-Webhook-Triggers)
+
+The Yaml config setup may look something like this:
+
+```yml
+notifications:
+  - id: lark-group-message
+    type: lark
+    data:
+      url: https://open.larksuite.com/open-apis/bot/v2/hook/your-webhook-key-here
 ```
 
 Keep watch on these pages, new notification methods are being developed.

@@ -221,7 +221,6 @@ config.json
 docs/out
 
 #ignore personal configs
-config.json
 monika.json
 monika.postman_collection.json
 #ignore databasefile

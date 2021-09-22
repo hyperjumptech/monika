@@ -26,13 +26,6 @@ import { Config } from '../../interfaces/config'
 import { Probe } from '../../interfaces/probe'
 import { DEFAULT_THRESHOLD } from '../../looper'
 
-const defaultNotification = [
-  {
-    type: 'desktop',
-    id: 'unique-id-desktop-monika-notif',
-  },
-]
-
 let probes: Probe[] = []
 
 const getConvertedProbeFromPostmanItem = (item: any) => {
@@ -81,7 +74,6 @@ export const parseConfigFromPostman = (configString: string): Config => {
     parsePostmanItem(parsed.item)
 
     const configMonika: any = {
-      notifications: defaultNotification,
       probes,
     }
 

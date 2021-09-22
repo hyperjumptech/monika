@@ -110,3 +110,7 @@ export interface WorkplaceData {
   access_token: string
   body: string
 }
+
+export interface LarkData {
+  url: string
+}
