@@ -32,6 +32,7 @@ import {
   upperCase,
   size,
   includes,
+  isEmpty,
 } from 'lodash'
 
 // wrap substrings that are object accessor with double quote
@@ -64,6 +65,7 @@ export const compileExpression = (
       endsWith,
       includes,
       size,
+      isEmpty,
     },
   })(obj)
 }
