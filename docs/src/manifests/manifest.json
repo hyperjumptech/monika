@@ -41,6 +41,11 @@
           "editUrl": "/guides/tls-checkers.md"
         },
         {
+          "title": "Status Notification",
+          "path": "/guides/status-notification",
+          "editUrl": "/guides/status-notification.md"
+        },
+        {
           "title": "CLI Options",
           "path": "/guides/cli-options",
           "editUrl": "/guides/cli-options.md"

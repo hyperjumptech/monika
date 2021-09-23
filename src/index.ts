@@ -206,7 +206,7 @@ class Monika extends Command {
         return
       }
 
-      await initLoaders(flags)
+      await initLoaders(flags, this.config)
 
       let scheduledTasks: ScheduledTask[] = []
       let abortCurrentLooper: (() => void) | undefined

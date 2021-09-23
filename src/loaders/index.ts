@@ -22,7 +22,9 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import type { IConfig } from '@oclif/config'
 import { getConfig, setupConfig } from '../components/config'
+import { setContext } from '../context'
 import events from '../events'
 import { tlsChecker } from '../jobs/tls-check'
 import { loopCheckSTUNServer, loopReport } from '../looper'
@@ -36,9 +38,11 @@ import { getPublicNetworkInfo } from '../utils/public-ip'
 import '../events/subscribers/application'
 import { jobsLoader } from './jobs'
 
-export default async function init(flags: any) {
+export default async function init(flags: any, cliConfig: IConfig) {
   const eventEmitter = getEventEmitter()
   const isTestEnvironment = process.env.CI || process.env.NODE_ENV === 'test'
+
+  setContext({ userAgent: cliConfig.userAgent })
 
   // cache location & ISP info
   await getPublicNetworkInfo()
