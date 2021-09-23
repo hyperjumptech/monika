@@ -22,9 +22,13 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import { hostname, platform } from 'os'
+import { promisify } from 'util'
 import { format } from 'date-fns'
 import * as Handlebars from 'handlebars'
-import { arch, hostname, platform, release } from 'os'
+import getos from 'getos'
+import osName from 'os-name'
+import { getContext } from '../../context'
 import { NotificationMessage } from '../../interfaces/notification'
 import { AxiosResponseWithExtraData } from '../../interfaces/request'
 import { ProbeAlert } from '../../interfaces/probe'
@@ -33,6 +37,8 @@ import {
   publicIpAddress,
   publicNetworkInfo,
 } from '../../utils/public-ip'
+
+const getLinuxDistro = promisify(getos)
 
 const getMonikaInstance = async (ipAddress: string) => {
   const osHostname = hostname()
@@ -62,8 +68,11 @@ export async function getMessageForAlert({
   probeState: string
   response: AxiosResponseWithExtraData
 }): Promise<NotificationMessage> {
-  const appVersion = getAppVersionDetail()
-  const monikaInstance = await getMonikaInstance(ipAddress)
+  const { userAgent } = getContext()
+  const [monikaInstance, osName] = await Promise.all([
+    getMonikaInstance(ipAddress),
+    getOSName(),
+  ])
   const meta = {
     type: probeState === 'UP' ? ('recovery' as const) : ('incident' as const),
     url,
@@ -120,12 +129,15 @@ Time: ${meta.time}
 
 From: ${monikaInstance}
 
-Version: ${appVersion}`
+OS: ${osName}
+
+Version: ${userAgent}`
+  const summary = `${expectedMessage} - ${userAgent} - ${osName}`
 
   const message = {
     subject: getSubject(probeState),
     body: bodyString,
-    summary: `${expectedMessage} - ${appVersion}`,
+    summary,
     meta,
   }
 
@@ -136,17 +148,21 @@ export const getMessageForStart = async (
   hostname: string,
   ip: string
 ): Promise<NotificationMessage> => {
-  const appVersion = getAppVersionDetail()
-  const monikaInstance = await getMonikaInstance(ip)
+  const { userAgent } = getContext()
+  const [monikaInstance, osName] = await Promise.all([
+    getMonikaInstance(ip),
+    getOSName(),
+  ])
+  const monikaDetail = `${monikaInstance} - ${userAgent} - ${osName}`
 
   return {
     subject: 'Monika is started',
-    body: `Monika is running from ${monikaInstance} - ${appVersion}`,
-    summary: `Monika is running from ${monikaInstance} - ${appVersion}`,
+    body: `Monika is running from ${monikaDetail}`,
+    summary: `Monika is running from ${monikaDetail}`,
     meta: {
       type: 'start',
       time: new Date().toUTCString(),
-      hostname: hostname,
+      hostname,
       privateIpAddress: ip,
       publicIpAddress,
     },
@@ -157,27 +173,41 @@ export const getMessageForTerminate = async (
   hostname: string,
   ip: string
 ): Promise<NotificationMessage> => {
-  const appVersion = getAppVersionDetail()
-  const monikaInstance = await getMonikaInstance(ip)
+  const { userAgent } = getContext()
+  const [monikaInstance, osName] = await Promise.all([
+    getMonikaInstance(ip),
+    getOSName(),
+  ])
+  const monikaDetail = `${monikaInstance} - ${userAgent} - ${osName}`
 
   return {
     subject: 'Monika terminated',
-    body: `Monika is no longer running from ${monikaInstance} - ${appVersion}`,
-    summary: `Monika is no longer running from ${monikaInstance} - ${appVersion}`,
+    body: `Monika is no longer running from ${monikaDetail}`,
+    summary: `Monika is no longer running from ${monikaDetail}`,
     meta: {
       type: 'termination',
       time: new Date().toUTCString(),
-      hostname: hostname,
+      hostname,
       privateIpAddress: ip,
       publicIpAddress,
     },
   }
 }
 
-export function getAppVersionDetail() {
-  const { env, version } = process
+export async function getOSName() {
+  const osPlatform = platform()
+  const isLinux = osPlatform === 'linux'
 
-  return `@hyperjumptech/monika/${
-    env.npm_package_version
-  } ${platform()}-${arch()} ${release()} node-${version}`
+  if (isLinux) {
+    const linuxDistro = await getLinuxDistro()
+
+    // checking again due to inconsistency of getos module return type
+    if (linuxDistro.os !== 'linux') {
+      return linuxDistro.os
+    }
+
+    return `${linuxDistro?.dist} ${linuxDistro?.release}`
+  }
+
+  return osName()
 }

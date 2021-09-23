@@ -22,50 +22,19 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { compileExpression as _compileExpression } from 'filtrex'
-import {
-  get,
-  has,
-  endsWith,
-  startsWith,
-  lowerCase,
-  upperCase,
-  size,
-  includes,
-  isEmpty,
-} from 'lodash'
-
-// wrap substrings that are object accessor with double quote
-// then wrap again with __getValueByPath function call
-// eg: 'response.body.title' becomes '__getValueByPath("response.body.title")'
-export const sanitizeExpression = (query: string, objectKeys: string[]) => {
-  let sanitizedQuery = query
-
-  objectKeys.forEach((key) => {
-    const pattern = new RegExp(`(^| |\\()(${key}(\\.|\\[)\\S*[^\\s),])`, 'g')
-    sanitizedQuery = sanitizedQuery.replace(pattern, '$1__getValueByPath("$2")')
-  })
-
-  return sanitizedQuery
+type Context = {
+  // userAgent example: @hyperjumptech/monika/1.2.3 linux-x64 node-14.17.0
+  userAgent: string
 }
 
-export const compileExpression = (
-  expression: string,
-  objectKeys: string[] = []
-) => (obj: any) => {
-  const sanitizedExpression = sanitizeExpression(expression, objectKeys)
+let context = {
+  userAgent: '',
+}
 
-  return _compileExpression(sanitizedExpression, {
-    extraFunctions: {
-      __getValueByPath: (path: string) => get(obj, path), //  for internal use, not to be exposed to user
-      has,
-      lowerCase,
-      upperCase,
-      startsWith,
-      endsWith,
-      includes,
-      size,
-      isEmpty,
-    },
-  })(obj)
+export function getContext(): Context {
+  return context
+}
+
+export function setContext(updatedContext: Context) {
+  context = { ...context, ...updatedContext }
 }
