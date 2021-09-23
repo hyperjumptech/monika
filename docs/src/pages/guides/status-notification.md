@@ -3,7 +3,7 @@ id: status-notification
 title: Status Notification
 ---
 
-Monika sends status notification based on a schedule with following information:
+Monika sends status notification periodically based on a schedule with following information:
 
 - Host
 - Number of probes
@@ -29,4 +29,18 @@ probes:
   - requests:
       - url: http://example.com
 status-notification: 0 6 * * *
+```
+
+You can also choose to disable this feature altogether. Just set the value to `false`
+
+```bash
+monika --status-notification false
+```
+
+or
+
+```yml
+notifications: ...
+probes: ...
+status-notification: false
 ```
