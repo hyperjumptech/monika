@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import { ProbeAlert } from '../../../interfaces/probe'
-import { AxiosResponseWithExtraData } from '../../../interfaces/request'
+import { ProbeRequestResponse } from '../../../interfaces/request'
 import queryExpression from './query-expression'
 
 // parse string like "response-time-greater-than-200-ms" and return the time in ms
@@ -45,7 +45,7 @@ export const parseAlertStringTime = (str: string): number => {
 
 const responseChecker = (
   alert: ProbeAlert,
-  res: AxiosResponseWithExtraData
+  res: ProbeRequestResponse
 ): boolean => {
   // if status is 599 : timeout or uri is not found (0), worth reporting so return true
   if (res.status === 599 || res.status === 0 || res.status === 1) {

@@ -22,101 +22,113 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { RequestConfig } from '../../interfaces/request'
-import { executeRequest } from './request'
-import { AxiosResponseWithExtraData } from '../../interfaces/request'
+import axios from 'axios'
 import * as Handlebars from 'handlebars'
+import { ProbeRequestResponse, RequestConfig } from '../../interfaces/request'
 
 export async function probing(
   requestConfig: RequestConfig,
-  responses: Array<AxiosResponseWithExtraData>
-) {
-  try {
-    // Compile URL using handlebars to render URLs that uses previous responses data
-    const { url } = requestConfig
-    const requestURL = url
-    const renderURL = Handlebars.compile(requestURL)
-    const renderedURL = renderURL({ responses })
+  responses: Array<ProbeRequestResponse>
+): Promise<ProbeRequestResponse> {
+  // Compile URL using handlebars to render URLs that uses previous responses data
+  const { url } = requestConfig
+  const requestURL = url
+  const renderURL = Handlebars.compile(requestURL)
+  const renderedURL = renderURL({ responses })
 
-    // Compile headers using handlebars to render URLs that uses previous responses data.
-    // In some case such as value is not string, it will be returned as is without being compiled.
-    // If the request does not have any headers, then it should skip this process.
-    if (requestConfig.headers) {
-      for await (const header of Object.keys(requestConfig.headers)) {
-        try {
-          const rawHeader = requestConfig.headers[header]
-          const renderHeader = Handlebars.compile(rawHeader)
-          const renderedHeader = renderHeader({ responses })
+  // Compile headers using handlebars to render URLs that uses previous responses data.
+  // In some case such as value is not string, it will be returned as is without being compiled.
+  // If the request does not have any headers, then it should skip this process.
+  if (requestConfig.headers) {
+    for (const header of Object.keys(requestConfig.headers)) {
+      const rawHeader = requestConfig.headers[header]
+      const renderHeader = Handlebars.compile(rawHeader)
+      const renderedHeader = renderHeader({ responses })
 
-          requestConfig.headers = {
-            ...requestConfig.headers,
-            [header]: renderedHeader,
-          }
-        } catch (_) {}
+      requestConfig.headers = {
+        ...requestConfig.headers,
+        [header]: renderedHeader,
       }
     }
+  }
 
+  const axiosInstance = axios.create()
+  const requestStartedAt = new Date().getTime()
+
+  try {
     // Do the request using compiled URL and compiled headers (if exists)
-    const res = await executeRequest({
+    const resp = await axiosInstance.request({
       ...requestConfig,
       url: renderedURL,
+      data: requestConfig.body,
     })
-    return res as AxiosResponseWithExtraData
-  } catch (error) {
-    let errResponseCode
-    let errData
-    let errHdr
-    let errText
-
-    if (error.response) {
-      // 400, 500 get here
-      errResponseCode = error.response.status
-      errData = error.response.data
-      errHdr = error.response.headers
-    } else if (error.request) {
-      // timeout is here, ECONNABORTED, ENOTFOUND
-      switch (error.code) {
-        case 'ECONNABORTED':
-          errResponseCode = 599 // https://httpstatuses.com/599
-          errText = 'TIMEDOUT'
-          break
-
-        case 'ENOTFOUND':
-          errResponseCode = 0 // not found, the abyss never returned a statusCode
-          errText = 'NOTFOUND' // assign some unique errResponseCode for decoding later.
-          break
-
-        case 'ECONNRESET':
-          errResponseCode = 1 // connection reset from target, assign some unique number responsecCode
-          errText = 'ECONNRESET'
-          break
-
-        case 'ECONNREFUSED':
-          errResponseCode = 2 // got rejected, again
-          errText = 'ECONNREFUSED'
-          break
-
-        default:
-          errResponseCode = error.code // just return the error code
-          errText = 'unknown error'
-      }
-      errData = ''
-      errHdr = ''
-    } else {
-      // other errors
-      errResponseCode = error.code
-      errText = 'unknown error'
-      errData = ''
-      errHdr = ''
-    }
+    const responseTime = new Date().getTime() - requestStartedAt
+    const { data, headers, status } = resp
 
     return {
-      data: errData,
-      status: errResponseCode,
-      statusText: errText,
-      headers: errHdr,
-      config: error.config, // get the response from error.config instead of error.response.xxx as -
-      extraData: error.config.extraData, // the response data lives in the data.config space
-    } as AxiosResponseWithExtraData
+      data,
+      status,
+      headers,
+      responseTime,
+    }
+  } catch (error) {
+    const responseTime = new Date().getTime() - requestStartedAt
+
+    // The request was made and the server responded with a status code
+    // 400, 500 get here
+    if (error?.response) {
+      return {
+        data: error?.response?.data,
+        status: error?.response?.status,
+        headers: error?.response?.headers,
+        responseTime,
+      }
+    }
+
+    // The request was made but no response was received
+    // timeout is here, ECONNABORTED, ENOTFOUND, ECONNRESET, ECONNREFUSED
+    if (error?.request) {
+      const status = errorRequestCodeToNumber(error?.code)
+
+      return {
+        data: '',
+        status,
+        headers: '',
+        responseTime,
+      }
+    }
+
+    // other errors
+    return {
+      data: '',
+      status: error.code || 'Unknown error',
+      headers: '',
+      responseTime,
+    }
+  }
+}
+
+function errorRequestCodeToNumber(
+  errorRequestCode: string | undefined
+): number {
+  switch (errorRequestCode) {
+    case 'ECONNABORTED':
+      return 599 // https://httpstatuses.com/599
+
+    case 'ENOTFOUND':
+      // not found, the abyss never returned a statusCode
+      // assign some unique errResponseCode for decoding later.
+      return 0
+
+    case 'ECONNRESET':
+      // connection reset from target, assign some unique number responsecCode
+      return 1
+
+    case 'ECONNREFUSED':
+      // got rejected, again
+      return 2
+
+    default:
+      return 3
   }
 }

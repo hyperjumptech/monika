@@ -5,6 +5,46 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.1] - 2021-09-22
+
+### Added
+
+- Update Raspberry Pi tutorial (#380)
+- Add city and ISP in notification (#387)
+- Docs: Update Monika Documentation Structure (#393)
+- Compress binaries as ZIP when Releasing (#396)
+- Tests: Add stub getPublicNetworkInfo to make test run faster (#401)
+- Add alert for individual request (#390)
+- Support an object for TLS check domains (#388)
+- Docs: Add Yaml example configs (#404)
+- Validate symon configuration (#413)
+- Add support multiple args to config flag (#407)
+- Add Larksuite notification (#425)
+- Add Monika and OS Version in Notification Message (#429)
+- Allow merge from --postman and --har with --config (#427)
+
+### Changed
+
+- Clean up average response time in the status summary (#398)
+- Offload and centralized side effect only function (#392)
+- Reorganize Event Emitter (#399)
+- Attach incident and recovery thresholds calculation to each request and per alert (#410)
+- Convert all test config files from .json to .yml (#421)
+- Refactor: Change implementation of request log printing (#418)
+- Changed: Database-less mode (#426)
+
+### Fixed
+
+- Stop STUN check loop on provided repeat flag (#375)
+- Fix TLS check showing empty message (#386)
+- Chain request header is not set on chaining request (#385)
+- Change error message for non-http error (#405)
+- Prometheus histogram in seconds, but response time is in milliseconds (#408)
+- Double logs on multiple alerts (#402)
+- Fix docs build (#411)
+- Reorganize Cron Jobs (#417)
+- Prevent Command with logs or flush Flag to Load Unneeded Function (#420)
+
 ## [1.6.0] - 2021-09-07
 
 ### Added

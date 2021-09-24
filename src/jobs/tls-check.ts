@@ -25,7 +25,7 @@
 import { getConfig } from '../components/config'
 import { saveNotificationLog } from '../components/logger/history'
 import { sendAlerts } from '../components/notification'
-import { checkTLS } from '../components/tls-checker'
+import { checkTLS, TLSHostArg } from '../components/tls-checker'
 import { Notification } from '../interfaces/notification'
 import type { ValidatedResponse } from '../plugins/validate-response'
 import { log } from '../utils/pino'
@@ -39,17 +39,14 @@ export function tlsChecker() {
     const { certificate } = config
     const defaultExpiryReminder = 30
 
-    certificate?.domains.forEach((domain: string | Record<string, any>) => {
-      log.info(`Running TLS check for ${domain} every day at 00:00`)
-
-      const domainIsObject = typeof domain !== 'string'
-      const host = domainIsObject
-        ? (domain as Record<string, any>)?.domain
-        : domain
+    certificate?.domains.forEach((domain: string | TLSHostArg) => {
+      const host = (domain as TLSHostArg)?.domain ?? (domain as string)
       const reminder = certificate?.reminder ?? defaultExpiryReminder
       const notifications = config?.notifications
 
-      checkTLS(host, reminder).catch((error) => {
+      log.info(`Running TLS check for ${host} every day at 00:00`)
+
+      checkTLS(domain, reminder).catch((error) => {
         log.error(error.message)
 
         if (notifications && notifications?.length > 0) {
@@ -72,14 +69,8 @@ export function tlsChecker() {
               isAlertTriggered: true,
               response: {
                 status: 500,
-                config: {
-                  extraData: {
-                    requestStartedAt: 0,
-                    responseTime: 0,
-                  },
-                },
+                responseTime: 0,
                 data: {},
-                statusText: '',
                 headers: {},
               },
             }
