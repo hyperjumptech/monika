@@ -48,19 +48,22 @@ import { log } from './utils/pino'
 
 const em = getEventEmitter()
 
-function getDefaultConfig() {
+function getDefaultConfig(): Array<string> {
   const filesArray = fs.readdirSync('./')
   const monikaDotJsonFile = filesArray.find((x) => x === 'monika.json')
   const monikaDotYamlFile = filesArray.find(
     (x) => x === 'monika.yml' || x === 'monika.yaml'
   )
 
-  return monikaDotYamlFile
-    ? `./${monikaDotYamlFile}`
-    : monikaDotJsonFile
-    ? `./${monikaDotJsonFile}`
-    : './monika.yml'
+  return [
+    monikaDotYamlFile
+      ? `./${monikaDotYamlFile}`
+      : monikaDotJsonFile
+      ? `./${monikaDotJsonFile}`
+      : './monika.yml',
+  ]
 }
+
 class Monika extends Command {
   static description = 'Monika command line monitoring tool'
 
