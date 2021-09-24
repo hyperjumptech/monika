@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import { compileExpression } from '../../../utils/expression-parser'
-import { AxiosResponseWithExtraData } from '../../../interfaces/request'
+import { ProbeRequestResponse } from '../../../interfaces/request'
 
 /**
  * queryExpression runs a query against probe results
@@ -31,12 +31,12 @@ import { AxiosResponseWithExtraData } from '../../../interfaces/request'
  * @param {string} query is the query string to operate on the res object
  * @returns {boolean} true or false result of the query a
  */
-const queryExpression = (res: AxiosResponseWithExtraData, query: string) => {
+const queryExpression = (res: ProbeRequestResponse, query: string) => {
   const object = {
     response: {
       size: Number(res.headers['content-length']),
       status: res.status,
-      time: res.config.extraData?.responseTime,
+      time: res.responseTime,
       body: res.data,
       headers: res.headers,
     },

@@ -41,7 +41,6 @@ import {
   WhatsappData,
   LarkData,
 } from '../../src/interfaces/data'
-import { AxiosResponseWithExtraData } from '../../src/interfaces/request'
 
 describe('send alerts', () => {
   afterEach(() => {
@@ -55,14 +54,11 @@ describe('send alerts', () => {
         alert: { query: 'status-not-2xx', message: '' },
         isAlertTriggered: false,
         response: {
+          data: '',
           status: 500,
-          config: {
-            extraData: {
-              responseTime: 0,
-            },
-          },
+          responseTime: 0,
           headers: {},
-        } as AxiosResponseWithExtraData,
+        },
       },
       notifications: [
         {
@@ -88,14 +84,11 @@ describe('send alerts', () => {
         alert: { query: 'status-not-2xx', message: '' },
         isAlertTriggered: true,
         response: {
+          data: '',
           status: 500,
-          config: {
-            extraData: {
-              responseTime: 0,
-            },
-          },
+          responseTime: 0,
           headers: {},
-        } as AxiosResponseWithExtraData,
+        },
       },
       notifications: [
         {
@@ -121,14 +114,11 @@ describe('send alerts', () => {
         alert: { query: 'status-not-2xx', message: '' },
         isAlertTriggered: true,
         response: {
+          data: '',
           status: 500,
-          config: {
-            extraData: {
-              responseTime: 0,
-            },
-          },
+          responseTime: 0,
           headers: {},
-        } as AxiosResponseWithExtraData,
+        },
       },
       notifications: [
         {
@@ -155,14 +145,11 @@ describe('send alerts', () => {
         alert: { query: 'status-not-2xx', message: '' },
         isAlertTriggered: true,
         response: {
+          data: '',
           status: 500,
-          config: {
-            extraData: {
-              responseTime: 0,
-            },
-          },
+          responseTime: 0,
           headers: {},
-        } as AxiosResponseWithExtraData,
+        },
       },
       notifications: [
         {
@@ -190,14 +177,11 @@ describe('send alerts', () => {
         alert: { query: 'status-not-2xx', message: '' },
         isAlertTriggered: true,
         response: {
+          data: '',
           status: 500,
-          config: {
-            extraData: {
-              responseTime: 0,
-            },
-          },
+          responseTime: 0,
           headers: {},
-        } as AxiosResponseWithExtraData,
+        },
       },
       notifications: [
         {
@@ -230,14 +214,11 @@ describe('send alerts', () => {
         alert: { query: 'status-not-2xx', message: '' },
         isAlertTriggered: true,
         response: {
+          data: '',
           status: 500,
-          config: {
-            extraData: {
-              responseTime: 0,
-            },
-          },
+          responseTime: 0,
           headers: {},
-        } as AxiosResponseWithExtraData,
+        },
       },
       notifications: [
         {
@@ -266,14 +247,11 @@ describe('send alerts', () => {
         alert: { query: 'status-not-2xx', message: '' },
         isAlertTriggered: true,
         response: {
+          data: '',
           status: 500,
-          config: {
-            extraData: {
-              responseTime: 0,
-            },
-          },
+          responseTime: 0,
           headers: {},
-        } as AxiosResponseWithExtraData,
+        },
       },
       notifications: [
         {
@@ -320,14 +298,11 @@ describe('send alerts', () => {
         alert: { query: 'status-not-2xx', message: '' },
         isAlertTriggered: true,
         response: {
+          data: '',
           status: 500,
-          config: {
-            extraData: {
-              responseTime: 0,
-            },
-          },
+          responseTime: 0,
           headers: {},
-        } as AxiosResponseWithExtraData,
+        },
       },
       notifications: [
         {
@@ -355,14 +330,11 @@ describe('send alerts', () => {
         alert: { query: 'status-not-2xx', message: '' },
         isAlertTriggered: true,
         response: {
+          data: '',
           status: 500,
-          config: {
-            extraData: {
-              responseTime: 0,
-            },
-          },
+          responseTime: 0,
           headers: {},
-        } as AxiosResponseWithExtraData,
+        },
       },
       notifications: [
         {
@@ -388,14 +360,11 @@ describe('send alerts', () => {
         alert: { query: 'status-not-2xx', message: '' },
         isAlertTriggered: true,
         response: {
+          data: '',
           status: 500,
-          config: {
-            extraData: {
-              responseTime: 0,
-            },
-          },
+          responseTime: 0,
           headers: {},
-        } as AxiosResponseWithExtraData,
+        },
       },
       notifications: [
         {
@@ -421,14 +390,11 @@ describe('send alerts', () => {
         alert: { query: 'status-not-2xx', message: '' },
         isAlertTriggered: true,
         response: {
+          data: '',
           status: 500,
-          config: {
-            extraData: {
-              responseTime: 0,
-            },
-          },
+          responseTime: 0,
           headers: {},
-        } as AxiosResponseWithExtraData,
+        },
       },
       notifications: [
         {

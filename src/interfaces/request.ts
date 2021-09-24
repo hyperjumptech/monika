@@ -22,20 +22,14 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { AxiosRequestConfig, AxiosResponse } from 'axios'
+import { AxiosRequestConfig } from 'axios'
 import { ProbeAlert } from './probe'
 
-export interface ExtraData {
-  requestStartedAt: number
+export interface ProbeRequestResponse<T = any> {
+  data: T
+  status: number
+  headers: any
   responseTime: number
-}
-
-export interface AxiosRequestConfigWithExtraData extends AxiosRequestConfig {
-  extraData?: ExtraData
-}
-
-export interface AxiosResponseWithExtraData extends AxiosResponse {
-  config: AxiosRequestConfigWithExtraData
 }
 
 export interface RequestConfig extends Omit<AxiosRequestConfig, 'data'> {

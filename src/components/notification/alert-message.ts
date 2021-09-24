@@ -30,7 +30,7 @@ import getos from 'getos'
 import osName from 'os-name'
 import { getContext } from '../../context'
 import { NotificationMessage } from '../../interfaces/notification'
-import { AxiosResponseWithExtraData } from '../../interfaces/request'
+import { ProbeRequestResponse } from '../../interfaces/request'
 import { ProbeAlert } from '../../interfaces/probe'
 import {
   getPublicIp,
@@ -66,7 +66,7 @@ export async function getMessageForAlert({
   url: string
   ipAddress: string
   probeState: string
-  response: AxiosResponseWithExtraData
+  response: ProbeRequestResponse
 }): Promise<NotificationMessage> {
   const { userAgent } = getContext()
   const [monikaInstance, osName] = await Promise.all([
@@ -89,9 +89,9 @@ export async function getMessageForAlert({
   }
   const getExpectedMessage = (
     alert: ProbeAlert,
-    response: AxiosResponseWithExtraData
+    response: ProbeRequestResponse
   ) => {
-    const { statusText, status } = response
+    const { status } = response
     const isHTTPStatusCode = status >= 100 && status <= 599
 
     if (!alert.message) return ''
@@ -106,7 +106,7 @@ export async function getMessageForAlert({
           return 'Connection refused'
 
         default:
-          return statusText
+          return status
       }
     }
 
@@ -114,7 +114,7 @@ export async function getMessageForAlert({
       response: {
         size: Number(response.headers['content-length']),
         status,
-        time: response.config.extraData?.responseTime,
+        time: response?.responseTime,
         body: response.data,
         headers: response.headers,
       },
