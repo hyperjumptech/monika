@@ -32,6 +32,7 @@ import getIp from '../utils/ip'
 import { log } from '../utils/pino'
 import { publicIpAddress } from '../utils/public-ip'
 import fs from 'fs'
+import type { IConfig } from '@oclif/config'
 
 export async function getSummaryAndSendNotif() {
   const config = getConfig()
@@ -102,7 +103,7 @@ function readPidFile(): PidObject {
 
 /**
  * savePidFile saves a monika.pid file with some useful information
- * @param {obj} flags is the oclif flag boject
+ * @param {obj} flags is the oclif flag object
  */
 export const savePidFile = (flags: any) => {
   // convert JSON object to string
@@ -119,10 +120,9 @@ export const savePidFile = (flags: any) => {
   })
 }
 
-/**
- * cleanupPid removes the monika.pid file when done
- */
-export function cleanupPid() {
+// do somee cleanups on exit
+// eventEmitter.on(events.application.terminated, async () => {
+export function cleanPidFile() {
   fs.unlink('monika.pid', (err) => {
     if (err) {
       log.indo('trying to cleanup monika.pid, got err: ', err)
@@ -156,7 +156,7 @@ function getDaysHours(startTime: Date): string {
  * printSummary gathers and print some stats
  * @param {object} flags is the oclif map flag frameworks
  */
-export async function printSummary(flags: any) {
+export async function printSummary(flags: any, cliConfig: IConfig) {
   await setupConfig(flags)
 
   const config = getConfig()
@@ -184,7 +184,8 @@ export async function printSummary(flags: any) {
     Number of notifications \t: ${summary.numberOfSentNotifications} in last 24h
 
     Up time \t: ${uptime}
-    Running on \t: ${host}  
+    Running on \t: ${host}   
+    App version : ${cliConfig.userAgent} 
         
     `)
   } catch (error) {

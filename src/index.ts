@@ -223,7 +223,7 @@ class Monika extends Command {
       }
 
       if (flags.summary) {
-        printSummary(flags)
+        printSummary(flags, this.config)
         return
       }
 
