@@ -24,7 +24,7 @@
 
 import { expect } from 'chai'
 import validateResponse from '..'
-import { AxiosResponseWithExtraData } from '../../../interfaces/request'
+import { ProbeRequestResponse } from '../../../interfaces/request'
 
 describe('validateResponse', () => {
   const mockedAlerts = [
@@ -35,16 +35,16 @@ describe('validateResponse', () => {
     { query: 'response.time > 10', message: '' },
   ]
 
-  const generateMockedResponse = (status: number, responseTime: number) => {
+  const generateMockedResponse = (
+    status: number,
+    responseTime: number
+  ): ProbeRequestResponse => {
     return {
+      data: '',
       status,
-      config: {
-        extraData: {
-          responseTime,
-        },
-      },
+      responseTime,
       headers: {},
-    } as AxiosResponseWithExtraData
+    }
   }
 
   it('status-not-2xx = true && response-time-greater-than-10-ms = true', () => {
@@ -59,11 +59,8 @@ describe('validateResponse', () => {
         },
         isAlertTriggered: true,
         response: {
-          config: {
-            extraData: {
-              responseTime: 20,
-            },
-          },
+          data: '',
+          responseTime: 20,
           headers: {},
           status: 300,
         },
@@ -74,11 +71,8 @@ describe('validateResponse', () => {
           message: '',
         },
         response: {
-          config: {
-            extraData: {
-              responseTime: 20,
-            },
-          },
+          data: '',
+          responseTime: 20,
           headers: {},
           status: 300,
         },
@@ -98,11 +92,8 @@ describe('validateResponse', () => {
           message: '',
         },
         response: {
-          config: {
-            extraData: {
-              responseTime: 20,
-            },
-          },
+          data: '',
+          responseTime: 20,
           headers: {},
           status: 200,
         },
@@ -114,11 +105,8 @@ describe('validateResponse', () => {
           message: '',
         },
         response: {
-          config: {
-            extraData: {
-              responseTime: 20,
-            },
-          },
+          data: '',
+          responseTime: 20,
           headers: {},
           status: 200,
         },
@@ -138,11 +126,8 @@ describe('validateResponse', () => {
           message: '',
         },
         response: {
-          config: {
-            extraData: {
-              responseTime: 10,
-            },
-          },
+          data: '',
+          responseTime: 10,
           headers: {},
           status: 300,
         },
@@ -154,11 +139,8 @@ describe('validateResponse', () => {
           message: '',
         },
         response: {
-          config: {
-            extraData: {
-              responseTime: 10,
-            },
-          },
+          data: '',
+          responseTime: 10,
           headers: {},
           status: 300,
         },
@@ -178,11 +160,8 @@ describe('validateResponse', () => {
           message: '',
         },
         response: {
-          config: {
-            extraData: {
-              responseTime: 10,
-            },
-          },
+          data: '',
+          responseTime: 10,
           headers: {},
           status: 200,
         },
@@ -194,11 +173,8 @@ describe('validateResponse', () => {
           message: '',
         },
         response: {
-          config: {
-            extraData: {
-              responseTime: 10,
-            },
-          },
+          data: '',
+          responseTime: 10,
           headers: {},
           status: 200,
         },

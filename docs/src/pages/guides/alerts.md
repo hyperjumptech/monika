@@ -129,6 +129,10 @@ There are also several helper functions available:
 
   example: `size(response.body.data.items)` gets the count of items.
 
+- **isEmpty(value)**: Checks if value is an empty object, empty array, empty string, null, or undefined.
+
+  example: `isEmpty(response.body.data)` checks whether the data propery is empty or not
+
 ## Alert Message
 
 ```yml

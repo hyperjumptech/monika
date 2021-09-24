@@ -24,49 +24,16 @@
 
 import fs from 'fs'
 import path from 'path'
-import pino, { LoggerOptions, LogDescriptor } from 'pino'
-import { LogObject, PlainLogObject } from '../interfaces/logs'
+import pino, { LoggerOptions } from 'pino'
 
 const project = path.join(__dirname, '../../tsconfig.json')
 const dev = fs.existsSync(project)
-
-const isLogObject = (obj: any): obj is LogObject => {
-  return obj?.type === 'PROBE'
-}
-
-const isPlainLog = (obj: any): obj is PlainLogObject => {
-  return obj?.type?.startsWith('PLAIN')
-}
 
 const prettyPrint = {
   translateTime: true,
   ignore: 'hostname,pid,time',
   hideObject: true,
   sync: false, // async mode for better performance
-  messageFormat(log: LogDescriptor) {
-    const time = new Date(log.time).toISOString()
-
-    if (isPlainLog(log)) {
-      return `${log.msg}`
-    }
-
-    if (isLogObject(log)) {
-      let alertMsg = ''
-      let notifMsg = ''
-
-      const probeMsg = `${log.iteration} id:${log.id} ${log.responseCode} ${log.method} ${log.url} ${log.responseTime}ms`
-
-      if (log.notification?.flag) {
-        notifMsg = `, NOTIF: ${log.notification.message}`
-      }
-      if (log.alert?.flag) {
-        alertMsg = `, ${log.alert.flag}: ${log.alert.message}`
-      }
-
-      return `${time} ${probeMsg}${alertMsg}${notifMsg}`
-    }
-    return `${log.msg}`
-  },
 }
 
 const transport: LoggerOptions = dev

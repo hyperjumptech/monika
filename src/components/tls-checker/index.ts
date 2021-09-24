@@ -24,7 +24,7 @@
 
 import sslChecker from 'ssl-checker'
 
-type TLSHostArg = {
+export type TLSHostArg = {
   domain: string
   options?: Record<string, any>
 }

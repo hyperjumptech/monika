@@ -64,7 +64,7 @@ export function sanitizeProbe(probe: Probe, id: string): Probe {
       `Warning: Probe ${probe.id} has no recoveryThreshold configuration defined. Using the default threshold: 5`
     )
   }
-  if (alerts.length === 0) {
+  if (alerts === undefined || alerts.length === 0) {
     probe.alerts = [
       {
         query: 'response.status < 200 or response.status > 299',
@@ -133,12 +133,14 @@ export async function loopCheckSTUNServer(interval: number) {
  * @param {object} probe is the target to request
  * @param {object} notifications is the array of channels to notify the user if probes does not work
  * @param {number} repeats handle controls test interaction/repetition
+ * @param {boolean} verboseLogs store all requests to database
  * @returns {function} func with isAborted true if interrupted
  */
 function loopProbe(
   probe: Probe,
   notifications: Notification[],
-  repeats: number
+  repeats: number,
+  verboseLogs: boolean
 ) {
   let counter = 0
 
@@ -147,7 +149,7 @@ function loopProbe(
       clearInterval(probeInterval)
       clearInterval(checkSTUNinterval)
     } else if (isConnectedToSTUNServer) {
-      doProbe(++counter, probe, notifications)
+      doProbe(++counter, probe, notifications, verboseLogs)
     }
   }, (probe.interval ?? 10) * MILLISECONDS)
 
@@ -163,18 +165,24 @@ function loopProbe(
  * @param {object} sanitizedProbes probes that has been sanitized
  * @param {object} notifications probe notifications
  * @param {number} repeats number of repeats
- * @param {object} ids of address
+ * @param {boolean} verboseLogs store all requests to database
  * @returns {function} abort function
  */
 export function idFeeder(
   sanitizedProbes: Probe[],
   notifications: Notification[],
-  repeats: number
+  repeats: number,
+  verboseLogs: boolean
 ) {
   const intervals: Array<NodeJS.Timeout> = []
 
   for (const probe of sanitizedProbes) {
-    const interval = loopProbe(probe, notifications ?? [], repeats ?? 0)
+    const interval = loopProbe(
+      probe,
+      notifications ?? [],
+      repeats ?? 0,
+      verboseLogs
+    )
     intervals.push(interval)
   }
 
