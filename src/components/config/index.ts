@@ -146,7 +146,9 @@ const addDefaultNotifications = (
 }
 
 export const setupConfig = async (flags: any) => {
+  // check for default config path when -c/--config not provided
   if (
+    flags.config.length === 1 &&
     ['./monika.json', './monika.yml', './monika.yaml'].includes(
       flags.config[0]
     ) &&
