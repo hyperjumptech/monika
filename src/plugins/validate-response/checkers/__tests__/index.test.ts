@@ -24,7 +24,7 @@
 
 import { expect } from 'chai'
 import responseChecker from '..'
-import { AxiosResponseWithExtraData } from '../../../../interfaces/request'
+import { ProbeRequestResponse } from '../../../../interfaces/request'
 
 describe('responseChecker', () => {
   describe('status-not-2xx', () => {
@@ -32,10 +32,7 @@ describe('responseChecker', () => {
       return {
         status,
         headers: {},
-        config: {
-          extraData: {},
-        },
-      } as AxiosResponseWithExtraData
+      } as ProbeRequestResponse
     }
 
     it('should handle when response status is 100', () => {
@@ -120,13 +117,11 @@ describe('responseChecker', () => {
   describe('res-time-greater-than-x', () => {
     const generateMockedResponse = (responseTime: number) => {
       return {
-        config: {
-          extraData: {
-            responseTime, // milliseconds
-          },
-        },
+        data: '',
+        status: 200,
+        responseTime, // milliseconds
         headers: {},
-      } as AxiosResponseWithExtraData
+      }
     }
 
     it('seconds - should handle when response time is greater than alert defined response time', () => {
