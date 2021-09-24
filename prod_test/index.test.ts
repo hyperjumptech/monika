@@ -49,8 +49,15 @@ describe('monika', () => {
     })
   })
 
-  it('shows starting message with valid config', (done) => {
+  it('shows starting message with valid json config', (done) => {
     exec(`monika -c ./monika.example.json`, (_, stdout) => {
+      expect(stdout).to.contain('Starting Monika.')
+      done()
+    })
+  })
+
+  it('shows starting message with valid yaml config', (done) => {
+    exec(`monika -c ./monika.example.yml`, (_, stdout) => {
       expect(stdout).to.contain('Starting Monika.')
       done()
     })
