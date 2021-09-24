@@ -140,7 +140,7 @@ function getDaysHours(startTime: Date): string {
     (new Date().getTime() - new Date(startTime).getTime()) / 1000
   )
   const numDays = Math.floor(duration / 86400)
-  duration -= numDays * 86400 // get the remaining hourse
+  duration -= numDays * 86400 // get the remaining hours
 
   const numHours = Math.floor(duration / 3600) % 24
   duration -= numHours * 3600 // get the remaining minutes
