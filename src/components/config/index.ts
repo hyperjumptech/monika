@@ -146,8 +146,16 @@ const addDefaultNotifications = (
 }
 
 export const setupConfig = async (flags: any) => {
+  if (
+    ['./monika.json', './monika.yml', './monika.yaml'].includes(
+      flags.config[0]
+    ) &&
+    !existsSync(flags.config[0])
+  ) {
+    delete flags.config
+  }
   const configParse = new Array<Promise<Partial<Config>>>(0)
-  if (Array.isArray(flags.config) && flags.config.length > 0) {
+  if (flags.config && Array.isArray(flags.config) && flags.config.length > 0) {
     const json = parseDefaultConfig(flags)
     configParse.push(...json)
   }
