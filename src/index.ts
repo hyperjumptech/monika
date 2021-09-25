@@ -173,7 +173,6 @@ class Monika extends Command {
     }),
   }
 
-  // eslint-disable-next-line complexity
   async run() {
     const { flags } = this.parse(Monika)
 
