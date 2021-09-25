@@ -52,6 +52,11 @@ interface ProbeSendNotification extends Omit<ProbeStatusProcessed, 'statuses'> {
   probeState?: ServerAlertState
 }
 
+// global variable
+let maxResponseTime = 0
+let minResponseTime = 0
+export let averageResponseTime = 0
+
 // Probes Thresholds processed, Send out notifications/alerts.
 async function checkThresholdsAndSendAlert(
   data: ProbeStatusProcessed,
@@ -143,6 +148,8 @@ export async function doProbe(
       // eslint-disable-next-line no-await-in-loop
       const probeRes: ProbeRequestResponse = await probing(request, responses)
 
+      calculateResponseTime(probeRes)
+
       eventEmitter.emit(events.probe.response.received, {
         probe,
         requestIndex,
@@ -221,4 +228,19 @@ export async function doProbe(
       }
     }
   }
+}
+
+function calculateResponseTime(probeRes: ProbeRequestResponse) {
+  if (maxResponseTime === 0 && minResponseTime === 0) {
+    // first time
+    maxResponseTime = probeRes.responseTime
+    minResponseTime = probeRes.responseTime
+  } else if (probeRes.responseTime > maxResponseTime) {
+    maxResponseTime = probeRes.responseTime
+  } else {
+    // probeRes.responseTime < minResponseTime
+    minResponseTime = probeRes.responseTime
+  }
+
+  averageResponseTime = maxResponseTime + minResponseTime / 2
 }

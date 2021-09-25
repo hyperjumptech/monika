@@ -363,13 +363,6 @@ export async function getSummary() {
     db.all(getProbesSummarySQL),
   ])
 
-  const totalRequests = probesSummary.reduce((acc, { count }) => acc + count, 0)
-  const rawAverageResponseTime =
-    probesSummary.reduce(
-      (acc, curr) => acc + curr.average_response_time * curr.count,
-      0
-    ) / totalRequests || 0
-  const averageResponseTime = Math.round(rawAverageResponseTime)
   const numberOfIncidents: number =
     notificationsSummaryByType.find((notif) => notif.type === 'NOTIFY-INCIDENT')
       ?.count || 0
@@ -383,7 +376,6 @@ export async function getSummary() {
 
   return {
     numberOfProbes: probesSummary.length,
-    averageResponseTime,
     numberOfIncidents,
     numberOfRecoveries,
     numberOfSentNotifications,

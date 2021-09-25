@@ -32,6 +32,7 @@ import { getContext } from '../context'
 import getIp from '../utils/ip'
 import { log } from '../utils/pino'
 import { publicIpAddress } from '../utils/public-ip'
+import { averageResponseTime as runningAverageResponseTime } from '../components/probe'
 
 export async function getSummaryAndSendNotif() {
   const config = getConfig()
@@ -48,7 +49,7 @@ export async function getSummaryAndSendNotif() {
       body: `Status Update ${format(new Date(), 'yyyy-MM-dd HH:mm:ss XXX')}
 Host: ${hostname()} (${[publicIpAddress, getIp()].filter(Boolean).join('/')})
 Number of probes: ${summary.numberOfProbes}
-Average response time: ${summary.averageResponseTime} ms in the last 24 hours
+Average response time: ${runningAverageResponseTime} ms in the last 24 hours
 Incidents: ${summary.numberOfIncidents} in the last 24 hours
 Recoveries: ${summary.numberOfRecoveries} in the last 24 hours
 Notifications: ${summary.numberOfSentNotifications}
@@ -61,6 +62,7 @@ Version: ${userAgent}`,
         hostname: hostname(),
         privateIpAddress: getIp(),
         publicIpAddress,
+        averageResponseTime: runningAverageResponseTime,
         ...summary,
       },
     }).catch((error) => log.error(`Summary notification: ${error.message}`))
