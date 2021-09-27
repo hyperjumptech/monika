@@ -242,5 +242,5 @@ function calculateResponseTime(probeRes: ProbeRequestResponse) {
     minResponseTime = probeRes.responseTime
   }
 
-  averageResponseTime = maxResponseTime + minResponseTime / 2
+  averageResponseTime = (maxResponseTime + minResponseTime) / 2
 }
