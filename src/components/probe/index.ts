@@ -53,8 +53,10 @@ interface ProbeSendNotification extends Omit<ProbeStatusProcessed, 'statuses'> {
 }
 
 // global variable
-let maxResponseTime = 0
-let minResponseTime = 0
+let responseCount = 0
+let totalResponseTime = 0
+export let maxResponseTime = 0
+export let minResponseTime = 0
 export let averageResponseTime = 0
 
 // Probes Thresholds processed, Send out notifications/alerts.
@@ -231,16 +233,18 @@ export async function doProbe(
 }
 
 function calculateResponseTime(probeRes: ProbeRequestResponse) {
-  if (maxResponseTime === 0 && minResponseTime === 0) {
+  responseCount += 1
+
+  if (responseCount === 1) {
     // first time
     maxResponseTime = probeRes.responseTime
     minResponseTime = probeRes.responseTime
   } else if (probeRes.responseTime > maxResponseTime) {
     maxResponseTime = probeRes.responseTime
-  } else {
-    // probeRes.responseTime < minResponseTime
+  } else if (probeRes.responseTime < minResponseTime) {
     minResponseTime = probeRes.responseTime
   }
 
-  averageResponseTime = (maxResponseTime + minResponseTime) / 2
+  totalResponseTime += probeRes.responseTime
+  averageResponseTime = Math.floor(totalResponseTime / responseCount)
 }

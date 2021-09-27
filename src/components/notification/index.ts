@@ -184,6 +184,8 @@ export async function sendNotifications(
                 time: message.meta.time,
                 monika: message.meta.monikaInstance,
                 numberOfProbes: String(message.meta.numberOfProbes),
+                maxResponseTime: String(message.meta.maxResponseTime),
+                minResponseTime: String(message.meta.minResponseTime),
                 averageResponseTime: String(message.meta.averageResponseTime),
                 numberOfIncidents: String(message.meta.numberOfIncidents),
                 numberOfRecoveries: String(message.meta.numberOfRecoveries),
