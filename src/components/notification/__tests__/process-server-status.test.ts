@@ -245,6 +245,15 @@ describe('processThresholds', () => {
       validatedResponse: failureResponse,
     })
 
+    // send success response as much threshold
+    for (let i = 0; i < probe.recoveryThreshold; i++) {
+      result = processThresholds({
+        probe,
+        requestIndex: 1,
+        validatedResponse: successResponse,
+      })
+    }
+
     expect(result[0].state).to.equals('UP')
 
     // should not send notification again since state does not change
