@@ -110,3 +110,9 @@ export interface WorkplaceData {
   access_token: string
   body: string
 }
+
+export interface DBLimit {
+  max_db_size: number
+  deleted_data: number
+  cron_schedule: string
+}

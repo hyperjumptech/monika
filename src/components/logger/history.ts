@@ -98,6 +98,33 @@ export async function openLogfile() {
   }
 }
 
+export async function deleteFromProbeRequests(limit: number) {
+  const getIdsToBeDeleted = `SELECT id FROM probe_requests order by created_at asc limit ${limit}`
+  const deleteFromProbeRequests = `DELETE FROM probe_requests WHERE id IN (${getIdsToBeDeleted})`
+  const res = await db.run(deleteFromProbeRequests)
+  if (!res.changes || res.changes < 1) {
+    log.error('failed to delete data from probe-requests')
+  }
+}
+
+export async function deleteFromAlerts(limit: number) {
+  const getIdsToBeDeleted = `SELECT id FROM notifications order by created_at asc limit ${limit}`
+  const deleteFromAlerts = `DELETE FROM notifications WHERE id IN (${getIdsToBeDeleted})`
+  const res = await db.run(deleteFromAlerts)
+  if (!res.changes || res.changes < 1) {
+    log.error('failed to delete data from alerts')
+  }
+}
+
+export async function deleteFromNotifications(limit: number) {
+  const getIdsToBeDeleted = `SELECT id FROM alerts order by created_at asc limit ${limit}`
+  const deleteFromAlerts = `DELETE FROM alerts WHERE id IN (${getIdsToBeDeleted})`
+  const res = await db.run(deleteFromAlerts)
+  if (!res.changes || res.changes < 1) {
+    log.error('failed to delete data from notifications')
+  }
+}
+
 const objectNullValueToUndefined = <T extends Record<string, unknown>>(
   obj: T
 ): { [K in keyof T]: T[K] extends null ? undefined : T[K] } => {
