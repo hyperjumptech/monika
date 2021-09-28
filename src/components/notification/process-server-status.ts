@@ -160,12 +160,8 @@ export const processThresholds = ({
       alertQuery: alert.query,
       state: state.value as 'UP' | 'DOWN',
       shouldSendNotification:
-        (state.value === 'DOWN' &&
-          prevStateValue === 'UP' &&
-          state.context.consecutiveFailures === incidentThreshold) ||
-        (state.value === 'UP' &&
-          prevStateValue === 'DOWN' &&
-          state.context.consecutiveSuccesses === recoveryThreshold),
+        (state.value === 'DOWN' && prevStateValue === 'UP') ||
+        (state.value === 'UP' && prevStateValue === 'DOWN'),
     })
   })
 
