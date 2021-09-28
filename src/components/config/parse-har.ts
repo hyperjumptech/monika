@@ -68,12 +68,6 @@ export const parseHarFile = (fileContents: string): Config => {
     )
 
     const harConfig: any = {
-      notifications: [
-        {
-          id: 'har-desktop-notif',
-          type: 'desktop',
-        },
-      ],
       probes: [
         {
           requests: harRequest,

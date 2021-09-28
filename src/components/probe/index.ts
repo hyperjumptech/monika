@@ -26,7 +26,7 @@ import events from '../../events'
 import { Notification } from '../../interfaces/notification'
 import { Probe } from '../../interfaces/probe'
 import type { ServerAlertState } from '../../interfaces/probe-status'
-import { AxiosResponseWithExtraData } from '../../interfaces/request'
+import { ProbeRequestResponse } from '../../interfaces/request'
 import validateResponse, {
   ValidatedResponse,
 } from '../../plugins/validate-response'
@@ -141,10 +141,7 @@ export async function doProbe(
     try {
       // intentionally wait for a request to finish before processing next request in loop
       // eslint-disable-next-line no-await-in-loop
-      const probeRes: AxiosResponseWithExtraData = await probing(
-        request,
-        responses
-      )
+      const probeRes: ProbeRequestResponse = await probing(request, responses)
 
       eventEmitter.emit(events.probe.response.received, {
         probe,
@@ -163,6 +160,7 @@ export async function doProbe(
           0: 'URI not found',
           1: 'Connection reset',
           2: 'Connection refused',
+          3: 'Unknown error',
           599: 'Request Timed out',
         }
 

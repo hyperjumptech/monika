@@ -111,6 +111,10 @@ export interface WorkplaceData {
   body: string
 }
 
+export interface LarkData {
+  url: string
+}
+
 export interface DBLimit {
   max_db_size: number
   deleted_data: number

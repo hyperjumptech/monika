@@ -26,7 +26,7 @@ import path from 'path'
 import SQLite3 from 'sqlite3'
 import { open, Database } from 'sqlite'
 
-import { AxiosResponseWithExtraData } from '../../interfaces/request'
+import { ProbeRequestResponse } from '../../interfaces/request'
 import { Probe } from '../../interfaces/probe'
 import { Notification } from '../../interfaces/notification'
 import { log } from '../../utils/pino'
@@ -271,7 +271,7 @@ export async function saveProbeRequestLog({
 }: {
   probe: Probe
   requestIndex: number
-  probeRes: AxiosResponseWithExtraData
+  probeRes: ProbeRequestResponse
   alertQueries?: string[]
   error?: string
 }) {
@@ -323,7 +323,7 @@ export async function saveProbeRequestLog({
       probeRes.status,
       JSON.stringify(probeRes.headers),
       responseBody,
-      probeRes.config.extraData?.responseTime ?? 0,
+      probeRes?.responseTime ?? 0,
       probeRes.headers['content-length'],
       errorResp,
     ])

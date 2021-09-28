@@ -48,19 +48,22 @@ import { log } from './utils/pino'
 
 const em = getEventEmitter()
 
-function getDefaultConfig() {
+function getDefaultConfig(): Array<string> {
   const filesArray = fs.readdirSync('./')
   const monikaDotJsonFile = filesArray.find((x) => x === 'monika.json')
   const monikaDotYamlFile = filesArray.find(
     (x) => x === 'monika.yml' || x === 'monika.yaml'
   )
 
-  return monikaDotYamlFile
-    ? `./${monikaDotYamlFile}`
-    : monikaDotJsonFile
-    ? `./${monikaDotJsonFile}`
-    : './monika.yml'
+  return [
+    monikaDotYamlFile
+      ? `./${monikaDotYamlFile}`
+      : monikaDotJsonFile
+      ? `./${monikaDotJsonFile}`
+      : './monika.yml',
+  ]
 }
+
 class Monika extends Command {
   static description = 'Monika command line monitoring tool'
 
@@ -100,7 +103,14 @@ class Monika extends Command {
       char: 'p', // (p)ostman
       description: 'Run Monika using a Postman json file.',
       multiple: false,
-      exclusive: ['config', 'har'],
+      exclusive: ['har'],
+    }),
+
+    har: flags.string({
+      char: 'H', // (H)ar file to
+      description: 'Run Monika using a HAR file',
+      multiple: false,
+      exclusive: ['postman'],
     }),
 
     logs: flags.boolean({
@@ -140,13 +150,6 @@ class Monika extends Command {
       char: 'i', // (i)ds to run
       description: 'specific probe ids to run',
       multiple: false,
-    }),
-
-    har: flags.string({
-      char: 'H', // (H)ar file to
-      description: 'Run Monika using a HAR file',
-      multiple: false,
-      exclusive: ['config', 'postman'],
     }),
 
     output: flags.string({
@@ -206,7 +209,7 @@ class Monika extends Command {
         return
       }
 
-      await initLoaders(flags)
+      await initLoaders(flags, this.config)
 
       let scheduledTasks: ScheduledTask[] = []
       let abortCurrentLooper: (() => void) | undefined
@@ -380,6 +383,8 @@ Please refer to the Monika documentations on how to how to configure notificatio
             case 'slack':
               startupMessage += `    URL: ${item.data.url}\n`
               break
+            case 'lark':
+              startupMessage += `    URL: ${item.data.url}\n`
           }
         })
       }
