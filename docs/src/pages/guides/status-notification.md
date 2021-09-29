@@ -7,7 +7,7 @@ Monika sends status notification periodically based on a schedule with following
 
 - Host
 - Number of probes
-- Average response time in the run time
+- Average response time in the last 24 hours
 - Incidents in the last 24 hours
 - Recoveries in the last 24 hours
 - Number of sent notifications in the last 24 hours

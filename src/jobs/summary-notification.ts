@@ -53,9 +53,9 @@ export async function getSummaryAndSendNotif() {
       body: `Status Update ${format(new Date(), 'yyyy-MM-dd HH:mm:ss XXX')}
 Host: ${hostname()} (${[publicIpAddress, getIp()].filter(Boolean).join('/')})
 Number of probes: ${summary.numberOfProbes}
-Maximum response time: ${maxResponseTime} ms in the run time
-Minimum response time: ${minResponseTime} ms in the run time
-Average response time: ${averageResponseTime} ms in the run time
+Maximum response time: ${maxResponseTime} ms in the last 24 hours
+Minimum response time: ${minResponseTime} ms in the last 24 hours
+Average response time: ${averageResponseTime} ms in the last 24 hours
 Incidents: ${summary.numberOfIncidents} in the last 24 hours
 Recoveries: ${summary.numberOfRecoveries} in the last 24 hours
 Notifications: ${summary.numberOfSentNotifications}
