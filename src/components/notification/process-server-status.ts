@@ -33,7 +33,6 @@ export type ServerAlertStateContext = {
   recoveryThreshold: number
   consecutiveFailures: number
   consecutiveSuccesses: number
-  hasBeenDownAtLeastOnce: boolean
 }
 
 const serverAlertStateInterpreters = new Map<
@@ -68,7 +67,6 @@ export const serverAlertStateMachine = createMachine<ServerAlertStateContext>(
         },
       },
       DOWN: {
-        entry: 'handleDownState',
         on: {
           FAILURE: {
             actions: 'handleFailure',
@@ -96,9 +94,6 @@ export const serverAlertStateMachine = createMachine<ServerAlertStateContext>(
       handleSuccess: assign({
         consecutiveFailures: (_context) => 0,
         consecutiveSuccesses: (context) => context.consecutiveSuccesses + 1,
-      }),
-      handleDownState: assign({
-        hasBeenDownAtLeastOnce: (_context) => true,
       }),
     },
     guards: {
@@ -140,7 +135,6 @@ export const processThresholds = ({
           recoveryThreshold,
           consecutiveFailures: 0,
           consecutiveSuccesses: 0,
-          hasBeenDownAtLeastOnce: false,
         })
 
         interpreters[alert.query] = interpret(stateMachine).start()
@@ -156,6 +150,8 @@ export const processThresholds = ({
 
     const interpreter = serverAlertStateInterpreters.get(request)![alert.query]
 
+    const prevStateValue = interpreter.state.value
+
     interpreter.send(isAlertTriggered ? 'FAILURE' : 'SUCCESS')
 
     const state = interpreter.state
@@ -164,11 +160,8 @@ export const processThresholds = ({
       alertQuery: alert.query,
       state: state.value as 'UP' | 'DOWN',
       shouldSendNotification:
-        (state.value === 'DOWN' &&
-          state.context.consecutiveFailures === incidentThreshold) ||
-        (state.value === 'UP' &&
-          state.context.consecutiveSuccesses === recoveryThreshold &&
-          state.context.hasBeenDownAtLeastOnce),
+        (state.value === 'DOWN' && prevStateValue === 'UP') ||
+        (state.value === 'UP' && prevStateValue === 'DOWN'),
     })
   })
 
