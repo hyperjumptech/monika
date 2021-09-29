@@ -172,7 +172,7 @@ class Monika extends Command {
     }),
 
     summary: flags.boolean({
-      description: 'Display a summay of monika running stats',
+      description: 'Display a summary of monika running stats',
       default: false,
     }),
 

@@ -137,7 +137,7 @@ export function savePidFile(flags: any, config: Config) {
 eventEmitter.on(events.application.terminated, async () => {
   fs.unlink('monika.pid', (err) => {
     if (err) {
-      log.indo('trying to cleanup monika.pid, got err: ', err)
+      log.info('trying to cleanup monika.pid, got err: ', err)
     }
   })
 })
