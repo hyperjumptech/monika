@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.2] - 2021-09-28
+
+### Fixed
+
+- Fix undefined app version when not running use npm (#432)
+- Fix a TLS check issue with domain objects (#433)
+- Fix resolve default config as array (#438)
+- Fix Notification was sent when no state transition happen (#445)
+
+### Added
+
+- isEmpty alert query helper (#435)
+- documentation for status notification schedule (#436)
+
+### Changed
+
+- make probe request response interface leaner (#439)
+
 ## [1.6.1] - 2021-09-22
 
 ### Added
