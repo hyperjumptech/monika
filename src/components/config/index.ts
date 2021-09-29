@@ -42,6 +42,12 @@ const emitter = new EventEmitter()
 
 let cfg: Config
 let configs: Partial<Config>[]
+let configFile: string // stores monika config file before it is flags.config is clobbered
+
+export const getConfigFile = () => {
+  if (!configFile) throw new Error('configFile not set')
+  return configFile
+}
 
 export const getConfig = () => {
   if (!cfg) throw new Error('Configuration setup has not been run yet')
@@ -147,6 +153,7 @@ const addDefaultNotifications = (
 
 export const setupConfig = async (flags: any) => {
   // check for default config path when -c/--config not provided
+  configFile = flags.config
   if (
     flags.config.length === 1 &&
     ['./monika.json', './monika.yml', './monika.yaml'].includes(

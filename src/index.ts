@@ -277,7 +277,7 @@ class Monika extends Command {
         )
 
         // save some record files
-        savePidFile(flags, config)
+        savePidFile(config)
 
         // emit the sanitized probe
         if (sanitizedProbe) {
