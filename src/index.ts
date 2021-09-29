@@ -43,6 +43,7 @@ import { Probe } from './interfaces/probe'
 import {
   printSummary,
   getSummaryAndSendNotif,
+  savePidFile,
 } from './jobs/summary-notification'
 import initLoaders from './loaders'
 import {
@@ -185,6 +186,7 @@ class Monika extends Command {
     }),
   }
 
+  /* eslint-disable complexity */
   async run() {
     const { flags } = this.parse(Monika)
 
@@ -223,7 +225,7 @@ class Monika extends Command {
       }
 
       if (flags.summary) {
-        printSummary(flags, this.config)
+        printSummary(this.config)
         return
       }
 
@@ -273,6 +275,9 @@ class Monika extends Command {
         const sanitizedProbe = probesToRun.map((probe: Probe) =>
           sanitizeProbe(probe, probe.id)
         )
+
+        // save some record files
+        savePidFile(flags, config)
 
         // emit the sanitized probe
         if (sanitizedProbe) {

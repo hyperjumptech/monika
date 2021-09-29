@@ -37,7 +37,6 @@ import { getPublicNetworkInfo } from '../utils/public-ip'
 // import to activate all the application event emitter subscribers
 import '../events/subscribers/application'
 import { jobsLoader } from './jobs'
-import { savePidFile } from '../jobs/summary-notification'
 
 export default async function init(flags: any, cliConfig: IConfig) {
   const eventEmitter = getEventEmitter()
@@ -66,7 +65,6 @@ export default async function init(flags: any, cliConfig: IConfig) {
   }
 
   await setupConfig(flags)
-  await savePidFile(flags)
 
   // check TLS when Monika starts
   tlsChecker()

@@ -23,7 +23,7 @@
  **********************************************************************************/
 import { hostname } from 'os'
 import format from 'date-fns/format'
-import { getConfig, setupConfig } from '../components/config'
+import { getConfig } from '../components/config'
 import { getSummary } from '../components/logger/history'
 import { sendNotifications } from '../components/notification'
 import { getOSName } from '../components/notification/alert-message'
@@ -33,6 +33,13 @@ import { log } from '../utils/pino'
 import { publicIpAddress } from '../utils/public-ip'
 import fs from 'fs'
 import type { IConfig } from '@oclif/config'
+import events from '../events'
+import { Config } from '../interfaces/config'
+
+import { getEventEmitter } from '../utils/events'
+import { Notification } from '../interfaces/notification'
+import { Probe } from '../interfaces/probe'
+const eventEmitter = getEventEmitter()
 
 export async function getSummaryAndSendNotif() {
   const config = getConfig()
@@ -74,6 +81,8 @@ interface PidObject {
   monikaPid: number
   monikaConfigFile: string
   monikaStartTime: Date
+  monikaProbes: Probe
+  monikaNotifs: Notification
 }
 
 /**
@@ -98,19 +107,23 @@ function readPidFile(): PidObject {
     monikaPid: json.monikaPid,
     monikaConfigFile: json.monikaConfigFile,
     monikaStartTime: json.monikaStartTime,
+    monikaProbes: json.monikaProbes,
+    monikaNotifs: json.monikaNotifs,
   }
 }
 
 /**
  * savePidFile saves a monika.pid file with some useful information
  * @param {obj} flags is the oclif flag object
+ * @param {obj} config is a Config object
  */
-export const savePidFile = (flags: any) => {
-  // convert JSON object to string
+export function savePidFile(flags: any, config: Config) {
   const data = JSON.stringify({
     monikaStartTime: new Date(),
     monikaConfigFile: flags.config,
     monikaPid: process.pid,
+    monikaProbes: config.probes ? config.probes.length : '0',
+    monikaNotifs: config.notifications ? config.notifications.length : '0',
   })
 
   fs.writeFile('monika.pid', data, (err) => {
@@ -121,14 +134,13 @@ export const savePidFile = (flags: any) => {
 }
 
 // do somee cleanups on exit
-// eventEmitter.on(events.application.terminated, async () => {
-export function cleanPidFile() {
+eventEmitter.on(events.application.terminated, async () => {
   fs.unlink('monika.pid', (err) => {
     if (err) {
       log.indo('trying to cleanup monika.pid, got err: ', err)
     }
   })
-}
+})
 
 /**
  * getDaysHours breaks down the date into days  hours minute string
@@ -154,16 +166,9 @@ function getDaysHours(startTime: Date): string {
 
 /**
  * printSummary gathers and print some stats
- * @param {object} flags is the oclif map flag frameworks
+ * @param {object} cliConfig is oclif config structure
  */
-export async function printSummary(flags: any, cliConfig: IConfig) {
-  await setupConfig(flags)
-
-  const config = getConfig()
-
-  const { notifications } = config
-  if (!notifications) log.info('No notifications have been set')
-
+export async function printSummary(cliConfig: IConfig) {
   try {
     const pidObject = readPidFile()
     const summary = await getSummary()
@@ -177,8 +182,8 @@ export async function printSummary(flags: any, cliConfig: IConfig) {
     log.info(`Monika Summary \n
     Monika process id \t\t: ${pidObject.monikaPid}
     Active config file \t\t: ${pidObject.monikaConfigFile}
-    Probes set \t\t\t: ${config.probes ? config.probes.length : 0}
-    Notifications set \t\t: ${notifications ? notifications.length : 0}
+    Probes set \t\t\t: ${pidObject.monikaProbes}
+    Notifications set \t\t: ${pidObject.monikaNotifs}
     Number of incidents \t: ${summary.numberOfIncidents} in last 24hr
     Number of recoveries \t: ${summary.numberOfRecoveries} in last 24hr
     Number of notifications \t: ${summary.numberOfSentNotifications} in last 24h
