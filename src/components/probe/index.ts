@@ -37,6 +37,7 @@ import { sendAlerts } from '../notification'
 import { processThresholds } from '../notification/process-server-status'
 import { getLogsAndReport } from '../reporter'
 import { probing } from './probing'
+import { logResponseTime } from '../logger/response-time-log'
 
 // TODO: move this to interface file?
 interface ProbeStatusProcessed {
@@ -51,13 +52,6 @@ interface ProbeSendNotification extends Omit<ProbeStatusProcessed, 'statuses'> {
   index: number
   probeState?: ServerAlertState
 }
-
-// global variable
-let responseCount = 0
-let totalResponseTime = 0
-export let maxResponseTime = 0
-export let minResponseTime = 0
-export let averageResponseTime = 0
 
 // Probes Thresholds processed, Send out notifications/alerts.
 async function checkThresholdsAndSendAlert(
@@ -150,7 +144,7 @@ export async function doProbe(
       // eslint-disable-next-line no-await-in-loop
       const probeRes: ProbeRequestResponse = await probing(request, responses)
 
-      calculateResponseTime(probeRes)
+      logResponseTime(probeRes)
 
       eventEmitter.emit(events.probe.response.received, {
         probe,
@@ -230,21 +224,4 @@ export async function doProbe(
       }
     }
   }
-}
-
-function calculateResponseTime(probeRes: ProbeRequestResponse) {
-  responseCount += 1
-
-  if (responseCount === 1) {
-    // first time
-    maxResponseTime = probeRes.responseTime
-    minResponseTime = probeRes.responseTime
-  } else if (probeRes.responseTime > maxResponseTime) {
-    maxResponseTime = probeRes.responseTime
-  } else if (probeRes.responseTime < minResponseTime) {
-    minResponseTime = probeRes.responseTime
-  }
-
-  totalResponseTime += probeRes.responseTime
-  averageResponseTime = Math.floor(totalResponseTime / responseCount)
 }

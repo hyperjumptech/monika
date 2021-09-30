@@ -33,10 +33,10 @@ import getIp from '../utils/ip'
 import { log } from '../utils/pino'
 import { publicIpAddress } from '../utils/public-ip'
 import {
-  averageResponseTime,
-  minResponseTime,
   maxResponseTime,
-} from '../components/probe'
+  minResponseTime,
+  averageResponseTime,
+} from '../components/logger/response-time-log'
 
 export async function getSummaryAndSendNotif() {
   const config = getConfig()
