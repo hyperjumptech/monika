@@ -92,6 +92,10 @@ export const sendLark = async (
                     tag: 'text',
                     text: `From: ${message.meta.monikaInstance}`,
                   },
+                  {
+                    tag: 'text',
+                    text: `Version: ${message.meta.version}`,
+                  },
                 ],
               ],
             },

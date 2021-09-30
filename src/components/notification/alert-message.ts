@@ -81,6 +81,7 @@ export async function getMessageForAlert({
     privateIpAddress: ipAddress,
     publicIpAddress,
     monikaInstance,
+    version: userAgent,
   }
   const getSubject = (probeState: string) => {
     const recoveryOrIncident = probeState === 'UP' ? 'Recovery' : 'Incident'
@@ -132,7 +133,8 @@ From: ${monikaInstance}
 OS: ${osName}
 
 Version: ${userAgent}`
-  const summary = `${expectedMessage} - ${userAgent} - ${osName}`
+
+  const summary = `${expectedMessage}`
 
   const message = {
     subject: getSubject(probeState),
@@ -165,6 +167,7 @@ export const getMessageForStart = async (
       hostname,
       privateIpAddress: ip,
       publicIpAddress,
+      version: userAgent,
     },
   }
 }
@@ -190,6 +193,7 @@ export const getMessageForTerminate = async (
       hostname,
       privateIpAddress: ip,
       publicIpAddress,
+      version: userAgent,
     },
   }
 }
