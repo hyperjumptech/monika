@@ -69,6 +69,7 @@ Version: ${userAgent}`,
         hostname: hostname(),
         privateIpAddress: getIp(),
         publicIpAddress,
+        version: userAgent,
         ...summary,
       },
     }).catch((error) => log.error(`Summary notification: ${error.message}`))
