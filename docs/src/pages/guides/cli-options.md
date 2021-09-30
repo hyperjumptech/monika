@@ -208,7 +208,8 @@ While Monika is running, you can fetch the running statistics by using the `--su
 monika --summary
 ```
 
-Please not that you need to run the above command from the same working directory as the process you want to see/check.
+Please note that you need to run the above command from the same working directory as the running monika you want to see/check.
+The '--summary' flag also does not when no other monika process is running.
 
 ## Verbose
 
