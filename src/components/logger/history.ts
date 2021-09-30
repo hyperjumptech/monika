@@ -98,31 +98,52 @@ export async function openLogfile() {
   }
 }
 
-export async function deleteFromProbeRequests(limit: number) {
+export async function deleteFromProbeRequests(limit: number): Promise<number> {
   const getIdsToBeDeleted = `SELECT id FROM probe_requests order by created_at asc limit ${limit}`
-  const deleteFromProbeRequests = `DELETE FROM probe_requests WHERE id IN (${getIdsToBeDeleted})`
-  const res = await db.run(deleteFromProbeRequests)
-  if (!res.changes || res.changes < 1) {
-    log.error('failed to delete data from probe-requests')
+  const idsres = await db.all(getIdsToBeDeleted)
+
+  if (idsres.length > 0) {
+    const deleteFromProbeRequests = `DELETE FROM probe_requests WHERE id IN (${getIdsToBeDeleted})`
+    const res = await db.run(deleteFromProbeRequests)
+    if (!res.changes || res.changes < 1) {
+      log.error('No data has been deleted from probe_requests')
+    }
+    return res.changes || 0
   }
+
+  return 0
 }
 
-export async function deleteFromAlerts(limit: number) {
+export async function deleteFromAlerts(limit: number): Promise<number> {
   const getIdsToBeDeleted = `SELECT id FROM notifications order by created_at asc limit ${limit}`
-  const deleteFromAlerts = `DELETE FROM notifications WHERE id IN (${getIdsToBeDeleted})`
-  const res = await db.run(deleteFromAlerts)
-  if (!res.changes || res.changes < 1) {
-    log.error('failed to delete data from alerts')
+  const idsres = await db.all(getIdsToBeDeleted)
+
+  if (idsres.length > 0) {
+    const deleteFromAlerts = `DELETE FROM notifications WHERE id IN (${getIdsToBeDeleted})`
+    const res = await db.run(deleteFromAlerts)
+    if (!res.changes || res.changes < 1) {
+      log.error('No data has been deleted from alerts')
+    }
+    return res.changes || 0
   }
+
+  return 0
 }
 
-export async function deleteFromNotifications(limit: number) {
+export async function deleteFromNotifications(limit: number): Promise<number> {
   const getIdsToBeDeleted = `SELECT id FROM alerts order by created_at asc limit ${limit}`
-  const deleteFromAlerts = `DELETE FROM alerts WHERE id IN (${getIdsToBeDeleted})`
-  const res = await db.run(deleteFromAlerts)
-  if (!res.changes || res.changes < 1) {
-    log.error('failed to delete data from notifications')
+  const idsres = await db.all(getIdsToBeDeleted)
+
+  if (idsres.length > 0) {
+    const deleteFromAlerts = `DELETE FROM alerts WHERE id IN (${getIdsToBeDeleted})`
+    const res = await db.run(deleteFromAlerts)
+    if (!res.changes || res.changes < 1) {
+      log.error('No data has been deleted from notifications')
+    }
+    return res.changes || 0
   }
+
+  return 0
 }
 
 const objectNullValueToUndefined = <T extends Record<string, unknown>>(
