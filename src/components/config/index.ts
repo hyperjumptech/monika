@@ -76,10 +76,10 @@ const handshakeAndValidate = async (config: Config) => {
 
 const updateConfig = async (config: Config) => {
   await handshakeAndValidate(config)
-  const lastConfig = cfg?.version
+  const lastConfigVersion = cfg?.version
   cfg = config
-  cfg.version = lastConfig || md5Hash(config)
-  if (lastConfig !== cfg.version) {
+  cfg.version = cfg.version || md5Hash(cfg)
+  if (lastConfigVersion !== undefined && lastConfigVersion !== cfg.version) {
     emitter.emit(events.config.updated, cfg)
     log.warn('config file update detected')
   }

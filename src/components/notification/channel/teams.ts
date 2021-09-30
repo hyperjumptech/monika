@@ -89,6 +89,7 @@ export const sendTeams = async (
                   name: 'From',
                   value: message.meta.monikaInstance,
                 },
+                { name: 'Version', value: message.meta.version },
               ],
               markdown: true,
             },

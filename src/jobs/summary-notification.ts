@@ -71,6 +71,7 @@ Version: ${userAgent}`,
         maxResponseTime,
         minResponseTime,
         averageResponseTime,
+        version: userAgent,
         ...summary,
       },
     }).catch((error) => log.error(`Summary notification: ${error.message}`))
