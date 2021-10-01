@@ -29,10 +29,10 @@ import { parseHarFile } from './parse-har'
 import path from 'path'
 import yml from 'js-yaml'
 
-export const parseConfig = async (
+export const parseConfig = (
   configPath: string,
   type: string
-): Promise<Partial<Config>> => {
+): Partial<Config> => {
   // Read file from configPath
   try {
     // Read file from configPath

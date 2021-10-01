@@ -123,60 +123,52 @@ const scheduleRemoteConfigFetcher = (
   }, interval * 1000)
 }
 
-const parseDefaultConfig = (flags: any): Promise<Partial<Config>>[] => {
-  return (flags.config as Array<string>).map((source, i) => {
-    if (isUrl(source)) {
-      scheduleRemoteConfigFetcher(source, flags['config-interval'], i)
-      return fetchConfig(source)
-    }
-    delete flags.config
-    watchConfigFile(source, 'monika', i, flags.repeat)
-    return parseConfig(source, 'monika')
-  })
+const parseDefaultConfig = (flags: any): Promise<Partial<Config>[]> => {
+  return Promise.all(
+    (flags.config as Array<string>).map((source, i) => {
+      if (isUrl(source)) {
+        scheduleRemoteConfigFetcher(source, flags['config-interval'], i)
+        return fetchConfig(source)
+      }
+      watchConfigFile(source, 'monika', i, flags.repeat)
+      return parseConfig(source, 'monika')
+    })
+  )
 }
 
-const addDefaultNotifications = (
-  parse: Promise<Partial<Config>>
-): Promise<Partial<Config>> => {
-  return parse.then((config) => {
-    log.info('Notifications not found, using desktop as default...')
-    config.notifications = [{ id: 'default', type: 'desktop', data: undefined }]
-    return config
-  })
+const addDefaultNotifications = (config: Partial<Config>): Partial<Config> => {
+  log.info('Notifications not found, using desktop as default...')
+  return {
+    ...config,
+    notifications: [{ id: 'default', type: 'desktop', data: undefined }],
+  }
 }
 
 export const setupConfig = async (flags: any) => {
   // check for default config path when -c/--config not provided
-  if (
-    flags.config.length === 1 &&
-    ['./monika.json', './monika.yml', './monika.yaml'].includes(
-      flags.config[0]
-    ) &&
-    !existsSync(flags.config[0])
-  ) {
-    delete flags.config
+  if (flags.config.length === 0 && !flags.har && !flags.postman) {
+    throw new Error(
+      'Configuration file not found. By default, Monika looks for monika.yml configuration file in the current directory.\n\nOtherwise, you can also specify a configuration file using -c flag as follows:\n\nmonika -c <path_to_configuration_file>\n\nYou can create a configuration file via web interface by opening this web app: https://hyperjumptech.github.io/monika-config-generator/'
+    )
   }
-  const configParse = new Array<Promise<Partial<Config>>>(0)
-  if (flags.config && Array.isArray(flags.config) && flags.config.length > 0) {
-    const json = parseDefaultConfig(flags)
-    configParse.push(...json)
-  }
-  let nonDefaultConfig
+
+  const parsedConfigs = await parseDefaultConfig(flags)
+
+  let nonDefaultConfig: Partial<Config> | undefined
   if (flags.har) {
     nonDefaultConfig = parseConfig(flags.har, 'har')
   } else if (flags.postman) {
     nonDefaultConfig = parseConfig(flags.postman, 'postman')
   }
-  if (configParse.length === 0 && nonDefaultConfig !== undefined) {
+
+  if (parsedConfigs.length === 0 && nonDefaultConfig !== undefined) {
     nonDefaultConfig = addDefaultNotifications(nonDefaultConfig)
   }
-  if (nonDefaultConfig !== undefined) configParse.push(nonDefaultConfig)
-  if (configParse.length === 0) {
-    throw new Error(
-      'Configuration file not found. By default, Monika looks for monika.json or monika.yml configuration file in the current directory.\n\nOtherwise, you can also specify a configuration file using -c flag as follows:\n\nmonika -c <path_to_configuration_file>\n\nYou can create a configuration file via web interface by opening this web app: https://hyperjumptech.github.io/monika-config-generator/'
-    )
-  }
-  configs = await Promise.all(configParse)
+
+  if (nonDefaultConfig !== undefined) parsedConfigs.push(nonDefaultConfig)
+
+  configs = parsedConfigs
+
   await updateConfig(mergeConfigs())
 }
 
