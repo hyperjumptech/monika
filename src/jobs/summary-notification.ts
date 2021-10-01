@@ -36,6 +36,9 @@ import {
   maxResponseTime,
   minResponseTime,
   averageResponseTime,
+  checkIs24HourHasPassed,
+  resetlogs,
+  getLogLifeTimeInHour,
 } from '../components/logger/response-time-log'
 
 export async function getSummaryAndSendNotif() {
@@ -47,15 +50,16 @@ export async function getSummaryAndSendNotif() {
   try {
     const { userAgent } = getContext()
     const [summary, osName] = await Promise.all([getSummary(), getOSName()])
+    const responseTimelogLifeTimeInHour = getLogLifeTimeInHour()
 
     sendNotifications(notifications, {
       subject: `Monika Status`,
       body: `Status Update ${format(new Date(), 'yyyy-MM-dd HH:mm:ss XXX')}
 Host: ${hostname()} (${[publicIpAddress, getIp()].filter(Boolean).join('/')})
 Number of probes: ${summary.numberOfProbes}
-Maximum response time: ${maxResponseTime} ms in the last 24 hours
-Minimum response time: ${minResponseTime} ms in the last 24 hours
-Average response time: ${averageResponseTime} ms in the last 24 hours
+Maximum response time: ${maxResponseTime} ms in the last ${responseTimelogLifeTimeInHour} hours
+Minimum response time: ${minResponseTime} ms in the last ${responseTimelogLifeTimeInHour} hours
+Average response time: ${averageResponseTime} ms in the last ${responseTimelogLifeTimeInHour} hours
 Incidents: ${summary.numberOfIncidents} in the last 24 hours
 Recoveries: ${summary.numberOfRecoveries} in the last 24 hours
 Notifications: ${summary.numberOfSentNotifications}
@@ -71,10 +75,15 @@ Version: ${userAgent}`,
         maxResponseTime,
         minResponseTime,
         averageResponseTime,
+        responseTimelogLifeTimeInHour,
         version: userAgent,
         ...summary,
       },
     }).catch((error) => log.error(`Summary notification: ${error.message}`))
+
+    if (checkIs24HourHasPassed()) {
+      resetlogs()
+    }
   } catch (error) {
     log.error(`Summary notification: ${error.message}`)
   }

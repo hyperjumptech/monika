@@ -34,7 +34,12 @@ export let maxResponseTime = 0
 export let minResponseTime = 0
 export let averageResponseTime = 0
 
-function resetlogs() {
+export function getLogLifeTimeInHour() {
+  const now = new Date()
+  return differenceInHours(now, startTime24HourCycle)
+}
+
+export function resetlogs() {
   startTime24HourCycle = new Date()
   responseCount = 0
   totalResponseTime = 0
@@ -43,7 +48,7 @@ function resetlogs() {
   averageResponseTime = 0
 }
 
-function checkIs24HourHasPassed() {
+export function checkIs24HourHasPassed() {
   const now = new Date()
   const diffInHours = differenceInHours(now, startTime24HourCycle)
   if (diffInHours > 24) {
@@ -54,10 +59,6 @@ function checkIs24HourHasPassed() {
 }
 
 export function logResponseTime(probeRes: ProbeRequestResponse) {
-  if (checkIs24HourHasPassed()) {
-    resetlogs()
-  }
-
   responseCount += 1
 
   if (responseCount === 1) {
