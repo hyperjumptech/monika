@@ -54,14 +54,9 @@ function getDefaultConfig(): Array<string> {
   const monikaDotYamlFile = filesArray.find(
     (x) => x === 'monika.yml' || x === 'monika.yaml'
   )
+  const defaultConfig = monikaDotYamlFile || monikaDotJsonFile
 
-  return [
-    monikaDotYamlFile
-      ? `./${monikaDotYamlFile}`
-      : monikaDotJsonFile
-      ? `./${monikaDotJsonFile}`
-      : './monika.yml',
-  ]
+  return defaultConfig ? [defaultConfig] : []
 }
 
 class Monika extends Command {
