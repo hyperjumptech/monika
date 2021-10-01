@@ -32,5 +32,7 @@ export function jobsLoader() {
   // schedule TLS checker every day at 00:00
   cron.schedule('0 0 * * *', tlsChecker)
   // schedule database size check
-  cron.schedule(db_limit.cron_schedule, check_db_size)
+  if (db_limit && db_limit.cron_schedule) {
+    cron.schedule(db_limit.cron_schedule, check_db_size)
+  }
 }
