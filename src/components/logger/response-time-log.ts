@@ -36,7 +36,8 @@ export let averageResponseTime = 0
 
 export function getLogLifeTimeInHour() {
   const now = new Date()
-  return differenceInHours(now, startTime24HourCycle)
+  const diff = differenceInHours(now, startTime24HourCycle)
+  return diff || 1
 }
 
 export function resetlogs() {
