@@ -42,12 +42,6 @@ const emitter = new EventEmitter()
 
 let cfg: Config
 let configs: Partial<Config>[]
-let configFile: string // stores monika config file before it is flags.config is clobbered
-
-export const getConfigFile = () => {
-  if (!configFile) throw new Error('configFile not set')
-  return configFile
-}
 
 export const getConfig = () => {
   if (!cfg) throw new Error('Configuration setup has not been run yet')

@@ -46,11 +46,7 @@ import {
   savePidFile,
 } from './jobs/summary-notification'
 import initLoaders from './loaders'
-import {
-  /* loopCheckSTUNServer */ idFeeder,
-  isIDValid,
-  sanitizeProbe,
-} from './looper'
+import { idFeeder, isIDValid, sanitizeProbe } from './looper'
 import { getEventEmitter } from './utils/events'
 import { log } from './utils/pino'
 
@@ -271,8 +267,8 @@ class Monika extends Command {
           sanitizeProbe(probe, probe.id)
         )
 
-        // save some record files
-        savePidFile(config)
+        // save some data into files for later
+        savePidFile(flags.config, config)
 
         // emit the sanitized probe
         if (sanitizedProbe) {

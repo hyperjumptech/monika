@@ -23,7 +23,7 @@
  **********************************************************************************/
 import { hostname } from 'os'
 import format from 'date-fns/format'
-import { getConfig, getConfigFile } from '../components/config'
+import { getConfig } from '../components/config'
 import { getSummary } from '../components/logger/history'
 import { sendNotifications } from '../components/notification'
 import { getOSName } from '../components/notification/alert-message'
@@ -115,12 +115,13 @@ function readPidFile(): PidObject {
 
 /**
  * savePidFile saves a monika.pid file with some useful information
+ * @param {string} configFile is the configuration file used
  * @param {obj} config is a Config object
  */
-export function savePidFile(config: Config) {
+export function savePidFile(configFile: string[], config: Config) {
   const data = JSON.stringify({
     monikaStartTime: new Date(),
-    monikaConfigFile: getConfigFile(),
+    monikaConfigFile: configFile,
     monikaPid: process.pid,
     monikaProbes: config.probes ? config.probes.length : '0',
     monikaNotifs: config.notifications ? config.notifications.length : '0',
