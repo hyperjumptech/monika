@@ -40,7 +40,11 @@ import { resetServerAlertStates } from './components/notification/process-server
 import events from './events'
 import { Config } from './interfaces/config'
 import { Probe } from './interfaces/probe'
-import { getSummaryAndSendNotif } from './jobs/summary-notification'
+import {
+  printSummary,
+  getSummaryAndSendNotif,
+  savePidFile,
+} from './jobs/summary-notification'
 import initLoaders from './loaders'
 import { idFeeder, isIDValid, sanitizeProbe } from './looper'
 import { getEventEmitter } from './utils/events'
@@ -65,9 +69,9 @@ class Monika extends Command {
   static examples = [
     'monika',
     'monika --logs',
-    'monika -r 1 --id 1,2,5,7',
+    'monika -r 1 --id "weather, stocks, 5, 7"',
     'monika --create-config',
-    'monika --config https://raw.githubusercontent.com/hyperjumptech/monika/main/monika.example.json --config-interval 900',
+    'monika --config https://raw.githubusercontent.com/hyperjumptech/monika/main/monika.example.yml --config-interval 900',
   ]
 
   static flags = {
@@ -110,15 +114,15 @@ class Monika extends Command {
 
     logs: flags.boolean({
       char: 'l', // prints the (l)ogs
-      description: 'print all logs.',
+      description: 'Print all logs.',
     }),
 
     flush: flags.boolean({
-      description: 'flush logs',
+      description: 'Flush logs',
     }),
 
     verbose: flags.boolean({
-      description: 'show verbose log messages',
+      description: 'Show verbose log messages',
       default: false,
     }),
 
@@ -130,20 +134,20 @@ class Monika extends Command {
 
     repeat: flags.string({
       char: 'r', // (r)epeat
-      description: 'repeats the test run n times',
+      description: 'Repeats the test run n times',
       multiple: false,
     }),
 
     stun: flags.integer({
       char: 's', // (s)stun
-      description: 'interval in seconds to check STUN server',
+      description: 'Interval in seconds to check STUN server',
       multiple: false,
       default: 20,
     }),
 
     id: flags.string({
       char: 'i', // (i)ds to run
-      description: 'specific probe ids to run',
+      description: 'Define specific probe ids to run',
       multiple: false,
     }),
 
@@ -154,7 +158,12 @@ class Monika extends Command {
     }),
 
     force: flags.boolean({
-      description: 'force command',
+      description: 'Force commands with a yes whenever Y/n is prompted.',
+      default: false,
+    }),
+
+    summary: flags.boolean({
+      description: 'Display a summary of monika running stats',
       default: false,
     }),
 
@@ -168,6 +177,7 @@ class Monika extends Command {
     }),
   }
 
+  /* eslint-disable complexity */
   async run() {
     const { flags } = this.parse(Monika)
 
@@ -201,6 +211,12 @@ class Monika extends Command {
           log.info('Cancelled. Thank you.')
         }
         await closeLog()
+
+        return
+      }
+
+      if (flags.summary) {
+        printSummary(this.config)
         return
       }
 
@@ -250,6 +266,9 @@ class Monika extends Command {
         const sanitizedProbe = probesToRun.map((probe: Probe) =>
           sanitizeProbe(probe, probe.id)
         )
+
+        // save some data into files for later
+        savePidFile(flags.config, config)
 
         // emit the sanitized probe
         if (sanitizedProbe) {
