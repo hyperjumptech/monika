@@ -200,6 +200,17 @@ monika -s 10
 
 If the number is zero or less, monika will check the STUN server just once, not repeteadly, to get public IP.
 
+## Summary
+
+While Monika is running, you can fetch the running statistics by using the `--summary` flag from another terminal.
+
+```bash
+monika --summary
+```
+
+Please note that you need to run the above command from the same working directory as the running monika you want to see/check.
+The '--summary' flag also does not when no other monika process is running.
+
 ## Verbose
 
 Like your app to be more chatty and honest revealing all its internal details? Use the `--verbose` flag.
