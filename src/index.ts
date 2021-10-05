@@ -246,6 +246,7 @@ class Monika extends Command {
           flags.verbose,
           !abortCurrentLooper
         )
+        this.log('Using config file: ', flags.config)
         this.log(startupMessage)
 
         // config probes to be run by the looper
