@@ -52,12 +52,8 @@ async function deleteData(config: Config) {
 
   if (stats.size > db_limit.max_db_size) {
     const probe_res = await deleteFromProbeRequests(db_limit.deleted_data)
-    const notif_res = await deleteFromNotifications(db_limit.deleted_data)
-    const alert_res = await deleteFromAlerts(db_limit.deleted_data)
-
-    if (probe_res === 0 && notif_res === 0 && alert_res === 0) {
-      return
-    }
+    await deleteFromNotifications(probe_res.probe_ids)
+    await deleteFromAlerts(probe_res.probe_request_ids)
 
     deleteData(config) // recursive until reached expected file size
   }
