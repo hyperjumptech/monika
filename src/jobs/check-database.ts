@@ -22,19 +22,39 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Certificate } from './certificate'
-import { Notification } from './notification'
-import { Probe } from './probe'
-import { SymonConfig } from '../components/reporter'
-import { DBLimit } from './data'
+import path from 'path'
+import fs from 'fs'
+import { getConfig } from '../components/config'
+import {
+  deleteFromAlerts,
+  deleteFromNotifications,
+  deleteFromProbeRequests,
+} from '../components/logger/history'
+import { Config } from '../interfaces/config'
+const dbPath = path.resolve(process.cwd(), 'monika-logs.db')
 
-export interface Config {
-  certificate?: Certificate
-  interval?: number
-  notifications?: Notification[]
-  probes: Probe[]
-  'status-notification': string
-  symon?: SymonConfig
-  version?: string
-  db_limit: DBLimit
+export function check_db_size() {
+  const config = getConfig()
+  deleteData(config)
+}
+
+async function deleteData(config: Config) {
+  const { db_limit } = config
+  const stats = fs.statSync(dbPath)
+
+  if (!db_limit.max_db_size) {
+    return
+  }
+
+  if (!db_limit.deleted_data) {
+    return
+  }
+
+  if (stats.size > db_limit.max_db_size) {
+    const probe_res = await deleteFromProbeRequests(db_limit.deleted_data)
+    await deleteFromNotifications(probe_res.probe_ids)
+    await deleteFromAlerts(probe_res.probe_request_ids)
+
+    deleteData(config) // recursive until reached expected file size
+  }
 }
