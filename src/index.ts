@@ -49,6 +49,7 @@ import initLoaders from './loaders'
 import { idFeeder, isIDValid, sanitizeProbe } from './looper'
 import { getEventEmitter } from './utils/events'
 import { log } from './utils/pino'
+import path from 'path'
 
 const em = getEventEmitter()
 
@@ -246,7 +247,13 @@ class Monika extends Command {
           flags.verbose,
           !abortCurrentLooper
         )
-        this.log('Using config file: ', flags.config)
+
+        for (const x in flags.config) {
+          if (x.length > 0) {
+            this.log('Using config file: ', path.resolve(flags.config[x]))
+          }
+        }
+
         this.log(startupMessage)
 
         // config probes to be run by the looper
