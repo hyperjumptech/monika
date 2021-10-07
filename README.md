@@ -71,7 +71,7 @@ Please abide by the [Contributor's Code of Conduct](CODE_OF_CONDUCTS.md)
 For detailed information, you can click on any of the specific docs below:
 
 - [Quick Start](https://hyperjumptech.github.io/monika/quick-start)
-- [Installations](https://hyperjumptech.github.io/monika/installation)
+- [Installations](https://monika.hyperjump.tech/quick-start#installation)
 - [How it works](https://hyperjumptech.github.io/monika/guides/probes)
 
 ## License
