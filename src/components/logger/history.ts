@@ -73,6 +73,21 @@ export type UnreportedLog = {
   notifications: UnreportedNotificationsLog[]
 }
 
+export type DeleteProbeRes = {
+  probe_ids: ProbeIdDate[]
+  probe_request_ids: ProbeReqIdDate[]
+}
+
+export type ProbeIdDate = {
+  id: string
+  created_at: number
+}
+
+export type ProbeReqIdDate = {
+  id: number
+  created_at: number
+}
+
 let db: Database<SQLite3.Database, SQLite3.Statement>
 
 async function migrate() {
@@ -95,6 +110,49 @@ export async function openLogfile() {
     await migrate()
   } catch (error) {
     log.error("Warning: Can't open logfile. " + error.message)
+  }
+}
+
+export async function deleteFromProbeRequests(
+  limit: number
+): Promise<DeleteProbeRes> {
+  const getIdsToBeDeleted = `SELECT id, probe_id, created_at FROM probe_requests order by created_at asc limit ${limit}`
+  const idsres = await db.all(getIdsToBeDeleted)
+  const ids = idsres.map((res) => ({ id: res.id, created_at: res.created_at }))
+  const probeIds = idsres.map((res) => ({
+    id: res.probe_id,
+    created_at: res.created_at,
+  }))
+  if (idsres.length > 0) {
+    const deleteFromProbeRequests = `DELETE FROM probe_requests WHERE id IN (${getIdsToBeDeleted})`
+    await db.run(deleteFromProbeRequests)
+  }
+
+  return {
+    probe_ids: probeIds,
+    probe_request_ids: ids,
+  }
+}
+
+export async function deleteFromAlerts(probe_req_ids: ProbeReqIdDate[]) {
+  if (probe_req_ids.length > 0) {
+    await Promise.all(
+      probe_req_ids.map(async (item) => {
+        const deleteFromAlerts = `DELETE FROM alerts WHERE probe_request_id = ${item.id} and created_at = ${item.created_at}`
+        await db.run(deleteFromAlerts)
+      })
+    )
+  }
+}
+
+export async function deleteFromNotifications(probe_ids: ProbeIdDate[]) {
+  if (probe_ids.length > 0) {
+    await Promise.all(
+      probe_ids.map(async (item) => {
+        const deleteFromNotifications = `DELETE FROM notifications WHERE probe_id = ${item.id} and created_at = ${item.created_at}`
+        await db.run(deleteFromNotifications)
+      })
+    )
   }
 }
 

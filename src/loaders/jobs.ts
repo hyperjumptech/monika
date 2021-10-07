@@ -24,8 +24,15 @@
 
 import cron from 'node-cron'
 import { tlsChecker } from '../jobs/tls-check'
+import { check_db_size } from '../jobs/check-database'
+import { getConfig } from '../components/config'
 
 export function jobsLoader() {
+  const { db_limit } = getConfig()
   // schedule TLS checker every day at 00:00
   cron.schedule('0 0 * * *', tlsChecker)
+  // schedule database size check
+  if (db_limit && db_limit.cron_schedule) {
+    cron.schedule(db_limit.cron_schedule, check_db_size)
+  }
 }

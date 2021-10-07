@@ -138,3 +138,9 @@ probes:
 #     data:
 #       thread_id: "1234567890"
 #       access_token: YOUR_CUSTOM_INTEGRATION_ACCESS_TOKEN
+
+# limit log database size in bytes
+db_limit:
+  max_db_size: 1000000000
+  deleted_data: 1
+  cron_schedule: '*/1 * * * *'
