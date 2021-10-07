@@ -42,6 +42,8 @@ export const sendSmtpMail = async (transporter: Mail, opt: Mail.Options) => {
     product: {
       name: 'Monika',
       link: 'https://monika.hyperjump.tech/',
+      logo:
+        'https://raw.githubusercontent.com/hyperjumptech/monika/main/docs/public/monika.svg',
     },
   })
   const email = {
