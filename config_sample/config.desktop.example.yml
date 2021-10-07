@@ -1,6 +1,7 @@
 probes:
   - requests:
       - url: http://github.com
+        timeout: 10000
 
 notifications:
   - id: desktop-notification
