@@ -22,57 +22,39 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios from 'axios'
+import path from 'path'
+import fs from 'fs'
+import { getConfig } from '../components/config'
 import {
-  AxiosRequestConfigWithExtraData,
-  AxiosResponseWithExtraData,
-  RequestConfig,
-} from '../../interfaces/request'
+  deleteFromAlerts,
+  deleteFromNotifications,
+  deleteFromProbeRequests,
+} from '../components/logger/history'
+import { Config } from '../interfaces/config'
+const dbPath = path.resolve(process.cwd(), 'monika-logs.db')
 
-const responseInterceptor = (axiosResponse: AxiosResponseWithExtraData) => {
-  const start = axiosResponse?.config.extraData?.requestStartedAt!
-  const responseTime = new Date().getTime() - start
-
-  const data = {
-    ...axiosResponse,
-    config: {
-      ...axiosResponse?.config,
-      extraData: {
-        ...axiosResponse?.config.extraData,
-        responseTime,
-      },
-    },
-  }
-
-  return data
+export function check_db_size() {
+  const config = getConfig()
+  deleteData(config)
 }
 
-export const executeRequest = async (config: RequestConfig) => {
-  const axiosInstance = axios.create()
-  axiosInstance.interceptors.request.use(
-    (axiosRequestConfig: AxiosRequestConfigWithExtraData) => {
-      const data = {
-        ...axiosRequestConfig,
-        extraData: {
-          ...axiosRequestConfig?.extraData,
-          requestStartedAt: new Date().getTime(),
-        },
-      }
-      return data
-    }
-  )
-  axiosInstance.interceptors.response.use(
-    (axiosResponse: AxiosResponseWithExtraData) => {
-      const data = responseInterceptor(axiosResponse)
-      return data
-    },
-    (axiosResponse: AxiosResponseWithExtraData) => {
-      const data = responseInterceptor(axiosResponse)
-      throw data
-    }
-  )
-  return axiosInstance.request({
-    ...config,
-    data: config.body,
-  })
+async function deleteData(config: Config) {
+  const { db_limit } = config
+  const stats = fs.statSync(dbPath)
+
+  if (!db_limit.max_db_size) {
+    return
+  }
+
+  if (!db_limit.deleted_data) {
+    return
+  }
+
+  if (stats.size > db_limit.max_db_size) {
+    const probe_res = await deleteFromProbeRequests(db_limit.deleted_data)
+    await deleteFromNotifications(probe_res.probe_ids)
+    await deleteFromAlerts(probe_res.probe_request_ids)
+
+    deleteData(config) // recursive until reached expected file size
+  }
 }

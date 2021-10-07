@@ -22,58 +22,19 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { hostname } from 'os'
-import { NotificationSendingError, sendNotifications } from '.'
-import { Notification } from '../../interfaces/notification'
-import getIp from '../../utils/ip'
-import { getMessageForStart } from './alert-message'
-import {
-  dataDiscordSchemaValidator,
-  dataMailgunSchemaValidator,
-  dataMonikaNotifSchemaValidator,
-  dataSendgridSchemaValidator,
-  dataSlackSchemaValidator,
-  dataSMTPSchemaValidator,
-  dataTeamsSchemaValidator,
-  dataTelegramSchemaValidator,
-  dataWebhookSchemaValidator,
-  dataWorkplaceSchemaValidator,
-  dataLarkSchemaValidator,
-} from './validator'
+type Context = {
+  // userAgent example: @hyperjumptech/monika/1.2.3 linux-x64 node-14.17.0
+  userAgent: string
+}
 
-// reexported with alias because this `errorMessage` function is used in test file
-export const errorMessage = NotificationSendingError.create
+let context = {
+  userAgent: '',
+}
 
-export const notificationChecker = async (notifications: Notification[]) => {
-  const validators = {
-    desktop: null,
-    discord: dataDiscordSchemaValidator,
-    mailgun: dataMailgunSchemaValidator,
-    'monika-notif': dataMonikaNotifSchemaValidator,
-    sendgrid: dataSendgridSchemaValidator,
-    slack: dataSlackSchemaValidator,
-    smtp: dataSMTPSchemaValidator,
-    teams: dataTeamsSchemaValidator,
-    telegram: dataTelegramSchemaValidator,
-    webhook: dataWebhookSchemaValidator,
-    whatsapp: dataWebhookSchemaValidator,
-    workplace: dataWorkplaceSchemaValidator,
-    lark: dataLarkSchemaValidator,
-  }
+export function getContext(): Context {
+  return context
+}
 
-  await Promise.all(
-    notifications.map(async (notification) => {
-      const validator = validators[notification.type]
-      if (!validator) return Promise.resolve()
-      try {
-        const validated = await validator.validateAsync(notification.data)
-        return validated
-      } catch (error) {
-        throw NotificationSendingError.create(notification.type, error?.message)
-      }
-    })
-  )
-
-  const message = await getMessageForStart(hostname(), getIp())
-  await sendNotifications(notifications, message)
+export function setContext(updatedContext: Context) {
+  context = { ...context, ...updatedContext }
 }

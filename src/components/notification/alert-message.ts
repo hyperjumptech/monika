@@ -22,11 +22,15 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import { hostname, platform } from 'os'
+import { promisify } from 'util'
 import { format } from 'date-fns'
 import * as Handlebars from 'handlebars'
-import { hostname } from 'os'
+import getos from 'getos'
+import osName from 'os-name'
+import { getContext } from '../../context'
 import { NotificationMessage } from '../../interfaces/notification'
-import { AxiosResponseWithExtraData } from '../../interfaces/request'
+import { ProbeRequestResponse } from '../../interfaces/request'
 import { ProbeAlert } from '../../interfaces/probe'
 import {
   getPublicIp,
@@ -34,19 +38,21 @@ import {
   publicNetworkInfo,
 } from '../../utils/public-ip'
 
-let monikaInstance = ''
+const getLinuxDistro = promisify(getos)
 
 const getMonikaInstance = async (ipAddress: string) => {
+  const osHostname = hostname()
   await getPublicIp()
-  monikaInstance = `${hostname()} (${[publicIpAddress, ipAddress]
-    .filter(Boolean)
-    .join('/')})`
 
   if (publicNetworkInfo) {
-    monikaInstance = `${publicNetworkInfo.city} - ${
-      publicNetworkInfo.isp
-    } (${publicIpAddress}) - ${hostname()} (${ipAddress})`
+    const { city, isp } = publicNetworkInfo
+
+    return `${city} - ${isp} (${publicIpAddress}) - ${osHostname} (${ipAddress})`
   }
+
+  return `${osHostname} (${[publicIpAddress, ipAddress]
+    .filter(Boolean)
+    .join('/')})`
 }
 
 export async function getMessageForAlert({
@@ -60,19 +66,33 @@ export async function getMessageForAlert({
   url: string
   ipAddress: string
   probeState: string
-  response: AxiosResponseWithExtraData
+  response: ProbeRequestResponse
 }): Promise<NotificationMessage> {
+  const { userAgent } = getContext()
+  const [monikaInstance, osName] = await Promise.all([
+    getMonikaInstance(ipAddress),
+    getOSName(),
+  ])
+  const meta = {
+    type: probeState === 'UP' ? ('recovery' as const) : ('incident' as const),
+    url,
+    time: format(new Date(), 'yyyy-MM-dd HH:mm:ss XXX'),
+    hostname: hostname(),
+    privateIpAddress: ipAddress,
+    publicIpAddress,
+    monikaInstance,
+    version: userAgent,
+  }
   const getSubject = (probeState: string) => {
     const recoveryOrIncident = probeState === 'UP' ? 'Recovery' : 'Incident'
 
     return `New ${recoveryOrIncident} from Monika`
   }
-
   const getExpectedMessage = (
     alert: ProbeAlert,
-    response: AxiosResponseWithExtraData
+    response: ProbeRequestResponse
   ) => {
-    const { statusText, status } = response
+    const { status } = response
     const isHTTPStatusCode = status >= 100 && status <= 599
 
     if (!alert.message) return ''
@@ -87,7 +107,7 @@ export async function getMessageForAlert({
           return 'Connection refused'
 
         default:
-          return statusText
+          return status
       }
     }
 
@@ -95,39 +115,31 @@ export async function getMessageForAlert({
       response: {
         size: Number(response.headers['content-length']),
         status,
-        time: response.config.extraData?.responseTime,
+        time: response?.responseTime,
         body: response.data,
         headers: response.headers,
       },
     })
   }
-
-  const meta = {
-    type: probeState === 'UP' ? ('recovery' as const) : ('incident' as const),
-    url,
-    time: format(new Date(), 'yyyy-MM-dd HH:mm:ss XXX'),
-    hostname: hostname(),
-    privateIpAddress: ipAddress,
-    publicIpAddress,
-    monikaInstance,
-  }
-
-  if (monikaInstance.length === 0) {
-    await getMonikaInstance(ipAddress)
-  }
-
-  const bodyString = `Message: ${getExpectedMessage(alert, response)}
+  const expectedMessage = getExpectedMessage(alert, response)
+  const bodyString = `Message: ${expectedMessage}
 
 URL: ${meta.url}
 
 Time: ${meta.time}
 
-From: ${monikaInstance}`
+From: ${monikaInstance}
+
+OS: ${osName}
+
+Version: ${userAgent}`
+
+  const summary = `${expectedMessage}`
 
   const message = {
     subject: getSubject(probeState),
     body: bodyString,
-    summary: getExpectedMessage(alert, response),
+    summary,
     meta,
   }
 
@@ -138,20 +150,24 @@ export const getMessageForStart = async (
   hostname: string,
   ip: string
 ): Promise<NotificationMessage> => {
-  if (monikaInstance.length === 0) {
-    await getMonikaInstance(ip)
-  }
+  const { userAgent } = getContext()
+  const [monikaInstance, osName] = await Promise.all([
+    getMonikaInstance(ip),
+    getOSName(),
+  ])
+  const monikaDetail = `${monikaInstance} - ${userAgent} - ${osName}`
 
   return {
     subject: 'Monika is started',
-    body: `Monika is running from ${monikaInstance}`,
-    summary: `Monika is running from ${monikaInstance}`,
+    body: `Monika is running from ${monikaDetail}`,
+    summary: `Monika is running from ${monikaDetail}`,
     meta: {
       type: 'start',
       time: new Date().toUTCString(),
-      hostname: hostname,
+      hostname,
       privateIpAddress: ip,
       publicIpAddress,
+      version: userAgent,
     },
   }
 }
@@ -160,20 +176,42 @@ export const getMessageForTerminate = async (
   hostname: string,
   ip: string
 ): Promise<NotificationMessage> => {
-  if (monikaInstance.length === 0) {
-    await getMonikaInstance(ip)
-  }
+  const { userAgent } = getContext()
+  const [monikaInstance, osName] = await Promise.all([
+    getMonikaInstance(ip),
+    getOSName(),
+  ])
+  const monikaDetail = `${monikaInstance} - ${userAgent} - ${osName}`
 
   return {
     subject: 'Monika terminated',
-    body: `Monika is no longer running from ${monikaInstance}`,
-    summary: `Monika is no longer running from ${monikaInstance}`,
+    body: `Monika is no longer running from ${monikaDetail}`,
+    summary: `Monika is no longer running from ${monikaDetail}`,
     meta: {
       type: 'termination',
       time: new Date().toUTCString(),
-      hostname: hostname,
+      hostname,
       privateIpAddress: ip,
       publicIpAddress,
+      version: userAgent,
     },
   }
+}
+
+export async function getOSName() {
+  const osPlatform = platform()
+  const isLinux = osPlatform === 'linux'
+
+  if (isLinux) {
+    const linuxDistro = await getLinuxDistro()
+
+    // checking again due to inconsistency of getos module return type
+    if (linuxDistro.os !== 'linux') {
+      return linuxDistro.os
+    }
+
+    return `${linuxDistro?.dist} ${linuxDistro?.release}`
+  }
+
+  return osName()
 }

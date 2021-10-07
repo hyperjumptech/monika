@@ -40,7 +40,11 @@ import { resetServerAlertStates } from './components/notification/process-server
 import events from './events'
 import { Config } from './interfaces/config'
 import { Probe } from './interfaces/probe'
-import { getSummaryAndSendNotif } from './jobs/summary-notification'
+import {
+  printSummary,
+  getSummaryAndSendNotif,
+  savePidFile,
+} from './jobs/summary-notification'
 import initLoaders from './loaders'
 import { idFeeder, isIDValid, sanitizeProbe } from './looper'
 import { getEventEmitter } from './utils/events'
@@ -48,28 +52,26 @@ import { log } from './utils/pino'
 
 const em = getEventEmitter()
 
-function getDefaultConfig() {
+function getDefaultConfig(): Array<string> {
   const filesArray = fs.readdirSync('./')
   const monikaDotJsonFile = filesArray.find((x) => x === 'monika.json')
   const monikaDotYamlFile = filesArray.find(
     (x) => x === 'monika.yml' || x === 'monika.yaml'
   )
+  const defaultConfig = monikaDotYamlFile || monikaDotJsonFile
 
-  return monikaDotYamlFile
-    ? `./${monikaDotYamlFile}`
-    : monikaDotJsonFile
-    ? `./${monikaDotJsonFile}`
-    : './monika.yml'
+  return defaultConfig ? [defaultConfig] : []
 }
+
 class Monika extends Command {
   static description = 'Monika command line monitoring tool'
 
   static examples = [
     'monika',
     'monika --logs',
-    'monika -r 1 --id 1,2,5,7',
+    'monika -r 1 --id "weather, stocks, 5, 7"',
     'monika --create-config',
-    'monika --config https://raw.githubusercontent.com/hyperjumptech/monika/main/monika.example.json --config-interval 900',
+    'monika --config https://raw.githubusercontent.com/hyperjumptech/monika/main/monika.example.yml --config-interval 900',
   ]
 
   static flags = {
@@ -100,20 +102,27 @@ class Monika extends Command {
       char: 'p', // (p)ostman
       description: 'Run Monika using a Postman json file.',
       multiple: false,
-      exclusive: ['config', 'har'],
+      exclusive: ['har'],
+    }),
+
+    har: flags.string({
+      char: 'H', // (H)ar file to
+      description: 'Run Monika using a HAR file',
+      multiple: false,
+      exclusive: ['postman'],
     }),
 
     logs: flags.boolean({
       char: 'l', // prints the (l)ogs
-      description: 'print all logs.',
+      description: 'Print all logs.',
     }),
 
     flush: flags.boolean({
-      description: 'flush logs',
+      description: 'Flush logs',
     }),
 
     verbose: flags.boolean({
-      description: 'show verbose log messages',
+      description: 'Show verbose log messages',
       default: false,
     }),
 
@@ -125,28 +134,21 @@ class Monika extends Command {
 
     repeat: flags.string({
       char: 'r', // (r)epeat
-      description: 'repeats the test run n times',
+      description: 'Repeats the test run n times',
       multiple: false,
     }),
 
     stun: flags.integer({
       char: 's', // (s)stun
-      description: 'interval in seconds to check STUN server',
+      description: 'Interval in seconds to check STUN server',
       multiple: false,
       default: 20,
     }),
 
     id: flags.string({
       char: 'i', // (i)ds to run
-      description: 'specific probe ids to run',
+      description: 'Define specific probe ids to run',
       multiple: false,
-    }),
-
-    har: flags.string({
-      char: 'H', // (H)ar file to
-      description: 'Run Monika using a HAR file',
-      multiple: false,
-      exclusive: ['config', 'postman'],
     }),
 
     output: flags.string({
@@ -156,7 +158,12 @@ class Monika extends Command {
     }),
 
     force: flags.boolean({
-      description: 'force command',
+      description: 'Force commands with a yes whenever Y/n is prompted.',
+      default: false,
+    }),
+
+    summary: flags.boolean({
+      description: 'Display a summary of monika running stats',
       default: false,
     }),
 
@@ -170,6 +177,7 @@ class Monika extends Command {
     }),
   }
 
+  /* eslint-disable complexity */
   async run() {
     const { flags } = this.parse(Monika)
 
@@ -203,10 +211,16 @@ class Monika extends Command {
           log.info('Cancelled. Thank you.')
         }
         await closeLog()
+
         return
       }
 
-      await initLoaders(flags)
+      if (flags.summary) {
+        printSummary(this.config)
+        return
+      }
+
+      await initLoaders(flags, this.config)
 
       let scheduledTasks: ScheduledTask[] = []
       let abortCurrentLooper: (() => void) | undefined
@@ -252,6 +266,9 @@ class Monika extends Command {
         const sanitizedProbe = probesToRun.map((probe: Probe) =>
           sanitizeProbe(probe, probe.id)
         )
+
+        // save some data into files for later
+        savePidFile(flags.config, config)
 
         // emit the sanitized probe
         if (sanitizedProbe) {
@@ -380,6 +397,8 @@ Please refer to the Monika documentations on how to how to configure notificatio
             case 'slack':
               startupMessage += `    URL: ${item.data.url}\n`
               break
+            case 'lark':
+              startupMessage += `    URL: ${item.data.url}\n`
           }
         })
       }

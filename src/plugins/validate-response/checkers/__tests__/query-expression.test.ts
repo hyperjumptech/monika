@@ -23,19 +23,16 @@
  **********************************************************************************/
 
 import { expect } from 'chai'
-import { AxiosResponseWithExtraData } from '../../../../interfaces/request'
 import queryExpression from '../query-expression'
 
 describe('queryExpression', () => {
   it('should handle response time query', () => {
     const res = {
+      data: '',
+      status: 200,
       headers: {},
-      config: {
-        extraData: {
-          responseTime: 150,
-        },
-      },
-    } as AxiosResponseWithExtraData
+      responseTime: 150,
+    }
 
     const result = queryExpression(res, 'response.time > 1000')
 
@@ -44,10 +41,11 @@ describe('queryExpression', () => {
 
   it('should handle response status query', () => {
     const res = {
+      data: '',
       status: 200,
       headers: {},
-      config: {},
-    } as AxiosResponseWithExtraData
+      responseTime: 200,
+    }
 
     const result = queryExpression(res, 'response.status != 200')
 
@@ -56,10 +54,11 @@ describe('queryExpression', () => {
 
   it('should handle response size query', () => {
     const res = {
+      data: '',
       status: 200,
       headers: { 'content-length': 2000 },
-      config: {},
-    } as AxiosResponseWithExtraData
+      responseTime: 200,
+    }
 
     const result = queryExpression(res, 'response.size < 1000')
 
@@ -68,10 +67,11 @@ describe('queryExpression', () => {
 
   it('should handle response headers query', () => {
     const res = {
+      data: '',
       status: 200,
       headers: { 'Content-Type': 'application/json' },
-      config: {},
-    } as AxiosResponseWithExtraData
+      responseTime: 200,
+    }
 
     const result = queryExpression(
       res,
@@ -85,11 +85,11 @@ describe('queryExpression', () => {
     const res = {
       status: 200,
       headers: {},
-      config: {},
+      responseTime: 200,
       data: {
         message: 'Hello',
       },
-    } as AxiosResponseWithExtraData
+    }
 
     const result = queryExpression(
       res,

@@ -24,7 +24,7 @@
 
 import { Probe, ProbeAlert } from '../../interfaces/probe'
 import { Notification } from '../../interfaces/notification'
-import { AxiosResponseWithExtraData } from '../../interfaces/request'
+import { ProbeRequestResponse } from '../../interfaces/request'
 import { log } from '../../utils/pino'
 import { saveProbeRequestLog, saveNotificationLog } from './history'
 
@@ -35,7 +35,7 @@ export class RequestLog {
 
   private requestIndex: number
 
-  private response?: AxiosResponseWithExtraData
+  private response?: ProbeRequestResponse
 
   private triggeredAlerts: ProbeAlert[] = []
 
@@ -61,7 +61,7 @@ export class RequestLog {
     this.requestIndex = requestIndex
   }
 
-  setResponse(response: AxiosResponseWithExtraData) {
+  setResponse(response: ProbeRequestResponse) {
     this.response = response
   }
 
@@ -100,7 +100,7 @@ export class RequestLog {
     const probeMsg = `${this.iteration} id:${this.probe.id} ${
       this.response?.status || '-'
     } ${this.request.method} ${this.request.url} ${
-      this.response?.config.extraData?.responseTime || '-'
+      this.response?.responseTime || '-'
     }ms`
 
     if (printedNotification) {

@@ -21,128 +21,147 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  *
  * SOFTWARE.                                                                      *
  **********************************************************************************/
-
 import axios from 'axios'
-import { NotificationMessage } from '../../../interfaces/notification'
-import { TeamsData } from './../../../interfaces/data'
 
-export const sendTeams = async (
-  data: TeamsData,
+import { NotificationMessage } from '../../../interfaces/notification'
+import { LarkData } from '../../../interfaces/data'
+import { log } from '../../../utils/pino'
+
+export const sendLark = async (
+  data: LarkData,
   message: NotificationMessage
 ) => {
+  const notifType =
+    message.meta.type[0].toUpperCase() + message.meta.type.substring(1)
+  let larkMessage
+
   switch (message.meta.type) {
     case 'start':
-    case 'termination': {
-      await axios({
-        method: 'POST',
-        url: data.url,
-        data: {
-          '@type': 'MessageCard',
-          themeColor: '3BAFDA',
-          summary: message.summary,
-          sections: [
-            {
-              activityTitle: message.subject,
-              markdown: true,
-              facts: [
-                {
-                  name: 'Message',
-                  value: message.body,
-                },
+    case 'termination':
+      larkMessage = {
+        msg_type: 'post',
+        content: {
+          post: {
+            en_us: {
+              title: 'Monika Notification',
+              content: [
+                [
+                  {
+                    tag: 'text',
+                    text: `New ${notifType} from Monika\n`,
+                  },
+                  {
+                    tag: 'text',
+                    text: `${message.summary}\n`,
+                  },
+                ],
               ],
             },
-          ],
+          },
         },
-      })
+      }
       break
-    }
     case 'incident':
-    case 'recovery': {
-      const notifType =
-        message.meta.type[0].toUpperCase() + message.meta.type.substring(1)
-      const notifColor = message.meta.type === 'incident' ? 'DF202E' : '8CC152'
-
-      await axios({
-        method: 'POST',
-        url: data.url,
-        data: {
-          '@type': 'MessageCard',
-          themeColor: notifColor,
-          summary: `New ${notifType} from Monika`,
-          sections: [
-            {
-              activityTitle: `New ${notifType} from Monika`,
-              facts: [
-                {
-                  name: 'Message',
-                  value: message.summary,
-                },
-                {
-                  name: 'URL',
-                  value: `[${message.meta.url}](${message.meta.url})`,
-                },
-                {
-                  name: 'Time',
-                  value: message.meta.time,
-                },
-                {
-                  name: 'From',
-                  value: message.meta.monikaInstance,
-                },
-                { name: 'Version', value: message.meta.version },
+    case 'recovery':
+      larkMessage = {
+        msg_type: 'post',
+        content: {
+          post: {
+            en_us: {
+              title: 'Monika Notification',
+              content: [
+                [
+                  {
+                    tag: 'text',
+                    text: `New ${notifType} from Monika\n`,
+                  },
+                  {
+                    tag: 'text',
+                    text: `Message: ${message.summary}\n`,
+                  },
+                  {
+                    tag: 'a',
+                    text: `URL: ${message.meta.url}\n`,
+                    href: `${message.meta.url}`,
+                  },
+                  {
+                    tag: 'text',
+                    text: `Time: ${message.meta.time}\n`,
+                  },
+                  {
+                    tag: 'text',
+                    text: `From: ${message.meta.monikaInstance}`,
+                  },
+                  {
+                    tag: 'text',
+                    text: `Version: ${message.meta.version}`,
+                  },
+                ],
               ],
-              markdown: true,
             },
-          ],
+          },
         },
-      })
+      }
       break
-    }
-    case 'status-update': {
-      await axios({
-        method: 'POST',
-        url: data.url,
-        data: {
-          '@type': 'MessageCard',
-          summary: message.summary,
-          sections: [
-            {
-              activityTitle: 'Monika Status',
-              activitySubtitle: message.subject,
-              facts: [
+    case 'status-update':
+      larkMessage = {
+        msg_type: 'post',
+        content: {
+          post: {
+            en_us: {
+              title: 'Monika Status Update',
+              content: [
                 {
-                  name: 'Host',
-                  value: message.meta.monikaInstance,
+                  tag: 'a',
+                  text: `${message.meta.monikaInstance}`,
+                  href: `${message.meta.monikaInstance}`,
                 },
                 {
-                  name: 'Number of Probes',
-                  value: message.meta.numberOfProbes,
+                  tag: 'text',
+                  value: `${message.meta.numberOfProbes}`,
                 },
                 {
-                  name: 'Average Response Time',
+                  tag: 'text',
                   value: `${message.meta.averageResponseTime} ms in the last 24 hours`,
                 },
                 {
-                  name: 'Incidents',
+                  tag: 'text',
                   value: `${message.meta.numberOfIncidents} in the last 24 hours`,
                 },
                 {
-                  name: 'Recoveries',
+                  tag: 'text',
                   value: `${message.meta.numberOfRecoveries} in the last 24 hours`,
                 },
                 {
-                  name: 'Notifications',
+                  tag: 'text',
                   value: message.meta.numberOfSentNotifications,
                 },
               ],
             },
-          ],
+          },
         },
-      })
+      }
       break
-    }
-
     default:
       break
+  }
+
+  try {
+    const res = await axios({
+      method: 'POST',
+      url: data.url,
+      headers: {
+        Accept: 'application/json',
+        'Content-type': 'application/json',
+      },
+      data: larkMessage,
+    })
+
+    return res
+  } catch (error) {
+    log.error(
+      "Couldn't send notification to Lark Suite. Got this error: " +
+        error.message
+    )
   }
 }

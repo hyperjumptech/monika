@@ -32,6 +32,7 @@ import {
   WebhookData,
   WhatsappData,
   WorkplaceData,
+  LarkData,
 } from './data'
 
 export type Notification =
@@ -47,6 +48,7 @@ export type Notification =
   | DiscordNotification
   | WorkplaceNotification
   | DesktopNotification
+  | LarkNotification
 
 interface BaseNotification {
   id: string
@@ -114,6 +116,11 @@ interface DesktopNotification extends BaseNotification {
   data: undefined
 }
 
+interface LarkNotification extends BaseNotification {
+  type: 'lark'
+  data: LarkData
+}
+
 export interface NotificationMessage {
   subject: string
   body: string
@@ -132,6 +139,7 @@ interface BaseNotificationMessageMeta {
   publicIpAddress: string
   [key: string]: unknown
   monikaInstance?: any
+  version: string
 }
 interface NotificationIncidentRecoveryMessageMeta
   extends BaseNotificationMessageMeta {
