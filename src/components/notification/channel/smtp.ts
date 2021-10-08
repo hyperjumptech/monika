@@ -49,7 +49,10 @@ export const sendSmtpMail = async (transporter: Mail, opt: Mail.Options) => {
   const email = {
     body: {
       name: `${opt.to}`,
-      intro: [`${opt.subject}`, `${opt.text}`],
+      intro: [
+        `${opt.subject}`,
+        `<div style="white-space: pre-wrap;">${opt.text}</div>`,
+      ],
     },
   }
 
