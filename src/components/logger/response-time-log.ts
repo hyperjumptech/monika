@@ -22,103 +22,56 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-export interface MailData {
-  recipients: string[]
+import { differenceInHours } from 'date-fns'
+import { ProbeRequestResponse } from '../../interfaces/request'
+
+// global variable
+// we can say it is safe to use global variable here since the probe is processed sequentially as mentioned in probe/index.ts line 143: intentionally wait for a request to finish before processing next request in loop
+let startTime24HourCycle = new Date()
+let responseCount = 0
+let totalResponseTime = 0
+export let maxResponseTime = 0
+export let minResponseTime = 0
+export let averageResponseTime = 0
+
+export function getLogLifeTimeInHour() {
+  const now = new Date()
+  const diff = differenceInHours(now, startTime24HourCycle)
+  return diff || 1
 }
 
-export interface MailgunData extends MailData {
-  apiKey: string
-  domain: string
-  username?: string
+export function resetlogs() {
+  startTime24HourCycle = new Date()
+  responseCount = 0
+  totalResponseTime = 0
+  maxResponseTime = 0
+  minResponseTime = 0
+  averageResponseTime = 0
 }
 
-export interface SendgridData extends MailData {
-  apiKey: string
-  sender: string
+export function checkIs24HourHasPassed() {
+  const now = new Date()
+  const diffInHours = differenceInHours(now, startTime24HourCycle)
+  if (diffInHours > 24) {
+    return true
+  }
+
+  return false
 }
 
-export interface SMTPData extends MailData {
-  hostname: string
-  port: number
-  username: string
-  password: string
-}
+export function logResponseTime(probeRes: ProbeRequestResponse) {
+  responseCount += 1
 
-export interface TeamsData {
-  url: string
-}
+  if (responseCount === 1) {
+    // first time
+    maxResponseTime = probeRes.responseTime
+    minResponseTime = probeRes.responseTime
+  } else if (probeRes.responseTime > maxResponseTime) {
+    maxResponseTime = probeRes.responseTime
+  } else if (probeRes.responseTime < minResponseTime) {
+    minResponseTime = probeRes.responseTime
+  }
 
-export interface WebhookData {
-  url: string
-  body: string
-}
-
-export interface MonikaNotifData {
-  url: string
-  body: MonikaNotifDataBody
-}
-
-export type MonikaNotifDataBody =
-  | MonikaAlertNotifDataBody
-  | MonikaStartAndTerminationNotifDataBody
-  | MonikaStatusUpdateNotifDataBody
-
-interface MonikaAlertNotifDataBody {
-  type: 'incident' | 'recovery'
-  alert: string
-  url: string
-  time: string
-  monika: string
-}
-
-interface MonikaStartAndTerminationNotifDataBody {
-  type: 'start' | 'termination'
-  ip_address: string
-}
-
-interface MonikaStatusUpdateNotifDataBody {
-  type: 'status-update'
-  time: string
-  monika: string
-  numberOfProbes: string
-  maxResponseTime: string
-  minResponseTime: string
-  averageResponseTime: string
-  numberOfIncidents: string
-  numberOfRecoveries: string
-  numberOfSentNotifications: string
-}
-
-export interface TelegramData {
-  group_id: string
-  bot_token: string
-  body: string
-}
-
-export interface WebhookDataBody {
-  url: string
-  time: string
-  alert: string
-}
-
-export interface WhatsappData extends MailData {
-  url: string
-  username: string
-  password: string
-}
-
-export interface WorkplaceData {
-  thread_id: string
-  access_token: string
-  body: string
-}
-
-export interface LarkData {
-  url: string
-}
-
-export interface DBLimit {
-  max_db_size: number
-  deleted_data: number
-  cron_schedule: string
+  totalResponseTime += probeRes.responseTime
+  averageResponseTime = Math.floor(totalResponseTime / responseCount)
 }
