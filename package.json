@@ -52,6 +52,7 @@
     "joi": "^17.4.0",
     "js-yaml": "^4.1.0",
     "lodash": "^4.17.21",
+    "macaddress": "^0.5.2",
     "mailgen": "^2.0.15",
     "mailgun.js": "^3.5.4",
     "node-cron": "3.0.0",
