@@ -91,7 +91,7 @@ class SymonClient {
           'x-api-key': this.apiKey,
         },
       })
-      .then((res) => res.data)
+      .then((res) => res.data?.monikaId)
   }
 }
 
