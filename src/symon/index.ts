@@ -85,13 +85,12 @@ class SymonClient {
   async initiate() {
     const handshakeData = await getHandshakeData()
     this.monikaId = await axios
-      // TODO: Change the pathname when the endpoint is ready in symon-saas
-      .post(`${this.url}/v1/monika/handshake`, handshakeData, {
+      .post(`${this.url}/v1/monika/client-handshake`, handshakeData, {
         headers: {
           'x-api-key': this.apiKey,
         },
       })
-      .then((res) => res.data?.monikaId)
+      .then((res) => res.data?.data.monikaId)
   }
 }
 
