@@ -22,46 +22,56 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import * as nodemailer from 'nodemailer'
-import Mail from 'nodemailer/lib/mailer'
-import Mailgen from 'mailgen'
+import { differenceInHours } from 'date-fns'
+import { ProbeRequestResponse } from '../../interfaces/request'
 
-import { SMTPData } from '../../../interfaces/data'
+// global variable
+// we can say it is safe to use global variable here since the probe is processed sequentially as mentioned in probe/index.ts line 143: intentionally wait for a request to finish before processing next request in loop
+let startTime24HourCycle = new Date()
+let responseCount = 0
+let totalResponseTime = 0
+export let maxResponseTime = 0
+export let minResponseTime = 0
+export let averageResponseTime = 0
 
-export const createSmtpTransport = (cfg: SMTPData) => {
-  return nodemailer.createTransport({
-    host: cfg.hostname,
-    port: cfg.port,
-    auth: { user: cfg.username, pass: cfg.password },
-  })
+export function getLogLifeTimeInHour() {
+  const now = new Date()
+  const diff = differenceInHours(now, startTime24HourCycle)
+  return diff || 1
 }
 
-export const sendSmtpMail = async (transporter: Mail, opt: Mail.Options) => {
-  const mailGenerator = new Mailgen({
-    theme: 'default',
-    product: {
-      name: 'Monika',
-      link: 'https://monika.hyperjump.tech/',
-      logo:
-        'https://raw.githubusercontent.com/hyperjumptech/monika/main/docs/public/monika.svg',
-    },
-  })
-  const email = {
-    body: {
-      name: `${opt.to}`,
-      intro: [
-        `${opt.subject}`,
-        `<div style="white-space: pre-wrap;">${opt.text}</div>`,
-      ],
-    },
+export function resetlogs() {
+  startTime24HourCycle = new Date()
+  responseCount = 0
+  totalResponseTime = 0
+  maxResponseTime = 0
+  minResponseTime = 0
+  averageResponseTime = 0
+}
+
+export function checkIs24HourHasPassed() {
+  const now = new Date()
+  const diffInHours = differenceInHours(now, startTime24HourCycle)
+  if (diffInHours > 24) {
+    return true
   }
 
-  const emailTemplate = mailGenerator.generate(email)
+  return false
+}
 
-  return transporter.sendMail({
-    from: opt.from,
-    to: opt.to,
-    subject: opt.subject,
-    html: emailTemplate,
-  })
+export function logResponseTime(probeRes: ProbeRequestResponse) {
+  responseCount += 1
+
+  if (responseCount === 1) {
+    // first time
+    maxResponseTime = probeRes.responseTime
+    minResponseTime = probeRes.responseTime
+  } else if (probeRes.responseTime > maxResponseTime) {
+    maxResponseTime = probeRes.responseTime
+  } else if (probeRes.responseTime < minResponseTime) {
+    minResponseTime = probeRes.responseTime
+  }
+
+  totalResponseTime += probeRes.responseTime
+  averageResponseTime = Math.floor(totalResponseTime / responseCount)
 }

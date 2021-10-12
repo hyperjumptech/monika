@@ -22,46 +22,77 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import * as nodemailer from 'nodemailer'
-import Mail from 'nodemailer/lib/mailer'
-import Mailgen from 'mailgen'
+import { hostname } from 'os'
+import { getOSName } from '../components/notification/alert-message'
+import getIp from '../utils/ip'
+import {
+  getPublicIp,
+  getPublicNetworkInfo,
+  publicIpAddress,
+  publicNetworkInfo,
+} from '../utils/public-ip'
+import mac from 'macaddress'
+import axios from 'axios'
 
-import { SMTPData } from '../../../interfaces/data'
-
-export const createSmtpTransport = (cfg: SMTPData) => {
-  return nodemailer.createTransport({
-    host: cfg.hostname,
-    port: cfg.port,
-    auth: { user: cfg.username, pass: cfg.password },
-  })
+type SymonHandshakeData = {
+  macAddress: string
+  host: string
+  publicIp: string
+  privateIp: string
+  isp: string
+  city: string
+  pid: number
 }
 
-export const sendSmtpMail = async (transporter: Mail, opt: Mail.Options) => {
-  const mailGenerator = new Mailgen({
-    theme: 'default',
-    product: {
-      name: 'Monika',
-      link: 'https://monika.hyperjump.tech/',
-      logo:
-        'https://raw.githubusercontent.com/hyperjumptech/monika/main/docs/public/monika.svg',
-    },
-  })
-  const email = {
-    body: {
-      name: `${opt.to}`,
-      intro: [
-        `${opt.subject}`,
-        `<div style="white-space: pre-wrap;">${opt.text}</div>`,
-      ],
-    },
+const getHandshakeData = async (): Promise<SymonHandshakeData> => {
+  await getPublicNetworkInfo()
+  await getPublicIp()
+  await getOSName()
+
+  const macAddress = await mac.one()
+  const host = hostname()
+  const publicIp = publicIpAddress
+  const privateIp = getIp()
+  const isp = publicNetworkInfo.isp
+  const city = publicNetworkInfo.city
+  const pid = process.pid
+
+  return {
+    macAddress,
+    host,
+    publicIp,
+    privateIp,
+    isp,
+    city,
+    pid,
+  }
+}
+
+class SymonClient {
+  url = ''
+
+  apiKey = ''
+
+  monikaId = ''
+
+  configHash = ''
+
+  constructor(url: string, apiKey: string) {
+    this.url = url
+    this.apiKey = apiKey
   }
 
-  const emailTemplate = mailGenerator.generate(email)
-
-  return transporter.sendMail({
-    from: opt.from,
-    to: opt.to,
-    subject: opt.subject,
-    html: emailTemplate,
-  })
+  async initiate() {
+    const handshakeData = await getHandshakeData()
+    this.monikaId = await axios
+      // TODO: Change the pathname when the endpoint is ready in symon-saas
+      .post(`${this.url}/v1/monika/handshake`, handshakeData, {
+        headers: {
+          'x-api-key': this.apiKey,
+        },
+      })
+      .then((res) => res.data?.monikaId)
+  }
 }
+
+export default SymonClient

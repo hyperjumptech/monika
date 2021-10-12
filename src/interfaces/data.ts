@@ -81,6 +81,8 @@ interface MonikaStatusUpdateNotifDataBody {
   time: string
   monika: string
   numberOfProbes: string
+  maxResponseTime: string
+  minResponseTime: string
   averageResponseTime: string
   numberOfIncidents: string
   numberOfRecoveries: string

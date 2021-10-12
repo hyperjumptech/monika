@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.3] - 2021-10-07
+
+### Fixed
+
+- Docs: minor url path installation (#462)
+- Using yaml format with remote configuration (#459)
+- In notification message, move Monika's version to new line (#452)
+- Config file changes not detected (#447)
+
+### Added
+
+- Show which config is being used (#460)
+- Limit database size (#444)
+- Show summary of currently running Monika (#440)
+
 ## [1.6.2] - 2021-09-28
 
 ### Fixed
