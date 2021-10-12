@@ -44,7 +44,7 @@ type SymonHandshakeData = {
   pid: number
 }
 
-const getHanshakeData = async (): Promise<SymonHandshakeData> => {
+const getHandshakeData = async (): Promise<SymonHandshakeData> => {
   await getPublicNetworkInfo()
   await getPublicIp()
   await getOSName()
@@ -83,7 +83,7 @@ class SymonClient {
   }
 
   async initiate() {
-    const handshakeData = await getHanshakeData()
+    const handshakeData = await getHandshakeData()
     this.monikaId = await axios
       // TODO: Change the pathname when the endpoint is ready in symon-saas
       .post(`${this.url}/v1/monika/handshake`, handshakeData, {
