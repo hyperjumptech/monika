@@ -18,12 +18,13 @@
     "monitoring"
   ],
   "scripts": {
+    "clean": "rm -rf coverage lib tsconfig.tsbuildinfo",
     "preinstall": "node scripts/preinstall.js",
     "pretest": "npm run check-format",
     "posttest": "eslint . --ext .ts --config .eslintrc",
-    "prepack": "rm -rf lib tsconfig.tsbuildinfo && tsc -b && oclif-dev readme",
+    "prepack": "npm run clean && tsc -b && oclif-dev readme",
     "start": "npm run prepack && ./bin/run",
-    "test": "cross-env NODE_ENV=test nyc --extension .ts mocha --forbid-only \"{src,test}/**/*.test.ts\"",
+    "test": "npm run clean && cross-env NODE_ENV=test nyc --reporter=lcov --extension .ts mocha --forbid-only \"{src,test}/**/*.test.ts\"",
     "prod_test": "cross-env NODE_ENV=test nyc --extension .ts mocha --forbid-only \"prod_test/**/*.test.ts\"",
     "version": "oclif-dev readme && git add README.md",
     "format": "prettier --write .",
