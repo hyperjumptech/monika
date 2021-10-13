@@ -23,6 +23,7 @@
  **********************************************************************************/
 
 import chai, { expect } from 'chai'
+import spies from 'chai-spies'
 import { sendAlerts } from '../../src/components/notification'
 import * as discord from '../../src/components/notification/channel/discord'
 import * as mailgun from '../../src/components/notification/channel/mailgun'
@@ -41,6 +42,8 @@ import {
   WhatsappData,
   LarkData,
 } from '../../src/interfaces/data'
+
+chai.use(spies)
 
 describe('send alerts', () => {
   afterEach(() => {
