@@ -22,6 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import { getContext, setContext } from '../../context'
 import { MonikaNotifDataBody } from '../../interfaces/data'
 import {
   Notification,
@@ -233,25 +234,57 @@ export async function sendNotifications(
   )
 }
 
-export async function sendAlerts({
-  validation,
-  notifications,
-  url,
-  probeState,
-}: {
+type SendAlertsProps = {
+  probeID: string
   validation: ValidatedResponse
   notifications: Notification[]
   url: string
   probeState: string
-}) {
+}
+
+export async function sendAlerts({
+  probeID,
+  validation,
+  notifications,
+  url,
+  probeState,
+}: SendAlertsProps) {
   const ipAddress = getIp()
+  const isRecovery = probeState === 'UP'
   const message = await getMessageForAlert({
+    probeID,
     alert: validation.alert,
     url,
     ipAddress,
-    probeState,
+    isRecovery,
     response: validation.response,
   })
 
+  updateLastIncidentData(isRecovery, probeID, url)
+
   return sendNotifications(notifications, message)
+}
+
+function updateLastIncidentData(
+  isRecovery: boolean,
+  probeID: string,
+  url: string
+) {
+  const { incidents } = getContext()
+
+  if (isRecovery) {
+    // delete last incident
+    const newIncidents = incidents.filter(
+      (incident) =>
+        incident.probeID !== probeID && incident.probeRequestURL !== url
+    )
+
+    setContext({ incidents: newIncidents })
+    return
+  }
+
+  // set incident date time to global context to be used later on recovery notification
+  const newIncident = { probeID, probeRequestURL: url, createdAt: new Date() }
+
+  setContext({ incidents: [...incidents, newIncident] })
 }
