@@ -63,7 +63,11 @@ describe('Symon Handshake', () => {
         return {
           status: 200,
           body: JSON.stringify({
-            monikaId: '1234',
+            statusCode: 'ok',
+            message: 'Successfully handshaked with Symon',
+            data: {
+              monikaId: '1234',
+            },
           }),
         }
       }
