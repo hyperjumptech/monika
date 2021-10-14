@@ -48,6 +48,10 @@ export interface TeamsData {
   url: string
 }
 
+export interface SlackData {
+  url: string
+}
+
 export interface WebhookData {
   url: string
   body: string
