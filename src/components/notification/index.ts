@@ -124,10 +124,7 @@ export async function sendNotifications(
             break
           }
           case 'slack': {
-            await sendSlack({
-              ...notification.data,
-              body: message.body,
-            })
+            await sendSlack(notification.data, message)
             break
           }
           case 'telegram': {
