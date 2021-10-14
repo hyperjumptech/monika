@@ -80,6 +80,7 @@ async function checkThresholdsAndSendAlert(
 
     if ((notifications?.length ?? 0) > 0) {
       await sendAlerts({
+        probeID: probe.id,
         url: url,
         probeState: statusString,
         notifications: notifications ?? [],

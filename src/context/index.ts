@@ -25,16 +25,35 @@
 type Context = {
   // userAgent example: @hyperjumptech/monika/1.2.3 linux-x64 node-14.17.0
   userAgent: string
+  incidents: Incident[]
 }
 
-let context = {
-  userAgent: '',
+type NewContext = {
+  userAgent?: string
+  incidents?: Incident[]
 }
+
+type Incident = {
+  probeID: string
+  probeRequestURL: string
+  createdAt: Date
+}
+
+const initialContext: Context = {
+  userAgent: '',
+  incidents: [],
+}
+
+let context: Context = initialContext
 
 export function getContext(): Context {
   return context
 }
 
-export function setContext(updatedContext: Context) {
-  context = { ...context, ...updatedContext }
+export function setContext(newContext: NewContext) {
+  context = { ...context, ...newContext }
+}
+
+export function resetContext() {
+  context = initialContext
 }
