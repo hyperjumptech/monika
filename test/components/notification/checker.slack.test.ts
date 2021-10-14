@@ -5,7 +5,7 @@ import {
   errorMessage,
   notificationChecker,
 } from '../../../src/components/notification/checker'
-import { WebhookData } from '../../../src/interfaces/data'
+import { SlackData } from '../../../src/interfaces/data'
 
 chai.use(spies)
 
@@ -24,7 +24,7 @@ describe('notificationChecker - slackNotification', () => {
       await notificationChecker([
         {
           ...notificationConfig,
-          data: {} as WebhookData,
+          data: {} as SlackData,
         },
       ])
     } catch (error) {
@@ -44,7 +44,7 @@ describe('notificationChecker - slackNotification', () => {
           ...notificationConfig,
           data: {
             url: 'example',
-          } as WebhookData,
+          } as SlackData,
         },
       ])
     } catch (error) {

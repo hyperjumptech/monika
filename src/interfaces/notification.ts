@@ -33,6 +33,7 @@ import {
   WhatsappData,
   WorkplaceData,
   LarkData,
+  SlackData,
 } from './data'
 
 export type Notification =
@@ -76,7 +77,7 @@ interface WebhookNotification extends BaseNotification {
 
 interface SlackNotification extends BaseNotification {
   type: 'slack'
-  data: WebhookData
+  data: SlackData
 }
 
 interface WhatsappBusinessNotification extends BaseNotification {
