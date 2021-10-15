@@ -37,6 +37,7 @@ import { sendAlerts } from '../notification'
 import { processThresholds } from '../notification/process-server-status'
 import { getLogsAndReport } from '../reporter'
 import { probing } from './probing'
+import { logResponseTime } from '../logger/response-time-log'
 
 // TODO: move this to interface file?
 interface ProbeStatusProcessed {
@@ -79,6 +80,7 @@ async function checkThresholdsAndSendAlert(
 
     if ((notifications?.length ?? 0) > 0) {
       await sendAlerts({
+        probeID: probe.id,
         url: url,
         probeState: statusString,
         notifications: notifications ?? [],
@@ -142,6 +144,8 @@ export async function doProbe(
       // intentionally wait for a request to finish before processing next request in loop
       // eslint-disable-next-line no-await-in-loop
       const probeRes: ProbeRequestResponse = await probing(request, responses)
+
+      logResponseTime(probeRes)
 
       eventEmitter.emit(events.probe.response.received, {
         probe,

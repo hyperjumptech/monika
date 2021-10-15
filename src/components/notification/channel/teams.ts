@@ -119,8 +119,16 @@ export const sendTeams = async (
                   value: message.meta.numberOfProbes,
                 },
                 {
+                  name: 'Maximum Response Time',
+                  value: `${message.meta.maxResponseTime} ms in the last ${message.meta.responseTimelogLifeTimeInHour} hours`,
+                },
+                {
+                  name: 'Minimum Response Time',
+                  value: `${message.meta.maxResponseTime} ms in the last ${message.meta.responseTimelogLifeTimeInHour} hours`,
+                },
+                {
                   name: 'Average Response Time',
-                  value: `${message.meta.averageResponseTime} ms in the last 24 hours`,
+                  value: `${message.meta.averageResponseTime} ms in the last ${message.meta.responseTimelogLifeTimeInHour} hours`,
                 },
                 {
                   name: 'Incidents',

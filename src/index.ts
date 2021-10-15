@@ -50,6 +50,7 @@ import { idFeeder, isIDValid, sanitizeProbe } from './looper'
 import { getEventEmitter } from './utils/events'
 import { log } from './utils/pino'
 import path from 'path'
+import isUrl from 'is-url'
 
 const em = getEventEmitter()
 
@@ -248,9 +249,12 @@ class Monika extends Command {
           !abortCurrentLooper
         )
 
+        // Display config files sued
         for (const x in flags.config) {
-          if (x.length > 0) {
-            this.log('Using config file: ', path.resolve(flags.config[x]))
+          if (isUrl(flags.config[x])) {
+            this.log('Using remote config:', flags.config[x])
+          } else if (flags.config[x].length > 0) {
+            this.log('Using config file:', path.resolve(flags.config[x]))
           }
         }
 

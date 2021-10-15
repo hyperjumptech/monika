@@ -22,38 +22,56 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-type Context = {
-  // userAgent example: @hyperjumptech/monika/1.2.3 linux-x64 node-14.17.0
-  userAgent: string
-  incidents: Incident[]
+import { differenceInHours } from 'date-fns'
+import { ProbeRequestResponse } from '../../interfaces/request'
+
+// global variable
+// we can say it is safe to use global variable here since the probe is processed sequentially as mentioned in probe/index.ts line 143: intentionally wait for a request to finish before processing next request in loop
+let startTime24HourCycle = new Date()
+let responseCount = 0
+let totalResponseTime = 0
+export let maxResponseTime = 0
+export let minResponseTime = 0
+export let averageResponseTime = 0
+
+export function getLogLifeTimeInHour() {
+  const now = new Date()
+  const diff = differenceInHours(now, startTime24HourCycle)
+  return diff || 1
 }
 
-type NewContext = {
-  userAgent?: string
-  incidents?: Incident[]
+export function resetlogs() {
+  startTime24HourCycle = new Date()
+  responseCount = 0
+  totalResponseTime = 0
+  maxResponseTime = 0
+  minResponseTime = 0
+  averageResponseTime = 0
 }
 
-type Incident = {
-  probeID: string
-  probeRequestURL: string
-  createdAt: Date
+export function checkIs24HourHasPassed() {
+  const now = new Date()
+  const diffInHours = differenceInHours(now, startTime24HourCycle)
+  if (diffInHours > 24) {
+    return true
+  }
+
+  return false
 }
 
-const initialContext: Context = {
-  userAgent: '',
-  incidents: [],
-}
+export function logResponseTime(probeRes: ProbeRequestResponse) {
+  responseCount += 1
 
-let context: Context = initialContext
+  if (responseCount === 1) {
+    // first time
+    maxResponseTime = probeRes.responseTime
+    minResponseTime = probeRes.responseTime
+  } else if (probeRes.responseTime > maxResponseTime) {
+    maxResponseTime = probeRes.responseTime
+  } else if (probeRes.responseTime < minResponseTime) {
+    minResponseTime = probeRes.responseTime
+  }
 
-export function getContext(): Context {
-  return context
-}
-
-export function setContext(newContext: NewContext) {
-  context = { ...context, ...newContext }
-}
-
-export function resetContext() {
-  context = initialContext
+  totalResponseTime += probeRes.responseTime
+  averageResponseTime = Math.floor(totalResponseTime / responseCount)
 }

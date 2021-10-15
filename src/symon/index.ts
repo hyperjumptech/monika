@@ -22,38 +22,76 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-type Context = {
-  // userAgent example: @hyperjumptech/monika/1.2.3 linux-x64 node-14.17.0
-  userAgent: string
-  incidents: Incident[]
+import { hostname } from 'os'
+import { getOSName } from '../components/notification/alert-message'
+import getIp from '../utils/ip'
+import {
+  getPublicIp,
+  getPublicNetworkInfo,
+  publicIpAddress,
+  publicNetworkInfo,
+} from '../utils/public-ip'
+import mac from 'macaddress'
+import axios from 'axios'
+
+type SymonHandshakeData = {
+  macAddress: string
+  host: string
+  publicIp: string
+  privateIp: string
+  isp: string
+  city: string
+  pid: number
 }
 
-type NewContext = {
-  userAgent?: string
-  incidents?: Incident[]
+const getHandshakeData = async (): Promise<SymonHandshakeData> => {
+  await getPublicNetworkInfo()
+  await getPublicIp()
+  await getOSName()
+
+  const macAddress = await mac.one()
+  const host = hostname()
+  const publicIp = publicIpAddress
+  const privateIp = getIp()
+  const isp = publicNetworkInfo.isp
+  const city = publicNetworkInfo.city
+  const pid = process.pid
+
+  return {
+    macAddress,
+    host,
+    publicIp,
+    privateIp,
+    isp,
+    city,
+    pid,
+  }
 }
 
-type Incident = {
-  probeID: string
-  probeRequestURL: string
-  createdAt: Date
+class SymonClient {
+  url = ''
+
+  apiKey = ''
+
+  monikaId = ''
+
+  configHash = ''
+
+  constructor(url: string, apiKey: string) {
+    this.url = url
+    this.apiKey = apiKey
+  }
+
+  async initiate() {
+    const handshakeData = await getHandshakeData()
+    this.monikaId = await axios
+      .post(`${this.url}/v1/monika/client-handshake`, handshakeData, {
+        headers: {
+          'x-api-key': this.apiKey,
+        },
+      })
+      .then((res) => res.data?.data.monikaId)
+  }
 }
 
-const initialContext: Context = {
-  userAgent: '',
-  incidents: [],
-}
-
-let context: Context = initialContext
-
-export function getContext(): Context {
-  return context
-}
-
-export function setContext(newContext: NewContext) {
-  context = { ...context, ...newContext }
-}
-
-export function resetContext() {
-  context = initialContext
-}
+export default SymonClient

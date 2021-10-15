@@ -229,3 +229,6 @@ monika-logs.db*
 *.har
 monika.yml
 monika.yaml
+
+# IntelliJ
+.idea/

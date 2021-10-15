@@ -22,44 +22,44 @@
 //  * SOFTWARE.                                                                      *
 //  **********************************************************************************/
 
-// import { expect } from 'chai'
-// import { exec } from 'child_process'
+import { expect } from 'chai'
+import { exec } from 'child_process'
 
-// describe('monika', () => {
-//   it('shows version', (done) => {
-//     exec(`monika -v`, (_, stdout) => {
-//       expect(stdout).to.contain('@hyperjumptech/monika/')
-//       done()
-//     })
-//   })
+describe('monika', () => {
+  it('shows version', (done) => {
+    exec(`monika -v`, (_, stdout) => {
+      expect(stdout).to.contain('@hyperjumptech/monika/')
+      done()
+    })
+  })
 
-//   it('should display error message when no config found', (done) => {
-//     exec(`monika`, (_, _stdout, stderr) => {
-//       expect(stderr).to.contain('Error: Configuration file not found.')
-//       done()
-//     })
-//   })
+  it('should display error message when no config found', (done) => {
+    exec(`monika`, (_, _stdout, stderr) => {
+      expect(stderr).to.contain('Error: Configuration file not found.')
+      done()
+    })
+  })
 
-//   it('shows config generator link when no config found', (done) => {
-//     exec(`monika`, (_, _stdout, stderr) => {
-//       expect(stderr).to.contain(
-//         'https://hyperjumptech.github.io/monika-config-generator/'
-//       )
-//       done()
-//     })
-//   })
+  it('shows config generator link when no config found', (done) => {
+    exec(`monika`, (_, _stdout, stderr) => {
+      expect(stderr).to.contain(
+        'https://hyperjumptech.github.io/monika-config-generator/'
+      )
+      done()
+    })
+  })
 
-//   it('shows starting message with valid json config', (done) => {
-//     exec(`monika -c ./monika.example.json`, (_, stdout) => {
-//       expect(stdout).to.contain('Starting Monika.')
-//       done()
-//     })
-//   })
+  it('shows starting message with valid json config', (done) => {
+    exec(`monika -c ./monika.example.json`, (_, stdout) => {
+      expect(stdout).to.contain('Starting Monika.')
+      done()
+    })
+  })
 
-//   it('shows starting message with valid yaml config', (done) => {
-//     exec(`monika -c ./monika.example.yml`, (_, stdout) => {
-//       expect(stdout).to.contain('Starting Monika.')
-//       done()
-//     })
-//   })
-// })
+  it('shows starting message with valid yaml config', (done) => {
+    exec(`monika -c ./monika.example.yml`, (_, stdout) => {
+      expect(stdout).to.contain('Starting Monika.')
+      done()
+    })
+  })
+})

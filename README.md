@@ -1,6 +1,6 @@
 ![](https://raw.githubusercontent.com/hyperjumptech/monika/main/docs/public/monika.svg)
 
-[![Build Status](https://github.com/hyperjumptech/monika/workflows/Node.js%20CI/badge.svg?event=push&branch=main)](https://github.com/hyperjumptech/monika/actions)
+[![Build Status](https://github.com/hyperjumptech/monika/workflows/Node.js%20CI/badge.svg?event=push&branch=main)](https://github.com/hyperjumptech/monika/actions) [![codecov](https://codecov.io/gh/hyperjumptech/monika/branch/main/graph/badge.svg?token=O3WVT7DP6F)](https://codecov.io/gh/hyperjumptech/monika)
 
 # About
 
