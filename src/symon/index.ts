@@ -32,7 +32,7 @@ import {
   publicNetworkInfo,
 } from '../utils/public-ip'
 import mac from 'macaddress'
-import axios from 'axios'
+import axios, { AxiosInstance } from 'axios'
 
 type SymonHandshakeData = {
   macAddress: string
@@ -42,6 +42,18 @@ type SymonHandshakeData = {
   isp: string
   city: string
   pid: number
+}
+
+type SymonClientEvent = {
+  event: 'incident' | 'recovery'
+  alertId: string
+  response: {
+    status: number
+    time?: number
+    size?: number
+    headers?: Record<string, unknown>
+    body?: unknown
+  }
 }
 
 const getHandshakeData = async (): Promise<SymonHandshakeData> => {
@@ -77,20 +89,28 @@ class SymonClient {
 
   configHash = ''
 
+  httpClient: AxiosInstance
+
   constructor(url: string, apiKey: string) {
     this.url = url
     this.apiKey = apiKey
+    this.httpClient = axios.create({
+      baseURL: `${url}/v1/monika`,
+      headers: {
+        'x-api-key': apiKey,
+      },
+    })
   }
 
   async initiate() {
     const handshakeData = await getHandshakeData()
-    this.monikaId = await axios
-      .post(`${this.url}/v1/monika/client-handshake`, handshakeData, {
-        headers: {
-          'x-api-key': this.apiKey,
-        },
-      })
+    this.monikaId = await this.httpClient
+      .post('/client-handshake', handshakeData)
       .then((res) => res.data?.data.monikaId)
+  }
+
+  async notifyEvent(event: SymonClientEvent) {
+    await this.httpClient.post('/events', { monikaId: this.monikaId, ...event })
   }
 }
 
