@@ -22,8 +22,13 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import axios, { AxiosInstance } from 'axios'
+import mac from 'macaddress'
 import { hostname } from 'os'
+
 import { getOSName } from '../components/notification/alert-message'
+import { Config } from '../interfaces/config'
+import { md5Hash } from '../utils/hash'
 import getIp from '../utils/ip'
 import {
   getPublicIp,
@@ -31,8 +36,7 @@ import {
   publicIpAddress,
   publicNetworkInfo,
 } from '../utils/public-ip'
-import mac from 'macaddress'
-import axios, { AxiosInstance } from 'axios'
+import { Probe } from '../interfaces/probe'
 
 type SymonHandshakeData = {
   macAddress: string
@@ -55,6 +59,10 @@ type SymonClientEvent = {
     body?: unknown
   }
 }
+
+type ConfigListener = (config: Config) => void
+
+const isTestEnvironment = process.env.NODE_ENV === 'test' || process.env.CI
 
 const getHandshakeData = async (): Promise<SymonHandshakeData> => {
   await getPublicNetworkInfo()
@@ -81,19 +89,19 @@ const getHandshakeData = async (): Promise<SymonHandshakeData> => {
 }
 
 class SymonClient {
-  url = ''
-
-  apiKey = ''
-
   monikaId = ''
+
+  config: Config | null = null
 
   configHash = ''
 
-  httpClient: AxiosInstance
+  fetchProbesInterval = 60000 // 1 minute
+
+  private httpClient: AxiosInstance
+
+  private configListeners: ConfigListener[] = []
 
   constructor(url: string, apiKey: string) {
-    this.url = url
-    this.apiKey = apiKey
     this.httpClient = axios.create({
       baseURL: `${url}/v1/monika`,
       headers: {
@@ -103,14 +111,64 @@ class SymonClient {
   }
 
   async initiate() {
-    const handshakeData = await getHandshakeData()
-    this.monikaId = await this.httpClient
-      .post('/client-handshake', handshakeData)
-      .then((res) => res.data?.data.monikaId)
+    this.monikaId = await this.handshake()
+
+    await this.fetchProbesAndUpdateConfig()
+    if (!isTestEnvironment) {
+      setInterval(this.fetchProbesAndUpdateConfig, this.fetchProbesInterval)
+    }
   }
 
   async notifyEvent(event: SymonClientEvent) {
     await this.httpClient.post('/events', { monikaId: this.monikaId, ...event })
+  }
+
+  // monika subscribes to config update by providing listener callback
+  onConfig(listener: ConfigListener) {
+    if (this.config) listener(this.config)
+
+    this.configListeners.push(listener)
+
+    // return unsubscribe function
+    return () => {
+      const index = this.configListeners.findIndex((cl) => cl === listener)
+      this.configListeners.splice(index, 1)
+    }
+  }
+
+  private async handshake(): Promise<string> {
+    const handshakeData = await getHandshakeData()
+    return this.httpClient
+      .post('/client-handshake', handshakeData)
+      .then((res) => res.data?.data.monikaId)
+  }
+
+  private async fetchProbes() {
+    return this.httpClient
+      .get<{ data: Probe[] }>(`/probes`, {
+        params: {
+          monikaId: this.monikaId,
+          configHash: this.configHash || undefined,
+        },
+      })
+      .then((res) => res.data.data)
+  }
+
+  private updateConfig(newConfig: Config) {
+    const newHash = md5Hash(newConfig)
+
+    if (this.configHash !== newHash) {
+      this.config = newConfig
+      this.configHash = newHash
+      this.configListeners.forEach((listener) => {
+        listener(newConfig)
+      })
+    }
+  }
+
+  private async fetchProbesAndUpdateConfig() {
+    const probes = await this.fetchProbes()
+    this.updateConfig({ probes })
   }
 }
 
