@@ -96,7 +96,8 @@ export async function getMessageForAlert({
     const { status } = response
     const isHTTPStatusCode = status >= 100 && status <= 599
 
-    if (!alert.message) return ''
+    if (!alert.message)
+      return `Response status: ${response.status}; Response time: ${response.responseTime}; Alert: ${alert.query}`
 
     if (!isHTTPStatusCode) {
       switch (status) {
