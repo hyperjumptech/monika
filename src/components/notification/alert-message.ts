@@ -91,13 +91,17 @@ export async function getMessageForAlert({
   }
   const getExpectedMessage = (
     alert: ProbeAlert,
-    response: ProbeRequestResponse
+    response: ProbeRequestResponse,
+    isRecovery: boolean
   ) => {
     const { status } = response
     const isHTTPStatusCode = status >= 100 && status <= 599
 
-    if (!alert.message)
-      return `Response status: ${response.status}; Response time: ${response.responseTime}; Alert: ${alert.query}`
+    if (!alert.message) {
+      if (isRecovery)
+        return `The request is back to normal and pass the query: ${alert.query}`
+      return `The request failed because the response does not pass the query: ${alert.query}. The actual response status is ${response.status} and the response time is ${response.responseTime}.`
+    }
 
     if (!isHTTPStatusCode) {
       switch (status) {
@@ -131,7 +135,7 @@ export async function getMessageForAlert({
     isRecovery,
     lastIncident?.createdAt
   )
-  const expectedMessage = getExpectedMessage(alert, response)
+  const expectedMessage = getExpectedMessage(alert, response, isRecovery)
   const bodyString = `Message: ${recoveryMessage}${expectedMessage}
 
 URL: ${meta.url}
