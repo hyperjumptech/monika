@@ -145,7 +145,12 @@ class SymonClient {
 
   private async fetchProbes() {
     return this.httpClient
-      .get<{ data: Probe[] }>('/probes')
+      .get<{ data: Probe[] }>(`/probes`, {
+        params: {
+          monikaId: this.monikaId,
+          configHash: this.configHash || undefined,
+        },
+      })
       .then((res) => res.data.data)
   }
 
