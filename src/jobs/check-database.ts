@@ -42,7 +42,7 @@ async function deleteData(config: Config) {
   const { db_limit } = config
   const stats = fs.statSync(dbPath)
 
-  if (!db_limit.max_db_size) {
+  if (!db_limit?.max_db_size) {
     return
   }
 

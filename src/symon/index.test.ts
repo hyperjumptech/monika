@@ -27,39 +27,53 @@ import { RequestInterceptor } from 'node-request-interceptor'
 import withDefaultInterceptors from 'node-request-interceptor/lib/presets/default'
 import SymonClient from '.'
 import sinon from 'sinon'
-import chai from 'chai'
-import spies from 'chai-spies'
 import Stun from 'stun'
+import { Config } from '../interfaces/config'
 
-chai.use(spies)
+let interceptor: RequestInterceptor
+let testStunStub: sinon.SinonStub
 
-describe('Symon Handshake', () => {
-  let interceptor: any
-  let testStunStub: any
+beforeEach(() => {
+  interceptor = new RequestInterceptor(withDefaultInterceptors)
 
-  beforeEach(() => {
-    interceptor = new RequestInterceptor(withDefaultInterceptors)
-
-    // mock the stun request
-    testStunStub = sinon.stub(Stun, 'request').resolves({
-      getXorAddress: () => {
-        return {
-          address: '192.168.1.1',
-        }
-      },
-    })
+  interceptor.use((req) => {
+    // mock the call to get isp and city
+    if (req.url.origin === 'http://ip-api.com') {
+      return {
+        status: 200,
+        body: JSON.stringify({
+          city: 'jakarta',
+          isp: 'hyperjump',
+        }),
+      }
+    }
   })
-  afterEach(() => {
-    interceptor.restore()
-    testStunStub.restore()
+
+  // mock the stun request
+  testStunStub = sinon.stub(Stun, 'request').resolves({
+    getXorAddress: () => {
+      return {
+        address: '192.168.1.1',
+      }
+    },
   })
+})
+
+afterEach(() => {
+  interceptor.restore()
+  testStunStub.restore()
+})
+
+describe('Symon initiate', () => {
   it('should send handshake data on initiate', async () => {
     let sentBody = ''
     // mock the outgoing requests
-    interceptor.use((req: any) => {
+    interceptor.use((req) => {
       // mock the handshake to symon
       if (['http://localhost:4000'].includes(req.url.origin)) {
-        sentBody = req.body
+        if (req.url.pathname.endsWith('client-handshake')) {
+          sentBody = req.body!
+        }
         return {
           status: 200,
           body: JSON.stringify({
@@ -68,17 +82,6 @@ describe('Symon Handshake', () => {
             data: {
               monikaId: '1234',
             },
-          }),
-        }
-      }
-
-      // mock the call to get isp and city
-      if (['http://ip-api.com'].includes(req.url.origin)) {
-        return {
-          status: 200,
-          body: JSON.stringify({
-            city: 'jakarta',
-            isp: 'hyperjump',
           }),
         }
       }
@@ -96,5 +99,91 @@ describe('Symon Handshake', () => {
     expect(body.city).equals('jakarta')
     expect(body.host).length.greaterThan(0)
     expect(body.privateIp).length.greaterThan(0)
+  })
+
+  it('should fetch probes config on initiate', async () => {
+    const config: Config = {
+      probes: [
+        {
+          id: '1',
+          name: 'test',
+          requests: [],
+          incidentThreshold: 5,
+          recoveryThreshold: 5,
+          alerts: [],
+        },
+      ],
+    }
+
+    interceptor.use((req) => {
+      if (req.url.origin === 'http://localhost:4000') {
+        if (req.url.pathname.endsWith('client-handshake')) {
+          return {
+            status: 200,
+            body: JSON.stringify({
+              statusCode: 'ok',
+              message: 'Successfully handshaked with Symon',
+              data: {
+                monikaId: '1234',
+              },
+            }),
+          }
+        }
+        if (req.url.pathname.endsWith('probes')) {
+          return {
+            status: 200,
+            body: JSON.stringify({
+              statusCode: 'ok',
+              message: 'Successfully get probes configuration',
+              data: config.probes,
+            }),
+          }
+        }
+      }
+    })
+
+    const symon = new SymonClient('http://localhost:4000', 'abcd')
+
+    expect(symon.config).to.be.null
+
+    await symon.initiate()
+
+    expect(symon.config).deep.equals(config)
+  })
+})
+
+describe('Send incident or recovery event', () => {
+  it('should send event to Symon when incident or recovery happens', async () => {
+    let sentBody = ''
+
+    // mock the outgoing requests
+    interceptor.use((req) => {
+      if (req.url.href === 'http://localhost:4000/api/v1/monika/events') {
+        sentBody = req.body as string
+
+        return {
+          status: 200,
+          body: JSON.stringify({
+            message: 'Successfully send incident event to Symon',
+            data: null,
+          }),
+        }
+      }
+    })
+
+    const symon = new SymonClient('http://localhost:4000/api', 'abcd')
+    symon.monikaId = '1234'
+
+    await symon.notifyEvent({
+      event: 'incident',
+      alertId: 'alert86',
+      response: { status: 400, time: 1000 },
+    })
+
+    const body = JSON.parse(sentBody)
+    expect(body.monikaId).equals('1234')
+    expect(body.event).equals('incident')
+    expect(body.alertId).equals('alert86')
+    expect(body.response).deep.equals({ status: 400, time: 1000 })
   })
 })
