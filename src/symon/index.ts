@@ -198,13 +198,10 @@ class SymonClient {
 
       const notifications = logs.notifications.map(({ id: _, ...n }) => n)
 
-      const configVersion = this.config?.version ?? md5Hash(this.config ?? '')
-
       await this.httpClient({
         url: '/report',
         data: {
           monika_instance_id: this.monikaId,
-          config_version: configVersion,
           data: {
             requests,
             notifications,
