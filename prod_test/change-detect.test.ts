@@ -77,9 +77,10 @@ describe('Change Detection', () => {
 
   fs.writeFileSync('./testConfig.yml', initFile, 'utf-8')
 
-  it('should detect changes in configs', () => {
-    exec(`monika -r 10 -c ./testConfig.yml`, (_, out, _stderr) => {
-      expect(out).to.contain('Restarting Monika.')
+  it('should detect changes in current config', (done) => {
+    exec(`monika -c testCOnfig.yml`, (_, _stdout, stderr) => {
+      expect(stderr).to.contain('Restarting Monika.')
+      done()
     })
-  }).timeout(10000)
+  })
 })
