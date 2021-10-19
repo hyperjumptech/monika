@@ -28,7 +28,6 @@ import { hostname } from 'os'
 
 import { getOSName } from '../components/notification/alert-message'
 import { Config } from '../interfaces/config'
-import { md5Hash } from '../utils/hash'
 import getIp from '../utils/ip'
 import {
   getPublicIp,
@@ -145,21 +144,23 @@ class SymonClient {
 
   private async fetchProbes() {
     return this.httpClient
-      .get<{ data: Probe[] }>(`/probes`, {
-        params: {
-          monikaId: this.monikaId,
-          configHash: this.configHash || undefined,
+      .get<{ data: Probe[] }>(`/${this.monikaId}/probes`, {
+        headers: {
+          ...(this.configHash ? { 'If-None-Match': this.configHash } : {}),
+        },
+        validateStatus(status) {
+          return [200, 304].includes(status)
         },
       })
-      .then((res) => res.data.data)
+      .then((res) => {
+        return { probes: res.data.data, hash: res.headers.etag }
+      })
   }
 
-  private updateConfig(newConfig: Config) {
-    const newHash = md5Hash(newConfig)
-
-    if (this.configHash !== newHash) {
+  private updateConfig(newConfig: Config, probesHash: string) {
+    if (this.configHash !== probesHash) {
       this.config = newConfig
-      this.configHash = newHash
+      this.configHash = probesHash
       this.configListeners.forEach((listener) => {
         listener(newConfig)
       })
@@ -167,8 +168,8 @@ class SymonClient {
   }
 
   private async fetchProbesAndUpdateConfig() {
-    const probes = await this.fetchProbes()
-    this.updateConfig({ probes })
+    const { probes, hash } = await this.fetchProbes()
+    this.updateConfig({ probes }, hash)
   }
 }
 
