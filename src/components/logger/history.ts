@@ -256,12 +256,24 @@ export async function setRequestLogAsReported(ids: number[]) {
   await db.run(updateRowsSQL)
 }
 
+export async function deleteRequestLogs(ids: number[]) {
+  const sql = `DELETE FROM probe_requests WHERE id IN (${ids.join(', ')})`
+
+  await db.run(sql)
+}
+
 export async function setNotificationLogAsReported(ids: number[]) {
   const updateRowsSQL = `UPDATE notifications SET reported = 1 WHERE id IN (${ids.join(
     ', '
   )})`
 
   await db.run(updateRowsSQL)
+}
+
+export async function deleteNotificationLogs(ids: number[]) {
+  const sql = `DELETE FROM notifications WHERE id IN (${ids.join(', ')})`
+
+  await db.run(sql)
 }
 
 /**
