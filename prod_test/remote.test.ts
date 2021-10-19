@@ -2,18 +2,13 @@ import { exec } from 'child_process'
 import { expect } from 'chai'
 
 describe('Remote configurations', () => {
-  it('should show and load with remote config', async (done) => {
-    const url =
-      'https://raw.githubusercontent.com/hyperjumptech/monika/main/config_sample/config.desktop.example.yml'
-
-    exec(`monika -r 3 -c ${url}`, async (err, out) => {
-      if (err) {
-        return Promise.reject(err)
+  it('remote config should work config', (done) => {
+    exec(
+      `monika -r 3 -c https://raw.githubusercontent.com/hyperjumptech/monika/main/config_sample/config.desktop.example.yml`,
+      (_, stdout) => {
+        expect(stdout).to.contain('Using remote config.')
+        done()
       }
-      expect(out).to.contain('Using remote config')
-      return Promise.resolve(out)
-    })
-
-    done()
-  }).timeout(5000)
+    )
+  })
 })

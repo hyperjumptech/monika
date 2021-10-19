@@ -22,9 +22,9 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { expect } from 'chai'
 import { exec } from 'child_process'
 import * as fs from 'fs'
+import { expect } from 'chai'
 
 const initFile = `
 probes:
@@ -77,10 +77,9 @@ describe('Change Detection', () => {
 
   fs.writeFileSync('./testConfig.yml', initFile, 'utf-8')
 
-  it('should detect changes in configs', (done) => {
-    exec(`monika -r 10 -c ./testConfig.yml`, (_, out, _) => {
+  it('should detect changes in configs', () => {
+    exec(`monika -r 10 -c ./testConfig.yml`, (_, out, _stderr) => {
       expect(out).to.contain('Restarting Monika.')
-      done()
     })
   }).timeout(10000)
 })
