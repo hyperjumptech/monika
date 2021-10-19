@@ -114,7 +114,10 @@ class SymonClient {
 
     await this.fetchProbesAndUpdateConfig()
     if (!isTestEnvironment) {
-      setInterval(this.fetchProbesAndUpdateConfig, this.fetchProbesInterval)
+      setInterval(
+        this.fetchProbesAndUpdateConfig.bind(this),
+        this.fetchProbesInterval
+      )
     }
   }
 
