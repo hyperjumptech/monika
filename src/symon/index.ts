@@ -25,9 +25,11 @@
 import axios, { AxiosInstance } from 'axios'
 import mac from 'macaddress'
 import { hostname } from 'os'
+import pako from 'pako'
 
 import { getOSName } from '../components/notification/alert-message'
 import { Config } from '../interfaces/config'
+import { Probe } from '../interfaces/probe'
 import { md5Hash } from '../utils/hash'
 import getIp from '../utils/ip'
 import {
@@ -36,7 +38,12 @@ import {
   publicIpAddress,
   publicNetworkInfo,
 } from '../utils/public-ip'
-import { Probe } from '../interfaces/probe'
+import {
+  getUnreportedLogs,
+  deleteNotificationLogs,
+  deleteRequestLogs,
+} from '../components/logger/history'
+import { log } from '../utils/pino'
 
 type SymonHandshakeData = {
   macAddress: string
@@ -117,6 +124,11 @@ class SymonClient {
     if (!isTestEnvironment) {
       setInterval(this.fetchProbesAndUpdateConfig, this.fetchProbesInterval)
     }
+
+    await this.report()
+    if (!isTestEnvironment) {
+      setInterval(this.report, this.fetchProbesInterval)
+    }
   }
 
   async notifyEvent(event: SymonClientEvent) {
@@ -169,6 +181,46 @@ class SymonClient {
   private async fetchProbesAndUpdateConfig() {
     const probes = await this.fetchProbes()
     this.updateConfig({ probes })
+  }
+
+  async report() {
+    try {
+      const symonConfig = this.config?.symon
+      const limit = parseInt(process.env.MONIKA_REPORT_LIMIT ?? '100', 10)
+
+      const logs = await getUnreportedLogs(limit)
+
+      const requests = logs.requests.map(({ id: _, ...r }) => ({
+        ...r,
+        projectID: symonConfig?.projectID,
+        organizationID: symonConfig?.organizationID,
+      }))
+
+      const notifications = logs.notifications.map(({ id: _, ...n }) => n)
+
+      await this.httpClient({
+        url: '/report',
+        data: {
+          monika_instance_id: this.monikaId,
+          data: {
+            requests,
+            notifications,
+          },
+        },
+        headers: {
+          'Content-Encoding': 'gzip',
+          'Content-Type': 'application/json',
+        },
+        transformRequest: (req) => pako.gzip(JSON.stringify(req)).buffer,
+      })
+
+      await Promise.all([
+        deleteRequestLogs(logs.requests.map((log) => log.id)),
+        deleteNotificationLogs(logs.notifications.map((log) => log.id)),
+      ])
+    } catch (error) {
+      log.warn(" ›   Warning: Can't report history to Symon. " + error.message)
+    }
   }
 }
 
