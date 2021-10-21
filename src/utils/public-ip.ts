@@ -30,7 +30,7 @@ import getIp from './ip'
 
 export let publicIpAddress = ''
 export let isConnectedToSTUNServer = true
-export let publicNetworkInfo: { city: string; isp: string }
+export let publicNetworkInfo: { country: string; city: string; isp: string }
 
 async function testStun(): Promise<string> {
   const response = await stun.request('stun.l.google.com:19302')
@@ -41,8 +41,8 @@ export async function getPublicNetworkInfo() {
   try {
     const ip = await testStun()
     const response = await axios.get(`http://ip-api.com/json/${ip}`)
-    const { city, isp } = response.data
-    publicNetworkInfo = { city, isp }
+    const { country, city, isp } = response.data
+    publicNetworkInfo = { country, city, isp }
     log.info(
       `Monika is running from: ${publicNetworkInfo.city} - ${
         publicNetworkInfo.isp

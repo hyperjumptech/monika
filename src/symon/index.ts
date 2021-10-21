@@ -52,7 +52,9 @@ type SymonHandshakeData = {
   privateIp: string
   isp: string
   city: string
+  country: string
   pid: number
+  os: string
 }
 
 type SymonClientEvent = {
@@ -74,14 +76,15 @@ const isTestEnvironment = process.env.NODE_ENV === 'test' || process.env.CI
 const getHandshakeData = async (): Promise<SymonHandshakeData> => {
   await getPublicNetworkInfo()
   await getPublicIp()
-  await getOSName()
 
+  const os = await getOSName()
   const macAddress = await mac.one()
   const host = hostname()
   const publicIp = publicIpAddress
   const privateIp = getIp()
   const isp = publicNetworkInfo.isp
   const city = publicNetworkInfo.city
+  const country = publicNetworkInfo.country
   const pid = process.pid
 
   return {
@@ -91,7 +94,9 @@ const getHandshakeData = async (): Promise<SymonHandshakeData> => {
     privateIp,
     isp,
     city,
+    country,
     pid,
+    os,
   }
 }
 
