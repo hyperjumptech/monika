@@ -80,6 +80,16 @@ class Monika extends Command {
     version: flags.version({ char: 'v' }),
     help: flags.help({ char: 'h' }),
 
+    symonUrl: flags.string({
+      description: 'URL of Symon',
+      dependsOn: ['symonKey'],
+    }),
+
+    symonKey: flags.string({
+      description: 'API Key for Symon',
+      dependsOn: ['symonUrl'],
+    }),
+
     config: flags.string({
       char: 'c',
       description:
