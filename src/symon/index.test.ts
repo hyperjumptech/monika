@@ -44,6 +44,7 @@ beforeEach(() => {
         body: JSON.stringify({
           city: 'jakarta',
           isp: 'hyperjump',
+          country: 'Indonesia',
         }),
       }
     }
@@ -97,8 +98,10 @@ describe('Symon initiate', () => {
     expect(body.macAddress).length.greaterThan(0)
     expect(body.isp).equals('hyperjump')
     expect(body.city).equals('jakarta')
+    expect(body.country).equals('Indonesia')
     expect(body.host).length.greaterThan(0)
     expect(body.privateIp).length.greaterThan(0)
+    expect(body.os).length.greaterThan(0)
   })
 
   it('should fetch probes config on initiate', async () => {

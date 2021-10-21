@@ -25,9 +25,11 @@
 import axios, { AxiosInstance } from 'axios'
 import mac from 'macaddress'
 import { hostname } from 'os'
+import pako from 'pako'
 
 import { getOSName } from '../components/notification/alert-message'
 import { Config } from '../interfaces/config'
+import { Probe } from '../interfaces/probe'
 import getIp from '../utils/ip'
 import {
   getPublicIp,
@@ -35,7 +37,12 @@ import {
   publicIpAddress,
   publicNetworkInfo,
 } from '../utils/public-ip'
-import { Probe } from '../interfaces/probe'
+import {
+  getUnreportedLogs,
+  deleteNotificationLogs,
+  deleteRequestLogs,
+} from '../components/logger/history'
+import { log } from '../utils/pino'
 
 type SymonHandshakeData = {
   macAddress: string
@@ -44,7 +51,9 @@ type SymonHandshakeData = {
   privateIp: string
   isp: string
   city: string
+  country: string
   pid: number
+  os: string
 }
 
 type SymonClientEvent = {
@@ -66,14 +75,15 @@ const isTestEnvironment = process.env.NODE_ENV === 'test' || process.env.CI
 const getHandshakeData = async (): Promise<SymonHandshakeData> => {
   await getPublicNetworkInfo()
   await getPublicIp()
-  await getOSName()
 
+  const os = await getOSName()
   const macAddress = await mac.one()
   const host = hostname()
   const publicIp = publicIpAddress
   const privateIp = getIp()
   const isp = publicNetworkInfo.isp
   const city = publicNetworkInfo.city
+  const country = publicNetworkInfo.country
   const pid = process.pid
 
   return {
@@ -83,7 +93,9 @@ const getHandshakeData = async (): Promise<SymonHandshakeData> => {
     privateIp,
     isp,
     city,
+    country,
     pid,
+    os,
   }
 }
 
@@ -118,6 +130,11 @@ class SymonClient {
         this.fetchProbesAndUpdateConfig.bind(this),
         this.fetchProbesInterval
       )
+    }
+
+    await this.report()
+    if (!isTestEnvironment) {
+      setInterval(this.report, this.fetchProbesInterval)
     }
   }
 
@@ -173,6 +190,46 @@ class SymonClient {
   private async fetchProbesAndUpdateConfig() {
     const { probes, hash } = await this.fetchProbes()
     this.updateConfig({ probes }, hash)
+  }
+
+  async report() {
+    try {
+      const symonConfig = this.config?.symon
+      const limit = parseInt(process.env.MONIKA_REPORT_LIMIT ?? '100', 10)
+
+      const logs = await getUnreportedLogs(limit)
+
+      const requests = logs.requests.map(({ id: _, ...r }) => ({
+        ...r,
+        projectID: symonConfig?.projectID,
+        organizationID: symonConfig?.organizationID,
+      }))
+
+      const notifications = logs.notifications.map(({ id: _, ...n }) => n)
+
+      await this.httpClient({
+        url: '/report',
+        data: {
+          monika_instance_id: this.monikaId,
+          data: {
+            requests,
+            notifications,
+          },
+        },
+        headers: {
+          'Content-Encoding': 'gzip',
+          'Content-Type': 'application/json',
+        },
+        transformRequest: (req) => pako.gzip(JSON.stringify(req)).buffer,
+      })
+
+      await Promise.all([
+        deleteRequestLogs(logs.requests.map((log) => log.id)),
+        deleteNotificationLogs(logs.notifications.map((log) => log.id)),
+      ])
+    } catch (error) {
+      log.warn(" ›   Warning: Can't report history to Symon. " + error.message)
+    }
   }
 }
 
