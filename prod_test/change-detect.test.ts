@@ -71,16 +71,19 @@ notifications:
     type: desktop
 `
 describe('Change Detection', () => {
-  setTimeout(function () {
-    fs.writeFileSync('./testConfig.yml', changeFile, 'utf-8')
-  }, 1500)
-
-  fs.writeFileSync('./testConfig.yml', initFile, 'utf-8')
+  beforeEach(() => {
+    fs.writeFileSync('./testConfig.yml', initFile, 'utf-8')
+  })
 
   it('should detect changes in current config', (done) => {
-    exec(`monika -c testConfig.yml`, (_, _stdout, stderr) => {
-      expect(stderr).to.contain('Restarting Monika.')
+    setTimeout(() => {
+      fs.writeFileSync('./testConfig.yml', changeFile, 'utf-8')
+    }, 1000)
+
+    exec(`monika -r 20 -c testConfig.yml`, (_, _stdout, _stderr) => {
+      expect(_stdout).to.contain('Restarting Monika.')
+
       done()
     })
-  })
+  }).timeout(15000)
 })
