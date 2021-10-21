@@ -40,7 +40,7 @@ import {
 
 const getLinuxDistro = promisify(getos)
 
-const getMonikaInstance = async (ipAddress: string) => {
+export const getMonikaInstance = async (ipAddress: string) => {
   const osHostname = hostname()
   await getPublicIp()
 

@@ -26,7 +26,10 @@ import format from 'date-fns/format'
 import { getConfig } from '../components/config'
 import { getSummary } from '../components/logger/history'
 import { sendNotifications } from '../components/notification'
-import { getOSName } from '../components/notification/alert-message'
+import {
+  getOSName,
+  getMonikaInstance,
+} from '../components/notification/alert-message'
 import { getContext } from '../context'
 import getIp from '../utils/ip'
 import { log } from '../utils/pino'
@@ -57,13 +60,18 @@ export async function getSummaryAndSendNotif() {
 
   try {
     const { userAgent } = getContext()
-    const [summary, osName] = await Promise.all([getSummary(), getOSName()])
+    const privateIpAddress = getIp()
+    const [summary, osName, monikaInstance] = await Promise.all([
+      getSummary(),
+      getOSName(),
+      getMonikaInstance(privateIpAddress),
+    ])
     const responseTimelogLifeTimeInHour = getLogLifeTimeInHour()
 
     sendNotifications(notifications, {
       subject: `Monika Status`,
       body: `Status Update ${format(new Date(), 'yyyy-MM-dd HH:mm:ss XXX')}
-Host: ${hostname()} (${[publicIpAddress, getIp()].filter(Boolean).join('/')})
+Host: ${monikaInstance})
 Number of probes: ${summary.numberOfProbes}
 Maximum response time: ${maxResponseTime} ms in the last ${responseTimelogLifeTimeInHour} hours
 Minimum response time: ${minResponseTime} ms in the last ${responseTimelogLifeTimeInHour} hours
@@ -78,8 +86,9 @@ Version: ${userAgent}`,
         type: 'status-update' as const,
         time: format(new Date(), 'yyyy-MM-dd HH:mm:ss XXX'),
         hostname: hostname(),
-        privateIpAddress: getIp(),
+        privateIpAddress,
         publicIpAddress,
+        monikaInstance,
         maxResponseTime,
         minResponseTime,
         averageResponseTime,
