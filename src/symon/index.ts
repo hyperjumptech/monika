@@ -114,7 +114,7 @@ class SymonClient {
 
   constructor(url: string, apiKey: string) {
     this.httpClient = axios.create({
-      baseURL: `${url}/v1/monika`,
+      baseURL: `${url}/api/v1/monika`,
       headers: {
         'x-api-key': apiKey,
       },
@@ -177,10 +177,10 @@ class SymonClient {
       })
   }
 
-  private updateConfig(newConfig: Config, probesHash: string) {
-    if (this.configHash !== probesHash) {
+  private updateConfig(newConfig: Config) {
+    if (newConfig.version && this.configHash !== newConfig.version) {
       this.config = newConfig
-      this.configHash = probesHash
+      this.configHash = newConfig.version
       this.configListeners.forEach((listener) => {
         listener(newConfig)
       })
@@ -189,7 +189,8 @@ class SymonClient {
 
   private async fetchProbesAndUpdateConfig() {
     const { probes, hash } = await this.fetchProbes()
-    this.updateConfig({ probes }, hash)
+    const newConfig: Config = { probes, version: hash }
+    this.updateConfig(newConfig)
   }
 
   async report() {
