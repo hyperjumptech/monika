@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /**********************************************************************************
  * MIT License                                                                    *
  *                                                                                *
@@ -29,9 +30,11 @@ import SymonClient from '.'
 import sinon from 'sinon'
 import Stun from 'stun'
 import { Config } from '../interfaces/config'
+import * as loggerHistory from '../components/logger/history'
 
 let interceptor: RequestInterceptor
 let testStunStub: sinon.SinonStub
+let getUnreportedLogsStub: sinon.SinonStub
 
 beforeEach(() => {
   interceptor = new RequestInterceptor(withDefaultInterceptors)
@@ -58,11 +61,16 @@ beforeEach(() => {
       }
     },
   })
+
+  getUnreportedLogsStub = sinon
+    .stub(loggerHistory, 'getUnreportedLogs')
+    .resolves({ requests: [], notifications: [] })
 })
 
 afterEach(() => {
   interceptor.restore()
   testStunStub.restore()
+  getUnreportedLogsStub.restore()
 })
 
 describe('Symon initiate', () => {
@@ -156,6 +164,50 @@ describe('Symon initiate', () => {
     await symon.initiate()
 
     expect(symon.config).deep.equals(config)
+  })
+
+  it('should report on initiate', async () => {
+    interceptor.use((req) => {
+      if (req.url.origin === 'http://localhost:4000') {
+        if (req.url.pathname.endsWith('client-handshake')) {
+          return {
+            status: 200,
+            body: JSON.stringify({
+              statusCode: 'ok',
+              message: 'Successfully handshaked with Symon',
+              data: {
+                monikaId: '1234',
+              },
+            }),
+          }
+        }
+        if (req.url.pathname.endsWith('probes')) {
+          return {
+            status: 200,
+            body: JSON.stringify({
+              statusCode: 'ok',
+              message: 'Successfully get probes configuration',
+            }),
+          }
+        }
+        if (req.url.pathname.endsWith('report')) {
+          return {
+            status: 200,
+            body: JSON.stringify({
+              statusCode: 'ok',
+              message: 'Successfully report to Symon',
+            }),
+          }
+        }
+      }
+    })
+
+    const symon = new SymonClient('http://localhost:4000', 'abcd')
+    const reportSpy = sinon.spy(symon, 'report')
+
+    await symon.initiate()
+
+    expect(reportSpy.called).equals(true)
   })
 })
 
