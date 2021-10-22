@@ -114,6 +114,7 @@ describe('Symon initiate', () => {
 
   it('should fetch probes config on initiate', async () => {
     const config: Config = {
+      version: 'asdfg123',
       probes: [
         {
           id: '1',
@@ -143,6 +144,9 @@ describe('Symon initiate', () => {
         if (req.url.pathname.endsWith('probes')) {
           return {
             status: 200,
+            headers: {
+              etag: config.version as string,
+            },
             body: JSON.stringify({
               statusCode: 'ok',
               message: 'Successfully get probes configuration',
@@ -226,7 +230,7 @@ describe('Send incident or recovery event', () => {
       }
     })
 
-    const symon = new SymonClient('http://localhost:4000/api', 'abcd')
+    const symon = new SymonClient('http://localhost:4000', 'abcd')
     symon.monikaId = '1234'
 
     await symon.notifyEvent({
