@@ -175,6 +175,12 @@ class SymonClient {
       .then((res) => {
         return { probes: res.data.data, hash: res.headers.etag }
       })
+      .catch((error) => {
+        if (error.isAxiosError) {
+          return Promise.reject(new Error(error.response.data.message))
+        }
+        return Promise.reject(error)
+      })
   }
 
   private updateConfig(newConfig: Config) {
