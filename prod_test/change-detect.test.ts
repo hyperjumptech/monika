@@ -35,7 +35,7 @@ probes:
         method: GET
         timeout: 5000
         saveBody: false
-        interval: 10
+        interval: 1
 
     alerts:
       - query: response.status == 500
@@ -57,7 +57,7 @@ probes:
         method: GET
         timeout: 5000
         saveBody: false
-        interval: 3
+        interval: 1
 
     alerts:
       - query: response.status == 500
