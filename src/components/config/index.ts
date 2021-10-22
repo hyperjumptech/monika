@@ -22,23 +22,23 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import EventEmitter from 'events'
 import chokidar from 'chokidar'
-import pEvent from 'p-event'
+import { cli } from 'cli-ux'
+import { existsSync, writeFileSync } from 'fs'
 import isUrl from 'is-url'
-import events from './../../events'
-import { open } from './../../utils/open-website'
+import pEvent from 'p-event'
+
+import events from '../../events'
 import { Config } from '../../interfaces/config'
+import { getEventEmitter } from '../../utils/events'
+import { md5Hash } from '../../utils/hash'
+import { open } from '../../utils/open-website'
+import { log } from '../../utils/pino'
 import { fetchConfig } from './fetch'
 import { parseConfig } from './parse'
 import { validateConfig } from './validate'
-import { handshake } from '../reporter'
-import { log } from '../../utils/pino'
-import { md5Hash } from '../../utils/hash'
-import { existsSync, writeFileSync } from 'fs'
-import { cli } from 'cli-ux'
 
-const emitter = new EventEmitter()
+const emitter = getEventEmitter()
 
 let cfg: Config
 let configs: Partial<Config>[]
@@ -58,24 +58,13 @@ export async function* getConfigIterator() {
   }
 }
 
-const handshakeAndValidate = async (config: Config) => {
-  if (config.symon?.url && config.symon?.key) {
-    try {
-      await handshake(config)
-    } catch (error) {
-      log.warn(` ›   Warning: Can't do handshake with Symon.`)
+export const updateConfig = async (config: Config, validate = true) => {
+  if (validate) {
+    const validated = validateConfig(config)
+    if (!validated.valid) {
+      throw new Error(validated.message)
     }
   }
-
-  const validated = validateConfig(config)
-
-  if (!validated.valid) {
-    throw new Error(validated.message)
-  }
-}
-
-const updateConfig = async (config: Config) => {
-  await handshakeAndValidate(config)
   const lastConfigVersion = cfg?.version
   cfg = config
   cfg.version = cfg.version || md5Hash(cfg)
