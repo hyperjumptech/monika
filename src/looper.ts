@@ -24,16 +24,13 @@
 
 import { Config } from './interfaces/config'
 import { Probe } from './interfaces/probe'
-import { getLogsAndReport } from './components/reporter'
 import { doProbe } from './components/probe'
 import { log } from './utils/pino'
 import { Notification } from './interfaces/notification'
-import { getUnreportedLogsCount } from './components/logger/history'
 import { getPublicIp, isConnectedToSTUNServer } from './utils/public-ip'
 
 const MILLISECONDS = 1000
 export const DEFAULT_THRESHOLD = 5
-const DEFAULT_REPORT_INTERVAL = 180000 // 3 minutes
 let checkSTUNinterval: NodeJS.Timeout
 
 /**
@@ -191,23 +188,4 @@ export function idFeeder(
   }
 
   return abort
-}
-
-export async function loopReport(getConfig: () => Config) {
-  const { symon } = getConfig()
-
-  if (symon) {
-    // Send previously unreported logs to symon
-    const unreportedCount = await getUnreportedLogsCount()
-    const limit = parseInt(process.env.MONIKA_REPORT_LIMIT || '100', 10)
-
-    for (let i = unreportedCount; i > 0; i -= limit) {
-      // eslint-disable-next-line no-await-in-loop
-      await getLogsAndReport()
-    }
-
-    // Next run report on interval
-    const { interval = DEFAULT_REPORT_INTERVAL } = symon
-    setInterval(getLogsAndReport, interval)
-  }
 }

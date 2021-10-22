@@ -23,11 +23,11 @@
  **********************************************************************************/
 
 import type { IConfig } from '@oclif/config'
-import { getConfig, setupConfig } from '../components/config'
+import { setupConfig, updateConfig } from '../components/config'
 import { setContext } from '../context'
 import events from '../events'
 import { tlsChecker } from '../jobs/tls-check'
-import { loopCheckSTUNServer, loopReport } from '../looper'
+import { loopCheckSTUNServer } from '../looper'
 import {
   PrometheusCollector,
   startPrometheusMetricsServer,
@@ -37,10 +37,12 @@ import { getPublicNetworkInfo } from '../utils/public-ip'
 // import to activate all the application event emitter subscribers
 import '../events/subscribers/application'
 import { jobsLoader } from './jobs'
+import SymonClient from '../symon'
 
 export default async function init(flags: any, cliConfig: IConfig) {
   const eventEmitter = getEventEmitter()
   const isTestEnvironment = process.env.CI || process.env.NODE_ENV === 'test'
+  const isSymonMode = Boolean(flags.symonUrl) && Boolean(flags.symonKey)
 
   setContext({ userAgent: cliConfig.userAgent })
 
@@ -64,7 +66,13 @@ export default async function init(flags: any, cliConfig: IConfig) {
     startPrometheusMetricsServer(flags.prometheus)
   }
 
-  await setupConfig(flags)
+  if (isSymonMode) {
+    const symonClient = new SymonClient(flags.symonUrl, flags.symonKey)
+    await symonClient.initiate()
+    symonClient.onConfig((config) => updateConfig(config, false))
+  } else {
+    await setupConfig(flags)
+  }
 
   // check TLS when Monika starts
   tlsChecker()
@@ -72,8 +80,5 @@ export default async function init(flags: any, cliConfig: IConfig) {
   if (!isTestEnvironment) {
     // load cron jobs
     jobsLoader()
-
-    // Run report on interval if symon configuration exists
-    loopReport(getConfig)
   }
 }
