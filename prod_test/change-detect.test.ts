@@ -22,7 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { exec } from 'child_process'
+import { exec, execSync } from 'child_process'
 import * as fs from 'fs'
 import { expect } from 'chai'
 
@@ -73,15 +73,17 @@ notifications:
 describe('Change Detection', () => {
   beforeEach(() => {
     fs.writeFileSync('./testConfig.yml', initFile, 'utf-8')
+    fs.writeFileSync('./updated.yml', changeFile, 'utf-8')
   })
 
   it('should detect changes in current config', (done) => {
-    exec(`monika  -c testConfig.yml`, (_, _stdout, _stderr) => {
+    exec(`monika -c testConfig.yml`, (_, _stdout, _stderr) => {
       setTimeout(() => {
-        fs.writeFileSync('./testConfig.yml', changeFile, 'utf-8')
-        expect(_stdout).to.contain('Restarting Monika')
-        done()
-      }, 2000)
+        execSync('cp updated.yml testConfig.yml') // overwrite config file
+      }, 12000) // wait for the monika to
+
+      expect(_stdout).to.contain('Restarting Monika')
+      done()
     })
-  }).timeout(10000)
+  }).timeout(21000)
 })
