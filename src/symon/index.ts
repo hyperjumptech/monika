@@ -125,6 +125,8 @@ class SymonClient {
   async initiate() {
     this.monikaId = await this.handshake()
 
+    log.info('Handshake succesful')
+
     await this.fetchProbesAndUpdateConfig()
     if (!isTestEnvironment) {
       setInterval(
@@ -222,6 +224,11 @@ class SymonClient {
 
       const notifications = logs.notifications.map(({ id: _, ...n }) => n)
 
+      if (requests.length === 0 && notifications.length === 0) {
+        log.info('Nothing to report')
+        return
+      }
+
       await this.httpClient({
         url: '/report',
         method: 'POST',
@@ -239,13 +246,21 @@ class SymonClient {
         transformRequest: (req) => pako.gzip(JSON.stringify(req)).buffer,
       })
 
+      log.info(
+        `Reported ${requests.length} requests and ${notifications.length} notifications.`
+      )
+
       await Promise.all([
         deleteRequestLogs(logs.requests.map((log) => log.id)),
         deleteNotificationLogs(logs.notifications.map((log) => log.id)),
       ])
+
+      log.info(
+        `Deleted reported requests and notifications from local database.`
+      )
     } catch (error) {
       log.warn(
-        " ›   Warning: Can't report history to Symon. " + (error as any).message
+        "Warning: Can't report history to Symon. " + (error as any).message
       )
     }
   }
