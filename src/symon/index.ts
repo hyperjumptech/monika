@@ -47,7 +47,7 @@ import { log } from '../utils/pino'
 
 type SymonHandshakeData = {
   macAddress: string
-  host: string
+  hostname: string
   publicIp: string
   privateIp: string
   isp: string
@@ -89,7 +89,7 @@ const getHandshakeData = async (): Promise<SymonHandshakeData> => {
 
   return {
     macAddress,
-    host,
+    hostname: host,
     publicIp,
     privateIp,
     isp,
