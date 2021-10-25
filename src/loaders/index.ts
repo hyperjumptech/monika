@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import type { IConfig } from '@oclif/config'
-import { setupConfig, updateConfig } from '../components/config'
+import { setupConfig } from '../components/config'
 import { setContext } from '../context'
 import events from '../events'
 import { tlsChecker } from '../jobs/tls-check'
@@ -37,7 +37,6 @@ import { getPublicNetworkInfo } from '../utils/public-ip'
 // import to activate all the application event emitter subscribers
 import '../events/subscribers/application'
 import { jobsLoader } from './jobs'
-import SymonClient from '../symon'
 
 export default async function init(flags: any, cliConfig: IConfig) {
   const eventEmitter = getEventEmitter()
@@ -66,19 +65,15 @@ export default async function init(flags: any, cliConfig: IConfig) {
     startPrometheusMetricsServer(flags.prometheus)
   }
 
-  if (isSymonMode) {
-    const symonClient = new SymonClient(flags.symonUrl, flags.symonKey)
-    await symonClient.initiate()
-    symonClient.onConfig((config) => updateConfig(config, false))
-  } else {
+  if (!isSymonMode) {
     await setupConfig(flags)
-  }
 
-  // check TLS when Monika starts
-  tlsChecker()
+    // check TLS when Monika starts
+    tlsChecker()
 
-  if (!isTestEnvironment) {
-    // load cron jobs
-    jobsLoader()
+    if (!isTestEnvironment) {
+      // load cron jobs
+      jobsLoader()
+    }
   }
 }

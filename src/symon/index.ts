@@ -135,7 +135,7 @@ class SymonClient {
 
     await this.report()
     if (!isTestEnvironment) {
-      setInterval(this.report, this.fetchProbesInterval)
+      setInterval(this.report.bind(this), this.fetchProbesInterval)
     }
   }
 
@@ -157,6 +157,7 @@ class SymonClient {
   }
 
   private async handshake(): Promise<string> {
+    log.info('Performing handshake with symon')
     const handshakeData = await getHandshakeData()
     return this.httpClient
       .post('/client-handshake', handshakeData)
@@ -164,6 +165,7 @@ class SymonClient {
   }
 
   private async fetchProbes() {
+    log.info('Getting probes from symon')
     return this.httpClient
       .get<{ data: Probe[] }>(`/${this.monikaId}/probes`, {
         headers: {
@@ -195,12 +197,17 @@ class SymonClient {
   }
 
   private async fetchProbesAndUpdateConfig() {
-    const { probes, hash } = await this.fetchProbes()
-    const newConfig: Config = { probes, version: hash }
-    this.updateConfig(newConfig)
+    try {
+      const { probes, hash } = await this.fetchProbes()
+      const newConfig: Config = { probes, version: hash }
+      this.updateConfig(newConfig)
+    } catch (error) {
+      log.warn((error as any).message)
+    }
   }
 
   async report() {
+    log.info('Reporting to symon')
     try {
       const symonConfig = this.config?.symon
       const limit = parseInt(process.env.MONIKA_REPORT_LIMIT ?? '100', 10)
@@ -237,7 +244,9 @@ class SymonClient {
         deleteNotificationLogs(logs.notifications.map((log) => log.id)),
       ])
     } catch (error) {
-      log.warn(" ›   Warning: Can't report history to Symon. " + error.message)
+      log.warn(
+        " ›   Warning: Can't report history to Symon. " + (error as any).message
+      )
     }
   }
 }
