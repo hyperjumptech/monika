@@ -63,6 +63,7 @@ export async function* getConfigIterator(skipConfigCheck = true) {
 }
 
 export const updateConfig = async (config: Config, validate = true) => {
+  log.debug('Updating config')
   if (validate) {
     const validated = validateConfig(config)
     if (!validated.valid) {

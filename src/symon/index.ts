@@ -125,7 +125,7 @@ class SymonClient {
   async initiate() {
     this.monikaId = await this.handshake()
 
-    log.info('Handshake succesful')
+    log.debug('Handshake succesful')
 
     await this.fetchProbesAndUpdateConfig()
     if (!isTestEnvironment) {
@@ -159,7 +159,7 @@ class SymonClient {
   }
 
   private async handshake(): Promise<string> {
-    log.info('Performing handshake with symon')
+    log.debug('Performing handshake with symon')
     const handshakeData = await getHandshakeData()
     return this.httpClient
       .post('/client-handshake', handshakeData)
@@ -167,7 +167,7 @@ class SymonClient {
   }
 
   private async fetchProbes() {
-    log.info('Getting probes from symon')
+    log.debug('Getting probes from symon')
     return this.httpClient
       .get<{ data: Probe[] }>(`/${this.monikaId}/probes`, {
         headers: {
@@ -178,6 +178,7 @@ class SymonClient {
         },
       })
       .then((res) => {
+        log.debug(`Received ${res.data.data.length} probes`)
         return { probes: res.data.data, hash: res.headers.etag }
       })
       .catch((error) => {
@@ -190,11 +191,14 @@ class SymonClient {
 
   private updateConfig(newConfig: Config) {
     if (newConfig.version && this.configHash !== newConfig.version) {
+      log.debug(`Received config changes. Reloading monika`)
       this.config = newConfig
       this.configHash = newConfig.version
       this.configListeners.forEach((listener) => {
         listener(newConfig)
       })
+    } else {
+      log.debug(`Received config does not change.`)
     }
   }
 
@@ -209,7 +213,7 @@ class SymonClient {
   }
 
   async report() {
-    log.info('Reporting to symon')
+    log.debug('Reporting to symon')
     try {
       const symonConfig = this.config?.symon
       const limit = parseInt(process.env.MONIKA_REPORT_LIMIT ?? '100', 10)
@@ -225,7 +229,7 @@ class SymonClient {
       const notifications = logs.notifications.map(({ id: _, ...n }) => n)
 
       if (requests.length === 0 && notifications.length === 0) {
-        log.info('Nothing to report')
+        log.debug('Nothing to report')
         return
       }
 
@@ -246,7 +250,7 @@ class SymonClient {
         transformRequest: (req) => pako.gzip(JSON.stringify(req)).buffer,
       })
 
-      log.info(
+      log.debug(
         `Reported ${requests.length} requests and ${notifications.length} notifications.`
       )
 
@@ -255,7 +259,7 @@ class SymonClient {
         deleteNotificationLogs(logs.notifications.map((log) => log.id)),
       ])
 
-      log.info(
+      log.debug(
         `Deleted reported requests and notifications from local database.`
       )
     } catch (error) {
