@@ -217,8 +217,9 @@ class SymonClient {
 
       await this.httpClient({
         url: '/report',
+        method: 'POST',
         data: {
-          monika_instance_id: this.monikaId,
+          monikaInstanceId: this.monikaId,
           data: {
             requests,
             notifications,
