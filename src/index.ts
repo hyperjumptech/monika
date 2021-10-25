@@ -273,11 +273,14 @@ class Monika extends Command {
         const startupMessage = this.buildStartupMessage(
           config,
           flags.verbose,
-          !abortCurrentLooper
+          !abortCurrentLooper,
+          isSymonMode
         )
 
         // Display config files being used
-        if (!isSymonMode) {
+        if (isSymonMode) {
+          log.info(startupMessage)
+        } else {
           for (const x in flags.config) {
             // eslint-disable-next-line max-depth
             if (isUrl(flags.config[x])) {
@@ -286,9 +289,8 @@ class Monika extends Command {
               this.log('Using config file:', path.resolve(flags.config[x]))
             }
           }
+          this.log(startupMessage)
         }
-
-        this.log(startupMessage)
 
         // config probes to be run by the looper
         // default sequence for Each element
@@ -353,7 +355,16 @@ class Monika extends Command {
     }
   }
 
-  buildStartupMessage(config: Config, verbose = false, firstRun: boolean) {
+  buildStartupMessage(
+    config: Config,
+    verbose = false,
+    firstRun: boolean,
+    isSymonMode = false
+  ) {
+    if (isSymonMode) {
+      return 'Running in Symon mode'
+    }
+
     const { probes, notifications } = config
 
     let startupMessage = ''
