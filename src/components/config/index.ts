@@ -43,13 +43,17 @@ const emitter = getEventEmitter()
 let cfg: Config
 let configs: Partial<Config>[]
 
-export const getConfig = () => {
-  if (!cfg) throw new Error('Configuration setup has not been run yet')
+export const getConfig = (skipConfigCheck = true) => {
+  if (!skipConfigCheck) {
+    if (!cfg) throw new Error('Configuration setup has not been run yet')
+  }
   return cfg
 }
 
-export async function* getConfigIterator() {
-  if (!cfg) throw new Error('Configuration setup has not been run yet')
+export async function* getConfigIterator(skipConfigCheck = true) {
+  if (!skipConfigCheck) {
+    if (!cfg) throw new Error('Configuration setup has not been run yet')
+  }
 
   yield cfg
 
@@ -59,6 +63,7 @@ export async function* getConfigIterator() {
 }
 
 export const updateConfig = async (config: Config, validate = true) => {
+  log.debug('Updating config')
   if (validate) {
     const validated = validateConfig(config)
     if (!validated.valid) {
