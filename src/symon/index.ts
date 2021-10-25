@@ -178,7 +178,11 @@ class SymonClient {
         },
       })
       .then((res) => {
-        log.debug(`Received ${res.data.data.length} probes`)
+        if (res.data.data) {
+          log.debug(`Received ${res.data.data.length} probes`)
+        } else {
+          log.debug(`No new config from Symon`)
+        }
         return { probes: res.data.data, hash: res.headers.etag }
       })
       .catch((error) => {

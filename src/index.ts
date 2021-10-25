@@ -340,7 +340,7 @@ class Monika extends Command {
           scheduledTasks.push(scheduledStatusUpdateTask)
         }
 
-        const verboseLogs = Boolean(config.symon) || flags['keep-verbose-logs']
+        const verboseLogs = isSymonMode || flags['keep-verbose-logs']
 
         abortCurrentLooper = idFeeder(
           sanitizedProbe,

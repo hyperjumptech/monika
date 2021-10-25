@@ -209,7 +209,7 @@ export async function doProbe(
         break
       }
     } catch (error) {
-      requestLog.addError(error.message)
+      requestLog.addError((error as any).message)
       break
     } finally {
       requestLog.print()
