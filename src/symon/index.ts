@@ -219,16 +219,11 @@ class SymonClient {
   async report() {
     log.debug('Reporting to symon')
     try {
-      const symonConfig = this.config?.symon
       const limit = parseInt(process.env.MONIKA_REPORT_LIMIT ?? '100', 10)
 
       const logs = await getUnreportedLogs(limit)
 
-      const requests = logs.requests.map(({ id: _, ...r }) => ({
-        ...r,
-        projectID: symonConfig?.projectID,
-        organizationID: symonConfig?.organizationID,
-      }))
+      const requests = logs.requests
 
       const notifications = logs.notifications.map(({ id: _, ...n }) => n)
 
