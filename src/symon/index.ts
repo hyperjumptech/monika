@@ -226,7 +226,7 @@ class SymonClient {
         url: '/report',
         method: 'POST',
         data: {
-          monikaInstanceId: this.monikaId,
+          monikaId: this.monikaId,
           data: {
             requests,
             notifications,
