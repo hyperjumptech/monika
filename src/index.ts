@@ -306,16 +306,19 @@ class Monika extends Command {
           )
         }
 
-        // sanitize the probe
-        const sanitizedProbe = probesToRun.map((probe: Probe) =>
-          sanitizeProbe(probe, probe.id)
-        )
+        const sanitizedProbe = probesToRun.map((probe: Probe) => {
+          const sanitized = sanitizeProbe(probe, probe.id)
+          if (isSymonMode) {
+            sanitized.alerts = []
+          }
+          return sanitized
+        })
 
         // save some data into files for later
         savePidFile(flags.config, config)
 
         // emit the sanitized probe
-        if (sanitizedProbe) {
+        if (sanitizedProbe.length > 0) {
           em.emit(events.config.sanitized, sanitizedProbe)
         }
 

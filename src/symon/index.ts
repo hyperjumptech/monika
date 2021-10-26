@@ -24,6 +24,7 @@
  **********************************************************************************/
 
 import axios, { AxiosInstance } from 'axios'
+import { EventEmitter } from 'events'
 import mac from 'macaddress'
 import { hostname } from 'os'
 import pako from 'pako'
@@ -44,6 +45,9 @@ import {
   deleteRequestLogs,
 } from '../components/logger/history'
 import { log } from '../utils/pino'
+import { getEventEmitter } from '../utils/events'
+import events from '../events'
+import { ValidatedResponse } from '../plugins/validate-response'
 
 type SymonHandshakeData = {
   macAddress: string
@@ -67,6 +71,13 @@ type SymonClientEvent = {
     headers?: Record<string, unknown>
     body?: unknown
   }
+}
+
+type NotificationEvent = {
+  probeID: string
+  url: string
+  probeState: string
+  validation: ValidatedResponse
 }
 
 type ConfigListener = (config: Config) => void
@@ -109,6 +120,8 @@ class SymonClient {
 
   fetchProbesInterval = 60000 // 1 minute
 
+  eventEmitter: EventEmitter | null = null
+
   private httpClient: AxiosInstance
 
   private configListeners: ConfigListener[] = []
@@ -127,6 +140,24 @@ class SymonClient {
 
     log.debug('Handshake succesful')
 
+    this.eventEmitter = getEventEmitter()
+    this.eventEmitter.on(
+      events.probe.notification.willSend,
+      (args: NotificationEvent) => {
+        this.notifyEvent({
+          event: args.probeState === 'DOWN' ? 'incident' : 'recovery',
+          alertId: args.validation.alert.id ?? '',
+          response: {
+            status: args.validation.response.status,
+            time: args.validation.response.responseTime,
+            size: args.validation.response.headers['content-length'],
+            headers: args.validation.response.headers ?? {},
+            body: args.validation.response.data,
+          },
+        })
+      }
+    )
+
     await this.fetchProbesAndUpdateConfig()
     if (!isTestEnvironment) {
       setInterval(
@@ -142,6 +173,7 @@ class SymonClient {
   }
 
   async notifyEvent(event: SymonClientEvent) {
+    log.debug('Sending incident/recovery event to Symon')
     await this.httpClient.post('/events', { monikaId: this.monikaId, ...event })
   }
 

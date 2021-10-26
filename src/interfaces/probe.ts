@@ -27,6 +27,7 @@ import { RequestConfig } from './request'
 export interface ProbeAlert {
   query: string
   message?: string
+  id?: string
 }
 
 export interface Probe {

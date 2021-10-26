@@ -38,5 +38,8 @@ export default {
     response: {
       received: 'PROBE_RESPONSE_RECEIVED',
     },
+    notification: {
+      willSend: 'PROBE_NOTIFICATION_WILL_SEND',
+    },
   },
 }
