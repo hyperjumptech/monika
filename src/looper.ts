@@ -109,17 +109,15 @@ export function isIDValid(config: Config, ids: string): boolean {
 }
 
 export async function loopCheckSTUNServer(interval: number) {
+  // if interval = 0 get ip once and exit. No need to setup interval.
+  if (interval === 0 || process.env.CI || process.env.NODE_ENV === 'test') {
+    await getPublicIp()
+    return
+  }
+
   checkSTUNinterval = setInterval(async () => {
     await getPublicIp()
-
-    if (interval <= 0) {
-      clearInterval(checkSTUNinterval)
-    }
   }, interval * MILLISECONDS)
-
-  if (process.env.CI || process.env.NODE_ENV === 'test') {
-    clearInterval(checkSTUNinterval)
-  }
 
   return checkSTUNinterval
 }
