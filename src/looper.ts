@@ -131,6 +131,7 @@ export async function loopCheckSTUNServer(interval: number) {
  * @param {boolean} verboseLogs store all requests to database
  * @returns {function} func with isAborted true if interrupted
  */
+// eslint-disable-next-line max-params
 function loopProbe(
   probe: Probe,
   notifications: Notification[],
@@ -163,6 +164,7 @@ function loopProbe(
  * @param {boolean} verboseLogs store all requests to database
  * @returns {function} abort function
  */
+// eslint-disable-next-line max-params
 export function idFeeder(
   sanitizedProbes: Probe[],
   notifications: Notification[],

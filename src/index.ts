@@ -28,7 +28,11 @@ import chalk from 'chalk'
 import cli from 'cli-ux'
 import fs from 'fs'
 import cron, { ScheduledTask } from 'node-cron'
-import { createConfig, getConfigIterator } from './components/config'
+import {
+  createConfig,
+  getConfigIterator,
+  updateConfig,
+} from './components/config'
 import { printAllLogs } from './components/logger'
 import {
   closeLog,
@@ -51,8 +55,10 @@ import { getEventEmitter } from './utils/events'
 import { log } from './utils/pino'
 import path from 'path'
 import isUrl from 'is-url'
+import SymonClient from './symon'
 
 const em = getEventEmitter()
+let symonClient
 
 function getDefaultConfig(): Array<string> {
   const filesArray = fs.readdirSync('./')
@@ -232,12 +238,23 @@ class Monika extends Command {
         return
       }
 
+      const isSymonMode = Boolean(flags.symonUrl) && Boolean(flags.symonKey)
+      if (isSymonMode) {
+        symonClient = new SymonClient(
+          flags.symonUrl as string,
+          flags.symonKey as string
+        )
+        await symonClient.initiate()
+        symonClient.onConfig((config) => updateConfig(config, false))
+      }
+
       await initLoaders(flags, this.config)
 
       let scheduledTasks: ScheduledTask[] = []
       let abortCurrentLooper: (() => void) | undefined
 
-      for await (const config of getConfigIterator()) {
+      for await (const config of getConfigIterator(isSymonMode)) {
+        if (!config) continue
         if (abortCurrentLooper) {
           resetServerAlertStates()
           abortCurrentLooper()
@@ -256,19 +273,24 @@ class Monika extends Command {
         const startupMessage = this.buildStartupMessage(
           config,
           flags.verbose,
-          !abortCurrentLooper
+          !abortCurrentLooper,
+          isSymonMode
         )
 
-        // Display config files sued
-        for (const x in flags.config) {
-          if (isUrl(flags.config[x])) {
-            this.log('Using remote config:', flags.config[x])
-          } else if (flags.config[x].length > 0) {
-            this.log('Using config file:', path.resolve(flags.config[x]))
+        // Display config files being used
+        if (isSymonMode) {
+          log.info(startupMessage)
+        } else {
+          for (const x in flags.config) {
+            // eslint-disable-next-line max-depth
+            if (isUrl(flags.config[x])) {
+              this.log('Using remote config:', flags.config[x])
+            } else if (flags.config[x].length > 0) {
+              this.log('Using config file:', path.resolve(flags.config[x]))
+            }
           }
+          this.log(startupMessage)
         }
-
-        this.log(startupMessage)
 
         // config probes to be run by the looper
         // default sequence for Each element
@@ -284,16 +306,19 @@ class Monika extends Command {
           )
         }
 
-        // sanitize the probe
-        const sanitizedProbe = probesToRun.map((probe: Probe) =>
-          sanitizeProbe(probe, probe.id)
-        )
+        const sanitizedProbe = probesToRun.map((probe: Probe) => {
+          const sanitized = sanitizeProbe(probe, probe.id)
+          if (isSymonMode) {
+            sanitized.alerts = []
+          }
+          return sanitized
+        })
 
         // save some data into files for later
         savePidFile(flags.config, config)
 
         // emit the sanitized probe
-        if (sanitizedProbe) {
+        if (sanitizedProbe.length > 0) {
           em.emit(events.config.sanitized, sanitizedProbe)
         }
 
@@ -318,7 +343,7 @@ class Monika extends Command {
           scheduledTasks.push(scheduledStatusUpdateTask)
         }
 
-        const verboseLogs = Boolean(config.symon) || flags['keep-verbose-logs']
+        const verboseLogs = isSymonMode || flags['keep-verbose-logs']
 
         abortCurrentLooper = idFeeder(
           sanitizedProbe,
@@ -329,11 +354,20 @@ class Monika extends Command {
       }
     } catch (error) {
       await closeLog()
-      this.error(error?.message, { exit: 1 })
+      this.error((error as any)?.message, { exit: 1 })
     }
   }
 
-  buildStartupMessage(config: Config, verbose = false, firstRun: boolean) {
+  buildStartupMessage(
+    config: Config,
+    verbose = false,
+    firstRun: boolean,
+    isSymonMode = false
+  ) {
+    if (isSymonMode) {
+      return 'Running in Symon mode'
+    }
+
     const { probes, notifications } = config
 
     let startupMessage = ''
