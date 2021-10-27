@@ -24,6 +24,7 @@
  **********************************************************************************/
 
 import axios, { AxiosInstance } from 'axios'
+import { EventEmitter } from 'events'
 import mac from 'macaddress'
 import { hostname } from 'os'
 import pako from 'pako'
@@ -44,10 +45,13 @@ import {
   deleteRequestLogs,
 } from '../components/logger/history'
 import { log } from '../utils/pino'
+import { getEventEmitter } from '../utils/events'
+import events from '../events'
+import { ValidatedResponse } from '../plugins/validate-response'
 
 type SymonHandshakeData = {
   macAddress: string
-  host: string
+  hostname: string
   publicIp: string
   privateIp: string
   isp: string
@@ -67,6 +71,13 @@ type SymonClientEvent = {
     headers?: Record<string, unknown>
     body?: unknown
   }
+}
+
+type NotificationEvent = {
+  probeID: string
+  url: string
+  probeState: string
+  validation: ValidatedResponse
 }
 
 type ConfigListener = (config: Config) => void
@@ -89,7 +100,7 @@ const getHandshakeData = async (): Promise<SymonHandshakeData> => {
 
   return {
     macAddress,
-    host,
+    hostname: host,
     publicIp,
     privateIp,
     isp,
@@ -109,6 +120,8 @@ class SymonClient {
 
   fetchProbesInterval = 60000 // 1 minute
 
+  eventEmitter: EventEmitter | null = null
+
   private httpClient: AxiosInstance
 
   private configListeners: ConfigListener[] = []
@@ -125,6 +138,26 @@ class SymonClient {
   async initiate() {
     this.monikaId = await this.handshake()
 
+    log.debug('Handshake succesful')
+
+    this.eventEmitter = getEventEmitter()
+    this.eventEmitter.on(
+      events.probe.notification.willSend,
+      (args: NotificationEvent) => {
+        this.notifyEvent({
+          event: args.probeState === 'DOWN' ? 'incident' : 'recovery',
+          alertId: args.validation.alert.id ?? '',
+          response: {
+            status: args.validation.response.status,
+            time: args.validation.response.responseTime,
+            size: args.validation.response.headers['content-length'],
+            headers: args.validation.response.headers ?? {},
+            body: args.validation.response.data,
+          },
+        })
+      }
+    )
+
     await this.fetchProbesAndUpdateConfig()
     if (!isTestEnvironment) {
       setInterval(
@@ -135,11 +168,12 @@ class SymonClient {
 
     await this.report()
     if (!isTestEnvironment) {
-      setInterval(this.report, this.fetchProbesInterval)
+      setInterval(this.report.bind(this), this.fetchProbesInterval)
     }
   }
 
   async notifyEvent(event: SymonClientEvent) {
+    log.debug('Sending incident/recovery event to Symon')
     await this.httpClient.post('/events', { monikaId: this.monikaId, ...event })
   }
 
@@ -157,6 +191,7 @@ class SymonClient {
   }
 
   private async handshake(): Promise<string> {
+    log.debug('Performing handshake with symon')
     const handshakeData = await getHandshakeData()
     return this.httpClient
       .post('/client-handshake', handshakeData)
@@ -164,6 +199,7 @@ class SymonClient {
   }
 
   private async fetchProbes() {
+    log.debug('Getting probes from symon')
     return this.httpClient
       .get<{ data: Probe[] }>(`/${this.monikaId}/probes`, {
         headers: {
@@ -174,6 +210,11 @@ class SymonClient {
         },
       })
       .then((res) => {
+        if (res.data.data) {
+          log.debug(`Received ${res.data.data.length} probes`)
+        } else {
+          log.debug(`No new config from Symon`)
+        }
         return { probes: res.data.data, hash: res.headers.etag }
       })
       .catch((error) => {
@@ -186,40 +227,48 @@ class SymonClient {
 
   private updateConfig(newConfig: Config) {
     if (newConfig.version && this.configHash !== newConfig.version) {
+      log.debug(`Received config changes. Reloading monika`)
       this.config = newConfig
       this.configHash = newConfig.version
       this.configListeners.forEach((listener) => {
         listener(newConfig)
       })
+    } else {
+      log.debug(`Received config does not change.`)
     }
   }
 
   private async fetchProbesAndUpdateConfig() {
-    const { probes, hash } = await this.fetchProbes()
-    const newConfig: Config = { probes, version: hash }
-    this.updateConfig(newConfig)
+    try {
+      const { probes, hash } = await this.fetchProbes()
+      const newConfig: Config = { probes, version: hash }
+      this.updateConfig(newConfig)
+    } catch (error) {
+      log.warn((error as any).message)
+    }
   }
 
   async report() {
+    log.debug('Reporting to symon')
     try {
-      const symonConfig = this.config?.symon
       const limit = parseInt(process.env.MONIKA_REPORT_LIMIT ?? '100', 10)
 
       const logs = await getUnreportedLogs(limit)
 
-      const requests = logs.requests.map(({ id: _, ...r }) => ({
-        ...r,
-        projectID: symonConfig?.projectID,
-        organizationID: symonConfig?.organizationID,
-      }))
+      const requests = logs.requests
 
       const notifications = logs.notifications.map(({ id: _, ...n }) => n)
+
+      if (requests.length === 0 && notifications.length === 0) {
+        log.debug('Nothing to report')
+        return
+      }
 
       await this.httpClient({
         url: '/report',
         method: 'POST',
         data: {
-          monikaInstanceId: this.monikaId,
+          monikaId: this.monikaId,
           data: {
             requests,
             notifications,
@@ -232,12 +281,22 @@ class SymonClient {
         transformRequest: (req) => pako.gzip(JSON.stringify(req)).buffer,
       })
 
+      log.debug(
+        `Reported ${requests.length} requests and ${notifications.length} notifications.`
+      )
+
       await Promise.all([
         deleteRequestLogs(logs.requests.map((log) => log.id)),
         deleteNotificationLogs(logs.notifications.map((log) => log.id)),
       ])
+
+      log.debug(
+        `Deleted reported requests and notifications from local database.`
+      )
     } catch (error) {
-      log.warn(" ›   Warning: Can't report history to Symon. " + error.message)
+      log.warn(
+        "Warning: Can't report history to Symon. " + (error as any).message
+      )
     }
   }
 }

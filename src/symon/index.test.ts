@@ -107,7 +107,7 @@ describe('Symon initiate', () => {
     expect(body.isp).equals('hyperjump')
     expect(body.city).equals('jakarta')
     expect(body.country).equals('Indonesia')
-    expect(body.host).length.greaterThan(0)
+    expect(body.hostname).length.greaterThan(0)
     expect(body.privateIp).length.greaterThan(0)
     expect(body.os).length.greaterThan(0)
   })
