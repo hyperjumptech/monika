@@ -5,25 +5,22 @@ title: Probes
 
 Probes are the heart of the monitoring requests. Probes are arrays of request objects defined in the config file `monika.json` like so.
 
-```json
-  "probes": [
-    {
-      "id": "1",
-      "name": "Name of the probe",
-      "description": "Probe to check GET time",
-      "interval": 10,
-      "requests": [{ }],
-      "alerts": []
-    },
-    {
-      "id": "2",
-      "name": "Name of the probe 2",
-      "description": "Probe to check GET health",
-      "interval": 10,
-      "requests": [{ }],
-      "alerts": []
-    }
-  ]
+```yaml
+probes:
+  - id: '1'
+    name: Name of the probe
+    description: Probe to check GET time
+    interval: 10
+    requests:
+      - {}
+    alerts: []
+  - id: '2'
+    name: Name of the probe 2
+    description: Probe to check GET health
+    interval: 10
+    requests:
+      - {}
+    alerts: []
 ```
 
 Monika goes through each probe object, sends it out, and determines whether an alert or notification need to be sent out.
@@ -32,35 +29,28 @@ Monika goes through each probe object, sends it out, and determines whether an a
 
 An actual probe request may be something like below.
 
-```json
-  "probes": [
-    {
-      "id": "1",
-      "name": "Example: get Time",
-      "description": "Probe",
-      "interval": 10,
-      "requests": [{
-        "method": "POST",
-        "url": "https://mybackend.org/user/login",
-        "timeout": 7000,
-        "saveBody": true,
-        "headers": {
-          "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkhlbGxvIGZyb20gSHlwZXJqdW1wIiwiaWF0IjoxNTE2MjM5MDIyfQ.T2SbP1G39CMD4MMfkOZYGFgNIQgNkyi0sPdiFi_DfVA"
-        },
-        "body": {
-          "username": "someusername",
-          "password": "somepassword"
-        },
-        "alerts": []
-      }],
-      "incidentThreshold": 3,
-      "recoveryThreshold": 3,
-      "alerts": [{
-        "query": "response.status != 200",
-        "message": "HTTP response status is {{ response.status }}, expecting 200"
-      }]
-    },
-  ]
+```yaml
+probes:
+-  id: '1'
+  name: 'Example: get Time'
+  description: Probe
+  interval: 10
+  requests:
+  - method: POST
+    url: https://mybackend.org/user/login
+    timeout: 7000
+    saveBody: true
+    headers:
+      Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkhlbGxvIGZyb20gSHlwZXJqdW1wIiwiaWF0IjoxNTE2MjM5MDIyfQ.T2SbP1G39CMD4MMfkOZYGFgNIQgNkyi0sPdiFi_DfVA
+    body:
+      username: someusername
+      password: somepassword
+    alerts: []
+  incidentThreshold: 3
+  recoveryThreshold: 3
+  alerts:
+  - query: response.status != 200
+    message: HTTP response status is {{ response.status }}, expecting 200
 ```
 
 Details of the field are give in the table below.
@@ -83,23 +73,23 @@ Details of the field are give in the table below.
 
 The default shape of a response when Monika has successfully fetched a request is as the following.
 
-```json
-{
-  "status": 200,
-  "statusText": "OK",
-  "headers": { ... },
-  "config": {
-    "url": "https://reqres.in/api/users",
-    "method": "GET",
-    "data": "{'test':'test'}",
-    "headers": {
-      "Accept": "application/json, text/plain, */*",
-      "User-Agent": "axios/0.21.1"
-    },
-    "body": { "test": "test" },
-  },
-  "data": { ... }
-}
+```yaml
+status: 200
+statusText: OK
+headers: {...}
+config:
+- url: https://reqres.in/api/users
+  method: GET
+  data: { test: test }
+  headers:
+  - Accept:
+    - application/json
+    - text/plain
+    - */*
+    User-Agent: axios/0.21.1
+  body: { }
+data: { }
+
 ```
 
 Details of the fields are shown in the table below.

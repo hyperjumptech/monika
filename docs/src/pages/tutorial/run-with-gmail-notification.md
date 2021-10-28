@@ -3,39 +3,29 @@ id: run-with-gmail-notification
 title: Run with GMail Notification
 ---
 
-1. Create a `monika.json` file and fill it out with the following
+1. Create a `monika.yml` file and fill it out with the following
 
-   ```json
-   {
-     "notifications": [
-       {
-         "id": "unique-id-smtp",
-         "type": "smtp",
-         "data": {
-           "recipients": ["YOUR_EMAIL_ADDRESS_HERE"],
-           "hostname": "smtp.gmail.com",
-           "port": 587,
-           "username": "YOUR_GMAIL_ACCOUNT",
-           "password": "YOUR_GMAIL_PASSWORD_OR_APP_PASSWORD"
-         }
-       }
-     ],
-     "probes": [
-       {
-         "id": "1",
-         "name": "Monika Landing Page",
-         "description": "Landing page of awesome Monika",
-         "interval": 10,
-         "requests": [
-           {
-             "url": "https://hyperjumptech.github.io/monika",
-             "timeout": 7000
-           }
-         ],
-         "alerts": ["status-not-2xx"]
-       }
-     ]
-   }
+   ```yaml
+   notifications:
+    - id: unique-id-smtp
+      type: smtp
+      data:
+        recipients:
+        - YOUR_EMAIL_ADDRESS_HERE
+        hostname: smtp.gmail.com
+        port: 587
+        username: YOUR_GMAIL_ACCOUNT
+        password: YOUR_GMAIL_PASSWORD_OR_APP_PASSWORD
+    probes:
+    - id: '1'
+      name: Monika Landing Page
+      description: Landing page of awesome Monika
+      interval: 10
+      requests:
+      - url: https://hyperjumptech.github.io/monika
+        timeout: 7000
+      alerts:
+      - status-not-2xx
    ```
 
 2. Replace `YOUR_EMAIL_ADDRESS_HERE` in the monika.json with your email address that will receive the notification.
