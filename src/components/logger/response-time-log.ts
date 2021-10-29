@@ -22,47 +22,56 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { log } from './pino'
-import stun from 'stun'
-import axios from 'axios'
-import { hostname } from 'os'
-import getIp from './ip'
+import { differenceInHours } from 'date-fns'
+import { ProbeRequestResponse } from '../../interfaces/request'
 
-export let publicIpAddress = ''
-export let isConnectedToSTUNServer = true
-export let publicNetworkInfo: { country: string; city: string; isp: string }
+// global variable
+// we can say it is safe to use global variable here since the probe is processed sequentially as mentioned in probe/index.ts line 143: intentionally wait for a request to finish before processing next request in loop
+let startTime24HourCycle = new Date()
+let responseCount = 0
+let totalResponseTime = 0
+export let maxResponseTime = 0
+export let minResponseTime = 0
+export let averageResponseTime = 0
 
-async function testStun(): Promise<string> {
-  const response = await stun.request('stun.l.google.com:19302')
-  return response?.getXorAddress()?.address
+export function getLogLifeTimeInHour() {
+  const now = new Date()
+  const diff = differenceInHours(now, startTime24HourCycle)
+  return diff || 1
 }
 
-export async function getPublicNetworkInfo() {
-  try {
-    const ip = await testStun()
-    const response = await axios.get(`http://ip-api.com/json/${ip}`)
-    const { country, city, isp } = response.data
-    publicNetworkInfo = { country, city, isp }
-    log.info(
-      `Monika is running from: ${publicNetworkInfo.city} - ${
-        publicNetworkInfo.isp
-      } (${ip}) - ${hostname()} (${getIp()})`
-    )
-  } catch (error) {
-    log.error(`Failed to obtain location/ISP info`)
-  }
+export function resetlogs() {
+  startTime24HourCycle = new Date()
+  responseCount = 0
+  totalResponseTime = 0
+  maxResponseTime = 0
+  minResponseTime = 0
+  averageResponseTime = 0
 }
 
-export async function getPublicIp() {
-  try {
-    const address = await testStun()
-    if (address) {
-      publicIpAddress = address
-      isConnectedToSTUNServer = true
-      log.info(`Connected to STUN Server. Monika is running from: ${address}`)
-    }
-  } catch (error) {
-    isConnectedToSTUNServer = false
-    log.error(`STUN Server is unreachable. Can't obtain Public IP`)
+export function checkIs24HourHasPassed() {
+  const now = new Date()
+  const diffInHours = differenceInHours(now, startTime24HourCycle)
+  if (diffInHours > 24) {
+    return true
   }
+
+  return false
+}
+
+export function logResponseTime(probeRes: ProbeRequestResponse) {
+  responseCount += 1
+
+  if (responseCount === 1) {
+    // first time
+    maxResponseTime = probeRes.responseTime
+    minResponseTime = probeRes.responseTime
+  } else if (probeRes.responseTime > maxResponseTime) {
+    maxResponseTime = probeRes.responseTime
+  } else if (probeRes.responseTime < minResponseTime) {
+    minResponseTime = probeRes.responseTime
+  }
+
+  totalResponseTime += probeRes.responseTime
+  averageResponseTime = Math.floor(totalResponseTime / responseCount)
 }

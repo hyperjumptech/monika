@@ -24,16 +24,13 @@
 
 import { Config } from './interfaces/config'
 import { Probe } from './interfaces/probe'
-import { getLogsAndReport } from './components/reporter'
 import { doProbe } from './components/probe'
 import { log } from './utils/pino'
 import { Notification } from './interfaces/notification'
-import { getUnreportedLogsCount } from './components/logger/history'
 import { getPublicIp, isConnectedToSTUNServer } from './utils/public-ip'
 
 const MILLISECONDS = 1000
 export const DEFAULT_THRESHOLD = 5
-const DEFAULT_REPORT_INTERVAL = 180000 // 3 minutes
 let checkSTUNinterval: NodeJS.Timeout
 
 /**
@@ -112,17 +109,15 @@ export function isIDValid(config: Config, ids: string): boolean {
 }
 
 export async function loopCheckSTUNServer(interval: number) {
+  // if interval = 0 get ip once and exit. No need to setup interval.
+  if (interval === 0 || process.env.CI || process.env.NODE_ENV === 'test') {
+    await getPublicIp()
+    return
+  }
+
   checkSTUNinterval = setInterval(async () => {
     await getPublicIp()
-
-    if (interval <= 0) {
-      clearInterval(checkSTUNinterval)
-    }
   }, interval * MILLISECONDS)
-
-  if (process.env.CI || process.env.NODE_ENV === 'test') {
-    clearInterval(checkSTUNinterval)
-  }
 
   return checkSTUNinterval
 }
@@ -136,6 +131,7 @@ export async function loopCheckSTUNServer(interval: number) {
  * @param {boolean} verboseLogs store all requests to database
  * @returns {function} func with isAborted true if interrupted
  */
+// eslint-disable-next-line max-params
 function loopProbe(
   probe: Probe,
   notifications: Notification[],
@@ -168,6 +164,7 @@ function loopProbe(
  * @param {boolean} verboseLogs store all requests to database
  * @returns {function} abort function
  */
+// eslint-disable-next-line max-params
 export function idFeeder(
   sanitizedProbes: Probe[],
   notifications: Notification[],
@@ -191,23 +188,4 @@ export function idFeeder(
   }
 
   return abort
-}
-
-export async function loopReport(getConfig: () => Config) {
-  const { symon } = getConfig()
-
-  if (symon) {
-    // Send previously unreported logs to symon
-    const unreportedCount = await getUnreportedLogsCount()
-    const limit = parseInt(process.env.MONIKA_REPORT_LIMIT || '100', 10)
-
-    for (let i = unreportedCount; i > 0; i -= limit) {
-      // eslint-disable-next-line no-await-in-loop
-      await getLogsAndReport()
-    }
-
-    // Next run report on interval
-    const { interval = DEFAULT_REPORT_INTERVAL } = symon
-    setInterval(getLogsAndReport, interval)
-  }
 }

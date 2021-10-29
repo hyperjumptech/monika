@@ -23,6 +23,7 @@
  **********************************************************************************/
 
 import chai, { expect } from 'chai'
+import spies from 'chai-spies'
 import { sendAlerts } from '../../src/components/notification'
 import * as discord from '../../src/components/notification/channel/discord'
 import * as mailgun from '../../src/components/notification/channel/mailgun'
@@ -42,6 +43,8 @@ import {
   LarkData,
 } from '../../src/interfaces/data'
 
+chai.use(spies)
+
 describe('send alerts', () => {
   afterEach(() => {
     chai.spy.restore()
@@ -50,6 +53,7 @@ describe('send alerts', () => {
   it('should send UP alert', async () => {
     chai.spy.on(mailgun, 'sendMailgun', () => Promise.resolve())
     await sendAlerts({
+      probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
       validation: {
         alert: { query: 'status-not-2xx', message: '' },
         isAlertTriggered: false,
@@ -80,6 +84,7 @@ describe('send alerts', () => {
   it('should send DOWN alert', async () => {
     chai.spy.on(mailgun, 'sendMailgun', () => Promise.resolve())
     await sendAlerts({
+      probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
       validation: {
         alert: { query: 'status-not-2xx', message: '' },
         isAlertTriggered: true,
@@ -110,6 +115,7 @@ describe('send alerts', () => {
   it('should send mailgun notification', async () => {
     chai.spy.on(mailgun, 'sendMailgun', () => Promise.resolve())
     await sendAlerts({
+      probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
       validation: {
         alert: { query: 'status-not-2xx', message: '' },
         isAlertTriggered: true,
@@ -141,6 +147,7 @@ describe('send alerts', () => {
   it('should send mailgun notification without username', async () => {
     chai.spy.on(mailgun, 'sendMailgun', () => Promise.resolve())
     await sendAlerts({
+      probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
       validation: {
         alert: { query: 'status-not-2xx', message: '' },
         isAlertTriggered: true,
@@ -173,6 +180,7 @@ describe('send alerts', () => {
     chai.spy.on(slack, 'sendSlack', () => Promise.resolve())
 
     await sendAlerts({
+      probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
       validation: {
         alert: { query: 'status-not-2xx', message: '' },
         isAlertTriggered: true,
@@ -210,6 +218,7 @@ describe('send alerts', () => {
   it('should send SMTP notification', async () => {
     chai.spy.on(smtp, 'sendSmtpMail', () => Promise.resolve())
     await sendAlerts({
+      probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
       validation: {
         alert: { query: 'status-not-2xx', message: '' },
         isAlertTriggered: true,
@@ -243,6 +252,7 @@ describe('send alerts', () => {
     chai.spy.on(whatsapp, 'sendWhatsapp', () => Promise.resolve())
 
     await sendAlerts({
+      probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
       validation: {
         alert: { query: 'status-not-2xx', message: '' },
         isAlertTriggered: true,
@@ -294,6 +304,7 @@ describe('send alerts', () => {
     chai.spy.on(telegram, 'sendTelegram', () => Promise.resolve())
 
     await sendAlerts({
+      probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
       validation: {
         alert: { query: 'status-not-2xx', message: '' },
         isAlertTriggered: true,
@@ -326,6 +337,7 @@ describe('send alerts', () => {
     chai.spy.on(discord, 'sendDiscord', () => Promise.resolve())
 
     await sendAlerts({
+      probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
       validation: {
         alert: { query: 'status-not-2xx', message: '' },
         isAlertTriggered: true,
@@ -356,6 +368,7 @@ describe('send alerts', () => {
     chai.spy.on(monikaNotif, 'sendMonikaNotif', () => Promise.resolve())
 
     await sendAlerts({
+      probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
       validation: {
         alert: { query: 'status-not-2xx', message: '' },
         isAlertTriggered: true,
@@ -386,6 +399,7 @@ describe('send alerts', () => {
     chai.spy.on(lark, 'sendLark', () => Promise.resolve())
 
     await sendAlerts({
+      probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
       validation: {
         alert: { query: 'status-not-2xx', message: '' },
         isAlertTriggered: true,

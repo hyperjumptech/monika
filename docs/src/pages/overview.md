@@ -37,4 +37,4 @@ Monika is open sourced. How many of you click the "Pricing" menu every time afte
 
 ## You talked me into it, what now?
 
-[Let's install Monika](https://hyperjumptech.github.io/monika/installation)
+[Let's install Monika](https://monika.hyperjump.tech/quick-start)
