@@ -122,7 +122,15 @@ export const sendLark = async (
                 },
                 {
                   tag: 'text',
-                  value: `${message.meta.averageResponseTime} ms in the last 24 hours`,
+                  value: `${message.meta.maxResponseTime} ms in the last ${message.meta.responseTimelogLifeTimeInHour} hours`,
+                },
+                {
+                  tag: 'text',
+                  value: `${message.meta.minResponseTime} ms in the last ${message.meta.responseTimelogLifeTimeInHour} hours`,
+                },
+                {
+                  tag: 'text',
+                  value: `${message.meta.averageResponseTime} ms in the last ${message.meta.responseTimelogLifeTimeInHour} hours`,
                 },
                 {
                   tag: 'text',

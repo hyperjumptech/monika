@@ -118,7 +118,7 @@ export const Seo = withRouter(
           rel="icon"
           type="image/png"
           sizes="192x192"
-          href={`${router.basePath}/android-icon-192x192.png`}
+          href={`${router.basePath}/android-chrome-192x192.png`}
         />
         <link
           rel="icon"

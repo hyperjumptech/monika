@@ -24,6 +24,7 @@
 
 import * as nodemailer from 'nodemailer'
 import Mail from 'nodemailer/lib/mailer'
+import Mailgen from 'mailgen'
 
 import { SMTPData } from '../../../interfaces/data'
 
@@ -36,10 +37,31 @@ export const createSmtpTransport = (cfg: SMTPData) => {
 }
 
 export const sendSmtpMail = async (transporter: Mail, opt: Mail.Options) => {
+  const mailGenerator = new Mailgen({
+    theme: 'default',
+    product: {
+      name: 'Monika',
+      link: 'https://monika.hyperjump.tech/',
+      logo:
+        'https://raw.githubusercontent.com/hyperjumptech/monika/main/docs/public/monika.svg',
+    },
+  })
+  const email = {
+    body: {
+      name: `${opt.to}`,
+      intro: [
+        `${opt.subject}`,
+        `<div style="white-space: pre-wrap;">${opt.text}</div>`,
+      ],
+    },
+  }
+
+  const emailTemplate = mailGenerator.generate(email)
+
   return transporter.sendMail({
     from: opt.from,
     to: opt.to,
     subject: opt.subject,
-    text: opt.text,
+    html: emailTemplate,
   })
 }

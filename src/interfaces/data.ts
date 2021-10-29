@@ -48,6 +48,10 @@ export interface TeamsData {
   url: string
 }
 
+export interface SlackData {
+  url: string
+}
+
 export interface WebhookData {
   url: string
   body: string
@@ -81,6 +85,8 @@ interface MonikaStatusUpdateNotifDataBody {
   time: string
   monika: string
   numberOfProbes: string
+  maxResponseTime: string
+  minResponseTime: string
   averageResponseTime: string
   numberOfIncidents: string
   numberOfRecoveries: string

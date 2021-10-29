@@ -30,6 +30,7 @@ export async function probing(
   requestConfig: RequestConfig,
   responses: Array<ProbeRequestResponse>
 ): Promise<ProbeRequestResponse> {
+  const newReq = { ...requestConfig }
   // Compile URL using handlebars to render URLs that uses previous responses data
   const { url } = requestConfig
   const requestURL = url
@@ -45,8 +46,8 @@ export async function probing(
       const renderHeader = Handlebars.compile(rawHeader)
       const renderedHeader = renderHeader({ responses })
 
-      requestConfig.headers = {
-        ...requestConfig.headers,
+      newReq.headers = {
+        ...newReq.headers,
         [header]: renderedHeader,
       }
     }
@@ -58,9 +59,9 @@ export async function probing(
   try {
     // Do the request using compiled URL and compiled headers (if exists)
     const resp = await axiosInstance.request({
-      ...requestConfig,
+      ...newReq,
       url: renderedURL,
-      data: requestConfig.body,
+      data: newReq.body,
     })
     const responseTime = new Date().getTime() - requestStartedAt
     const { data, headers, status } = resp

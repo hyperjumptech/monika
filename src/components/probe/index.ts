@@ -37,6 +37,7 @@ import { sendAlerts } from '../notification'
 import { processThresholds } from '../notification/process-server-status'
 import { getLogsAndReport } from '../reporter'
 import { probing } from './probing'
+import { logResponseTime } from '../logger/response-time-log'
 
 // TODO: move this to interface file?
 interface ProbeStatusProcessed {
@@ -65,6 +66,8 @@ async function checkThresholdsAndSendAlert(
     validatedResponseStatuses,
   } = data
   const probeSendNotification = async (data: ProbeSendNotification) => {
+    const eventEmitter = getEventEmitter()
+
     const {
       index,
       probe,
@@ -76,17 +79,26 @@ async function checkThresholdsAndSendAlert(
 
     const statusString = probeState?.state ?? 'UP'
     const url = probe.requests[requestIndex].url ?? ''
+    const validation =
+      validatedResponseStatuses.find(
+        (validateResponse: ValidatedResponse) =>
+          validateResponse.alert.query === probeState?.alertQuery
+      ) || validatedResponseStatuses[index]
+
+    eventEmitter.emit(events.probe.notification.willSend, {
+      probeID: probe.id,
+      url: url,
+      probeState: statusString,
+      validation,
+    })
 
     if ((notifications?.length ?? 0) > 0) {
       await sendAlerts({
+        probeID: probe.id,
         url: url,
         probeState: statusString,
         notifications: notifications ?? [],
-        validation:
-          validatedResponseStatuses.find(
-            (validateResponse: ValidatedResponse) =>
-              validateResponse.alert.query === probeState?.alertQuery
-          ) || validatedResponseStatuses[index],
+        validation,
       })
     }
   }
@@ -143,6 +155,8 @@ export async function doProbe(
       // eslint-disable-next-line no-await-in-loop
       const probeRes: ProbeRequestResponse = await probing(request, responses)
 
+      logResponseTime(probeRes)
+
       eventEmitter.emit(events.probe.response.received, {
         probe,
         requestIndex,
@@ -168,7 +182,8 @@ export async function doProbe(
       }
 
       // combine global probe alerts with all individual request alerts
-      const combinedAlerts = probe.alerts.concat(...(request.alerts || []))
+      const probeAlerts = probe.alerts ?? []
+      const combinedAlerts = probeAlerts.concat(...(request.alerts || []))
 
       // Responses have been processed and validated
       const validatedResponse = validateResponse(combinedAlerts, probeRes)
@@ -205,7 +220,7 @@ export async function doProbe(
         break
       }
     } catch (error) {
-      requestLog.addError(error.message)
+      requestLog.addError((error as any).message)
       break
     } finally {
       requestLog.print()
