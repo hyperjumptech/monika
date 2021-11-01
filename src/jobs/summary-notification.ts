@@ -89,7 +89,6 @@ OS: ${osName}
 Version: ${userAgent}
 
 Tweet this status!
-
 ${tweetMessage}
 `,
       summary: `There are ${summary.numberOfIncidents} incidents and ${summary.numberOfRecoveries} recoveries in the last 24 hours. - ${userAgent} - ${osName}`,

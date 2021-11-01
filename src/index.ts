@@ -333,7 +333,7 @@ class Monika extends Command {
           const schedule =
             flags['status-notification'] ||
             config['status-notification'] ||
-            '*/1 * * * *'
+            '0 6 * * *'
 
           const scheduledStatusUpdateTask = cron.schedule(
             schedule,
