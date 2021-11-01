@@ -117,9 +117,9 @@ class SymonClient {
 
   configHash = ''
 
-  fetchProbesInterval = 60000 // (ms) 60 seconds
+  private fetchProbesInterval: number // (ms)
 
-  reportProbesInterval = 20000 // (ms) 20 seconds
+  private reportProbesInterval: number // (ms)
 
   private probes: Probe[] = []
 
@@ -136,6 +136,16 @@ class SymonClient {
         'x-api-key': apiKey,
       },
     })
+
+    this.fetchProbesInterval = parseInt(
+      process.env.FETCH_PROBES_INTERVAL ?? '60000',
+      10
+    )
+
+    this.reportProbesInterval = parseInt(
+      process.env.REPORT_PROBES_INTERVAL ?? '20000',
+      10
+    )
   }
 
   async initiate() {
