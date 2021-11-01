@@ -325,7 +325,8 @@ class Monika extends Command {
         // schedule status update notification
         if (
           process.env.NODE_ENV !== 'test' &&
-          flags['status-notification'] !== 'false'
+          flags['status-notification'] !== 'false' &&
+          !isSymonMode
         ) {
           // defaults to 6 AM
           // default value is not defined in flag configuration,
