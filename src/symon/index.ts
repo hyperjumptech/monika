@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 /**********************************************************************************
  * MIT License                                                                    *
  *                                                                                *
@@ -29,25 +28,25 @@ import mac from 'macaddress'
 import { hostname } from 'os'
 import pako from 'pako'
 
+import {
+  deleteNotificationLogs,
+  deleteRequestLogs,
+  getUnreportedLogs,
+} from '../components/logger/history'
 import { getOSName } from '../components/notification/alert-message'
+import events from '../events'
 import { Config } from '../interfaces/config'
 import { Probe } from '../interfaces/probe'
+import { ValidatedResponse } from '../plugins/validate-response'
+import { getEventEmitter } from '../utils/events'
 import getIp from '../utils/ip'
+import { log } from '../utils/pino'
 import {
   getPublicIp,
   getPublicNetworkInfo,
   publicIpAddress,
   publicNetworkInfo,
 } from '../utils/public-ip'
-import {
-  getUnreportedLogs,
-  deleteNotificationLogs,
-  deleteRequestLogs,
-} from '../components/logger/history'
-import { log } from '../utils/pino'
-import { getEventEmitter } from '../utils/events'
-import events from '../events'
-import { ValidatedResponse } from '../plugins/validate-response'
 
 type SymonHandshakeData = {
   macAddress: string
@@ -118,7 +117,11 @@ class SymonClient {
 
   configHash = ''
 
-  fetchProbesInterval = 60000 // 1 minute
+  fetchProbesInterval = 60000 // (ms) 60 seconds
+
+  reportProbesInterval = 20000 // (ms) 20 seconds
+
+  private probes: Probe[] = []
 
   eventEmitter: EventEmitter | null = null
 
@@ -168,7 +171,7 @@ class SymonClient {
 
     await this.report()
     if (!isTestEnvironment) {
-      setInterval(this.report.bind(this), this.fetchProbesInterval)
+      setInterval(this.report.bind(this), this.reportProbesInterval)
     }
   }
 
@@ -211,6 +214,8 @@ class SymonClient {
       })
       .then((res) => {
         if (res.data.data) {
+          this.probes = res.data.data
+
           log.debug(`Received ${res.data.data.length} probes`)
         } else {
           log.debug(`No new config from Symon`)
@@ -253,7 +258,8 @@ class SymonClient {
     try {
       const limit = parseInt(process.env.MONIKA_REPORT_LIMIT ?? '100', 10)
 
-      const logs = await getUnreportedLogs(limit)
+      const probeIds = this.probes.map((probe) => probe.id)
+      const logs = await getUnreportedLogs(limit, probeIds)
 
       const requests = logs.requests
 
