@@ -81,7 +81,7 @@ export const sendDesktop = (data: NotifyData) => {
     case 'Darwin':
       spawnSync('osascript', ['-e', osascript])
       break
-    case 'Windows NT':
+    case 'Windows_NT':
       execSync(powershellScript, { shell: 'powershell.exe' })
       break
     default:
