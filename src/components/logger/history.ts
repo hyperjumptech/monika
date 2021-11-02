@@ -189,7 +189,10 @@ export async function getUnreportedLogsCount(): Promise<number> {
   return row?.count || 0
 }
 
-export async function getUnreportedLogs(limit: number): Promise<UnreportedLog> {
+export async function getUnreportedLogs(
+  limit: number,
+  ids: string[]
+): Promise<UnreportedLog> {
   const readUnreportedRequestsSQL = `
     SELECT PR.id,
       PR.created_at as timestamp,
@@ -209,7 +212,7 @@ export async function getUnreportedLogs(limit: number): Promise<UnreportedLog> {
       END alerts
     FROM probe_requests PR
       LEFT JOIN alerts A ON PR.id = A.probe_request_id
-    WHERE PR.reported = 0
+    WHERE PR.reported = 0 AND PR.probe_id IN ('${ids.join("','")}')
     GROUP BY PR.id
     LIMIT ${limit};`
 
