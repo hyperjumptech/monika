@@ -88,7 +88,6 @@ Notifications: ${summary.numberOfSentNotifications}
 OS: ${osName}
 Version: ${userAgent}
 
-Tweet this status!
 ${tweetMessage}
 `,
       summary: `There are ${summary.numberOfIncidents} incidents and ${summary.numberOfRecoveries} recoveries in the last 24 hours. - ${userAgent} - ${osName}`,
@@ -248,7 +247,7 @@ function createTweetMessage({
   number_of_incidents: number
   number_of_recoveries: number
 }): string {
-  const message = `I'm using Monika by @hyperjump_tech to monitor ${number_of_probes} probes! In the last 24 hours, 
+  const message = `I am using Monika by @hyperjump_tech to monitor ${number_of_probes} probes! In the last 24 hours, 
 
 ⏱ the average response time is ${average_response_time} ms
 ⚠️ there were ${number_of_incidents} incidents
@@ -256,9 +255,9 @@ function createTweetMessage({
 
 Give it a try!
 
-opensource
-
 https://monika.hyperjump.tech`
 
-  return `https://twitter.com/intent/tweet?text=${encodeURI(message)}`
+  return `<a href=https://twitter.com/intent/tweet?text=${encodeURI(
+    message
+  )}&hashtags=opensource,monika>Tweet this status!</a>`
 }
