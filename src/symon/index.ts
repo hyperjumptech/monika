@@ -143,7 +143,7 @@ class SymonClient {
     )
 
     this.reportProbesInterval = parseInt(
-      process.env.REPORT_PROBES_INTERVAL ?? '20000',
+      process.env.REPORT_PROBES_INTERVAL ?? '10000',
       10
     )
   }
@@ -266,10 +266,8 @@ class SymonClient {
   async report() {
     log.debug('Reporting to symon')
     try {
-      const limit = parseInt(process.env.MONIKA_REPORT_LIMIT ?? '100', 10)
-
       const probeIds = this.probes.map((probe) => probe.id)
-      const logs = await getUnreportedLogs(limit, probeIds)
+      const logs = await getUnreportedLogs(probeIds)
 
       const requests = logs.requests
 
@@ -302,8 +300,8 @@ class SymonClient {
       )
 
       await Promise.all([
-        deleteRequestLogs(logs.requests.map((log) => log.id)),
-        deleteNotificationLogs(logs.notifications.map((log) => log.id)),
+        deleteRequestLogs(logs.requests.map((log) => log.probe_id)),
+        deleteNotificationLogs(logs.notifications.map((log) => log.probe_id)),
       ])
 
       log.debug(
