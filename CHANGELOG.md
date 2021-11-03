@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.6] - 2021-11-02
+
+### Fixed
+
+- Fix windows desktop notification doesn't show (#517)
+- Fix issue with symon reporting (#516)
+
+### Updated
+
+- Prevent status notification when in symon mode (#513)
+
 ## [1.6.5] - 2021-10-27
 
 ### Fixed
