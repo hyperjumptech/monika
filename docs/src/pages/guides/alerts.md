@@ -5,23 +5,17 @@ title: Alerts
 
 Alerts are the types of condition that will trigger Monika to send notification. It is an array located on probes defined in the config file `monika.yml` like so.
 
-```yml
-  probes: [
-    - id: 1
-      name: Name of the probe
-      requests: [
-        ...
-          ...
-        - alerts: [
-              query: response.size >= 10000
-              message: Response size is {{ response.size }} expecting less than 10000
-          ]
-      ]
-    - alerts: [
-          query: response.status != 200
-          message: HTTP Status code is {{ response.status }} expecting 200
-      ]
-  ]
+```yaml
+probes:
+  id: '1'
+  name: Name of the probe
+  requests:
+    - alerts:
+        - query: response.size >= 10000
+          message: Response size is {{ response.size }}, expecting less than 10000
+  alerts:
+    - query: response.status != 200
+      message: HTTP Status code is {{ response.status }}, expecting 200
 ```
 
 The `alerts` configuration can be put under `probe` or under each `requests` as displayed above. Alerts defined under `probe` will run for all requests, while the alerts defined under specific request will run for that request only.
@@ -31,8 +25,8 @@ The `alerts` configuration can be put under `probe` or under each `requests` as 
 Query contains any arbitrary expression that will trigger alert when it returns a truthy value
 
 ```yml
-- alerts: [query: response.status == 500
-        ...]
+- alerts:
+    query: response.status == 500
 ```
 
 Inside the query expression you can get the response object.
@@ -50,20 +44,15 @@ The `response.headers` and `response.body` can be queried further with object ac
 For example, to trigger alert when content-type is not json you may use
 
 ```yml
-  alerts : [
-    - query: response.headers['content-type'] != "application/json"
-      ...
-
-  ]
+alerts:
+  - query: response.headers['content-type'] != "application/json"
 ```
 
 Or to query value inside the body
 
 ```yml
-  alerts : [
-    - query: response.body.data.todos[0].title != "Drink water"
-      ...
-  ]
+alerts:
+  - query: response.body.data.todos[0].title != "Drink water"
 ```
 
 These operators are available:
