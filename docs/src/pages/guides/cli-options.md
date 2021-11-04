@@ -33,11 +33,11 @@ A neat feature is that the configuration file is watched and any changes will ca
 Monika also supports multiple sources of configuration at the same time.
 **Any top-level** keys from the first argument will be overridden by the later source(s).
 
-For example, assuming you have a file named `only-notif.json` whose content `{"notifications":[<your-notifications-here>]}`
+For example, assuming you have a file named `only-notif.yml` whose content `{"notifications":[<your-notifications-here>]}`
 
 ```bash
-# only-notif.json's notifications will override notifications foo-monitoring.json has
-monika -c foo-monitoring.json only-notif.json
+# only-notif.yml's notifications will override notifications foo-monitoring.yml has
+monika -c foo-monitoring.yml only-notif.yml
 ```
 
 ## Create Config
@@ -89,7 +89,7 @@ monika -H my-file.har
 You can use the combination of `--create-config` and `--har` flags to convert the HAR archive into to a monika.yml configuration file.
 
 ```bash
-# default to monika.json
+# default to monika.yml
 monika --create-config -H my-file.har
 ```
 
@@ -98,7 +98,7 @@ monika --create-config -H my-file.har
 You can also use `-c/--config` to merge properties with them. Note that using `--har` will override probes passed to `-c/--config`.
 
 ```bash
-monika --config monika-notifications.json -H my-file.har
+monika --config monika-notifications.yml -H my-file.har
 ```
 
 **P.S.**: HAR files may contain sensitive information, use caution when distributing HAR filles.
@@ -137,10 +137,10 @@ You must respond with a capital `"Y"` to confirm if you want to flush the logs o
 
 ## Postman
 
-Have an existing request on postman you want to automate? Monika supports reading postman.json as configuration input. Use the `-p` or the `--postman` switches.
+Have an existing request on postman you want to automate? Monika supports reading postman.yml as configuration input. Use the `-p` or the `--postman` switches.
 
 ```bash
-monika -p postman.json
+monika -p postman.yml
 ```
 
 ### Create config from Postman file
@@ -152,7 +152,7 @@ You can use the combination of `--create-config` and `--postman` flags to conver
 You can also use `-c/--config` to merge properties with them. Note that using `--postman` will override probes passed to `-c/--config`.
 
 ```bash
-monika --config monika-notifications.json --postman my-file.har
+monika --config monika-notifications.yml --postman my-file.har
 ```
 
 ## Prometheus
