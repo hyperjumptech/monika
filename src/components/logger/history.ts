@@ -189,10 +189,7 @@ export async function getUnreportedLogsCount(): Promise<number> {
   return row?.count || 0
 }
 
-export async function getUnreportedLogs(
-  limit: number,
-  ids: string[]
-): Promise<UnreportedLog> {
+export async function getUnreportedLogs(ids: string[]): Promise<UnreportedLog> {
   const readUnreportedRequestsSQL = `
     SELECT PR.id,
       PR.created_at as timestamp,
@@ -213,8 +210,7 @@ export async function getUnreportedLogs(
     FROM probe_requests PR
       LEFT JOIN alerts A ON PR.id = A.probe_request_id
     WHERE PR.reported = 0 AND PR.probe_id IN ('${ids.join("','")}')
-    GROUP BY PR.id
-    LIMIT ${limit};`
+    GROUP BY PR.id;`
 
   const readUnreportedNotificationsSQL = `
     SELECT id,
@@ -226,8 +222,7 @@ export async function getUnreportedLogs(
       notification_id,
       channel
     FROM notifications
-    WHERE reported = 0
-    LIMIT ${limit};`
+    WHERE reported = 0 AND probe_id IN ('${ids.join("','")}');`
 
   const [unreportedRequests, unreportedNotifications] = await Promise.all([
     db.all(readUnreportedRequestsSQL).then(
@@ -251,32 +246,18 @@ export async function getUnreportedLogs(
   }
 }
 
-export async function setRequestLogAsReported(ids: number[]) {
-  const updateRowsSQL = `UPDATE probe_requests SET reported = 1 WHERE id IN (${ids.join(
-    ', '
-  )})`
+export async function deleteRequestLogs(ids: string[]) {
+  const idsString = ids.join("','")
+  const sql = `DELETE FROM probe_requests WHERE probe_id IN ('${idsString}');`
 
-  await db.run(updateRowsSQL)
+  return db.run(sql)
 }
 
-export async function deleteRequestLogs(ids: number[]) {
-  const sql = `DELETE FROM probe_requests WHERE id IN (${ids.join(', ')})`
+export async function deleteNotificationLogs(ids: string[]) {
+  const idsString = ids.join("','")
+  const sql = `DELETE FROM notifications WHERE probe_id IN ('${idsString}');`
 
-  await db.run(sql)
-}
-
-export async function setNotificationLogAsReported(ids: number[]) {
-  const updateRowsSQL = `UPDATE notifications SET reported = 1 WHERE id IN (${ids.join(
-    ', '
-  )})`
-
-  await db.run(updateRowsSQL)
-}
-
-export async function deleteNotificationLogs(ids: number[]) {
-  const sql = `DELETE FROM notifications WHERE id IN (${ids.join(', ')})`
-
-  await db.run(sql)
+  return db.run(sql)
 }
 
 /**
