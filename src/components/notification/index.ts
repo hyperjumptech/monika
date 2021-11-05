@@ -139,7 +139,7 @@ export async function sendNotifications(
             const transporter = createSmtpTransport(notification.data)
             await sendSmtpMail(transporter, {
               // TODO: Read from ENV Variables
-              from: 'http-probe@hyperjump.tech',
+              from: 'Monika@hyperjump.tech',
               to: notification?.data?.recipients?.join(','),
               subject: message.subject,
               text: message.body,
