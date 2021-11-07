@@ -35,7 +35,6 @@ import { log } from '../../utils/pino'
 import { RequestLog } from '../logger'
 import { sendAlerts } from '../notification'
 import { processThresholds } from '../notification/process-server-status'
-import { getLogsAndReport } from '../reporter'
 import { probing } from './probing'
 import { logResponseTime } from '../logger/response-time-log'
 
@@ -225,14 +224,7 @@ export async function doProbe(
     } finally {
       requestLog.print()
       if (verboseLogs || requestLog.hasIncidentOrRecovery) {
-        requestLog
-          .saveToDatabase()
-          .then(() => {
-            if (requestLog.hasIncidentOrRecovery) {
-              return getLogsAndReport()
-            }
-          })
-          .catch((error) => log.error(error.message))
+        requestLog.saveToDatabase().catch((error) => log.error(error.message))
       }
     }
   }

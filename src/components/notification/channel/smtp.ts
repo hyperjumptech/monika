@@ -27,6 +27,7 @@ import Mail from 'nodemailer/lib/mailer'
 import Mailgen from 'mailgen'
 
 import { SMTPData } from '../../../interfaces/data'
+import { convertTextToHTML } from '../../../utils/text'
 
 export const createSmtpTransport = (cfg: SMTPData) => {
   return nodemailer.createTransport({
@@ -49,10 +50,7 @@ export const sendSmtpMail = async (transporter: Mail, opt: Mail.Options) => {
   const email = {
     body: {
       name: `${opt.to}`,
-      intro: [
-        `${opt.subject}`,
-        `<div style="white-space: pre-wrap;">${opt.text}</div>`,
-      ],
+      intro: [`${opt.subject}`, convertTextToHTML(`${opt.text}`)],
     },
   }
 
