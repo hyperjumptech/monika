@@ -448,13 +448,11 @@ Please refer to the Monika documentations on how to how to configure notificatio
             case 'sendgrid':
               break
             case 'webhook':
-              startupMessage += `    URL: ${item.data.url}\n`
-              break
             case 'slack':
+            case 'lark':
+            case 'google-chat':
               startupMessage += `    URL: ${item.data.url}\n`
               break
-            case 'lark':
-              startupMessage += `    URL: ${item.data.url}\n`
           }
         })
       }

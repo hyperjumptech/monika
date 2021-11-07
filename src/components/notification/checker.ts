@@ -39,6 +39,7 @@ import {
   dataWebhookSchemaValidator,
   dataWorkplaceSchemaValidator,
   dataLarkSchemaValidator,
+  dataGoogleChatSchemaValidator,
 } from './validator'
 
 // reexported with alias because this `errorMessage` function is used in test file
@@ -59,6 +60,7 @@ export const notificationChecker = async (notifications: Notification[]) => {
     whatsapp: dataWebhookSchemaValidator,
     workplace: dataWorkplaceSchemaValidator,
     lark: dataLarkSchemaValidator,
+    'google-chat': dataGoogleChatSchemaValidator,
   }
 
   await Promise.all(
