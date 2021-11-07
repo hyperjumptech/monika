@@ -67,6 +67,12 @@ export async function getSummaryAndSendNotif() {
       getMonikaInstance(privateIpAddress),
     ])
     const responseTimelogLifeTimeInHour = getLogLifeTimeInHour()
+    const tweetMessage = createTweetMessage({
+      average_response_time: averageResponseTime,
+      number_of_incidents: summary.numberOfIncidents,
+      number_of_probes: summary.numberOfProbes,
+      number_of_recoveries: summary.numberOfRecoveries,
+    })
 
     sendNotifications(notifications, {
       subject: `Monika Status`,
@@ -80,7 +86,10 @@ Incidents: ${summary.numberOfIncidents} in the last 24 hours
 Recoveries: ${summary.numberOfRecoveries} in the last 24 hours
 Notifications: ${summary.numberOfSentNotifications}
 OS: ${osName}
-Version: ${userAgent}`,
+Version: ${userAgent}
+
+${tweetMessage}
+`,
       summary: `There are ${summary.numberOfIncidents} incidents and ${summary.numberOfRecoveries} recoveries in the last 24 hours. - ${userAgent} - ${osName}`,
       meta: {
         type: 'status-update' as const,
@@ -225,4 +234,30 @@ export async function printSummary(cliConfig: IConfig) {
   } catch (error) {
     log.error(`Summary notification: ${error.message}`)
   }
+}
+
+function createTweetMessage({
+  number_of_probes,
+  average_response_time,
+  number_of_incidents,
+  number_of_recoveries,
+}: {
+  number_of_probes: number
+  average_response_time: number
+  number_of_incidents: number
+  number_of_recoveries: number
+}): string {
+  const message = `I am using Monika by @hyperjump_tech to monitor ${number_of_probes} probes! In the last 24 hours, 
+
+⏱ the average response time is ${average_response_time} ms
+⚠️ there were ${number_of_incidents} incidents
+✅ and ${number_of_recoveries} recoveries!
+
+Give it a try!
+
+https://monika.hyperjump.tech`
+
+  return `<a href=https://twitter.com/intent/tweet?text=${encodeURI(
+    message
+  )}&hashtags=opensource,monika>Tweet this status!</a>`
 }

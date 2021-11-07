@@ -26,6 +26,7 @@ import Mailgun from 'mailgun.js'
 import formData from 'form-data'
 import { MailgunData } from '../../../interfaces/data'
 import { SendInput } from '../../../interfaces/mailgun'
+import { convertTextToHTML } from '../../../utils/text'
 
 export const sendMailgun = async (
   inputData: SendInput,
@@ -40,7 +41,7 @@ export const sendMailgun = async (
     from: `${sender.name} <${sender.email}>`,
     to: recipients,
     subject: subject,
-    text: body,
+    html: convertTextToHTML(body),
   }
   return mg.messages.create(domain, data)
 }
