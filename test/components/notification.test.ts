@@ -34,6 +34,7 @@ import * as telegram from '../../src/components/notification/channel/telegram'
 import * as webhook from '../../src/components/notification/channel/webhook'
 import * as whatsapp from '../../src/components/notification/channel/whatsapp'
 import * as lark from '../../src/components/notification/channel/lark'
+import * as googlechat from '../../src/components/notification/channel/googlechat'
 import {
   MailgunData,
   MonikaNotifData,
@@ -41,6 +42,7 @@ import {
   WebhookData,
   WhatsappData,
   LarkData,
+  GoogleChatData,
 } from '../../src/interfaces/data'
 
 chai.use(spies)
@@ -424,5 +426,36 @@ describe('send alerts', () => {
     })
 
     expect(lark.sendLark).to.have.been.called.exactly(1)
+  })
+
+  it('should send google chat notification ', async () => {
+    chai.spy.on(lark, 'sendGoogleChat', () => Promise.resolve())
+
+    await sendAlerts({
+      probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
+      validation: {
+        alert: { query: 'status-not-2xx', message: '' },
+        isAlertTriggered: true,
+        response: {
+          data: '',
+          status: 500,
+          responseTime: 0,
+          headers: {},
+        },
+      },
+      notifications: [
+        {
+          id: 'googlechat-test',
+          type: 'google-chat',
+          data: {
+            url: 'xx',
+          } as GoogleChatData,
+        },
+      ],
+      url: 'https://hyperjump.tech',
+      probeState: 'DOWN',
+    })
+
+    expect(googlechat.sendGoogleChat).to.have.been.called.exactly(1)
   })
 })

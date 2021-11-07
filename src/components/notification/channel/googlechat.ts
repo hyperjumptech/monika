@@ -124,7 +124,7 @@ export const sendGoogleChat = async (
                 widgets: [
                   {
                     textParagraph: {
-                      text: `<b><font color=#0000ff>Message</font></b> ${message.summary}`,
+                      text: `<b>Message <font color=#0000ff>Recovery</font></b> ${message.summary}`,
                     },
                   },
                   {
@@ -150,6 +150,63 @@ export const sendGoogleChat = async (
       }
       break
     case 'status-update':
+      chatMessage = {
+        cards: [
+          {
+            header: {
+              title: 'Monika Notification',
+              subtitle: `Monika Status`,
+              imageUrl: 'https://bit.ly/3kckaGO',
+            },
+            sections: [
+              {
+                widgets: [
+                  {
+                    textParagraph: {
+                      text: `<b>Host</b> ${message.meta.monikaInstance}`,
+                    },
+                  },
+                  {
+                    textParagraph: {
+                      text: `<b>Number of Probes</b> ${message.meta.numberOfProbes}`,
+                    },
+                  },
+                  {
+                    textParagraph: {
+                      text: `<b>Maximum Response Time</b> ${message.meta.maxResponseTime} ms in the last ${message.meta.responseTimelogLifeTimeInHour} hours`,
+                    },
+                  },
+                  {
+                    textParagraph: {
+                      text: `<b>Minimum Response Time</b>: ${message.meta.maxResponseTime} ms in the last ${message.meta.responseTimelogLifeTimeInHour} hours`,
+                    },
+                  },
+                  {
+                    textParagraph: {
+                      text: `<b>Average Response Time</b>: ${message.meta.averageResponseTime} ms in the last ${message.meta.responseTimelogLifeTimeInHour} hours`,
+                    },
+                  },
+                  {
+                    textParagraph: {
+                      text: `<b>Incidents</b> ${message.meta.numberOfIncidents} in the last 24 hours`,
+                    },
+                  },
+                  {
+                    textParagraph: {
+                      text: `<b>Recoveries</b> ${message.meta.numberOfRecoveries} in the last 24 hours`,
+                    },
+                  },
+                  {
+                    textParagraph: {
+                      text: `<b>Notifications</b> ${message.meta.numberOfSentNotifications}`,
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      }
       break
     default:
       break
