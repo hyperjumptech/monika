@@ -20,13 +20,15 @@ probes:
 
 The `alerts` configuration can be put under `probe` or under each `requests` as displayed above. Alerts defined under `probe` will run for all requests, while the alerts defined under specific request will run for that request only.
 
+Probes are performed after every interval, and alerts are generated after a specified threshold and some network latency. Monika can perform probes once a second, therefore a theoretical maximum rate of one alert a second (ignoring any network latency).
+
 ## Alert Query
 
 Query contains any arbitrary expression that will trigger alert when it returns a truthy value
 
 ```yml
-- alerts:
-    query: response.status == 500
+alerts:
+  - query: response.status == 500
 ```
 
 Inside the query expression you can get the response object.
@@ -125,10 +127,9 @@ There are also several helper functions available:
 ## Alert Message
 
 ```yml
-  alerts: [
-    - query: response.status != 200
-      message: HTTP Status code is different, expecting 200
-  ]
+alerts:
+  - query: response.status != 200
+    message: HTTP Status code is different, expecting 200
 ```
 
 This is the message that is used in the sent notification.
