@@ -429,7 +429,7 @@ describe('send alerts', () => {
   })
 
   it('should send google chat notification ', async () => {
-    chai.spy.on(lark, 'sendGoogleChat', () => Promise.resolve())
+    chai.spy.on(googlechat, 'sendGoogleChat', () => Promise.resolve())
 
     await sendAlerts({
       probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
