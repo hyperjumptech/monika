@@ -118,16 +118,27 @@ Monika supports Facebook Workplace. To enable notification via Workplace, you mu
 
 ## Google Chat
 
-You can send Monika notifications to your Google Chat. First you need to generate the url webhook for Monika to use. To create a webhook,
+You can send Monika notifications to your Google Chat. First you need to generate the url webhook for Monika to use. To create a webhook:
 
 1. Open Google Chat
 2. Go to the space to add notification
-3. Select configure webhook from the top of the page
-4. Under Incoming webhook, click add webhook
-5. Name the new webhook and save
-6. Copy the URL in the webhook URL column.
+3. Select **Manage webhook** from the top of the page
+4. Under Incoming webhook, click **Add another** if one already exist, in either case you need to provdie a name.
+5. Name the new webhook and **Save**
+6. Copy the URL in the webhook modal
+7. You will need the URL in your monika configuration
 
-For ruther information check the Google Chat [documentations here](https://developers.google.com/chat/how-tos/webhooks)
+For futher information check the Google Chat [documentations here](https://developers.google.com/chat/how-tos/webhooks)
+
+Example of Google Chat configuration may be something similar to below:
+
+```yaml
+notifications:
+  - id: myGoogleChatNotif
+    type: google-chat
+    data:
+      url: https://chat.googleapis.com/v1/spaces/XXXXX/messages?key=1122334455
+```
 
 ## Larksuite Notifications
 
