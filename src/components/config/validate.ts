@@ -223,6 +223,11 @@ function validateNotification(notifications: Notification[]): Validation {
         break
       }
 
+      case 'google-chat': {
+        if (!notification.data.url) return WEBHOOK_NO_URL
+        break
+      }
+
       default:
         return NOTIFICATION_INVALID_TYPE
     }

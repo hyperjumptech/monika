@@ -34,6 +34,7 @@ import {
   WorkplaceData,
   LarkData,
   SlackData,
+  GoogleChatData,
 } from './data'
 
 export type Notification =
@@ -50,6 +51,7 @@ export type Notification =
   | WorkplaceNotification
   | DesktopNotification
   | LarkNotification
+  | GoogleChatNotification
 
 interface BaseNotification {
   id: string
@@ -120,6 +122,11 @@ interface DesktopNotification extends BaseNotification {
 interface LarkNotification extends BaseNotification {
   type: 'lark'
   data: LarkData
+}
+
+interface GoogleChatNotification extends BaseNotification {
+  type: 'google-chat'
+  data: GoogleChatData
 }
 
 export interface NotificationMessage {
