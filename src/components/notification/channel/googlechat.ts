@@ -60,7 +60,7 @@ export const sendGoogleChat = async (
                   },
                   {
                     textParagraph: {
-                      text: `<b>From</b> IP: ${message.meta.monikaInstance}`,
+                      text: `<b>From</b> ${message.body}`,
                     },
                   },
                 ],
