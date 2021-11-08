@@ -50,17 +50,17 @@ export const sendGoogleChat = async (
                 widgets: [
                   {
                     textParagraph: {
-                      text: `<b>Message</b>: New monika monitoring started`,
+                      text: `<b>Message:</b> New monika monitoring started`,
                     },
                   },
                   {
                     textParagraph: {
-                      text: `<b>Time</b>: ${message.meta.time}`,
+                      text: `<b>Time:</b> ${message.meta.time}`,
                     },
                   },
                   {
                     textParagraph: {
-                      text: `<b>From</b>: ${message.body}`,
+                      text: `<b>From:</b> ${message.body}`,
                     },
                   },
                 ],
@@ -90,17 +90,17 @@ export const sendGoogleChat = async (
                   },
                   {
                     textParagraph: {
-                      text: `<b>URL</b>: <a href>${message.meta.url}</a>`,
+                      text: `<b>URL:</b> <a href>${message.meta.url}</a>`,
                     },
                   },
                   {
                     textParagraph: {
-                      text: `<b>Time</b>: ${message.meta.time}`,
+                      text: `<b>Time:</b> ${message.meta.time}`,
                     },
                   },
                   {
                     textParagraph: {
-                      text: `<b>From</b>: ${message.meta.monikaInstance}`,
+                      text: `<b>From:</b> ${message.meta.monikaInstance}`,
                     },
                   },
                 ],
@@ -129,17 +129,17 @@ export const sendGoogleChat = async (
                   },
                   {
                     textParagraph: {
-                      text: `<b>URL</b>: <a href>${message.meta.url}<a>`,
+                      text: `<b>URL:</b> <a href>${message.meta.url}<a>`,
                     },
                   },
                   {
                     textParagraph: {
-                      text: `<b>Time</b>: ${message.meta.time}`,
+                      text: `<b>Time:</b> ${message.meta.time}`,
                     },
                   },
                   {
                     textParagraph: {
-                      text: `<b>From</b>: ${message.meta.monikaInstance}`,
+                      text: `<b>From:</b> ${message.meta.monikaInstance}`,
                     },
                   },
                 ],
@@ -163,42 +163,42 @@ export const sendGoogleChat = async (
                 widgets: [
                   {
                     textParagraph: {
-                      text: `<b>Host</b>: ${message.meta.monikaInstance}`,
+                      text: `<b>Host:</b> ${message.meta.monikaInstance}`,
                     },
                   },
                   {
                     textParagraph: {
-                      text: `<b>Number of Probes</b>: ${message.meta.numberOfProbes}`,
+                      text: `<b>Number of Probes:</b> ${message.meta.numberOfProbes}`,
                     },
                   },
                   {
                     textParagraph: {
-                      text: `<b>Maximum Response Time</b>: ${message.meta.maxResponseTime} ms in the last ${message.meta.responseTimelogLifeTimeInHour} hours`,
+                      text: `<b>Maximum Response Time:</b> ${message.meta.maxResponseTime} ms in the last ${message.meta.responseTimelogLifeTimeInHour} hours`,
                     },
                   },
                   {
                     textParagraph: {
-                      text: `<b>Minimum Response Time</b>: ${message.meta.maxResponseTime} ms in the last ${message.meta.responseTimelogLifeTimeInHour} hours`,
+                      text: `<b>Minimum Response Time:</b> ${message.meta.maxResponseTime} ms in the last ${message.meta.responseTimelogLifeTimeInHour} hours`,
                     },
                   },
                   {
                     textParagraph: {
-                      text: `<b>Average Response Time</b>: ${message.meta.averageResponseTime} ms in the last ${message.meta.responseTimelogLifeTimeInHour} hours`,
+                      text: `<b>Average Response Time:</b> ${message.meta.averageResponseTime} ms in the last ${message.meta.responseTimelogLifeTimeInHour} hours`,
                     },
                   },
                   {
                     textParagraph: {
-                      text: `<b>Incidents</b>: ${message.meta.numberOfIncidents} in the last 24 hours`,
+                      text: `<b>Incidents:</b> ${message.meta.numberOfIncidents} in the last 24 hours`,
                     },
                   },
                   {
                     textParagraph: {
-                      text: `<b>Recoveries</b>: ${message.meta.numberOfRecoveries} in the last 24 hours`,
+                      text: `<b>Recoveries:</b> ${message.meta.numberOfRecoveries} in the last 24 hours`,
                     },
                   },
                   {
                     textParagraph: {
-                      text: `<b>Notifications</b>: ${message.meta.numberOfSentNotifications}`,
+                      text: `<b>Notifications:</b> ${message.meta.numberOfSentNotifications}`,
                     },
                   },
                 ],
