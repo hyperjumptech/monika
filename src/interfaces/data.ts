@@ -126,3 +126,7 @@ export interface DBLimit {
   deleted_data: number
   cron_schedule: string
 }
+
+export interface GoogleChatData {
+  url: string
+}
