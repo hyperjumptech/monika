@@ -27,10 +27,10 @@ Probes are performed after every interval, and alerts are generated after a spec
 In general it will be something like:
 
 ```text
-Alert resolution = interval period (s) x threshold x network_and_channel_latency
+Alert resolution = interval period (s) x threshold + network_and_channel_latencies
 ```
 
-Feom above, the theoretical maximum resolution is one second.
+From above, the theoretical maximum resolution is one second.
 
 ## Alert Query
 
