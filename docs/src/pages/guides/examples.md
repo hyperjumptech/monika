@@ -141,19 +141,25 @@ probes:
 
 In the configuration above, the first request will fetch all users from `https://reqres.in/api/users`. Then in the second request, Monika will fetch the details of the first user from the first request. If there are no triggered alerts, the response returned from the first request is ready to be used by the second request using values from `{{ responses.[0].data }}`.
 
-Let's say the response from fetching all users in YAML format as follows:
+Let's say the response from fetching all users in JSON format as follows:
 
-```yaml
-page: 2
-per_page: 6
-total: 12
-total_pages: 2
-data:
-  id: 7
-  email: michael.lawson@reqres.in
-  first_name: Michael
-  last_name: Lawson
-  avatar: https://reqres.in/img/faces/7-image.jpg
+```json
+{
+  "page": 2,
+  "per_page": 6,
+  "total": 12,
+  "total_pages": 2,
+  "data": [
+    {
+        "id": 7,
+        "email": "michael.lawson@reqres.in",
+        "first_name": "Michael",
+        "last_name": "Lawson",
+        "avatar": "https://reqres.in/img/faces/7-image.jpg"
+    },
+    ...
+  ]
+}
 ```
 
 To use the user ID of the first user in the second request, we define the url of the second request as `{{ responses.[0].data.data.[0].id }}`.
