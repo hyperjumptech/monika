@@ -20,13 +20,23 @@ probes:
 
 The `alerts` configuration can be put under `probe` or under each `requests` as displayed above. Alerts defined under `probe` will run for all requests, while the alerts defined under specific request will run for that request only.
 
-Probes are performed after every interval, and alerts are generated after a specified threshold and some network latency. Monika can perform probes once a second, therefore a theoretical maximum rate of one alert a second (ignoring any network latency).
+## Alert Timing
+
+Probes are performed after every interval, and alerts are generated after a specified threshold. Monika can perform probes once a second, therefore a theoretical maximum rate of one alert a second. Please keep in mind that there also some delays to your network, notification channels (slack, email, etc), so your result will vary.
+
+In general it will be something like:
+
+```text
+Alert resolution = interval period (s) x threshold x network_and_channel_latency
+```
+
+Feom above, the theoretical maximum resolution is one second.
 
 ## Alert Query
 
 Query contains any arbitrary expression that will trigger alert when it returns a truthy value
 
-```yml
+```yaml
 alerts:
   - query: response.status == 500
 ```
@@ -45,16 +55,23 @@ The `response.headers` and `response.body` can be queried further with object ac
 
 For example, to trigger alert when content-type is not json you may use
 
-```yml
+```yaml
 alerts:
   - query: response.headers['content-type'] != "application/json"
 ```
 
 Or to query value inside the body
 
-```yml
+```yaml
 alerts:
   - query: response.body.data.todos[0].title != "Drink water"
+```
+
+Additionaly you can have proccessing done in your queries. For instance, to ensure case insensitivity, you might want to convert to lower case. It might look something like this:
+
+```yaml
+alerts:
+  - query: has(lowerCase(response.body.status), "success")
 ```
 
 These operators are available:
@@ -126,7 +143,7 @@ There are also several helper functions available:
 
 ## Alert Message
 
-```yml
+```yaml
 alerts:
   - query: response.status != 200
     message: HTTP Status code is different, expecting 200

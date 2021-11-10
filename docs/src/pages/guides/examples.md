@@ -141,7 +141,7 @@ probes:
 
 In the configuration above, the first request will fetch all users from `https://reqres.in/api/users`. Then in the second request, Monika will fetch the details of the first user from the first request. If there are no triggered alerts, the response returned from the first request is ready to be used by the second request using values from `{{ responses.[0].data }}`.
 
-Let's say the response from fetching all users in JSON format as follows:
+Let's say the response from fetching all users in YAML format as follows:
 
 ```yaml
 page: 2

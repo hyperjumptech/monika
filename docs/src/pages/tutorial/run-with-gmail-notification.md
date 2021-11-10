@@ -28,11 +28,11 @@ probes:
       - status-not-2xx
 ```
 
-2. Replace `YOUR_EMAIL_ADDRESS_HERE` in the monika.json with your email address that will receive the notification.
+2. Replace `YOUR_EMAIL_ADDRESS_HERE` in the `monika.yml` with your email address that will receive the notification.
 3. Replace `YOUR_GMAIL_ACCOUNT` with your valid Gmail account, e.g., `yourname@gmail.com`.
 4. Replace `YOUR_GMAIL_PASSWORD_OR_APP_PASSWORD` with your Gmail password.
    1. If you have activated Two Factor Authentication (2FA), you need to create an app password. Refer [here](https://support.google.com/accounts/answer/185833) to create an app password for your Gmail account.
-5. If you have [installed Monika globally](/installation), run `monika` from Terminal app (macOS) in the same directory where `monika.json` exists. If you haven't, you can quickly run Monika by running `npx @hyperjumptech/monika` in the same directory where monika.json exists.
+5. If you have [installed Monika globally](/installation), run `monika` from Terminal app (macOS) in the same directory where `monika.yml` exists. If you haven't, you can quickly run Monika by running `npx @hyperjumptech/monika` in the same directory where monika.yml exists.
 6. During runtime, Monika will output a log that looks like this
 
    ```bash
