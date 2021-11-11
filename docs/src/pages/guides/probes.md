@@ -3,7 +3,7 @@ id: probes
 title: Probes
 ---
 
-Probes are the heart of the monitoring requests. Probes are arrays of request objects defined in the config file `monika.json` like so.
+Probes are the heart of the monitoring requests. Probes are arrays of request objects defined in the config file `monika.yml` like so.
 
 ```yaml
 probes:
@@ -106,7 +106,7 @@ Probe response data could be used for [Request Chaining](https://hyperjumptech.g
 
 In a configuration with multiple probes, `Monika` will perform the requests in sequence in the order that they are entered, one after another. When the `--id` flag is used, the sequence of IDs are executed as entered.
 
-On completion, `Monika` will sleep until the next interval to start again. At the top of the `monika.json` file there is an `interval` setting. The execution will be restarted after every `interval`. If interval is shorter than the amount of time to dispatch all the requests, then `Monika` will immediately repeat after the last probe response and any notification alerts sent. When the `--repeat` flag is set with a value, Monika will not run indefinitely, instead, it will stop after executing the probes as many times as specified.
+On completion, `Monika` will sleep until the next interval to start again. At the top of the `monika.yml` file there is an `interval` setting. The execution will be restarted after every `interval`. If interval is shorter than the amount of time to dispatch all the requests, then `Monika` will immediately repeat after the last probe response and any notification alerts sent. When the `--repeat` flag is set with a value, Monika will not run indefinitely, instead, it will stop after executing the probes as many times as specified.
 
 ## Postman JSON file support
 
