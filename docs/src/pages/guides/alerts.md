@@ -5,34 +5,40 @@ title: Alerts
 
 Alerts are the types of condition that will trigger Monika to send notification. It is an array located on probes defined in the config file `monika.yml` like so.
 
-```yml
-  probes: [
-    - id: 1
-      name: Name of the probe
-      requests: [
-        ...
-          ...
-        - alerts: [
-              query: response.size >= 10000
-              message: Response size is {{ response.size }} expecting less than 10000
-          ]
-      ]
-    - alerts: [
-          query: response.status != 200
-          message: HTTP Status code is {{ response.status }} expecting 200
-      ]
-  ]
+```yaml
+probes:
+  id: '1'
+  name: Name of the probe
+  requests:
+    - alerts:
+        - query: response.size >= 10000
+          message: Response size is {{ response.size }}, expecting less than 10000
+  alerts:
+    - query: response.status != 200
+      message: HTTP Status code is {{ response.status }}, expecting 200
 ```
 
 The `alerts` configuration can be put under `probe` or under each `requests` as displayed above. Alerts defined under `probe` will run for all requests, while the alerts defined under specific request will run for that request only.
+
+## Alert Timing
+
+Probes are performed after every interval, and alerts are generated after a specified threshold. Monika can perform probes once a second, therefore a theoretical maximum rate of one alert a second. Please keep in mind that there also some delays to your network, notification channels (slack, email, etc), so your result will vary.
+
+In general it will be something like:
+
+```text
+Alert resolution = interval period (s) x threshold + network_and_channel_latencies
+```
+
+From above, the theoretical maximum resolution is one second.
 
 ## Alert Query
 
 Query contains any arbitrary expression that will trigger alert when it returns a truthy value
 
-```yml
-- alerts: [query: response.status == 500
-        ...]
+```yaml
+alerts:
+  - query: response.status == 500
 ```
 
 Inside the query expression you can get the response object.
@@ -49,21 +55,23 @@ The `response.headers` and `response.body` can be queried further with object ac
 
 For example, to trigger alert when content-type is not json you may use
 
-```yml
-  alerts : [
-    - query: response.headers['content-type'] != "application/json"
-      ...
-
-  ]
+```yaml
+alerts:
+  - query: response.headers['content-type'] != "application/json"
 ```
 
 Or to query value inside the body
 
-```yml
-  alerts : [
-    - query: response.body.data.todos[0].title != "Drink water"
-      ...
-  ]
+```yaml
+alerts:
+  - query: response.body.data.todos[0].title != "Drink water"
+```
+
+Additionaly you can have proccessing done in your queries. For instance, to ensure case insensitivity, you might want to convert to lower case. It might look something like this:
+
+```yaml
+alerts:
+  - query: has(lowerCase(response.body.status), "success")
 ```
 
 These operators are available:
@@ -135,11 +143,10 @@ There are also several helper functions available:
 
 ## Alert Message
 
-```yml
-  alerts: [
-    - query: response.status != 200
-      message: HTTP Status code is different, expecting 200
-  ]
+```yaml
+alerts:
+  - query: response.status != 200
+    message: HTTP Status code is different, expecting 200
 ```
 
 This is the message that is used in the sent notification.
