@@ -58,7 +58,7 @@ import isUrl from 'is-url'
 import SymonClient from './symon'
 
 const em = getEventEmitter()
-let symonClient
+let symonClient: SymonClient
 
 function getDefaultConfig(): Array<string> {
   const filesArray = fs.readdirSync('./')
@@ -461,6 +461,16 @@ Please refer to the Monika documentations on how to how to configure notificatio
 
     return startupMessage
   }
+
+  async catch(error: Error) {
+    super.catch(error)
+
+    if (symonClient) {
+      await symonClient.sendStatus({ isOnline: false })
+    }
+
+    throw error
+  }
 }
 
 /**
@@ -473,6 +483,10 @@ process.on('SIGINT', async () => {
     log.info(
       'Can you give us some feedback by clicking this link https://github.com/hyperjumptech/monika/discussions?\n'
     )
+  }
+
+  if (symonClient) {
+    await symonClient.sendStatus({ isOnline: false })
   }
 
   em.emit(events.application.terminated)

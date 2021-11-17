@@ -154,6 +154,7 @@ class SymonClient {
 
   async initiate() {
     this.monikaId = await this.handshake()
+    await this.sendStatus({ isOnline: true })
 
     log.debug('Handshake succesful')
 
@@ -315,6 +316,23 @@ class SymonClient {
       log.warn(
         "Warning: Can't report history to Symon. " + (error as any).message
       )
+    }
+  }
+
+  async sendStatus({ isOnline }: { isOnline: boolean }) {
+    try {
+      await this.httpClient({
+        url: '/status',
+        method: 'POST',
+        data: {
+          monikaId: this.monikaId,
+          status: isOnline,
+        },
+      })
+
+      log.debug('Status successfully sent to Symon.')
+    } catch (error) {
+      log.warn("Warning: Can't send status to Symon. " + error?.message)
     }
   }
 }
