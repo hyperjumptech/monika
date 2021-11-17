@@ -34,6 +34,7 @@ import {
   getUnreportedLogs,
 } from '../components/logger/history'
 import { getOSName } from '../components/notification/alert-message'
+import { getContext } from '../context'
 import events from '../events'
 import { Config } from '../interfaces/config'
 import { Probe } from '../interfaces/probe'
@@ -58,6 +59,7 @@ type SymonHandshakeData = {
   country: string
   pid: number
   os: string
+  version: string
 }
 
 type SymonClientEvent = {
@@ -96,6 +98,7 @@ const getHandshakeData = async (): Promise<SymonHandshakeData> => {
   const city = publicNetworkInfo.city
   const country = publicNetworkInfo.country
   const pid = process.pid
+  const { userAgent: version } = getContext()
 
   return {
     macAddress,
@@ -107,6 +110,7 @@ const getHandshakeData = async (): Promise<SymonHandshakeData> => {
     country,
     pid,
     os,
+    version,
   }
 }
 
