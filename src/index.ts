@@ -468,6 +468,8 @@ Please refer to the Monika documentations on how to how to configure notificatio
     if (symonClient) {
       await symonClient.sendStatus({ isOnline: false })
     }
+
+    throw error
   }
 }
 
