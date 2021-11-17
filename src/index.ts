@@ -238,6 +238,8 @@ class Monika extends Command {
         return
       }
 
+      await initLoaders(flags, this.config)
+
       const isSymonMode = Boolean(flags.symonUrl) && Boolean(flags.symonKey)
       if (isSymonMode) {
         symonClient = new SymonClient(
@@ -247,8 +249,6 @@ class Monika extends Command {
         await symonClient.initiate()
         symonClient.onConfig((config) => updateConfig(config, false))
       }
-
-      await initLoaders(flags, this.config)
 
       let scheduledTasks: ScheduledTask[] = []
       let abortCurrentLooper: (() => void) | undefined

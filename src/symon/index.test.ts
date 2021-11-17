@@ -31,6 +31,7 @@ import sinon from 'sinon'
 import Stun from 'stun'
 import { Config } from '../interfaces/config'
 import * as loggerHistory from '../components/logger/history'
+import { setContext } from '../context'
 
 let interceptor: RequestInterceptor
 let testStunStub: sinon.SinonStub
@@ -75,6 +76,9 @@ afterEach(() => {
 
 describe('Symon initiate', () => {
   it('should send handshake data on initiate', async () => {
+    setContext({
+      userAgent: 'v1.5.0',
+    })
     let sentBody = ''
     // mock the outgoing requests
     interceptor.use((req) => {
@@ -110,6 +114,7 @@ describe('Symon initiate', () => {
     expect(body.hostname).length.greaterThan(0)
     expect(body.privateIp).length.greaterThan(0)
     expect(body.os).length.greaterThan(0)
+    expect(body.version).equals('v1.5.0')
   })
 
   it('should fetch probes config on initiate', async () => {
