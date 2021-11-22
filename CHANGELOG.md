@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.8] - 2021-11-22
+
+### Added
+
+- Add Google chat notification channel (#523)
+- Tweet status notification (#514)
+
+### Fixed
+
+- Docs: Update documentations for alert notification and old json examples (#525)
+- Docs: update examples and documentation to you yaml (#519)
+- Zero probes in status notification (#524)
+
+### Updated
+
+- Add send status when initiated, terminated and exited (#530)
+- Add version to handshake data (#529)
+
 ## [1.6.7] - 2021-11-03
 
 ### Fixed
