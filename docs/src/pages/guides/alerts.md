@@ -13,12 +13,54 @@ probes:
     - alerts:
         - query: response.size >= 10000
           message: Response size is {{ response.size }}, expecting less than 10000
-  alerts:
-    - query: response.status != 200
-      message: HTTP Status code is {{ response.status }}, expecting 200
 ```
 
-The `alerts` configuration can be put under `probe` or under each `requests` as displayed above. Alerts defined under `probe` will run for all requests, while the alerts defined under specific request will run for that request only.
+You can define alerts in two ways: **request alerts** and **probe alerts**
+
+### Request Alerts
+
+Request alerts are `alerts` configurations that are put under the `requests` key. Alerts defined under a specific request will run for that request only. Take a look at an example below:
+
+```yaml
+probes:
+  id: '1'
+  name: Name of the probe
+  requests:
+    - method: GET
+      url: https://github.com
+      alerts:
+        - query: response.status != 200
+          message: Status not 2xx # (This alert is only triggered for the github.com request)
+    - method: GET
+      url: https://gitlab.com
+      alerts:
+        - query: response.status != 200
+          message: Status not 2xx # (This alert is only triggered for the gitlab.com request)
+```
+
+### Probe Alerts
+
+Probe alerts are `alerts` configurations that are put under the `probe` key. Alerts defined under a specific probe will run for all requests. Take a look at an example below:
+
+```yaml
+probes:
+  id: '1'
+  name: Name of the probe
+  requests:
+    - method: GET
+      url: https://github.com
+      alerts:
+        - query: response.status != 200
+          message: Status not 2xx # (This alert is only triggered for the github.com request)
+    - method: GET
+      url: https://gitlab.com
+      alerts:
+        - query: response.status != 200
+          message: Status not 2xx # (This alert is only triggered for the gitlab.com request)
+  alerts:
+    - query: response.time > 10000
+      message: Response time is longer than 10 seconds # (This alert is triggered for all request)
+```
 
 ## Alert Timing
 
