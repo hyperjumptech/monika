@@ -56,6 +56,7 @@ import { log } from './utils/pino'
 import path from 'path'
 import isUrl from 'is-url'
 import SymonClient from './symon'
+import { ExitError } from '@oclif/errors'
 
 const em = getEventEmitter()
 let symonClient: SymonClient
@@ -469,6 +470,10 @@ Please refer to the Monika documentations on how to how to configure notificatio
       await symonClient.sendStatus({ isOnline: false })
     }
 
+    if (error instanceof ExitError) {
+      const oclifHandler = require('@oclif/errors/handle')
+      return oclifHandler(error)
+    }
     throw error
   }
 }
