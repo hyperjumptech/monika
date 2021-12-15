@@ -3,16 +3,16 @@ function setup() {
     load './node_modules/bats-assert/load.bash'
 }
 
-@test "Should failed of missing configuration" {
+@test "Should failed with missing configuration" {
     run npm start
     
     assert_failure 
     assert_output --partial 'Error: Configuration file not found.'
 }
 
-@test "Should failed and check version" {
+@test "Should failed but version is printed" {
     run npm start
     
     assert_failure 
-    assert_output --partial '@hyperjumptech/monika@1.6.5'
+    assert_output --partial '@hyperjumptech/monika@'
 }
