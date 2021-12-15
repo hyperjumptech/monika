@@ -7,18 +7,10 @@ title: Examples
 
 Here is a probe example with GET request to hit github.com:
 
-```json
-{
-  "probes": [
-    {
-      "requests": [
-        {
-          "url": "https://github.com"
-        }
-      ]
-    }
-  ]
-}
+```yaml
+probes:
+  - requests:
+      - url: https://github.com
 ```
 
 By default if you didn't define the method, it will be set as GET. Please note that with this configuration, you will not get any notifications when github.com is down since the notification configuration is not defined.
@@ -27,37 +19,27 @@ By default if you didn't define the method, it will be set as GET. Please note t
 
 Here is a probe example to monitor Monika landing page:
 
-```json
-{
-  "notifications": [
-    {
-      "id": "unique-id-smtp",
-      "type": "smtp",
-      "data": {
-        "recipients": ["YOUR_EMAIL_ADDRESS_HERE"],
-        "hostname": "smtp.gmail.com",
-        "port": 587,
-        "username": "YOUR_GMAIL_ACCOUNT",
-        "password": "YOUR_GMAIL_PASSWORD_OR_APP_PASSWORD"
-      }
-    }
-  ],
-  "probes": [
-    {
-      "id": "1",
-      "name": "Monika Landing Page",
-      "description": "Landing page of awesome Monika",
-      "interval": 10,
-      "requests": [
-        {
-          "url": "https://hyperjumptech.github.io/monika",
-          "timeout": 7000
-        }
-      ],
-      "alerts": ["status-not-2xx"]
-    }
-  ]
-}
+```yaml
+notifications:
+  - id: unique-id-smtp
+    type: smtp
+    data:
+      recipients:
+        - YOUR_EMAIL_ADDRESS_HERE
+      hostname: smtp.gmail.com
+      port: 587
+      username: YOUR_GMAIL_ACCOUNT
+      password: YOUR_GMAIL_PASSWORD_OR_APP_PASSWORD
+probes:
+  - id: '1'
+    name: Monika Landing Page
+    description: Landing page of awesome Monika
+    interval: 10
+    requests:
+      - url: https://hyperjumptech.github.io/monika
+        timeout: 7000
+    alerts:
+      - status-not-2xx
 ```
 
 Using the above configuration, Monika will check the landing page every 10 seconds and will send a notification by email when the landing page is down 5 times in a row. For more information about available notification channels, refer to [Notifications](https://hyperjumptech.github.io/monika/guides/notifications).
@@ -66,31 +48,21 @@ Using the above configuration, Monika will check the landing page every 10 secon
 
 Here is probe example with POST request to simulate HTML form submission
 
-```json
-{
-  "probes": [
-    {
-      "id": "1",
-      "name": "HTML form submission",
-      "description": "simulate html form submission",
-      "interval": 10,
-      "requests": [
-        {
-          "method": "POST",
-          "url": "http://www.foo.com/login.php",
-          "timeout": 7000,
-          "headers": {
-            "Content-Type": "application/x-www-form-urlencoded"
-          },
-          "body": {
-            "username": "someusername",
-            "password": "somepassword"
-          }
-        }
-      ]
-    }
-  ]
-}
+```yaml
+probes:
+  - id: '1'
+    name: HTML form submission
+    description: simulate html form submission
+    interval: 10
+    requests:
+      - method: POST
+        url: http://www.foo.com/login.php
+        timeout: 7000
+        headers:
+          Content-Type: application/x-www-form-urlencoded
+        body:
+          username: someusername
+          password: somepassword
 ```
 
 Using the configuration above, Monika will send a POST request to http://www.foo.com/login.php with the defined request's body.
@@ -99,34 +71,26 @@ Using the configuration above, Monika will send a POST request to http://www.foo
 
 Here is an example configuration with multiple requests:
 
-```json
-{
-  "probes": [
-    {
-      "id": "1",
-      "name": "Probing Github",
-      "description": "simulate html form submission",
-      "interval": 10,
-      "requests": [
-        {
-          "method": "GET",
-          "url": "https://github.com/",
-          "timeout": 7000,
-          "saveBody": false
-        },
-        {
-          "method": "GET",
-          "url": "https://github.com/hyperjumptech",
-          "timeout": 7000,
-          "saveBody": true
-        }
-      ],
-      "incidentThreshold": 3,
-      "recoveryThreshold": 3,
-      "alerts": ["status-not-2xx", "response-time-greater-than-200-ms"]
-    }
-  ]
-}
+```yaml
+probes:
+  - id: '1'
+    name: Probing Github
+    description: simulate html form submission
+    interval: 10
+    requests:
+      - method: GET
+        url: https://github.com/
+        timeout: 7000
+        saveBody: false
+      - method: GET
+        url: https://github.com/hyperjumptech
+        timeout: 7000
+        saveBody: true
+    incidentThreshold: 3
+    recoveryThreshold: 3
+    alerts:
+      - status-not-2xx
+      - response-time-greater-than-200-ms
 ```
 
 In the configuration above, Monika will first check `https://github.com/` then `https://github.com/hyperjumptech`. If the status code of `https://github.com/` is not 2xx (e.g., 200, 201), Monika **will not** check `https://github.com/hyperjumptech`.
@@ -139,7 +103,7 @@ Monika supports request chaining, which enables you to do multiple requests and 
 
 Here is an example on how you could get previous request(s) response data into your next request:
 
-```
+```shell
 {{ response.[0].status }} ==> Get status code from first request response
 {{ response.[1].data.token }} ==> Get token from second request response
 {{ response.[2].headers.SetCookie[0] }} ==> Get first cookie from third request response
@@ -155,32 +119,24 @@ In the sections below, you can find several examples of configuration file which
 
 Here is an example of using previous request's response in the path/query parameters:
 
-```json
-{
-  "probes": [
-    {
-      "id": "1",
-      "name": "Probing Github",
-      "description": "simulate html form submission",
-      "interval": 10,
-      "requests": [
-        {
-          "method": "GET",
-          "url": "https://reqres.in/api/users",
-          "timeout": 7000
-        },
-        {
-          "method": "GET",
-          "url": "https://reqres.in/api/users/{{ responses.[0].data.data.[0].id }}",
-          "timeout": 7000
-        }
-      ],
-      "incidentThreshold": 3,
-      "recoveryThreshold": 3,
-      "alerts": ["status-not-2xx", "response-time-greater-than-2000-ms"]
-    }
-  ]
-}
+```yaml
+probes:
+  - id: '1'
+    name: Probing Github
+    description: simulate html form submission
+    interval: 10
+    requests:
+      - method: GET
+        url: https://reqres.in/api/users
+        timeout: 7000
+      - method: GET
+        url: https://reqres.in/api/users/{{ responses.[0].data.data.[0].id }}
+        timeout: 7000
+    incidentThreshold: 3
+    recoveryThreshold: 3
+    alerts:
+      - status-not-2xx
+      - response-time-greater-than-2000-ms
 ```
 
 In the configuration above, the first request will fetch all users from `https://reqres.in/api/users`. Then in the second request, Monika will fetch the details of the first user from the first request. If there are no triggered alerts, the response returned from the first request is ready to be used by the second request using values from `{{ responses.[0].data }}`.
@@ -212,43 +168,32 @@ To use the user ID of the first user in the second request, we define the url of
 
 Here is an example of using previous request's response in the headers:
 
-```json
-{
-  "probes": [
-    {
-      "id": "1",
-      "name": "Probing Github",
-      "description": "simulate html form submission",
-      "interval": 10,
-      "requests": [
-        {
-          "method": "POST",
-          "url": "https://reqres.in/api/login",
-          "timeout": 7000,
-          "body": {
-            "email": "eve.holt@reqres.in",
-            "password": "cityslicka"
-          }
-        },
-        {
-          "method": "POST",
-          "url": "https://reqres.in/api/users/",
-          "timeout": 7000,
-          "body": {
-            "name": "morpheus",
-            "job": "leader"
-          },
-          "headers": {
-            "Authorization": "Bearer {{ responses.[0].data.token }}"
-          }
-        }
-      ],
-      "incidentThreshold": 3,
-      "recoveryThreshold": 3,
-      "alerts": ["status-not-2xx", "response-time-greater-than-2000-ms"]
-    }
-  ]
-}
+```yaml
+probes:
+  - id: '1'
+    name: Probing Github
+    description: simulate html form submission
+    interval: 10
+    requests:
+      - method: POST
+        url: https://reqres.in/api/login
+        timeout: 7000
+        body:
+          email: eve.holt@reqres.in
+          password: cityslicka
+      - method: POST
+        url: https://reqres.in/api/users/
+        timeout: 7000
+        body:
+          name: morpheus
+          job: leader
+        headers:
+          Authorization: Bearer {{ responses.[0].data.token }}
+    incidentThreshold: 3
+    recoveryThreshold: 3
+    alerts:
+      - status-not-2xx
+      - response-time-greater-than-2000-ms
 ```
 
 Using the above configuration, Monika will perform login request in the first request, then use the returned token in the Authorization header of the second request.

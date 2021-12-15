@@ -116,3 +116,9 @@ export const dataLarkSchemaValidator = dataBaseEmailSchemaValidator(
 ).keys({
   url: Joi.string().uri().required().label('Lark URL'),
 })
+
+export const dataGoogleChatSchemaValidator = dataBaseEmailSchemaValidator(
+  'google-chat'
+).keys({
+  url: Joi.string().uri().required().label('Google URL'),
+})

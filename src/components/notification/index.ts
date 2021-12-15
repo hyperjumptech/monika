@@ -44,6 +44,7 @@ import { sendWebhook } from './channel/webhook'
 import { sendWhatsapp } from './channel/whatsapp'
 import { sendWorkplace } from './channel/workplace'
 import { sendLark } from './channel/lark'
+import { sendGoogleChat } from './channel/googlechat'
 
 export class NotificationSendingError extends Error {
   notificationType: string
@@ -139,7 +140,7 @@ export async function sendNotifications(
             const transporter = createSmtpTransport(notification.data)
             await sendSmtpMail(transporter, {
               // TODO: Read from ENV Variables
-              from: 'http-probe@hyperjump.tech',
+              from: 'Monika@hyperjump.tech',
               to: notification?.data?.recipients?.join(','),
               subject: message.subject,
               text: message.body,
@@ -216,6 +217,11 @@ export async function sendNotifications(
 
           case 'lark': {
             await sendLark(notification.data, message)
+            break
+          }
+
+          case 'google-chat': {
+            await sendGoogleChat(notification.data, message)
             break
           }
 

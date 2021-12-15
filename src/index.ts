@@ -56,9 +56,10 @@ import { log } from './utils/pino'
 import path from 'path'
 import isUrl from 'is-url'
 import SymonClient from './symon'
+import { ExitError } from '@oclif/errors'
 
 const em = getEventEmitter()
-let symonClient
+let symonClient: SymonClient
 
 function getDefaultConfig(): Array<string> {
   const filesArray = fs.readdirSync('./')
@@ -238,6 +239,8 @@ class Monika extends Command {
         return
       }
 
+      await initLoaders(flags, this.config)
+
       const isSymonMode = Boolean(flags.symonUrl) && Boolean(flags.symonKey)
       if (isSymonMode) {
         symonClient = new SymonClient(
@@ -247,8 +250,6 @@ class Monika extends Command {
         await symonClient.initiate()
         symonClient.onConfig((config) => updateConfig(config, false))
       }
-
-      await initLoaders(flags, this.config)
 
       let scheduledTasks: ScheduledTask[] = []
       let abortCurrentLooper: (() => void) | undefined
@@ -325,7 +326,8 @@ class Monika extends Command {
         // schedule status update notification
         if (
           process.env.NODE_ENV !== 'test' &&
-          flags['status-notification'] !== 'false'
+          flags['status-notification'] !== 'false' &&
+          !isSymonMode
         ) {
           // defaults to 6 AM
           // default value is not defined in flag configuration,
@@ -448,19 +450,31 @@ Please refer to the Monika documentations on how to how to configure notificatio
             case 'sendgrid':
               break
             case 'webhook':
-              startupMessage += `    URL: ${item.data.url}\n`
-              break
             case 'slack':
+            case 'lark':
+            case 'google-chat':
               startupMessage += `    URL: ${item.data.url}\n`
               break
-            case 'lark':
-              startupMessage += `    URL: ${item.data.url}\n`
           }
         })
       }
     }
 
     return startupMessage
+  }
+
+  async catch(error: Error) {
+    super.catch(error)
+
+    if (symonClient) {
+      await symonClient.sendStatus({ isOnline: false })
+    }
+
+    if (error instanceof ExitError) {
+      const oclifHandler = require('@oclif/errors/handle')
+      return oclifHandler(error)
+    }
+    throw error
   }
 }
 
@@ -474,6 +488,10 @@ process.on('SIGINT', async () => {
     log.info(
       'Can you give us some feedback by clicking this link https://github.com/hyperjumptech/monika/discussions?\n'
     )
+  }
+
+  if (symonClient) {
+    await symonClient.sendStatus({ isOnline: false })
   }
 
   em.emit(events.application.terminated)

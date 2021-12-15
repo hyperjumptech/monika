@@ -83,7 +83,7 @@ npm install && npm run prepack
 To run Monika, use this command
 
 ```bash
-./bin/run -c monika.example.json
+./bin/run -c monika.example.yml
 ```
 
 ![nodejs & npm version](/tutorials/raspberry-pi/run-monika-example-json.png)

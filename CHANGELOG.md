@@ -5,6 +5,55 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.9] - 2021-12-14
+
+## Fixed
+
+- Error when showing version (#538)
+
+## Added
+
+- Docs: Show Medium articles in the docs (#539)
+
+## Updated
+
+- Docs: Update Request and Probe Alerts (#534)
+
+## [1.6.8] - 2021-11-22
+
+### Added
+
+- Add Google chat notification channel (#523)
+- Tweet status notification (#514)
+
+### Fixed
+
+- Docs: Update documentations for alert notification and old json examples (#525)
+- Docs: update examples and documentation to you yaml (#519)
+- Zero probes in status notification (#524)
+
+### Updated
+
+- Add send status when initiated, terminated and exited (#530)
+- Add version to handshake data (#529)
+
+## [1.6.7] - 2021-11-03
+
+### Fixed
+
+- Fix reported requests not deleted in symon mode (#520)
+
+## [1.6.6] - 2021-11-02
+
+### Fixed
+
+- Fix windows desktop notification doesn't show (#517)
+- Fix issue with symon reporting (#516)
+
+### Updated
+
+- Prevent status notification when in symon mode (#513)
+
 ## [1.6.5] - 2021-10-27
 
 ### Fixed

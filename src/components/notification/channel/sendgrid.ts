@@ -25,6 +25,7 @@
 import sgMail from '@sendgrid/mail'
 import { SendgridData } from '../../../interfaces/data'
 import { SendInput } from '../../../interfaces/mailgun'
+import { convertTextToHTML } from '../../../utils/text'
 
 export const sendSendgrid = async (
   inputData: SendInput,
@@ -38,7 +39,7 @@ export const sendSendgrid = async (
     to: recipients,
     from: sender.email,
     subject,
-    html: body.replace(/\n/g, '<br/>'),
+    html: convertTextToHTML(body),
   }
 
   return sgMail.send(msg)
