@@ -3,27 +3,24 @@ id: probes
 title: Probes
 ---
 
-Probes are the heart of the monitoring requests. Probes are arrays of request objects defined in the config file `monika.json` like so.
+Probes are the heart of the monitoring requests. Probes are arrays of request objects defined in the config file `monika.yml` like so.
 
-```json
-  "probes": [
-    {
-      "id": "1",
-      "name": "Name of the probe",
-      "description": "Probe to check GET time",
-      "interval": 10,
-      "requests": [{ }],
-      "alerts": []
-    },
-    {
-      "id": "2",
-      "name": "Name of the probe 2",
-      "description": "Probe to check GET health",
-      "interval": 10,
-      "requests": [{ }],
-      "alerts": []
-    }
-  ]
+```yaml
+probes:
+  - id: '1'
+    name: Name of the probe
+    description: Probe to check GET time
+    interval: 10
+    requests:
+      - {}
+    alerts: []
+  - id: '2'
+    name: Name of the probe 2
+    description: Probe to check GET health
+    interval: 10
+    requests:
+      - {}
+    alerts: []
 ```
 
 Monika goes through each probe object, sends it out, and determines whether an alert or notification need to be sent out.
@@ -32,34 +29,28 @@ Monika goes through each probe object, sends it out, and determines whether an a
 
 An actual probe request may be something like below.
 
-```json
-  "probes": [
-    {
-      "id": "1",
-      "name": "Example: get Time",
-      "description": "Probe",
-      "interval": 10,
-      "requests": [{
-        "method": "POST",
-        "url": "https://mybackend.org/user/login",
-        "timeout": 7000,
-        "saveBody": true,
-        "headers": {
-          "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkhlbGxvIGZyb20gSHlwZXJqdW1wIiwiaWF0IjoxNTE2MjM5MDIyfQ.T2SbP1G39CMD4MMfkOZYGFgNIQgNkyi0sPdiFi_DfVA"
-        },
-        "body": {
-          "username": "someusername",
-          "password": "somepassword"
-        },
-        "alerts": []
-      }],
-      "incidentThreshold": 3,
-      "recoveryThreshold": 3,
-      "alerts": [{
-        "query": "response.status != 200",
-        "message": "HTTP response status is {{ response.status }}, expecting 200"
-      }]
-    },
+```yaml
+  probes: [
+    id: '1'
+    name: 'Example: get Time'
+    description: Probe
+    interval: 10
+    requests:
+    - method: POST
+      url: https://mybackend.org/user/login
+      timeout: 7000
+      saveBody: true
+      headers:
+        Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkhlbGxvIGZyb20gSHlwZXJqdW1wIiwiaWF0IjoxNTE2MjM5MDIyfQ.T2SbP1G39CMD4MMfkOZYGFgNIQgNkyi0sPdiFi_DfVA
+      body:
+        username: someusername
+        password: somepassword
+      alerts: ARRAY-HERE
+    incidentThreshold: 3
+    recoveryThreshold: 3
+    alerts:
+    - query: response.status != 200
+      message: HTTP response status is {{ response.status }}, expecting 200
   ]
 ```
 
@@ -83,23 +74,20 @@ Details of the field are give in the table below.
 
 The default shape of a response when Monika has successfully fetched a request is as the following.
 
-```json
-{
-  "status": 200,
-  "statusText": "OK",
-  "headers": { ... },
-  "config": {
-    "url": "https://reqres.in/api/users",
-    "method": "GET",
-    "data": "{'test':'test'}",
-    "headers": {
-      "Accept": "application/json, text/plain, */*",
-      "User-Agent": "axios/0.21.1"
-    },
-    "body": { "test": "test" },
-  },
-  "data": { ... }
-}
+```yaml
+status: 200
+statusText: OK
+headers:
+  test-header: ...
+config:
+  url: https://reqres.in/api/users
+  method: GET
+  data:
+    mydata: value
+  headers:
+    Accept: application/json, text/plain, */*
+    User-Agent: axios/0.21.1
+data: ...
 ```
 
 Details of the fields are shown in the table below.
@@ -118,7 +106,7 @@ Probe response data could be used for [Request Chaining](https://hyperjumptech.g
 
 In a configuration with multiple probes, `Monika` will perform the requests in sequence in the order that they are entered, one after another. When the `--id` flag is used, the sequence of IDs are executed as entered.
 
-On completion, `Monika` will sleep until the next interval to start again. At the top of the `monika.json` file there is an `interval` setting. The execution will be restarted after every `interval`. If interval is shorter than the amount of time to dispatch all the requests, then `Monika` will immediately repeat after the last probe response and any notification alerts sent. When the `--repeat` flag is set with a value, Monika will not run indefinitely, instead, it will stop after executing the probes as many times as specified.
+On completion, `Monika` will sleep until the next interval to start again. At the top of the `monika.yml` file there is an `interval` setting. The execution will be restarted after every `interval`. If interval is shorter than the amount of time to dispatch all the requests, then `Monika` will immediately repeat after the last probe response and any notification alerts sent. When the `--repeat` flag is set with a value, Monika will not run indefinitely, instead, it will stop after executing the probes as many times as specified.
 
 ## Postman JSON file support
 

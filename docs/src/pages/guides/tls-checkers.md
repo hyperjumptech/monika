@@ -5,23 +5,18 @@ title: TLS Checkers
 
 You can check TLS validity and set the threshold to send notification before the expiry time.
 
-```json
-{
-  "probes": [{ "requests": [{ "url": "http://example.com" }] }],
-  "certificate": {
-    "domains": [
-      "example.com",
-      "expired.badssl.com",
-      {
-        "domain": "example.com",
-        "options": {
-          "path": "/foo"
-        }
-      }
-    ],
-    "reminder": 30
-  }
-}
+```yaml
+probes:
+  - requests:
+      - url: http://example.com
+certificate:
+  domains:
+    - example.com
+    - expired.badssl.com
+    - domain: example.com
+      options:
+        path: '/foo'
+  reminder: 30
 ```
 
 | Name     | Data Type | Required | Default Value | Description                                                                |

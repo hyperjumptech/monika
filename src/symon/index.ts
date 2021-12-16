@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 /**********************************************************************************
  * MIT License                                                                    *
  *                                                                                *
@@ -29,25 +28,26 @@ import mac from 'macaddress'
 import { hostname } from 'os'
 import pako from 'pako'
 
+import {
+  deleteNotificationLogs,
+  deleteRequestLogs,
+  getUnreportedLogs,
+} from '../components/logger/history'
 import { getOSName } from '../components/notification/alert-message'
+import { getContext } from '../context'
+import events from '../events'
 import { Config } from '../interfaces/config'
 import { Probe } from '../interfaces/probe'
+import { ValidatedResponse } from '../plugins/validate-response'
+import { getEventEmitter } from '../utils/events'
 import getIp from '../utils/ip'
+import { log } from '../utils/pino'
 import {
   getPublicIp,
   getPublicNetworkInfo,
   publicIpAddress,
   publicNetworkInfo,
 } from '../utils/public-ip'
-import {
-  getUnreportedLogs,
-  deleteNotificationLogs,
-  deleteRequestLogs,
-} from '../components/logger/history'
-import { log } from '../utils/pino'
-import { getEventEmitter } from '../utils/events'
-import events from '../events'
-import { ValidatedResponse } from '../plugins/validate-response'
 
 type SymonHandshakeData = {
   macAddress: string
@@ -59,6 +59,7 @@ type SymonHandshakeData = {
   country: string
   pid: number
   os: string
+  version: string
 }
 
 type SymonClientEvent = {
@@ -97,6 +98,7 @@ const getHandshakeData = async (): Promise<SymonHandshakeData> => {
   const city = publicNetworkInfo.city
   const country = publicNetworkInfo.country
   const pid = process.pid
+  const { userAgent: version } = getContext()
 
   return {
     macAddress,
@@ -108,6 +110,7 @@ const getHandshakeData = async (): Promise<SymonHandshakeData> => {
     country,
     pid,
     os,
+    version,
   }
 }
 
@@ -118,7 +121,11 @@ class SymonClient {
 
   configHash = ''
 
-  fetchProbesInterval = 60000 // 1 minute
+  private fetchProbesInterval: number // (ms)
+
+  private reportProbesInterval: number // (ms)
+
+  private probes: Probe[] = []
 
   eventEmitter: EventEmitter | null = null
 
@@ -133,10 +140,21 @@ class SymonClient {
         'x-api-key': apiKey,
       },
     })
+
+    this.fetchProbesInterval = parseInt(
+      process.env.FETCH_PROBES_INTERVAL ?? '60000',
+      10
+    )
+
+    this.reportProbesInterval = parseInt(
+      process.env.REPORT_PROBES_INTERVAL ?? '10000',
+      10
+    )
   }
 
   async initiate() {
     this.monikaId = await this.handshake()
+    await this.sendStatus({ isOnline: true })
 
     log.debug('Handshake succesful')
 
@@ -168,7 +186,7 @@ class SymonClient {
 
     await this.report()
     if (!isTestEnvironment) {
-      setInterval(this.report.bind(this), this.fetchProbesInterval)
+      setInterval(this.report.bind(this), this.reportProbesInterval)
     }
   }
 
@@ -211,6 +229,8 @@ class SymonClient {
       })
       .then((res) => {
         if (res.data.data) {
+          this.probes = res.data.data
+
           log.debug(`Received ${res.data.data.length} probes`)
         } else {
           log.debug(`No new config from Symon`)
@@ -251,9 +271,8 @@ class SymonClient {
   async report() {
     log.debug('Reporting to symon')
     try {
-      const limit = parseInt(process.env.MONIKA_REPORT_LIMIT ?? '100', 10)
-
-      const logs = await getUnreportedLogs(limit)
+      const probeIds = this.probes.map((probe) => probe.id)
+      const logs = await getUnreportedLogs(probeIds)
 
       const requests = logs.requests
 
@@ -286,8 +305,8 @@ class SymonClient {
       )
 
       await Promise.all([
-        deleteRequestLogs(logs.requests.map((log) => log.id)),
-        deleteNotificationLogs(logs.notifications.map((log) => log.id)),
+        deleteRequestLogs(logs.requests.map((log) => log.probe_id)),
+        deleteNotificationLogs(logs.notifications.map((log) => log.probe_id)),
       ])
 
       log.debug(
@@ -297,6 +316,23 @@ class SymonClient {
       log.warn(
         "Warning: Can't report history to Symon. " + (error as any).message
       )
+    }
+  }
+
+  async sendStatus({ isOnline }: { isOnline: boolean }) {
+    try {
+      await this.httpClient({
+        url: '/status',
+        method: 'POST',
+        data: {
+          monikaId: this.monikaId,
+          status: isOnline,
+        },
+      })
+
+      log.debug('Status successfully sent to Symon.')
+    } catch (error) {
+      log.warn("Warning: Can't send status to Symon. " + error?.message)
     }
   }
 }

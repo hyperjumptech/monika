@@ -63,11 +63,18 @@ describe('TLS Checker', () => {
       // arrange
       const url = 'example.com'
 
-      // act
-      const result = await checkTLS(url)
-
-      // assert
-      expect(result).to.equal(null)
+      try {
+        // act
+        const result = await checkTLS(url)
+        // assert
+        expect(result).to.equal(null)
+      } catch (error) {
+        // assert when example.com certificate will expire
+        // because nothing lasts forever
+        expect(error.message).to.include(
+          `${url} security certificate will expire at`
+        )
+      }
     })
 
     it('tests example.com with custom options', async () => {
@@ -79,11 +86,18 @@ describe('TLS Checker', () => {
         },
       }
 
-      // act
-      const result = await checkTLS(domainDef)
-
-      // assert
-      expect(result).to.equal(null)
+      try {
+        // act
+        const result = await checkTLS(domainDef)
+        // assert
+        expect(result).to.equal(null)
+      } catch (error) {
+        // assert when example.com certificate will expire
+        // because nothing lasts forever
+        expect(error.message).to.include(
+          `${domainDef.domain} security certificate will expire at`
+        )
+      }
     })
   })
 })

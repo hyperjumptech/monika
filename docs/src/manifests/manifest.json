@@ -13,6 +13,11 @@
           "title": "Quick Start",
           "path": "/quick-start",
           "editUrl": "/quick-start.md"
+        },
+        {
+          "title": "Articles",
+          "path": "/articles",
+          "editUrl": "/articles.js"
         }
       ]
     },

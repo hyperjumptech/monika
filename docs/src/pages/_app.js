@@ -26,6 +26,7 @@ import React, { useEffect } from 'react'
 import '@docsearch/react/dist/style.css'
 import '../styles/index.css'
 import Head from 'next/head'
+import { QueryClient, QueryClientProvider } from 'react-query'
 import { SearchProvider } from 'components/useSearch'
 import CookieConsent, { getCookieConsentValue } from 'react-cookie-consent'
 import { useRouter } from 'next/router'
@@ -43,6 +44,7 @@ function loadScript(src, attrs = {}) {
 }
 
 function MyApp({ Component, pageProps }) {
+  const queryClient = new QueryClient()
   React.useEffect(() => {
     loadScript('https://buttons.github.io/buttons.js')
   }, [])
@@ -91,12 +93,14 @@ function MyApp({ Component, pageProps }) {
           }}
         />
       </Head>
-      <SearchProvider>
-        <CookieConsent enableDeclineButton>
-          This website uses cookies to enhance the user experience.
-        </CookieConsent>
-        <Component {...pageProps} />
-      </SearchProvider>
+      <QueryClientProvider client={queryClient}>
+        <SearchProvider>
+          <CookieConsent enableDeclineButton>
+            This website uses cookies to enhance the user experience.
+          </CookieConsent>
+          <Component {...pageProps} />
+        </SearchProvider>
+      </QueryClientProvider>
     </>
   )
 }
