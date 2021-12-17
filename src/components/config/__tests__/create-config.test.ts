@@ -42,17 +42,17 @@ describe('Har config', () => {
     it('should create config from har file', async () => {
       const flags = {
         har: './src/components/config/__tests__/form_encoded.har',
-        output: 'monika.har.json',
+        output: 'monika.har.yml',
       }
       await createConfig(flags)
-      expect(fs.lstatSync('monika.har.json').isFile()).to.be.true
+      expect(fs.lstatSync('monika.har.yml').isFile()).to.be.true
 
-      const generated = fs.readFileSync('monika.har.json', 'utf-8')
+      const generated = fs.readFileSync('monika.har.yml', 'utf-8')
       const expected = fs.readFileSync(
-        './src/components/config/__tests__/expected.har.json',
+        './src/components/config/__tests__/expected.har.yml',
         'utf-8'
       )
-      expect(_.isEqual(JSON.parse(generated), JSON.parse(expected))).to.be.true
+      expect(_.isEqual(generated, expected)).to.be.true
     })
   })
 })
@@ -63,17 +63,17 @@ describe('Postman config', () => {
       const flags = {
         postman:
           './src/components/config/__tests__/simple.postman_collection.json',
-        output: 'monika.postman.json',
+        output: 'monika.postman.yml',
       }
       await createConfig(flags)
-      expect(fs.lstatSync('monika.postman.json').isFile()).to.be.true
+      expect(fs.lstatSync('monika.postman.yml').isFile()).to.be.true
 
-      const generated = fs.readFileSync('monika.postman.json', 'utf-8')
+      const generated = fs.readFileSync('monika.postman.yml', 'utf-8')
       const expected = fs.readFileSync(
-        './src/components/config/__tests__/expected.postman.json',
+        './src/components/config/__tests__/expected.postman.yml',
         'utf-8'
       )
-      expect(_.isEqual(JSON.parse(generated), JSON.parse(expected))).to.be.true
+      expect(_.isEqual(generated, expected)).to.be.true
     })
   })
 })
