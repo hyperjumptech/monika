@@ -37,6 +37,7 @@ import { log } from '../../utils/pino'
 import { fetchConfig } from './fetch'
 import { parseConfig } from './parse'
 import { validateConfig } from './validate'
+import yml from 'js-yaml'
 
 const emitter = getEventEmitter()
 
@@ -202,7 +203,7 @@ export const createConfig = async (flags: any) => {
 
     const parse = parseConfig(path, type)
     const result = await addDefaultNotifications(parse)
-    const file = flags.output || 'monika.json'
+    const file = flags.output || 'monika.yml'
 
     if (existsSync(file) && !flags.force) {
       const ans = await cli.prompt(
@@ -217,7 +218,8 @@ export const createConfig = async (flags: any) => {
       }
     }
 
-    writeFileSync(file, JSON.stringify(result), 'utf8')
+    const yamlDoc = yml.dump(result)
+    writeFileSync(file, yamlDoc, 'utf8')
     log.info(`${file} file has been created.`)
   }
 }
