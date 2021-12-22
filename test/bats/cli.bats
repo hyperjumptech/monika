@@ -16,3 +16,17 @@ function setup() {
     assert_failure 
     assert_output --partial '@hyperjumptech/monika@'
 }
+
+@test "Should success starting monika" {
+    run npm start -- -r 1 -s 0 -c test/bats/namika.yml
+    
+    assert_success
+    assert_output --partial 'Starting Monika.'
+}
+
+@test "Should success starting monika with warning" {
+    run npm start -- -r 1 -s 0 -c test/bats/namika.yml
+    
+    assert_success    
+    assert_output --partial 'Warning: Probe 1 has no incidentThreshold'
+}

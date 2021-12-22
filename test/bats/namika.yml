@@ -1,0 +1,12 @@
+probes:
+  - id: '1'
+    name: 'idntimes check'
+    requests:
+      - url: https://symon.hyperjump.tech
+notifications:
+  - id: desktop
+    type: desktop
+  # - id: random-string-monika-notif
+  #   type: monika-notif
+  #   data:
+  #     url: https://whatsapp.hyperjump.tech/api/notify?token=45b8c9b1-16a5-4d38-908c-2b7f6f79ade0
