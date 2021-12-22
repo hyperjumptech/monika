@@ -144,6 +144,7 @@ function loopProbe(
     if (counter === repeats) {
       clearInterval(probeInterval)
       clearInterval(checkSTUNinterval)
+      process.kill(process.pid, 'SIGINT')
     } else if (isConnectedToSTUNServer) {
       doProbe(++counter, probe, notifications, verboseLogs)
     }
