@@ -77,11 +77,7 @@ export async function getStaticProps() {
     })
 
     if (!data) {
-      return {
-        props: {
-          articles: [],
-        },
-      }
+      throw new Error('Failed to fetch RSS Feed.')
     }
 
     const parser = new XMLParser()
