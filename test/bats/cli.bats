@@ -66,3 +66,17 @@ function setup() {
     
     assert_success
 }
+
+@test "Should be able to run monika using har file" {
+    run npm start -- -r 1 -s 0 --har test/bats/configs/harTest.har
+    
+    assert_success    
+    assert_output --partial 'GET https://yt3.ggpht.com/a/default-user=s68'
+}
+
+@test "Should be able to run monika using postman collections" {
+    run npm start -- -r 1 -s 0 --postman test/bats/configs/simple.postman_collection.json
+    
+    assert_success    
+    assert_output --partial 'GET http://127.0.0.1:5000/v1'
+}
