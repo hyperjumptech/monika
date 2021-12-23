@@ -44,9 +44,25 @@ function setup() {
     assert_output --partial 'Warning: Probe 1 has no Alerts configuration defined'
 }
 
-@test "Should run probe" {
+@test "Should be able to run probe" {
     run npm start -- -r 1 -s 0 -c test/bats/configs/basic.yml
     
     assert_success    
     assert_output --partial 'GET https://symon.hyperjump.tech'
+}
+
+@test "Should be able to create config file from har" {
+    run npm start -- --create-config --har test/bats/configs/harTest.har --output test/bats/configs/harTest.yml
+    run cat test/bats/configs/harTest.yml
+    run rm test/bats/configs/harTest.yml
+
+    assert_success
+}
+
+@test "Should be able to create config file from postman collection" {
+    run npm start -- --create-config --postman test/bats/configs/simple.postman_collection.json --output test/bats/configs/postman_collection.yml
+    run cat test/bats/configs/postman_collection.yml
+    run rm test/bats/configs/postman_collection.yml
+    
+    assert_success
 }
