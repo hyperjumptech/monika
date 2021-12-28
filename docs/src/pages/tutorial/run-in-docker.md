@@ -7,7 +7,11 @@ Monika is available as a docker image. Paste a copy of your configuration file `
 From the same directory, you can run:
 
 ```bash
+# Run Monika in foreground
 docker run --name monika -v ${PWD}/monika.yml:/config/monika.yml --detach hyperjump/monika:latest
+
+# Or, if you prefer to run Monika in the background
+docker run -d --name monika -v ${PWD}/monika.yml:/config/monika.yml --detach hyperjump/monika:latest
 ```
 
 Once monika is up and running, you can see its log using
