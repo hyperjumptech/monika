@@ -52,7 +52,7 @@ function setup() {
 }
 
 @test "Should be able to create config file from har" {
-    run npm start -- --create-config --har test/bats/configs/harTest.har --output test/bats/configs/harTest.yml
+    run npm start -- --create-config --har test/testConfigs/harTest.har --output test/bats/configs/harTest.yml
     run cat test/bats/configs/harTest.yml
     run rm test/bats/configs/harTest.yml
 
@@ -60,7 +60,7 @@ function setup() {
 }
 
 @test "Should be able to create config file from postman collection" {
-    run npm start -- --create-config --postman test/bats/configs/simple.postman_collection.json --output test/bats/configs/postman_collection.yml
+    run npm start -- --create-config --postman test/testConfigs/simple.postman_collection.json --output test/bats/configs/postman_collection.yml
     run cat test/bats/configs/postman_collection.yml
     run rm test/bats/configs/postman_collection.yml
     
@@ -68,14 +68,14 @@ function setup() {
 }
 
 @test "Should be able to run monika using har file" {
-    run npm start -- -r 1 -s 0 --har test/bats/configs/harTest.har
+    run npm start -- -r 1 -s 0 --har test/testConfigs/harTest.har
     
     assert_success    
     assert_output --partial 'GET https://yt3.ggpht.com/a/default-user=s68'
 }
 
 @test "Should be able to run monika using postman collections" {
-    run npm start -- -r 1 -s 0 --postman test/bats/configs/simple.postman_collection.json
+    run npm start -- -r 1 -s 0 --postman test/testConfigs/simple.postman_collection.json
     
     assert_success    
     assert_output --partial 'GET http://127.0.0.1:5000/v1'
