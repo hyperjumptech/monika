@@ -60,4 +60,4 @@ docker run --name monika_interactive \
 
 For further docker commands and documentation, visit the official Docker [documentation here](https://docs.docker.com/engine/reference/commandline/run/).
 
-If all else fails, hit us up at https://github.com/hyperjumptech/monika.
+If all else fails, hit us up at [monika discussions](https://github.com/hyperjumptech/monika/discussions) or [file an issue](https://github.com/hyperjumptech/monika/issues).
