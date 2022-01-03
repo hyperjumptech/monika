@@ -42,4 +42,22 @@ docker run --name monika_interactive \
     monika -c /config/monika.yml --prometheus 3001
 ```
 
+## Troubleshooting
+
+Genererally when facing issues with your container, try the parameters using regular monika. For instance:
+
+```bash
+monika -c /config/monika.yml --prometheus 3001
+```
+
+Ensure your container is up and running by running simple commands/parameters:
+
+```bash
+docker run --name monika_interactive \
+    -v ${PWD}/myConfig.yml:/config/monika.yml \
+    -d hyperjump/monika:latest monika --help
+```
+
 For further docker commands and documentation, visit the official Docker [documentation here](https://docs.docker.com/engine/reference/commandline/run/).
+
+If all else fails, hit us up at https://github.com/hyperjumptech/monika.
