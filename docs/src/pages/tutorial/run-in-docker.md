@@ -13,7 +13,7 @@ Once you've pulled the latest image, pass it your monika yaml configuration to t
 
 ```bash
 # Run Monika in foreground
-docker run --name monika -v ${PWD}/monika.yml:/config/monika.yml --detach hyperjump/monika:latest
+docker run --name monika -v ${PWD}/monika.yml:/config/monika.yml -it hyperjump/monika:latest
 
 # Or, if you prefer to run Monika in the background
 docker run --name monika -v ${PWD}/monika.yml:/config/monika.yml --detach hyperjump/monika:latest
