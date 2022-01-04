@@ -154,6 +154,8 @@ export const setupConfig = async (flags: any) => {
     nonDefaultConfig = parseConfig(flags.har, 'har')
   } else if (flags.postman) {
     nonDefaultConfig = parseConfig(flags.postman, 'postman')
+  } else if (flags.insomnia) {
+    nonDefaultConfig = parseConfig(flags.insomnia, 'insomnia')
   }
 
   if (parsedConfigs.length === 0 && nonDefaultConfig !== undefined) {

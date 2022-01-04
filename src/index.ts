@@ -121,14 +121,21 @@ class Monika extends Command {
       char: 'p', // (p)ostman
       description: 'Run Monika using a Postman json file.',
       multiple: false,
-      exclusive: ['har'],
+      exclusive: ['har', 'insomnia'],
     }),
 
     har: flags.string({
       char: 'H', // (H)ar file to
       description: 'Run Monika using a HAR file',
       multiple: false,
-      exclusive: ['postman'],
+      exclusive: ['postman', 'insomnia'],
+    }),
+
+    insomnia: flags.string({
+      char: 'I', // (I)nsomnia.json file to
+      description: 'Run Monika using an Insomnia json file',
+      multiple: false,
+      exclusive: ['har', 'postman'],
     }),
 
     logs: flags.boolean({
