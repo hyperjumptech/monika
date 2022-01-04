@@ -1,0 +1,5 @@
+probes:
+  - id: '1'
+    name: 'idntimes check'
+    requests:
+      - url: https://symon.hyperjump.tech
