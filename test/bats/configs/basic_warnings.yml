@@ -1,0 +1,4 @@
+probes:
+  - id: '1'
+    requests:
+      - url: https://symon.hyperjump.tech
