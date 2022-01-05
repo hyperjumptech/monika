@@ -33,6 +33,8 @@ For further details on probes, check the [guide here](https://monika.hyperjump.t
 
 Alerts are part of probes, and describe the conditions to trigger an alert. Alerts are basicaly test condition for your service, such as http status, response time, or a particular response body.
 
+The sample below shows an alert will be generated if http response status is 500 or the response time is greater than 150ms.
+
 ```bash
 alerts:
   - query: response.status == 500
@@ -45,7 +47,7 @@ For details on alerts and how you can configure different triggers, see the [gui
 
 ## Notifications
 
-Once an alert is triggered, Monika can send a notification through any of of the supported channels.
+Once an alert is triggered, Monika can send a notification through any of the supported channels.
 
 A simple desktop alert for instance is done in two lines, see below:
 
