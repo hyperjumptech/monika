@@ -12,7 +12,7 @@ At this moment, Monika support these channel of notifications (You can use just 
 1. [Desktop Notifications](https://hyperjumptech.github.io/monika/guides/notifications#desktop-notifications)
 2. [Discord](https://hyperjumptech.github.io/monika/guides/notifications#discord)
 3. [Facebook Workplace](https://hyperjumptech.github.io/monika/guides/notifications#facebook-workplace)
-4. [Google Chat](https://https://hyperjumptech.github.io/monika/guides/notifications#Google-Chat)
+4. [Google Chat](https://hyperjumptech.github.io/monika/guides/notifications#google-chat)
 5. [Lark Suite](https://hyperjumptech.github.io/monika/guides/notifications#larksuite-notifications)
 6. [Mailgun](https://hyperjumptech.github.io/monika/guides/notifications#mailgun)
 7. [Microsoft Teams](https://hyperjumptech.github.io/monika/guides/notifications#microsoft-teams)
