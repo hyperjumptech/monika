@@ -3,14 +3,13 @@ id: configuration-file
 title: Configuration File
 ---
 
-Monika uses a yaml file format to describe all the settings and configurations. Built-in example is included can be seen `monika.example.yml`
-The following are a summary of their settings.
+Monika uses a YAML file format to describe all the settings and configurations. A sample is included in the pproject can be seen `monika.example.yml`
 
-In general Monika and its configuration file, `monika.yml` is divided into three general section. The probe, an alert section and a notification section.
+The following are a summary of their settings. In general Monika and its configuration file, `monika.yml` is divided into three sections. A probe, an alert and a notification section.
 
 ## Probes
 
-Probes describe the request to perform on your service to test. A probe will include the request, made up of the http url to test, method, timout and any headers that you might need.
+Probes describe the request(s) to perform on your service to test. A probe will include the request, the http url to test, its method, timeout and any headers that you might wish to add..
 
 Here is an example probe:
 
@@ -42,13 +41,13 @@ alerts:
     message: response time is slow
 ```
 
-For further documentation on alerts, see the [guide here](https://monika.hyperjump.tech/guides/alerts) here.
+For details on alerts and how you can configure different triggers, see the [guide here](https://monika.hyperjump.tech/guides/alerts) here.
 
 ## Notifications
 
 Once an alert is triggered, Monika can send a notification through any of of the supported channels.
 
-A simple desktop alert is shown below:
+A simple desktop alert for instance is done in two lines, see below:
 
 ```bash
 notifications:
@@ -71,7 +70,7 @@ notifications:
       password: SMTP_PASSWORD
 ```
 
-To a variety of chat channels like whatsapp, discord and Google chat:
+Monika also support a wide variety of chat channels such as whatsapp, discord, Google chat, and even Lark Suite:
 
 ```bash
 notifications:
@@ -82,4 +81,4 @@ notifications:
 
 ```
 
-For complete list of the different notification channels, visit the [guide here](https://monika.hyperjump.tech/guides/notifications).
+For the complete list of the different notification channels supported, visit the [guide here](https://monika.hyperjump.tech/guides/notifications).
