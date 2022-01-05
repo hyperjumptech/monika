@@ -107,7 +107,8 @@ class Monika extends Command {
     }),
 
     'create-config': flags.boolean({
-      description: 'open Monika Configuration Generator using default browser',
+      description:
+        'Create config from HAR (-H), postman (-p), insomnia (-I) export file, or open Monika Configuration Generator using default browser',
     }),
 
     'config-interval': flags.integer({

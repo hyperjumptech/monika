@@ -44,7 +44,8 @@ export const parseConfig = (
 
     if (type === 'har') return parseHarFile(configString)
     if (type === 'postman') return parseConfigFromPostman(configString)
-    if (type === 'insomnia') return parseInsomnia(configString)
+    if (type === 'insomnia')
+      return parseInsomnia(configString, ext.replace('.', ''))
 
     if (ext === '.yml' || ext === '.yaml') {
       const cfg = yml.load(configString, { json: true })

@@ -1,26 +1,129 @@
 import { Config } from '../../interfaces/config'
 import yml from 'js-yaml'
+import { Probe } from '../../interfaces/probe'
+import { DEFAULT_THRESHOLD } from '../../looper'
+import { compile } from 'handlebars'
+import { Method } from 'axios'
 
-interface InsomniaData {
+interface InsomniaResource {
+  _id: string
+  authentication: any
+  name: string
+  data?: any
+  description?: string
   url?: string
+  headers?: any
   method?: string
-  body?: string
+  body?: any
+  _type: string
 }
+
+let baseUrl = ''
+let environmentVariables: any | undefined
 
 export default function parseInsomnia(
   configString: string,
   format?: string
 ): Config {
-  let data: InsomniaData[] = []
-  if (format === 'yaml') {
-    data = yml.load(configString, { json: true }) as InsomniaData[]
+  let insomniaData
+  if (format === 'yaml' || format === 'yml') {
+    insomniaData = yml.load(configString, { json: true }) as InsomniaResource[]
   } else {
-    data = JSON.parse(configString)
+    insomniaData = JSON.parse(configString)
   }
+  validateInsomniaExport(insomniaData)
+  const data: InsomniaResource[] = insomniaData.resources
+  const env = data
+    .reverse()
+    .find(
+      (d) =>
+        d._type === 'environment' &&
+        d.data?.scheme &&
+        d.data?.host &&
+        d.data?.base_path
+    )
+
+  environmentVariables = env?.data
+  setBaseUrl(environmentVariables)
 
   return mapInsomniaToConfig(data)
 }
 
-function mapInsomniaToConfig(data: InsomniaData[]): Config {
-  return { probes: [] }
+function validateInsomniaExport(data: any) {
+  if (
+    data?.['__export_format'] !== 4 &&
+    (data?.['__export_source'] as undefined | string)?.includes('insomnia')
+  ) {
+    throw new Error(
+      'Failed to parse Insomnia project, please use export format v4.'
+    )
+  }
+}
+
+function setBaseUrl(env?: any) {
+  baseUrl = `${env?.scheme?.[0] ?? 'http'}://${env?.host}${env?.base_path}`
+}
+
+function mapInsomniaToConfig(data: InsomniaResource[]): Config {
+  const insomniaRequests = data.filter(
+    ({ _type, url, body }) =>
+      _type === 'request' &&
+      url &&
+      // skip binary upload requests
+      body?.mimeType !== 'application/octet-stream'
+  )
+  const probes = insomniaRequests.map<Probe>(mapInsomniaRequestToConfig)
+
+  return { probes }
+}
+
+function mapInsomniaRequestToConfig(res: InsomniaResource): Probe {
+  const url = compile(res.url)({ base_url: baseUrl })
+  const authorization = getAuthorizationHeader(res)
+  let headers: { [key: string]: string | undefined } | undefined
+  if (authorization)
+    headers = {
+      authorization,
+    }
+  if (res.headers) {
+    if (headers === undefined) headers = {}
+    for (const h of res.headers) {
+      headers[h.name] = h.value
+    }
+  }
+
+  return {
+    id: res._id,
+    name: res.name,
+    description: res.description,
+    requests: [
+      {
+        url,
+        method: (res?.method ?? 'GET') as Method,
+        body: JSON.parse(res.body?.text ?? '{}'),
+        timeout: 10000,
+        headers,
+      },
+    ],
+    interval: 30,
+    incidentThreshold: DEFAULT_THRESHOLD,
+    recoveryThreshold: DEFAULT_THRESHOLD,
+    alerts: [],
+  }
+}
+
+function getAuthorizationHeader(res: InsomniaResource): string | undefined {
+  let authorization: string | undefined
+  if (
+    res.authentication?.type === 'bearer' &&
+    (res.authentication?.disabled ?? false) === false
+  ) {
+    let authTemplate = res.authentication?.token as string | undefined
+    authTemplate = authTemplate?.replace('_.', '')
+    authorization = `${res.authentication?.prefix ?? 'bearer'} ${compile(
+      authTemplate
+    )(environmentVariables ?? {})}`
+  }
+
+  return authorization
 }
