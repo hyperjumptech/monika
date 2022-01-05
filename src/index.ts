@@ -133,8 +133,8 @@ class Monika extends Command {
     }),
 
     insomnia: flags.string({
-      char: 'I', // (I)nsomnia.json file to
-      description: 'Run Monika using an Insomnia json file',
+      char: 'I', // (I)nsomnia file to
+      description: 'Run Monika using an Insomnia json/yaml file',
       multiple: false,
       exclusive: ['har', 'postman'],
     }),
