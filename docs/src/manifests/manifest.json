@@ -26,9 +26,19 @@
       "heading": true,
       "routes": [
         {
-          "title": "Probes",
-          "path": "/guides/probes",
-          "editUrl": "/guides/probes.md"
+          "title": "Alerts",
+          "path": "/guides/alerts",
+          "editUrl": "/guides/alerts.md"
+        },
+        {
+          "title": "CLI Options",
+          "path": "/guides/cli-options",
+          "editUrl": "/guides/cli-options.md"
+        },
+        {
+          "tittle": "Configuration File",
+          "path": "/guides/configuration-file",
+          "editUrl": "/guides/configuration-file.md"
         },
         {
           "title": "Notifications",
@@ -36,14 +46,9 @@
           "editUrl": "/guides/notifications.md"
         },
         {
-          "title": "Alerts",
-          "path": "/guides/alerts",
-          "editUrl": "/guides/alerts.md"
-        },
-        {
-          "title": "TLS Checkers",
-          "path": "/guides/tls-checkers",
-          "editUrl": "/guides/tls-checkers.md"
+          "title": "Probes",
+          "path": "/guides/probes",
+          "editUrl": "/guides/probes.md"
         },
         {
           "title": "Status Notification",
@@ -51,9 +56,9 @@
           "editUrl": "/guides/status-notification.md"
         },
         {
-          "title": "CLI Options",
-          "path": "/guides/cli-options",
-          "editUrl": "/guides/cli-options.md"
+          "title": "TLS Checkers",
+          "path": "/guides/tls-checkers",
+          "editUrl": "/guides/tls-checkers.md"
         },
         {
           "title": "Troubleshoot",

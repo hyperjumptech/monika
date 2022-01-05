@@ -1,6 +1,6 @@
 ---
-id: monika.yml
-title: monka.yml
+id: configuration-file
+title: Configuration File
 ---
 
 Monika uses a yaml file format to describe all the settings and configurations. Built-in example is included can be seen `monika.example.yml`
