@@ -161,7 +161,7 @@ monika --config monika-notifications.yml --postman my-postman-collection.json
 
 ## Insomnia
 
-Use your own [Insomnia](https://insomnia.rest) collection with Monika by providing `--insomnia` or `-I`.
+Use your own [Insomnia](https://insomnia.rest) collection with Monika by providing `--insomnia` or `-I`. We currently only support Insomnia **export version 4**. You can use both JSON and YAML file format.
 
 ```bash
 monika -I /your/insomnia/collection.yaml # JSON / YAML

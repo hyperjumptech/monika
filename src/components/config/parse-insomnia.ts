@@ -47,7 +47,7 @@ let environmentVariables: any | undefined
 
 export default function parseInsomnia(
   configString: string,
-  format?: string
+  format: string
 ): Config {
   let insomniaData
   if (format === 'yaml' || format === 'yml') {
