@@ -107,7 +107,8 @@ class Monika extends Command {
     }),
 
     'create-config': flags.boolean({
-      description: 'open Monika Configuration Generator using default browser',
+      description:
+        'Create config from HAR (-H), postman (-p), insomnia (-I) export file, or open Monika Configuration Generator using default browser',
     }),
 
     'config-interval': flags.integer({
@@ -121,14 +122,21 @@ class Monika extends Command {
       char: 'p', // (p)ostman
       description: 'Run Monika using a Postman json file.',
       multiple: false,
-      exclusive: ['har'],
+      exclusive: ['har', 'insomnia'],
     }),
 
     har: flags.string({
       char: 'H', // (H)ar file to
       description: 'Run Monika using a HAR file',
       multiple: false,
-      exclusive: ['postman'],
+      exclusive: ['postman', 'insomnia'],
+    }),
+
+    insomnia: flags.string({
+      char: 'I', // (I)nsomnia file to
+      description: 'Run Monika using an Insomnia json/yaml file',
+      multiple: false,
+      exclusive: ['har', 'postman'],
     }),
 
     logs: flags.boolean({

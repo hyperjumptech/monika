@@ -140,19 +140,47 @@ You must respond with a capital `"Y"` to confirm if you want to flush the logs o
 Have an existing request on postman you want to automate? Monika supports reading postman.yml as configuration input. Use the `-p` or the `--postman` switches.
 
 ```bash
-monika -p postman.yml
+monika -p postman.json
 ```
 
 ### Create config from Postman file
 
 You can use the combination of `--create-config` and `--postman` flags to convert the postman files to a monika.yml config file.
 
+```bash
+monika --create-config --postman postman.json
+```
+
 ### Merge Postman file to existing configurations
 
 You can also use `-c/--config` to merge properties with them. Note that using `--postman` will override probes passed to `-c/--config`.
 
 ```bash
-monika --config monika-notifications.yml --postman my-file.har
+monika --config monika-notifications.yml --postman my-postman-collection.json
+```
+
+## Insomnia
+
+Use your own [Insomnia](https://insomnia.rest) collection with Monika by providing `--insomnia` or `-I`. We currently only support Insomnia **export version 4**. You can use both JSON and YAML file format.
+
+```bash
+monika -I /your/insomnia/collection.yaml # JSON / YAML
+```
+
+### Create config from Insomnia file
+
+Generate your Monika configuration with combining `--create-config` and `--insomnia` flags to convert your Insomnia collection file to a monika config file.
+
+```bash
+monika --create-config --insomnia /your/insomnia/collection.yaml # JSON / YAML
+```
+
+### Merge Insomnia file to existing configurations
+
+Merge your existing configurations with an Insomnia collection file using `-c/--config` together with `-I/--insomnia`. Note that this will override probes passed to `-c`.
+
+```bash
+monika --config monika-notifications.yml --insomnia /insomnia/collection.yml
 ```
 
 ## Prometheus

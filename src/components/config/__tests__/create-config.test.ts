@@ -27,13 +27,17 @@ import fs from 'fs'
 import { createConfig } from '..'
 import _ from 'lodash'
 
-afterEach(() => {
-  if (fs.existsSync('monika.har.json')) {
-    fs.unlinkSync('monika.har.json')
+beforeEach(() => {
+  if (fs.existsSync('monika.har.yml')) {
+    fs.unlinkSync('monika.har.yml')
   }
 
-  if (fs.existsSync('monika.postman.json')) {
-    fs.unlinkSync('monika.postman.json')
+  if (fs.existsSync('monika.postman.yml')) {
+    fs.unlinkSync('monika.postman.yml')
+  }
+
+  if (fs.existsSync('monika.insomnia.yml')) {
+    fs.unlinkSync('monika.insomnia.yml')
   }
 })
 
@@ -71,6 +75,26 @@ describe('Postman config', () => {
       const generated = fs.readFileSync('monika.postman.yml', 'utf-8')
       const expected = fs.readFileSync(
         './src/components/config/__tests__/expected.postman.yml',
+        'utf-8'
+      )
+      expect(_.isEqual(generated, expected)).to.be.true
+    })
+  })
+})
+
+describe('Insomnia config', () => {
+  describe('Create config from insomnia file', () => {
+    it('should create config from insomnia file', async () => {
+      const flags = {
+        insomnia: './src/components/config/__tests__/petstore.insomnia.yaml',
+        output: 'monika.insomnia.yml',
+      }
+      await createConfig(flags)
+      expect(fs.lstatSync('monika.insomnia.yml').isFile()).to.be.true
+
+      const generated = fs.readFileSync('monika.insomnia.yml', 'utf-8')
+      const expected = fs.readFileSync(
+        './src/components/config/__tests__/expected.insomnia.yml',
         'utf-8'
       )
       expect(_.isEqual(generated, expected)).to.be.true
