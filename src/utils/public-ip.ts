@@ -33,21 +33,29 @@ export let isConnectedToSTUNServer = true
 export let publicNetworkInfo: { country: string; city: string; isp: string }
 
 async function testStun(): Promise<string> {
-  const response = await stun.request('stun.l.google.com:19302')
-  return response?.getXorAddress()?.address
+  try {
+    const response = await stun.request('stun.l.google.com:19302')
+    return response?.getXorAddress()?.address
+  } catch (error) {
+    log.error(`stun server is inaccessible, got: ${error}`)
+    return Promise.resolve('') // return an empty string
+  }
 }
 
 export async function getPublicNetworkInfo() {
   try {
     const ip = await testStun()
-    const response = await axios.get(`http://ip-api.com/json/${ip}`)
-    const { country, city, isp } = response.data
-    publicNetworkInfo = { country, city, isp }
-    log.info(
-      `Monika is running from: ${publicNetworkInfo.city} - ${
-        publicNetworkInfo.isp
-      } (${ip}) - ${hostname()} (${getIp()})`
-    )
+
+    if (ip) {
+      const response = await axios.get(`http://ip-api.com/json/${ip}`)
+      const { country, city, isp } = response.data
+      publicNetworkInfo = { country, city, isp }
+      log.info(
+        `Monika is running from: ${publicNetworkInfo.city} - ${
+          publicNetworkInfo.isp
+        } (${ip}) - ${hostname()} (${getIp()})`
+      )
+    }
   } catch (error) {
     log.error(`Failed to obtain location/ISP info`)
   }
