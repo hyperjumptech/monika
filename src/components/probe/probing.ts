@@ -59,7 +59,7 @@ export async function probing(
         [header]: renderedHeader,
       }
 
-      // flag for "Content-Type" form
+      // evaluate "Content-Type" header in case-insensitive manner
       if (
         header.toLocaleLowerCase() === headerContentType &&
         rawHeader === contentType['form-urlencoded']
