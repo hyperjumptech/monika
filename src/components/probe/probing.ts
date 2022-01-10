@@ -25,6 +25,13 @@
 import axios from 'axios'
 import * as Handlebars from 'handlebars'
 import { ProbeRequestResponse, RequestConfig } from '../../interfaces/request'
+import * as qs from 'querystring'
+
+const headerContentType = 'Content-Type'
+const contentType = {
+  'form-urlencoded': 'application/x-www-form-urlencoded',
+  json: 'application/json',
+}
 
 export async function probing(
   requestConfig: RequestConfig,
@@ -58,10 +65,16 @@ export async function probing(
 
   try {
     // Do the request using compiled URL and compiled headers (if exists)
+    let requestBody: any = newReq.body
+    if (
+      newReq.headers?.[headerContentType] === contentType['form-urlencoded']
+    ) {
+      requestBody = qs.stringify(requestBody)
+    }
     const resp = await axiosInstance.request({
       ...newReq,
       url: renderedURL,
-      data: newReq.body,
+      data: requestBody,
     })
     const responseTime = new Date().getTime() - requestStartedAt
     const { data, headers, status } = resp
