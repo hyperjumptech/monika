@@ -111,10 +111,7 @@ describe('Probing', () => {
     it('should submit correct form', async () => {
       interceptor.use((req: any) => {
         if (['http://localhost:4000/login'].includes(req.url.href)) {
-          if (
-            req.body ===
-            '{"username":"example@example.com","password":"example"}'
-          )
+          if (req.body === 'username=example%40example.com&password=example')
             return { status: 200 }
 
           return { status: 400 }
