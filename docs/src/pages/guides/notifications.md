@@ -17,12 +17,13 @@ At this moment, Monika support these channel of notifications (You can use just 
 6. [Mailgun](https://hyperjumptech.github.io/monika/guides/notifications#mailgun)
 7. [Microsoft Teams](https://hyperjumptech.github.io/monika/guides/notifications#microsoft-teams)
 8. [Monika Whatsapp Notifier](https://hyperjumptech.github.io/monika/guides/notifications#monika-whatsapp-notifier)
-9. [SendGrid](https://hyperjumptech.github.io/monika/guides/notifications#sendgrid)
-10. [Slack](https://hyperjumptech.github.io/monika/guides/notifications#slack-incoming-webhook)
-11. [SMTP](https://hyperjumptech.github.io/monika/guides/notifications#smtp)
-12. [Telegram](https://hyperjumptech.github.io/monika/guides/notifications#telegram)
-13. [Webhook](https://hyperjumptech.github.io/monika/guides/notifications#webhook)
-14. [WhatsApp Business](https://hyperjumptech.github.io/monika/guides/notifications#whatsapp)
+9. [PagerDuty](https://hyperjumptech.github.io/monika/guides/notifications#pagerduty)
+10. [SendGrid](https://hyperjumptech.github.io/monika/guides/notifications#sendgrid)
+11. [Slack](https://hyperjumptech.github.io/monika/guides/notifications#slack-incoming-webhook)
+12. [SMTP](https://hyperjumptech.github.io/monika/guides/notifications#smtp)
+13. [Telegram](https://hyperjumptech.github.io/monika/guides/notifications#telegram)
+14. [Webhook](https://hyperjumptech.github.io/monika/guides/notifications#webhook)
+15. [WhatsApp Business](https://hyperjumptech.github.io/monika/guides/notifications#whatsapp)
 
 ## Configurations
 
@@ -219,6 +220,27 @@ data:
 | ID   | Notification identity number             | `MonikaNotif12345`                                                 |
 | Type | Notification types                       | `monika-notif`                                                     |
 | Url  | The URL of the Monika Notif Webhook link | `https://whatsapp.hyperjump.tech/api/notify?token=<webhook.token>` |
+
+## PagerDuty
+
+PagerDuty is a platform for agile incident management. You need the integration key to use PagerDuty. You can get the integration key by following the steps in [the documentation](https://support.pagerduty.com/docs/services-and-integrations). To give you the flexibility to choose which probe belongs to which PagerDuty service. You need to map the integration key with your probe id in the configuration.
+
+```yaml
+- id: unique-id-monika-notif
+  type: pagerduty
+  data:
+    - key: YOUR_PAGERDUTY_INTEGRATION_KEY
+      probeID: ZN32nw_KsvTKtLFNu55JV
+    - key: YOUR_PAGERDUTY_INTEGRATION_KEY
+      probeID: 8SeUFIud-xV9Ac5mFLRx8
+```
+
+| Key          | Description                  | Example                            |
+| ------------ | ---------------------------- | ---------------------------------- |
+| id           | Notification identity number | `MonikaNotif12345`                 |
+| type         | Notification types           | `pagerduty`                        |
+| data.key     | PagerDuty integration key    | `0nlar5b9ko8hnqrvsfnhtmihyopn5eri` |
+| data.probeID | Probe ID                     | `ZN32nw_KsvTKtLFNu55JV`            |
 
 ## Sendgrid
 

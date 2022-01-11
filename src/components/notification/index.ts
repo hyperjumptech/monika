@@ -45,6 +45,7 @@ import { sendWhatsapp } from './channel/whatsapp'
 import { sendWorkplace } from './channel/workplace'
 import { sendLark } from './channel/lark'
 import { sendGoogleChat } from './channel/googlechat'
+import { newPagerDuty } from './channel/pagerduty'
 
 export class NotificationSendingError extends Error {
   notificationType: string
@@ -74,6 +75,8 @@ export async function sendNotifications(
   notifications: Notification[],
   message: NotificationMessage
 ) {
+  const pagerduty = newPagerDuty()
+
   await Promise.all(
     // eslint-disable-next-line complexity
     notifications.map(async (notification) => {
@@ -224,6 +227,10 @@ export async function sendNotifications(
             await sendGoogleChat(notification.data, message)
             break
           }
+
+          case pagerduty.slug:
+            await pagerduty.send(notification.data, message)
+            break
 
           default: {
             break

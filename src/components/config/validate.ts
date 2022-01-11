@@ -32,6 +32,7 @@ import { isValidURL } from '../../utils/is-valid-url'
 import { parseAlertStringTime } from '../../plugins/validate-response/checkers'
 import { compileExpression } from '../../utils/expression-parser'
 import type { SymonConfig } from '../reporter'
+import { newPagerDuty } from '../notification/channel/pagerduty'
 
 const HTTPMethods = [
   'DELETE',
@@ -64,10 +65,6 @@ const NO_PROBES = setInvalidResponse(
 const NOTIFICATION_NO_RECIPIENTS = setInvalidResponse(
   'Recipients does not exists or has length lower than 1!'
 )
-const NOTIFICATION_INVALID_TYPE = setInvalidResponse(
-  'Notifications type is not allowed'
-)
-
 const PROBE_NO_REQUESTS = setInvalidResponse(
   'Probe requests does not exists or has length lower than 1!'
 )
@@ -77,7 +74,6 @@ const PROBE_REQUEST_INVALID_URL = setInvalidResponse(
 const PROBE_REQUEST_INVALID_METHOD = setInvalidResponse(
   'Probe request method is invalid! Valid methods are GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS, PURGE, LINK, and UNLINK'
 )
-const PROBE_ALERT_INVALID = setInvalidResponse(`Probe alert format is invalid!`)
 
 const PROBE_REQUEST_NO_URL = setInvalidResponse(
   'Probe request URL does not exists'
@@ -124,6 +120,8 @@ const WORKPLACE_NO_THREAD_ID = setInvalidResponse(
 )
 
 function validateNotification(notifications: Notification[]): Validation {
+  const pagerduty = newPagerDuty()
+
   // Check notifications properties
   for (const notification of notifications) {
     // Check if type equals to mailgun, smtp, or sendgrid, and has no recipients
@@ -228,8 +226,19 @@ function validateNotification(notifications: Notification[]): Validation {
         break
       }
 
+      case pagerduty.slug: {
+        const error = pagerduty.validateConfig(notification.data)
+        if (error) {
+          return setInvalidResponse(error)
+        }
+
+        break
+      }
+
       default:
-        return NOTIFICATION_INVALID_TYPE
+        return setInvalidResponse(
+          `Notifications type is not allowed (${(notification as any)?.type})`
+        )
     }
   }
 
@@ -293,7 +302,7 @@ export const validateConfig = (configuration: Config): Validation => {
     for (const alert of alerts) {
       const check = isValidProbeAlert(alert)
       if (!check) {
-        return PROBE_ALERT_INVALID
+        return setInvalidResponse(`Probe alert format is invalid! (${alert})`)
       }
     }
 

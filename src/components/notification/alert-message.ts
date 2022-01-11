@@ -81,6 +81,8 @@ export async function getMessageForAlert({
   const recoveryOrIncident = isRecovery ? 'Recovery' : 'Incident'
   const meta = {
     type: isRecovery ? ('recovery' as const) : ('incident' as const),
+    probeID,
+    alertQuery: alert.query,
     url,
     time: format(new Date(), 'yyyy-MM-dd HH:mm:ss XXX'),
     hostname: hostname(),
