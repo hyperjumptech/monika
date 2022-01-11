@@ -63,7 +63,7 @@ export async function* getConfigIterator(skipConfigCheck = true) {
   }
 }
 
-export const updateConfig = async (config: Config, validate = true) => {
+export const updateConfig = (config: Config, validate = true) => {
   log.debug('Updating config')
   if (validate) {
     const validated = validateConfig(config)
@@ -83,7 +83,7 @@ export const updateConfig = async (config: Config, validate = true) => {
 const mergeConfigs = (): Config => {
   const mergedConfig = configs.reduce((prev, current) => {
     return { ...prev, ...current }
-  })
+  }, {})
   return mergedConfig as Config
 }
 
@@ -100,9 +100,9 @@ const watchConfigFile = (
   )
   if (watchConfigFile) {
     const watcher = chokidar.watch(path)
-    watcher.on('change', async () => {
-      configs[index] = await parseConfig(path, type)
-      await updateConfig(mergeConfigs())
+    watcher.on('change', () => {
+      configs[index] = parseConfig(path, type)
+      updateConfig(mergeConfigs())
     })
   }
 }
@@ -113,8 +113,12 @@ const scheduleRemoteConfigFetcher = (
   index: number
 ) => {
   setInterval(async () => {
-    configs[index] = await fetchConfig(url)
-    await updateConfig(mergeConfigs())
+    try {
+      configs[index] = await fetchConfig(url)
+      updateConfig(mergeConfigs())
+    } catch (error) {
+      log.error(error?.message)
+    }
   }, interval * 1000)
 }
 
@@ -166,7 +170,7 @@ export const setupConfig = async (flags: any) => {
 
   configs = parsedConfigs
 
-  await updateConfig(mergeConfigs())
+  updateConfig(mergeConfigs())
 }
 
 const getPathAndTypeFromFlag = (flags: any) => {
