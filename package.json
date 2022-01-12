@@ -119,7 +119,7 @@
     "singleQuote": true
   },
   "engines": {
-    "node": ">=8.0.0"
+    "node": ">=12.0.0"
   },
   "files": [
     "/bin",
