@@ -78,7 +78,7 @@ export const parseConfigFromPostman = (configString: string): Config => {
     }
 
     return configMonika
-  } catch (error) {
+  } catch (error: any) {
     if (error.name === 'SyntaxError') {
       throw new Error('Postman file is in invalid JSON format!')
     }

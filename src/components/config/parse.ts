@@ -49,10 +49,10 @@ export const parseConfig = (
 
     if (ext === '.yml' || ext === '.yaml') {
       const cfg = yml.load(configString, { json: true })
-      return (cfg as unknown) as Config
+      return cfg as unknown as Config
     }
     return JSON.parse(configString)
-  } catch (error) {
+  } catch (error: any) {
     if (error.code === 'ENOENT' && error.path === configPath) {
       throw new Error(`Configuration file not found: ${configPath}.`)
     }
