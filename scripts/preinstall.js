@@ -47,11 +47,13 @@ const dev = fs.existsSync(project)
 // this will only run in development
 if (dev) {
   const npmVersion = execSync('npm -v', { encoding: 'utf-8' }).trim()
-  const [major] = npmVersion.split('.').map((n) => parseInt(n, 10))
+  const [major] = npmVersion.split('.').map((n) => Number.parseInt(n, 10))
   if (major > 6) {
     console.error(
       `\x1b[31mYou are using npm version ${npmVersion}. Change to npm version 6 when working on monika!\x1b[0m`
     )
-    process.exit(1)
+    if (!process.env.CI) {
+      process.exit(1)
+    }
   }
 }
