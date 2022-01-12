@@ -74,7 +74,7 @@ jobs:
         name: List all the files to be compressed
         shell: bash
       - name: Compress all binaries to one zip
-        uses: papeloto/action-zip@v1
+        uses: vimtor/action-zip@v1
         with:
           files: dist/${{ matrix.file_name }} dist/node_sqlite3.node 
           dest: monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}.zip
