@@ -85,11 +85,8 @@ export class PrometheusCollector {
       method: method ?? 'GET',
       statusCode: response?.status,
     }
-    const {
-      statusCode,
-      responseTime,
-      responseSize,
-    } = this.prometheusCustomCollector
+    const { statusCode, responseTime, responseSize } =
+      this.prometheusCustomCollector
 
     // collect metrics
     statusCode
