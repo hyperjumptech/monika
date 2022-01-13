@@ -85,6 +85,8 @@ type ConfigListener = (config: Config) => void
 
 const isTestEnvironment = process.env.NODE_ENV === 'test' || process.env.CI
 
+let hasConnectionToSymon = false
+
 const getHandshakeData = async (): Promise<SymonHandshakeData> => {
   await getPublicNetworkInfo()
   await getPublicIp()
@@ -132,6 +134,8 @@ class SymonClient {
   private httpClient: AxiosInstance
 
   private configListeners: ConfigListener[] = []
+
+  private reportIntervalId: any
 
   constructor(url: string, apiKey: string) {
     this.httpClient = axios.create({
@@ -186,7 +190,10 @@ class SymonClient {
 
     await this.report()
     if (!isTestEnvironment) {
-      setInterval(this.report.bind(this), this.reportProbesInterval)
+      this.reportIntervalId = setInterval(
+        this.report.bind(this),
+        this.reportProbesInterval
+      )
     }
   }
 
@@ -263,12 +270,26 @@ class SymonClient {
       const { probes, hash } = await this.fetchProbes()
       const newConfig: Config = { probes, version: hash }
       this.updateConfig(newConfig)
+      if (!hasConnectionToSymon) {
+        hasConnectionToSymon = true
+        if (!isTestEnvironment && !this.reportIntervalId) {
+          this.reportIntervalId = setInterval(
+            this.report.bind(this),
+            this.reportProbesInterval
+          )
+        }
+      }
     } catch (error) {
       log.warn((error as any).message)
     }
   }
 
   async report() {
+    if (!hasConnectionToSymon) {
+      log.warn('Has no connection to symon')
+      return
+    }
+
     log.debug('Reporting to symon')
     try {
       const probeIds = this.probes.map((probe) => probe.id)
@@ -313,6 +334,12 @@ class SymonClient {
         `Deleted reported requests and notifications from local database.`
       )
     } catch (error) {
+      hasConnectionToSymon = false
+      if (this.reportIntervalId) {
+        clearInterval(this.reportIntervalId)
+        this.reportIntervalId = null
+      }
+
       log.warn(
         "Warning: Can't report history to Symon. " + (error as any).message
       )
