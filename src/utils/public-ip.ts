@@ -63,6 +63,10 @@ export async function getPublicNetworkInfo() {
   }
 }
 
+/**
+ * getPublicIP sends a request to stun server getting IP address
+ * @returns {Promise}
+ */
 export async function getPublicIp() {
   try {
     const address = await pokeStun()
