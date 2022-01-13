@@ -34,7 +34,7 @@ export let isConnectedToSTUNServer = true
 export let publicNetworkInfo: { country: string; city: string; isp: string }
 
 /**
- * testStun sends a request to stun server
+ * pokeStun sends a poke/request to stun server
  * @returns {Promise<string>}
  */
 async function pokeStun(): Promise<string> {
@@ -74,7 +74,6 @@ export async function getPublicIp() {
   } catch {
     isConnectedToSTUNServer = false
     log.warn(`STUN Server is temporarily unreachable. Check network.`)
-
-    return Promise.resolve('') // couldn't access public STUN but resolve and retry
+    return Promise.resolve() // couldn't access public stun but resolve and retry
   }
 }
