@@ -24,11 +24,11 @@ describe('notificationChecker - mailgunNotification', () => {
       await notificationChecker([
         {
           ...notificationConfig,
-          data: ({
+          data: {
             domain: 'mailgun.com',
             username: 'mailgunuser',
             recipients: [],
-          } as unknown) as MailgunData,
+          } as unknown as MailgunData,
         },
       ])
     } catch (error) {

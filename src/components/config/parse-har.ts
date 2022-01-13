@@ -76,7 +76,7 @@ export const parseHarFile = (fileContents: string): Config => {
     }
 
     return harConfig
-  } catch (error) {
+  } catch (error: any) {
     if (error.name === 'SyntaxError') {
       throw new Error('Har file is in invalid JSON format!')
     }

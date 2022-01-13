@@ -358,7 +358,7 @@ class SymonClient {
       })
 
       log.debug('Status successfully sent to Symon.')
-    } catch (error) {
+    } catch (error: any) {
       log.warn("Warning: Can't send status to Symon. " + error?.message)
     }
   }

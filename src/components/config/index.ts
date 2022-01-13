@@ -154,6 +154,8 @@ export const setupConfig = async (flags: any) => {
     nonDefaultConfig = parseConfig(flags.har, 'har')
   } else if (flags.postman) {
     nonDefaultConfig = parseConfig(flags.postman, 'postman')
+  } else if (flags.insomnia) {
+    nonDefaultConfig = parseConfig(flags.insomnia, 'insomnia')
   }
 
   if (parsedConfigs.length === 0 && nonDefaultConfig !== undefined) {
@@ -181,6 +183,11 @@ const getPathAndTypeFromFlag = (flags: any) => {
     type = 'har'
   }
 
+  if (flags.insomnia) {
+    path = flags.insomnia
+    type = 'insomnia'
+  }
+
   return {
     path,
     type,
@@ -188,7 +195,7 @@ const getPathAndTypeFromFlag = (flags: any) => {
 }
 
 export const createConfig = async (flags: any) => {
-  if (!flags.har && !flags.postman) {
+  if (!flags.har && !flags.postman && !flags.insomnia) {
     log.info(
       'Opening Monika Configuration Generator in your default browser...'
     )

@@ -52,10 +52,8 @@ export default async function init(flags: any, cliConfig: IConfig) {
 
   // start Promotheus server
   if (flags.prometheus) {
-    const {
-      registerCollectorFromProbes,
-      collectProbeRequestMetrics,
-    } = new PrometheusCollector()
+    const { registerCollectorFromProbes, collectProbeRequestMetrics } =
+      new PrometheusCollector()
 
     // register prometheus metric collectors
     eventEmitter.on(events.config.sanitized, registerCollectorFromProbes)

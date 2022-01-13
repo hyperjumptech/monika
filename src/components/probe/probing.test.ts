@@ -107,5 +107,29 @@ describe('Probing', () => {
         expect(results[k].sentToken).to.be.equals(results[k].expectedToken)
       }
     })
+
+    it('should submit correct form', async () => {
+      interceptor.use((req: any) => {
+        if (['http://localhost:4000/login'].includes(req.url.href)) {
+          if (req.body === 'username=example%40example.com&password=example')
+            return { status: 200 }
+
+          return { status: 400 }
+        }
+      })
+
+      const request: any = {
+        url: 'http://localhost:4000/login',
+        method: 'POST',
+        headers: { 'content-type': 'application/x-www-form-urlencoded' },
+        body: JSON.parse(
+          '{"username": "example@example.com", "password": "example"}'
+        ),
+        timeout: 10,
+      }
+
+      const result = await probing(request, [])
+      expect(result.status).to.be.equals(200)
+    })
   })
 })

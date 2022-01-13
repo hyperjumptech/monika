@@ -28,6 +28,7 @@ import { parseConfigFromPostman } from './parse-postman'
 import { parseHarFile } from './parse-har'
 import path from 'path'
 import yml from 'js-yaml'
+import parseInsomnia from './parse-insomnia'
 
 export const parseConfig = (
   configPath: string,
@@ -41,19 +42,17 @@ export const parseConfig = (
       throw new Error(`Failed to read ${configPath}, got empty.`)
     const ext = path.extname(configPath)
 
-    if (type === 'har') {
-      return parseHarFile(configString)
-    }
-    if (type === 'postman') {
-      return parseConfigFromPostman(configString)
-    }
+    if (type === 'har') return parseHarFile(configString)
+    if (type === 'postman') return parseConfigFromPostman(configString)
+    if (type === 'insomnia')
+      return parseInsomnia(configString, ext.replace('.', ''))
 
     if (ext === '.yml' || ext === '.yaml') {
       const cfg = yml.load(configString, { json: true })
-      return (cfg as unknown) as Config
+      return cfg as unknown as Config
     }
     return JSON.parse(configString)
-  } catch (error) {
+  } catch (error: any) {
     if (error.code === 'ENOENT' && error.path === configPath) {
       throw new Error(`Configuration file not found: ${configPath}.`)
     }
