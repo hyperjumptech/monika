@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.10] - 2022-01-11
+
+## Added
+
+- Support for form-urlencoded (#565)
+- Insomnia support (#560)
+- Bats cli test (#542) (#548)
+
+## Updated
+
+- Creating config from Postman or Har results in yaml format now (#543)
+- Docs: docker use (#557)
+- Docs: config file yaml description (#559)
+- Docs: running in background (#550)
+
+## Fixed
+
+- Stuck after finish all repetition (#547)
+- Docs: handle get rss feed using getStaticProps (#545)
+
 ## [1.6.9] - 2021-12-14
 
 ## Fixed

@@ -72,7 +72,7 @@ describe('Prometheus plugin', () => {
         try {
           // act
           await fetch('http://localhost:4446/metrics', { method: 'POST' })
-        } catch (error) {
+        } catch (error: any) {
           // assert
           expect(error.response.status).to.equal(405)
         }

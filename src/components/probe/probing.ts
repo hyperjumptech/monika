@@ -25,6 +25,13 @@
 import axios from 'axios'
 import * as Handlebars from 'handlebars'
 import { ProbeRequestResponse, RequestConfig } from '../../interfaces/request'
+import * as qs from 'querystring'
+
+const headerContentType = 'content-type'
+const contentType = {
+  'form-urlencoded': 'application/x-www-form-urlencoded',
+  json: 'application/json',
+}
 
 export async function probing(
   requestConfig: RequestConfig,
@@ -36,6 +43,7 @@ export async function probing(
   const requestURL = url
   const renderURL = Handlebars.compile(requestURL)
   const renderedURL = renderURL({ responses })
+  let shouldEncodeFormUrl = false
 
   // Compile headers using handlebars to render URLs that uses previous responses data.
   // In some case such as value is not string, it will be returned as is without being compiled.
@@ -50,6 +58,14 @@ export async function probing(
         ...newReq.headers,
         [header]: renderedHeader,
       }
+
+      // evaluate "Content-Type" header in case-insensitive manner
+      if (
+        header.toLocaleLowerCase() === headerContentType &&
+        rawHeader === contentType['form-urlencoded']
+      ) {
+        shouldEncodeFormUrl = true
+      }
     }
   }
 
@@ -58,10 +74,14 @@ export async function probing(
 
   try {
     // Do the request using compiled URL and compiled headers (if exists)
+    let requestBody: any = newReq.body
+    if (shouldEncodeFormUrl) {
+      requestBody = qs.stringify(requestBody)
+    }
     const resp = await axiosInstance.request({
       ...newReq,
       url: renderedURL,
-      data: newReq.body,
+      data: requestBody,
     })
     const responseTime = new Date().getTime() - requestStartedAt
     const { data, headers, status } = resp
@@ -72,7 +92,7 @@ export async function probing(
       headers,
       responseTime,
     }
-  } catch (error) {
+  } catch (error: any) {
     const responseTime = new Date().getTime() - requestStartedAt
 
     // The request was made and the server responded with a status code

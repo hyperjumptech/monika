@@ -1,0 +1,299 @@
+probes:
+  - id: req_wrk_a255aeabb44240f5885e3360f9a6ee6538e8e88f
+    name: Delete user
+    description: ''
+    requests:
+      - url: https://petstore3.swagger.io/api/v3/user/
+        method: DELETE
+        body: {}
+        timeout: 10000
+        headers: {}
+    interval: 30
+    incidentThreshold: 5
+    recoveryThreshold: 5
+    alerts: []
+  - id: req_wrk_a255aeabb44240f5885e3360f9a6ee656d74493f
+    name: Update user
+    description: ''
+    requests:
+      - url: https://petstore3.swagger.io/api/v3/user/
+        method: PUT
+        body:
+          id: 10
+          username: theUser
+          firstName: John
+          lastName: James
+          email: john@email.com
+          password: 12345
+          phone: 12345
+          userStatus: 1
+        timeout: 10000
+        headers:
+          Content-Type: application/json
+    interval: 30
+    incidentThreshold: 5
+    recoveryThreshold: 5
+    alerts: []
+  - id: req_wrk_a255aeabb44240f5885e3360f9a6ee6574f1d1d1
+    name: Get user by user name
+    description: ''
+    requests:
+      - url: https://petstore3.swagger.io/api/v3/user/
+        method: GET
+        body: {}
+        timeout: 10000
+        headers: {}
+    interval: 30
+    incidentThreshold: 5
+    recoveryThreshold: 5
+    alerts: []
+  - id: req_wrk_a255aeabb44240f5885e3360f9a6ee65740025cb
+    name: Logs out current logged in user session
+    description: ''
+    requests:
+      - url: https://petstore3.swagger.io/api/v3/user/logout
+        method: GET
+        body: {}
+        timeout: 10000
+        headers: {}
+    interval: 30
+    incidentThreshold: 5
+    recoveryThreshold: 5
+    alerts: []
+  - id: req_wrk_a255aeabb44240f5885e3360f9a6ee6500ac9da2
+    name: Logs user into the system
+    description: ''
+    requests:
+      - url: https://petstore3.swagger.io/api/v3/user/login
+        method: GET
+        body: {}
+        timeout: 10000
+        headers: {}
+    interval: 30
+    incidentThreshold: 5
+    recoveryThreshold: 5
+    alerts: []
+  - id: req_wrk_a255aeabb44240f5885e3360f9a6ee65e94a615f
+    name: Creates list of users with given input array
+    description: ''
+    requests:
+      - url: https://petstore3.swagger.io/api/v3/user/createWithList
+        method: POST
+        body:
+          - id: 10
+            username: theUser
+            firstName: John
+            lastName: James
+            email: john@email.com
+            password: 12345
+            phone: 12345
+            userStatus: 1
+        timeout: 10000
+        headers:
+          Content-Type: application/json
+    interval: 30
+    incidentThreshold: 5
+    recoveryThreshold: 5
+    alerts: []
+  - id: req_wrk_a255aeabb44240f5885e3360f9a6ee65fe3d55d0
+    name: Create user
+    description: ''
+    requests:
+      - url: https://petstore3.swagger.io/api/v3/user
+        method: POST
+        body:
+          id: 10
+          username: theUser
+          firstName: John
+          lastName: James
+          email: john@email.com
+          password: 12345
+          phone: 12345
+          userStatus: 1
+        timeout: 10000
+        headers:
+          Content-Type: application/json
+    interval: 30
+    incidentThreshold: 5
+    recoveryThreshold: 5
+    alerts: []
+  - id: req_wrk_a255aeabb44240f5885e3360f9a6ee6515e47538
+    name: Delete purchase order by ID
+    description: ''
+    requests:
+      - url: https://petstore3.swagger.io/api/v3/store/order/
+        method: DELETE
+        body: {}
+        timeout: 10000
+        headers: {}
+    interval: 30
+    incidentThreshold: 5
+    recoveryThreshold: 5
+    alerts: []
+  - id: req_wrk_a255aeabb44240f5885e3360f9a6ee65f021bcd3
+    name: Find purchase order by ID
+    description: ''
+    requests:
+      - url: https://petstore3.swagger.io/api/v3/store/order/
+        method: GET
+        body: {}
+        timeout: 10000
+        headers: {}
+    interval: 30
+    incidentThreshold: 5
+    recoveryThreshold: 5
+    alerts: []
+  - id: req_wrk_a255aeabb44240f5885e3360f9a6ee65e24a4f9e
+    name: Place an order for a pet
+    description: ''
+    requests:
+      - url: https://petstore3.swagger.io/api/v3/store/order
+        method: POST
+        body:
+          id: 10
+          petId: 198772
+          quantity: 7
+          shipDate: '2022-01-03T07:39:22.140Z'
+          status: approved
+          complete: true
+        timeout: 10000
+        headers:
+          Content-Type: application/json
+    interval: 30
+    incidentThreshold: 5
+    recoveryThreshold: 5
+    alerts: []
+  - id: req_wrk_a255aeabb44240f5885e3360f9a6ee65443ac9e7
+    name: Returns pet inventories by status
+    description: ''
+    requests:
+      - url: https://petstore3.swagger.io/api/v3/store/inventory
+        method: GET
+        body: {}
+        timeout: 10000
+        headers:
+          api_key: '{{ apiKey }}'
+    interval: 30
+    incidentThreshold: 5
+    recoveryThreshold: 5
+    alerts: []
+  - id: req_wrk_a255aeabb44240f5885e3360f9a6ee65e804bd05
+    name: Deletes a pet
+    description: ''
+    requests:
+      - url: https://petstore3.swagger.io/api/v3/pet/
+        method: DELETE
+        body: {}
+        timeout: 10000
+        headers:
+          api_key: string
+    interval: 30
+    incidentThreshold: 5
+    recoveryThreshold: 5
+    alerts: []
+  - id: req_wrk_a255aeabb44240f5885e3360f9a6ee65a4608701
+    name: Updates a pet in the store with form data
+    description: ''
+    requests:
+      - url: https://petstore3.swagger.io/api/v3/pet/
+        method: POST
+        body: {}
+        timeout: 10000
+        headers: {}
+    interval: 30
+    incidentThreshold: 5
+    recoveryThreshold: 5
+    alerts: []
+  - id: req_wrk_a255aeabb44240f5885e3360f9a6ee653d1a51d3
+    name: Find pet by ID
+    description: ''
+    requests:
+      - url: https://petstore3.swagger.io/api/v3/pet/
+        method: GET
+        body: {}
+        timeout: 10000
+        headers:
+          api_key: '{{ apiKey }}'
+    interval: 30
+    incidentThreshold: 5
+    recoveryThreshold: 5
+    alerts: []
+  - id: req_wrk_a255aeabb44240f5885e3360f9a6ee6542a17980
+    name: Finds Pets by tags
+    description: ''
+    requests:
+      - url: https://petstore3.swagger.io/api/v3/pet/findByTags
+        method: GET
+        body: {}
+        timeout: 10000
+        headers: {}
+    interval: 30
+    incidentThreshold: 5
+    recoveryThreshold: 5
+    alerts: []
+  - id: req_wrk_a255aeabb44240f5885e3360f9a6ee6580ab0d08
+    name: Finds Pets by status
+    description: ''
+    requests:
+      - url: https://petstore3.swagger.io/api/v3/pet/findByStatus?status=available
+        method: GET
+        body: {}
+        timeout: 10000
+        headers: {}
+    interval: 30
+    incidentThreshold: 5
+    recoveryThreshold: 5
+    alerts: []
+  - id: req_wrk_a255aeabb44240f5885e3360f9a6ee6574a7a059
+    name: Update an existing pet
+    description: ''
+    requests:
+      - url: https://petstore3.swagger.io/api/v3/pet
+        method: PUT
+        body:
+          id: 10
+          name: doggie
+          category:
+            id: 1
+            name: Dogs
+          photoUrls:
+            - string
+          tags:
+            - id: 0
+              name: string
+          status: string
+        timeout: 10000
+        headers:
+          Content-Type: application/json
+    interval: 30
+    incidentThreshold: 5
+    recoveryThreshold: 5
+    alerts: []
+  - id: req_wrk_a255aeabb44240f5885e3360f9a6ee6523acbe44
+    name: Add a new pet to the store
+    description: ''
+    requests:
+      - url: https://petstore3.swagger.io/api/v3/pet
+        method: POST
+        body:
+          id: 10
+          name: doggie
+          category:
+            id: 1
+            name: Dogs
+          photoUrls:
+            - string
+          tags:
+            - id: 0
+              name: string
+          status: string
+        timeout: 10000
+        headers:
+          Content-Type: application/json
+    interval: 30
+    incidentThreshold: 5
+    recoveryThreshold: 5
+    alerts: []
+notifications:
+  - id: default
+    type: desktop
