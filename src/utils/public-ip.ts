@@ -33,13 +33,8 @@ export let isConnectedToSTUNServer = true
 export let publicNetworkInfo: { country: string; city: string; isp: string }
 
 async function testStun(): Promise<string> {
-  try {
-    const response = await stun.request('stun.l.google.com:19302')
-    return response?.getXorAddress()?.address
-  } catch (error) {
-    log.error(`stun server is inaccessible, got: ${error}`)
-    return Promise.resolve('') // return an empty string
-  }
+  const response = await stun.request('stun.l.google.com:19302')
+  return response?.getXorAddress()?.address
 }
 
 export async function getPublicNetworkInfo() {
@@ -71,6 +66,8 @@ export async function getPublicIp() {
     }
   } catch (error) {
     isConnectedToSTUNServer = false
-    log.error(`STUN Server is unreachable. Can't obtain Public IP`)
+    log.warn(`STUN Server is temprorarily unreachable. Check network.`)
+
+    return Promise.resolve('') // couldn't access public STUN but resolve and retry
   }
 }

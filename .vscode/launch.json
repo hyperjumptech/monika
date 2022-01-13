@@ -17,8 +17,8 @@
       "request": "launch",
       "name": "Launch with args",
       "skipFiles": ["<node_internals>/**"],
-      "program": "${workspaceFolder}/bin/run",
-      "args": ["-i mock"]
+      "program": "${workspaceFolder}/bin/run_dev",
+      "args": ["-c ./monika.yml -i httpbin_200"]
     }
   ]
 }
