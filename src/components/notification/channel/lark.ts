@@ -166,7 +166,7 @@ export const sendLark = async (
     })
 
     return res
-  } catch (error) {
+  } catch (error: any) {
     log.error(
       "Couldn't send notification to Lark Suite. Got this error: " +
         error.message

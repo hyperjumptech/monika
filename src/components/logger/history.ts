@@ -109,7 +109,7 @@ export async function openLogfile() {
     })
 
     await migrate()
-  } catch (error) {
+  } catch (error: any) {
     log.error("Warning: Can't open logfile. " + error.message)
   }
 }
@@ -361,7 +361,7 @@ export async function saveProbeRequestLog({
         db.run(insertAlertSQL, [now, insertProbeRequestResult.lastID, alert])
       )
     )
-  } catch (error) {
+  } catch (error: any) {
     log.error("Error: Can't insert data into monika-log.db. " + error.message)
   }
 }
@@ -404,7 +404,7 @@ export async function saveNotificationLog(
       notification.id,
       notification.type,
     ])
-  } catch (error) {
+  } catch (error: any) {
     log.error("Error: Can't insert data into monika-log.db. " + error.message)
   }
 }

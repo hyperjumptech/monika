@@ -224,7 +224,7 @@ export const sendGoogleChat = async (
     })
 
     return res
-  } catch (error) {
+  } catch (error: any) {
     log.error(
       "Couldn't send notification to Google Chat. Got this error: " +
         error.message

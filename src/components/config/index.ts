@@ -116,7 +116,7 @@ const scheduleRemoteConfigFetcher = (
     try {
       configs[index] = await fetchConfig(url)
       updateConfig(mergeConfigs())
-    } catch (error) {
+    } catch (error: any) {
       log.error(error?.message)
     }
   }, interval * 1000)

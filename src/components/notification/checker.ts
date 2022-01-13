@@ -73,7 +73,7 @@ export const notificationChecker = async (notifications: Notification[]) => {
       try {
         const validated = await validator.validateAsync(notification.data)
         return validated
-      } catch (error) {
+      } catch (error: any) {
         throw NotificationSendingError.create(notification.type, error?.message)
       }
     })

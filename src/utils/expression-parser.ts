@@ -49,23 +49,22 @@ export const sanitizeExpression = (query: string, objectKeys: string[]) => {
   return sanitizedQuery
 }
 
-export const compileExpression = (
-  expression: string,
-  objectKeys: string[] = []
-) => (obj: any) => {
-  const sanitizedExpression = sanitizeExpression(expression, objectKeys)
+export const compileExpression =
+  (expression: string, objectKeys: string[] = []) =>
+  (obj: any) => {
+    const sanitizedExpression = sanitizeExpression(expression, objectKeys)
 
-  return _compileExpression(sanitizedExpression, {
-    extraFunctions: {
-      __getValueByPath: (path: string) => get(obj, path), //  for internal use, not to be exposed to user
-      has,
-      lowerCase,
-      upperCase,
-      startsWith,
-      endsWith,
-      includes,
-      size,
-      isEmpty,
-    },
-  })(obj)
-}
+    return _compileExpression(sanitizedExpression, {
+      extraFunctions: {
+        __getValueByPath: (path: string) => get(obj, path), //  for internal use, not to be exposed to user
+        has,
+        lowerCase,
+        upperCase,
+        startsWith,
+        endsWith,
+        includes,
+        size,
+        isEmpty,
+      },
+    })(obj)
+  }

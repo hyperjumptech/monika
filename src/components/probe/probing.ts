@@ -92,7 +92,7 @@ export async function probing(
       headers,
       responseTime,
     }
-  } catch (error) {
+  } catch (error: any) {
     const responseTime = new Date().getTime() - requestStartedAt
 
     // The request was made and the server responded with a status code

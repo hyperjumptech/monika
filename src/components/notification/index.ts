@@ -237,7 +237,7 @@ export async function sendNotifications(
           }
         }
         return Promise.resolve()
-      } catch (error) {
+      } catch (error: any) {
         throw NotificationSendingError.create(notification.type, error?.message)
       }
     })

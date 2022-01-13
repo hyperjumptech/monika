@@ -44,7 +44,7 @@ export function startPrometheusMetricsServer(port: number) {
       const prometheusMetrics = await register.metrics()
 
       res.status(200).end(prometheusMetrics)
-    } catch (error) {
+    } catch (error: any) {
       res.status(500).json({ message: error.message })
     }
   })
