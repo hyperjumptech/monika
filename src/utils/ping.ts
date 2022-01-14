@@ -22,63 +22,14 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { log } from './pino'
-import stun from 'stun'
-import axios from 'axios'
-import { hostname } from 'node:os'
-import getIp from './ip'
-import { sendPing } from './ping'
+const ping = require('ping')
 
-export let publicIpAddress = ''
-export let isConnectedToSTUNServer = true
-export let publicNetworkInfo: { country: string; city: string; isp: string }
-
+const PING_TIMEOUT_S = 10 // 10 seconds
 /**
- * pokeStun sends a poke/request to stun server
- * @returns {Promise<string>}
+ * sendPing() sends a ping to an address/host
+ * @param host is a string
+ * @returns
  */
-async function pokeStun(): Promise<string> {
-  const connection = await sendPing('stun.l.google.com')
-  if (connection.alive) {
-    const response = await stun.request('stun.l.google.com:19302')
-    return response?.getXorAddress()?.address
-  }
-
-  return Promise.reject(new Error('stun inaccessible')) // could not connect to STUN server
-}
-
-export async function getPublicNetworkInfo() {
-  try {
-    const ip = await pokeStun()
-    const response = await axios.get(`http://ip-api.com/json/${ip}`)
-    const { country, city, isp } = response.data
-    publicNetworkInfo = { country, city, isp }
-    log.info(
-      `Monika is running from: ${publicNetworkInfo.city} - ${
-        publicNetworkInfo.isp
-      } (${ip}) - ${hostname()} (${getIp()})`
-    )
-  } catch (error) {
-    log.warn(`Failed to obtain location/ISP info. Got: ${error}`)
-    return Promise.resolve() // couldn't resolve publicNetworkInfo, fail gracefully and continue
-  }
-}
-
-/**
- * getPublicIP sends a request to stun server getting IP address
- * @returns {Promise}
- */
-export async function getPublicIp() {
-  try {
-    const address = await pokeStun()
-    if (address) {
-      publicIpAddress = address
-      isConnectedToSTUNServer = true
-      log.info(`Connected to STUN Server. Monika is running from: ${address}`)
-    }
-  } catch {
-    isConnectedToSTUNServer = false
-    log.warn(`STUN Server is temporarily unreachable. Check network.`)
-    return Promise.resolve() // couldn't access public stun but resolve and retry
-  }
+export async function sendPing(host: string) {
+  return ping.promise.probe(host, { timeout: PING_TIMEOUT_S })
 }
