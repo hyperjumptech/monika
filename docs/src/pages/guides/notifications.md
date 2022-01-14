@@ -226,18 +226,25 @@ data:
 PagerDuty is a platform for agile incident management. You need the integration key to use PagerDuty. You can get the integration key by following the steps in [the documentation](https://support.pagerduty.com/docs/services-and-integrations). To give you the flexibility to choose which probe belongs to which PagerDuty service. You need to map the PagerDuty integration key with your Monika probe id in the configuration.
 
 ```yaml
-- id: unique-id-monika-notif
+- id: unique-id-pagerdut-notif
   type: pagerduty
   data:
     - key: YOUR_PAGERDUTY_INTEGRATION_KEY
       probeID: ZN32nw_KsvTKtLFNu55JV
-    - key: YOUR_PAGERDUTY_INTEGRATION_KEY
+    - key: YOUR_PAGERDUTY_INTEGRATION_KEY_2
       probeID: 8SeUFIud-xV9Ac5mFLRx8
+  probes:
+    - id: ZN32nw_KsvTKtLFNu55JV
+      requests:
+        - url: https://example.com
+    - id: 8SeUFIud-xV9Ac5mFLRx8
+      requests:
+        - url: https://example.com.login
 ```
 
 | Key          | Description                  | Example                            |
 | ------------ | ---------------------------- | ---------------------------------- |
-| id           | Notification identity number | `MonikaNotif12345`                 |
+| id           | Notification identity number | `pager-duty-1`                     |
 | type         | Notification types           | `pagerduty`                        |
 | data.key     | PagerDuty integration key    | `0nlar5b9ko8hnqrvsfnhtmihyopn5eri` |
 | data.probeID | Monika Probe ID              | `ZN32nw_KsvTKtLFNu55JV`            |
