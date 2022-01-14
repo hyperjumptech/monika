@@ -22,6 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import { PagerDutyNotification } from '../components/notification/channel/pagerduty'
 import {
   MailgunData,
   MonikaNotifData,
@@ -52,6 +53,7 @@ export type Notification =
   | DesktopNotification
   | LarkNotification
   | GoogleChatNotification
+  | PagerDutyNotification
 
 interface BaseNotification {
   id: string

@@ -27,6 +27,7 @@ import { NotificationSendingError, sendNotifications } from '.'
 import { Notification } from '../../interfaces/notification'
 import getIp from '../../utils/ip'
 import { getMessageForStart } from './alert-message'
+import { newPagerDuty } from './channel/pagerduty'
 import {
   dataDiscordSchemaValidator,
   dataMailgunSchemaValidator,
@@ -46,6 +47,7 @@ import {
 export const errorMessage = NotificationSendingError.create
 
 export const notificationChecker = async (notifications: Notification[]) => {
+  const pagerduty = newPagerDuty()
   const validators = {
     desktop: null,
     discord: dataDiscordSchemaValidator,
@@ -61,6 +63,7 @@ export const notificationChecker = async (notifications: Notification[]) => {
     workplace: dataWorkplaceSchemaValidator,
     lark: dataLarkSchemaValidator,
     'google-chat': dataGoogleChatSchemaValidator,
+    pagerduty: pagerduty.validator,
   }
 
   await Promise.all(

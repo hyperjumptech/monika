@@ -35,7 +35,8 @@
         "unicorn/no-process-exit": "warn",
         "unicorn/prefer-switch": "warn",
         "unicorn/prefer-string-slice": "warn",
-        "no-useless-catch": "warn"
+        "no-useless-catch": "warn",
+        "unicorn/prefer-object-from-entries": "warn"
     },
     "overrides": [
         {
