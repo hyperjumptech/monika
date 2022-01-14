@@ -223,7 +223,7 @@ data:
 
 ## PagerDuty
 
-PagerDuty is a platform for agile incident management. You need the integration key to use PagerDuty. You can get the integration key by following the steps in [the documentation](https://support.pagerduty.com/docs/services-and-integrations). To give you the flexibility to choose which probe belongs to which PagerDuty service. You need to map the integration key with your probe id in the configuration.
+PagerDuty is a platform for agile incident management. You need the integration key to use PagerDuty. You can get the integration key by following the steps in [the documentation](https://support.pagerduty.com/docs/services-and-integrations). To give you the flexibility to choose which probe belongs to which PagerDuty service. You need to map the PagerDuty integration key with your Monika probe id in the configuration.
 
 ```yaml
 - id: unique-id-monika-notif
