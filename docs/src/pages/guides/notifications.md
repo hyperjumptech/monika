@@ -240,7 +240,7 @@ PagerDuty is a platform for agile incident management. You need the integration 
 | id           | Notification identity number | `MonikaNotif12345`                 |
 | type         | Notification types           | `pagerduty`                        |
 | data.key     | PagerDuty integration key    | `0nlar5b9ko8hnqrvsfnhtmihyopn5eri` |
-| data.probeID | Probe ID                     | `ZN32nw_KsvTKtLFNu55JV`            |
+| data.probeID | Monika Probe ID              | `ZN32nw_KsvTKtLFNu55JV`            |
 
 ## Sendgrid
 
