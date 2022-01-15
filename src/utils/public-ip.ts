@@ -25,7 +25,7 @@
 import { log } from './pino'
 import stun from 'stun'
 import axios from 'axios'
-import os from 'node:os'
+import { hostname } from 'os'
 import getIp from './ip'
 import { sendPing } from './ping'
 
@@ -56,7 +56,7 @@ export async function getPublicNetworkInfo() {
     log.info(
       `Monika is running from: ${publicNetworkInfo.city} - ${
         publicNetworkInfo.isp
-      } (${ip}) - ${os.hostname()} (${getIp()})`
+      } (${ip}) - ${hostname()} (${getIp()})`
     )
   } catch (error) {
     log.warn(`Failed to obtain location/ISP info. Got: ${error}`)
