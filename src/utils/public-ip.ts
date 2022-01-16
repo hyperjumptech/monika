@@ -33,13 +33,15 @@ export let publicIpAddress = ''
 export let isConnectedToSTUNServer = true
 export let publicNetworkInfo: { country: string; city: string; isp: string }
 
+const isTestEnvironment = process.env.NODE_ENV === 'test' || process.env.CI
+
 /**
  * pokeStun sends a poke/request to stun server
  * @returns {Promise<string>}
  */
 async function pokeStun(): Promise<string> {
   const connection = await sendPing('stun.l.google.com')
-  if (connection.alive) {
+  if (connection.alive || isTestEnvironment) {
     const response = await stun.request('stun.l.google.com:19302')
     return response?.getXorAddress()?.address
   }
