@@ -27,7 +27,6 @@ import { EventEmitter } from 'node:events'
 import mac from 'macaddress'
 import { hostname } from 'node:os'
 import pako from 'pako'
-
 import {
   deleteNotificationLogs,
   deleteRequestLogs,
