@@ -190,7 +190,7 @@ export function idFeeder(
   }
 
   const abort = () => {
-    for (const i of intervals)  clearInterval(i)
+    for (const i of intervals) clearInterval(i)
   }
 
   return abort
