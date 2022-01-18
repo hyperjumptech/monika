@@ -25,7 +25,7 @@
 import { log } from './pino'
 import stun from 'stun'
 import axios from 'axios'
-import { hostname } from 'node:os'
+import { hostname } from 'os'
 import getIp from './ip'
 import { sendPing } from './ping'
 
