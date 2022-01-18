@@ -25,7 +25,7 @@
 import { log } from './pino'
 import stun from 'stun'
 import axios from 'axios'
-import { hostname } from 'os'
+import { hostname } from 'node:os'
 import getIp from './ip'
 import { sendPing } from './ping'
 
@@ -33,11 +33,19 @@ export let publicIpAddress = ''
 export let isConnectedToSTUNServer = true
 export let publicNetworkInfo: { country: string; city: string; isp: string }
 
+const isTestEnvironment = process.env.NODE_ENV === 'test'
+
 /**
  * pokeStun sends a poke/request to stun server
  * @returns {Promise<string>}
  */
 async function pokeStun(): Promise<string> {
+  // for testing, bypass ping/stun server... apparently ping cannot run in github actions
+  // reference: https://github.com/actions/virtual-environments/issues/1519
+  if (!isTestEnvironment) {
+    Promise.resolve('1.2.3.4')
+  }
+
   const connection = await sendPing('stun.l.google.com')
   if (connection.alive) {
     const response = await stun.request('stun.l.google.com:19302')
