@@ -23,9 +23,9 @@
  **********************************************************************************/
 
 import axios, { AxiosInstance } from 'axios'
-import { EventEmitter } from 'events'
+import { EventEmitter } from 'node:events'
 import mac from 'macaddress'
-import { hostname } from 'os'
+import { hostname } from 'node:os'
 import pako from 'pako'
 
 import {
@@ -48,6 +48,7 @@ import {
   publicIpAddress,
   publicNetworkInfo,
 } from '../utils/public-ip'
+import { clearProbeInterval } from '../looper'
 
 type SymonHandshakeData = {
   macAddress: string
@@ -145,12 +146,12 @@ class SymonClient {
       },
     })
 
-    this.fetchProbesInterval = parseInt(
+    this.fetchProbesInterval = Number.parseInt(
       process.env.FETCH_PROBES_INTERVAL ?? '60000',
       10
     )
 
-    this.reportProbesInterval = parseInt(
+    this.reportProbesInterval = Number.parseInt(
       process.env.REPORT_PROBES_INTERVAL ?? '10000',
       10
     )
@@ -210,7 +211,7 @@ class SymonClient {
 
     // return unsubscribe function
     return () => {
-      const index = this.configListeners.findIndex((cl) => cl === listener)
+      const index = this.configListeners.indexOf(listener)
       this.configListeners.splice(index, 1)
     }
   }
@@ -242,12 +243,14 @@ class SymonClient {
         } else {
           log.debug(`No new config from Symon`)
         }
+
         return { probes: res.data.data, hash: res.headers.etag }
       })
       .catch((error) => {
         if (error.isAxiosError) {
           return Promise.reject(new Error(error.response.data.message))
         }
+
         return Promise.reject(error)
       })
   }
@@ -257,9 +260,9 @@ class SymonClient {
       log.debug(`Received config changes. Reloading monika`)
       this.config = newConfig
       this.configHash = newConfig.version
-      this.configListeners.forEach((listener) => {
+      for (const listener of this.configListeners) {
         listener(newConfig)
-      })
+      }
     } else {
       log.debug(`Received config does not change.`)
     }
@@ -336,6 +339,7 @@ class SymonClient {
     } catch (error) {
       hasConnectionToSymon = false
       if (this.reportIntervalId) {
+        clearProbeInterval()
         clearInterval(this.reportIntervalId)
         this.reportIntervalId = null
       }
