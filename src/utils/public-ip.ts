@@ -33,7 +33,7 @@ export let publicIpAddress = ''
 export let isConnectedToSTUNServer = true
 export let publicNetworkInfo: { country: string; city: string; isp: string }
 
-const isTestEnvironment = process.env.NODE_ENV === 'test'
+const isTestEnvironment = process.env.CI || process.env.NODE_ENV === 'test'
 
 /**
  * pokeStun sends a poke/request to stun server
