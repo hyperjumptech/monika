@@ -43,7 +43,7 @@ async function pokeStun(): Promise<string> {
   // for testing, bypass ping/stun server... apparently ping cannot run in github actions
   // reference: https://github.com/actions/virtual-environments/issues/1519
   if (isTestEnvironment) {
-    return Promise.resolve('1.2.3.4')
+    return Promise.resolve('192.168.1.1') // adding for specific asserts in other tests
   }
 
   const connection = await sendPing('stun.l.google.com')
