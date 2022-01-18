@@ -27,19 +27,37 @@ import stun from 'stun'
 import axios from 'axios'
 import { hostname } from 'os'
 import getIp from './ip'
+import { sendPing } from './ping'
 
 export let publicIpAddress = ''
 export let isConnectedToSTUNServer = true
 export let publicNetworkInfo: { country: string; city: string; isp: string }
 
-async function testStun(): Promise<string> {
-  const response = await stun.request('stun.l.google.com:19302')
-  return response?.getXorAddress()?.address
+const isTestEnvironment = process.env.CI || process.env.NODE_ENV === 'test'
+
+/**
+ * pokeStun sends a poke/request to stun server
+ * @returns {Promise<string>}
+ */
+async function pokeStun(): Promise<string> {
+  // for testing, bypass ping/stun server... apparently ping cannot run in github actions
+  // reference: https://github.com/actions/virtual-environments/issues/1519
+  if (isTestEnvironment) {
+    return Promise.resolve('192.168.1.1') // adding for specific asserts in other tests
+  }
+
+  const connection = await sendPing('stun.l.google.com')
+  if (connection.alive) {
+    const response = await stun.request('stun.l.google.com:19302')
+    return response?.getXorAddress()?.address
+  }
+
+  return Promise.reject(new Error('stun inaccessible')) // could not connect to STUN server
 }
 
 export async function getPublicNetworkInfo() {
   try {
-    const ip = await testStun()
+    const ip = await pokeStun()
     const response = await axios.get(`http://ip-api.com/json/${ip}`)
     const { country, city, isp } = response.data
     publicNetworkInfo = { country, city, isp }
@@ -49,20 +67,26 @@ export async function getPublicNetworkInfo() {
       } (${ip}) - ${hostname()} (${getIp()})`
     )
   } catch (error) {
-    log.error(`Failed to obtain location/ISP info`)
+    log.warn(`Failed to obtain location/ISP info. Got: ${error}`)
+    return Promise.resolve() // couldn't resolve publicNetworkInfo, fail gracefully and continue
   }
 }
 
+/**
+ * getPublicIP sends a request to stun server getting IP address
+ * @returns {Promise}
+ */
 export async function getPublicIp() {
   try {
-    const address = await testStun()
+    const address = await pokeStun()
     if (address) {
       publicIpAddress = address
       isConnectedToSTUNServer = true
       log.info(`Connected to STUN Server. Monika is running from: ${address}`)
     }
-  } catch (error) {
+  } catch {
     isConnectedToSTUNServer = false
-    log.error(`STUN Server is unreachable. Can't obtain Public IP`)
+    log.warn(`STUN Server is temporarily unreachable. Check network.`)
+    return Promise.resolve() // couldn't access public stun but resolve and retry
   }
 }
