@@ -27,7 +27,6 @@ import { EventEmitter } from 'events'
 import mac from 'macaddress'
 import { hostname } from 'os'
 import pako from 'pako'
-
 import {
   deleteNotificationLogs,
   deleteRequestLogs,
@@ -48,6 +47,7 @@ import {
   publicIpAddress,
   publicNetworkInfo,
 } from '../utils/public-ip'
+import { clearProbeInterval } from '../looper'
 
 type SymonHandshakeData = {
   macAddress: string
@@ -84,6 +84,9 @@ type NotificationEvent = {
 type ConfigListener = (config: Config) => void
 
 const isTestEnvironment = process.env.NODE_ENV === 'test' || process.env.CI
+
+let hasConnectionToSymon = false
+let reportIntervalId: any
 
 const getHandshakeData = async (): Promise<SymonHandshakeData> => {
   await getPublicNetworkInfo()
@@ -141,12 +144,12 @@ class SymonClient {
       },
     })
 
-    this.fetchProbesInterval = parseInt(
+    this.fetchProbesInterval = Number.parseInt(
       process.env.FETCH_PROBES_INTERVAL ?? '60000',
       10
     )
 
-    this.reportProbesInterval = parseInt(
+    this.reportProbesInterval = Number.parseInt(
       process.env.REPORT_PROBES_INTERVAL ?? '10000',
       10
     )
@@ -185,9 +188,7 @@ class SymonClient {
     }
 
     await this.report()
-    if (!isTestEnvironment) {
-      setInterval(this.report.bind(this), this.reportProbesInterval)
-    }
+    await this.setReportInterval()
   }
 
   async notifyEvent(event: SymonClientEvent) {
@@ -203,7 +204,7 @@ class SymonClient {
 
     // return unsubscribe function
     return () => {
-      const index = this.configListeners.findIndex((cl) => cl === listener)
+      const index = this.configListeners.indexOf(listener)
       this.configListeners.splice(index, 1)
     }
   }
@@ -235,12 +236,14 @@ class SymonClient {
         } else {
           log.debug(`No new config from Symon`)
         }
+
         return { probes: res.data.data, hash: res.headers.etag }
       })
       .catch((error) => {
         if (error.isAxiosError) {
           return Promise.reject(new Error(error.response.data.message))
         }
+
         return Promise.reject(error)
       })
   }
@@ -250,9 +253,9 @@ class SymonClient {
       log.debug(`Received config changes. Reloading monika`)
       this.config = newConfig
       this.configHash = newConfig.version
-      this.configListeners.forEach((listener) => {
+      for (const listener of this.configListeners) {
         listener(newConfig)
-      })
+      }
     } else {
       log.debug(`Received config does not change.`)
     }
@@ -263,12 +266,21 @@ class SymonClient {
       const { probes, hash } = await this.fetchProbes()
       const newConfig: Config = { probes, version: hash }
       this.updateConfig(newConfig)
+      if (!hasConnectionToSymon) {
+        hasConnectionToSymon = true
+        await this.setReportInterval()
+      }
     } catch (error) {
       log.warn((error as any).message)
     }
   }
 
   async report() {
+    if (!hasConnectionToSymon) {
+      log.warn('Has no connection to symon')
+      return
+    }
+
     log.debug('Reporting to symon')
     try {
       const probeIds = this.probes.map((probe) => probe.id)
@@ -313,9 +325,29 @@ class SymonClient {
         `Deleted reported requests and notifications from local database.`
       )
     } catch (error) {
+      hasConnectionToSymon = false
+      if (reportIntervalId) {
+        clearProbeInterval()
+        reportIntervalId = clearInterval(reportIntervalId)
+        this.configHash = ''
+      }
+
       log.warn(
         "Warning: Can't report history to Symon. " + (error as any).message
       )
+    }
+  }
+
+  async setReportInterval() {
+    try {
+      if (!isTestEnvironment && !reportIntervalId) {
+        reportIntervalId = setInterval(
+          this.report.bind(this),
+          this.reportProbesInterval
+        )
+      }
+    } catch (error: any) {
+      log.warn("Warning: Can't set report interval. " + error?.message)
     }
   }
 

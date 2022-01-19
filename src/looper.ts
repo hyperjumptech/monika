@@ -32,6 +32,7 @@ import { getPublicIp, isConnectedToSTUNServer } from './utils/public-ip'
 const MILLISECONDS = 1000
 export const DEFAULT_THRESHOLD = 5
 let checkSTUNinterval: NodeJS.Timeout
+const intervals: Array<NodeJS.Timeout> = []
 
 /**
  * sanitizeProbe sanitize currently mapped probe name, alerts, and threshold
@@ -49,18 +50,21 @@ export function sanitizeProbe(probe: Probe, id: string): Probe {
       `Warning: Probe ${probe.id} has no name defined. Using the default name started by monika`
     )
   }
+
   if (!incidentThreshold) {
     probe.incidentThreshold = DEFAULT_THRESHOLD
     log.warn(
       `Warning: Probe ${probe.id} has no incidentThreshold configuration defined. Using the default threshold: 5`
     )
   }
+
   if (!recoveryThreshold) {
     probe.recoveryThreshold = DEFAULT_THRESHOLD
     log.warn(
       `Warning: Probe ${probe.id} has no recoveryThreshold configuration defined. Using the default threshold: 5`
     )
   }
+
   if (alerts === undefined || alerts.length === 0) {
     probe.alerts = [
       {
@@ -99,6 +103,7 @@ export function isIDValid(config: Config, ids: string): boolean {
         break
       }
     }
+
     if (!isFound) {
       log.error(`id not found: ${id}`)
       return false // ran through the probes and didn't find id
@@ -172,8 +177,6 @@ export function idFeeder(
   repeats: number,
   verboseLogs: boolean
 ) {
-  const intervals: Array<NodeJS.Timeout> = []
-
   for (const probe of sanitizedProbes) {
     const interval = loopProbe(
       probe,
@@ -185,8 +188,19 @@ export function idFeeder(
   }
 
   const abort = () => {
-    intervals.forEach((i) => clearInterval(i))
+    for (const i of intervals) {
+      clearInterval(i)
+    }
   }
 
   return abort
+}
+
+/**
+ * clearProbeInterval clear all probing process
+ */
+export function clearProbeInterval() {
+  for (const i of intervals) {
+    clearInterval(i)
+  }
 }
