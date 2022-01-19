@@ -23,9 +23,9 @@
  **********************************************************************************/
 
 import axios, { AxiosInstance } from 'axios'
-import { EventEmitter } from 'node:events'
+import { EventEmitter } from 'events'
 import mac from 'macaddress'
-import { hostname } from 'node:os'
+import { hostname } from 'os'
 import pako from 'pako'
 import {
   deleteNotificationLogs,
