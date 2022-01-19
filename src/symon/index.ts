@@ -86,6 +86,7 @@ type ConfigListener = (config: Config) => void
 const isTestEnvironment = process.env.NODE_ENV === 'test' || process.env.CI
 
 let hasConnectionToSymon = false
+let reportIntervalId: any
 
 const getHandshakeData = async (): Promise<SymonHandshakeData> => {
   await getPublicNetworkInfo()
@@ -134,8 +135,6 @@ class SymonClient {
   private httpClient: AxiosInstance
 
   private configListeners: ConfigListener[] = []
-
-  private reportIntervalId: any
 
   constructor(url: string, apiKey: string) {
     this.httpClient = axios.create({
@@ -189,12 +188,7 @@ class SymonClient {
     }
 
     await this.report()
-    if (!isTestEnvironment) {
-      this.reportIntervalId = setInterval(
-        this.report.bind(this),
-        this.reportProbesInterval
-      )
-    }
+    await this.setReportInterval()
   }
 
   async notifyEvent(event: SymonClientEvent) {
@@ -274,12 +268,7 @@ class SymonClient {
       this.updateConfig(newConfig)
       if (!hasConnectionToSymon) {
         hasConnectionToSymon = true
-        if (!isTestEnvironment && !this.reportIntervalId) {
-          this.reportIntervalId = setInterval(
-            this.report.bind(this),
-            this.reportProbesInterval
-          )
-        }
+        await this.setReportInterval()
       }
     } catch (error) {
       log.warn((error as any).message)
@@ -337,16 +326,28 @@ class SymonClient {
       )
     } catch (error) {
       hasConnectionToSymon = false
-      if (this.reportIntervalId) {
-        // to clear all interval when no cennection to symon established
+      if (reportIntervalId) {
         clearProbeInterval()
-        clearInterval(this.reportIntervalId)
-        this.reportIntervalId = null
+        reportIntervalId = clearInterval(reportIntervalId)
+        this.configHash = ''
       }
 
       log.warn(
         "Warning: Can't report history to Symon. " + (error as any).message
       )
+    }
+  }
+
+  async setReportInterval() {
+    try {
+      if (!isTestEnvironment && !reportIntervalId) {
+        reportIntervalId = setInterval(
+          this.report.bind(this),
+          this.reportProbesInterval
+        )
+      }
+    } catch (error: any) {
+      log.warn("Warning: Can't set report interval. " + error?.message)
     }
   }
 

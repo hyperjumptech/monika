@@ -32,7 +32,7 @@ import { getPublicIp, isConnectedToSTUNServer } from './utils/public-ip'
 const MILLISECONDS = 1000
 export const DEFAULT_THRESHOLD = 5
 let checkSTUNinterval: NodeJS.Timeout
-let probeInterval: NodeJS.Timeout
+const intervals: Array<NodeJS.Timeout> = []
 
 /**
  * sanitizeProbe sanitize currently mapped probe name, alerts, and threshold
@@ -145,7 +145,7 @@ function loopProbe(
 ) {
   let counter = 0
 
-  probeInterval = setInterval(() => {
+  const probeInterval = setInterval(() => {
     if (counter === repeats) {
       clearInterval(probeInterval)
       clearInterval(checkSTUNinterval)
@@ -177,8 +177,6 @@ export function idFeeder(
   repeats: number,
   verboseLogs: boolean
 ) {
-  const intervals: Array<NodeJS.Timeout> = []
-
   for (const probe of sanitizedProbes) {
     const interval = loopProbe(
       probe,
@@ -190,7 +188,9 @@ export function idFeeder(
   }
 
   const abort = () => {
-    for (const i of intervals) clearInterval(i)
+    for (const i of intervals) {
+      clearInterval(i)
+    }
   }
 
   return abort
@@ -200,5 +200,7 @@ export function idFeeder(
  * clearProbeInterval clear all probing process
  */
 export function clearProbeInterval() {
-  clearInterval(probeInterval)
+  for (const i of intervals) {
+    clearInterval(i)
+  }
 }
