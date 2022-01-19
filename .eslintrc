@@ -5,7 +5,7 @@
         "no-process-exit": "off",
         "no-use-before-define": ["warn", "nofunc"],
         "@typescript-eslint/no-use-before-define": "off",
-        "unicorn/prefer-node-protocol": "warn",
+        // "unicorn/prefer-node-protocol": "warn",
         "unicorn/no-lonely-if": "warn",
         "padding-line-between-statements": "warn",
         "unicorn/no-array-reduce": "warn",

@@ -140,7 +140,7 @@
   "lint-staged": {
     "*.{ts,js}": [
       "node scripts/add-license.js",
-      "eslint --cache"
+      "eslint --cache --fix"
     ],
     "*.{ts,js,css,md}": "prettier --write"
   },
