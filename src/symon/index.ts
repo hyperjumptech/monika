@@ -23,9 +23,9 @@
  **********************************************************************************/
 
 import axios, { AxiosInstance } from 'axios'
-import { EventEmitter } from 'events'
+import { EventEmitter } from 'node:events'
 import mac from 'macaddress'
-import { hostname } from 'os'
+import { hostname } from 'node:os'
 import pako from 'pako'
 import {
   deleteNotificationLogs,
@@ -338,6 +338,7 @@ class SymonClient {
     } catch (error) {
       hasConnectionToSymon = false
       if (this.reportIntervalId) {
+        // to clear all interval when no cennection to symon established
         clearProbeInterval()
         clearInterval(this.reportIntervalId)
         this.reportIntervalId = null
