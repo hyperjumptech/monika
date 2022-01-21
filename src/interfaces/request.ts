@@ -33,9 +33,10 @@ export interface ProbeRequestResponse<T = any> {
 }
 
 export interface RequestConfig extends Omit<AxiosRequestConfig, 'data'> {
-  saveBody?: boolean
+  saveBody?: boolean // save response body to db?
   url: string
   body: JSON
-  timeout: number
+  timeout: number // request timeout
   alerts?: ProbeAlert[]
+  ping?: boolean // is this request for a ping?
 }

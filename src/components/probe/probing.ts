@@ -25,7 +25,8 @@
 import axios from 'axios'
 import * as Handlebars from 'handlebars'
 import { ProbeRequestResponse, RequestConfig } from '../../interfaces/request'
-import * as qs from 'querystring'
+import * as qs from 'node:querystring'
+import { sendPing } from '../../utils/ping'
 
 const headerContentType = 'content-type'
 const contentType = {
@@ -33,6 +34,12 @@ const contentType = {
   json: 'application/json',
 }
 
+/**
+ * probing() is the heart of monika requests generation
+ * @param requestConfig
+ * @param responses an array of previous responses
+ * @returns ProbeRequestResponse, response to the probe request
+ */
 export async function probing(
   requestConfig: RequestConfig,
   responses: Array<ProbeRequestResponse>
@@ -70,7 +77,9 @@ export async function probing(
   }
 
   const axiosInstance = axios.create()
-  const requestStartedAt = new Date().getTime()
+  const requestStartedAt = Date.now()
+
+  let resp: any = {}
 
   try {
     // Do the request using compiled URL and compiled headers (if exists)
@@ -78,22 +87,43 @@ export async function probing(
     if (shouldEncodeFormUrl) {
       requestBody = qs.stringify(requestBody)
     }
-    const resp = await axiosInstance.request({
-      ...newReq,
-      url: renderedURL,
-      data: requestBody,
-    })
-    const responseTime = new Date().getTime() - requestStartedAt
-    const { data, headers, status } = resp
 
-    return {
-      data,
-      status,
-      headers,
-      responseTime,
+    // is this a reqeust for ping?
+    if (newReq.ping === true) {
+      const pingResp = await sendPing(renderedURL)
+
+      const responseTime = pingResp.avg // response time is the average ping time
+      const status = pingResp.alive ? 200 : 503 //  let's translate for now alive == 200, not alive = 503
+      const headers = {}
+      const data = pingResp
+
+      return {
+        data,
+        status,
+        headers,
+        responseTime,
+      }
     }
+ 
+      // if this is not a ping, then do regular REST request through axios
+      resp = await axiosInstance.request({
+        ...newReq,
+        url: renderedURL,
+        data: requestBody,
+      })
+
+      const responseTime = Date.now() - requestStartedAt
+      const { data, headers, status } = resp
+
+      return {
+        data,
+        status,
+        headers,
+        responseTime,
+      }
+    
   } catch (error: any) {
-    const responseTime = new Date().getTime() - requestStartedAt
+    const responseTime = Date.now() - requestStartedAt
 
     // The request was made and the server responded with a status code
     // 400, 500 get here

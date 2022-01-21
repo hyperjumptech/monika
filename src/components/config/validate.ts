@@ -34,7 +34,7 @@ import { compileExpression } from '../../utils/expression-parser'
 import type { SymonConfig } from '../reporter'
 import { newPagerDuty } from '../notification/channel/pagerduty'
 
-const HTTPMethods = [
+const HTTPMethods = new Set([
   'DELETE',
   'GET',
   'HEAD',
@@ -45,7 +45,8 @@ const HTTPMethods = [
   'PURGE',
   'LINK',
   'UNLINK',
-]
+  'PING', // fake method for ping
+])
 
 const setInvalidResponse = (message: string): Validation => ({
   valid: false,
@@ -71,6 +72,7 @@ const PROBE_NO_REQUESTS = setInvalidResponse(
 const PROBE_REQUEST_INVALID_URL = setInvalidResponse(
   'Probe request URL should start with http:// or https://'
 )
+
 const PROBE_REQUEST_INVALID_METHOD = setInvalidResponse(
   'Probe request method is invalid! Valid methods are GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS, PURGE, LINK, and UNLINK'
 )
@@ -256,7 +258,7 @@ const isValidProbeAlert = (alert: ProbeAlert | string): boolean => {
     }
 
     return Boolean(compileExpression(alert.query))
-  } catch (error) {
+  } catch {
     return false
   }
 }
@@ -273,6 +275,7 @@ export const validateConfig = (configuration: Config): Validation => {
       return validateValue
     }
   }
+
   // Validate probes
   if ((configuration?.probes?.length ?? 0) === 0) return NO_PROBES
 
@@ -288,13 +291,21 @@ export const validateConfig = (configuration: Config): Validation => {
 
       if (!url) return PROBE_REQUEST_NO_URL
 
-      if (url && !isValidURL(url)) return PROBE_REQUEST_INVALID_URL
+      if (url) {
+        if (request.ping === true) {
+          // if ping request, url not need to be so strict
+        } else if (!isValidURL(url)) {
+          return PROBE_REQUEST_INVALID_URL
+        }
+      }
 
-      if (!request.method) {
+      if (request.ping === true) {
+        request.method = 'PING' // ok PING is not an HTTP method, but for the purposes of logging, filtering and display
+      } else if (!request.method) {
         request.method = 'GET'
       }
 
-      if (HTTPMethods.indexOf(request.method.toUpperCase()) < 0)
+      if (!HTTPMethods.has(request.method.toUpperCase()))
         return PROBE_REQUEST_INVALID_METHOD
     }
 
