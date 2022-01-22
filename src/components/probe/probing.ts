@@ -104,24 +104,23 @@ export async function probing(
         responseTime,
       }
     }
- 
-      // if this is not a ping, then do regular REST request through axios
-      resp = await axiosInstance.request({
-        ...newReq,
-        url: renderedURL,
-        data: requestBody,
-      })
 
-      const responseTime = Date.now() - requestStartedAt
-      const { data, headers, status } = resp
+    // if this is not a ping, then do regular REST request through axios
+    resp = await axiosInstance.request({
+      ...newReq,
+      url: renderedURL,
+      data: requestBody,
+    })
 
-      return {
-        data,
-        status,
-        headers,
-        responseTime,
-      }
-    
+    const responseTime = Date.now() - requestStartedAt
+    const { data, headers, status } = resp
+
+    return {
+      data,
+      status,
+      headers,
+      responseTime,
+    }
   } catch (error: any) {
     const responseTime = Date.now() - requestStartedAt
 
