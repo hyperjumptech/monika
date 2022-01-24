@@ -34,7 +34,7 @@ import { compileExpression } from '../../utils/expression-parser'
 import type { SymonConfig } from '../reporter'
 import { newPagerDuty } from '../notification/channel/pagerduty'
 
-const HTTPMethods = new Set([
+const HTTPMethods = [
   'DELETE',
   'GET',
   'HEAD',
@@ -46,7 +46,7 @@ const HTTPMethods = new Set([
   'LINK',
   'UNLINK',
   'PING', // fake method for ping
-])
+]
 
 const setInvalidResponse = (message: string): Validation => ({
   valid: false,
@@ -299,13 +299,11 @@ export const validateConfig = (configuration: Config): Validation => {
         }
       }
 
-      if (request.ping === true) {
-        request.method = 'PING' // ok PING is not an HTTP method, but for the purposes of logging, filtering and display
-      } else if (!request.method) {
+      if (!request.method) {
         request.method = 'GET'
       }
 
-      if (!HTTPMethods.has(request.method.toUpperCase()))
+      if (HTTPMethods.indexOf(request.method.toUpperCase()) < 0)
         return PROBE_REQUEST_INVALID_METHOD
     }
 

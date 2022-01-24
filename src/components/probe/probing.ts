@@ -25,7 +25,7 @@
 import axios from 'axios'
 import * as Handlebars from 'handlebars'
 import { ProbeRequestResponse, RequestConfig } from '../../interfaces/request'
-import * as qs from 'node:querystring'
+import * as qs from 'querystring'
 import { sendPing } from '../../utils/ping'
 
 const headerContentType = 'content-type'
@@ -88,7 +88,7 @@ export async function probing(
       requestBody = qs.stringify(requestBody)
     }
 
-    // is this a reqeust for ping?
+    // is this a request for ping?
     if (newReq.ping === true) {
       const pingResp = await sendPing(renderedURL)
 
