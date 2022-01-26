@@ -105,8 +105,8 @@ export class RequestLog {
       probeMsg = `${this.iteration} id:${this.probe.id} PING:${
         this.response?.alive ? 'alive' : 'dead'
       } ${this.request.url} ${
-        this.response?.responseTime || '-'
-      }ms packetLoss:${this.response?.packetLoss}%`
+        this.response?.alive ? this.response?.responseTime : '-'
+      }ms packetLoss:${this.response?.alive ? this.response?.packetLoss : '-'}%`
     } else {
       probeMsg = `${this.iteration} id:${this.probe.id} ${
         this.response?.status || '-'
