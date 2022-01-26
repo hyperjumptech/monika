@@ -34,3 +34,6 @@ export async function sendPing(host: string) {
   const cleanUrl: any = host.replace(/^https?:\/\//, '') // sanitize url
   return ping.promise.probe(cleanUrl, { timeout: PING_TIMEOUT_S })
 }
+
+// some signal constants
+export const PING_TIMEDOUT = 4

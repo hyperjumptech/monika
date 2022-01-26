@@ -26,7 +26,7 @@ import axios from 'axios'
 import * as Handlebars from 'handlebars'
 import { ProbeRequestResponse, RequestConfig } from '../../interfaces/request'
 import * as qs from 'querystring'
-import { sendPing } from '../../utils/ping'
+import { sendPing, PING_TIMEDOUT } from '../../utils/ping'
 
 const headerContentType = 'content-type'
 const contentType = {
@@ -92,16 +92,26 @@ export async function probing(
     if (newReq.ping === true) {
       const pingResp = await sendPing(renderedURL)
 
-      const responseTime = pingResp.avg // response time is the average ping time
-      const status = pingResp.alive ? 200 : 503 //  let's translate for now alive == 200, not alive = 503
+      const requestType = 'ICMP'
+
+      const responseTime = pingResp.avg // map response time to the average ping time
+      const alive = pingResp.alive
+      const data = pingResp.output
       const headers = {}
-      const data = pingResp
+      const packetLoss = pingResp.packetLoss
+      const numericHost = pingResp.numericHost
+
+      const status = alive ? 200 : PING_TIMEDOUT
 
       return {
+        requestType,
         data,
         status,
         headers,
         responseTime,
+        alive,
+        numericHost,
+        packetLoss,
       }
     }
 
@@ -114,8 +124,10 @@ export async function probing(
 
     const responseTime = Date.now() - requestStartedAt
     const { data, headers, status } = resp
+    const requestType = 'HTTP'
 
     return {
+      requestType,
       data,
       status,
       headers,

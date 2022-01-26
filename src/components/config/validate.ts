@@ -45,7 +45,6 @@ const HTTPMethods = [
   'PURGE',
   'LINK',
   'UNLINK',
-  'PING', // fake method for ping
 ]
 
 const setInvalidResponse = (message: string): Validation => ({
