@@ -390,7 +390,7 @@ class Monika extends Command {
     // warn if config is empty
     if ((config.notifications?.length ?? 0) === 0) {
       const NO_NOTIFICATIONS_MESSAGE = `Notifications has not been set. We will not be able to notify you when an INCIDENT occurs!
-Please refer to the Monika documentations on how to how to configure notifications (e.g., Telegram, Slack, Desktop notification, etc.) at https://monika.hyperjump.tech/guides/notifications.`
+ Please refer to the Monika documentations on how to how to configure notifications (e.g., Telegram, Slack, Desktop notification, etc.) at https://monika.hyperjump.tech/guides/notifications.`
 
       startupMessage += boxen(chalk.yellow(NO_NOTIFICATIONS_MESSAGE), {
         padding: 1,
@@ -416,16 +416,16 @@ Please refer to the Monika documentations on how to how to configure notificatio
 
       for (const probe of probes) {
         startupMessage += `- Probe ID: ${probe.id}
-    Name: ${probe.name}
-    Description: ${probe.description}
-    Interval: ${probe.interval}
-`
+     Name: ${probe.name}
+     Description: ${probe.description}
+     Interval: ${probe.interval}
+ `
         for (const request of probe.requests) {
           startupMessage += `    Request Method: ${request.method}
-    Request URL: ${request.url}
-    Request Headers: ${JSON.stringify(request.headers)}
-    Request Body: ${JSON.stringify(request.body)}
-`
+     Request URL: ${request.url}
+     Request Headers: ${JSON.stringify(request.headers)}
+     Request Body: ${JSON.stringify(request.body)}
+ `
         }
 
         startupMessage += `    Alerts: ${probe.alerts.join(', ')}\n`
@@ -436,8 +436,8 @@ Please refer to the Monika documentations on how to how to configure notificatio
 
         for (const item of notifications) {
           startupMessage += `- Notification ID: ${item.id}
-    Type: ${item.type}      
-`
+     Type: ${item.type}      
+ `
           // Only show recipients if type is mailgun, smtp, or sendgrid
           // check one-by-one instead of using indexOf to avoid using type assertion
           if (
@@ -453,9 +453,9 @@ Please refer to the Monika documentations on how to how to configure notificatio
           switch (item.type) {
             case 'smtp':
               startupMessage += `    Hostname: ${item.data.hostname}
-    Port: ${item.data.port}
-    Username: ${item.data.username}
-`
+     Port: ${item.data.port}
+     Username: ${item.data.username}
+ `
               break
             case 'mailgun':
               startupMessage += `    Domain: ${item.data.domain}\n`
@@ -511,10 +511,6 @@ process.on('SIGINT', async () => {
   em.emit(events.application.terminated)
 
   process.exit(process.exitCode)
-})
-
-process.on('unhandledRejection', () => {
-  // TODO: fire telemetry/monitoring system
 })
 
 export = Monika
