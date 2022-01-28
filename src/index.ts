@@ -320,10 +320,10 @@ class Monika extends Command {
           }
 
           // doing custom sequences if list of ids is declared
-          const idSplit = new Set(flags.id.split(',').map((item: string) => item.trim()))
-          probesToRun = config.probes.filter((probe) =>
-            idSplit.has(probe.id)
+          const idSplit = new Set(
+            flags.id.split(',').map((item: string) => item.trim())
           )
+          probesToRun = config.probes.filter((probe) => idSplit.has(probe.id))
         }
 
         const sanitizedProbe = probesToRun.map((probe: Probe) => {
