@@ -237,7 +237,6 @@ class Monika extends Command {
         } else {
           log.info('Cancelled. Thank you.')
         }
-
         await closeLog()
 
         return
@@ -271,10 +270,9 @@ class Monika extends Command {
         }
 
         // Stop, destroy, and clear all previous cron tasks
-        for (const task of scheduledTasks) {
+        scheduledTasks.forEach((task) => {
           task.stop()
-        }
-
+        })
         scheduledTasks = []
 
         if (process.env.NODE_ENV !== 'test') {
@@ -300,7 +298,6 @@ class Monika extends Command {
               this.log('Using config file:', path.resolve(flags.config[x]))
             }
           }
-
           this.log(startupMessage)
         }
 
@@ -311,11 +308,10 @@ class Monika extends Command {
           if (!isIDValid(config, flags.id)) {
             throw new Error('Input error') // can't continue, exit from app
           }
-
           // doing custom sequences if list of ids is declared
-          const idSplit = new Set(flags.id.split(',').map((item: string) => item.trim()))
+          const idSplit = flags.id.split(',').map((item: string) => item.trim())
           probesToRun = config.probes.filter((probe) =>
-            idSplit.has(probe.id)
+            idSplit.includes(probe.id)
           )
         }
 
@@ -324,7 +320,6 @@ class Monika extends Command {
           if (isSymonMode) {
             sanitized.alerts = []
           }
-
           return sanitized
         })
 
@@ -414,27 +409,27 @@ class Monika extends Command {
     if (verbose) {
       startupMessage += 'Probes:\n'
 
-      for (const probe of probes) {
+      probes.forEach((probe) => {
         startupMessage += `- Probe ID: ${probe.id}
      Name: ${probe.name}
      Description: ${probe.description}
      Interval: ${probe.interval}
  `
-        for (const request of probe.requests) {
+        probe.requests.forEach((request) => {
           startupMessage += `    Request Method: ${request.method}
      Request URL: ${request.url}
      Request Headers: ${JSON.stringify(request.headers)}
      Request Body: ${JSON.stringify(request.body)}
  `
-        }
+        })
 
         startupMessage += `    Alerts: ${probe.alerts.join(', ')}\n`
-      }
+      })
 
       if (notifications && notifications.length > 0) {
         startupMessage += `\nNotifications:\n`
 
-        for (const item of notifications) {
+        notifications.forEach((item) => {
           startupMessage += `- Notification ID: ${item.id}
      Type: ${item.type}      
  `
@@ -469,7 +464,7 @@ class Monika extends Command {
               startupMessage += `    URL: ${item.data.url}\n`
               break
           }
-        }
+        })
       }
     }
 
@@ -487,7 +482,6 @@ class Monika extends Command {
       const oclifHandler = require('@oclif/errors/handle')
       return oclifHandler(error)
     }
-
     throw error
   }
 }
