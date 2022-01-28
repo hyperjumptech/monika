@@ -60,6 +60,7 @@ type SymonHandshakeData = {
   pid: number
   os: string
   version: string
+  locationId?: string
 }
 
 type SymonClientEvent = {
@@ -134,15 +135,19 @@ class SymonClient {
 
   private httpClient: AxiosInstance
 
+  private locationId: string
+
   private configListeners: ConfigListener[] = []
 
-  constructor(url: string, apiKey: string) {
+  constructor(url: string, apiKey: string, locationId?: string | undefined) {
     this.httpClient = axios.create({
       baseURL: `${url}/api/v1/monika`,
       headers: {
         'x-api-key': apiKey,
       },
     })
+
+    this.locationId = locationId || ''
 
     this.fetchProbesInterval = Number.parseInt(
       process.env.FETCH_PROBES_INTERVAL ?? '60000',
@@ -211,7 +216,17 @@ class SymonClient {
 
   private async handshake(): Promise<string> {
     log.debug('Performing handshake with symon')
-    const handshakeData = await getHandshakeData()
+    let handshakeData = await getHandshakeData()
+
+    // Check if location id existed and is valid
+    if (this.locationId && this.locationId.trim().length > 0) {
+      const prevHandshakeData = handshakeData
+      handshakeData = {
+        ...prevHandshakeData,
+        locationId: this.locationId,
+      }
+    }
+
     return this.httpClient
       .post('/client-handshake', handshakeData)
       .then((res) => res.data?.data.monikaId)
