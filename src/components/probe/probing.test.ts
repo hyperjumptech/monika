@@ -91,10 +91,10 @@ describe('Probing', () => {
       const results: any = []
       for (let i = 0; i < 2; i++) {
         const responses: any = []
-        for (const [j, request] of requests.entries()) {
+        for (let j = 0; j < requests.length; j++) {
           try {
             // eslint-disable-next-line no-await-in-loop
-            const resp = await probing(request, responses)
+            const resp = await probing(requests[j], responses)
             responses.push(resp)
             if (j !== 0) {
               results.push({
@@ -106,33 +106,9 @@ describe('Probing', () => {
         }
       }
 
-      for (const result of results) {
-        expect(result.sentToken).to.be.equals(result.expectedToken)
+      for (let k = 0; k < results.length; k++) {
+        expect(results[k].sentToken).to.be.equals(results[k].expectedToken)
       }
-    })
-
-    it('should submit correct form', async () => {
-      interceptor.use((req: any) => {
-        if (['http://localhost:4000/login'].includes(req.url.href)) {
-          if (req.body === 'username=example%40example.com&password=example')
-            return { status: 200 }
-
-          return { status: 400 }
-        }
-      })
-
-      const request: any = {
-        url: 'http://localhost:4000/login',
-        method: 'POST',
-        headers: { 'content-type': 'application/x-www-form-urlencoded' },
-        body: JSON.parse(
-          '{"username": "example@example.com", "password": "example"}'
-        ),
-        timeout: 10,
-      }
-
-      const result = await probing(request, [])
-      expect(result.status).to.be.equals(200)
     })
 
     it('should send request with multipart/form-data content-type', async () => {

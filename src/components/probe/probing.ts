@@ -79,7 +79,7 @@ export async function probing(
   }
 
   const axiosInstance = axios.create()
-  const requestStartedAt = Date.now()
+  const requestStartedAt = new Date().getTime()
 
   try {
     // Do the request using compiled URL and compiled headers (if exists)
@@ -88,7 +88,7 @@ export async function probing(
       url: renderedURL,
       data: requestBody,
     })
-    const responseTime = Date.now() - requestStartedAt
+    const responseTime = new Date().getTime() - requestStartedAt
     const { data, headers, status } = resp
 
     return {
@@ -98,7 +98,7 @@ export async function probing(
       responseTime,
     }
   } catch (error: any) {
-    const responseTime = Date.now() - requestStartedAt
+    const responseTime = new Date().getTime() - requestStartedAt
 
     // The request was made and the server responded with a status code
     // 400, 500 get here
