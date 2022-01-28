@@ -237,6 +237,7 @@ class Monika extends Command {
         } else {
           log.info('Cancelled. Thank you.')
         }
+
         await closeLog()
 
         return
@@ -270,9 +271,10 @@ class Monika extends Command {
         }
 
         // Stop, destroy, and clear all previous cron tasks
-        scheduledTasks.forEach((task) => {
+        for (const task of scheduledTasks) {
           task.stop()
-        })
+        }
+
         scheduledTasks = []
 
         if (process.env.NODE_ENV !== 'test') {
@@ -298,6 +300,7 @@ class Monika extends Command {
               this.log('Using config file:', path.resolve(flags.config[x]))
             }
           }
+
           this.log(startupMessage)
         }
 
@@ -308,10 +311,11 @@ class Monika extends Command {
           if (!isIDValid(config, flags.id)) {
             throw new Error('Input error') // can't continue, exit from app
           }
+
           // doing custom sequences if list of ids is declared
-          const idSplit = flags.id.split(',').map((item: string) => item.trim())
+          const idSplit = new Set(flags.id.split(',').map((item: string) => item.trim()))
           probesToRun = config.probes.filter((probe) =>
-            idSplit.includes(probe.id)
+            idSplit.has(probe.id)
           )
         }
 
@@ -320,6 +324,7 @@ class Monika extends Command {
           if (isSymonMode) {
             sanitized.alerts = []
           }
+
           return sanitized
         })
 
@@ -409,27 +414,27 @@ Please refer to the Monika documentations on how to how to configure notificatio
     if (verbose) {
       startupMessage += 'Probes:\n'
 
-      probes.forEach((probe) => {
+      for (const probe of probes) {
         startupMessage += `- Probe ID: ${probe.id}
     Name: ${probe.name}
     Description: ${probe.description}
     Interval: ${probe.interval}
 `
-        probe.requests.forEach((request) => {
+        for (const request of probe.requests) {
           startupMessage += `    Request Method: ${request.method}
     Request URL: ${request.url}
     Request Headers: ${JSON.stringify(request.headers)}
     Request Body: ${JSON.stringify(request.body)}
 `
-        })
+        }
 
         startupMessage += `    Alerts: ${probe.alerts.join(', ')}\n`
-      })
+      }
 
       if (notifications && notifications.length > 0) {
         startupMessage += `\nNotifications:\n`
 
-        notifications.forEach((item) => {
+        for (const item of notifications) {
           startupMessage += `- Notification ID: ${item.id}
     Type: ${item.type}      
 `
@@ -464,7 +469,7 @@ Please refer to the Monika documentations on how to how to configure notificatio
               startupMessage += `    URL: ${item.data.url}\n`
               break
           }
-        })
+        }
       }
     }
 
@@ -482,6 +487,7 @@ Please refer to the Monika documentations on how to how to configure notificatio
       const oclifHandler = require('@oclif/errors/handle')
       return oclifHandler(error)
     }
+
     throw error
   }
 }
@@ -505,6 +511,10 @@ process.on('SIGINT', async () => {
   em.emit(events.application.terminated)
 
   process.exit(process.exitCode)
+})
+
+process.on('unhandledRejection', () => {
+  // TODO: fire telemetry/monitoring system
 })
 
 export = Monika
