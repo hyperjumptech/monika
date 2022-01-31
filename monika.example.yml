@@ -23,6 +23,20 @@ probes:
 #           username: someusername
 #           password: somepassword
 
+# Example for sending a ping instead of a REST request.
+# - id: 'ping_test'
+#   name: ping_test
+#   description: requesting icmp ping
+#   interval: 10
+#   requests:
+#     - url: http://google.com
+#       ping: true
+#   alerts:
+#     - query: response.status == 500
+#       message: response status message
+#   incidentThreshold: 3
+#   recoveryThreshold: 3
+
 # Configuration example for sending Multiple requests
 # Requests could be define in array to run for multiple requests
 # and with this configuration monika will check on github.com first and then https://github.com/hyperjumptech.

@@ -58,17 +58,34 @@ Details of the field are give in the table below.
 
 | Topic                        | Description                                                                                                                                                                                                                                                                                                                                               |
 | :--------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| method                       | Http method such as GET, POST, PUT, DELETE                                                                                                                                                                                                                                                                                                                |
-| url                          | This is the url endpoint to dispatch the request to                                                                                                                                                                                                                                                                                                       |
-| timeout                      | Request timeout, after which time, `Monika`will assume timeout                                                                                                                                                                                                                                                                                            |
-| headers                      | Your http header                                                                                                                                                                                                                                                                                                                                          |
-| body                         | Any http body if your method requires it                                                                                                                                                                                                                                                                                                                  |
+| method                       | Http method such as GET, POST, PUT, DELETE.                                                                                                                                                                                                                                                                                                               |
+| url                          | This is the url endpoint to dispatch the request to.                                                                                                                                                                                                                                                                                                      |
+| timeout                      | Request timeout, after which time, `Monika` will assume timeout.                                                                                                                                                                                                                                                                                          |
+| headers                      | Http headers you might need for your request.                                                                                                                                                                                                                                                                                                             |
+| body                         | Any http body if your method requires it.                                                                                                                                                                                                                                                                                                                 |
 | interval (optional)          | Number of probe's interval (in seconds). Default value is 10 seconds.                                                                                                                                                                                                                                                                                     |
 | incidentThreshold (optional) | Number of times an alert should return true before Monika sends notifications. For example, when incidentThreshold is 3, Monika will only send notifications when the probed URL returns non-2xx status 3 times in a row. After sending the notifications, Monika will not send notifications anymore until the alert status changes. Default value is 5. |
 | recoveryThreshold (optional) | Number of times an alert should return false before Monika sends notifications. For example, when recoveryThreshold is 3, Monika will only send notifications when the probed URL returns status 2xx 3 times in a row. After sending the notifications, Monika will not send notifications anymore until the alert status changes. Default value is 5.    |
 | alerts                       | The condition which will trigger an alert, and the subsequent notification method to send out the alert. See below for further details on alerts and notifications.                                                                                                                                                                                       |
 | saveBody (optional)          | When set to true, the response body of the request is stored in the internal database. The default is off when not defined. This is to keep the log files size small as some responses can be sizeable. The setting is for each probe request.                                                                                                            |
-| alerts (optional)            | See [alerts](./alerts) section for detailed information                                                                                                                                                                                                                                                                                                   |
+| alerts (optional)            | See [alerts](./alerts) section for detailed information.                                                                                                                                                                                                                                                                                                  |
+| ping (optional)              | (boolean), If set true then send a PING to the specified url instead.                                                                                                                                                                                                                                                                                     |
+
+### PING
+
+You can send an ICMP echo request, to a specific url by enabling the `ping: true` field.
+In this mode the http method is ignored and a PING echo request is sent to the specified url.
+
+```yaml
+probes:
+  - id: 'ping_test'
+    name: ping_test
+    description: requesting icmp ping
+    interval: 10
+    requests:
+      - url: http://google.com
+        ping: true
+```
 
 ## Probe Response Anatomy
 
