@@ -19,7 +19,20 @@ There are two ways to install Monika
    $ yarn global add @hyperjumptech/monika
    ```
 
-2. Download and run standalone binary
+2. Install script (Linux or MacOS)
+
+   Run the following on your terminal:
+
+   ```bash
+   $ curl https://raw.githubusercontent.com/hyperjumptech/monika/main/scripts/monika-install.sh | sh
+   ```
+
+   You will be able to run the latest monika by the time it is done.
+
+   - This script will install monika to path `~/.monika`.
+   - This script only supports zsh and bash. If you are using other than that, please add the `~/.monika` installation path to your environment.
+
+3. Download and run standalone binary
 
    Head over to [Monika Release](https://github.com/hyperjumptech/monika/releases) page, download the Monika file according to your operating system, and rename it to `monika`.
 
