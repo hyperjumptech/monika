@@ -123,17 +123,16 @@ export const processThresholds = ({
       Interpreter<ServerAlertStateContext>
     > = {}
 
-    for (const alert of validatedResponse
-      .map((r) => r.alert)) {
-        const stateMachine = serverAlertStateMachine.withContext({
-          incidentThreshold,
-          recoveryThreshold,
-          consecutiveFailures: 0,
-          consecutiveSuccesses: 0,
-        })
+    for (const alert of validatedResponse.map((r) => r.alert)) {
+      const stateMachine = serverAlertStateMachine.withContext({
+        incidentThreshold,
+        recoveryThreshold,
+        consecutiveFailures: 0,
+        consecutiveSuccesses: 0,
+      })
 
-        interpreters[alert.query] = interpret(stateMachine).start()
-      }
+      interpreters[alert.query] = interpret(stateMachine).start()
+    }
 
     serverAlertStateInterpreters.set(request.id!, interpreters)
   }
