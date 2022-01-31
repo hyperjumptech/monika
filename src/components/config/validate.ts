@@ -71,6 +71,7 @@ const PROBE_NO_REQUESTS = setInvalidResponse(
 const PROBE_REQUEST_INVALID_URL = setInvalidResponse(
   'Probe request URL should start with http:// or https://'
 )
+
 const PROBE_REQUEST_INVALID_METHOD = setInvalidResponse(
   'Probe request method is invalid! Valid methods are GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS, PURGE, LINK, and UNLINK'
 )
@@ -256,7 +257,7 @@ const isValidProbeAlert = (alert: ProbeAlert | string): boolean => {
     }
 
     return Boolean(compileExpression(alert.query))
-  } catch (error) {
+  } catch {
     return false
   }
 }
@@ -273,6 +274,7 @@ export const validateConfig = (configuration: Config): Validation => {
       return validateValue
     }
   }
+
   // Validate probes
   if ((configuration?.probes?.length ?? 0) === 0) return NO_PROBES
 
@@ -288,8 +290,12 @@ export const validateConfig = (configuration: Config): Validation => {
 
       if (!url) return PROBE_REQUEST_NO_URL
 
-      if (url && !isValidURL(url)) return PROBE_REQUEST_INVALID_URL
+      // if not a ping request and url not valid, return INVLID_URL error
+      if (request.ping !== true && !isValidURL(url)) {
+        return PROBE_REQUEST_INVALID_URL
+      }
 
+      // if method is not set, set a default method
       if (!request.method) {
         request.method = 'GET'
       }

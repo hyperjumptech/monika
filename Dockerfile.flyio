@@ -1,0 +1,18 @@
+FROM node:14-alpine
+
+RUN apk add --no-cache --virtual .gyp python3 make g++ 
+
+# Setup environment variables
+ARG PARAMS
+ENV PARAMS=${PARAMS}
+ENV CI=true
+
+# Install Monika
+USER node
+RUN mkdir /home/node/.npm-global
+ENV PATH=/home/node/.npm-global/bin:$PATH
+ENV NPM_CONFIG_PREFIX=/home/node/.npm-global
+RUN npm install -g @hyperjumptech/monika
+
+# Run Monika with Params
+CMD ["sh", "-c", "${NPM_CONFIG_PREFIX}/bin/monika ${PARAMS}"]

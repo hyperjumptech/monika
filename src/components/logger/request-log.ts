@@ -83,6 +83,7 @@ export class RequestLog {
     this.errors.push(error)
   }
 
+  // print() generates the text and prints the logs for the past request iteration
   print() {
     const reversedSentNotifications = this.sentNotifications.slice().reverse()
     const printedNotification =
@@ -97,11 +98,22 @@ export class RequestLog {
     let errorMsg = ''
     let notifMsg = ''
 
-    const probeMsg = `${this.iteration} id:${this.probe.id} ${
-      this.response?.status || '-'
-    } ${this.request.method} ${this.request.url} ${
-      this.response?.responseTime || '-'
-    }ms`
+    // generate probe result messages
+    let probeMsg = ''
+
+    if (this.request.ping) {
+      probeMsg = `${this.iteration} id:${this.probe.id} PING:${
+        this.response?.alive ? 'alive' : 'dead'
+      } ${this.request.url} ${
+        this.response?.alive ? this.response?.responseTime : '-'
+      }ms packetLoss:${this.response?.alive ? this.response?.packetLoss : '-'}%`
+    } else {
+      probeMsg = `${this.iteration} id:${this.probe.id} ${
+        this.response?.status || '-'
+      } ${this.request.method} ${this.request.url} ${
+        this.response?.responseTime || '-'
+      }ms`
+    }
 
     if (printedNotification) {
       notifMsg = `, NOTIF: ${
