@@ -86,7 +86,7 @@ Notifies every minutes 1, 2, 5 and 7. In other words every xx:01, xx:02, xx:05, 
 status-notification "1-5 * * * *"
 ```
 
-Notifies every range from minutes 1 to 5.
+Notifies with the range of minute 1 to 5.
 
 ```bash
 status-notification "*/2 * * * *"
