@@ -290,14 +290,12 @@ export const validateConfig = (configuration: Config): Validation => {
 
       if (!url) return PROBE_REQUEST_NO_URL
 
-      if (url) {
-        if (request.ping === true) {
-          // if ping request, url not need to be so strict
-        } else if (!isValidURL(url)) {
-          return PROBE_REQUEST_INVALID_URL
-        }
+      // if not a ping request and url not valid, return INVLID_URL error
+      if (request.ping !== true && !isValidURL(url)) {
+        return PROBE_REQUEST_INVALID_URL
       }
 
+      // if method is not set, set a default method
       if (!request.method) {
         request.method = 'GET'
       }
