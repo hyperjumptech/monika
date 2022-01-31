@@ -45,16 +45,14 @@ let cfg: Config
 let configs: Partial<Config>[]
 
 export const getConfig = (skipConfigCheck = true) => {
-  if (!skipConfigCheck) {
-    if (!cfg) throw new Error('Configuration setup has not been run yet')
-  }
+  if (!skipConfigCheck && !cfg)
+    throw new Error('Configuration setup has not been run yet')
   return cfg
 }
 
 export async function* getConfigIterator(skipConfigCheck = true) {
-  if (!skipConfigCheck) {
-    if (!cfg) throw new Error('Configuration setup has not been run yet')
-  }
+  if (!skipConfigCheck && !cfg)
+    throw new Error('Configuration setup has not been run yet')
 
   yield cfg
 
@@ -64,13 +62,14 @@ export async function* getConfigIterator(skipConfigCheck = true) {
 }
 
 export const updateConfig = (config: Config, validate = true) => {
-  log.debug('Updating config')
+  log.info('Updating config')
   if (validate) {
     const validated = validateConfig(config)
     if (!validated.valid) {
       throw new Error(validated.message)
     }
   }
+
   const lastConfigVersion = cfg?.version
   cfg = config
   cfg.version = cfg.version || md5Hash(cfg)
@@ -129,6 +128,7 @@ const parseDefaultConfig = (flags: any): Promise<Partial<Config>[]> => {
         scheduleRemoteConfigFetcher(source, flags['config-interval'], i)
         return fetchConfig(source)
       }
+
       watchConfigFile(source, 'monika', i, flags.repeat)
       return parseConfig(source, 'monika')
     })

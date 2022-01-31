@@ -32,17 +32,12 @@ import { getContext } from '../../context'
 import { NotificationMessage } from '../../interfaces/notification'
 import { ProbeRequestResponse } from '../../interfaces/request'
 import { ProbeAlert } from '../../interfaces/probe'
-import {
-  getPublicIp,
-  publicIpAddress,
-  publicNetworkInfo,
-} from '../../utils/public-ip'
+import { publicIpAddress, publicNetworkInfo } from '../../utils/public-ip'
 
 const getLinuxDistro = promisify(getos)
 
 export const getMonikaInstance = async (ipAddress: string) => {
   const osHostname = hostname()
-  await getPublicIp()
 
   if (publicNetworkInfo) {
     const { city, isp } = publicNetworkInfo
@@ -129,6 +124,7 @@ export async function getMessageForAlert({
       },
     })
   }
+
   const lastIncident = incidents.find(
     (incident) =>
       incident.probeID === probeID && incident.probeRequestURL === url

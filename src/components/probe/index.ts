@@ -168,13 +168,14 @@ export async function doProbe(
       requestLog.setResponse(probeRes)
 
       // store request error log
-      if ([0, 1, 2, 599].includes(probeRes.status)) {
+      if ([0, 1, 2, 3, 4, 599].includes(probeRes.status)) {
         const errorMessageMap: Record<number, string> = {
-          0: 'URI not found',
-          1: 'Connection reset',
-          2: 'Connection refused',
-          3: 'Unknown error',
-          599: 'Request Timed out',
+          0: 'URI not found', // axios error
+          1: 'Connection reset', // axios error
+          2: 'Connection refused', // axios error
+          3: 'Unknown error', // axios error
+          4: 'Ping timed out', // ping error
+          599: 'Request Timed out', // axios error
         }
 
         requestLog.addError(errorMessageMap[probeRes.status])
