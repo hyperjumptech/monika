@@ -4,18 +4,8 @@ FROM node:14-alpine
 ARG PARAMS
 ENV PARAMS=${PARAMS}
 
-# Copy files
-WORKDIR /monika
-COPY package*.json ./
-RUN npm ci
-COPY . .
+# Install Monika
+RUN npm install -g @hyperjumptech/monika
 
-# Install
-RUN npm run prepack
-RUN npm pack
-RUN npm install -g --unsafe-perm ./hyperjumptech-monika-*.tgz
-
-# Install PM2 to run Monika
-WORKDIR /
-
+# Run Monika with Params
 CMD ["sh", "-c", "monika ${PARAMS}"]
