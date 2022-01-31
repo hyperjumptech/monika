@@ -16,12 +16,12 @@ repo_url="https://github.com/hyperjumptech/monika/"
 version_to_install="latest"
 
 # default monika path
-install_dir="${MONIKA_HOME:-"$HOME/.monika"}"
+install_dir=$HOME"/.monika"
 
 binary_url() {
   local version_name="$1"
   local os="$2"
-  echo "$repo_url\releases/download/v$version_name/monika-v$version_name-$os-x64.zip"
+  echo $repo_url"releases/download/v$version_name/monika-v$version_name-$os-x64.zip"
 }
 
 info() {
@@ -69,9 +69,8 @@ sanitize_version() {
 }
 
 get_latest_version() {
-  local url="$repo_url\releases/latest"
-  echo "$url"
-  sanitize_version "$(curl -iLs -o /dev/null -w %{url_effective} https://github.com/hyperjumptech/monika/releases/latest)"
+  local url=$repo_url"releases/latest"
+  echo $(sanitize_version "$(curl -iLs -o /dev/null -w %{url_effective} $url)")
 }
 
 get_os_name() {
@@ -92,18 +91,32 @@ get_os_name() {
   esac
 }
 
+install_from_file() {
+  unzip -o $1 -d $install_dir
+  chmod +x $install_dir"/monika"
+  rm $1
+}
+
 install_release_version() {
   local os=$(get_os_name)
   local version_name="$1"
-  echo $(binary_url "$version_name" "$os")
+  local url=$(binary_url "$version_name" "$os")
+  local target_path=$install_dir"/monika-v$version_name-$os-x64.zip"
+  if [[ ! -d $install_dir ]]; then
+    mkdir $install_dir
+  fi
+  
+  if [[ ! -f $target_path ]]; then
+    info "Downloading from: "$url
+    # download and overwrite target path
+    curl -L $url > $target_path
+  fi
+  install_from_file $target_path
 }
 
-# check for issue with MONIKA_HOME
-# if it is set, and exists, but is not a directory, the install will fail
 monika_home_is_ok() {
-  if [ -n "${MONIKA_HOME-}" ] && [ -e "$MONIKA_HOME" ] && ! [ -d "$MONIKA_HOME" ]; then
-    error "\$MONIKA_HOME is set but is not a directory ($MONIKA_HOME)."
-    eprintf "Please check your profile scripts and environment."
+  if [[ -f $install_dir ]]; then
+    error $install_dir" is a file. Please remove it first before installation."
     return 1
   fi
   return 0
@@ -114,17 +127,16 @@ install_version() {
   if ! monika_home_is_ok; then
     exit 1
   fi
-
   case "$version_to_install" in
     latest)
       local latest_version="$(get_latest_version)"
       info "Installing latest version of Monika ($latest_version)"
-      install_release_version "$latest_version"
+      install_release_version $latest_version $install_dir
       ;;
     *) # assume anything else is monika version
       local version_name=$(sanitize_version "$version_to_install")
       info "Installing Monika version $version_name"
-      install_release_version "$version_name"
+      install_release_version $version_name $install_dir
       ;;
   esac
 }
@@ -162,3 +174,18 @@ done
 check_architecture
 
 install_version "$version_to_install" "$install_dir"
+
+if [[ -f $HOME"/.bashrc" ]] && [[ -z $(grep '.monika' $HOME"/.bashrc") ]]; then
+  info 'Updating .bashrc file...'
+  echo -e "export PATH=\$PATH:$install_dir" >> $HOME"/.bashrc"
+  source $HOME/.bashrc
+fi
+
+if [[ -f $HOME"/.zshrc" ]] && [[ -z $(grep '.monika' $HOME"/.zshrc") ]]; then
+  info 'Updating .zshrc file...'
+  echo -e "export PATH=\$PATH:$install_dir" >> $HOME"/.zshrc"
+  # run zsh instead of run "source"
+  zsh
+fi
+
+info "Installation done. You can now start using monika."
