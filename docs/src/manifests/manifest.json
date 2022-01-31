@@ -99,6 +99,17 @@
       ]
     },
     {
+      "title": "Deployment",
+      "heading": true,
+      "routes": [
+        {
+          "title": "Deploy to Fly.io",
+          "path": "/deployment/deploy-to-fly-io",
+          "editUrl": "/deployment/deploy-to-fly.io.md"
+        }
+      ]
+    },
+    {
       "title": "Tutorial",
       "heading": true,
       "routes": [

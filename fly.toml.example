@@ -1,0 +1,18 @@
+app = "monika"
+
+kill_signal = "SIGINT"
+kill_timeout = 5
+
+[build]
+dockerfile = "Dockerfile.flyio"
+
+[build.args]
+# Insert your Monika parameters
+PARAMS = "-v"
+
+[env]
+# Insert your Monika parameters
+PARAMS = "-v" 
+
+[experimental]
+auto_rollback = true
