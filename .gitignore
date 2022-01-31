@@ -232,3 +232,6 @@ monika.yaml
 
 # IntelliJ
 .idea/
+
+# Fly.io
+fly.toml
