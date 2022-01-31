@@ -23,8 +23,16 @@ There are two ways to install Monika
 
    Run the following on your terminal:
 
+   - Bash
+
    ```bash
-   $ curl https://raw.githubusercontent.com/hyperjumptech/monika/main/scripts/monika-install.sh | sh
+   $ curl https://raw.githubusercontent.com/hyperjumptech/monika/main/scripts/monika-install.sh | bash
+   ```
+
+   - Zsh
+
+   ```bash
+   $ curl https://raw.githubusercontent.com/hyperjumptech/monika/main/scripts/monika-install.sh | zsh
    ```
 
    You will be able to run the latest monika by the time it is done.
