@@ -174,7 +174,7 @@ export async function doProbe(
           1: 'Connection reset', // axios error
           2: 'Connection refused', // axios error
           3: 'Unknown error', // axios error
-          4: 'ping timed out', // ping error
+          4: 'Ping timed out', // ping error
           599: 'Request Timed out', // axios error
         }
 
