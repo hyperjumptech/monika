@@ -152,7 +152,7 @@ check_architecture() {
   fi
 
   error "Sorry! Monika currently only provides pre-built binaries for x86_64 architectures."
-  return 1
+  exit 1
 }
 
 while [ $# -gt 0 ]
