@@ -49,7 +49,7 @@ status-notification: false
 
 To schedule the status notification we use standard cron syntax. You can tryout your configuration on [crontab.guru](https://crontab.guru/).
 
-In addition to he standard 5 cront syntax, Monika supports an optional seconds field.
+In addition to the standard 5 cron syntax, Monika supports an optional `seconds` field. So if you wrote 6 cron syntax, please be advised that the status notification could be sent so frequent.
 
 ```bash
  ┌────────────── second (optional)
