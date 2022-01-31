@@ -22,242 +22,144 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { expect } from 'chai'
-import { interpret, Interpreter } from 'xstate'
-import { Probe } from '../../../interfaces/probe'
-import { ServerAlertState } from '../../../interfaces/probe-status'
-import { ValidatedResponse } from '../../../plugins/validate-response'
-import {
-  processThresholds,
-  ServerAlertStateContext,
-  serverAlertStateInterpreters,
-  serverAlertStateMachine,
-} from '../process-server-status'
+import { assign, createMachine, interpret, Interpreter } from 'xstate'
 
-describe('serverAlertStateMachine', () => {
-  let interpreter: Interpreter<ServerAlertStateContext>
+import { Probe } from '../../interfaces/probe'
+import { ServerAlertState } from '../../interfaces/probe-status'
+import { ValidatedResponse } from '../../plugins/validate-response'
 
-  beforeEach(() => {
-    interpreter = interpret(
-      serverAlertStateMachine.withContext({
-        incidentThreshold: 5,
-        recoveryThreshold: 5,
+export type ServerAlertStateContext = {
+  incidentThreshold: number
+  recoveryThreshold: number
+  consecutiveFailures: number
+  consecutiveSuccesses: number
+}
+
+export const serverAlertStateInterpreters = new Map<
+  string,
+  Record<string, Interpreter<ServerAlertStateContext>>
+>()
+
+export const serverAlertStateMachine = createMachine<ServerAlertStateContext>(
+  {
+    id: 'server-alerts-state',
+    initial: 'UP',
+    states: {
+      UP: {
+        on: {
+          FAILURE: [
+            {
+              target: 'DOWN',
+              cond: 'incidentThresholdReached',
+              actions: 'handleFailure',
+            },
+            {
+              actions: 'handleFailure',
+            },
+          ],
+          SUCCESS: {
+            actions: 'handleSuccess',
+          },
+        },
+      },
+      DOWN: {
+        on: {
+          FAILURE: {
+            actions: 'handleFailure',
+          },
+          SUCCESS: [
+            {
+              target: 'UP',
+              cond: 'recoveryThresholdReached',
+              actions: 'handleSuccess',
+            },
+            {
+              actions: 'handleSuccess',
+            },
+          ],
+        },
+      },
+    },
+  },
+  {
+    actions: {
+      handleFailure: assign({
+        consecutiveFailures: (context) => context.consecutiveFailures + 1,
+        consecutiveSuccesses: (_context) => 0,
+      }),
+      handleSuccess: assign({
+        consecutiveFailures: (_context) => 0,
+        consecutiveSuccesses: (context) => context.consecutiveSuccesses + 1,
+      }),
+    },
+    guards: {
+      incidentThresholdReached: (context) => {
+        return context.consecutiveFailures + 1 >= context.incidentThreshold
+      },
+      recoveryThresholdReached: (context) => {
+        return context.consecutiveSuccesses + 1 >= context.recoveryThreshold
+      },
+    },
+  }
+)
+
+export const processThresholds = ({
+  probe,
+  requestIndex,
+  validatedResponse,
+}: {
+  probe: Probe
+  requestIndex: number
+  validatedResponse: ValidatedResponse[]
+}) => {
+  const { requests, incidentThreshold, recoveryThreshold } = probe
+  const request = requests[requestIndex]
+
+  const results: Array<ServerAlertState> = []
+
+  if (!serverAlertStateInterpreters.has(request.id!)) {
+    const interpreters: Record<
+      string,
+      Interpreter<ServerAlertStateContext>
+    > = {}
+
+    for (const alert of validatedResponse.map((r) => r.alert)) {
+      const stateMachine = serverAlertStateMachine.withContext({
+        incidentThreshold,
+        recoveryThreshold,
         consecutiveFailures: 0,
         consecutiveSuccesses: 0,
       })
-    ).start()
-  })
 
-  it('should init with UP state', () => {
-    expect(interpreter.state.value).to.equals('UP')
-  })
-
-  it('should change to DOWN state when consecutive failures reaches threshold', () => {
-    interpreter.send(['FAILURE', 'FAILURE', 'FAILURE', 'FAILURE', 'FAILURE'])
-    expect(interpreter.state.value).to.equals('DOWN')
-  })
-
-  it('should not change to DOWN state when consecutive failures do not reach threshold', () => {
-    interpreter.send(['FAILURE', 'FAILURE', 'FAILURE'])
-    expect(interpreter.state.value).to.equals('UP')
-  })
-
-  it('should not change to DOWN state when failures happened as much threshold or more but not consecutively', () => {
-    interpreter.send([
-      'FAILURE',
-      'FAILURE',
-      'FAILURE',
-      'FAILURE',
-      'SUCCESS',
-      'FAILURE',
-      'FAILURE',
-    ])
-    expect(interpreter.state.value).to.equals('UP')
-  })
-
-  it('should recover from DOWN state when consecutive successes reaches threshold', () => {
-    interpreter.send([
-      'FAILURE',
-      'FAILURE',
-      'FAILURE',
-      'FAILURE',
-      'FAILURE',
-      'SUCCESS',
-      'SUCCESS',
-      'SUCCESS',
-      'SUCCESS',
-      'SUCCESS',
-    ])
-    expect(interpreter.state.value).to.equals('UP')
-  })
-
-  it('should not recover from DOWN state when consecutive successes do not reach threshold', () => {
-    interpreter.send([
-      'FAILURE',
-      'FAILURE',
-      'FAILURE',
-      'FAILURE',
-      'FAILURE',
-      'FAILURE',
-      'SUCCESS',
-      'SUCCESS',
-    ])
-    expect(interpreter.state.value).to.equals('DOWN')
-  })
-
-  it('should not recover from DOWN state when successes happened as much threshold or more but not consecutively', () => {
-    interpreter.send([
-      'FAILURE',
-      'FAILURE',
-      'FAILURE',
-      'FAILURE',
-      'FAILURE',
-      'FAILURE',
-      'SUCCESS',
-      'SUCCESS',
-      'SUCCESS',
-      'FAILURE',
-      'SUCCESS',
-      'SUCCESS',
-    ])
-    expect(interpreter.state.value).to.equals('DOWN')
-  })
-})
-
-describe('processThresholds', () => {
-  beforeEach(() => {
-    serverAlertStateInterpreters.clear()
-  })
-
-  const probe = {
-    requests: [
-      {
-        id: '1',
-        method: 'GET',
-        url: 'https://httpbin.org/status/200',
-      },
-      {
-        id: '2',
-        method: 'POST',
-        url: 'https://httpbin.org/status/201',
-      },
-    ],
-    incidentThreshold: 2,
-    recoveryThreshold: 2,
-  } as Probe
-
-  const successResponse = [
-    {
-      alert: { query: 'response.time > 1000' },
-      isAlertTriggered: false,
-    },
-  ] as ValidatedResponse[]
-  const failureResponse = [
-    {
-      alert: { query: 'response.time > 1000' },
-      isAlertTriggered: true,
-    },
-  ] as ValidatedResponse[]
-
-  it('should attach state calculation to each request', () => {
-    // failure happened first for request with index 0
-    processThresholds({
-      probe,
-      requestIndex: 0,
-      validatedResponse: failureResponse,
-    })
-
-    // processing request with index 1
-    const result1 = processThresholds({
-      probe,
-      requestIndex: 1,
-      validatedResponse: failureResponse,
-    })
-
-    // failure happened only once for request with index 1, it does not reach threshold yet
-    expect(result1[0].state).to.equals('UP')
-
-    const result2 = processThresholds({
-      probe,
-      requestIndex: 1,
-      validatedResponse: failureResponse,
-    })
-
-    // second time failure happened for request with index 1, it reaches threshold
-    expect(result2[0].state).to.equals('DOWN')
-  })
-
-  it('should compute shouldSendNotification based on threshold and previous state', () => {
-    let result!: ServerAlertState[]
-
-    // trigger down state
-    for (let i = 0; i < probe.incidentThreshold; i++) {
-      result = processThresholds({
-        probe,
-        requestIndex: 1,
-        validatedResponse: failureResponse,
-      })
+      interpreters[alert.query] = interpret(stateMachine).start()
     }
 
-    expect(result[0].state).to.equals('DOWN')
+    serverAlertStateInterpreters.set(request.id!, interpreters)
+  }
 
-    // initial state is UP and now it is changed to DOWN, should send notification
-    expect(result[0].shouldSendNotification).to.equals(true)
+  // Send event for successes and failures to state interpreter
+  // then get latest state for each alert
+  for (const validation of validatedResponse) {
+    const { alert, isAlertTriggered } = validation
 
-    // send success response once
-    result = processThresholds({
-      probe,
-      requestIndex: 1,
-      validatedResponse: successResponse,
+    const interpreter = serverAlertStateInterpreters.get(request.id!)![
+      alert.query
+    ]
+
+    const prevStateValue = interpreter.state.value
+
+    interpreter.send(isAlertTriggered ? 'FAILURE' : 'SUCCESS')
+
+    const state = interpreter.state
+
+    results.push({
+      alertQuery: alert.query,
+      state: state.value as 'UP' | 'DOWN',
+      shouldSendNotification:
+        (state.value === 'DOWN' && prevStateValue === 'UP') ||
+        (state.value === 'UP' && prevStateValue === 'DOWN'),
     })
+  }
 
-    // send failure response again as much threshold
-    for (let i = 0; i < probe.incidentThreshold; i++) {
-      result = processThresholds({
-        probe,
-        requestIndex: 1,
-        validatedResponse: failureResponse,
-      })
-    }
-
-    expect(result[0].state).to.equals('DOWN')
-
-    // should not send notification again since state does not change
-    expect(result[0].shouldSendNotification).to.equals(false)
-
-    // send success response as much threshold
-    for (let i = 0; i < probe.recoveryThreshold; i++) {
-      result = processThresholds({
-        probe,
-        requestIndex: 1,
-        validatedResponse: successResponse,
-      })
-    }
-
-    expect(result[0].state).to.equals('UP')
-
-    // should send notification since state change from DOWN to UP
-    expect(result[0].shouldSendNotification).to.equals(true)
-
-    // send failure response once
-    result = processThresholds({
-      probe,
-      requestIndex: 1,
-      validatedResponse: failureResponse,
-    })
-
-    // send success response as much threshold
-    for (let i = 0; i < probe.recoveryThreshold; i++) {
-      result = processThresholds({
-        probe,
-        requestIndex: 1,
-        validatedResponse: successResponse,
-      })
-    }
-
-    expect(result[0].state).to.equals('UP')
-
-    // should not send notification again since state does not change
-    expect(result[0].shouldSendNotification).to.equals(false)
-  })
-})
+  return results
+}
