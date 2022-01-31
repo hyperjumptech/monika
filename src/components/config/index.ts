@@ -45,12 +45,14 @@ let cfg: Config
 let configs: Partial<Config>[]
 
 export const getConfig = (skipConfigCheck = true) => {
-  if (!skipConfigCheck && !cfg) throw new Error('Configuration setup has not been run yet')
+  if (!skipConfigCheck && !cfg)
+    throw new Error('Configuration setup has not been run yet')
   return cfg
 }
 
 export async function* getConfigIterator(skipConfigCheck = true) {
-  if (!skipConfigCheck && !cfg) throw new Error('Configuration setup has not been run yet')
+  if (!skipConfigCheck && !cfg)
+    throw new Error('Configuration setup has not been run yet')
 
   yield cfg
 
