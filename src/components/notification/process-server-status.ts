@@ -23,9 +23,9 @@
  **********************************************************************************/
 
 import { assign, createMachine, interpret, Interpreter } from 'xstate'
+
 import { Probe } from '../../interfaces/probe'
 import { ServerAlertState } from '../../interfaces/probe-status'
-import { RequestConfig } from '../../interfaces/request'
 import { ValidatedResponse } from '../../plugins/validate-response'
 
 export type ServerAlertStateContext = {
@@ -36,13 +36,9 @@ export type ServerAlertStateContext = {
 }
 
 const serverAlertStateInterpreters = new Map<
-  RequestConfig,
+  string,
   Record<string, Interpreter<ServerAlertStateContext>>
 >()
-
-export const resetServerAlertStates = () => {
-  serverAlertStateInterpreters.clear()
-}
 
 export const serverAlertStateMachine = createMachine<ServerAlertStateContext>(
   {
@@ -121,15 +117,14 @@ export const processThresholds = ({
 
   const results: Array<ServerAlertState> = []
 
-  if (!serverAlertStateInterpreters.has(request)) {
+  if (!serverAlertStateInterpreters.has(request.id!)) {
     const interpreters: Record<
       string,
       Interpreter<ServerAlertStateContext>
     > = {}
 
-    validatedResponse
-      .map((r) => r.alert)
-      .forEach((alert) => {
+    for (const alert of validatedResponse
+      .map((r) => r.alert)) {
         const stateMachine = serverAlertStateMachine.withContext({
           incidentThreshold,
           recoveryThreshold,
@@ -138,17 +133,19 @@ export const processThresholds = ({
         })
 
         interpreters[alert.query] = interpret(stateMachine).start()
-      })
+      }
 
-    serverAlertStateInterpreters.set(request, interpreters)
+    serverAlertStateInterpreters.set(request.id!, interpreters)
   }
 
   // Send event for successes and failures to state interpreter
   // then get latest state for each alert
-  validatedResponse.forEach((validation) => {
+  for (const validation of validatedResponse) {
     const { alert, isAlertTriggered } = validation
 
-    const interpreter = serverAlertStateInterpreters.get(request)![alert.query]
+    const interpreter = serverAlertStateInterpreters.get(request.id!)![
+      alert.query
+    ]
 
     const prevStateValue = interpreter.state.value
 
@@ -163,7 +160,7 @@ export const processThresholds = ({
         (state.value === 'DOWN' && prevStateValue === 'UP') ||
         (state.value === 'UP' && prevStateValue === 'DOWN'),
     })
-  })
+  }
 
   return results
 }

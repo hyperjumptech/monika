@@ -33,6 +33,7 @@ export interface ProbeRequestResponse<T = any> {
 }
 
 export interface RequestConfig extends Omit<AxiosRequestConfig, 'data'> {
+  id?: string
   saveBody?: boolean
   url: string
   body: JSON

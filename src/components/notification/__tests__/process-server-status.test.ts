@@ -29,7 +29,6 @@ import { ServerAlertState } from '../../../interfaces/probe-status'
 import { ValidatedResponse } from '../../../plugins/validate-response'
 import {
   processThresholds,
-  resetServerAlertStates,
   ServerAlertStateContext,
   serverAlertStateMachine,
 } from '../process-server-status'
@@ -153,10 +152,6 @@ describe('processThresholds', () => {
       isAlertTriggered: true,
     },
   ] as ValidatedResponse[]
-
-  beforeEach(() => {
-    resetServerAlertStates()
-  })
 
   it('should attach state calculation to each request', () => {
     // failure happened first for request with index 0
