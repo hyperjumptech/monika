@@ -181,7 +181,7 @@ if [ -f "$HOME/.bashrc" ] && [ -z "$(grep \".monika\" \"$HOME/.bashrc\")" ]; the
   export PATH="$PATH:$install_dir"
 fi
 
-if [ -f "$HOME/.zshrc" ] && [ -z "$(grep \".monika\" \"$HOME/.bashrc\")" ]; then
+if [ -f "$HOME/.zshrc" ] && [ -z "$(grep \".monika\" \"$HOME/.zshrc\")" ]; then
   info "Updating .zshrc file..."
   cat "export PATH=\$PATH:$install_dir" >> "$HOME/.zshrc"
   export PATH="$PATH:$install_dir"
