@@ -102,11 +102,11 @@ install_release_version() {
   local version_name="$1"
   local url=$(binary_url "$version_name" "$os")
   local target_path=$install_dir"/monika-v$version_name-$os-x64.zip"
-  if [[ ! -d $install_dir ]]; then
+  if [ ! -d $install_dir ]; then
     mkdir $install_dir
   fi
   
-  if [[ ! -f $target_path ]]; then
+  if [ ! -f $target_path ]; then
     info "Downloading from: "$url
     # download and overwrite target path
     curl -L $url > $target_path
@@ -115,7 +115,7 @@ install_release_version() {
 }
 
 monika_home_is_ok() {
-  if [[ -f $install_dir ]]; then
+  if [ -f $install_dir ]; then
     error $install_dir" is a file. Please remove it first before installation."
     return 1
   fi
@@ -143,11 +143,11 @@ install_version() {
 
 check_architecture() {
   local arch="$(uname -m)"
-  if [[ $arch = "x86_64" ]]; then
+  if [ $arch = "x86_64" ]; then
     return 0
   fi
 
-  if [[ $arch = "arm64" ]] && [[ "$(uname -s)" = "Darwin" ]]; then
+  if [ $arch = "arm64" ] && [ "$(uname -s)" = "Darwin" ]; then
     return 0
   fi
 
@@ -175,17 +175,17 @@ check_architecture
 
 install_version "$version_to_install" "$install_dir"
 
-if [[ -f $HOME"/.bashrc" ]] && [[ -z $(grep '.monika' $HOME"/.bashrc") ]]; then
+# if [ -f $HOME"/.bashrc" ] && [ -z $(grep '.monika' $HOME"/.bashrc") ]; then
+if [ -f $HOME"/.bashrc" ]; then
   info 'Updating .bashrc file...'
-  echo -e "export PATH=\$PATH:$install_dir" >> $HOME"/.bashrc"
-  source $HOME/.bashrc
+  cat "export PATH=\$PATH:$install_dir" >> $HOME"/.bashrc"
 fi
 
-if [[ -f $HOME"/.zshrc" ]] && [[ -z $(grep '.monika' $HOME"/.zshrc") ]]; then
+if [ -f $HOME"/.zshrc" ] && [ -z $(grep '.monika' $HOME"/.zshrc") ]; then
   info 'Updating .zshrc file...'
-  echo -e "export PATH=\$PATH:$install_dir" >> $HOME"/.zshrc"
-  # run zsh instead of run "source"
-  zsh
+  cat "export PATH=\$PATH:$install_dir" >> $HOME"/.zshrc"
 fi
+
+export PATH=$PATH:$install_dir
 
 info "Installation done. You can now start using monika."
