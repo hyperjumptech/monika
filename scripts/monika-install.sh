@@ -1,4 +1,6 @@
 #!/bin/sh
+# Shell script to automatically install Monika. This script should be compatible across shells, e.g., zsh, bash, dash.
+# For compatibility check and linting, use "checkbashisms -p monika-install.sh" and https://www.shellcheck.net/
 
 echo ""
 echo "███╗   ███╗ ██████╗ ███╗   ██╗██╗██╗  ██╗ █████╗ "
