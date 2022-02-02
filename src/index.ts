@@ -40,7 +40,6 @@ import {
   openLogfile,
 } from './components/logger/history'
 import { notificationChecker } from './components/notification/checker'
-import { resetServerAlertStates } from './components/notification/process-server-status'
 import events from './events'
 import { Config } from './interfaces/config'
 import { Probe } from './interfaces/probe'
@@ -273,7 +272,6 @@ class Monika extends Command {
       for await (const config of getConfigIterator(isSymonMode)) {
         if (!config) continue
         if (abortCurrentLooper) {
-          resetServerAlertStates()
           abortCurrentLooper()
         }
 
