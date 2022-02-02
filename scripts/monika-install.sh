@@ -178,4 +178,6 @@ check_architecture
 install_version "$version_to_install" "$install_dir"
 
 info "Monika is now installed on $install_dir, you can start using monika directly from this session."
-info "To make it permanently recognized across sessions, you can put \"export PATH=\$PATH:$install_dir\" (without the double quotes) into your shell profile / startup file, e.g., ~/.profile, ~/.zshrc, ~/.bashrc."
+info "To make it permanently recognized across sessions, you can put \"export PATH=\$PATH:$install_dir\" (without double quotes) into your shell startup."
+info "E.g., ~/.profile, ~/.zshrc, ~/.bashrc."
+echo ""
