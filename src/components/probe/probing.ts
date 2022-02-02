@@ -24,15 +24,10 @@
 
 import axios from 'axios'
 import * as Handlebars from 'handlebars'
+import FormData from 'form-data'
 import { ProbeRequestResponse, RequestConfig } from '../../interfaces/request'
 import * as qs from 'querystring'
 import { sendPing, PING_TIMEDOUT } from '../../utils/ping'
-
-const headerContentType = 'content-type'
-const contentType = {
-  'form-urlencoded': 'application/x-www-form-urlencoded',
-  json: 'application/json',
-}
 
 /**
  * probing() is the heart of monika requests generation
@@ -41,23 +36,22 @@ const contentType = {
  * @returns ProbeRequestResponse, response to the probe request
  */
 export async function probing(
-  requestConfig: RequestConfig,
+  requestConfig: Omit<RequestConfig, 'saveBody' | 'alert'>,
   responses: Array<ProbeRequestResponse>
 ): Promise<ProbeRequestResponse> {
-  const newReq = { ...requestConfig }
   // Compile URL using handlebars to render URLs that uses previous responses data
-  const { url } = requestConfig
-  const requestURL = url
-  const renderURL = Handlebars.compile(requestURL)
+  const { method, url, headers, timeout, body, ping } = requestConfig
+  const newReq = { method, headers, timeout, ping }
+  const renderURL = Handlebars.compile(url)
   const renderedURL = renderURL({ responses })
-  let shouldEncodeFormUrl = false
+  let requestBody: any = body
 
   // Compile headers using handlebars to render URLs that uses previous responses data.
   // In some case such as value is not string, it will be returned as is without being compiled.
   // If the request does not have any headers, then it should skip this process.
-  if (requestConfig.headers) {
-    for (const header of Object.keys(requestConfig.headers)) {
-      const rawHeader = requestConfig.headers[header]
+  if (headers) {
+    for (const header of Object.keys(headers)) {
+      const rawHeader = headers[header]
       const renderHeader = Handlebars.compile(rawHeader)
       const renderedHeader = renderHeader({ responses })
 
@@ -67,11 +61,26 @@ export async function probing(
       }
 
       // evaluate "Content-Type" header in case-insensitive manner
-      if (
-        header.toLocaleLowerCase() === headerContentType &&
-        rawHeader === contentType['form-urlencoded']
-      ) {
-        shouldEncodeFormUrl = true
+      if (header.toLocaleLowerCase() === 'content-type') {
+        const { content, contentType } = transformContentByType(body, rawHeader)
+
+        // change request body with the transformed request body
+        requestBody = content
+
+        if (rawHeader === 'multipart/form-data') {
+          // delete the previous content-type header and add a new header with boundary
+          // it needs to be deleted because multipart/form data needs to append the boundary data
+          // from
+          //    "content-type": "multipart/form-data"
+          // to
+          //    "content-type": "multipart/form-data; boundary=--------------------------012345678900123456789012"
+          delete newReq.headers[header]
+
+          newReq.headers = {
+            ...newReq.headers,
+            'content-type': contentType,
+          }
+        }
       }
     }
   }
@@ -79,15 +88,7 @@ export async function probing(
   const axiosInstance = axios.create()
   const requestStartedAt = Date.now()
 
-  let resp: any = {}
-
   try {
-    // Do the request using compiled URL and compiled headers (if exists)
-    let requestBody: any = newReq.body
-    if (shouldEncodeFormUrl) {
-      requestBody = qs.stringify(requestBody)
-    }
-
     // is this a request for ping?
     if (newReq.ping === true) {
       const pingResp = await sendPing(renderedURL)
@@ -115,8 +116,8 @@ export async function probing(
       }
     }
 
-    // if this is not a ping, then do regular REST request through axios
-    resp = await axiosInstance.request({
+    // Do the request using compiled URL and compiled headers (if exists)
+    const resp = await axiosInstance.request({
       ...newReq,
       url: renderedURL,
       data: requestBody,
@@ -167,6 +168,32 @@ export async function probing(
       headers: '',
       responseTime,
     }
+  }
+}
+
+function transformContentByType(
+  content: Record<string, any>,
+  contentType: string
+) {
+  switch (contentType) {
+    case 'application/x-www-form-urlencoded':
+      return {
+        content: qs.stringify(content),
+        contentType,
+      }
+
+    case 'multipart/form-data': {
+      const form = new FormData()
+
+      for (const contentKey of Object.keys(content)) {
+        form.append(contentKey, content[contentKey])
+      }
+
+      return { content: form, contentType: form.getHeaders()['content-type'] }
+    }
+
+    default:
+      return { content, contentType }
   }
 }
 
