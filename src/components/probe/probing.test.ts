@@ -170,7 +170,7 @@ describe('Probing', () => {
       expect(res.status).to.eq(200)
     })
 
-    it('should send request with plain/text content-type', async () => {
+    it('should send request with text-plain content-type', async () => {
       // arrange
       const server = setupServer(
         rest.post('https://example.com', (req, res, ctx) => {
