@@ -77,16 +77,20 @@ export async function getPublicNetworkInfo() {
  * @returns {Promise}
  */
 export async function getPublicIp() {
+  const time = new Date().toISOString()
+
   try {
     const address = await pokeStun()
     if (address) {
       publicIpAddress = address
       isConnectedToSTUNServer = true
-      log.info(`Connected to STUN Server. Monika is running from: ${address}`)
+      log.info(
+        `${time} - Connected to STUN Server. Monika is running from: ${address}`
+      )
     }
   } catch {
     isConnectedToSTUNServer = false
-    log.warn(`STUN Server is temporarily unreachable. Check network.`)
+    log.warn(`${time} STUN Server is temporarily unreachable. Check network.`)
     return Promise.resolve() // couldn't access public stun but resolve and retry
   }
 }
