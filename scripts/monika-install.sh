@@ -175,16 +175,5 @@ check_architecture
 
 install_version "$version_to_install" "$install_dir"
 
-if [ -f "$HOME/.bashrc" ] && [ -z "$(grep \".monika\" \"$HOME/.bashrc\")" ]; then
-  info "Updating .bashrc file..."
-  cat "export PATH=\$PATH:$install_dir" >> "$HOME/.bashrc"
-  export PATH="$PATH:$install_dir"
-fi
-
-if [ -f "$HOME/.zshrc" ] && [ -z "$(grep \".monika\" \"$HOME/.zshrc\")" ]; then
-  info "Updating .zshrc file..."
-  cat "export PATH=\$PATH:$install_dir" >> "$HOME/.zshrc"
-  export PATH="$PATH:$install_dir"
-fi
-
-info "Installation done. You can now start using monika."
+info "Monika is now installed on $install_dir, you can start using monika directly from this session."
+info "To make it permanently recognized across sessions, you can put \"export PATH=\$PATH:$install_dir\" (without the double quotes) into your shell profile / startup file, e.g., ~/.profile, ~/.zshrc, ~/.bashrc."
