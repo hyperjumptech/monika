@@ -25,17 +25,29 @@
 import { AxiosRequestConfig } from 'axios'
 import { ProbeAlert } from './probe'
 
+// RequestTypes are used to define the type of request that is being made.
+export type RequestTypes = 'http' | 'HTTP' | 'icmp' | 'ICMP'
+
+// ProbeRequestResponse is used to define the response from a probe requests.
 export interface ProbeRequestResponse<T = any> {
+  requestType?: RequestTypes // is this for http (default) or icmp  or others
   data: T
-  status: number
+  status: number // todo: Improve status management. Status as number is pretty limiting here if we want to support other protocols other than http
   headers: any
   responseTime: number
+
+  numericHost?: string
+  alive?: boolean
+  packetLoss?: number
 }
 
+// ProbeRequest is used to define the requests that is being made.
 export interface RequestConfig extends Omit<AxiosRequestConfig, 'data'> {
-  saveBody?: boolean
+  id?: string
+  saveBody?: boolean // save response body to db?
   url: string
   body: JSON
-  timeout: number
+  timeout: number // request timeout
   alerts?: ProbeAlert[]
+  ping?: boolean // is this request for a ping?
 }

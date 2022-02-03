@@ -29,8 +29,8 @@ import { ServerAlertState } from '../../../interfaces/probe-status'
 import { ValidatedResponse } from '../../../plugins/validate-response'
 import {
   processThresholds,
-  resetServerAlertStates,
   ServerAlertStateContext,
+  serverAlertStateInterpreters,
   serverAlertStateMachine,
 } from '../process-server-status'
 
@@ -125,13 +125,19 @@ describe('serverAlertStateMachine', () => {
 })
 
 describe('processThresholds', () => {
+  beforeEach(() => {
+    serverAlertStateInterpreters.clear()
+  })
+
   const probe = {
     requests: [
       {
+        id: '1',
         method: 'GET',
         url: 'https://httpbin.org/status/200',
       },
       {
+        id: '2',
         method: 'POST',
         url: 'https://httpbin.org/status/201',
       },
@@ -146,17 +152,12 @@ describe('processThresholds', () => {
       isAlertTriggered: false,
     },
   ] as ValidatedResponse[]
-
   const failureResponse = [
     {
       alert: { query: 'response.time > 1000' },
       isAlertTriggered: true,
     },
   ] as ValidatedResponse[]
-
-  beforeEach(() => {
-    resetServerAlertStates()
-  })
 
   it('should attach state calculation to each request', () => {
     // failure happened first for request with index 0

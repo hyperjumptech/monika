@@ -35,6 +35,7 @@ const getConvertedProbeFromPostmanItem = (item: any) => {
     name: item.name,
     requests: [
       {
+        id: req.name,
         url: req.url.raw,
         method: req.method,
         headers: req?.header?.reduce(
@@ -42,7 +43,7 @@ const getConvertedProbeFromPostmanItem = (item: any) => {
           {}
         ),
         body: req?.body?.raw || JSON.parse('{}'),
-        timeout: 10000,
+        timeout: 10_000,
       },
     ],
     incidentThreshold: DEFAULT_THRESHOLD,

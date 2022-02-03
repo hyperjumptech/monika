@@ -24,8 +24,11 @@
  **********************************************************************************/
 
 import { expect } from 'chai'
+import { rest } from 'msw'
+import { setupServer } from 'msw/node'
 import { RequestInterceptor } from 'node-request-interceptor'
 import withDefaultInterceptors from 'node-request-interceptor/lib/presets/default'
+import { RequestConfig } from '../../interfaces/request'
 import { probing } from './probing'
 
 describe('Probing', () => {
@@ -130,6 +133,43 @@ describe('Probing', () => {
 
       const result = await probing(request, [])
       expect(result.status).to.be.equals(200)
+    })
+
+    it('should send request with multipart/form-data content-type', async () => {
+      // arrange
+      const server = setupServer(
+        rest.post('https://example.com', (req, res, ctx) => {
+          const { headers, body } = req
+          const reqBody = body as Record<string, any>
+
+          if (
+            !headers.get('content-type')?.startsWith('multipart/form-data') ||
+            reqBody?.username !== 'john@example.com' ||
+            reqBody?.password !== 'drowssap'
+          ) {
+            return res(ctx.status(400))
+          }
+
+          return res(ctx.status(200))
+        })
+      )
+      const request: RequestConfig = {
+        url: 'https://example.com',
+        method: 'POST',
+        headers: { 'content-type': 'multipart/form-data' },
+        body: JSON.parse(
+          '{"username": "john@example.com", "password": "drowssap"}'
+        ),
+        timeout: 10,
+      }
+
+      // act
+      server.listen()
+      const res = await probing(request, [])
+      server.close()
+
+      // assert
+      expect(res.status).to.eq(200)
     })
   })
 })
