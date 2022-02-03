@@ -20,6 +20,11 @@ version_to_install="latest"
 # default monika path
 install_dir=$HOME"/.monika"
 
+os="linux"
+if [ "$(uname -s)" = "Darwin" ]; then
+  os="macos"
+fi
+
 binary_url() {
   version_name="$1"
   os="$2"
@@ -41,6 +46,14 @@ warning() {
 }
 
 # sanity checks
+
+if [ "$os" = "macos" ]; then
+  info "Looking for ggrep..."
+  if ! command -v ggrep > /dev/null; then
+    error "Please install GNU Grep (brew install grep) on your system using your favourite package manager."
+    exit 1
+  fi
+fi
 
 info "Looking for unzip..."
 if ! command -v unzip > /dev/null; then
@@ -67,30 +80,17 @@ END_HELP
 }
 
 sanitize_version() {
-  echo "$1" | grep -oP "([0-9]+(\.[0-9]+)+)"
+  grep_command="grep"
+  if [ "$os" = "linux" ]; then
+    grep_command="ggrep"
+  fi
+  echo "$1" | $grep_command -oP "([0-9]+(\.[0-9]+)+)"
+  exit 0
 }
 
 get_latest_version() {
   url=$repo_url"releases/latest"
   echo "$(sanitize_version $(curl -iLs -o /dev/null -w %{url_effective} $url))"
-}
-
-get_os_name() {
-  os=$(uname -s)
-  case "$os" in
-    Darwin)
-      echo "macos"
-      return 0
-      ;;
-    Linux)
-      echo "linux"
-      return 0
-      ;;
-    *)
-      error "Unsupported OS: $os"
-      exit 1
-      ;;
-  esac
 }
 
 install_from_file() {
@@ -100,7 +100,6 @@ install_from_file() {
 }
 
 install_release_version() {
-  os=$(get_os_name)
   version_name="$1"
   url=$(binary_url "$version_name" "$os")
   target_path="$install_dir/monika-v$version_name-$os-x64.zip"
