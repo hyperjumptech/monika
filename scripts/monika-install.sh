@@ -85,7 +85,6 @@ sanitize_version() {
     grep_command="ggrep"
   fi
   echo "$1" | $grep_command -Eo "([0-9]+(\.[0-9]+)+)"
-  exit 0
 }
 
 get_latest_version() {
