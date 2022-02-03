@@ -81,10 +81,10 @@ END_HELP
 
 sanitize_version() {
   grep_command="grep"
-  if [ "$os" = "linux" ]; then
+  if [ "$os" = "macos" ]; then
     grep_command="ggrep"
   fi
-  echo "$1" | $grep_command -oP "([0-9]+(\.[0-9]+)+)"
+  echo "$1" | $grep_command -Eo "([0-9]+(\.[0-9]+)+)"
   exit 0
 }
 
