@@ -21,6 +21,8 @@ There are two ways to install Monika
 
 2. Install script (Linux or MacOS)
 
+   1. Download and install Monika pre-built binaries.
+
    ```bash
    $ curl https://raw.githubusercontent.com/hyperjumptech/monika/main/scripts/monika-install.sh | sh
    ```

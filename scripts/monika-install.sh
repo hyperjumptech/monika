@@ -18,11 +18,14 @@ repo_url="https://github.com/hyperjumptech/monika/"
 version_to_install="latest"
 
 # default monika path
-install_dir=$HOME"/.monika"
+install_dir=$HOME"/.local/bin"
 
 os="linux"
 if [ "$(uname -s)" = "Darwin" ]; then
   os="macos"
+  # we currently don't support MacOS binaries.
+  error "Sorry! Monika only provides pre-built binaries for Linux x86_64."
+  exit 1
 fi
 
 binary_url() {
@@ -89,11 +92,11 @@ install_from_file() {
 install_release_version() {
   version_name="$1"
   url=$(binary_url "$version_name" "$os")
-  target_path="$install_dir/monika-v$version_name-$os-x64.zip"
+  target_path="/tmp/monika-v$version_name-$os-x64.zip"
   if [ ! -d "$install_dir" ]; then
-    mkdir "$install_dir"
+    mkdir p "$install_dir"
   fi
-  
+
   if [ ! -f "$target_path" ]; then
     info "Downloading from: $url"
     # download and overwrite target path
@@ -135,11 +138,11 @@ check_architecture() {
     return 0
   fi
 
-  if [ "$arch" = "arm64" ] && [ "$(uname -s)" = "Darwin" ]; then
+  if [ "$arch" = "x86_64" ] && [ "$(uname -s)" = "Darwin" ]; then
     return 0
   fi
 
-  error "Sorry! Monika currently only provides pre-built binaries for x86_64 architectures."
+  error "Sorry! Monika only provides pre-built binaries for x86_64 architectures."
   exit 1
 }
 
@@ -163,6 +166,5 @@ check_architecture
 
 install_version "$version_to_install" "$install_dir"
 
-info "Monika is now installed on $install_dir, you can start using monika directly from this session."
-info "To make it permanently recognized across sessions, you can put \"export PATH=\$PATH:$install_dir\" (without double quotes) into your shell startup."
-info "E.g., ~/.profile, ~/.zshrc, ~/.bashrc."
+info "Monika is now installed on $install_dir. You can now start using Monika."
+info "To uninstall, just remove the \"monika\" and \"node_sqlite3.node\" from $install_dir."
