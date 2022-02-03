@@ -79,7 +79,7 @@ jobs:
           files: dist/${{ matrix.file_name }} dist/node_sqlite3.node
           dest: monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}.zip
       - name: Generate SHA256 Checksum
-        run: sha256sum monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}.zip > monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}-sha256sums.txt
+        run: shasum -a 256 monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}.zip > monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}-CHECKSUM.txt
       - name: Upload binary to release
         uses: svenstaro/upload-release-action@v2
         with:
@@ -91,6 +91,6 @@ jobs:
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}-sha256sums.txt
-          asset_name: monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}-sha256sums.txt
+          file: monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}-CHECKSUM.txt
+          asset_name: monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}-CHECKSUM.txt
           tag: ${{ github.ref }}
