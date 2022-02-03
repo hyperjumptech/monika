@@ -47,14 +47,6 @@ warning() {
 
 # sanity checks
 
-if [ "$os" = "macos" ]; then
-  info "Looking for ggrep..."
-  if ! command -v ggrep > /dev/null; then
-    error "Please install GNU Grep (brew install grep) on your system using your favourite package manager."
-    exit 1
-  fi
-fi
-
 info "Looking for unzip..."
 if ! command -v unzip > /dev/null; then
 	error "Please install unzip on your system using your favourite package manager."
@@ -80,11 +72,7 @@ END_HELP
 }
 
 sanitize_version() {
-  grep_command="grep"
-  if [ "$os" = "macos" ]; then
-    grep_command="ggrep"
-  fi
-  echo "$1" | $grep_command -Eo "([0-9]+(\.[0-9]+)+)"
+  echo "$1" | grep -Eo "([0-9]+(\.[0-9]+)+)"
 }
 
 get_latest_version() {
