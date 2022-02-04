@@ -2,7 +2,7 @@
 # For complete documentation on configuration check https://monika.hyperjump.tech/guides/probes
 # Monika can run by its minimal configuration such as :
 probes:
-  - id: "1"
+  - id: '1'
     requests:
       - url: http://github.com
 # Configuration example for sending HTML Form Submission
@@ -174,4 +174,4 @@ probes:
 db_limit:
   max_db_size: 1000000000
   deleted_data: 1
-  cron_schedule: "*/1 * * * *"
+  cron_schedule: '*/1 * * * *'
