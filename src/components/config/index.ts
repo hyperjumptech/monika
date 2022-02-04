@@ -43,7 +43,7 @@ export const DEFAULT_CONFIG_INTERVAL = 900
 const emitter = getEventEmitter()
 
 let cfg: Config
-let configs: Partial<Config>[]
+let defaultConfigs: Partial<Config>[]
 let nonDefaultConfig: Partial<Config>
 
 export const getConfig = (skipConfigCheck = true): Config => {
@@ -86,14 +86,21 @@ export const updateConfig = (config: Config, validate = true): void => {
 // mergeConfigs merges global configs var by overwriting each other
 // with initial value taken from nonDefaultConfig
 const mergeConfigs = (): Config => {
+  log.debug('NON DEFAULT')
+  log.debug(JSON.stringify(nonDefaultConfig))
+  log.debug(`${defaultConfigs === undefined}`)
+  log.debug(`${nonDefaultConfig === undefined}`)
+  if (defaultConfigs === undefined && nonDefaultConfig !== undefined) {
+    return nonDefaultConfig as Config
+  }
+
   // eslint-disable-next-line unicorn/no-array-reduce
-  const mergedConfig = configs.reduce(
-    (prev, current) => ({
+  const mergedConfig = defaultConfigs.reduce((prev, current) => {
+    return {
       ...prev,
       ...current,
-    }),
-    nonDefaultConfig || {}
-  )
+    }
+  }, nonDefaultConfig || {})
 
   return mergedConfig as Config
 }
@@ -116,7 +123,7 @@ const watchConfigFile = (
       if (index === undefined) {
         nonDefaultConfig = newConfig
       } else {
-        configs[index] = newConfig
+        defaultConfigs[index] = newConfig
       }
 
       updateConfig(mergeConfigs())
@@ -136,7 +143,7 @@ const scheduleRemoteConfigFetcher = (
       if (index === undefined) {
         nonDefaultConfig = newConfig
       } else {
-        configs[index] = newConfig
+        defaultConfigs[index] = newConfig
       }
 
       updateConfig(mergeConfigs())
@@ -182,7 +189,12 @@ const addDefaultNotifications = (config: Partial<Config>): Partial<Config> => {
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const setupConfig = async (flags: any): Promise<void> => {
   // check for default config path when -c/--config not provided
-  if (flags.config.length === 0 && !flags.har && !flags.postman) {
+  if (
+    flags.config.length === 0 &&
+    flags.har === undefined &&
+    flags.postman === undefined &&
+    flags.insomnia === undefined
+  ) {
     throw new Error(
       'Configuration file not found. By default, Monika looks for monika.yml configuration file in the current directory.\n\nOtherwise, you can also specify a configuration file using -c flag as follows:\n\nmonika -c <path_to_configuration_file>\n\nYou can create a configuration file via web interface by opening this web app: https://hyperjumptech.github.io/monika-config-generator/'
     )
@@ -203,10 +215,8 @@ export const setupConfig = async (flags: any): Promise<void> => {
     nonDefaultConfig = addDefaultNotifications(nonDefaultConfig)
   }
 
-  if (nonDefaultConfig !== undefined) parsedConfigs.push(nonDefaultConfig)
-
-  configs = parsedConfigs
-
+  defaultConfigs = parsedConfigs
+  log.debug(`KOK GA BISA NON DEFAULT? ${nonDefaultConfig}`)
   updateConfig(mergeConfigs())
 }
 
