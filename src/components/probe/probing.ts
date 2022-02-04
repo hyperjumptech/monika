@@ -25,6 +25,7 @@
 import axios from 'axios'
 import * as Handlebars from 'handlebars'
 import FormData from 'form-data'
+import YAML from 'yaml'
 import { ProbeRequestResponse, RequestConfig } from '../../interfaces/request'
 import * as qs from 'querystring'
 import { sendPing, PING_TIMEDOUT } from '../../utils/ping'
@@ -171,10 +172,7 @@ export async function probing(
   }
 }
 
-function transformContentByType(
-  content: Record<string, any>,
-  contentType: string
-) {
+function transformContentByType(content: any, contentType: string) {
   switch (contentType) {
     case 'application/x-www-form-urlencoded':
       return {
@@ -190,6 +188,13 @@ function transformContentByType(
       }
 
       return { content: form, contentType: form.getHeaders()['content-type'] }
+    }
+
+    case 'text/yaml': {
+      const yamlDoc = new YAML.Document()
+      yamlDoc.contents = content
+
+      return { content: yamlDoc.toString(), contentType }
     }
 
     default:
