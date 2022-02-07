@@ -43,7 +43,7 @@ probes:
 # If the status code of github.com is 500, monika will not check https://github.com/hyperjumptech.
 # Alerts could also be define in array to check on multiple response conditions
 # probes:
-#   - id: '1'
+#   - id: "1"
 #     name: Probing Github
 #     description: Multiple
 #     interval: 10
@@ -56,6 +56,23 @@ probes:
 #         method: GET
 #         timeout: 7000
 #         saveBody: true
+#         # You can use pipe (|) to set multiline strings in YAML if you want to send plain text or XML content
+#       - url: https://example.com/plain-text
+#         method: POST
+#         headers:
+#           Content-Type: text/plain
+#         body: |
+#           name=John
+#           password=secret
+#       - url: https://example.com/xml
+#         method: POST
+#         headers:
+#           Content-Type: application/xml
+#         body: |
+#           <user>
+#             <name>John</name>
+#             <password>secret</password>
+#           </user>
 #     alerts:
 #       - query: response.status == 500
 #         message: response status message

@@ -7,9 +7,9 @@ At the center of Monika is a configuration file. Follow the steps below to quick
 
 ## Installation
 
-There are two ways to install Monika
+There are three ways to install Monika
 
-1. Install using [npm](https://npmjs.com) or [yarn](https://yarnpkg.com).
+1. Install using [npm](https://npmjs.com) or [yarn](https://yarnpkg.com) (**Windows/Linux/Mac**).
 
    If you're using NPM or Yarn, you can simply run this command in your terminal:
 
@@ -19,7 +19,17 @@ There are two ways to install Monika
    $ yarn global add @hyperjumptech/monika
    ```
 
-2. Download and run standalone binary
+2. Install script (Linux)
+
+   1. Download and install Monika pre-built binaries.
+
+   ```bash
+   $ curl https://raw.githubusercontent.com/hyperjumptech/monika/main/scripts/monika-install.sh | sh
+   ```
+
+   You will be able to run the latest monika by the time it is done. This script will install monika to path `~/.local/bin`.
+
+3. Download and run standalone binary (Windows/Linux)
 
    Head over to [Monika Release](https://github.com/hyperjumptech/monika/releases) page, download the Monika file according to your operating system, and rename it to `monika`.
 

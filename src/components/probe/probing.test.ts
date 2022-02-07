@@ -157,9 +157,116 @@ describe('Probing', () => {
         url: 'https://example.com',
         method: 'POST',
         headers: { 'content-type': 'multipart/form-data' },
-        body: JSON.parse(
-          '{"username": "john@example.com", "password": "drowssap"}'
-        ),
+        body: { username: 'john@example.com', password: 'drowssap' } as any,
+        timeout: 10,
+      }
+
+      // act
+      server.listen()
+      const res = await probing(request, [])
+      server.close()
+
+      // assert
+      expect(res.status).to.eq(200)
+    })
+
+    it('should send request with text-plain content-type', async () => {
+      // arrange
+      const server = setupServer(
+        rest.post('https://example.com', (req, res, ctx) => {
+          const { headers, body } = req
+
+          if (
+            headers.get('content-type') !== 'text/plain' ||
+            body !== 'multiline string\nexample'
+          ) {
+            console.error(headers.get('content-type'))
+            console.error(body)
+
+            return res(ctx.status(400))
+          }
+
+          return res(ctx.status(200))
+        })
+      )
+      const request: RequestConfig = {
+        url: 'https://example.com',
+        method: 'POST',
+        headers: { 'content-type': 'text/plain' },
+        body: 'multiline string\nexample' as any,
+        timeout: 10,
+      }
+
+      // act
+      server.listen()
+      const res = await probing(request, [])
+      server.close()
+
+      // assert
+      expect(res.status).to.eq(200)
+    })
+
+    it('should send request with text/yaml content-type', async () => {
+      // arrange
+      const server = setupServer(
+        rest.post('https://example.com', (req, res, ctx) => {
+          const { headers, body } = req
+
+          if (
+            headers.get('content-type') !== 'text/yaml' ||
+            body !== 'username: john@example.com\npassword: secret\n'
+          ) {
+            console.error(headers.get('content-type'))
+            console.error(body)
+
+            return res(ctx.status(400))
+          }
+
+          return res(ctx.status(200))
+        })
+      )
+      const request: RequestConfig = {
+        url: 'https://example.com',
+        method: 'POST',
+        headers: { 'content-type': 'text/yaml' },
+        body: { username: 'john@example.com', password: 'secret' } as any,
+        timeout: 10,
+      }
+
+      // act
+      server.listen()
+      const res = await probing(request, [])
+      server.close()
+
+      // assert
+      expect(res.status).to.eq(200)
+    })
+
+    it('should send request with application/xml content-type', async () => {
+      // arrange
+      const server = setupServer(
+        rest.post('https://example.com', (req, res, ctx) => {
+          const { headers, body } = req
+          const reqBody = JSON.parse(body as string)
+
+          if (
+            headers.get('content-type') !== 'application/xml' ||
+            reqBody?.username !== 'john@example.com'
+          ) {
+            console.error(headers.get('content-type'))
+            console.error(body)
+
+            return res(ctx.status(400))
+          }
+
+          return res(ctx.status(200))
+        })
+      )
+      const request: RequestConfig = {
+        url: 'https://example.com',
+        method: 'POST',
+        headers: { 'content-type': 'application/xml' },
+        body: { username: 'john@example.com', password: 'secret' } as any,
         timeout: 10,
       }
 
