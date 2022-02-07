@@ -29,30 +29,29 @@ import PropTypes from 'prop-types'
 const ArticleCard = (props) => {
   return (
     <>
-      <div className="container">
+      <div style={{ backgroundColor: '#272727' }} className="rounded-lg m-4">
         <img alt={props.image_alt} src={props.image_src} className="image" />
-        <span className="text">{props.text}</span>
-        <span className="text1">{props.text1}</span>
-        <a
-          href={props.link_text}
-          target="_blank"
-          rel="noreferrer noopener"
-          className="link"
-        >
-          {props.text3}
-        </a>
+        <div className="container overflow-x-hidden">
+          <span className="text">{props.text}</span>
+          <span className="text1">{props.text1}</span>
+          <a
+            href={props.link_text}
+            target="_blank"
+            rel="noreferrer noopener"
+            className="link"
+          >
+            {props.text3}
+          </a>
+        </div>
       </div>
       <style jsx>
         {`
           .container {
             flex: 0 0 auto;
-            margin: var(--dl-space-space-unit);
             display: flex;
             max-width: 300px;
             align-items: flex-start;
-            border-radius: var(--dl-radius-radius-radius8);
             flex-direction: column;
-            background-color: #272727;
           }
           .image {
             margin: var(--dl-space-space-halfunit);
