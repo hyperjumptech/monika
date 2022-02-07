@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.12] - 2022-02-07
+
+## Added
+
+- Install script (#590)
+- Support yaml for request payload (#596)
+- Release Checksum (#595)
+- Multipart/form-data content type support (#588)
+- --symonLocationId flag for Symon handshake process (#589)
+- Ping feature (#579)
+- Docs: Deploy to Fly.io (#587)
+
+## Fixed
+
+- Not send recovery status when running on Symon mode (#594)
+
+## Updated
+
+- Update Cron Documentation (#592)
+
 ## [1.6.11] - 2022-01-24
 
 ## Added
