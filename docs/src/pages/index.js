@@ -291,7 +291,7 @@ export default function IndexPage() {
         </div>
         <div className="testimonials">
           <div className="container05">
-            <div className="container06">
+            <div className="container">
               <img
                 alt="image"
                 src="/playground_assets/quote-mark.svg"
@@ -299,24 +299,19 @@ export default function IndexPage() {
               />
               <h1 className="text09 headline2">What They Say</h1>
               <h1 className="text10 headline2">About Monika</h1>
-              <div className="container07">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-10">
                 <TestimonialsCard
                   text="Thank you Monika by Hyperjump.  With Monika, we can improve our services SLA, get notified early when we have a server issue. Easy to install, have multi notification channels, can be setup from different server regions, and is easy to integrate on the dashboard make it all complete and help us to analyze the issue asap."
                   text1="Eric Sudadyo"
                   text2="DevOps Manager, Yummycorp"
                   image_src="/playground_assets/yummy-200h.png"
-                ></TestimonialsCard>
-              </div>
-            </div>
-            <div className="container08">
-              <div className="container09">
+                />
                 <TestimonialsCard
-                  src="/playground_assets/logo-1.svg"
                   text="Before using Monika, we were unaware when our website is down until our users reported it. We don’t want it to happen again. Now with Monika, we are notified much faster so our team can react quicker to solve the issue. Thank you, Monika!"
                   text1="Marsya Nurmaranti"
                   text2="Executive Director, Indorelawan"
                   image_src="/playground_assets/indorelawan_logomerah%20panjang_png-200h.png"
-                ></TestimonialsCard>
+                />
               </div>
             </div>
           </div>
