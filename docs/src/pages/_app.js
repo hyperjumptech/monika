@@ -31,6 +31,7 @@ import { SearchProvider } from 'components/useSearch'
 import CookieConsent, { getCookieConsentValue } from 'react-cookie-consent'
 import { useRouter } from 'next/router'
 import * as gtag from '../lib/gtag'
+import '../styles/teleporthq.css'
 
 function loadScript(src, attrs = {}) {
   if (typeof document !== 'undefined') {
