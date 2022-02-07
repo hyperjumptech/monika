@@ -280,7 +280,7 @@ export default function IndexPage() {
             <div className="container04">
               <iframe
                 className="my-auto md:w-96 md:h-72 w-56 h-32 video"
-                src="https://www.youtube-nocookie.com/embed/o4jrNeNeFmM"
+                src="https://www.youtube.com/embed/po1XHcIbJVw"
                 title="YouTube video player"
                 frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
