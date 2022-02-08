@@ -86,8 +86,7 @@ export const updateConfig = (config: Config, validate = true): void => {
 // mergeConfigs merges global configs var by overwriting each other
 // with initial value taken from nonDefaultConfig
 const mergeConfigs = (): Config => {
-  log.debug('NON DEFAULT')
-  log.debug(JSON.stringify(nonDefaultConfig))
+  log.error('==============mergeConfigs()')
   log.debug(`${defaultConfigs === undefined}`)
   log.debug(`${nonDefaultConfig === undefined}`)
   if (defaultConfigs === undefined && nonDefaultConfig !== undefined) {
@@ -200,7 +199,7 @@ export const setupConfig = async (flags: any): Promise<void> => {
     )
   }
 
-  const parsedConfigs = await parseDefaultConfig(flags)
+  defaultConfigs = await parseDefaultConfig(flags)
 
   let nonDefaultConfig: Partial<Config> | undefined
   if (flags.har) {
@@ -211,12 +210,13 @@ export const setupConfig = async (flags: any): Promise<void> => {
     nonDefaultConfig = await parseConfigType(flags.insomnia, 'insomnia', flags)
   }
 
-  if (parsedConfigs.length === 0 && nonDefaultConfig !== undefined) {
+  if (defaultConfigs.length === 0 && nonDefaultConfig !== undefined) {
     nonDefaultConfig = addDefaultNotifications(nonDefaultConfig)
   }
 
-  defaultConfigs = parsedConfigs
-  log.debug(`KOK GA BISA NON DEFAULT? ${nonDefaultConfig}`)
+  log.error('========MERGING AND UPDATE CONFIG')
+  log.debug(JSON.stringify(defaultConfigs))
+  log.debug(JSON.stringify(nonDefaultConfig))
   updateConfig(mergeConfigs())
 }
 
