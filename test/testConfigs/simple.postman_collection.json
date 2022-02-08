@@ -6,7 +6,7 @@
   },
   "item": [
     {
-      "name": "Get Request (123 123 ini kenapa muncul???)",
+      "name": "Get Request",
       "request": {
         "method": "GET",
         "header": [],
