@@ -86,10 +86,7 @@ export const updateConfig = (config: Config, validate = true): void => {
 // mergeConfigs merges global configs var by overwriting each other
 // with initial value taken from nonDefaultConfig
 const mergeConfigs = (): Config => {
-  log.error('==============mergeConfigs()')
-  log.debug(`${defaultConfigs === undefined}`)
-  log.debug(`${nonDefaultConfig === undefined}`)
-  if (defaultConfigs === undefined && nonDefaultConfig !== undefined) {
+  if (defaultConfigs.length === 0 && nonDefaultConfig !== undefined) {
     return nonDefaultConfig as Config
   }
 
@@ -201,7 +198,6 @@ export const setupConfig = async (flags: any): Promise<void> => {
 
   defaultConfigs = await parseDefaultConfig(flags)
 
-  let nonDefaultConfig: Partial<Config> | undefined
   if (flags.har) {
     nonDefaultConfig = await parseConfigType(flags.har, 'har', flags)
   } else if (flags.postman) {
@@ -214,9 +210,6 @@ export const setupConfig = async (flags: any): Promise<void> => {
     nonDefaultConfig = addDefaultNotifications(nonDefaultConfig)
   }
 
-  log.error('========MERGING AND UPDATE CONFIG')
-  log.debug(JSON.stringify(defaultConfigs))
-  log.debug(JSON.stringify(nonDefaultConfig))
   updateConfig(mergeConfigs())
 }
 
