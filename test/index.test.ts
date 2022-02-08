@@ -104,7 +104,7 @@ describe('monika', () => {
       ])
     )
     .it('merge har file with other config', (ctx) => {
-      expect(ctx.stdout).to.contain('Notifications: 2').and.contain('Probes: 1')
+      expect(ctx.stdout).to.contain('Notifications: 2').and.contain('Probes: 2')
     })
 
   test
@@ -119,7 +119,7 @@ describe('monika', () => {
       ])
     )
     .it('probes from har file will override regardless flag order', (ctx) => {
-      expect(ctx.stdout).to.contain('Notifications: 2').and.contain('Probes: 1')
+      expect(ctx.stdout).to.contain('Notifications: 2').and.contain('Probes: 2')
     })
 
   test
@@ -134,7 +134,7 @@ describe('monika', () => {
       ])
     )
     .it('merge postman file with other config', (ctx) => {
-      expect(ctx.stdout).to.contain('Notifications: 2').and.contain('Probes: 1')
+      expect(ctx.stdout).to.contain('Notifications: 2').and.contain('Probes: 2')
     })
 
   test
@@ -153,7 +153,7 @@ describe('monika', () => {
       (ctx) => {
         expect(ctx.stdout)
           .to.contain('Notifications: 2')
-          .and.contain('Probes: 1')
+          .and.contain('Probes: 2')
       }
     )
 
@@ -183,7 +183,11 @@ describe('monika', () => {
   test
     .stderr()
     .do(() =>
-      cmd.run(['--config', resolve('./test/testConfigs/probes/noProbes.yml')])
+      cmd.run([
+        '--verbose',
+        '--config',
+        resolve('./test/testConfigs/probes/noProbes.yml'),
+      ])
     )
     .catch((error) => {
       expect(error.message).to.contain(
