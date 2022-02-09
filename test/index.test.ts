@@ -433,6 +433,30 @@ describe('monika', () => {
     .stdout()
     .do(() =>
       cmd.run([
+        '--insomnia',
+        resolve('./src/components/config/__tests__/petstore.insomnia.yaml'),
+      ])
+    )
+    .it('runs with insomnia file config', (ctx) => {
+      expect(ctx.stdout).to.contain('Starting Monika.')
+    })
+
+  test
+    .stdout()
+    .do(() =>
+      cmd.run([
+        '--postman',
+        resolve('./test/testConfigs/simple.postman_collection.json'),
+      ])
+    )
+    .it('runs with postman file', (ctx) => {
+      expect(ctx.stdout).to.contain('Starting Monika.')
+    })
+
+  test
+    .stdout()
+    .do(() =>
+      cmd.run([
         '-c',
         resolve('./test/testConfigs/manyNotif.yml'),
         resolve('./test/testConfigs/manyProbes.yml'),
