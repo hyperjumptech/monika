@@ -1,6 +1,6 @@
 # This workflow will run tests using node and then publish a package to Snapcraft when a release is created
 
-name: Upload Binary
+name: Publish to Snapcraft
 
 on:
   release:
@@ -26,15 +26,12 @@ jobs:
         name: Run production test
   build:
     runs-on: ubuntu-latest
+    needs: test
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
           node-version: 16
-      - run: npm ci
-        name: Install dependencies
-      - run: npm test
-        name: Run tests
       - run: npm install -g oclif
         name: Install Oclif
       - run: oclif pack tarballs --targets=linux-x64 --no-xz

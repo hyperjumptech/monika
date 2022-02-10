@@ -14,7 +14,3 @@ parts:
   monika:
     plugin: dump
     source: ./monika.tar.gz
-    override-pull: |
-      snapcraftctl pull
-      CLI_VERSION=$(grep \"version\": packages/cli/package.json | head -n 1 | awk '{print $2}' | tr -d \" | tr -d \,)
-      snapcraftctl set-version $CLI_VERSION
