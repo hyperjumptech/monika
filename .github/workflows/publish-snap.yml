@@ -32,6 +32,8 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: 16
+      - run: npm ci
+        name: Install dependencies
       - run: npm install -g oclif
         name: Install Oclif
       - run: oclif pack tarballs --targets=linux-x64 --no-xz
