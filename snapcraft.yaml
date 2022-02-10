@@ -1,0 +1,20 @@
+name: monika
+version: git
+summary: Synthetic monitoring made easy
+description: Monika is a command line monitoring tool
+confinement: devmode
+grade: stable
+base: core20
+
+apps:
+  monika:
+    command: bin/run
+
+parts:
+  monika:
+    plugin: dump
+    source: ./monika.tar.gz
+    override-pull: |
+      snapcraftctl pull
+      CLI_VERSION=$(grep \"version\": packages/cli/package.json | head -n 1 | awk '{print $2}' | tr -d \" | tr -d \,)
+      snapcraftctl set-version $CLI_VERSION
