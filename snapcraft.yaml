@@ -5,7 +5,7 @@ description: |
   Monika is a command-line application for synthetic monitoring. 
 
   The name Monika stands for "Monitoring Berkala", which means "periodic monitoring" in the Indonesian language.
-confinement: devmode
+confinement: strict
 license: MIT
 grade: stable
 base: core20
@@ -14,12 +14,17 @@ apps:
   monika:
     command: bin/run
 
+plugs:
+  desktop:
+
 parts:
   monika:
     plugin: dump
     source: ./monika.tar.gz
     override-pull: |
       sudo apt-get install -y jq curl
-      CLI_VERSION=$(curl https://api.github.com/repos/dennypradipta/monika/releases/latest -s | jq .tag_name -r)
+      CLI_VERSION=$(curl https://api.github.com/repos/hyperjumptech/monika/releases/latest -s | jq .tag_name -r)
       snapcraftctl set-version $CLI_VERSION
       snapcraftctl pull
+    stage-packages:
+      - libnotify-bin
