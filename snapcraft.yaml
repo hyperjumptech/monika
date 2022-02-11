@@ -14,3 +14,8 @@ parts:
   monika:
     plugin: dump
     source: ./monika.tar.gz
+    override-pull: |
+      sudo apt-get install -y jq curl
+      CLI_VERSION=$(curl https://api.github.com/repos/hyperjumptech/monika/releases/latest -s | jq .name -r)
+      snapcraftctl set-version $CLI_VERSION
+      snapcraftctl pull
