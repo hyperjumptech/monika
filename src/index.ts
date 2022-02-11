@@ -22,10 +22,10 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Command, flags } from '@oclif/command'
+import { Command, Flags as flags } from '@oclif/core'
 import boxen from 'boxen'
 import chalk from 'chalk'
-import cli from 'cli-ux'
+import { CliUx } from '@oclif/core'
 import fs from 'fs'
 import cron, { ScheduledTask } from 'node-cron'
 import {
@@ -56,7 +56,7 @@ import { log } from './utils/pino'
 import path from 'path'
 import isUrl from 'is-url'
 import SymonClient from './symon'
-import { ExitError, handle as oclifErrHandler } from '@oclif/errors'
+import { Errors } from '@oclif/core'
 
 const em = getEventEmitter()
 let symonClient: SymonClient
@@ -107,7 +107,7 @@ class Monika extends Command {
       char: 'c',
       description:
         'JSON configuration filename or URL. If none is supplied, will look for monika.json in the current directory',
-      default: () => getDefaultConfig(),
+      default: () => Promise.resolve(getDefaultConfig()),
       env: 'MONIKA_JSON_CONFIG',
       multiple: true,
     }),
@@ -212,7 +212,7 @@ class Monika extends Command {
 
   /* eslint-disable complexity */
   async run(): Promise<void> {
-    const { flags } = this.parse(Monika)
+    const { flags } = await this.parse(Monika)
 
     try {
       if (flags['create-config']) {
@@ -232,7 +232,7 @@ class Monika extends Command {
         let ans
 
         if (!flags.force) {
-          ans = await cli.prompt(
+          ans = await CliUx.ux.prompt(
             'Are you sure you want to flush all logs in monika-logs.db (Y/n)?'
           )
         }
@@ -489,8 +489,8 @@ Please refer to the Monika documentations on how to how to configure notificatio
       await symonClient.sendStatus({ isOnline: false })
     }
 
-    if (error instanceof ExitError) {
-      return oclifErrHandler(error)
+    if (error instanceof Errors.ExitError) {
+      return Errors.handle(error)
     }
 
     throw error
