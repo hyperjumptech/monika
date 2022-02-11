@@ -145,7 +145,12 @@ const addDefaultNotifications = (config: Partial<Config>): Partial<Config> => {
 
 export const setupConfig = async (flags: any) => {
   // check for default config path when -c/--config not provided
-  if (flags.config.length === 0 && !flags.har && !flags.postman) {
+  if (
+    flags.config.length === 0 &&
+    flags.har === undefined &&
+    flags.postman === undefined &&
+    flags.insomnia === undefined
+  ) {
     throw new Error(
       'Configuration file not found. By default, Monika looks for monika.yml configuration file in the current directory.\n\nOtherwise, you can also specify a configuration file using -c flag as follows:\n\nmonika -c <path_to_configuration_file>\n\nYou can create a configuration file via web interface by opening this web app: https://hyperjumptech.github.io/monika-config-generator/'
     )
