@@ -471,13 +471,12 @@ export default function IndexPage() {
               <Link href="/quick-start">
                 <a
                   className="link15 button"
-                  onClick={() => {
-                    console.log('masuk')
+                  onClick={() =>
                     event({
                       action: 'cta_button_footer',
                       category: 'cta_button',
                     })
-                  }}
+                  }
                 >
                   Start Now
                 </a>
