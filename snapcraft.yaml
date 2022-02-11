@@ -1,12 +1,10 @@
 name: monika
 adopt-info: monika
-source-code: https://github.com/hyperjumptech/monika.git
-website: https://monika.hyperjump.tech
 summary: Synthetic monitoring made easy
 description: |
-  Monika is a command-line application for synthetic monitoring. The name Monika stands for "Monitoring Berkala", which means "periodic monitoring" in the Indonesian language.
-
-  Please see the [overview](https://hyperjumptech.github.io/monika/overview) to see documentation on how to install and how to use Monika.
+  Monika is a command-line application for synthetic monitoring. 
+  
+  The name Monika stands for "Monitoring Berkala", which means "periodic monitoring" in the Indonesian language.
 confinement: devmode
 license: MIT
 grade: stable
