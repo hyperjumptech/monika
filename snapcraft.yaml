@@ -9,7 +9,7 @@ description: |
   Please see the [overview](https://hyperjumptech.github.io/monika/overview) to see documentation on how to install and how to use Monika.
 confinement: devmode
 license: MIT
-grade: devel
+grade: stable
 base: core20
 
 apps:
