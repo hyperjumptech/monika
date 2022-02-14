@@ -15,7 +15,11 @@ apps:
     command: bin/run
 
 plugs:
-  desktop:
+  - desktop
+  - desktop-legacy
+  - network
+  - home
+  - removable-media
 
 parts:
   monika:
