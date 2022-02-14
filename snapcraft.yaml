@@ -17,6 +17,8 @@ apps:
       - desktop
       - desktop-legacy
       - network
+      - network-bind
+      - network-observe
       - home
       - removable-media
 
