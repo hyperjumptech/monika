@@ -13,13 +13,12 @@ base: core20
 apps:
   monika:
     command: bin/run
-
-plugs:
-  - desktop
-  - desktop-legacy
-  - network
-  - home
-  - removable-media
+    plugs:
+      - desktop
+      - desktop-legacy
+      - network
+      - home
+      - removable-media
 
 parts:
   monika:
