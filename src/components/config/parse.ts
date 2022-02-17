@@ -29,18 +29,21 @@ import { parseHarFile } from './parse-har'
 import path from 'path'
 import yml from 'js-yaml'
 import parseInsomnia from './parse-insomnia'
+import isUrl from 'is-url'
+import { fetchConfig } from './fetch'
 
-export const parseConfig = (
-  configPath: string,
+export const parseConfig = async (
+  source: string,
   type: string
-): Partial<Config> => {
-  // Read file from configPath
+): Promise<Partial<Config>> => {
   try {
-    // Read file from configPath
-    const configString = readFileSync(configPath, 'utf-8')
+    const configString = isUrl(source)
+      ? await fetchConfig(source)
+      : readFileSync(source, 'utf-8')
+
     if (configString.length === 0)
-      throw new Error(`Failed to read ${configPath}, got empty.`)
-    const ext = path.extname(configPath)
+      throw new Error(`Failed to read ${source}, got empty.`)
+    const ext = path.extname(source)
 
     if (type === 'har') return parseHarFile(configString)
     if (type === 'postman') return parseConfigFromPostman(configString)
@@ -51,10 +54,11 @@ export const parseConfig = (
       const cfg = yml.load(configString, { json: true })
       return cfg as unknown as Config
     }
+
     return JSON.parse(configString)
   } catch (error: any) {
-    if (error.code === 'ENOENT' && error.path === configPath) {
-      throw new Error(`Configuration file not found: ${configPath}.`)
+    if (error.code === 'ENOENT' && error.path === source) {
+      throw new Error(`Configuration file not found: ${source}.`)
     }
 
     if (error.name === 'SyntaxError') {

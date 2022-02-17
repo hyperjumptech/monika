@@ -30,6 +30,7 @@ import fs from 'fs'
 import cron, { ScheduledTask } from 'node-cron'
 import {
   createConfig,
+  DEFAULT_CONFIG_INTERVAL,
   getConfigIterator,
   updateConfig,
 } from './components/config'
@@ -55,7 +56,7 @@ import { log } from './utils/pino'
 import path from 'path'
 import isUrl from 'is-url'
 import SymonClient from './symon'
-import { ExitError } from '@oclif/errors'
+import { ExitError, handle as oclifErrHandler } from '@oclif/errors'
 
 const em = getEventEmitter()
 let symonClient: SymonClient
@@ -119,7 +120,7 @@ class Monika extends Command {
     'config-interval': flags.integer({
       description:
         'The interval (in seconds) for periodic config checking if url is used as config source',
-      default: 900,
+      default: DEFAULT_CONFIG_INTERVAL,
       dependsOn: ['config'],
     }),
 
@@ -210,7 +211,7 @@ class Monika extends Command {
   }
 
   /* eslint-disable complexity */
-  async run() {
+  async run(): Promise<void> {
     const { flags } = this.parse(Monika)
 
     try {
@@ -288,8 +289,8 @@ class Monika extends Command {
 
         const startupMessage = this.buildStartupMessage(
           config,
-          flags.verbose,
           !abortCurrentLooper,
+          flags.verbose,
           isSymonMode
         )
 
@@ -380,10 +381,10 @@ class Monika extends Command {
 
   buildStartupMessage(
     config: Config,
-    verbose = false,
     firstRun: boolean,
+    verbose = false,
     isSymonMode = false
-  ) {
+  ): string {
     if (isSymonMode) {
       return 'Running in Symon mode'
     }
@@ -393,7 +394,7 @@ class Monika extends Command {
     let startupMessage = ''
 
     // warn if config is empty
-    if ((config.notifications?.length ?? 0) === 0) {
+    if ((notifications?.length ?? 0) === 0) {
       const NO_NOTIFICATIONS_MESSAGE = `Notifications has not been set. We will not be able to notify you when an INCIDENT occurs!
 Please refer to the Monika documentations on how to how to configure notifications (e.g., Telegram, Slack, Desktop notification, etc.) at https://monika.hyperjump.tech/guides/notifications.`
 
@@ -481,7 +482,7 @@ Please refer to the Monika documentations on how to how to configure notificatio
     return startupMessage
   }
 
-  async catch(error: Error) {
+  async catch(error: Error): Promise<any> {
     super.catch(error)
 
     if (symonClient) {
@@ -489,8 +490,7 @@ Please refer to the Monika documentations on how to how to configure notificatio
     }
 
     if (error instanceof ExitError) {
-      const oclifHandler = require('@oclif/errors/handle')
-      return oclifHandler(error)
+      return oclifErrHandler(error)
     }
 
     throw error
