@@ -23,24 +23,12 @@
  **********************************************************************************/
 
 import axios from 'axios'
-import yml, { YAMLException } from 'js-yaml'
-import { Config } from '../../interfaces/config'
 
-export const fetchConfig = async (url: string): Promise<Partial<Config>> => {
+export const fetchConfig = async (url: string): Promise<string> => {
   try {
     const { data } = await axios.get(url)
-
-    const json =
-      typeof data === 'string' ? yml.load(data, { json: true }) : data
-
-    return json
-  } catch (error) {
-    if (error instanceof YAMLException) {
-      throw new SyntaxError(
-        'The remote configuration file is in invalid YAML format!'
-      )
-    }
-
+    return data
+  } catch {
     throw new Error(`The configuration file in ${url} is unreachable. Please check the URL again or your internet connection. 
     `)
   }
