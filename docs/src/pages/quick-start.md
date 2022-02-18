@@ -7,7 +7,7 @@ At the center of Monika is a configuration file. Follow the steps below to quick
 
 ## Installation
 
-There are three ways to install Monika
+There are four ways to install Monika
 
 1. Install using [npm](https://npmjs.com) or [yarn](https://yarnpkg.com) (**Windows/Linux/Mac**).
 
@@ -36,6 +36,14 @@ There are three ways to install Monika
    UNIX-based users may have to run `sudo chmod +x monika` in order to execute Monika binary file. Please note that currently, only x64 architecture is supported.
 
    In order to run Monika binary file, you must download the `node_sqlite3-<os>-<arch>.node` file according to your OS, rename it to `node_sqlite3.node` and put it in one folder with the Monika binary file.
+
+4. Install via [Chocolatey](https://community.chocolatey.org/packages/monika) (**Windows**)
+
+   If you are using Windows and familliar with chocolatey, you can search the monika package in [Chocolatey Community Repository](https://community.chocolatey.org/). Type in `monika` in the search bar and you will find the package, then you can see the package detail and install it with just this command in Windows Power Shell (With Administrator permission)
+
+   ```
+   choco install monika
+   ```
 
 ## Download the configuration file
 
