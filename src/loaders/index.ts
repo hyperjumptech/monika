@@ -38,7 +38,8 @@ import { getPublicNetworkInfo } from '../utils/public-ip'
 import '../events/subscribers/application'
 import { jobsLoader } from './jobs'
 
-export default async function init(flags: any, cliConfig: IConfig) {
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export default async function init(flags: any, cliConfig: IConfig): Promise<void> {
   const eventEmitter = getEventEmitter()
   const isTestEnvironment = process.env.CI || process.env.NODE_ENV === 'test'
   const isSymonMode = Boolean(flags.symonUrl) && Boolean(flags.symonKey)

@@ -88,6 +88,7 @@
     "ssl-checker": "2.0.7",
     "stun": "^2.1.0",
     "tslib": "^1.14.1",
+    "unzip-stream": "^0.3.1",
     "xstate": "^4.24.0",
     "yaml": "1.10.2"
   },
@@ -114,7 +115,6 @@
     "bats-support": "^0.3.0",
     "chai": "^4.3.4",
     "chai-spies": "^1.0.0",
-    "cross-env": "^7.0.3",
     "eslint": "^7.32.0",
     "eslint-config-oclif": "^4.0.0",
     "eslint-config-oclif-typescript": "^1.0.2",
