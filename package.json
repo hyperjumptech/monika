@@ -17,7 +17,7 @@
       "-h"
     ],
     "bin": "monika",
-    "commands": "lib/commands",
+    "default": "monika",
     "dirname": "monika",
     "plugins": [
       "@oclif/plugin-version",
