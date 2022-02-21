@@ -130,7 +130,7 @@ async function checkThresholdsAndSendAlert(
  * @param {number} checkOrder the order of probe being processed
  * @param {object} probe contains all the probes
  * @param {array} notifications contains all the notifications
- * @param {boolean} verboseLogs store all requests to database
+ * @param {boolean} verboseLogs flag for log verbosity
  */
 export async function doProbe(
   checkOrder: number,
@@ -162,7 +162,7 @@ export async function doProbe(
         response: probeRes,
       })
 
-      // Add to an array to be accessed by another request
+      // Add to a response array to be accessed by another request
       responses.push(probeRes)
 
       requestLog.setResponse(probeRes)
