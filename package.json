@@ -10,13 +10,15 @@
     "monika": "./bin/run"
   },
   "oclif": {
-    "bin": "monika",
-    "additionalHelpFlags": [
-      "-h"
-    ],
     "additionalVersionFlags": [
       "-v"
     ],
+    "additionalHelpFlags": [
+      "-h"
+    ],
+    "bin": "monika",
+    "commands": "lib/commands",
+    "dirname": "monika",
     "plugins": [
       "@oclif/plugin-version",
       "@oclif/plugin-help"
@@ -28,17 +30,17 @@
     "monitoring"
   ],
   "scripts": {
-    "clean": "rm -rf coverage lib tsconfig.tsbuildinfo",
+    "clean": "rm -rf coverage lib tsconfig.tsbuildinfo oclif.manifest.json",
     "preinstall": "node scripts/preinstall.js",
     "pretest": "npm run check-format",
     "posttest": "eslint . --ext .ts --config .eslintrc",
-    "prepack": "npm run clean && tsc -b && oclif-dev readme",
+    "prepack": "npm run clean && tsc -b && oclif manifest",
     "start": "npm run prepack && ./bin/dev",
     "start:prod": "npm run prepack && ./bin/run",
     "test": "npm run clean && cross-env NODE_ENV=test nyc --reporter=lcov --extension .ts mocha --config .mocharc.json --forbid-only \"{src,test}/**/*.test.ts\"",
     "cli-test": "npx bats test/bats/cli.bats",
     "prod_test": "cross-env NODE_ENV=test nyc --extension .ts mocha --forbid-only \"prod_test/**/*.test.ts\"",
-    "version": "oclif-dev readme && git add README.md",
+    "version": "oclif readme && git add README.md",
     "format": "prettier --write .",
     "check-format": "prettier --check .",
     "pkg": "npm run prepack && pkg . --compress brotli"
@@ -124,7 +126,7 @@
     "node-request-interceptor": "^0.6.3",
     "nodemailer-mock": "^1.5.4",
     "nyc": "^15.1.0",
-    "oclif": "^2.4.4",
+    "oclif": "^2.4.5",
     "prettier": "2.5.1",
     "ts-node": "^10.4.0",
     "typescript": "4.4.4"
@@ -139,6 +141,8 @@
   "files": [
     "/bin",
     "/lib",
+    "/npm-shrinkwrap.json",
+    "/oclif.manifest.json",
     "/scripts",
     "/db/migrations"
   ],
