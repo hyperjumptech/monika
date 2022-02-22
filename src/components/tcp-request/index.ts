@@ -22,28 +22,65 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { RequestConfig } from './request'
+import net from 'net'
+import { differenceInMilliseconds } from 'date-fns'
 
-export interface ProbeAlert {
-  query: string
-  message?: string
-  id?: string
-}
-
-export type Socket = {
+type TCPRequest = {
   host: string
   port: number
   data: string | Uint8Array
+  timeout?: number
 }
 
-export interface Probe {
-  id: string
-  name: string
-  description?: string
-  interval?: number
-  requests: RequestConfig[]
-  socket?: Socket
-  incidentThreshold: number
-  recoveryThreshold: number
-  alerts: ProbeAlert[]
+type Result = {
+  duration: number
+  status: 'UP' | 'DOWN'
+  message: string
+}
+
+export async function check(tcpRequest: TCPRequest): Promise<Result> {
+  const { host, port, data, timeout } = tcpRequest
+
+  try {
+    const startTime = new Date()
+    const resp = await send({ host, port, data, timeout: timeout ?? 10 })
+    const endTime = new Date()
+    const duration = differenceInMilliseconds(endTime, startTime)
+    const responseData = Buffer.from(resp, 'utf8')
+    const isAlertTriggered = responseData?.length < 1
+
+    return { duration, status: isAlertTriggered ? 'DOWN' : 'UP', message: '' }
+  } catch (error: any) {
+    return { duration: 0, status: 'DOWN', message: error?.message }
+  }
+}
+
+async function send(tcpRequest: TCPRequest): Promise<any> {
+  const { host, port, data, timeout } = tcpRequest
+
+  return new Promise((resolve, reject) => {
+    const client = new net.Socket()
+    const requestTimeout = setTimeout(() => {
+      client.destroy()
+    }, timeout)
+
+    client.connect(port, host, () => {
+      if (data) {
+        client.write(data)
+      }
+    })
+
+    client.on('data', (data) => {
+      resolve(data)
+
+      // clean timeout and kill client after server's response
+      clearTimeout(requestTimeout)
+      client.destroy()
+    })
+
+    client.on('error', (err) => {
+      clearTimeout(requestTimeout)
+      reject(err)
+    })
+  })
 }

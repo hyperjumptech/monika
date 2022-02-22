@@ -108,6 +108,11 @@ export async function getMessageForAlert({
           return 'Connection reset'
         case 2:
           return 'Connection refused'
+        // for TCP request
+        case 5:
+          return isRecovery
+            ? 'The request is back to normal'
+            : 'Response size is 0, expecting more than 0'
 
         default:
           return status

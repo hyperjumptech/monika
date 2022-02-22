@@ -34,9 +34,13 @@ import { getEventEmitter } from '../../utils/events'
 import { log } from '../../utils/pino'
 import { RequestLog } from '../logger'
 import { sendAlerts } from '../notification'
-import { processThresholds } from '../notification/process-server-status'
+import {
+  processThresholds,
+  shouldSendNotification,
+} from '../notification/process-server-status'
 import { probing } from './probing'
 import { logResponseTime } from '../logger/response-time-log'
+import { check } from '../tcp-request'
 
 // TODO: move this to interface file?
 interface ProbeStatusProcessed {
@@ -141,9 +145,34 @@ export async function doProbe(
   const eventEmitter = getEventEmitter()
   const responses = []
 
+  if (probe?.socket) {
+    const { id, incidentThreshold, recoveryThreshold, socket } = probe
+    const { host, port, data } = socket
+    const url = `${host}:${port}`
+    const tcpRequestID = `tcp-${id}`
+    const { duration, status } = await check({ host, port, data })
+    const timeNow = new Date().toISOString()
+    const logMessage = `${timeNow} [TCP] id:${id} ${url} ${duration}ms`
+    const isAlertTriggered = status === 'DOWN'
+
+    isAlertTriggered ? log.warn(logMessage) : log.info(logMessage)
+    logResponseTime(duration)
+
+    processTCPRequestResult({
+      probeID: id,
+      tcpRequestID,
+      tcpRequestURL: url,
+      incidentThreshold,
+      recoveryThreshold,
+      responseTime: duration,
+      isAlertTriggered,
+      notifications,
+    }).catch((error) => log.error(error.message))
+  }
+
   for (
     let requestIndex = 0;
-    requestIndex < probe.requests.length;
+    requestIndex < probe?.requests?.length;
     requestIndex++
   ) {
     const request = probe.requests[requestIndex]
@@ -154,7 +183,7 @@ export async function doProbe(
       // eslint-disable-next-line no-await-in-loop
       const probeRes: ProbeRequestResponse = await probing(request, responses)
 
-      logResponseTime(probeRes)
+      logResponseTime(probeRes.responseTime)
 
       eventEmitter.emit(events.probe.response.received, {
         probe,
@@ -228,5 +257,60 @@ export async function doProbe(
         requestLog.saveToDatabase().catch((error) => log.error(error.message))
       }
     }
+  }
+}
+
+type ProcessTCPRequestResult = {
+  probeID: string
+  tcpRequestID: string
+  tcpRequestURL: string
+  incidentThreshold: number
+  recoveryThreshold: number
+  responseTime: number
+  isAlertTriggered: boolean
+  notifications: Array<Notification>
+}
+
+async function processTCPRequestResult({
+  probeID,
+  tcpRequestID,
+  tcpRequestURL,
+  incidentThreshold,
+  recoveryThreshold,
+  responseTime,
+  isAlertTriggered,
+  notifications,
+}: ProcessTCPRequestResult) {
+  const defaultAlertQuery = 'response.size < 1'
+  const { state, shouldSendNotification: shouldSendNotif } =
+    shouldSendNotification({
+      id: tcpRequestID,
+      alertQuery: defaultAlertQuery,
+      incidentThreshold,
+      recoveryThreshold,
+      isAlertTriggered,
+    })
+
+  if (shouldSendNotif) {
+    // TODO: Remove validation below
+    // validation is used because it is needed to send alert
+    const validation: ValidatedResponse = {
+      alert: { query: defaultAlertQuery, message: '' },
+      isAlertTriggered: true,
+      response: {
+        status: 5,
+        responseTime,
+        data: {},
+        headers: {},
+      },
+    }
+
+    await sendAlerts({
+      probeID,
+      url: tcpRequestURL,
+      probeState: state,
+      notifications: notifications ?? [],
+      validation,
+    })
   }
 }
