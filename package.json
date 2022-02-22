@@ -146,8 +146,8 @@
     "/scripts",
     "/db/migrations"
   ],
-  "homepage": "https://github.com/https://github.com/hyperjumptech/monika",
-  "bugs": "https://github.com/https://github.com/hyperjumptech/monika/issues",
+  "homepage": "https://monika.hyperjump.tech",
+  "bugs": "https://github.com/hyperjumptech/monika/issues",
   "repository": "https://github.com/hyperjumptech/monika",
   "husky": {
     "hooks": {
