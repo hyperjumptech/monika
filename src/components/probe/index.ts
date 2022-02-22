@@ -282,6 +282,7 @@ async function processTCPRequestResult({
   notifications,
 }: ProcessTCPRequestResult) {
   const defaultAlertQuery = 'response.size < 1'
+  const defaultMessage = 'Response size is 0, expecting more than 0'
   const { state, shouldSendNotification: shouldSendNotif } =
     shouldSendNotification({
       id: tcpRequestID,
@@ -295,7 +296,7 @@ async function processTCPRequestResult({
     // TODO: Remove validation below
     // validation is used because it is needed to send alert
     const validation: ValidatedResponse = {
-      alert: { query: defaultAlertQuery, message: '' },
+      alert: { query: defaultAlertQuery, message: defaultMessage },
       isAlertTriggered: true,
       response: {
         status: 5,

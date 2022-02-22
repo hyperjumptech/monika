@@ -110,9 +110,7 @@ export async function getMessageForAlert({
           return 'Connection refused'
         // for TCP request
         case 5:
-          return isRecovery
-            ? 'The request is back to normal'
-            : 'Response size is 0, expecting more than 0'
+          return isRecovery ? 'The request is back to normal' : alert?.message
 
         default:
           return status
