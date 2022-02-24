@@ -238,3 +238,6 @@ fly.toml
 
 # Oclif
 oclif.manifest.json
+
+# Archives
+*.tar.gz
