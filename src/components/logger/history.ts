@@ -441,5 +441,5 @@ export async function getSummary() {
  * closeLog closes the database
  */
 export async function closeLog() {
-  await db.close()
+  await db?.close()
 }
