@@ -235,3 +235,6 @@ monika.yaml
 
 # Fly.io
 fly.toml
+
+# Archives
+*.tar.gz

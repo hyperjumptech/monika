@@ -8,6 +8,8 @@ Monika is a command line application for synthetic monitoring. The name Monika s
 
 ## How to Use
 
+[![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-black.svg)](https://snapcraft.io/monika)
+
 Please see the [overview](https://hyperjumptech.github.io/monika/overview) to see documentations on how to install and how to use Monika.
 
 ## Contributing
