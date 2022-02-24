@@ -34,6 +34,7 @@ import PrimaryButton from '../components/homepage/primary-button'
 import TestimonialsCard from '../components/homepage/testimonials-card'
 import FeatureCard from '../components/homepage/feature-card'
 import ArticleCard from '../components/homepage/article-card'
+import { event } from 'lib/gtag'
 
 export default function IndexPage() {
   const [isOpenMobileMenu, setOpenMobileMenu] = useState(false)
@@ -52,18 +53,15 @@ export default function IndexPage() {
         <div data-role="Header" className="header-container">
           <header className="header">
             <div className="logo">
-              <a
-                href="https://monika.hyperjump.tech/"
-                target="_blank"
-                rel="noreferrer noopener"
-                className="link"
-              >
-                <img
-                  alt="image"
-                  src="/playground_assets/logo-monika-color%20%5B1%5D-1500h.png"
-                  className="image"
-                />
-              </a>
+              <Link href="/">
+                <a className="link">
+                  <img
+                    alt="image"
+                    src="/playground_assets/logo-monika-color%20%5B1%5D-1500h.png"
+                    className="image"
+                  />
+                </a>
+              </Link>
             </div>
             <div className="menu">
               <Link href="/overview">
@@ -133,20 +131,17 @@ export default function IndexPage() {
             style={{ display: isOpenMobileMenu ? 'block' : 'none' }}
           >
             <div className="top">
-              <a
-                href="https://monika.hyperjump.tech/"
-                target="_blank"
-                rel="noreferrer noopener"
-                className="link05"
-              >
-                <div className="logo1">
-                  <img
-                    alt="image"
-                    src="/playground_assets/logo-monika-color%20%5B1%5D-1500h.png"
-                    className="image01"
-                  />
-                </div>
-              </a>
+              <Link href="/">
+                <a className="link05">
+                  <div className="logo1">
+                    <img
+                      alt="image"
+                      src="/playground_assets/logo-monika-color%20%5B1%5D-1500h.png"
+                      className="image01"
+                    />
+                  </div>
+                </a>
+              </Link>
               <div
                 data-type="CloseMobileMenu"
                 className="close-menu"
@@ -243,32 +238,34 @@ export default function IndexPage() {
                   src="/playground_assets/socials-group-200h.png"
                   className="image04"
                 />
-                <a
-                  href="https://monika.hyperjump.tech/quick-start"
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  className="link11"
-                  style={{ display: 'block' }}
-                >
-                  <PrimaryButton
-                    button="Get Started in 30 seconds"
-                    rootClassName="rootClassName"
-                    className="component02"
-                  ></PrimaryButton>
-                </a>
+                <Link href="/quick-start">
+                  <a
+                    className="link11"
+                    style={{ display: 'block' }}
+                    onClick={() =>
+                      event({
+                        action: 'cta_button_hero',
+                        category: 'cta_button',
+                      })
+                    }
+                  >
+                    <PrimaryButton
+                      button="Get Started in 30 seconds"
+                      rootClassName="rootClassName"
+                      className="component02"
+                    ></PrimaryButton>
+                  </a>
+                </Link>
                 <div className="container03 space-x-4">
                   <a
                     href="https://github.com/hyperjumptech/monika"
                     target="_blank"
                     rel="noreferrer noopener"
-                    className="link12"
                   >
-                    <a href="https://github.com/hyperjumptech/monika/stargazers">
-                      <img
-                        alt="GitHub stars"
-                        src="https://img.shields.io/github/stars/hyperjumptech/monika?style=for-the-badge"
-                      />
-                    </a>
+                    <img
+                      alt="GitHub stars"
+                      src="https://img.shields.io/github/stars/hyperjumptech/monika?style=for-the-badge"
+                    />
                   </a>
                   <img
                     alt="npm"
@@ -471,14 +468,19 @@ export default function IndexPage() {
               </span>
             </div>
             <div className="container22">
-              <a
-                href="https://monika.hyperjump.tech/quick-start"
-                target="_blank"
-                rel="noreferrer noopener"
-                className="link15 button"
-              >
-                Start Now
-              </a>
+              <Link href="/quick-start">
+                <a
+                  className="link15 button"
+                  onClick={() =>
+                    event({
+                      action: 'cta_button_footer',
+                      category: 'cta_button',
+                    })
+                  }
+                >
+                  Start Now
+                </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -486,32 +488,24 @@ export default function IndexPage() {
           <footer className="container23">
             <div className="container24">
               <div className="container25">
-                <a
-                  href="https://monika.hyperjump.tech/"
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  className="link16"
-                >
-                  <img
-                    alt="image"
-                    src="/playground_assets/logo-monika-color%20%5B1%5D-1500h.png"
-                    className="image09"
-                  />
-                </a>
+                <Link href="/">
+                  <a className="link16">
+                    <img
+                      alt="image"
+                      src="/playground_assets/logo-monika-color%20%5B1%5D-1500h.png"
+                      className="image09"
+                    />
+                  </a>
+                </Link>
               </div>
               <div className="container26">
                 <span className="text27">Resources</span>
                 <Link href="/overview">
                   <a className="link17">Documentation</a>
                 </Link>
-                <a
-                  href="https://monika.hyperjump.tech/guides/examples"
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  className="link18"
-                >
-                  Example
-                </a>
+                <Link href="/guides/examples">
+                  <a className="link18">Example</a>
+                </Link>
                 <a
                   href="https://monika-config.hyperjump.tech/"
                   target="_blank"

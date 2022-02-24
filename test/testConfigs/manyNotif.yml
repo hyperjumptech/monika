@@ -2,8 +2,6 @@ notifications:
   - id: unique-id
     type: webhook
     data:
-      url: http://www.example.com
+      url: https://www.example.com
   - id: unique-id
-    type: webhook
-    data:
-      url: http://www.my-webhook.com
+    type: desktop
