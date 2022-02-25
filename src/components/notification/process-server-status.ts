@@ -28,6 +28,8 @@ import { Probe } from '../../interfaces/probe'
 import { ServerAlertState } from '../../interfaces/probe-status'
 import { ValidatedResponse } from '../../plugins/validate-response'
 
+let isFirstTimeSendEvent = true
+
 export type ServerAlertStateContext = {
   incidentThreshold: number
   recoveryThreshold: number
@@ -156,9 +158,12 @@ export const processThresholds = ({
       alertQuery: alert.query,
       state: state.value as 'UP' | 'DOWN',
       shouldSendNotification:
+        isFirstTimeSendEvent ||
         (state.value === 'DOWN' && prevStateValue === 'UP') ||
         (state.value === 'UP' && prevStateValue === 'DOWN'),
     })
+
+    isFirstTimeSendEvent = false
   }
 
   return results
