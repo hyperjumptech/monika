@@ -266,7 +266,7 @@ describe('processThresholds', () => {
 describe('Send notification based on threshold', () => {
   describe('not send notification', () => {
     it('the incident does not cross the threshold', () => {
-      // arrange
+      // act
       const { state, shouldSendNotification } = getNotificationState({
         id: 'random-id',
         alertQuery: 'response.size < 0',
@@ -275,34 +275,36 @@ describe('Send notification based on threshold', () => {
         isAlertTriggered: true,
       })
 
+      // assert
       expect(state).eq('UP')
       expect(shouldSendNotification).eq(false)
     })
 
     it('the recovery does not cross the threshold', () => {
-      // arrange
+      // act
       getNotificationState({
-        id: 'random-id',
-        alertQuery: 'response.size < 0',
+        id: 'random-id-2',
+        alertQuery: 'response.size < 1',
         incidentThreshold: 2,
         recoveryThreshold: 2,
         isAlertTriggered: true,
       })
       getNotificationState({
-        id: 'random-id',
-        alertQuery: 'response.size < 0',
+        id: 'random-id-2',
+        alertQuery: 'response.size < 1',
         incidentThreshold: 2,
         recoveryThreshold: 2,
         isAlertTriggered: true,
       })
       const { state, shouldSendNotification } = getNotificationState({
-        id: 'random-id',
-        alertQuery: 'response.size < 0',
-        incidentThreshold: 3,
-        recoveryThreshold: 3,
+        id: 'random-id-2',
+        alertQuery: 'response.size < 1',
+        incidentThreshold: 2,
+        recoveryThreshold: 2,
         isAlertTriggered: false,
       })
 
+      // assert
       expect(state).eq('DOWN')
       expect(shouldSendNotification).eq(false)
     })
@@ -310,50 +312,51 @@ describe('Send notification based on threshold', () => {
 
   describe('send notification', () => {
     it('the incident cross the threshold', () => {
-      // arrange
-      const { state, shouldSendNotification } = getNotificationState({
-        id: 'random-id',
-        alertQuery: 'response.size < 0',
+      // act
+      const { shouldSendNotification } = getNotificationState({
+        id: 'random-id-3',
+        alertQuery: 'response.size < 2',
         incidentThreshold: 1,
         recoveryThreshold: 1,
         isAlertTriggered: true,
       })
 
-      expect(state).eq('DOWN')
+      // assert
       expect(shouldSendNotification).eq(true)
     })
 
     it('the recovery cross the threshold', () => {
-      // arrange
+      // act
       getNotificationState({
-        id: 'random-id',
-        alertQuery: 'response.size < 0',
+        id: 'random-id-4',
+        alertQuery: 'response.size < 3',
         incidentThreshold: 2,
         recoveryThreshold: 2,
         isAlertTriggered: true,
       })
       getNotificationState({
-        id: 'random-id',
-        alertQuery: 'response.size < 0',
+        id: 'random-id-4',
+        alertQuery: 'response.size < 3',
         incidentThreshold: 2,
         recoveryThreshold: 2,
         isAlertTriggered: true,
       })
       getNotificationState({
-        id: 'random-id',
-        alertQuery: 'response.size < 0',
+        id: 'random-id-4',
+        alertQuery: 'response.size < 3',
         incidentThreshold: 2,
         recoveryThreshold: 2,
         isAlertTriggered: false,
       })
       const { state, shouldSendNotification } = getNotificationState({
-        id: 'random-id',
-        alertQuery: 'response.size < 0',
+        id: 'random-id-4',
+        alertQuery: 'response.size < 3',
         incidentThreshold: 2,
         recoveryThreshold: 2,
         isAlertTriggered: false,
       })
 
+      // assert
       expect(state).eq('UP')
       expect(shouldSendNotification).eq(true)
     })

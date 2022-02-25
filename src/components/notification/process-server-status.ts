@@ -211,7 +211,8 @@ export function getNotificationState({
   return {
     state: currentStateValue as 'UP' | 'DOWN',
     shouldSendNotification:
-      (currentStateValue === 'DOWN' && prevStateValue === 'UP') ||
+      (currentStateValue === 'DOWN' &&
+        (prevStateValue === 'UP' || !prevStateValue)) ||
       (currentStateValue === 'UP' && prevStateValue === 'DOWN'),
   }
 }
