@@ -41,8 +41,15 @@ const intervals: Array<NodeJS.Timeout> = []
  * @returns {object} as probe
  */
 export function sanitizeProbe(probe: Probe, id: string): Probe {
-  const { name, incidentThreshold, recoveryThreshold, alerts } = probe
+  const { name, requests, incidentThreshold, recoveryThreshold, alerts } = probe
   probe.id = `${id}`
+  probe.requests = requests?.map((request) => {
+    if (!request.method) {
+      return { ...request, method: 'GET' }
+    }
+
+    return { ...request }
+  })
 
   if (!name) {
     probe.name = `monika_${probe.id}`

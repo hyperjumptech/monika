@@ -303,7 +303,7 @@ export const validateConfig = (configuration: Config): Validation => {
           return PROBE_REQUEST_INVALID_URL
         }
 
-        if (!HTTPMethods.includes(method ?? 'GET'.toUpperCase()))
+        if (!HTTPMethods.includes(method?.toUpperCase() ?? 'GET'))
           return PROBE_REQUEST_INVALID_METHOD
       }
     }
