@@ -28,6 +28,7 @@ import { Probe } from '../../../interfaces/probe'
 import { ServerAlertState } from '../../../interfaces/probe-status'
 import { ValidatedResponse } from '../../../plugins/validate-response'
 import {
+  getNotificationState,
   processThresholds,
   ServerAlertStateContext,
   serverAlertStateInterpreters,
@@ -259,5 +260,102 @@ describe('processThresholds', () => {
 
     // should not send notification again since state does not change
     expect(result[0].shouldSendNotification).to.equals(false)
+  })
+})
+
+describe('Send notification based on threshold', () => {
+  describe('not send notification', () => {
+    it('the incident does not cross the threshold', () => {
+      // arrange
+      const { state, shouldSendNotification } = getNotificationState({
+        id: 'random-id',
+        alertQuery: 'response.size < 0',
+        incidentThreshold: 3,
+        recoveryThreshold: 3,
+        isAlertTriggered: true,
+      })
+
+      expect(state).eq('UP')
+      expect(shouldSendNotification).eq(false)
+    })
+
+    it('the recovery does not cross the threshold', () => {
+      // arrange
+      getNotificationState({
+        id: 'random-id',
+        alertQuery: 'response.size < 0',
+        incidentThreshold: 2,
+        recoveryThreshold: 2,
+        isAlertTriggered: true,
+      })
+      getNotificationState({
+        id: 'random-id',
+        alertQuery: 'response.size < 0',
+        incidentThreshold: 2,
+        recoveryThreshold: 2,
+        isAlertTriggered: true,
+      })
+      const { state, shouldSendNotification } = getNotificationState({
+        id: 'random-id',
+        alertQuery: 'response.size < 0',
+        incidentThreshold: 3,
+        recoveryThreshold: 3,
+        isAlertTriggered: false,
+      })
+
+      expect(state).eq('DOWN')
+      expect(shouldSendNotification).eq(false)
+    })
+  })
+
+  describe('send notification', () => {
+    it('the incident cross the threshold', () => {
+      // arrange
+      const { state, shouldSendNotification } = getNotificationState({
+        id: 'random-id',
+        alertQuery: 'response.size < 0',
+        incidentThreshold: 1,
+        recoveryThreshold: 1,
+        isAlertTriggered: true,
+      })
+
+      expect(state).eq('DOWN')
+      expect(shouldSendNotification).eq(true)
+    })
+
+    it('the recovery cross the threshold', () => {
+      // arrange
+      getNotificationState({
+        id: 'random-id',
+        alertQuery: 'response.size < 0',
+        incidentThreshold: 2,
+        recoveryThreshold: 2,
+        isAlertTriggered: true,
+      })
+      getNotificationState({
+        id: 'random-id',
+        alertQuery: 'response.size < 0',
+        incidentThreshold: 2,
+        recoveryThreshold: 2,
+        isAlertTriggered: true,
+      })
+      getNotificationState({
+        id: 'random-id',
+        alertQuery: 'response.size < 0',
+        incidentThreshold: 2,
+        recoveryThreshold: 2,
+        isAlertTriggered: false,
+      })
+      const { state, shouldSendNotification } = getNotificationState({
+        id: 'random-id',
+        alertQuery: 'response.size < 0',
+        incidentThreshold: 2,
+        recoveryThreshold: 2,
+        isAlertTriggered: false,
+      })
+
+      expect(state).eq('UP')
+      expect(shouldSendNotification).eq(true)
+    })
   })
 })

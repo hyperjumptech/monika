@@ -177,7 +177,7 @@ export const processThresholds = ({
   return results
 }
 
-export function shouldSendNotification({
+export function getNotificationState({
   id,
   alertQuery,
   incidentThreshold,

@@ -36,7 +36,7 @@ import { RequestLog } from '../logger'
 import { sendAlerts } from '../notification'
 import {
   processThresholds,
-  shouldSendNotification,
+  getNotificationState,
 } from '../notification/process-server-status'
 import { probing } from './probing'
 import { logResponseTime } from '../logger/response-time-log'
@@ -283,16 +283,15 @@ async function processTCPRequestResult({
 }: ProcessTCPRequestResult) {
   const defaultAlertQuery = 'response.size < 1'
   const defaultMessage = 'Response size is 0, expecting more than 0'
-  const { state, shouldSendNotification: shouldSendNotif } =
-    shouldSendNotification({
-      id: tcpRequestID,
-      alertQuery: defaultAlertQuery,
-      incidentThreshold,
-      recoveryThreshold,
-      isAlertTriggered,
-    })
+  const { state, shouldSendNotification } = getNotificationState({
+    id: tcpRequestID,
+    alertQuery: defaultAlertQuery,
+    incidentThreshold,
+    recoveryThreshold,
+    isAlertTriggered,
+  })
 
-  if (shouldSendNotif) {
+  if (shouldSendNotification) {
     // TODO: Remove validation below
     // validation is used because it is needed to send alert
     const validation: ValidatedResponse = {
