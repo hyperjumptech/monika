@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.13] - 2022-02-17
+
+## Fixed
+
+- Insomnia flag error without -c default in CWD (#602)
+- Auto reload monika for non-default configuration (#604)
+
+## Added
+
+- Docs: revamp landing page (#598)
+- Docs: send cta click events to google analytics (#609)
+
 ## [1.6.12] - 2022-02-07
 
 ## Added

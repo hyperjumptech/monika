@@ -43,7 +43,7 @@ import {
   getLogLifeTimeInHour,
 } from '../components/logger/response-time-log'
 import fs from 'fs'
-import type { IConfig } from '@oclif/config'
+import type { Config as IConfig } from '@oclif/core'
 import events from '../events'
 import { Config } from '../interfaces/config'
 
