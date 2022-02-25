@@ -55,14 +55,16 @@ export async function check(tcpRequest: TCPRequest): Promise<Result> {
   }
 }
 
-async function send(tcpRequest: TCPRequest): Promise<any> {
+async function send(
+  tcpRequest: Omit<TCPRequest, 'timeout'> & { timeout: number }
+): Promise<any> {
   const { host, port, data, timeout } = tcpRequest
 
   return new Promise((resolve, reject) => {
     const client = new net.Socket()
-    const requestTimeout = setTimeout(() => {
-      client.destroy()
-    }, timeout)
+    client.setKeepAlive(true)
+    client.setTimeout(timeout)
+    let isConnect = false
 
     client.connect(port, host, () => {
       if (data) {
@@ -73,14 +75,26 @@ async function send(tcpRequest: TCPRequest): Promise<any> {
     client.on('data', (data) => {
       resolve(data)
 
-      // clean timeout and kill client after server's response
-      clearTimeout(requestTimeout)
       client.destroy()
     })
 
     client.on('error', (err) => {
-      clearTimeout(requestTimeout)
       reject(err)
+    })
+
+    client.on('connect', () => {
+      isConnect = true
+    })
+
+    client.on('timeout', () => {
+      client.destroy()
+    })
+
+    client.on('close', (hadError) => {
+      if (!isConnect || hadError) {
+        const err = new Error('Connection error')
+        reject(err)
+      }
     })
   })
 }
