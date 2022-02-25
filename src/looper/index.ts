@@ -22,12 +22,12 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Config } from './interfaces/config'
-import { Probe } from './interfaces/probe'
-import { doProbe } from './components/probe'
-import { log } from './utils/pino'
-import { Notification } from './interfaces/notification'
-import { getPublicIp, isConnectedToSTUNServer } from './utils/public-ip'
+import { Config } from '../interfaces/config'
+import { Probe } from '../interfaces/probe'
+import { doProbe } from '../components/probe'
+import { log } from '../utils/pino'
+import { Notification } from '../interfaces/notification'
+import { getPublicIp, isConnectedToSTUNServer } from '../utils/public-ip'
 
 const MILLISECONDS = 1000
 export const DEFAULT_THRESHOLD = 5

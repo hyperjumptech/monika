@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import chokidar from 'chokidar'
-import { cli } from 'cli-ux'
+import { CliUx } from '@oclif/core'
 import { existsSync, writeFileSync } from 'fs'
 import isUrl from 'is-url'
 import pEvent from 'p-event'
@@ -259,7 +259,7 @@ export const createConfig = async (flags: any): Promise<void> => {
     const file = flags.output || 'monika.yml'
 
     if (existsSync(file) && !flags.force) {
-      const ans = await cli.prompt(
+      const ans = await CliUx.ux.prompt(
         `\n${file} file is already exists. Overwrite (Y/n)?`
       )
 

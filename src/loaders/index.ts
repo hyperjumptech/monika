@@ -22,7 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import type { IConfig } from '@oclif/config'
+import type { Config as IConfig } from '@oclif/core'
 import { setupConfig } from '../components/config'
 import { setContext } from '../context'
 import events from '../events'
