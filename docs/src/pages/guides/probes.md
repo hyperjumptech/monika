@@ -87,6 +87,19 @@ probes:
         ping: true
 ```
 
+### TCP
+
+You can send a TCP request to a specific `host` and `port` with `data` by using the `socket` field.
+
+```yaml
+probes:
+  - id: 'tcp-example'
+    socket:
+      host: localhost
+      port: 3333
+      data: Hello from Monika
+```
+
 ## Probe Response Anatomy
 
 The default shape of a response when Monika has successfully fetched a request is as the following.
