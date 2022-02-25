@@ -152,7 +152,7 @@ export async function doProbe(
     const tcpRequestID = `tcp-${id}`
     const { duration, status } = await check({ host, port, data })
     const timeNow = new Date().toISOString()
-    const logMessage = `${timeNow} [TCP] id:${id} ${url} ${duration}ms`
+    const logMessage = `${timeNow} ${checkOrder} id:${id} [TCP] ${url} ${duration}ms`
     const isAlertTriggered = status === 'DOWN'
 
     isAlertTriggered ? log.warn(logMessage) : log.info(logMessage)
