@@ -217,6 +217,11 @@ class Monika extends Command {
       description: 'store all requests logs to database',
       default: false,
     }),
+
+    'auto-update': Flags.string({
+      description:
+        'Enable auto-update for Monika. Available options: major, minor, patch',
+    }),
   }
 
   /* eslint-disable complexity */
