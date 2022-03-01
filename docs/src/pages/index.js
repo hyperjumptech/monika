@@ -289,11 +289,6 @@ export default function IndexPage() {
         <div className="testimonials">
           <div className="container05">
             <div className="container">
-              <img
-                alt="image"
-                src="/playground_assets/quote-mark.svg"
-                className="image05"
-              />
               <h1 className="text09 headline2">What They Say</h1>
               <h1 className="text10 headline2">About Monika</h1>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-10">
@@ -1245,7 +1240,7 @@ export default function IndexPage() {
           }
           .text25 {
             color: var(--dl-color-gray-white);
-            max-width: 500px;
+            max-width: 600px;
             text-align: center;
             margin-bottom: var(--dl-space-space-unit);
           }
