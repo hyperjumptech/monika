@@ -9,43 +9,16 @@ on:
     types: [created]
 
 jobs:
-  # test:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #     - uses: actions/setup-node@v1
-  #       with:
-  #         node-version: 16
-  #     - run: npm ci
-  #       name: Install dependencies
-  #     - run: npm test
-  #       name: Run tests
-  #     - run: npm pack
-  #       name: Pack using npm pack
-  #     - run: npm install -g ./hyperjumptech-monika-*.tgz
-  #       name: Install the packed npm package
-  #     - run: npm run prod_test
-  #       name: Run production test
-
   upload:
-    needs: test
     name: Publish for ${{ matrix.os }}
     runs-on: ${{ matrix.runs_on }}
     strategy:
       matrix:
         include:
-          # - os: Linux
-          #   runs_on: ubuntu-latest
-          #   platform: linux-x64
-            # file_name: monika
           - os: Windows
             runs_on: windows-latest
             platform: win-x64
             file_name: monika.exe
-          # - os: MacOS
-          #   runs_on: macos-latest
-          #   platform: macos-x64
-          #   file_name: monika
 
     steps:
       - uses: actions/checkout@v2
@@ -60,10 +33,7 @@ jobs:
       
       - run: npm ci
         name: Install dependencies
-      
-      - run: npm run pkg -- -t node12-${{ matrix.platform }}
-        name: Pack the binary using vercel/pkg
-     
+
       - run: |
           echo "::set-output name=NODE_SQLITE_PATH::$(find ./node_modules -name node_sqlite3.node)"
         name: Find SQLite binary
@@ -108,7 +78,23 @@ jobs:
           asset_name: monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}-CHECKSUM.txt
           tag: ${{ github.ref }}
       
-      - name: Upload package to chocolatey
-        run: echo ${{ steps.upload_binary_to_release.outputs.browser_download_url }}
+      - name: Create chocolateyinstall.ps1 file
+        run: Install-ChocolateyZipPackage monika "$(Split-Path -parent $MyInvocation.MyCommand.Definition)" [${{ steps.upload_binary_to_release.outputs.browser_download_url }} --checksum64 shasum -a 256 monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}.zip -checksumType64 'sha256'] > ./chocolatey/tools/chocolateyinstall.ps1
+
+      - name: Edit version in monika.nuspec
+        uses: rvolo/xml-replace-action@v0.2
+        with:
+          filepath: "./chocolatey/monika.nuspec"
+          xpath: "//package/metadata/version/text()"
+          replace: ${{ steps.get_version.outputs.VERSION }}
+
+      - name: Choco pack
+        run: choco pack
+
+      - name: Choco upload
+        run: |
+          choco apikey --key ${{ secrets.GITHUB_TOKEN }} --source https://push.chocolatey.org/
+          choco push monika.${{ steps.get_version.outputs.VERSION }}.nupkg --source https://push.chocolatey.org/
+
 
 
