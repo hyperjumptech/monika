@@ -4,27 +4,28 @@
 name: Upload Binary
 
 on:
+  workflow_dispatch:
   release:
-    types: [published]
+    types: [created]
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-        with:
-          node-version: 16
-      - run: npm ci
-        name: Install dependencies
-      - run: npm test
-        name: Run tests
-      - run: npm pack
-        name: Pack using npm pack
-      - run: npm install -g ./hyperjumptech-monika-*.tgz
-        name: Install the packed npm package
-      - run: npm run prod_test
-        name: Run production test
+  # test:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - uses: actions/setup-node@v1
+  #       with:
+  #         node-version: 16
+  #     - run: npm ci
+  #       name: Install dependencies
+  #     - run: npm test
+  #       name: Run tests
+  #     - run: npm pack
+  #       name: Pack using npm pack
+  #     - run: npm install -g ./hyperjumptech-monika-*.tgz
+  #       name: Install the packed npm package
+  #     - run: npm run prod_test
+  #       name: Run production test
 
   upload:
     needs: test
@@ -33,60 +34,72 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: Linux
-            runs_on: ubuntu-latest
-            platform: linux-x64
-            file_name: monika
+          # - os: Linux
+          #   runs_on: ubuntu-latest
+          #   platform: linux-x64
+            # file_name: monika
           - os: Windows
             runs_on: windows-latest
             platform: win-x64
             file_name: monika.exe
-          - os: MacOS
-            runs_on: macos-latest
-            platform: macos-x64
-            file_name: monika
+          # - os: MacOS
+          #   runs_on: macos-latest
+          #   platform: macos-x64
+          #   file_name: monika
 
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
           node-version: 16
+      
       - run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
         name: Get version
         id: get_version
         shell: bash
+      
       - run: npm ci
         name: Install dependencies
+      
       - run: npm run pkg -- -t node12-${{ matrix.platform }}
         name: Pack the binary using vercel/pkg
+     
       - run: |
           echo "::set-output name=NODE_SQLITE_PATH::$(find ./node_modules -name node_sqlite3.node)"
         name: Find SQLite binary
         id: find-node-sqlite
         shell: bash
+      
       - run: echo ${{ steps.find-node-sqlite.outputs.NODE_SQLITE_PATH }}
         name: Check if the SQLite binary is exists
         shell: bash
+      
       - run: cp ${{ steps.find-node-sqlite.outputs.NODE_SQLITE_PATH }} ./dist
         name: Copy the node sqlite binary
         shell: bash
+      
       - run: file ./dist/*
         name: List all the files to be compressed
         shell: bash
+      
       - name: Compress all binaries to one zip
         uses: vimtor/action-zip@v1
         with:
           files: dist/${{ matrix.file_name }} dist/node_sqlite3.node
           dest: monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}.zip
+      
       - name: Generate SHA256 Checksum
         run: shasum -a 256 monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}.zip > monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}-CHECKSUM.txt
+      
       - name: Upload binary to release
+        id: upload_binary_to_release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}.zip
           asset_name: monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}.zip
           tag: ${{ github.ref }}
+
       - name: Upload checksum to release
         uses: svenstaro/upload-release-action@v2
         with:
@@ -94,3 +107,8 @@ jobs:
           file: monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}-CHECKSUM.txt
           asset_name: monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}-CHECKSUM.txt
           tag: ${{ github.ref }}
+      
+      - name: Upload package to chocolatey
+        run: echo ${{ steps.upload_binary_to_release.outputs.browser_download_url }}
+
+
