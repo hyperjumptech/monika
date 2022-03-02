@@ -33,56 +33,54 @@ jobs:
 
       - run: mkdir dist && echo test file > ./dist/test-file.txt
         name: Pack the binary using vercel/pkg
-      
-      # - run: file ./dist/*
-      #   name: List all the files to be compressed
-      #   shell: bash
-      
-      # - name: Compress all binaries to one zip
-      #   uses: vimtor/action-zip@v1
-      #   with:
-      #     files: dist/${{ matrix.file_name }} dist/node_sqlite3.node
-      #     dest: monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}.zip
-      
-      # - name: Generate SHA256 Checksum
-      #   run: shasum -a 256 monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}.zip > monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}-CHECKSUM.txt
-      
-      # - name: Upload binary to release
-      #   id: upload_binary_to_release
-      #   uses: svenstaro/upload-release-action@v2
-      #   with:
-      #     repo_token: ${{ secrets.GITHUB_TOKEN }}
-      #     file: monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}.zip
-      #     asset_name: monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}.zip
-      #     tag: ${{ github.ref }}
 
-      # - name: Upload checksum to release
-      #   uses: svenstaro/upload-release-action@v2
-      #   with:
-      #     repo_token: ${{ secrets.GITHUB_TOKEN }}
-      #     file: monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}-CHECKSUM.txt
-      #     asset_name: monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}-CHECKSUM.txt
-      #     tag: ${{ github.ref }}
+      - run: file ./dist/*
+        name: List all the files to be compressed
+        shell: bash
       
-      # - name: Create chocolateyinstall.ps1 file
-      #   run: echo Install-ChocolateyZipPackage monika "$(Split-Path -parent $MyInvocation.MyCommand.Definition)" [${{ steps.upload_binary_to_release.outputs.browser_download_url }} --checksum64 shasum -a 256 monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}.zip -checksumType64 'sha256'] > ./chocolatey/tools/chocolateyinstall.ps1
+      - name: Compress all binaries to one zip
+        uses: vimtor/action-zip@v1
+        with:
+          files: dist/${{ matrix.file_name }} dist/node_sqlite3.node
+          dest: monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}.zip
+      
+      - name: Generate SHA256 Checksum
+        run: shasum -a 256 monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}.zip > monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}-CHECKSUM.txt
+      
+      - name: Upload binary to release
+        id: upload_binary_to_release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}.zip
+          asset_name: monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}.zip
+          tag: ${{ github.ref }}
+
+      - name: Upload checksum to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}-CHECKSUM.txt
+          asset_name: monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}-CHECKSUM.txt
+          tag: ${{ github.ref }}
+      
       - name: Create chocolateyinstall.ps1 file
-        run: echo Install-ChocolateyZipPackage monika "$(Split-Path -parent $MyInvocation.MyCommand.Definition)" [--checksum64 shasum -a 256 monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}.zip -checksumType64 'sha256'] > ./chocolatey/tools/chocolateyinstall.ps1
+        run: echo Install-ChocolateyZipPackage monika './chocolatey/tools' [${{ steps.upload_binary_to_release.outputs.browser_download_url }} --checksum64 shasum -a 256 monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}.zip -checksumType64 'sha256'] > ./chocolatey/tools/chocolateyinstall.ps1
 
-      # - name: Edit version in monika.nuspec
-      #   uses: rvolo/xml-replace-action@v0.2
-      #   with:
-      #     filepath: "./chocolatey/monika.nuspec"
-      #     xpath: "//package/metadata/version/text()"
-      #     replace: ${{ steps.get_version.outputs.VERSION }}
+      - name: Edit version in monika.nuspec
+        uses: rvolo/xml-replace-action@v0.2
+        with:
+          filepath: "./chocolatey/monika.nuspec"
+          xpath: "//package/metadata/version/text()"
+          replace: ${{ steps.get_version.outputs.VERSION }}
 
-      # - name: Choco pack
-      #   run: choco pack
+      - name: Choco pack
+        run: choco pack
 
-      # - name: Choco upload
-      #   run: |
-      #     choco apikey --key ${{ secrets.GITHUB_TOKEN }} --source https://push.chocolatey.org/
-      #     choco push monika.${{ steps.get_version.outputs.VERSION }}.nupkg --source https://push.chocolatey.org/
+      - name: Choco upload
+        run: |
+          choco apikey --key ${{ secrets.GITHUB_TOKEN }} --source https://push.chocolatey.org/
+          choco push monika.${{ steps.get_version.outputs.VERSION }}.nupkg --source https://push.chocolatey.org/
 
 
 
