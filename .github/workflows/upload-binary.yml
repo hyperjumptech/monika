@@ -4,89 +4,58 @@
 name: Upload Binary
 
 on:
+  workflow_dispatch:
   release:
-    types: [published]
+    types: [created]
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-        with:
-          node-version: 16
-      - run: npm ci
-        name: Install dependencies
-      - run: npm test
-        name: Run tests
-      - run: npm pack
-        name: Pack using npm pack
-      - run: npm install -g ./hyperjumptech-monika-*.tgz
-        name: Install the packed npm package
-      - run: npm run prod_test
-        name: Run production test
-
   upload:
-    needs: test
     name: Publish for ${{ matrix.os }}
     runs-on: ${{ matrix.runs_on }}
     strategy:
       matrix:
         include:
-          - os: Linux
-            runs_on: ubuntu-latest
-            platform: linux-x64
-            file_name: monika
           - os: Windows
             runs_on: windows-latest
             platform: win-x64
             file_name: monika.exe
-          - os: MacOS
-            runs_on: macos-latest
-            platform: macos-x64
-            file_name: monika
 
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
           node-version: 16
+      
       - run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
         name: Get version
         id: get_version
         shell: bash
-      - run: npm ci
-        name: Install dependencies
-      - run: npm run pkg -- -t node12-${{ matrix.platform }}
+
+      - run: mkdir dist && echo test file > ./dist/test-file.txt
         name: Pack the binary using vercel/pkg
-      - run: |
-          echo "::set-output name=NODE_SQLITE_PATH::$(find ./node_modules -name node_sqlite3.node)"
-        name: Find SQLite binary
-        id: find-node-sqlite
-        shell: bash
-      - run: echo ${{ steps.find-node-sqlite.outputs.NODE_SQLITE_PATH }}
-        name: Check if the SQLite binary is exists
-        shell: bash
-      - run: cp ${{ steps.find-node-sqlite.outputs.NODE_SQLITE_PATH }} ./dist
-        name: Copy the node sqlite binary
-        shell: bash
+
       - run: file ./dist/*
         name: List all the files to be compressed
         shell: bash
+      
       - name: Compress all binaries to one zip
         uses: vimtor/action-zip@v1
         with:
           files: dist/${{ matrix.file_name }} dist/node_sqlite3.node
           dest: monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}.zip
+      
       - name: Generate SHA256 Checksum
         run: shasum -a 256 monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}.zip > monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}-CHECKSUM.txt
+      
       - name: Upload binary to release
+        id: upload_binary_to_release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}.zip
           asset_name: monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}.zip
           tag: ${{ github.ref }}
+
       - name: Upload checksum to release
         uses: svenstaro/upload-release-action@v2
         with:
@@ -94,3 +63,96 @@ jobs:
           file: monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}-CHECKSUM.txt
           asset_name: monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}-CHECKSUM.txt
           tag: ${{ github.ref }}
+      
+      - name: Read checksum file
+        id: checksum_file
+        uses: juliangruber/read-file-action@v1
+        with:
+          path: monika-${{ steps.get_version.outputs.VERSION }}-win-x64-CHECKSUM.txt
+      
+      - name: Create chocolateyinstall.ps1 file
+        run: mkdir -p chocolatey/tools && echo "Install-ChocolateyZipPackage monika ${{ '"$(Split-Path -parent $MyInvocation.MyCommand.Definition)"' }} [${{ steps.upload_binary_to_release.outputs.browser_download_url }} ${{'-checksum64'}} 8739c76e681f900923b900c9df0ef75cf421d39cabb54650c4b9ad19b6a76d85 ${{'-checksumType64'}} 'sha256']" > ./chocolatey/tools/chocolateyinstall.ps1
+      
+      - name: See chocolateyinstall.ps1 file content
+        run: cat ./chocolatey/tools/chocolateyinstall.ps1
+
+      - name: Change version in nuspec file
+        uses: actions/github-script@v6
+        with:
+            script: |
+              const fs = require('fs');
+              const oldString = fs.readFileSync('./chocolatey/example/chocolateyinstall.example.ps1','utf8').toString();
+              const releaseUrlString = "${{ steps.read_version.outputs.content }}"
+              const checkSumString = "${{ steps.read_version.outputs.content }}"
+              const newString = oldString.replace("_RELEASE_URL_", releaseUrlString).replace("_CHECKSUM_CONTENT_", checkSumString);
+              fs.writeFile("./chocolatey/tools/chocolateyinstall.ps1", newString, {
+                encoding: "utf8"
+              },
+              (err) => {
+                if (err)
+                  console.log(err);
+                else {
+                  console.log("File written successfully\n");
+                }
+              });
+              return newString;
+            result-encoding: string
+
+      - run: echo ${{ steps.get_version.outputs.VERSION }} | sed 's/^.//' > version_number.txt
+        name: Write version number without preftix
+
+      - name: See version_number.txt content
+        run: cat version_number.txt
+
+      - name: Read version number without preftix
+        id: read_version
+        uses: juliangruber/read-file-action@v1
+        with:
+          path: version_number.txt
+          trim: true
+      
+      - name: Change version in nuspec file
+        uses: actions/github-script@v6
+        with:
+            script: |
+              const fs = require('fs');
+              const oldString = fs.readFileSync('./chocolatey/example/monika.example.nuspec','utf8').toString();
+              const versionString = "${{ steps.read_version.outputs.content }}"
+              const newString = oldString.replace("_VERSION_", versionString);
+              fs.writeFile("./chocolatey/monika.nuspec", newString, {
+                encoding: "utf8"
+              },
+              (err) => {
+                if (err)
+                  console.log(err);
+                else {
+                  console.log("File written successfully\n");
+                }
+              });
+              return newString;
+            result-encoding: string
+        
+      - name: see nuspec file content
+        run: cat ./chocolatey/monika.nuspec
+
+      - name: Choco pack
+        working-directory: ./chocolatey
+        run: choco pack
+
+      - name: remove example folder
+        working-directory: ./chocolatey
+        run: rm -r example
+
+      - name: List all the files in chocolatey folder
+        run: file ./chocolatey/*
+
+      - name: List all the files in chocolatey/tools folder
+        run: file ./chocolatey/tools/*
+
+      - name: Choco set apikey
+        working-directory: ./chocolatey
+        run: choco apikey --key ${{ secrets.CHOCOLATEY_API_KEY }} --source https://push.chocolatey.org/
+
+      - name: Choco upload
+        working-directory: ./chocolatey
+        run: choco push monika.1.6.12.nupkg --source https://push.chocolatey.org/ --debug --verbose
