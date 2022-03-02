@@ -30,26 +30,10 @@ jobs:
         name: Get version
         id: get_version
         shell: bash
-      
-      - run: npm ci
-        name: Install dependencies
 
-      - run: echo test file > ./dist/test-file.txt
+      - run: mkdir dist && echo test file > ./dist/test-file.txt
         name: Pack the binary using vercel/pkg
 
-      - run: |
-          echo "::set-output name=NODE_SQLITE_PATH::$(find ./node_modules -name node_sqlite3.node)"
-        name: Find SQLite binary
-        id: find-node-sqlite
-        shell: bash
-      
-      - run: echo ${{ steps.find-node-sqlite.outputs.NODE_SQLITE_PATH }}
-        name: Check if the SQLite binary is exists
-        shell: bash
-      
-      - run: cp ${{ steps.find-node-sqlite.outputs.NODE_SQLITE_PATH }} ./dist
-        name: Copy the node sqlite binary
-        shell: bash
       
       - run: file ./dist/*
         name: List all the files to be compressed
