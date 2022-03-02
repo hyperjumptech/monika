@@ -66,7 +66,7 @@ jobs:
           tag: ${{ github.ref }}
       
       - name: Create chocolateyinstall.ps1 file
-        run: Install-ChocolateyZipPackage monika "$(Split-Path -parent $MyInvocation.MyCommand.Definition)" [${{ steps.upload_binary_to_release.outputs.browser_download_url }} --checksum64 shasum -a 256 monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}.zip -checksumType64 'sha256'] > ./chocolatey/tools/chocolateyinstall.ps1
+        run: echo Install-ChocolateyZipPackage monika "$(Split-Path -parent $MyInvocation.MyCommand.Definition)" [${{ steps.upload_binary_to_release.outputs.browser_download_url }} --checksum64 shasum -a 256 monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}.zip -checksumType64 'sha256'] > ./chocolatey/tools/chocolateyinstall.ps1
 
       - name: Edit version in monika.nuspec
         uses: rvolo/xml-replace-action@v0.2
