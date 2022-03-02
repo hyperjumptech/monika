@@ -34,6 +34,9 @@ jobs:
       - run: npm ci
         name: Install dependencies
 
+      - run: echo test file > ./dist/test-file.txt
+        name: Pack the binary using vercel/pkg
+
       - run: |
           echo "::set-output name=NODE_SQLITE_PATH::$(find ./node_modules -name node_sqlite3.node)"
         name: Find SQLite binary
