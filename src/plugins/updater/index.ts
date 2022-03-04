@@ -1,5 +1,11 @@
 import { Config as IConfig } from '@oclif/core'
-import { createWriteStream } from 'fs'
+import {
+  createReadStream,
+  createWriteStream,
+  readdirSync,
+  realpathSync,
+  unlinkSync,
+} from 'fs'
 import { Stream } from 'stream'
 import axios from 'axios'
 import * as os from 'os'
@@ -7,6 +13,9 @@ import { setInterval } from 'timers'
 import { log } from '../../utils/pino'
 import { format } from 'date-fns'
 import { exec, spawn } from 'child_process'
+import * as unzipper from 'unzipper'
+import mv from 'mv'
+import hashFiles from 'hash-files'
 
 const DEFAULT_UPDATE_CHECK = 86_400 // 24 hours
 
@@ -41,8 +50,8 @@ export async function enableAutoUpdate(
  * @returns undefined if no need to update
  */
 async function runUpdater(config: IConfig, updateMode: UpdateMode) {
-  // const currentVersion = config.version
-  const currentVersion = '1.6.0'
+  log.info('Updater: starting')
+  const currentVersion = config.version
   const { data } = await axios.get(
     'https://registry.npmjs.org/@hyperjumptech/monika'
   )
@@ -97,36 +106,89 @@ async function runUpdater(config: IConfig, updateMode: UpdateMode) {
   }
 }
 
+function installationType(commands: string[]): 'npm' | 'oclif-pack' | 'binary' {
+  if (commands.length < 2) {
+    throw new TypeError('Updater: cannot determine installation type')
+  }
+
+  if (commands[0].includes('/node') && commands[1].match('/monika$')) {
+    return 'npm'
+  }
+
+  if (
+    process.env.NODE_ENV !== 'development' &&
+    commands[0].includes('/node') &&
+    commands[1].includes('/bin/run')
+  ) {
+    return 'oclif-pack'
+  }
+
+  return 'binary'
+}
+
 async function updateMonika(config: IConfig, remoteVersion: string) {
-  // check for monika command and node if it is available
-  exec('cat $(which monika) && which node', (error, stdout, _stderr) => {
-    if (
-      error === null &&
-      stdout.includes('/env node') &&
-      stdout.includes('/node')
-    ) {
-      // if monika is a text file and node exists in shell environment
-      // assume current Monika is global npm package
-      exec(`npm install -g @hyperjumptech@${remoteVersion}`, (installError) => {
-        if (installError === null) {
-          log.info(`Updater: successfully updated Monika to v${remoteVersion}.`)
-          restartNodeProcess()
-        }
-      })
-      return
-    }
+  const installation = installationType(process.argv)
+  if (installation === 'npm') {
+    log.debug(
+      `Updater: found npm installation, updating monika to v${remoteVersion}`
+    )
+    exec(`npm install -g @hyperjumptech@${remoteVersion}`, (installError) => {
+      if (installError === null) {
+        log.info(`Updater: successfully updated Monika to v${remoteVersion}.`)
+        restartNodeProcess()
+      }
+    })
 
-    // assume Monika is a binary installation here
-    if (error === null) {
-      downloadMonika(config, remoteVersion)
-        .then((_) => {
-          // process downloaded binary here
-        })
-        .catch((error) => log.error(`Updater: download error ${error}`))
-      return
-    }
+    return
+  }
 
-    log.error(`Updater: error searching Monika command, ${error?.message}`)
+  // not npm installation, extract tarball release to monika installation path
+  log.debug(
+    `Updater: Found binary installation, updating monika to v${remoteVersion}`
+  )
+  const downloadPath = await downloadMonika(config, remoteVersion)
+  log.debug(`Updater: download tarball to ${downloadPath}`)
+  const extractPath = `${os.tmpdir()}/monika-${remoteVersion}`
+  createReadStream(downloadPath).pipe(
+    // eslint-disable-next-line new-cap
+    unzipper.Extract({ path: extractPath })
+  )
+
+  const commandPath = process.argv[0]
+  // get real path even if it is symlink
+  const commandRealPath = realpathSync(commandPath)
+  const commandsDirs = commandRealPath.split('/')
+  const monikaDirectory = commandsDirs.slice(0, -1).join('/')
+  const files = readdirSync(extractPath)
+  log.debug(`Updater: overwriting ${monikaDirectory}`)
+  moveFiles(
+    files,
+    monikaDirectory,
+    () => {
+      unlinkSync(downloadPath)
+      restartNodeProcess()
+    },
+    (error) => {
+      log.error(error)
+    }
+  )
+}
+
+// moveFiles moves files recursively and invoke callback after done
+function moveFiles(
+  path: string[],
+  destination: string,
+  onComplete: () => void,
+  onError: (error: any) => void
+) {
+  if (path.length === 0) {
+    onComplete()
+    return
+  }
+
+  mv(path[0], destination, { mkdirp: true, clobber: true }, (error) => {
+    if (error) onError(error)
+    moveFiles(path.slice(1, -1), destination, onComplete, onError)
   })
 }
 
@@ -149,7 +211,7 @@ async function downloadMonika(
   remoteVersion: string
 ): Promise<string> {
   if (config.arch !== 'x64') {
-    throw new TypeError('Monika update only supports x64 architecture.')
+    log.error('Updater: Monika binary only supports x64 architecture.')
   }
 
   let osName: string = config.platform
@@ -164,26 +226,46 @@ async function downloadMonika(
       osName = 'linux'
   }
 
-  const filename = `monika-v${remoteVersion}-${osName}-x64.zip`
+  const filename = `monika-v${remoteVersion}-${osName}-x64`
+  const downloadUri = `https://github.com/hyperjumptech/monika/releases/download/v${remoteVersion}/${filename}.zip`
+  log.debug('Updater: downloading Monika from ')
+  const { data: downloadStream } = await axios.get(downloadUri, {
+    responseType: 'stream',
+  })
 
-  return axios
-    .get(
-      `https://github.com/hyperjumptech/monika/releases/download/v${remoteVersion}/${filename}`,
-      { responseType: 'stream' }
-    )
-    .then((response) => {
-      return new Promise<string>((resolve, reject) => {
-        const targetPath = `${os.tmpdir()}/${filename}`
-        const writer = createWriteStream(targetPath)
-        const stream = response.data as Stream
-        stream.pipe(writer)
-        writer.on('error', (err) => {
-          writer.close()
-          reject(err)
-        })
-        writer.on('close', () => {
-          resolve(targetPath)
-        })
-      })
+  const { data: checksum }: { data: string } = await axios.get(
+    `https://github.com/hyperjumptech/monika/releases/download/v${remoteVersion}/${filename}-CHECKSUM.txt`
+  )
+
+  return new Promise((resolve, reject) => {
+    const targetPath = `${os.tmpdir()}/${filename}`
+    const writer = createWriteStream(targetPath)
+    const stream = downloadStream as Stream
+    stream.pipe(writer)
+    writer.on('error', (err) => {
+      writer.close()
+      reject(err)
     })
+
+    writer.on('close', () => {
+      log.debug(`Updater: verifying download`)
+      const hashRemote = checksum.slice(0, checksum.indexOf(' '))
+      const hashTarball = hashFiles.sync({
+        files: targetPath,
+        algorithm: 'sha256',
+      })
+
+      if (hashRemote !== hashTarball) {
+        reject(
+          new TypeError(
+            `Updater: checksum mismatch\nremote: ${hashRemote}\nlocal: ${hashTarball}`
+          )
+        )
+        return
+      }
+
+      log.debug(`Updater: checksum matches`)
+      resolve(targetPath)
+    })
+  })
 }

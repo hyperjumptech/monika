@@ -55,6 +55,7 @@ export default async function init(
   // check if connected to STUN Server and getting the public IP in the same time
   loopCheckSTUNServer(flags.stun)
   // run auto-updater
+
   await enableAutoUpdate(cliConfig, flags['auto-update'])
 
   // start Promotheus server
