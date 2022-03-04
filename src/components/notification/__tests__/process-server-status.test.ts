@@ -45,6 +45,7 @@ describe('serverAlertStateMachine', () => {
         recoveryThreshold: 5,
         consecutiveFailures: 0,
         consecutiveSuccesses: 0,
+        isFirstTimeSendEvent: true,
       })
     ).start()
   })
@@ -267,6 +268,14 @@ describe('Send notification based on threshold', () => {
   describe('not send notification', () => {
     it('the incident does not cross the threshold', () => {
       // act
+      getNotificationState({
+        id: 'random-id',
+        alertQuery: 'response.size < 0',
+        incidentThreshold: 3,
+        recoveryThreshold: 3,
+        isAlertTriggered: true,
+      })
+
       const { state, shouldSendNotification } = getNotificationState({
         id: 'random-id',
         alertQuery: 'response.size < 0',

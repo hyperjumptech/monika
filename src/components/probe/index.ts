@@ -107,6 +107,7 @@ async function checkThresholdsAndSendAlert(
   }
 
   statuses
+    ?.filter((probeState) => !probeState.isFirstTime)
     ?.filter((probeState) => probeState.shouldSendNotification)
     ?.forEach((probeState, index) => {
       probeSendNotification({
@@ -283,7 +284,7 @@ async function processTCPRequestResult({
 }: ProcessTCPRequestResult) {
   const defaultAlertQuery = 'response.size < 1'
   const defaultMessage = 'Response size is 0, expecting more than 0'
-  const { state, shouldSendNotification } = getNotificationState({
+  const { state, isFirstTime, shouldSendNotification } = getNotificationState({
     id: tcpRequestID,
     alertQuery: defaultAlertQuery,
     incidentThreshold,
@@ -291,7 +292,7 @@ async function processTCPRequestResult({
     isAlertTriggered,
   })
 
-  if (shouldSendNotification) {
+  if (shouldSendNotification && !isFirstTime) {
     // TODO: Remove validation below
     // validation is used because it is needed to send alert
     const validation: ValidatedResponse = {
