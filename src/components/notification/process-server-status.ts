@@ -159,10 +159,11 @@ export const processThresholds = ({
     ]
 
     const prevStateValue = interpreter.state.value
-    const stateValue = interpreter.state.value
-    const stateContext = interpreter.state.context
 
     interpreter.send(isAlertTriggered ? 'FAILURE' : 'SUCCESS')
+
+    const stateValue = interpreter.state.value
+    const stateContext = interpreter.state.context
 
     results.push({
       isFirstTime: stateContext.isFirstTimeSendEvent,
