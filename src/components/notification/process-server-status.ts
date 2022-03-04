@@ -46,6 +46,7 @@ type ShouldSendNotification = {
 }
 
 type ShouldSendNotificationReturn = {
+  isFirstTime: boolean
   state: 'UP' | 'DOWN'
   shouldSendNotification: boolean
 }
@@ -211,6 +212,7 @@ export function getNotificationState({
       recoveryThreshold,
       consecutiveFailures: 0,
       consecutiveSuccesses: 0,
+      isFirstTimeSendEvent: true,
     })
 
     interpreters[alertQuery] = interpret(stateMachine).start()
@@ -224,10 +226,15 @@ export function getNotificationState({
   interpreter?.send(isAlertTriggered ? 'FAILURE' : 'SUCCESS')
 
   const currentStateValue = interpreter?.state?.value
+  const stateContext = interpreter?.state?.context
+
+  interpreter.send('FIST_TIME_EVENT_SENT')
 
   return {
+    isFirstTime: stateContext.isFirstTimeSendEvent,
     state: currentStateValue as 'UP' | 'DOWN',
     shouldSendNotification:
+      stateContext.isFirstTimeSendEvent ||
       (currentStateValue === 'DOWN' &&
         (prevStateValue === 'UP' || !prevStateValue)) ||
       (currentStateValue === 'UP' && prevStateValue === 'DOWN'),
