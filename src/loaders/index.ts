@@ -56,7 +56,9 @@ export default async function init(
   loopCheckSTUNServer(flags.stun)
   // run auto-updater
 
-  await enableAutoUpdate(cliConfig, flags['auto-update'])
+  if (flags['auto-update']) {
+    await enableAutoUpdate(cliConfig, flags['auto-update'])
+  }
 
   // start Promotheus server
   if (flags.prometheus) {

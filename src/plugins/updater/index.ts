@@ -24,13 +24,14 @@
 
 import { Config as IConfig } from '@oclif/core'
 import {
-  chmodSync,
+  copy,
+  chmod,
   createReadStream,
   createWriteStream,
-  readdirSync,
-  realpathSync,
+  readdir,
+  realpath,
   unlinkSync,
-} from 'fs'
+} from 'fs-extra'
 import { Stream } from 'stream'
 import axios from 'axios'
 import * as os from 'os'
@@ -40,7 +41,6 @@ import { format } from 'date-fns'
 import { exec } from 'child_process'
 import * as unzipper from 'unzipper'
 import hashFiles from 'hash-files'
-import { copy } from 'fs-extra'
 
 const DEFAULT_UPDATE_CHECK = 86_400 // 24 hours
 
@@ -193,11 +193,11 @@ async function updateMonika(config: IConfig, remoteVersion: string) {
 
   const commandPath = process.argv[0]
   // get real path even if it is symlink
-  const commandRealPath = realpathSync(commandPath)
+  const commandRealPath = await realpath(commandPath)
   const commandsDirs = commandRealPath.split('/')
   const monikaDirectory = commandsDirs.slice(0, -1).join('/')
-  const files = readdirSync(extractPath).map(
-    (filename) => `${extractPath}/${filename}`
+  const files = await readdir(extractPath).then((filenames) =>
+    filenames.map((filename) => `${extractPath}/${filename}`)
   )
   moveFiles(files, monikaDirectory, () => {
     unlinkSync(downloadPath)
@@ -225,7 +225,8 @@ async function moveFiles(
   log.info(`Updater: copy from ${source} to path ${destFile}`)
   // dereference = follow symbolic link
   await copy(source, destFile, { overwrite: true, dereference: true })
-  if (filename.includes('monika')) chmodSync(destFile, 0o755)
+  if (process.platform !== 'win32' && filename.includes('monika'))
+    await chmod(destFile, 0o755)
   await moveFiles(pathFiles.slice(1), destinationDirectory, onComplete)
 }
 
