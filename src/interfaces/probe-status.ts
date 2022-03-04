@@ -23,6 +23,7 @@
  **********************************************************************************/
 
 export interface ServerAlertState {
+  isFirstTime: boolean
   alertQuery: string
   state: 'UP' | 'DOWN'
   shouldSendNotification: boolean

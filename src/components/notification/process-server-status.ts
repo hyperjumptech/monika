@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /**********************************************************************************
  * MIT License                                                                    *
  *                                                                                *
@@ -28,13 +29,12 @@ import { Probe } from '../../interfaces/probe'
 import { ServerAlertState } from '../../interfaces/probe-status'
 import { ValidatedResponse } from '../../plugins/validate-response'
 
-let isFirstTimeSendEvent = true
-
 export type ServerAlertStateContext = {
   incidentThreshold: number
   recoveryThreshold: number
   consecutiveFailures: number
   consecutiveSuccesses: number
+  isFirstTimeSendEvent: boolean
 }
 
 export const serverAlertStateInterpreters = new Map<
@@ -49,6 +49,9 @@ export const serverAlertStateMachine = createMachine<ServerAlertStateContext>(
     states: {
       UP: {
         on: {
+          FIST_TIME_EVENT_SENT: {
+            actions: 'handleFirstTimeEventSent',
+          },
           FAILURE: [
             {
               target: 'DOWN',
@@ -66,6 +69,9 @@ export const serverAlertStateMachine = createMachine<ServerAlertStateContext>(
       },
       DOWN: {
         on: {
+          FIST_TIME_EVENT_SENT: {
+            actions: 'handleFirstTimeEventSent',
+          },
           FAILURE: {
             actions: 'handleFailure',
           },
@@ -85,6 +91,9 @@ export const serverAlertStateMachine = createMachine<ServerAlertStateContext>(
   },
   {
     actions: {
+      handleFirstTimeEventSent: assign({
+        isFirstTimeSendEvent: (_context) => false,
+      }),
       handleFailure: assign({
         consecutiveFailures: (context) => context.consecutiveFailures + 1,
         consecutiveSuccesses: (_context) => 0,
@@ -131,6 +140,7 @@ export const processThresholds = ({
         recoveryThreshold,
         consecutiveFailures: 0,
         consecutiveSuccesses: 0,
+        isFirstTimeSendEvent: true,
       })
 
       interpreters[alert.query] = interpret(stateMachine).start()
@@ -149,21 +159,22 @@ export const processThresholds = ({
     ]
 
     const prevStateValue = interpreter.state.value
+    const stateValue = interpreter.state.value
+    const stateContext = interpreter.state.context
 
     interpreter.send(isAlertTriggered ? 'FAILURE' : 'SUCCESS')
 
-    const state = interpreter.state
-
     results.push({
+      isFirstTime: stateContext.isFirstTimeSendEvent,
       alertQuery: alert.query,
-      state: state.value as 'UP' | 'DOWN',
+      state: stateValue as 'UP' | 'DOWN',
       shouldSendNotification:
-        isFirstTimeSendEvent ||
-        (state.value === 'DOWN' && prevStateValue === 'UP') ||
-        (state.value === 'UP' && prevStateValue === 'DOWN'),
+        stateContext.isFirstTimeSendEvent ||
+        (stateValue === 'DOWN' && prevStateValue === 'UP') ||
+        (stateValue === 'UP' && prevStateValue === 'DOWN'),
     })
 
-    isFirstTimeSendEvent = false
+    interpreter.send('FIST_TIME_EVENT_SENT')
   }
 
   return results

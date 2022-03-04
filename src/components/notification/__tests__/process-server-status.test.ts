@@ -44,6 +44,7 @@ describe('serverAlertStateMachine', () => {
         recoveryThreshold: 5,
         consecutiveFailures: 0,
         consecutiveSuccesses: 0,
+        isFirstTimeSendEvent: true,
       })
     ).start()
   })

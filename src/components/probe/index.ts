@@ -103,6 +103,7 @@ async function checkThresholdsAndSendAlert(
   }
 
   statuses
+    ?.filter((probeState) => !probeState.isFirstTime)
     ?.filter((probeState) => probeState.shouldSendNotification)
     ?.forEach((probeState, index) => {
       probeSendNotification({
