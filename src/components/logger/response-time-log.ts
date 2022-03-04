@@ -23,7 +23,6 @@
  **********************************************************************************/
 
 import { differenceInHours } from 'date-fns'
-import { ProbeRequestResponse } from '../../interfaces/request'
 
 // global variable
 // we can say it is safe to use global variable here since the probe is processed sequentially as mentioned in probe/index.ts line 143: intentionally wait for a request to finish before processing next request in loop
@@ -59,19 +58,19 @@ export function checkIs24HourHasPassed() {
   return false
 }
 
-export function logResponseTime(probeRes: ProbeRequestResponse) {
+export function logResponseTime(responseTime: number): void {
   responseCount += 1
 
   if (responseCount === 1) {
     // first time
-    maxResponseTime = probeRes.responseTime
-    minResponseTime = probeRes.responseTime
-  } else if (probeRes.responseTime > maxResponseTime) {
-    maxResponseTime = probeRes.responseTime
-  } else if (probeRes.responseTime < minResponseTime) {
-    minResponseTime = probeRes.responseTime
+    maxResponseTime = responseTime
+    minResponseTime = responseTime
+  } else if (responseTime > maxResponseTime) {
+    maxResponseTime = responseTime
+  } else if (responseTime < minResponseTime) {
+    minResponseTime = responseTime
   }
 
-  totalResponseTime += probeRes.responseTime
+  totalResponseTime += responseTime
   averageResponseTime = Math.floor(totalResponseTime / responseCount)
 }

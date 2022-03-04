@@ -36,6 +36,19 @@ export type ServerAlertStateContext = {
   consecutiveSuccesses: number
 }
 
+type ShouldSendNotification = {
+  id: string
+  alertQuery: string
+  incidentThreshold: number
+  recoveryThreshold: number
+  isAlertTriggered: boolean
+}
+
+type ShouldSendNotificationReturn = {
+  state: 'UP' | 'DOWN'
+  shouldSendNotification: boolean
+}
+
 export const serverAlertStateInterpreters = new Map<
   RequestConfig,
   Record<string, Interpreter<ServerAlertStateContext>>
@@ -160,4 +173,44 @@ export const processThresholds = ({
   }
 
   return results
+}
+
+export function getNotificationState({
+  id,
+  alertQuery,
+  incidentThreshold,
+  recoveryThreshold,
+  isAlertTriggered,
+}: ShouldSendNotification): ShouldSendNotificationReturn {
+  if (!serverAlertStateInterpreters.has(id)) {
+    const interpreters: Record<
+      string,
+      Interpreter<ServerAlertStateContext>
+    > = {}
+    const stateMachine = serverAlertStateMachine.withContext({
+      incidentThreshold,
+      recoveryThreshold,
+      consecutiveFailures: 0,
+      consecutiveSuccesses: 0,
+    })
+
+    interpreters[alertQuery] = interpret(stateMachine).start()
+
+    serverAlertStateInterpreters.set(id, interpreters)
+  }
+
+  const interpreter = serverAlertStateInterpreters.get(id!)![alertQuery]
+  const prevStateValue = interpreter?.state?.value
+
+  interpreter?.send(isAlertTriggered ? 'FAILURE' : 'SUCCESS')
+
+  const currentStateValue = interpreter?.state?.value
+
+  return {
+    state: currentStateValue as 'UP' | 'DOWN',
+    shouldSendNotification:
+      (currentStateValue === 'DOWN' &&
+        (prevStateValue === 'UP' || !prevStateValue)) ||
+      (currentStateValue === 'UP' && prevStateValue === 'DOWN'),
+  }
 }
