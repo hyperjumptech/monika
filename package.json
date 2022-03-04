@@ -61,6 +61,7 @@
     "express": "4.17.1",
     "filtrex": "^2.2.3",
     "form-data": "^4.0.0",
+    "fs-extra": "^9.0.13",
     "getos": "3.2.1",
     "handlebars": "^4.7.7",
     "hash-files": "^1.1.1",
@@ -72,7 +73,6 @@
     "macaddress": "^0.5.2",
     "mailgen": "^2.0.15",
     "mailgun.js": "^3.5.4",
-    "mv": "^2.1.1",
     "node-cron": "3.0.0",
     "nodemailer": "^6.5.0",
     "os-name": "4.0.1",
@@ -101,12 +101,12 @@
     "@types/boxen": "^3.0.1",
     "@types/chai": "^4.2.15",
     "@types/express": "^4.17.12",
+    "@types/fs-extra": "^9.0.13",
     "@types/getos": "^3.0.1",
     "@types/is-url": "^1.2.29",
     "@types/js-yaml": "^4.0.2",
     "@types/mocha": "^5.2.7",
-    "@types/mv": "^2.1.2",
-    "@types/node": "^10.17.54",
+    "@types/node": "^12.12.6",
     "@types/node-cron": "^2.0.4",
     "@types/nodemailer": "^6.4.1",
     "@types/pako": "^1.0.1",
@@ -174,9 +174,7 @@
       "./db/migrations/*.sql"
     ],
     "targets": [
-      "node12-linux-x64",
-      "node12-macos-x64",
-      "node12-win-x64"
+      "node12-linux-x64"
     ],
     "outputPath": "dist"
   }

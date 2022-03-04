@@ -1,5 +1,30 @@
+/**********************************************************************************
+ * MIT License                                                                    *
+ *                                                                                *
+ * Copyright (c) 2021 Hyperjump Technology                                        *
+ *                                                                                *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy   *
+ * of this software and associated documentation files (the "Software"), to deal  *
+ * in the Software without restriction, including without limitation the rights   *
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell      *
+ * copies of the Software, and to permit persons to whom the Software is          *
+ * furnished to do so, subject to the following conditions:                       *
+ *                                                                                *
+ * The above copyright notice and this permission notice shall be included in all *
+ * copies or substantial portions of the Software.                                *
+ *                                                                                *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR     *
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,       *
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE    *
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER         *
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,  *
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  *
+ * SOFTWARE.                                                                      *
+ **********************************************************************************/
+
 import { Config as IConfig } from '@oclif/core'
 import {
+  chmodSync,
   createReadStream,
   createWriteStream,
   readdirSync,
@@ -12,10 +37,10 @@ import * as os from 'os'
 import { setInterval } from 'timers'
 import { log } from '../../utils/pino'
 import { format } from 'date-fns'
-import { exec, spawn } from 'child_process'
+import { exec } from 'child_process'
 import * as unzipper from 'unzipper'
-import mv from 'mv'
 import hashFiles from 'hash-files'
+import { copy } from 'fs-extra'
 
 const DEFAULT_UPDATE_CHECK = 86_400 // 24 hours
 
@@ -25,6 +50,12 @@ export async function enableAutoUpdate(
   config: IConfig,
   mode: string
 ): Promise<void> {
+  if (config.arch !== 'x64') {
+    throw new TypeError(
+      'Updater: Monika binary only supports x64 architecture.'
+    )
+  }
+
   mode = mode.toLowerCase()
   if (mode === 'major' || mode === 'minor' || mode === 'patch') {
     const updateMode = <UpdateMode>mode
@@ -58,10 +89,10 @@ async function runUpdater(config: IConfig, updateMode: UpdateMode) {
 
   const latestVersion = data['dist-tags'].latest
   if (latestVersion === currentVersion) {
-    log.debug('Updater: already running latest version.')
+    log.info('Updater: already running latest version.')
     const nextCheck = new Date(Date.now() + DEFAULT_UPDATE_CHECK * 1000)
     const date = format(nextCheck, 'yyyy-MM-dd HH:mm:ss XXX')
-    log.debug(`Updater: next check at ${date}.`)
+    log.info(`Updater: next check at ${date}.`)
     return
   }
 
@@ -98,6 +129,7 @@ async function runUpdater(config: IConfig, updateMode: UpdateMode) {
     log.info(
       `Updater: already running latest ${updateMode.toLowerCase()} version: ${currentVersion}. Next check at ${date}.`
     )
+
     return
   }
 
@@ -129,25 +161,30 @@ function installationType(commands: string[]): 'npm' | 'oclif-pack' | 'binary' {
 async function updateMonika(config: IConfig, remoteVersion: string) {
   const installation = installationType(process.argv)
   if (installation === 'npm') {
-    log.debug(
+    log.info(
       `Updater: found npm installation, updating monika to v${remoteVersion}`
     )
-    exec(`npm install -g @hyperjumptech@${remoteVersion}`, (installError) => {
-      if (installError === null) {
-        log.info(`Updater: successfully updated Monika to v${remoteVersion}.`)
-        restartNodeProcess()
+    exec(
+      `npm install -g @hyperjumptech/monika@${remoteVersion}`,
+      (installError) => {
+        if (installError === null) {
+          log.info(`Updater: successfully updated Monika to v${remoteVersion}.`)
+          // eslint-disable-next-line unicorn/no-process-exit
+          process.exit(0)
+        }
+
+        log.error(`Updater: npm install error, ${installError}`)
       }
-    })
+    )
 
     return
   }
 
   // not npm installation, extract tarball release to monika installation path
-  log.debug(
+  log.info(
     `Updater: Found binary installation, updating monika to v${remoteVersion}`
   )
   const downloadPath = await downloadMonika(config, remoteVersion)
-  log.debug(`Updater: download tarball to ${downloadPath}`)
   const extractPath = `${os.tmpdir()}/monika-${remoteVersion}`
   createReadStream(downloadPath).pipe(
     // eslint-disable-next-line new-cap
@@ -159,44 +196,37 @@ async function updateMonika(config: IConfig, remoteVersion: string) {
   const commandRealPath = realpathSync(commandPath)
   const commandsDirs = commandRealPath.split('/')
   const monikaDirectory = commandsDirs.slice(0, -1).join('/')
-  const files = readdirSync(extractPath)
-  log.debug(`Updater: overwriting ${monikaDirectory}`)
-  moveFiles(
-    files,
-    monikaDirectory,
-    () => {
-      unlinkSync(downloadPath)
-      restartNodeProcess()
-    },
-    (error) => {
-      log.error(error)
-    }
+  const files = readdirSync(extractPath).map(
+    (filename) => `${extractPath}/${filename}`
   )
+  moveFiles(files, monikaDirectory, () => {
+    unlinkSync(downloadPath)
+    log.warn(`Monika has been updated to v${remoteVersion}, quitting...`)
+    // eslint-disable-next-line unicorn/no-process-exit
+    process.exit(0)
+  })
 }
 
 // moveFiles moves files recursively and invoke callback after done
-function moveFiles(
-  path: string[],
-  destination: string,
-  onComplete: () => void,
-  onError: (error: any) => void
+async function moveFiles(
+  pathFiles: string[],
+  destinationDirectory: string,
+  onComplete: () => void
 ) {
-  if (path.length === 0) {
+  log.info(`moves ${pathFiles} to ${destinationDirectory}`)
+  if (pathFiles.length === 0) {
     onComplete()
     return
   }
 
-  mv(path[0], destination, { mkdirp: true, clobber: true }, (error) => {
-    if (error) onError(error)
-    moveFiles(path.slice(1, -1), destination, onComplete, onError)
-  })
-}
-
-function restartNodeProcess() {
-  spawn(process.argv[0], process.argv.slice(1), {
-    env: { ...process.env },
-    stdio: 'ignore',
-  }).unref()
+  const source = pathFiles[0]
+  const filename = source.split('/').splice(-1)[0]
+  const destFile = `${destinationDirectory}/${filename}`
+  log.info(`Updater: copy from ${source} to path ${destFile}`)
+  // dereference = follow symbolic link
+  await copy(source, destFile, { overwrite: true, dereference: true })
+  if (filename.includes('monika')) chmodSync(destFile, 0o755)
+  await moveFiles(pathFiles.slice(1), destinationDirectory, onComplete)
 }
 
 /**
@@ -210,10 +240,6 @@ async function downloadMonika(
   config: IConfig,
   remoteVersion: string
 ): Promise<string> {
-  if (config.arch !== 'x64') {
-    log.error('Updater: Monika binary only supports x64 architecture.')
-  }
-
   let osName: string = config.platform
   switch (osName) {
     case 'darwin':
@@ -228,7 +254,6 @@ async function downloadMonika(
 
   const filename = `monika-v${remoteVersion}-${osName}-x64`
   const downloadUri = `https://github.com/hyperjumptech/monika/releases/download/v${remoteVersion}/${filename}.zip`
-  log.debug('Updater: downloading Monika from ')
   const { data: downloadStream } = await axios.get(downloadUri, {
     responseType: 'stream',
   })
@@ -248,7 +273,7 @@ async function downloadMonika(
     })
 
     writer.on('close', () => {
-      log.debug(`Updater: verifying download`)
+      log.info(`Updater: verifying download`)
       const hashRemote = checksum.slice(0, checksum.indexOf(' '))
       const hashTarball = hashFiles.sync({
         files: targetPath,
@@ -264,7 +289,7 @@ async function downloadMonika(
         return
       }
 
-      log.debug(`Updater: checksum matches`)
+      log.info(`Updater: checksum matches`)
       resolve(targetPath)
     })
   })
