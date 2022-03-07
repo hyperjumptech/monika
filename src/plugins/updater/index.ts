@@ -186,12 +186,12 @@ async function updateMonika(config: IConfig, remoteVersion: string) {
     exec(
       `npm install -g @hyperjumptech/monika@${remoteVersion}`,
       (installError) => {
-        if (installError === null) {
-          log.info(`Updater: successfully updated Monika to v${remoteVersion}.`)
-          process.kill(process.pid, 'SIGINT')
+        if (installError !== null) {
+          log.error(`Updater: npm install error, ${installError}`)
         }
 
-        log.error(`Updater: npm install error, ${installError}`)
+        log.info(`Updater: successfully updated Monika to v${remoteVersion}.`)
+        process.kill(process.pid, 'SIGINT')
       }
     )
 
