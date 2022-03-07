@@ -29,8 +29,8 @@ import {
   readdir,
   realpath,
   unlinkSync,
-  move,
   chmod,
+  copy,
 } from 'fs-extra'
 import { Stream } from 'stream'
 import axios from 'axios'
@@ -149,25 +149,22 @@ function installationType(commands: string[]): 'npm' | 'oclif-pack' | 'binary' {
 
   // npm install
   if (
-    process.env.NODE_ENV !== 'development' ||
-    (commands[0].match('/node$') !== null &&
-      commands[1].match('/monika$') !== null)
+    process.env.NODE_ENV === 'development' ||
+    (commands[0].match('node$') !== null &&
+      commands[1].match('monika$') !== null)
   ) {
     return 'npm'
   }
 
   // vercel/pkg
-  if (
-    commands[0].match('/node$') !== null &&
-    (commands[1] === '/snapshot/monika/bin/run') !== null
-  ) {
+  if (commands[1] === '/snapshot/monika/bin/run') {
     return 'binary'
   }
 
   // npx oclif pack
   if (
-    commands[0].match('/node$') !== null &&
-    commands[1].match('/bin/run$') !== null
+    commands[0].match('node$') !== null &&
+    commands[1].match('bin/run$') !== null
   ) {
     return 'oclif-pack'
   }
@@ -235,6 +232,7 @@ async function moveExtractedFiles(config: IConfig, extractPath: string) {
   const files = await readdir(extractPath).then((filenames) =>
     filenames.map((filename) => `${extractPath}/${filename}`)
   )
+  log.info(`Updater: extracted ${files}`)
   for await (const filePath of files) {
     const source = filePath
     const filename = source.split('/').splice(-1)[0]
@@ -242,7 +240,8 @@ async function moveExtractedFiles(config: IConfig, extractPath: string) {
     log.info(`Updater: copy from ${source} to path ${destFile}`)
     // dereference = follow symbolic link
     try {
-      await move(source, destFile, { overwrite: true })
+      await copy(source, destFile, { overwrite: true })
+      log.debug(`Updater: successfully copied ${source} to ${destFile}`)
       if (
         getPlatform(config) !== 'windows' &&
         destFile.match('/monika$') !== null
@@ -285,6 +284,7 @@ async function downloadMonika(
   const platformName = getPlatform(config)
   const filename = `monika-v${remoteVersion}-${platformName}-x64`
   const downloadUri = `https://github.com/hyperjumptech/monika/releases/download/v${remoteVersion}/${filename}.zip`
+  log.info(`Updater: download from ${downloadUri}`)
   const { data: downloadStream } = await axios.get(downloadUri, {
     responseType: 'stream',
   })
