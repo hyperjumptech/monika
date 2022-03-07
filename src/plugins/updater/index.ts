@@ -24,13 +24,13 @@
 
 import { Config as IConfig } from '@oclif/core'
 import {
-  copy,
-  chmod,
   createReadStream,
   createWriteStream,
   readdir,
   realpath,
   unlinkSync,
+  move,
+  chmod,
 } from 'fs-extra'
 import { Stream } from 'stream'
 import axios from 'axios'
@@ -50,7 +50,8 @@ export async function enableAutoUpdate(
   config: IConfig,
   mode: string
 ): Promise<void> {
-  if (config.arch !== 'x64') {
+  const installation = installationType(process.argv)
+  if (installation === 'binary' && config.arch !== 'x64') {
     throw new TypeError(
       'Updater: Monika binary only supports x64 architecture.'
     )
@@ -143,19 +144,35 @@ function installationType(commands: string[]): 'npm' | 'oclif-pack' | 'binary' {
     throw new TypeError('Updater: cannot determine installation type')
   }
 
-  if (commands[0].includes('/node') && commands[1].match('/monika$')) {
+  // npm install
+  if (
+    commands[0].match('/node$') !== null &&
+    commands[1].match('/monika$') !== null
+  ) {
     return 'npm'
   }
 
+  // vercel/pkg
   if (
     process.env.NODE_ENV !== 'development' &&
-    commands[0].includes('/node') &&
-    commands[1].includes('/bin/run')
+    commands[0].match('/node$') !== null &&
+    (commands[1] === '/snapshot/monika/bin/run') !== null
+  ) {
+    return 'binary'
+  }
+
+  // npx oclif pack
+  if (
+    process.env.NODE_ENV !== 'development' &&
+    commands[0].match('/node$') !== null &&
+    commands[1].match('/bin/run$') !== null
   ) {
     return 'oclif-pack'
   }
 
-  return 'binary'
+  throw new TypeError(
+    `Updater: unknown installation type. Command: ${process.argv}`
+  )
 }
 
 async function updateMonika(config: IConfig, remoteVersion: string) {
@@ -184,50 +201,73 @@ async function updateMonika(config: IConfig, remoteVersion: string) {
   log.info(
     `Updater: Found binary installation, updating monika to v${remoteVersion}`
   )
-  const downloadPath = await downloadMonika(config, remoteVersion)
+  let downloadPath = ''
+  try {
+    downloadPath = await downloadMonika(config, remoteVersion)
+  } catch (error) {
+    log.error(`Updater: download error ${error}`)
+    return
+  }
+
   const extractPath = `${os.tmpdir()}/monika-${remoteVersion}`
   createReadStream(downloadPath).pipe(
     // eslint-disable-next-line new-cap
     unzipper.Extract({ path: extractPath })
   )
 
+  await moveExtractedFiles(config, extractPath)
+  unlinkSync(downloadPath)
+  log.warn(`Monika has been updated to v${remoteVersion}, quitting...`)
+  // eslint-disable-next-line unicorn/no-process-exit
+  process.exit(0)
+}
+
+async function moveExtractedFiles(config: IConfig, extractPath: string) {
   const commandPath = process.argv[0]
-  // get real path even if it is symlink
   const commandRealPath = await realpath(commandPath)
   const commandsDirs = commandRealPath.split('/')
-  const monikaDirectory = commandsDirs.slice(0, -1).join('/')
+  let installationDirectory = commandsDirs.slice(0, -1).join('/')
+  if (installationType(process.argv) === 'oclif-pack') {
+    installationDirectory = commandsDirs.slice(0, -2).join('/')
+  }
+
   const files = await readdir(extractPath).then((filenames) =>
     filenames.map((filename) => `${extractPath}/${filename}`)
   )
-  moveFiles(files, monikaDirectory, () => {
-    unlinkSync(downloadPath)
-    log.warn(`Monika has been updated to v${remoteVersion}, quitting...`)
-    // eslint-disable-next-line unicorn/no-process-exit
-    process.exit(0)
-  })
+  for await (const filePath of files) {
+    const source = filePath
+    const filename = source.split('/').splice(-1)[0]
+    const destFile = `${installationDirectory}/${filename}`
+    log.info(`Updater: copy from ${source} to path ${destFile}`)
+    // dereference = follow symbolic link
+    try {
+      await move(source, destFile, { overwrite: true })
+      if (
+        getPlatform(config) !== 'windows' &&
+        destFile.match('/monika$') !== null
+      ) {
+        await chmod(destFile, 0o755)
+      }
+    } catch (error) {
+      log.error(`Updater: move files error ${error}`)
+    }
+  }
 }
 
-// moveFiles moves files recursively and invoke callback after done
-async function moveFiles(
-  pathFiles: string[],
-  destinationDirectory: string,
-  onComplete: () => void
-) {
-  log.info(`moves ${pathFiles} to ${destinationDirectory}`)
-  if (pathFiles.length === 0) {
-    onComplete()
-    return
+function getPlatform(config: IConfig): string {
+  let platform: string = config.platform
+  switch (platform) {
+    case 'darwin':
+      platform = 'macos'
+      break
+    case 'win32':
+      platform = 'windows'
+      break
+    default:
+      platform = 'linux'
   }
 
-  const source = pathFiles[0]
-  const filename = source.split('/').splice(-1)[0]
-  const destFile = `${destinationDirectory}/${filename}`
-  log.info(`Updater: copy from ${source} to path ${destFile}`)
-  // dereference = follow symbolic link
-  await copy(source, destFile, { overwrite: true, dereference: true })
-  if (process.platform !== 'win32' && filename.includes('monika'))
-    await chmod(destFile, 0o755)
-  await moveFiles(pathFiles.slice(1), destinationDirectory, onComplete)
+  return platform
 }
 
 /**
@@ -241,19 +281,8 @@ async function downloadMonika(
   config: IConfig,
   remoteVersion: string
 ): Promise<string> {
-  let osName: string = config.platform
-  switch (osName) {
-    case 'darwin':
-      osName = 'macos'
-      break
-    case 'win32':
-      osName = 'windows'
-      break
-    default:
-      osName = 'linux'
-  }
-
-  const filename = `monika-v${remoteVersion}-${osName}-x64`
+  const platformName = getPlatform(config)
+  const filename = `monika-v${remoteVersion}-${platformName}-x64`
   const downloadUri = `https://github.com/hyperjumptech/monika/releases/download/v${remoteVersion}/${filename}.zip`
   const { data: downloadStream } = await axios.get(downloadUri, {
     responseType: 'stream',
