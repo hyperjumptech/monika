@@ -55,7 +55,6 @@ export default async function init(
   // check if connected to STUN Server and getting the public IP in the same time
   loopCheckSTUNServer(flags.stun)
   // run auto-updater
-
   if (flags['auto-update']) {
     await enableAutoUpdate(cliConfig, flags['auto-update'])
   }

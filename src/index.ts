@@ -220,7 +220,7 @@ class Monika extends Command {
 
     'auto-update': Flags.string({
       description:
-        'Enable auto-update for Monika. Available options: major, minor, patch',
+        'Enable auto-update for Monika. Available options: major, minor, patch. This will make Monika terminate itself on successful update but does not restart',
     }),
   }
 

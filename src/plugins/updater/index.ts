@@ -43,8 +43,7 @@ import * as unzipper from 'unzipper'
 import hashFiles from 'hash-files'
 
 const DEFAULT_UPDATE_CHECK = 86_400 // 24 hours
-
-export type UpdateMode = 'major' | 'minor' | 'patch'
+type UpdateMode = 'major' | 'minor' | 'patch'
 
 export async function enableAutoUpdate(
   config: IConfig,
@@ -186,8 +185,7 @@ async function updateMonika(config: IConfig, remoteVersion: string) {
       (installError) => {
         if (installError === null) {
           log.info(`Updater: successfully updated Monika to v${remoteVersion}.`)
-          // eslint-disable-next-line unicorn/no-process-exit
-          process.exit(0)
+          process.kill(process.pid, 'SIGINT')
         }
 
         log.error(`Updater: npm install error, ${installError}`)
@@ -218,8 +216,7 @@ async function updateMonika(config: IConfig, remoteVersion: string) {
   await moveExtractedFiles(config, extractPath)
   unlinkSync(downloadPath)
   log.warn(`Monika has been updated to v${remoteVersion}, quitting...`)
-  // eslint-disable-next-line unicorn/no-process-exit
-  process.exit(0)
+  process.kill(process.pid, 'SIGINT')
 }
 
 async function moveExtractedFiles(config: IConfig, extractPath: string) {
@@ -313,7 +310,7 @@ async function downloadMonika(
       if (hashRemote !== hashTarball) {
         reject(
           new TypeError(
-            `Updater: checksum mismatch\nremote: ${hashRemote}\nlocal: ${hashTarball}`
+            `Updater: checksum mismatch. Got ${hashTarball}, expected ${hashRemote}.`
           )
         )
         return
