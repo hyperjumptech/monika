@@ -188,6 +188,7 @@ async function updateMonika(config: IConfig, remoteVersion: string) {
       (installError) => {
         if (installError !== null) {
           log.error(`Updater: npm install error, ${installError}`)
+          return
         }
 
         log.info(`Updater: successfully updated Monika to v${remoteVersion}.`)
