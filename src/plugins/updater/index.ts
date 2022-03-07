@@ -50,7 +50,11 @@ export async function enableAutoUpdate(
   mode: string
 ): Promise<void> {
   const installation = installationType(process.argv)
-  if (installation === 'binary' && config.arch !== 'x64') {
+  if (
+    process.env.NODE_ENV !== 'development' &&
+    installation === 'binary' &&
+    config.arch !== 'x64'
+  ) {
     throw new TypeError(
       'Updater: Monika binary only supports x64 architecture.'
     )
@@ -88,7 +92,7 @@ async function runUpdater(config: IConfig, updateMode: UpdateMode) {
   )
 
   const latestVersion = data['dist-tags'].latest
-  if (latestVersion === currentVersion) {
+  if (latestVersion === currentVersion || config.debug) {
     log.info('Updater: already running latest version.')
     const nextCheck = new Date(Date.now() + DEFAULT_UPDATE_CHECK * 1000)
     const date = format(nextCheck, 'yyyy-MM-dd HH:mm:ss XXX')
@@ -145,15 +149,15 @@ function installationType(commands: string[]): 'npm' | 'oclif-pack' | 'binary' {
 
   // npm install
   if (
-    commands[0].match('/node$') !== null &&
-    commands[1].match('/monika$') !== null
+    process.env.NODE_ENV !== 'development' ||
+    (commands[0].match('/node$') !== null &&
+      commands[1].match('/monika$') !== null)
   ) {
     return 'npm'
   }
 
   // vercel/pkg
   if (
-    process.env.NODE_ENV !== 'development' &&
     commands[0].match('/node$') !== null &&
     (commands[1] === '/snapshot/monika/bin/run') !== null
   ) {
@@ -162,7 +166,6 @@ function installationType(commands: string[]): 'npm' | 'oclif-pack' | 'binary' {
 
   // npx oclif pack
   if (
-    process.env.NODE_ENV !== 'development' &&
     commands[0].match('/node$') !== null &&
     commands[1].match('/bin/run$') !== null
   ) {
