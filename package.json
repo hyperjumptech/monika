@@ -177,5 +177,9 @@
       "node12-linux-x64"
     ],
     "outputPath": "dist"
+  },
+  "volta": {
+    "node": "16.14.0",
+    "npm": "6.14.16"
   }
 }
