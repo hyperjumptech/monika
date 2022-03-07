@@ -31,6 +31,7 @@ import {
   unlinkSync,
   chmod,
   copy,
+  remove,
 } from 'fs-extra'
 import { Stream } from 'stream'
 import axios from 'axios'
@@ -209,11 +210,27 @@ async function updateMonika(config: IConfig, remoteVersion: string) {
   }
 
   const extractPath = `${os.tmpdir()}/monika-${remoteVersion}`
-  createReadStream(downloadPath).pipe(
+  await remove(extractPath)
+  const archiveEntries = createReadStream(downloadPath).pipe(
     // eslint-disable-next-line new-cap
-    unzipper.Extract({ path: extractPath })
+    unzipper.Parse({ forceStream: true })
   )
+  const extractPromises: Promise<string>[] = []
+  for await (const entry of archiveEntries) {
+    const promise = new Promise<string>((resolve, reject) => {
+      const unzipperEntry = entry as unzipper.Entry
+      const filename = unzipperEntry.path
+      const filepath = `${extractPath}/${filename}`
+      unzipperEntry
+        .pipe(createWriteStream(filepath))
+        .on('error', (err) => reject(err))
+        .on('close', () => resolve(filepath))
+    })
 
+    extractPromises.push(promise)
+  }
+
+  await Promise.all(extractPromises)
   await moveExtractedFiles(config, extractPath)
   unlinkSync(downloadPath)
   log.warn(`Monika has been updated to v${remoteVersion}, quitting...`)

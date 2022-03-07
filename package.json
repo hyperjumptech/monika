@@ -1,7 +1,7 @@
 {
   "name": "@hyperjumptech/monika",
   "description": "Synthetic monitoring made easy",
-  "version": "1.6.13",
+  "version": "1.6.10",
   "license": "MIT",
   "author": "@hyperjumptech",
   "main": "lib/index.js",
@@ -175,9 +175,7 @@
       "./db/migrations/*.sql"
     ],
     "targets": [
-      "node12-linux-x64",
-      "node12-macos-x64",
-      "node12-win-x64"
+      "node12-linux-x64"
     ],
     "outputPath": "dist"
   },
