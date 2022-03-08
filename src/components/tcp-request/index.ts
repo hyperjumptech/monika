@@ -22,9 +22,79 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-export interface ServerAlertState {
-  isFirstTime: boolean
-  alertQuery: string
-  state: 'UP' | 'DOWN'
-  shouldSendNotification: boolean
+import net from 'net'
+import { differenceInMilliseconds } from 'date-fns'
+
+type TCPRequest = {
+  host: string
+  port: number
+  data: string | Uint8Array
+  timeout?: number
+}
+
+type Result = {
+  duration: number
+  status: 'UP' | 'DOWN'
+  message: string
+}
+
+export async function check(tcpRequest: TCPRequest): Promise<Result> {
+  const { host, port, data, timeout } = tcpRequest
+
+  try {
+    const startTime = new Date()
+    const resp = await send({ host, port, data, timeout: timeout ?? 10 })
+    const endTime = new Date()
+    const duration = differenceInMilliseconds(endTime, startTime)
+    const responseData = Buffer.from(resp, 'utf8')
+    const isAlertTriggered = responseData?.length < 1
+
+    return { duration, status: isAlertTriggered ? 'DOWN' : 'UP', message: '' }
+  } catch (error: any) {
+    return { duration: 0, status: 'DOWN', message: error?.message }
+  }
+}
+
+async function send(
+  tcpRequest: Omit<TCPRequest, 'timeout'> & { timeout: number }
+): Promise<any> {
+  const { host, port, data, timeout } = tcpRequest
+
+  return new Promise((resolve, reject) => {
+    const client = new net.Socket()
+    client.setKeepAlive(true)
+    client.setTimeout(timeout)
+    let isConnect = false
+
+    client.connect(port, host, () => {
+      if (data) {
+        client.write(data)
+      }
+    })
+
+    client.on('data', (data) => {
+      resolve(data)
+
+      client.destroy()
+    })
+
+    client.on('error', (err) => {
+      reject(err)
+    })
+
+    client.on('connect', () => {
+      isConnect = true
+    })
+
+    client.on('timeout', () => {
+      client.destroy()
+    })
+
+    client.on('close', (hadError) => {
+      if (!isConnect || hadError) {
+        const err = new Error('Connection error')
+        reject(err)
+      }
+    })
+  })
 }
