@@ -39,9 +39,9 @@ import * as os from 'os'
 import { setInterval } from 'timers'
 import { log } from '../../utils/pino'
 import { format } from 'date-fns'
-import { exec } from 'child_process'
+import { spawn } from 'child_process'
 import * as unzipper from 'unzipper'
-import hashFiles from 'hash-files'
+import hasha from 'hasha'
 
 const DEFAULT_UPDATE_CHECK = 86_400 // 24 hours
 type UpdateMode = 'major' | 'minor' | 'patch'
@@ -94,10 +94,9 @@ async function runUpdater(config: IConfig, updateMode: UpdateMode) {
 
   const latestVersion = data['dist-tags'].latest
   if (latestVersion === currentVersion || config.debug) {
-    log.info('Updater: already running latest version.')
     const nextCheck = new Date(Date.now() + DEFAULT_UPDATE_CHECK * 1000)
     const date = format(nextCheck, 'yyyy-MM-dd HH:mm:ss XXX')
-    log.info(`Updater: next check at ${date}.`)
+    log.info(`Updater: already running latest version, next check at ${date}.`)
     return
   }
 
@@ -144,39 +143,26 @@ async function runUpdater(config: IConfig, updateMode: UpdateMode) {
 }
 
 async function updateMonika(config: IConfig, remoteVersion: string) {
+  log.info(`Updater: updating monika to v${remoteVersion}`)
   const installation = installationType(process.argv)
   if (installation === 'npm') {
-    log.info(
-      `Updater: found npm installation, updating monika to v${remoteVersion}`
-    )
-    exec(
-      `npm install -g @hyperjumptech/monika@${remoteVersion}`,
-      (installError) => {
-        if (installError !== null) {
-          log.error(`Updater: npm install error, ${installError}`)
-          return
-        }
+    try {
+      await spawnAsync(
+        `npm install -g @hyperjumptech/monika@${remoteVersion}`,
+        true
+      )
+    } catch (error) {
+      log.error(`Updater: npm install error, ${error}`)
+    }
 
-        log.info(`Updater: successfully updated Monika to v${remoteVersion}.`)
-        process.kill(process.pid, 'SIGINT')
-      }
-    )
+    log.warn(`Monika has been updated to v${remoteVersion}, quitting...`)
+    process.kill(process.pid, 'SIGINT')
 
     return
   }
 
   // not npm installation, extract tarball release to monika installation path
-  log.info(
-    `Updater: Found binary installation, updating monika to v${remoteVersion}`
-  )
-  let downloadPath = ''
-  try {
-    downloadPath = await downloadMonika(config, remoteVersion)
-  } catch (error) {
-    log.error(`Updater: download error ${error}`)
-    return
-  }
-
+  const downloadPath = await downloadMonika(config, remoteVersion)
   const extractPath = `${os.tmpdir()}/monika-${remoteVersion}`
   await remove(extractPath)
   await mkdirs(extractPath)
@@ -185,6 +171,19 @@ async function updateMonika(config: IConfig, remoteVersion: string) {
   await remove(downloadPath)
   log.warn(`Monika has been updated to v${remoteVersion}, quitting...`)
   process.kill(process.pid, 'SIGINT')
+}
+
+async function spawnAsync(command: string, detached: boolean): Promise<void> {
+  return new Promise((resolve) => {
+    const commands = command.split(' ')
+    const cmd = spawn(commands[0], commands.slice(1), {
+      detached,
+      cwd: os.homedir(),
+    })
+    cmd.on('close', () => {
+      resolve()
+    })
+  })
 }
 
 async function extractArchive(
@@ -285,8 +284,7 @@ async function downloadMonika(
     writer.on('close', () => {
       log.info(`Updater: verifying download`)
       const hashRemote = checksum.slice(0, checksum.indexOf(' '))
-      const hashTarball = hashFiles.sync({
-        files: targetPath,
+      const hashTarball = hasha.fromFileSync(targetPath, {
         algorithm: 'sha256',
       })
 
