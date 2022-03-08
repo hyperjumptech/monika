@@ -28,10 +28,10 @@ import {
   createWriteStream,
   readdir,
   realpath,
-  unlinkSync,
   chmod,
-  copy,
   remove,
+  mkdirs,
+  move,
 } from 'fs-extra'
 import { Stream } from 'stream'
 import axios from 'axios'
@@ -143,38 +143,6 @@ async function runUpdater(config: IConfig, updateMode: UpdateMode) {
   }
 }
 
-function installationType(commands: string[]): 'npm' | 'oclif-pack' | 'binary' {
-  if (commands.length < 2) {
-    throw new TypeError('Updater: cannot determine installation type')
-  }
-
-  // npm install
-  if (
-    process.env.NODE_ENV === 'development' ||
-    (commands[0].match('node$') !== null &&
-      commands[1].match('monika$') !== null)
-  ) {
-    return 'npm'
-  }
-
-  // vercel/pkg
-  if (commands[1] === '/snapshot/monika/bin/run') {
-    return 'binary'
-  }
-
-  // npx oclif pack
-  if (
-    commands[0].match('node$') !== null &&
-    commands[1].match('bin/run$') !== null
-  ) {
-    return 'oclif-pack'
-  }
-
-  throw new TypeError(
-    `Updater: unknown installation type. Command: ${process.argv}`
-  )
-}
-
 async function updateMonika(config: IConfig, remoteVersion: string) {
   const installation = installationType(process.argv)
   if (installation === 'npm') {
@@ -211,7 +179,19 @@ async function updateMonika(config: IConfig, remoteVersion: string) {
 
   const extractPath = `${os.tmpdir()}/monika-${remoteVersion}`
   await remove(extractPath)
-  const archiveEntries = createReadStream(downloadPath).pipe(
+  await mkdirs(extractPath)
+  await extractArchive(downloadPath, extractPath)
+  await moveExtractedFiles(config, extractPath)
+  await remove(downloadPath)
+  log.warn(`Monika has been updated to v${remoteVersion}, quitting...`)
+  process.kill(process.pid, 'SIGINT')
+}
+
+async function extractArchive(
+  source: string,
+  destination: string
+): Promise<void> {
+  const archiveEntries = createReadStream(source).pipe(
     // eslint-disable-next-line new-cap
     unzipper.Parse({ forceStream: true })
   )
@@ -220,7 +200,7 @@ async function updateMonika(config: IConfig, remoteVersion: string) {
     const promise = new Promise<string>((resolve, reject) => {
       const unzipperEntry = entry as unzipper.Entry
       const filename = unzipperEntry.path
-      const filepath = `${extractPath}/${filename}`
+      const filepath = `${destination}/${filename}`
       unzipperEntry
         .pipe(createWriteStream(filepath))
         .on('error', (err) => reject(err))
@@ -231,13 +211,15 @@ async function updateMonika(config: IConfig, remoteVersion: string) {
   }
 
   await Promise.all(extractPromises)
-  await moveExtractedFiles(config, extractPath)
-  unlinkSync(downloadPath)
-  log.warn(`Monika has been updated to v${remoteVersion}, quitting...`)
-  process.kill(process.pid, 'SIGINT')
 }
 
-async function moveExtractedFiles(config: IConfig, extractPath: string) {
+/**
+ * moves files under @param source directory to monika installation path
+ * @param config oclif config
+ * @param source source file path to move
+ * @returns void
+ */
+async function moveExtractedFiles(config: IConfig, source: string) {
   const commandPath = process.argv[0]
   const commandRealPath = await realpath(commandPath)
   const commandsDirs = commandRealPath.split('/')
@@ -246,19 +228,15 @@ async function moveExtractedFiles(config: IConfig, extractPath: string) {
     installationDirectory = commandsDirs.slice(0, -2).join('/')
   }
 
-  const files = await readdir(extractPath).then((filenames) =>
-    filenames.map((filename) => `${extractPath}/${filename}`)
+  const files = await readdir(source).then((filenames) =>
+    filenames.map((filename) => `${source}/${filename}`)
   )
-  log.info(`Updater: extracted ${files}`)
   for await (const filePath of files) {
     const source = filePath
     const filename = source.split('/').splice(-1)[0]
     const destFile = `${installationDirectory}/${filename}`
-    log.info(`Updater: copy from ${source} to path ${destFile}`)
-    // dereference = follow symbolic link
     try {
-      await copy(source, destFile, { overwrite: true })
-      log.debug(`Updater: successfully copied ${source} to ${destFile}`)
+      await move(source, destFile, { overwrite: true })
       if (
         getPlatform(config) !== 'windows' &&
         destFile.match('/monika$') !== null
@@ -269,22 +247,6 @@ async function moveExtractedFiles(config: IConfig, extractPath: string) {
       log.error(`Updater: move files error ${error}`)
     }
   }
-}
-
-function getPlatform(config: IConfig): string {
-  let platform: string = config.platform
-  switch (platform) {
-    case 'darwin':
-      platform = 'macos'
-      break
-    case 'win32':
-      platform = 'windows'
-      break
-    default:
-      platform = 'linux'
-  }
-
-  return platform
 }
 
 /**
@@ -341,4 +303,52 @@ async function downloadMonika(
       resolve(targetPath)
     })
   })
+}
+
+function installationType(commands: string[]): 'npm' | 'oclif-pack' | 'binary' {
+  if (commands.length < 2) {
+    throw new TypeError('Updater: cannot determine installation type')
+  }
+
+  // npm install
+  if (
+    process.env.NODE_ENV === 'development' ||
+    (commands[0].match('node$') !== null &&
+      commands[1].match('monika$') !== null)
+  ) {
+    return 'npm'
+  }
+
+  // vercel/pkg
+  if (commands[1] === '/snapshot/monika/bin/run') {
+    return 'binary'
+  }
+
+  // npx oclif pack
+  if (
+    commands[0].match('node$') !== null &&
+    commands[1].match('bin/run$') !== null
+  ) {
+    return 'oclif-pack'
+  }
+
+  throw new TypeError(
+    `Updater: unknown installation type. Command: ${process.argv}`
+  )
+}
+
+function getPlatform(config: IConfig): string {
+  let platform: string = config.platform
+  switch (platform) {
+    case 'darwin':
+      platform = 'macos'
+      break
+    case 'win32':
+      platform = 'windows'
+      break
+    default:
+      platform = 'linux'
+  }
+
+  return platform
 }
