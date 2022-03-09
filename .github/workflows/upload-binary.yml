@@ -113,24 +113,16 @@ jobs:
         uses: juliangruber/read-file-action@v1
         with:
           path: monika-${{ steps.get_version.outputs.VERSION }}-win-x64-CHECKSUM.txt
-      
-      - name: Create chocolateyinstall.ps1 file
-        if: runner.os == 'Windows'
-        run: mkdir -p chocolatey/tools && echo "Install-ChocolateyZipPackage monika ${{ '"$(Split-Path -parent $MyInvocation.MyCommand.Definition)"' }} [${{ steps.upload_binary_to_release.outputs.browser_download_url }} ${{'-checksum64'}} 8739c76e681f900923b900c9df0ef75cf421d39cabb54650c4b9ad19b6a76d85 ${{'-checksumType64'}} 'sha256']" > ./chocolatey/tools/chocolateyinstall.ps1
-      
-      - name: See chocolateyinstall.ps1 file content
-        if: runner.os == 'Windows'
-        run: cat ./chocolatey/tools/chocolateyinstall.ps1
 
-      - name: Change version in nuspec file
+      - name: Create chocolateyinstall.ps1 file
         if: runner.os == 'Windows'
         uses: actions/github-script@v6
         with:
             script: |
               const fs = require('fs');
               const oldString = fs.readFileSync('./chocolatey/example/chocolateyinstall.example.ps1','utf8').toString();
-              const releaseUrlString = "${{ steps.read_version.outputs.content }}"
-              const checkSumString = "${{ steps.read_version.outputs.content }}"
+              const releaseUrlString = "${{ steps.upload_binary_to_release.outputs.browser_download_url }}"
+              const checkSumString = "${{ steps.checksum_file.outputs.content }}"
               const newString = oldString.replace("_RELEASE_URL_", releaseUrlString).replace("_CHECKSUM_CONTENT_", checkSumString);
               fs.writeFile("./chocolatey/tools/chocolateyinstall.ps1", newString, {
                 encoding: "utf8"
@@ -144,6 +136,10 @@ jobs:
               });
               return newString;
             result-encoding: string
+
+      - name: See chocolateyinstall.ps1 file content
+        if: runner.os == 'Windows'
+        run: cat ./chocolatey/tools/chocolateyinstall.ps1
 
       - run: echo ${{ steps.get_version.outputs.VERSION }} | sed 's/^.//' > version_number.txt
         name: Write version number without preftix
