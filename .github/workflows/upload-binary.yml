@@ -69,6 +69,7 @@ jobs:
           tag: ${{ github.ref }}
       
       - name: Read checksum file
+        if: runner.os == 'Windows'
         id: checksum_file
         uses: juliangruber/read-file-action@v1
         with:
