@@ -113,6 +113,10 @@ jobs:
         uses: juliangruber/read-file-action@v1
         with:
           path: monika-${{ steps.get_version.outputs.VERSION }}-win-x64-CHECKSUM.txt
+          trim: true
+
+      - name: Create chocolatey tools folder
+        run: mkdir -p ./chocolatey/tools
 
       - name: Create chocolateyinstall.ps1 file
         if: runner.os == 'Windows'
