@@ -4,9 +4,8 @@
 name: Upload Binary
 
 on:
-  workflow_dispatch:
   release:
-    types: [created]
+    types: [published]
 
 jobs:
   test:
