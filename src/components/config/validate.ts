@@ -26,7 +26,7 @@
 import Joi from 'joi'
 import { Notification } from '../../interfaces/notification'
 import { Config } from '../../interfaces/config'
-import { ProbeAlert } from '../../interfaces/probe'
+import { ProbeAlert, Socket } from '../../interfaces/probe'
 import { Validation } from '../../interfaces/validation'
 import { isValidURL } from '../../utils/is-valid-url'
 import { parseAlertStringTime } from '../../plugins/validate-response/checkers'
@@ -280,28 +280,32 @@ export const validateConfig = (configuration: Config): Validation => {
 
   // Check probes properties
   for (const probe of probes) {
-    const { alerts = [], requests } = probe
+    const { alerts = [], requests, socket } = probe
+    const tcpConfigError = validateTCPConfig(socket)
 
-    if ((requests?.length ?? 0) === 0) return PROBE_NO_REQUESTS
+    if (tcpConfigError) {
+      return setInvalidResponse(
+        `Monika configuration: probes.socket ${tcpConfigError}`
+      )
+    }
+
+    if ((!socket && (requests?.length ?? 0)) === 0) return PROBE_NO_REQUESTS
 
     // Check probe request properties
-    for (const request of requests) {
-      const { url } = request
+    if (requests?.length > 0) {
+      for (const request of requests) {
+        const { method, ping, url } = request
 
-      if (!url) return PROBE_REQUEST_NO_URL
+        if (!url) return PROBE_REQUEST_NO_URL
 
-      // if not a ping request and url not valid, return INVLID_URL error
-      if (request.ping !== true && !isValidURL(url)) {
-        return PROBE_REQUEST_INVALID_URL
+        // if not a ping request and url not valid, return INVLID_URL error
+        if (ping !== true && !isValidURL(url)) {
+          return PROBE_REQUEST_INVALID_URL
+        }
+
+        if (!HTTPMethods.includes(method?.toUpperCase() ?? 'GET'))
+          return PROBE_REQUEST_INVALID_METHOD
       }
-
-      // if method is not set, set a default method
-      if (!request.method) {
-        request.method = 'GET'
-      }
-
-      if (HTTPMethods.indexOf(request.method.toUpperCase()) < 0)
-        return PROBE_REQUEST_INVALID_METHOD
     }
 
     // Check probe alert properties
@@ -357,6 +361,21 @@ function validateSymonConfig(symonConfig?: SymonConfig) {
     interval: Joi.number(),
   })
   const validationError = schema.validate(symonConfig)
+
+  return validationError?.error?.message
+}
+
+function validateTCPConfig(tcpConfig?: Socket) {
+  if (!tcpConfig) {
+    return ''
+  }
+
+  const schema = Joi.object({
+    host: Joi.string().required(),
+    port: Joi.number().required(),
+    data: Joi.string(),
+  })
+  const validationError = schema.validate(tcpConfig)
 
   return validationError?.error?.message
 }

@@ -1,0 +1,204 @@
+:root {
+  --dl-color-gray-300: #d9dbe1ff;
+  --dl-color-gray-700: #969babff;
+  --dl-color-gray-800: #474a57ff;
+  --dl-color-gray-900: #18191fff;
+  --dl-color-pink-100: #ffb1e6ff;
+  --dl-color-pink-800: #ff72d2ff;
+  --dl-size-size-unit: 1rem;
+  --dl-color-gray-black: #000000ff;
+  --dl-color-gray-white: #ffffff;
+  --dl-color-orange-100: #ffe3c1ff;
+  --dl-color-orange-800: #ffc278ff;
+  --dl-color-purple-100: #f1e4ffff;
+  --dl-color-purple-800: #d6b1ffff;
+  --dl-color-purple-900: #ac69f8ff;
+  --dl-space-space-unit: 1rem;
+  --dl-color-purple-1000: #6209c6ff;
+  --dl-color-pink-default: #f22bb2ff;
+  --dl-size-size-halfunit: 0.5rem;
+  --dl-color-turquoise-100: #d5fafcff;
+  --dl-color-turquoise-800: #75e3eaff;
+  --dl-radius-radius-round: 50%;
+  --dl-color-orange-default: #fe9a22ff;
+  --dl-color-purple-default: #8c30f5ff;
+  --dl-size-size-doubleunit: 2rem;
+  --dl-size-size-tripleunit: 3rem;
+  --dl-space-space-halfunit: 0.5rem;
+  --dl-radius-radius-radius2: 2px;
+  --dl-radius-radius-radius4: 4px;
+  --dl-radius-radius-radius6: 6px;
+  --dl-radius-radius-radius8: 8px;
+  --dl-space-space-doubleunit: 2rem;
+  --dl-space-space-tripleunit: 3rem;
+  --dl-color-turquoise-default: #2ec5ceff;
+  --dl-color-default-blackmonikae13de: rgba(27, 27, 27, 1);
+  --dl-color-default-whitemonikaa367f: rgba(255, 255, 255, 1);
+  --dl-color-default-monikagradient80346: rgba(152, 124, 231, 1);
+}
+.teleport-show {
+  display: flex !important;
+}
+.list-item {
+  display: list-item;
+}
+.list {
+  width: 100%;
+  margin: 1em 0px 1em 0px;
+  display: block;
+  padding: 0px 0px 0px 1.5rem;
+  list-style-type: none;
+  list-style-position: outside;
+}
+.button {
+  color: var(--dl-color-gray-900);
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  font-family: Inter;
+  border-color: var(--dl-color-gray-900);
+  border-width: 1px;
+  border-radius: 4px;
+  background-color: var(--dl-color-gray-white);
+}
+.input {
+  color: var(--dl-color-gray-900);
+  cursor: auto;
+  padding: 0.5rem 1rem;
+  font-family: Inter;
+  border-color: var(--dl-color-gray-900);
+  border-width: 1px;
+  border-radius: 4px;
+  background-color: var(--dl-color-gray-white);
+}
+.textarea {
+  color: var(--dl-color-gray-900);
+  cursor: auto;
+  padding: 0.5rem;
+  font-family: Inter;
+  border-color: var(--dl-color-gray-900);
+  border-width: 1px;
+  border-radius: 4px;
+  background-color: var(--dl-color-gray-white);
+}
+.largeLabel {
+  font-size: 20px;
+  font-family: Inter;
+  font-weight: 600;
+  text-transform: none;
+  text-decoration: none;
+}
+.body2 {
+  font-size: 14px;
+  font-family: Inter;
+  font-weight: 400;
+  text-transform: none;
+  text-decoration: none;
+}
+.lead1 {
+  font-size: 18px;
+  font-family: Inter;
+  font-weight: 400;
+  line-height: 1.77;
+  text-transform: none;
+  text-decoration: none;
+}
+.headline6 {
+  font-size: 20px;
+  font-family: Inter;
+  font-weight: 500;
+  text-transform: none;
+  text-decoration: none;
+}
+.body1 {
+  font-size: 16px;
+  font-family: Inter;
+  font-weight: 400;
+  line-height: 1.55;
+  text-transform: none;
+  text-decoration: none;
+}
+.lead2 {
+  font-size: 14px;
+  font-family: Inter;
+  font-weight: 500;
+  line-height: 1.77;
+  text-transform: none;
+  text-decoration: none;
+}
+.headline3 {
+  font-size: 40px;
+  font-family: Inter;
+  font-weight: 800;
+  text-transform: none;
+  text-decoration: none;
+}
+.headline2 {
+  font-size: 48px;
+  font-family: Inter;
+  font-weight: 800;
+  text-transform: none;
+  text-decoration: none;
+}
+.headline5 {
+  font-size: 24px;
+  font-family: Inter;
+  font-weight: 600;
+  text-transform: none;
+  text-decoration: none;
+}
+.subtitle2 {
+  font-size: 18px;
+  font-family: Inter;
+  font-weight: 500;
+  text-transform: none;
+  text-decoration: none;
+}
+.smallLabel {
+  font-size: 12px;
+  font-family: Inter;
+  font-weight: 600;
+  text-transform: none;
+  text-decoration: none;
+}
+.mediumLabel {
+  font-size: 14px;
+  font-family: Inter;
+  font-weight: 600;
+  text-transform: none;
+  text-decoration: none;
+}
+.headline1 {
+  font-size: 72px;
+  font-family: Inter;
+  font-weight: 800;
+  text-transform: none;
+  text-decoration: none;
+}
+.badgeLabel {
+  font-size: 20px;
+  font-family: Nanum Pen Script;
+  font-weight: 400;
+  text-transform: none;
+  text-decoration: none;
+}
+.subtitle1 {
+  font-size: 18px;
+  font-family: Inter;
+  font-weight: 700;
+  text-transform: none;
+  text-decoration: none;
+}
+.headline4 {
+  font-size: 28px;
+  font-family: Inter;
+  font-weight: 800;
+  text-transform: none;
+  text-decoration: none;
+}
+.capitalised {
+  font-size: 14px;
+  font-family: Inter;
+  font-weight: 800;
+  text-transform: uppercase;
+  text-decoration: none;
+}

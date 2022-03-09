@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /**********************************************************************************
  * MIT License                                                                    *
  *                                                                                *
@@ -33,6 +34,21 @@ export type ServerAlertStateContext = {
   recoveryThreshold: number
   consecutiveFailures: number
   consecutiveSuccesses: number
+  isFirstTimeSendEvent: boolean
+}
+
+type ShouldSendNotification = {
+  id: string
+  alertQuery: string
+  incidentThreshold: number
+  recoveryThreshold: number
+  isAlertTriggered: boolean
+}
+
+type ShouldSendNotificationReturn = {
+  isFirstTime: boolean
+  state: 'UP' | 'DOWN'
+  shouldSendNotification: boolean
 }
 
 export const serverAlertStateInterpreters = new Map<
@@ -47,6 +63,9 @@ export const serverAlertStateMachine = createMachine<ServerAlertStateContext>(
     states: {
       UP: {
         on: {
+          FIST_TIME_EVENT_SENT: {
+            actions: 'handleFirstTimeEventSent',
+          },
           FAILURE: [
             {
               target: 'DOWN',
@@ -64,6 +83,9 @@ export const serverAlertStateMachine = createMachine<ServerAlertStateContext>(
       },
       DOWN: {
         on: {
+          FIST_TIME_EVENT_SENT: {
+            actions: 'handleFirstTimeEventSent',
+          },
           FAILURE: {
             actions: 'handleFailure',
           },
@@ -83,6 +105,9 @@ export const serverAlertStateMachine = createMachine<ServerAlertStateContext>(
   },
   {
     actions: {
+      handleFirstTimeEventSent: assign({
+        isFirstTimeSendEvent: (_context) => false,
+      }),
       handleFailure: assign({
         consecutiveFailures: (context) => context.consecutiveFailures + 1,
         consecutiveSuccesses: (_context) => 0,
@@ -129,6 +154,7 @@ export const processThresholds = ({
         recoveryThreshold,
         consecutiveFailures: 0,
         consecutiveSuccesses: 0,
+        isFirstTimeSendEvent: true,
       })
 
       interpreters[alert.query] = interpret(stateMachine).start()
@@ -150,16 +176,67 @@ export const processThresholds = ({
 
     interpreter.send(isAlertTriggered ? 'FAILURE' : 'SUCCESS')
 
-    const state = interpreter.state
+    const stateValue = interpreter.state.value
+    const stateContext = interpreter.state.context
 
     results.push({
+      isFirstTime: stateContext.isFirstTimeSendEvent,
       alertQuery: alert.query,
-      state: state.value as 'UP' | 'DOWN',
+      state: stateValue as 'UP' | 'DOWN',
       shouldSendNotification:
-        (state.value === 'DOWN' && prevStateValue === 'UP') ||
-        (state.value === 'UP' && prevStateValue === 'DOWN'),
+        stateContext.isFirstTimeSendEvent ||
+        (stateValue === 'DOWN' && prevStateValue === 'UP') ||
+        (stateValue === 'UP' && prevStateValue === 'DOWN'),
     })
+
+    interpreter.send('FIST_TIME_EVENT_SENT')
   }
 
   return results
+}
+
+export function getNotificationState({
+  id,
+  alertQuery,
+  incidentThreshold,
+  recoveryThreshold,
+  isAlertTriggered,
+}: ShouldSendNotification): ShouldSendNotificationReturn {
+  if (!serverAlertStateInterpreters.has(id)) {
+    const interpreters: Record<
+      string,
+      Interpreter<ServerAlertStateContext>
+    > = {}
+    const stateMachine = serverAlertStateMachine.withContext({
+      incidentThreshold,
+      recoveryThreshold,
+      consecutiveFailures: 0,
+      consecutiveSuccesses: 0,
+      isFirstTimeSendEvent: true,
+    })
+
+    interpreters[alertQuery] = interpret(stateMachine).start()
+
+    serverAlertStateInterpreters.set(id, interpreters)
+  }
+
+  const interpreter = serverAlertStateInterpreters.get(id!)![alertQuery]
+  const prevStateValue = interpreter?.state?.value
+
+  interpreter?.send(isAlertTriggered ? 'FAILURE' : 'SUCCESS')
+
+  const currentStateValue = interpreter?.state?.value
+  const stateContext = interpreter?.state?.context
+
+  interpreter.send('FIST_TIME_EVENT_SENT')
+
+  return {
+    isFirstTime: stateContext.isFirstTimeSendEvent,
+    state: currentStateValue as 'UP' | 'DOWN',
+    shouldSendNotification:
+      stateContext.isFirstTimeSendEvent ||
+      (currentStateValue === 'DOWN' &&
+        (prevStateValue === 'UP' || !prevStateValue)) ||
+      (currentStateValue === 'UP' && prevStateValue === 'DOWN'),
+  }
 }
