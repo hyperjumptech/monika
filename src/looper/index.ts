@@ -22,12 +22,12 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Config } from './interfaces/config'
-import { Probe } from './interfaces/probe'
-import { doProbe } from './components/probe'
-import { log } from './utils/pino'
-import { Notification } from './interfaces/notification'
-import { getPublicIp, isConnectedToSTUNServer } from './utils/public-ip'
+import { Config } from '../interfaces/config'
+import { Probe } from '../interfaces/probe'
+import { doProbe } from '../components/probe'
+import { log } from '../utils/pino'
+import { Notification } from '../interfaces/notification'
+import { getPublicIp, isConnectedToSTUNServer } from '../utils/public-ip'
 
 const MILLISECONDS = 1000
 export const DEFAULT_THRESHOLD = 5
@@ -41,8 +41,15 @@ const intervals: Array<NodeJS.Timeout> = []
  * @returns {object} as probe
  */
 export function sanitizeProbe(probe: Probe, id: string): Probe {
-  const { name, incidentThreshold, recoveryThreshold, alerts } = probe
+  const { name, requests, incidentThreshold, recoveryThreshold, alerts } = probe
   probe.id = `${id}`
+  probe.requests = requests?.map((request) => {
+    if (!request.method) {
+      return { ...request, method: 'GET' }
+    }
+
+    return { ...request }
+  })
 
   if (!name) {
     probe.name = `monika_${probe.id}`

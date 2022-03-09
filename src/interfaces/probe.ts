@@ -30,12 +30,19 @@ export interface ProbeAlert {
   id?: string
 }
 
+export type Socket = {
+  host: string
+  port: number
+  data: string | Uint8Array
+}
+
 export interface Probe {
   id: string
   name: string
   description?: string
   interval?: number
   requests: RequestConfig[]
+  socket?: Socket
   incidentThreshold: number
   recoveryThreshold: number
   alerts: ProbeAlert[]
