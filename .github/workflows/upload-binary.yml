@@ -126,7 +126,7 @@ jobs:
               const fs = require('fs');
               const oldString = fs.readFileSync('./chocolatey/example/chocolateyinstall.example.ps1','utf8').toString();
               const releaseUrlString = "${{ steps.upload_binary_to_release.outputs.browser_download_url }}"
-              const checkSumString = "${{ steps.checksum_file.outputs.content }}"
+              const checkSumString = "${{ steps.checksum_file.outputs.content }}".split("*")[0].trim()
               const newString = oldString.replace("_RELEASE_URL_", releaseUrlString).replace("_CHECKSUM_CONTENT_", checkSumString);
               fs.writeFile("./chocolatey/tools/chocolateyinstall.ps1", newString, {
                 encoding: "utf8"
