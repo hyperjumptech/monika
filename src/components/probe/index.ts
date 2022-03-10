@@ -135,19 +135,20 @@ async function checkThresholdsAndSendAlert(
  * @param {number} checkOrder the order of probe being processed
  * @param {object} probe contains all the probes
  * @param {array} notifications contains all the notifications
- * @param {boolean} verboseLogs store all requests to database
+ * @param {boolean} verboseLogs flag for log verbosity
+ * @returns {Promise<void>} void
  */
 export async function doProbe(
   checkOrder: number,
   probe: Probe,
   notifications: Notification[],
   verboseLogs: boolean
-) {
+): Promise<void> {
   const eventEmitter = getEventEmitter()
   const responses = []
 
   if (probe?.socket) {
-    const { id, incidentThreshold, recoveryThreshold, socket } = probe
+    const { id, socket } = probe
     const { host, port, data } = socket
     const url = `${host}:${port}`
     const tcpRequestID = `tcp-${id}`
@@ -159,15 +160,19 @@ export async function doProbe(
     isAlertTriggered ? log.warn(logMessage) : log.info(logMessage)
     logResponseTime(duration)
 
+    // let TCPrequestIndex = 0 // are there multiple tcp requests?
+    // TCPrequestIndex < probe?.requests?.length;  // multiple tcp request, for later support
+    // TCPrequestIndex++                           // for later supported
+    const TCPrequestIndex = 0
+
     processTCPRequestResult({
-      probeID: id,
+      probe,
       tcpRequestID,
       tcpRequestURL: url,
-      incidentThreshold,
-      recoveryThreshold,
       responseTime: duration,
       isAlertTriggered,
       notifications,
+      requestIndex: TCPrequestIndex,
     }).catch((error) => log.error(error.message))
   }
 
@@ -192,7 +197,7 @@ export async function doProbe(
         response: probeRes,
       })
 
-      // Add to an array to be accessed by another request
+      // Add to a response array to be accessed by another request
       responses.push(probeRes)
 
       requestLog.setResponse(probeRes)
@@ -262,34 +267,31 @@ export async function doProbe(
 }
 
 type ProcessTCPRequestResult = {
-  probeID: string
+  probe: Probe
   tcpRequestID: string
   tcpRequestURL: string
-  incidentThreshold: number
-  recoveryThreshold: number
   responseTime: number
   isAlertTriggered: boolean
   notifications: Array<Notification>
+  requestIndex: number // to support multiple tcp requests/chaining
 }
 
 async function processTCPRequestResult({
-  probeID,
-  tcpRequestID,
+  probe,
   tcpRequestURL,
-  incidentThreshold,
-  recoveryThreshold,
   responseTime,
   isAlertTriggered,
   notifications,
+  requestIndex,
 }: ProcessTCPRequestResult) {
   const defaultAlertQuery = 'response.size < 1'
   const defaultMessage = 'Response size is 0, expecting more than 0'
+  const { id } = probe
   const { state, isFirstTime, shouldSendNotification } = getNotificationState({
-    id: tcpRequestID,
+    probe,
     alertQuery: defaultAlertQuery,
-    incidentThreshold,
-    recoveryThreshold,
     isAlertTriggered,
+    requestIndex,
   })
 
   if (shouldSendNotification && !isFirstTime) {
@@ -307,7 +309,7 @@ async function processTCPRequestResult({
     }
 
     await sendAlerts({
-      probeID,
+      probeID: id,
       url: tcpRequestURL,
       probeState: state,
       notifications: notifications ?? [],
