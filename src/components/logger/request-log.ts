@@ -51,7 +51,7 @@ export class RequestLog {
     return this.probe.requests[this.requestIndex]
   }
 
-  get hasIncidentOrRecovery() {
+  get hasIncidentOrRecovery(): boolean {
     return this.sentNotifications.length > 0
   }
 
@@ -61,11 +61,11 @@ export class RequestLog {
     this.requestIndex = requestIndex
   }
 
-  setResponse(response: ProbeRequestResponse) {
+  setResponse(response: ProbeRequestResponse): void {
     this.response = response
   }
 
-  addAlerts(alerts: ProbeAlert[]) {
+  addAlerts(alerts: ProbeAlert[]): void {
     this.triggeredAlerts.push(...alerts)
   }
 
@@ -75,7 +75,7 @@ export class RequestLog {
       type: 'NOTIFY-INCIDENT' | 'NOTIFY-RECOVER'
       alertQuery: string
     }[]
-  ) {
+  ): void {
     this.sentNotifications.push(...data)
   }
 
@@ -84,7 +84,7 @@ export class RequestLog {
   }
 
   // print() generates the text and prints the logs for the past request iteration
-  print() {
+  print(): void {
     const reversedSentNotifications = this.sentNotifications.slice().reverse()
     const printedNotification =
       reversedSentNotifications.find(
@@ -101,6 +101,7 @@ export class RequestLog {
     // generate probe result messages
     let probeMsg = ''
 
+    // generate logs from ping request or probe request
     if (this.request.ping) {
       probeMsg = `${this.iteration} id:${this.probe.id} PING:${
         this.response?.alive ? 'alive' : 'dead'
@@ -142,7 +143,7 @@ export class RequestLog {
     }
   }
 
-  async saveToDatabase() {
+  async saveToDatabase(): Promise<void> {
     await Promise.all([
       saveProbeRequestLog({
         probe: this.probe,

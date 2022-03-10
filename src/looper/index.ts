@@ -154,6 +154,7 @@ function loopProbe(
 
   const probeInterval = setInterval(() => {
     if (counter === repeats) {
+      // for fixed repeat loops: check repeat flag, if equal to counter, the we'll stop the loop
       clearInterval(probeInterval)
       clearInterval(checkSTUNinterval)
       process.kill(process.pid, 'SIGINT')
