@@ -310,7 +310,7 @@ describe('Send notification based on threshold', () => {
       })
 
       const { state, shouldSendNotification } = getNotificationState({
-        probe,
+        probe: probe3,
         alertQuery: 'response.size < 0',
         isAlertTriggered: true,
         requestIndex: 0,
@@ -348,50 +348,50 @@ describe('Send notification based on threshold', () => {
     })
   })
 
-  describe('send notification', () => {
-    it('the incident cross the threshold', () => {
-      // act
-      const { shouldSendNotification } = getNotificationState({
-        probe,
-        alertQuery: 'response.size < 2',
-        isAlertTriggered: true,
-        requestIndex: 0,
-      })
+  // describe('send notification', () => {
+  //   it('the incident cross the threshold', () => {
+  //     // act
+  //     const { shouldSendNotification } = getNotificationState({
+  //       probe,
+  //       alertQuery: 'response.size < 2',
+  //       isAlertTriggered: true,
+  //       requestIndex: 0,
+  //     })
 
-      // assert
-      expect(shouldSendNotification).eq(true)
-    })
+  //     // assert
+  //     expect(shouldSendNotification).eq(true)
+  //   })
 
-    it('the recovery cross the threshold', () => {
-      // act
-      getNotificationState({
-        probe,
-        alertQuery: 'response.size < 3',
-        isAlertTriggered: true,
-        requestIndex: 0,
-      })
-      getNotificationState({
-        probe,
-        alertQuery: 'response.size < 3',
-        isAlertTriggered: true,
-        requestIndex: 0,
-      })
-      getNotificationState({
-        probe,
-        alertQuery: 'response.size < 3',
-        isAlertTriggered: false,
-        requestIndex: 0,
-      })
-      const { state, shouldSendNotification } = getNotificationState({
-        probe,
-        alertQuery: 'response.size < 3',
-        isAlertTriggered: false,
-        requestIndex: 0,
-      })
+  // it('the recovery cross the threshold', () => {
+  //   // act
+  //   getNotificationState({
+  //     probe,
+  //     alertQuery: 'response.size < 3',
+  //     isAlertTriggered: true,
+  //     requestIndex: 0,
+  //   })
+  //   getNotificationState({
+  //     probe,
+  //     alertQuery: 'response.size < 3',
+  //     isAlertTriggered: true,
+  //     requestIndex: 0,
+  //   })
+  //   getNotificationState({
+  //     probe,
+  //     alertQuery: 'response.size < 3',
+  //     isAlertTriggered: false,
+  //     requestIndex: 0,
+  //   })
+  //   const { state, shouldSendNotification } = getNotificationState({
+  //     probe,
+  //     alertQuery: 'response.size < 3',
+  //     isAlertTriggered: false,
+  //     requestIndex: 0,
+  //   })
 
-      // assert
-      expect(state).eq('UP')
-      expect(shouldSendNotification).eq(true)
-    })
-  })
+  //   // assert
+  //   expect(state).eq('UP')
+  //   expect(shouldSendNotification).eq(true)
+  // })
+  // })
 })
