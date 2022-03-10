@@ -27,6 +27,7 @@ import { assign, createMachine, interpret, Interpreter } from 'xstate'
 
 import { Probe } from '../../interfaces/probe'
 import { ServerAlertState } from '../../interfaces/probe-status'
+import { RequestConfig } from '../../interfaces/request'
 import { ValidatedResponse } from '../../plugins/validate-response'
 
 export type ServerAlertStateContext = {
@@ -38,11 +39,10 @@ export type ServerAlertStateContext = {
 }
 
 type ShouldSendNotification = {
-  id: string
+  probe: Probe
   alertQuery: string
-  incidentThreshold: number
-  recoveryThreshold: number
   isAlertTriggered: boolean
+  requestIndex: number
 }
 
 type ShouldSendNotificationReturn = {
@@ -52,7 +52,7 @@ type ShouldSendNotificationReturn = {
 }
 
 export const serverAlertStateInterpreters = new Map<
-  string,
+  RequestConfig,
   Record<string, Interpreter<ServerAlertStateContext>>
 >()
 
@@ -142,7 +142,7 @@ export const processThresholds = ({
 
   const results: Array<ServerAlertState> = []
 
-  if (!serverAlertStateInterpreters.has(request.id!)) {
+  if (!serverAlertStateInterpreters.has(request!)) {
     const interpreters: Record<
       string,
       Interpreter<ServerAlertStateContext>
@@ -160,17 +160,14 @@ export const processThresholds = ({
       interpreters[alert.query] = interpret(stateMachine).start()
     }
 
-    serverAlertStateInterpreters.set(request.id!, interpreters)
+    serverAlertStateInterpreters.set(request!, interpreters)
   }
 
   // Send event for successes and failures to state interpreter
   // then get latest state for each alert
   for (const validation of validatedResponse) {
     const { alert, isAlertTriggered } = validation
-
-    const interpreter = serverAlertStateInterpreters.get(request.id!)![
-      alert.query
-    ]
+    const interpreter = serverAlertStateInterpreters.get(request!)![alert.query]
 
     const prevStateValue = interpreter.state.value
 
@@ -196,13 +193,15 @@ export const processThresholds = ({
 }
 
 export function getNotificationState({
-  id,
+  probe,
   alertQuery,
-  incidentThreshold,
-  recoveryThreshold,
   isAlertTriggered,
+  requestIndex,
 }: ShouldSendNotification): ShouldSendNotificationReturn {
-  if (!serverAlertStateInterpreters.has(id)) {
+  const { requests, incidentThreshold, recoveryThreshold } = probe
+  const request = requests[requestIndex]
+
+  if (!serverAlertStateInterpreters.has(request)) {
     const interpreters: Record<
       string,
       Interpreter<ServerAlertStateContext>
@@ -217,10 +216,10 @@ export function getNotificationState({
 
     interpreters[alertQuery] = interpret(stateMachine).start()
 
-    serverAlertStateInterpreters.set(id, interpreters)
+    serverAlertStateInterpreters.set(request!, interpreters)
   }
 
-  const interpreter = serverAlertStateInterpreters.get(id!)![alertQuery]
+  const interpreter = serverAlertStateInterpreters.get(request!)![alertQuery]
   const prevStateValue = interpreter?.state?.value
 
   interpreter?.send(isAlertTriggered ? 'FAILURE' : 'SUCCESS')

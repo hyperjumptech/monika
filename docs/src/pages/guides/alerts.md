@@ -3,7 +3,7 @@ id: alerts
 title: Alerts
 ---
 
-Alerts are the types of condition that will trigger Monika to send notification. It is an array located on probes defined in the config file `monika.yml` like so.
+Alerts are the types of condition that will trigger Monika to send notification. It is an array defined in the config file `monika.yml` like so.
 
 ```yaml
 probes:
@@ -15,11 +15,11 @@ probes:
           message: Response size is {{ response.size }}, expecting less than 10000
 ```
 
-You can define alerts in two ways: **request alerts** and **probe alerts**
+You can define two types of alerts: **request alerts** and **probe alerts**
 
 ### Request Alerts
 
-Request alerts are `alerts` configurations that are put under the `requests` key. Alerts defined under a specific request will run for that request only. Take a look at an example below:
+Request alerts are `alerts` configurations that are scoped under the `requests` key. Alerts defined under a specific request will run for that specific request only. Take a look at the example below:
 
 ```yaml
 probes:
@@ -40,7 +40,7 @@ probes:
 
 ### Probe Alerts
 
-Probe alerts are `alerts` configurations that are put under the `probe` key. Alerts defined under a specific probe will run for all requests. Take a look at an example below:
+Probe alerts are `alerts` configurations that are defined under the `probe` key. Alerts scoped under the probe key will run for all requests for that probe. Take a look at the example below:
 
 ```yaml
 probes:
@@ -64,7 +64,7 @@ probes:
 
 ## Alert Timing
 
-Probes are performed after every interval, and alerts are generated after a specified threshold. Monika can perform probes once a second, therefore a theoretical maximum rate of one alert a second. Please keep in mind that there also some delays to your network, notification channels (slack, email, etc), so your result will vary.
+Probes are performed after every interval, and alerts are generated after a specified threshold. Monika can perform probes once a second, therefore a theoretical maximum rate of one alert a second. Please keep in mind that there may be some delays to your network, notification channels (slack, email, etc), so your result will vary.
 
 In general it will be something like:
 
