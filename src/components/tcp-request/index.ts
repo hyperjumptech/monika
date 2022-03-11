@@ -22,56 +22,79 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import type { Config as IConfig } from '@oclif/core'
-import { setupConfig } from '../components/config'
-import { setContext } from '../context'
-import events from '../events'
-import { tlsChecker } from '../jobs/tls-check'
-import { loopCheckSTUNServer } from '../looper'
-import {
-  PrometheusCollector,
-  startPrometheusMetricsServer,
-} from '../plugins/metrics/prometheus'
-import { getEventEmitter } from '../utils/events'
-import { getPublicNetworkInfo } from '../utils/public-ip'
-// import to activate all the application event emitter subscribers
-import '../events/subscribers/application'
-import { jobsLoader } from './jobs'
+import net from 'net'
+import { differenceInMilliseconds } from 'date-fns'
 
-export default async function init(flags: any, cliConfig: IConfig) {
-  const eventEmitter = getEventEmitter()
-  const isTestEnvironment = process.env.CI || process.env.NODE_ENV === 'test'
-  const isSymonMode = Boolean(flags.symonUrl) && Boolean(flags.symonKey)
+type TCPRequest = {
+  host: string
+  port: number
+  data: string | Uint8Array
+  timeout?: number
+}
 
-  setContext({ userAgent: cliConfig.userAgent })
+type Result = {
+  duration: number
+  status: 'UP' | 'DOWN'
+  message: string
+}
 
-  // cache location & ISP info
-  await getPublicNetworkInfo()
-  // check if connected to STUN Server and getting the public IP in the same time
-  loopCheckSTUNServer(flags.stun)
+export async function check(tcpRequest: TCPRequest): Promise<Result> {
+  const { host, port, data, timeout } = tcpRequest
 
-  // start Promotheus server
-  if (flags.prometheus) {
-    const { registerCollectorFromProbes, collectProbeRequestMetrics } =
-      new PrometheusCollector()
+  try {
+    const startTime = new Date()
+    const resp = await send({ host, port, data, timeout: timeout ?? 10 })
+    const endTime = new Date()
+    const duration = differenceInMilliseconds(endTime, startTime)
+    const responseData = Buffer.from(resp, 'utf8')
+    const isAlertTriggered = responseData?.length < 1
 
-    // register prometheus metric collectors
-    eventEmitter.on(events.config.sanitized, registerCollectorFromProbes)
-    // collect prometheus metrics
-    eventEmitter.on(events.probe.response.received, collectProbeRequestMetrics)
-
-    startPrometheusMetricsServer(flags.prometheus)
+    return { duration, status: isAlertTriggered ? 'DOWN' : 'UP', message: '' }
+  } catch (error: any) {
+    return { duration: 0, status: 'DOWN', message: error?.message }
   }
+}
 
-  if (!isSymonMode) {
-    await setupConfig(flags)
+async function send(
+  tcpRequest: Omit<TCPRequest, 'timeout'> & { timeout: number }
+): Promise<any> {
+  const { host, port, data, timeout } = tcpRequest
 
-    // check TLS when Monika starts
-    tlsChecker()
+  return new Promise((resolve, reject) => {
+    const client = new net.Socket()
+    client.setKeepAlive(true)
+    client.setTimeout(timeout)
+    let isConnect = false
 
-    if (!isTestEnvironment) {
-      // load cron jobs
-      jobsLoader()
-    }
-  }
+    client.connect(port, host, () => {
+      if (data) {
+        client.write(data)
+      }
+    })
+
+    client.on('data', (data) => {
+      resolve(data)
+
+      client.destroy()
+    })
+
+    client.on('error', (err) => {
+      reject(err)
+    })
+
+    client.on('connect', () => {
+      isConnect = true
+    })
+
+    client.on('timeout', () => {
+      client.destroy()
+    })
+
+    client.on('close', (hadError) => {
+      if (!isConnect || hadError) {
+        const err = new Error('Connection error')
+        reject(err)
+      }
+    })
+  })
 }

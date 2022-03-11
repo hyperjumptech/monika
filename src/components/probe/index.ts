@@ -34,9 +34,13 @@ import { getEventEmitter } from '../../utils/events'
 import { log } from '../../utils/pino'
 import { RequestLog } from '../logger'
 import { sendAlerts } from '../notification'
-import { processThresholds } from '../notification/process-server-status'
+import {
+  processThresholds,
+  getNotificationState,
+} from '../notification/process-server-status'
 import { probing } from './probing'
 import { logResponseTime } from '../logger/response-time-log'
+import { check } from '../tcp-request'
 
 // TODO: move this to interface file?
 interface ProbeStatusProcessed {
@@ -103,6 +107,7 @@ async function checkThresholdsAndSendAlert(
   }
 
   statuses
+    ?.filter((probeState) => !probeState.isFirstTime)
     ?.filter((probeState) => probeState.shouldSendNotification)
     ?.forEach((probeState, index) => {
       probeSendNotification({
@@ -130,20 +135,50 @@ async function checkThresholdsAndSendAlert(
  * @param {number} checkOrder the order of probe being processed
  * @param {object} probe contains all the probes
  * @param {array} notifications contains all the notifications
- * @param {boolean} verboseLogs store all requests to database
+ * @param {boolean} verboseLogs flag for log verbosity
+ * @returns {Promise<void>} void
  */
 export async function doProbe(
   checkOrder: number,
   probe: Probe,
   notifications: Notification[],
   verboseLogs: boolean
-) {
+): Promise<void> {
   const eventEmitter = getEventEmitter()
   const responses = []
 
+  if (probe?.socket) {
+    const { id, socket } = probe
+    const { host, port, data } = socket
+    const url = `${host}:${port}`
+    const tcpRequestID = `tcp-${id}`
+    const { duration, status } = await check({ host, port, data })
+    const timeNow = new Date().toISOString()
+    const logMessage = `${timeNow} ${checkOrder} id:${id} [TCP] ${url} ${duration}ms`
+    const isAlertTriggered = status === 'DOWN'
+
+    isAlertTriggered ? log.warn(logMessage) : log.info(logMessage)
+    logResponseTime(duration)
+
+    // let TCPrequestIndex = 0 // are there multiple tcp requests?
+    // TCPrequestIndex < probe?.requests?.length;  // multiple tcp request, for later support
+    // TCPrequestIndex++                           // for later supported
+    const TCPrequestIndex = 0
+
+    processTCPRequestResult({
+      probe,
+      tcpRequestID,
+      tcpRequestURL: url,
+      responseTime: duration,
+      isAlertTriggered,
+      notifications,
+      requestIndex: TCPrequestIndex,
+    }).catch((error) => log.error(error.message))
+  }
+
   for (
     let requestIndex = 0;
-    requestIndex < probe.requests.length;
+    requestIndex < probe?.requests?.length;
     requestIndex++
   ) {
     const request = probe.requests[requestIndex]
@@ -154,7 +189,7 @@ export async function doProbe(
       // eslint-disable-next-line no-await-in-loop
       const probeRes: ProbeRequestResponse = await probing(request, responses)
 
-      logResponseTime(probeRes)
+      logResponseTime(probeRes.responseTime)
 
       eventEmitter.emit(events.probe.response.received, {
         probe,
@@ -162,7 +197,7 @@ export async function doProbe(
         response: probeRes,
       })
 
-      // Add to an array to be accessed by another request
+      // Add to a response array to be accessed by another request
       responses.push(probeRes)
 
       requestLog.setResponse(probeRes)
@@ -228,5 +263,57 @@ export async function doProbe(
         requestLog.saveToDatabase().catch((error) => log.error(error.message))
       }
     }
+  }
+}
+
+type ProcessTCPRequestResult = {
+  probe: Probe
+  tcpRequestID: string
+  tcpRequestURL: string
+  responseTime: number
+  isAlertTriggered: boolean
+  notifications: Array<Notification>
+  requestIndex: number // to support multiple tcp requests/chaining
+}
+
+async function processTCPRequestResult({
+  probe,
+  tcpRequestURL,
+  responseTime,
+  isAlertTriggered,
+  notifications,
+  requestIndex,
+}: ProcessTCPRequestResult) {
+  const defaultAlertQuery = 'response.size < 1'
+  const defaultMessage = 'Response size is 0, expecting more than 0'
+  const { id } = probe
+  const { state, isFirstTime, shouldSendNotification } = getNotificationState({
+    probe,
+    alertQuery: defaultAlertQuery,
+    isAlertTriggered,
+    requestIndex,
+  })
+
+  if (shouldSendNotification && !isFirstTime) {
+    // TODO: Remove validation below
+    // validation is used because it is needed to send alert
+    const validation: ValidatedResponse = {
+      alert: { query: defaultAlertQuery, message: defaultMessage },
+      isAlertTriggered: true,
+      response: {
+        status: 5,
+        responseTime,
+        data: {},
+        headers: {},
+      },
+    }
+
+    await sendAlerts({
+      probeID: id,
+      url: tcpRequestURL,
+      probeState: state,
+      notifications: notifications ?? [],
+      validation,
+    })
   }
 }
