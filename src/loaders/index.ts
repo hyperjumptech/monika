@@ -37,8 +37,13 @@ import { getPublicNetworkInfo } from '../utils/public-ip'
 // import to activate all the application event emitter subscribers
 import '../events/subscribers/application'
 import { jobsLoader } from './jobs'
+import { enableAutoUpdate } from '../plugins/updater'
 
-export default async function init(flags: any, cliConfig: IConfig) {
+export default async function init(
+  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+  flags: any,
+  cliConfig: IConfig
+): Promise<void> {
   const eventEmitter = getEventEmitter()
   const isTestEnvironment = process.env.CI || process.env.NODE_ENV === 'test'
   const isSymonMode = Boolean(flags.symonUrl) && Boolean(flags.symonKey)
@@ -49,6 +54,10 @@ export default async function init(flags: any, cliConfig: IConfig) {
   await getPublicNetworkInfo()
   // check if connected to STUN Server and getting the public IP in the same time
   loopCheckSTUNServer(flags.stun)
+  // run auto-updater
+  if (flags['auto-update']) {
+    await enableAutoUpdate(cliConfig, flags['auto-update'])
+  }
 
   // start Promotheus server
   if (flags.prometheus) {
