@@ -40,6 +40,16 @@ For example, assuming you have a file named `only-notif.yml` whose content `{"no
 monika -c foo-monitoring.yml only-notif.yml
 ```
 
+## Auto-update
+
+Monika supports automatic update with `--auto-update major|minor|patch`. Where `major|minor|patch` refers to [semantic versioning (semver) specification](https://semver.org/). By default, the updater will check for a new Monika version every 24 hours.
+
+```bash
+monika --auto-update patch
+```
+
+**Note that** auto-update will make Monika terminate itself after succesful update. To automatically restart Monika when terminated, you need to run Monika with a process manager applications, e.g., monit, pm2, nodemon.
+
 ## Create Config
 
 Just starting out? Want to make a new configuration? The `--create-config` flag will spin up an easy Web based configuration file generator.
