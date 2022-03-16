@@ -41,6 +41,14 @@ There are many ways to install Monika
 
    [![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-black.svg)](https://snapcraft.io/monika)
 
+5. Install via [Chocolatey](https://community.chocolatey.org/packages/monika) (**Windows**)
+
+   If you are using Windows and familliar with chocolatey, you can search the monika package in [Chocolatey Community Repository](https://community.chocolatey.org/). Type in `monika` in the search bar and you will find the package, then you can see the package detail and install it with just this command in Windows Power Shell (With Administrator permission)
+
+   ```
+   choco install monika
+   ```
+
 ## Download the configuration file
 
 Download the example configuration that uses Desktop notification [here](https://raw.githubusercontent.com/hyperjumptech/monika/main/config_sample/config.desktop.example.yml) and rename it as monika.yml

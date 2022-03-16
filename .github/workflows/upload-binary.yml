@@ -51,42 +51,54 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: 16
+      
       - run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
         name: Get version
         id: get_version
         shell: bash
+
       - run: npm ci
         name: Install dependencies
+
       - run: npm run pkg -- -t node12-${{ matrix.platform }}
         name: Pack the binary using vercel/pkg
+
       - run: |
           echo "::set-output name=NODE_SQLITE_PATH::$(find ./node_modules -name node_sqlite3.node)"
         name: Find SQLite binary
         id: find-node-sqlite
         shell: bash
+
       - run: echo ${{ steps.find-node-sqlite.outputs.NODE_SQLITE_PATH }}
         name: Check if the SQLite binary is exists
         shell: bash
+
       - run: cp ${{ steps.find-node-sqlite.outputs.NODE_SQLITE_PATH }} ./dist
         name: Copy the node sqlite binary
         shell: bash
+
       - run: file ./dist/*
         name: List all the files to be compressed
         shell: bash
+      
       - name: Compress all binaries to one zip
         uses: vimtor/action-zip@v1
         with:
           files: dist/${{ matrix.file_name }} dist/node_sqlite3.node
           dest: monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}.zip
+      
       - name: Generate SHA256 Checksum
         run: shasum -a 256 monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}.zip > monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}-CHECKSUM.txt
+      
       - name: Upload binary to release
+        id: upload_binary_to_release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}.zip
           asset_name: monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}.zip
           tag: ${{ github.ref }}
+
       - name: Upload checksum to release
         uses: svenstaro/upload-release-action@v2
         with:
@@ -94,3 +106,111 @@ jobs:
           file: monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}-CHECKSUM.txt
           asset_name: monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}-CHECKSUM.txt
           tag: ${{ github.ref }}
+      
+      - name: Read checksum file
+        if: runner.os == 'Windows'
+        id: checksum_file
+        uses: juliangruber/read-file-action@v1
+        with:
+          path: monika-${{ steps.get_version.outputs.VERSION }}-win-x64-CHECKSUM.txt
+          trim: true
+
+      - name: Create chocolatey tools folder
+        run: mkdir -p ./chocolatey/tools
+
+      - name: Create chocolateyinstall.ps1 file
+        if: runner.os == 'Windows'
+        uses: actions/github-script@v6
+        with:
+            script: |
+              const fs = require('fs');
+              const oldString = fs.readFileSync('./chocolatey/example/chocolateyinstall.example.ps1','utf8').toString();
+              const releaseUrlString = "${{ steps.upload_binary_to_release.outputs.browser_download_url }}"
+              const checkSumString = "${{ steps.checksum_file.outputs.content }}".split("*")[0].trim()
+              const newString = oldString.replace("_RELEASE_URL_", releaseUrlString).replace("_CHECKSUM_CONTENT_", checkSumString);
+              fs.writeFile("./chocolatey/tools/chocolateyinstall.ps1", newString, {
+                encoding: "utf8"
+              },
+              (err) => {
+                if (err)
+                  console.log(err);
+                else {
+                  console.log("File written successfully\n");
+                }
+              });
+              return newString;
+            result-encoding: string
+
+      - name: See chocolateyinstall.ps1 file content
+        if: runner.os == 'Windows'
+        run: cat ./chocolatey/tools/chocolateyinstall.ps1
+
+      - run: echo ${{ steps.get_version.outputs.VERSION }} | sed 's/^.//' > version_number.txt
+        name: Write version number without preftix
+        if: runner.os == 'Windows'
+
+      - name: See version_number.txt content
+        if: runner.os == 'Windows'
+        run: cat version_number.txt
+
+      - name: Read version number without preftix
+        if: runner.os == 'Windows'
+        id: read_version
+        uses: juliangruber/read-file-action@v1
+        with:
+          path: version_number.txt
+          trim: true
+      
+      - name: Change version in nuspec file
+        if: runner.os == 'Windows'
+        uses: actions/github-script@v6
+        with:
+            script: |
+              const fs = require('fs');
+              const oldString = fs.readFileSync('./chocolatey/example/monika.example.nuspec','utf8').toString();
+              const versionString = "${{ steps.read_version.outputs.content }}"
+              const newString = oldString.replace("_VERSION_", versionString);
+              fs.writeFile("./chocolatey/monika.nuspec", newString, {
+                encoding: "utf8"
+              },
+              (err) => {
+                if (err)
+                  console.log(err);
+                else {
+                  console.log("File written successfully\n");
+                }
+              });
+              return newString;
+            result-encoding: string
+        
+      - name: see nuspec file content
+        if: runner.os == 'Windows'
+        run: cat ./chocolatey/monika.nuspec
+
+      - name: Choco pack
+        if: runner.os == 'Windows'
+        working-directory: ./chocolatey
+        run: choco pack
+
+      - name: remove example folder
+        if: runner.os == 'Windows'
+        working-directory: ./chocolatey
+        run: rm -r example
+
+      - name: List all the files in chocolatey folder
+        if: runner.os == 'Windows'
+        run: file ./chocolatey/*
+
+      - name: List all the files in chocolatey/tools folder
+        if: runner.os == 'Windows'
+        run: file ./chocolatey/tools/*
+
+      - name: Choco set apikey
+        if: runner.os == 'Windows'
+        working-directory: ./chocolatey
+        run: choco apikey --key ${{ secrets.CHOCOLATEY_API_KEY }} --source https://push.chocolatey.org/
+
+      - name: Choco push
+        if: runner.os == 'Windows'
+        working-directory: ./chocolatey
+        run: choco push monika.1.6.12.nupkg --source https://push.chocolatey.org/
