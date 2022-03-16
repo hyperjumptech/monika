@@ -265,6 +265,10 @@ describe('processThresholds', () => {
 })
 
 describe('Send notification based on threshold', () => {
+  beforeEach(() => {
+    serverAlertStateInterpreters.clear()
+  })
+
   const probe = {
     requests: [
       {
@@ -297,8 +301,8 @@ describe('Send notification based on threshold', () => {
             url: 'https://httpbin.org/status/201',
           },
         ],
-        incidentThreshold: 3,
-        recoveryThreshold: 3,
+        incidentThreshold: 4,
+        recoveryThreshold: 4,
       } as Probe
 
       // act
@@ -322,21 +326,40 @@ describe('Send notification based on threshold', () => {
     })
 
     it('the recovery does not cross the threshold', () => {
+      const probe3 = {
+        requests: [
+          {
+            id: '1',
+            method: 'GET',
+            url: 'https://httpbin.org/status/200',
+          },
+          {
+            id: '2',
+            method: 'POST',
+            url: 'https://httpbin.org/status/201',
+          },
+        ],
+        incidentThreshold: 2,
+        recoveryThreshold: 5,
+      } as Probe
+
       // act
       getNotificationState({
-        probe,
+        probe: probe3,
         alertQuery: 'response.size < 1',
         isAlertTriggered: true,
         requestIndex: 0,
       })
+
       getNotificationState({
-        probe,
+        probe: probe3,
         alertQuery: 'response.size < 1',
         isAlertTriggered: true,
         requestIndex: 0,
       })
+
       const { state, shouldSendNotification } = getNotificationState({
-        probe,
+        probe: probe3,
         alertQuery: 'response.size < 1',
         isAlertTriggered: false,
         requestIndex: 0,
@@ -348,50 +371,49 @@ describe('Send notification based on threshold', () => {
     })
   })
 
-  // describe('send notification', () => {
-  //   it('the incident cross the threshold', () => {
-  //     // act
-  //     const { shouldSendNotification } = getNotificationState({
-  //       probe,
-  //       alertQuery: 'response.size < 2',
-  //       isAlertTriggered: true,
-  //       requestIndex: 0,
-  //     })
+  describe('send notification', () => {
+    it('the incident cross the threshold', () => {
+      // act
+      const res = getNotificationState({
+        probe,
+        alertQuery: 'response.size < 2',
+        isAlertTriggered: true,
+        requestIndex: 0,
+      })
+      // assert
+      expect(res.shouldSendNotification).eq(true)
+    })
 
-  //     // assert
-  //     expect(shouldSendNotification).eq(true)
-  //   })
+    it('the recovery cross the threshold', () => {
+      // act
+      getNotificationState({
+        probe,
+        alertQuery: 'response.size < 3',
+        isAlertTriggered: true,
+        requestIndex: 0,
+      })
+      getNotificationState({
+        probe,
+        alertQuery: 'response.size < 3',
+        isAlertTriggered: true,
+        requestIndex: 0,
+      })
+      getNotificationState({
+        probe,
+        alertQuery: 'response.size < 3',
+        isAlertTriggered: false,
+        requestIndex: 0,
+      })
+      const { state, shouldSendNotification } = getNotificationState({
+        probe,
+        alertQuery: 'response.size < 3',
+        isAlertTriggered: false,
+        requestIndex: 0,
+      })
 
-  // it('the recovery cross the threshold', () => {
-  //   // act
-  //   getNotificationState({
-  //     probe,
-  //     alertQuery: 'response.size < 3',
-  //     isAlertTriggered: true,
-  //     requestIndex: 0,
-  //   })
-  //   getNotificationState({
-  //     probe,
-  //     alertQuery: 'response.size < 3',
-  //     isAlertTriggered: true,
-  //     requestIndex: 0,
-  //   })
-  //   getNotificationState({
-  //     probe,
-  //     alertQuery: 'response.size < 3',
-  //     isAlertTriggered: false,
-  //     requestIndex: 0,
-  //   })
-  //   const { state, shouldSendNotification } = getNotificationState({
-  //     probe,
-  //     alertQuery: 'response.size < 3',
-  //     isAlertTriggered: false,
-  //     requestIndex: 0,
-  //   })
-
-  //   // assert
-  //   expect(state).eq('UP')
-  //   expect(shouldSendNotification).eq(true)
-  // })
-  // })
+      // assert
+      expect(state).eq('UP')
+      expect(shouldSendNotification).eq(true)
+    })
+  })
 })

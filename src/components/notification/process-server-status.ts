@@ -199,13 +199,13 @@ export function getNotificationState({
   isAlertTriggered,
   requestIndex,
 }: ShouldSendNotification): ShouldSendNotificationReturn {
-  const { requests, incidentThreshold, recoveryThreshold } = probe
-  let id: string = ''
+  const { incidentThreshold, recoveryThreshold } = probe
+  let id = ''
 
   if (probe?.socket) {
     id = `tcp-${probe?.id}-${probe?.socket.toString()}` // generate unique id for each socket
-  } else if (probe?.requests) {
-    id = `http-${probe?.id}-${probe?.requests[requestIndex]?.id}` // geneerate id for http requests
+  } else {
+    id = `http-${probe?.id}-${probe?.requests[requestIndex]?.url}` // generate id for http requests
   }
 
   if (!serverAlertStateInterpreters.has(id)) {
