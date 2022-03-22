@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0] - 2022-03-22
+
+## Fixed
+
+- Property error on tcp request (#626)
+- "Unknown property" error when using some alert configuration (#617)
+
+## Updated
+
+- Landing page (#619)
+- @oclif/core (#610)
+- Recovery/incident after the first loop to Symon (#620)
+
+## Added
+
+- Install monika via Chocolatey (#623)
+- Self update (#622)
+- Support for tcp request (#618)
+- Publish to Snapcraft (#606)
+
 ## [1.6.13] - 2022-02-17
 
 ## Fixed
