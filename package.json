@@ -31,7 +31,6 @@
   ],
   "scripts": {
     "clean": "rm -rf coverage lib tsconfig.tsbuildinfo oclif.manifest.json",
-    "preinstall": "node scripts/preinstall.js",
     "pretest": "npm run check-format",
     "posttest": "eslint . --ext .ts --config .eslintrc",
     "prepack": "npm run clean && tsc -b && oclif manifest",
