@@ -2,35 +2,29 @@
 
 [![Build Status](https://github.com/hyperjumptech/monika/workflows/Node.js%20CI/badge.svg?event=push&branch=main)](https://github.com/hyperjumptech/monika/actions) [![codecov](https://codecov.io/gh/hyperjumptech/monika/branch/main/graph/badge.svg?token=O3WVT7DP6F)](https://codecov.io/gh/hyperjumptech/monika)
 
+![npm](https://img.shields.io/npm/dt/@hyperjumptech/monika?label=NPM%20Downloads)
+
 # About
 
 Monika is a command line application for synthetic monitoring. The name Monika stands for "**Moni**toring Ber**ka**la", which means "periodic monitoring" in the Indonesian language.
 
 ## How to Use
 
-[![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-black.svg)](https://snapcraft.io/monika)
-
-Please see the [overview](https://hyperjumptech.github.io/monika/overview) to see documentations on how to install and how to use Monika.
+You can find many ways to install Monika and how to start monitoring from the [Quick Start page](https://monika.hyperjump.tech/quick-start).
 
 ## Contributing
 
-You can install Monika from the npm package manager:
+Monika is a Node.js application written in TypeScript using the [oclif framework](https://oclif.io/).  
+It was developed on **node v14 (LTS)**, and **npm v6**.
 
-```bash
-npm i -g @hyperjumptech/monika
-```
-
-Monika is basically a node.js application written in typescript built around the oclif framework.  
-It was developed on **node v14 (LTS)**, and **npm v6**. You can run `npm version` for a complete version list.
-
-You can fetch, build, and use `Monika` from source. Clone this repository then install the dependencies like below:
+To start developing, clone this repository, then install the dependencies:
 
 ```bash
 git clone git@github.com:hyperjumptech/monika.git
 npm ci
 ```
 
-run `Monika`
+Then, to run Monika from the source,
 
 - on Linux/Unix/Mac
 
@@ -44,17 +38,19 @@ npm start
 .\bin\run.cmd
 ```
 
-Keep your codes formatted with **npm scripts** and ensure **eslint plugin** is installed and allowed to make changes in your IDE.
+To keep the formatting consistent, run the following command to format the source code:
 
 ```bash
 npm run format
 ```
 
-Finally you can also run `npm run test` to ensure changes do not break the code.
+Finally you can also run `npm run test` to prevent regression.
+
+Once you have made the changes, open a Pull Request and explain the issue your change will fix or the feature your change will add.
 
 ## Development References
 
-The tools and frameworks we used in this project are listed below.
+The tools and frameworks we used in this project are listed below:
 
 - [oclif](https://oclif.io/) to scaffold the CLI.
 - [Prettier](https://prettier.io/) to format the code.
@@ -75,6 +71,8 @@ For detailed information, you can click on any of the specific docs below:
 - [Quick Start](https://hyperjumptech.github.io/monika/quick-start)
 - [Installations](https://monika.hyperjump.tech/quick-start#installation)
 - [How it works](https://hyperjumptech.github.io/monika/guides/probes)
+
+<a href="https://www.producthunt.com/posts/monika-2?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-monika&#0045;2" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=332404&theme=light" alt="Monika - Open&#0032;source&#0032;and&#0032;free&#0032;HTTP&#0032;monitoring&#0032;tool | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
 
 ## License
 
