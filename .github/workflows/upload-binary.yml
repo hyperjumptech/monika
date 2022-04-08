@@ -213,4 +213,4 @@ jobs:
       - name: Choco push
         if: runner.os == 'Windows'
         working-directory: ./chocolatey
-        run: choco push monika.1.6.12.nupkg --source https://push.chocolatey.org/
+        run: choco push monika.${{ steps.read_version.outputs.content }}.nupkg --source https://push.chocolatey.org/
