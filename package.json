@@ -80,7 +80,7 @@
     "ping": "^0.4.1",
     "pino": "6.11.2",
     "pino-pretty": "4.7.1",
-    "pkg": "^5.3.1",
+    "pkg": "^5.6.0",
     "prom-client": "13.1.0",
     "sinon": "^11.1.2",
     "smtp-server": "^3.8.0",
@@ -172,12 +172,13 @@
       "./lib/**/*.js"
     ],
     "assets": [
-      "./db/migrations/*.sql"
+      "db/migrations/*.sql",
+      "node_modules/sqlite3/lib/binding/**/*"
     ],
     "targets": [
-      "node12-linux-x64",
-      "node12-macos-x64",
-      "node12-win-x64"
+      "node14-linux-x64",
+      "node14-macos-x64",
+      "node14-win-x64"
     ],
     "outputPath": "dist"
   }
