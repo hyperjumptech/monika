@@ -60,7 +60,7 @@ jobs:
       - run: npm ci
         name: Install dependencies
 
-      - run: npm run pkg
+      - run: npm run pkg -- -t node14-${{ matrix.platform }}
         name: Pack the binary using vercel/pkg
 
       - run: file ./dist/*
