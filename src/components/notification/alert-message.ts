@@ -103,7 +103,7 @@ export async function getMessageForAlert({
     if (!isHTTPStatusCode) {
       switch (status) {
         case 0:
-          return 'URI not found'
+          return 'Host cannot be reached'
         case 1:
           return 'Connection reset'
         case 2:
