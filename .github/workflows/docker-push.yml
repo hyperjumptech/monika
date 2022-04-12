@@ -2,6 +2,7 @@
 name: DockerPush
 
 on:
+  workflow_dispatch:
   release:
     types: [created]
 
