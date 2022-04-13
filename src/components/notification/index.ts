@@ -56,7 +56,10 @@ export class NotificationSendingError extends Error {
     this.notificationType = notificationType
   }
 
-  static create(notificationType: string, originalErrorMessage?: string) {
+  static create(
+    notificationType: string,
+    originalErrorMessage?: string
+  ): NotificationSendingError {
     // for the sake of passing test
     const notificationTypeformatted = notificationType
       .split('-')
@@ -74,7 +77,7 @@ export class NotificationSendingError extends Error {
 export async function sendNotifications(
   notifications: Notification[],
   message: NotificationMessage
-) {
+): Promise<void> {
   const pagerduty = newPagerDuty()
 
   await Promise.all(
@@ -161,39 +164,43 @@ export async function sendNotifications(
           case 'monika-notif': {
             let body: MonikaNotifDataBody
 
-            if (
-              message.meta.type === 'start' ||
-              message.meta.type === 'termination'
-            ) {
-              body = {
-                type: message.meta.type,
-                ip_address: message.body,
+            switch (message.meta.type) {
+              case 'start' || 'termination': {
+                body = {
+                  type: message.meta.type,
+                  ip_address: message.body,
+                }
+                break
               }
-            } else if (
-              message.meta.type === 'incident' ||
-              message.meta.type === 'recovery'
-            ) {
-              body = {
-                type: message.meta.type,
-                alert: message.summary,
-                url: message.meta.url,
-                time: message.meta.time,
-                monika: message.meta.monikaInstance,
+              case 'incident' || 'recovery': {
+                body = {
+                  type: message.meta.type,
+                  alert: message.summary,
+                  url: message.meta.url,
+                  time: message.meta.time,
+                  monika: message.meta.monikaInstance,
+                }
+                break
               }
-            } else if (message.meta.type === 'status-update') {
-              body = {
-                type: message.meta.type,
-                time: message.meta.time,
-                monika: message.meta.monikaInstance,
-                numberOfProbes: String(message.meta.numberOfProbes),
-                maxResponseTime: String(message.meta.maxResponseTime),
-                minResponseTime: String(message.meta.minResponseTime),
-                averageResponseTime: String(message.meta.averageResponseTime),
-                numberOfIncidents: String(message.meta.numberOfIncidents),
-                numberOfRecoveries: String(message.meta.numberOfRecoveries),
-                numberOfSentNotifications: String(
-                  message.meta.numberOfSentNotifications
-                ),
+              case 'status-update': {
+                body = {
+                  type: message.meta.type,
+                  time: message.meta.time,
+                  monika: message.meta.monikaInstance,
+                  numberOfProbes: String(message.meta.numberOfProbes),
+                  maxResponseTime: String(message.meta.maxResponseTime),
+                  minResponseTime: String(message.meta.minResponseTime),
+                  averageResponseTime: String(message.meta.averageResponseTime),
+                  numberOfIncidents: String(message.meta.numberOfIncidents),
+                  numberOfRecoveries: String(message.meta.numberOfRecoveries),
+                  numberOfSentNotifications: String(
+                    message.meta.numberOfSentNotifications
+                  ),
+                }
+                break
+              }
+              default: {
+                break
               }
             }
 

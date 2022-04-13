@@ -25,7 +25,7 @@
 import { spawnSync } from 'child_process'
 import { type } from 'os'
 
-export const open = (url: string) => {
+export const open = (url: string): void => {
   const operatingSystem = type()
   switch (operatingSystem) {
     case 'Darwin':

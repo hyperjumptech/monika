@@ -32,11 +32,12 @@ const convertNameValueArraysToObject = (
   }[]
 ) => {
   const obj: any = {}
-  headers.forEach((item) => {
+  for (const item of headers) {
     if (item.name.charAt(0) !== ':') {
       obj[item.name] = item.value
     }
-  })
+  }
+
   return obj
 }
 

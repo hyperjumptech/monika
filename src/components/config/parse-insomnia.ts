@@ -49,12 +49,11 @@ export default function parseInsomnia(
   configString: string,
   format: string
 ): Config {
-  let insomniaData
-  if (format === 'yaml' || format === 'yml') {
-    insomniaData = yml.load(configString, { json: true }) as InsomniaResource[]
-  } else {
-    insomniaData = JSON.parse(configString)
-  }
+  const insomniaData =
+    format === 'yaml' || format === 'yml'
+      ? (yml.load(configString, { json: true }) as InsomniaResource[])
+      : JSON.parse(configString)
+
   validateInsomniaExport(insomniaData)
   const data: InsomniaResource[] = insomniaData.resources
   const env = data
@@ -75,8 +74,8 @@ export default function parseInsomnia(
 
 function validateInsomniaExport(data: any) {
   if (
-    data?.['__export_format'] !== 4 &&
-    (data?.['__export_source'] as undefined | string)?.includes('insomnia')
+    data?.__export_format !== 4 &&
+    (data?.__export_source as undefined | string)?.includes('insomnia')
   ) {
     throw new Error(
       'Failed to parse Insomnia collection, please use export format v4.'
@@ -125,7 +124,7 @@ function mapInsomniaRequestToConfig(res: InsomniaResource): Probe {
         url,
         method: (res?.method ?? 'GET') as Method,
         body: JSON.parse(res.body?.text ?? '{}'),
-        timeout: 10000,
+        timeout: 10_000,
         headers,
       },
     ],

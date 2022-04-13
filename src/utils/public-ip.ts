@@ -70,6 +70,8 @@ export async function getPublicNetworkInfo() {
     log.warn(`Failed to obtain location/ISP info. Got: ${error}`)
     return Promise.resolve() // couldn't resolve publicNetworkInfo, fail gracefully and continue
   }
+
+  return null
 }
 
 /**
@@ -93,4 +95,6 @@ export async function getPublicIp() {
     log.warn(`${time} STUN Server is temporarily unreachable. Check network.`)
     return Promise.resolve() // couldn't access public stun but resolve and retry
   }
+
+  return null
 }
