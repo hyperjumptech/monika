@@ -30,7 +30,7 @@ import { log } from '../../../utils/pino'
 export const sendLark = async (
   data: LarkData,
   message: NotificationMessage
-) => {
+): Promise<any> => {
   const notifType =
     message.meta.type[0].toUpperCase() + message.meta.type.substring(1)
   let larkMessage

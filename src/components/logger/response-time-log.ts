@@ -33,13 +33,13 @@ export let maxResponseTime = 0
 export let minResponseTime = 0
 export let averageResponseTime = 0
 
-export function getLogLifeTimeInHour() {
+export function getLogLifeTimeInHour(): number {
   const now = new Date()
   const diff = differenceInHours(now, startTime24HourCycle)
   return diff || 1
 }
 
-export function resetlogs() {
+export function resetlogs(): void {
   startTime24HourCycle = new Date()
   responseCount = 0
   totalResponseTime = 0
@@ -48,7 +48,7 @@ export function resetlogs() {
   averageResponseTime = 0
 }
 
-export function checkIs24HourHasPassed() {
+export function checkIs24HourHasPassed(): Boolean {
   const now = new Date()
   const diffInHours = differenceInHours(now, startTime24HourCycle)
   if (diffInHours > 24) {

@@ -165,14 +165,16 @@ export async function sendNotifications(
             let body: MonikaNotifDataBody
 
             switch (message.meta.type) {
-              case 'start' || 'termination': {
+              case 'start':
+              case 'termination': {
                 body = {
                   type: message.meta.type,
                   ip_address: message.body,
                 }
                 break
               }
-              case 'incident' || 'recovery': {
+              case 'incident':
+              case 'recovery': {
                 body = {
                   type: message.meta.type,
                   alert: message.summary,

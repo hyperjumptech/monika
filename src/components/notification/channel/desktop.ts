@@ -35,7 +35,7 @@ interface NotifyData {
  * @param {string} str input string
  * @return {string} escape single quote with another
  */
-export const psEscape = (str: string) => {
+export const psEscape = (str: string): string => {
   let result = ''
   for (let i = 0; i < str.length; i++) {
     const ch = str[i]
@@ -43,8 +43,10 @@ export const psEscape = (str: string) => {
       // single quote, escape it with another single quote
       result += ch
     }
+
     result += ch
   }
+
   return result
 }
 

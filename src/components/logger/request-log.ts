@@ -79,7 +79,7 @@ export class RequestLog {
     this.sentNotifications.push(...data)
   }
 
-  addError(error: string) {
+  addError(error: string): void {
     this.errors.push(error)
   }
 
@@ -101,6 +101,11 @@ export class RequestLog {
     // generate probe result messages
     let probeMsg = ''
 
+    probeMsg = `${this.iteration} id:${this.probe.id} ${
+      this.response?.status || '-'
+    } ${this.request.method} ${this.request.url} ${
+      this.response?.responseTime || '-'
+    }ms`
     // generate logs from ping request or probe request
     if (this.request.ping) {
       probeMsg = `${this.iteration} id:${this.probe.id} PING:${
@@ -108,12 +113,6 @@ export class RequestLog {
       } ${this.request.url} ${
         this.response?.alive ? this.response?.responseTime : '-'
       }ms packetLoss:${this.response?.alive ? this.response?.packetLoss : '-'}%`
-    } else {
-      probeMsg = `${this.iteration} id:${this.probe.id} ${
-        this.response?.status || '-'
-      } ${this.request.method} ${this.request.url} ${
-        this.response?.responseTime || '-'
-      }ms`
     }
 
     if (printedNotification) {
