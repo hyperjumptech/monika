@@ -38,20 +38,23 @@ import {
 // wrap substrings that are object accessor with double quote
 // then wrap again with __getValueByPath function call
 // eg: 'response.body.title' becomes '__getValueByPath("response.body.title")'
-export const sanitizeExpression = (query: string, objectKeys: string[]) => {
+export const sanitizeExpression = (
+  query: string,
+  objectKeys: string[]
+): string => {
   let sanitizedQuery = query
 
-  objectKeys.forEach((key) => {
+  for (const key of objectKeys) {
     const pattern = new RegExp(`(^| |\\()(${key}(\\.|\\[)\\S*[^\\s),])`, 'g')
     sanitizedQuery = sanitizedQuery.replace(pattern, '$1__getValueByPath("$2")')
-  })
+  }
 
   return sanitizedQuery
 }
 
 export const compileExpression =
-  (expression: string, objectKeys: string[] = []) =>
-  (obj: any) => {
+  (expression: string, objectKeys: string[] = []): any =>
+  (obj: any): any => {
     const sanitizedExpression = sanitizeExpression(expression, objectKeys)
 
     return _compileExpression(sanitizedExpression, {

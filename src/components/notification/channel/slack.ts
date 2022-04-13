@@ -55,6 +55,7 @@ export const sendSlack = async (
       }
       break
     }
+
     case 'incident':
     case 'recovery': {
       content = {
@@ -102,6 +103,7 @@ export const sendSlack = async (
       }
       break
     }
+
     case 'status-update': {
       content = {
         text: `New '${notificationType}' from Monika`,
@@ -183,6 +185,7 @@ export const sendSlack = async (
       }
       break
     }
+
     default:
       break
   }

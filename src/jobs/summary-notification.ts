@@ -52,7 +52,7 @@ import { Notification } from '../interfaces/notification'
 import { Probe } from '../interfaces/probe'
 const eventEmitter = getEventEmitter()
 
-export async function getSummaryAndSendNotif() {
+export async function getSummaryAndSendNotif(): Promise<void> {
   const config = getConfig()
   const { notifications } = config
 
@@ -137,6 +137,7 @@ function readPidFile(): PidObject {
         'Could not find the file: monika.pid. Monika is probably not running or ran from a diffent directory'
       )
     }
+
     throw error
   }
 
@@ -155,7 +156,7 @@ function readPidFile(): PidObject {
  * @param {string} configFile is the configuration file used
  * @param {obj} config is a Config object
  */
-export function savePidFile(configFile: string[], config: Config) {
+export function savePidFile(configFile: string[], config: Config): void {
   const data = JSON.stringify({
     monikaStartTime: new Date(),
     monikaConfigFile: configFile,
@@ -187,13 +188,13 @@ eventEmitter.on(events.application.terminated, async () => {
  */
 function getDaysHours(startTime: Date): string {
   let duration = Math.abs(
-    (new Date().getTime() - new Date(startTime).getTime()) / 1000
+    (new Date().getTime() - new Date(startTime).getTime()) / 1_000
   )
-  const numDays = Math.floor(duration / 86400)
-  duration -= numDays * 86400 // get the remaining hours
+  const numDays = Math.floor(duration / 86_400)
+  duration -= numDays * 86_400 // get the remaining hours
 
-  const numHours = Math.floor(duration / 3600) % 24
-  duration -= numHours * 3600 // get the remaining minutes
+  const numHours = Math.floor(duration / 3_600) % 24
+  duration -= numHours * 3_600 // get the remaining minutes
 
   const numMinutes = Math.floor(duration / 60) % 60
 

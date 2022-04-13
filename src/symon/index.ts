@@ -160,7 +160,7 @@ class SymonClient {
     )
   }
 
-  async initiate() {
+  async initiate(): Promise<void> {
     this.monikaId = await this.handshake()
     await this.sendStatus({ isOnline: true })
 
@@ -196,13 +196,13 @@ class SymonClient {
     await this.setReportInterval()
   }
 
-  async notifyEvent(event: SymonClientEvent) {
+  async notifyEvent(event: SymonClientEvent): Promise<void> {
     log.debug('Sending incident/recovery event to Symon')
     await this.httpClient.post('/events', { monikaId: this.monikaId, ...event })
   }
 
   // monika subscribes to config update by providing listener callback
-  onConfig(listener: ConfigListener) {
+  onConfig(listener: ConfigListener): any {
     if (this.config) listener(this.config)
 
     this.configListeners.push(listener)
@@ -263,7 +263,7 @@ class SymonClient {
       })
   }
 
-  private updateConfig(newConfig: Config) {
+  private updateConfig(newConfig: Config): void {
     if (newConfig.version && this.configHash !== newConfig.version) {
       log.debug(`Received config changes. Reloading monika`)
       this.config = newConfig
@@ -290,7 +290,7 @@ class SymonClient {
     }
   }
 
-  async report() {
+  async report(): Promise<any> {
     if (!hasConnectionToSymon) {
       log.warn('Has no connection to symon')
       return

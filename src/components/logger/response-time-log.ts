@@ -48,7 +48,7 @@ export function resetlogs(): void {
   averageResponseTime = 0
 }
 
-export function checkIs24HourHasPassed(): Boolean {
+export function checkIs24HourHasPassed(): boolean {
   const now = new Date()
   const diffInHours = differenceInHours(now, startTime24HourCycle)
   if (diffInHours > 24) {

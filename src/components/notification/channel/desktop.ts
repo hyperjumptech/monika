@@ -55,7 +55,7 @@ export const psEscape = (str: string): string => {
  * @param {NotifyData} data notification data
  * @return {void}
  */
-export const sendDesktop = (data: NotifyData) => {
+export const sendDesktop = (data: NotifyData): any => {
   const { title, message } = data
   const operatingSystem = type()
 
