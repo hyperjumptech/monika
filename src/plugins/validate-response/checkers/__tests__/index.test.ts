@@ -125,7 +125,7 @@ describe('responseChecker', () => {
     }
 
     it('seconds - should handle when response time is greater than alert defined response time', () => {
-      const res = generateMockedResponse(20000)
+      const res = generateMockedResponse(20_000)
       const data = responseChecker(
         { query: 'response.time > 10000', message: '' },
         res
@@ -135,7 +135,7 @@ describe('responseChecker', () => {
     })
 
     it('seconds - should handle when response time is less than alert defined response time', () => {
-      const res = generateMockedResponse(10000)
+      const res = generateMockedResponse(10_000)
       const data = responseChecker(
         { query: 'response.time > 20000', message: '' },
         res

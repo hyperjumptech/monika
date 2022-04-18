@@ -30,7 +30,7 @@ import { convertTextToHTML } from '../../../utils/text'
 export const sendSendgrid = async (
   inputData: SendInput,
   sendgridConfigData: SendgridData
-) => {
+): Promise<any> => {
   const { subject, body, sender, recipients } = inputData
   const API_KEY = sendgridConfigData.apiKey
 

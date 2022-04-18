@@ -31,7 +31,7 @@ import { convertTextToHTML } from '../../../utils/text'
 export const sendMailgun = async (
   inputData: SendInput,
   mailgunConfigData: MailgunData
-) => {
+): Promise<any> => {
   const { subject, body, sender, recipients } = inputData
   const { username = 'api', domain, apiKey: key } = mailgunConfigData
 

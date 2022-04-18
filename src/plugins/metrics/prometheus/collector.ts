@@ -33,7 +33,7 @@ type PrometheusCustomCollector = {
 export class PrometheusCollector {
   private prometheusCustomCollector: Partial<PrometheusCustomCollector> = {}
 
-  registerCollectorFromProbes(probes: Probe[]) {
+  registerCollectorFromProbes(probes: Probe[]): void {
     // remove all registered metrics
     register.clear()
 
@@ -69,7 +69,7 @@ export class PrometheusCollector {
     }
   }
 
-  collectProbeRequestMetrics(probeResult: Record<string, any>) {
+  collectProbeRequestMetrics(probeResult: Record<string, any>): void {
     const { probe, requestIndex, response } = probeResult
     const { id, name, requests } = probe
     const request = requests[requestIndex]
