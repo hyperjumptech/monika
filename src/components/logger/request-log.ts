@@ -102,16 +102,16 @@ export class RequestLog {
     let probeMsg = ''
 
     // generate logs from ping request or probe request
-    if (this.request.ping) {
+    if (this.request?.ping) {
       probeMsg = `${this.iteration} id:${this.probe.id} PING:${
         this.response?.alive ? 'alive' : 'dead'
-      } ${this.request.url} ${
+      } ${this.request?.url} ${
         this.response?.alive ? this.response?.responseTime : '-'
       }ms packetLoss:${this.response?.alive ? this.response?.packetLoss : '-'}%`
     } else {
       probeMsg = `${this.iteration} id:${this.probe.id} ${
         this.response?.status || '-'
-      } ${this.request.method} ${this.request.url} ${
+      } ${this.request?.method} ${this.request?.url} ${
         this.response?.responseTime || '-'
       }ms`
     }
