@@ -120,7 +120,7 @@ function transformMessageToEventPayload(
   const { meta, summary } = message
   const { probeID, url, alertQuery, type, publicIpAddress } = meta
   const dedupKey = `${probeID}:${url}:${alertQuery}`.replace(' ', '')
-
+  /* eslint-disable camelcase */
   if (type === 'incident') {
     return {
       routing_key: routingKey,
@@ -142,6 +142,6 @@ function transformMessageToEventPayload(
       event_action: 'resolve',
     }
   }
-
+  /* eslint-enable */
   return null
 }

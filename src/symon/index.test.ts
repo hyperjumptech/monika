@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+
 /**********************************************************************************
  * MIT License                                                                    *
  *                                                                                *
@@ -87,6 +88,7 @@ describe('Symon initiate', () => {
         if (req.url.pathname.endsWith('client-handshake')) {
           sentBody = req.body!
         }
+
         return {
           status: 200,
           body: JSON.stringify({
@@ -146,6 +148,7 @@ describe('Symon initiate', () => {
             }),
           }
         }
+
         if (req.url.pathname.endsWith('probes')) {
           return {
             status: 200,
@@ -186,6 +189,7 @@ describe('Symon initiate', () => {
             }),
           }
         }
+
         if (req.url.pathname.endsWith('probes')) {
           return {
             status: 200,
@@ -195,6 +199,7 @@ describe('Symon initiate', () => {
             }),
           }
         }
+
         if (req.url.pathname.endsWith('report')) {
           return {
             status: 200,

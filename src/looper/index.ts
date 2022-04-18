@@ -120,7 +120,7 @@ export function isIDValid(config: Config, ids: string): boolean {
   return true
 }
 
-export async function loopCheckSTUNServer(interval: number) {
+export async function loopCheckSTUNServer(interval: number): Promise<any> {
   // if interval = 0 get ip once and exit. No need to setup interval.
   if (interval === 0 || process.env.CI || process.env.NODE_ENV === 'test') {
     await getPublicIp()
@@ -143,7 +143,7 @@ export async function loopCheckSTUNServer(interval: number) {
  * @param {boolean} verboseLogs store all requests to database
  * @returns {function} func with isAborted true if interrupted
  */
-// eslint-disable-next-line max-params
+
 function loopProbe(
   probe: Probe,
   notifications: Notification[],
@@ -184,7 +184,7 @@ export function idFeeder(
   notifications: Notification[],
   repeats: number,
   verboseLogs: boolean
-) {
+): any {
   for (const probe of sanitizedProbes) {
     const interval = loopProbe(
       probe,
@@ -206,8 +206,9 @@ export function idFeeder(
 
 /**
  * clearProbeInterval clear all probing process
+ * @returns void
  */
-export function clearProbeInterval() {
+export function clearProbeInterval(): void {
   for (const i of intervals) {
     clearInterval(i)
   }

@@ -36,6 +36,7 @@ type Result = {
   duration: number
   status: 'UP' | 'DOWN'
   message: string
+  responseData: Buffer | null
 }
 
 export async function check(tcpRequest: TCPRequest): Promise<Result> {
@@ -49,9 +50,19 @@ export async function check(tcpRequest: TCPRequest): Promise<Result> {
     const responseData = Buffer.from(resp, 'utf8')
     const isAlertTriggered = responseData?.length < 1
 
-    return { duration, status: isAlertTriggered ? 'DOWN' : 'UP', message: '' }
+    return {
+      duration,
+      responseData,
+      status: isAlertTriggered ? 'DOWN' : 'UP',
+      message: '',
+    }
   } catch (error: any) {
-    return { duration: 0, status: 'DOWN', message: error?.message }
+    return {
+      duration: 0,
+      responseData: null,
+      status: 'DOWN',
+      message: error?.message,
+    }
   }
 }
 

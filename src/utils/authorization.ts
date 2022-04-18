@@ -24,7 +24,7 @@
 
 import { AxiosBasicCredentials } from 'axios'
 
-export const authBasic = (cred: AxiosBasicCredentials) => {
+export const authBasic = (cred: AxiosBasicCredentials): any => {
   if (!cred.username)
     throw new Error('Username should not be empty or undefined')
   if (!cred.password || cred.password.length < 6)
@@ -37,11 +37,12 @@ export const authBasic = (cred: AxiosBasicCredentials) => {
   return `Basic ${result}`
 }
 
-export const authBearer = (token: string) => {
+export const authBearer = (token: string): string => {
   return `Bearer ${token}`
 }
 
-export const authorize = (type: string, args: any) => {
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export const authorize = (type: string, args: any): any => {
   switch (type) {
     case 'basic':
       return authBasic(args)

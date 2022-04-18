@@ -51,6 +51,7 @@ const responseChecker = (
   if (res.status === 599 || res.status === 0 || res.status === 1) {
     return true
   }
+
   // if a ping request is not connected, or timed out, return an alert
   if (res.alive === false || res.status === 4) {
     return true

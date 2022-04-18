@@ -37,19 +37,6 @@ export type ServerAlertStateContext = {
   isFirstTimeSendEvent: boolean
 }
 
-type ShouldSendNotification = {
-  probe: Probe
-  alertQuery: string
-  isAlertTriggered: boolean
-  requestIndex: number
-}
-
-type ShouldSendNotificationReturn = {
-  isFirstTime: boolean
-  state: 'UP' | 'DOWN'
-  shouldSendNotification: boolean
-}
-
 export const serverAlertStateInterpreters = new Map<
   string,
   Record<string, Interpreter<ServerAlertStateContext>>
@@ -136,10 +123,11 @@ export const processThresholds = ({
   requestIndex: number
   validatedResponse: ValidatedResponse[]
 }) => {
-  const { requests, incidentThreshold, recoveryThreshold } = probe
-  const request = requests[requestIndex]
-
-  const id = `${probe?.id}-${request?.id}-${request.url}`
+  const { requests, incidentThreshold, recoveryThreshold, socket } = probe
+  const request = requests?.[requestIndex]
+  const id = `${probe?.id}-${request?.id || ''}-${
+    request?.url || socket ? `${socket?.host}:${socket?.port}` : ''
+  }`
 
   const results: Array<ServerAlertState> = []
 
@@ -148,7 +136,6 @@ export const processThresholds = ({
       string,
       Interpreter<ServerAlertStateContext>
     > = {}
-
     for (const alert of validatedResponse.map((r) => r.alert)) {
       const stateMachine = serverAlertStateMachine.withContext({
         incidentThreshold,
@@ -191,58 +178,4 @@ export const processThresholds = ({
   }
 
   return results
-}
-
-export function getNotificationState({
-  probe,
-  alertQuery,
-  isAlertTriggered,
-  requestIndex,
-}: ShouldSendNotification): ShouldSendNotificationReturn {
-  const { incidentThreshold, recoveryThreshold } = probe
-  let id = ''
-
-  if (probe?.socket) {
-    id = `tcp-${probe?.id}-${probe?.socket.toString()}` // generate unique id for each socket
-  } else {
-    id = `http-${probe?.id}-${probe?.requests[requestIndex]?.url}` // generate id for http requests
-  }
-
-  if (!serverAlertStateInterpreters.has(id)) {
-    const interpreters: Record<
-      string,
-      Interpreter<ServerAlertStateContext>
-    > = {}
-    const stateMachine = serverAlertStateMachine.withContext({
-      incidentThreshold,
-      recoveryThreshold,
-      consecutiveFailures: 0,
-      consecutiveSuccesses: 0,
-      isFirstTimeSendEvent: true,
-    })
-
-    interpreters[alertQuery] = interpret(stateMachine).start()
-
-    serverAlertStateInterpreters.set(id!, interpreters)
-  }
-
-  const interpreter = serverAlertStateInterpreters.get(id!)![alertQuery]
-  const prevStateValue = interpreter?.state?.value
-
-  interpreter?.send(isAlertTriggered ? 'FAILURE' : 'SUCCESS')
-
-  const currentStateValue = interpreter?.state?.value
-  const stateContext = interpreter?.state?.context
-
-  interpreter.send('FIST_TIME_EVENT_SENT')
-
-  return {
-    isFirstTime: stateContext.isFirstTimeSendEvent,
-    state: currentStateValue as 'UP' | 'DOWN',
-    shouldSendNotification:
-      stateContext.isFirstTimeSendEvent ||
-      (currentStateValue === 'DOWN' &&
-        (prevStateValue === 'UP' || !prevStateValue)) ||
-      (currentStateValue === 'UP' && prevStateValue === 'DOWN'),
-  }
 }

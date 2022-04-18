@@ -27,7 +27,7 @@ import helmet from 'helmet'
 import { register } from 'prom-client'
 import { log } from '../../../utils/pino'
 
-export function startPrometheusMetricsServer(port: number) {
+export function startPrometheusMetricsServer(port: number): void {
   const app = express()
 
   // security middleware
@@ -36,6 +36,7 @@ export function startPrometheusMetricsServer(port: number) {
     if (req.method !== 'GET') {
       return res.status(405).end()
     }
+
     next()
   })
 

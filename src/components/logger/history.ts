@@ -24,7 +24,7 @@
 
 import path from 'path'
 import SQLite3 from 'sqlite3'
-import { open, Database } from 'sqlite'
+import { open, Database, ISqlite } from 'sqlite'
 
 import { ProbeRequestResponse } from '../../interfaces/request'
 import { Probe } from '../../interfaces/probe'
@@ -36,36 +36,36 @@ const dbPath = path.resolve(process.cwd(), 'monika-logs.db')
 
 type RequestsLog = {
   id: number
-  probe_id: string
-  response_status: number
-  request_url: string
-  response_time: number
+  probeId: string
+  responseStatus: number
+  requestUrl: string
+  responseTime: number
 }
 
 export type UnreportedRequestsLog = {
   id: number
   timestamp: number
-  probe_id: string
-  probe_name?: string
-  request_method: string
-  request_url: string
-  request_header?: string
-  request_body?: string
-  response_status: number
-  response_header?: string
-  response_time: number
-  response_size?: number
+  probeId: string
+  probeName?: string
+  requestMethod: string
+  requestUrl: string
+  requestHeader?: string
+  requestBody?: string
+  responseStatus: number
+  responseHeader?: string
+  responseTime: number
+  responseSize?: number
   alerts: string[]
 }
 
 export type UnreportedNotificationsLog = {
   id: number
   timestamp: number
-  probe_id: string
-  probe_name: string
-  alert_type: string
+  probeId: string
+  probeName: string
+  alertType: string
   type: string
-  notification_id: string
+  notificationId: string
   channel: string
 }
 
@@ -74,19 +74,19 @@ export type UnreportedLog = {
   notifications: UnreportedNotificationsLog[]
 }
 
-export type DeleteProbeRes = {
-  probe_ids: ProbeIdDate[]
-  probe_request_ids: ProbeReqIdDate[]
-}
-
 export type ProbeIdDate = {
   id: string
-  created_at: number
+  createdAt: number
 }
 
 export type ProbeReqIdDate = {
   id: number
-  created_at: number
+  createdAt: number
+}
+
+export type DeleteProbeRes = {
+  probeIds: ProbeIdDate[]
+  probeRequestIds: ProbeReqIdDate[]
 }
 
 let db: Database<SQLite3.Database, SQLite3.Statement>
@@ -99,8 +99,9 @@ async function migrate() {
 
 /**
  * openLogfile will open the file history.db and if it doesn't exist, create it and sets up the table
+ * @returns Promise<void>
  */
-export async function openLogfile() {
+export async function openLogfile(): Promise<void> {
   try {
     db = await open({
       filename: dbPath,
@@ -119,10 +120,10 @@ export async function deleteFromProbeRequests(
 ): Promise<DeleteProbeRes> {
   const getIdsToBeDeleted = `SELECT id, probe_id, created_at FROM probe_requests order by created_at asc limit ${limit}`
   const idsres = await db.all(getIdsToBeDeleted)
-  const ids = idsres.map((res) => ({ id: res.id, created_at: res.created_at }))
+  const ids = idsres.map((res) => ({ id: res.id, createdAt: res.createdAt }))
   const probeIds = idsres.map((res) => ({
     id: res.probe_id,
-    created_at: res.created_at,
+    createdAt: res.created_at,
   }))
   if (idsres.length > 0) {
     const deleteFromProbeRequests = `DELETE FROM probe_requests WHERE id IN (${getIdsToBeDeleted})`
@@ -130,43 +131,68 @@ export async function deleteFromProbeRequests(
   }
 
   return {
-    probe_ids: probeIds,
-    probe_request_ids: ids,
+    probeIds: probeIds,
+    probeRequestIds: ids,
   }
 }
 
-export async function deleteFromAlerts(probe_req_ids: ProbeReqIdDate[]) {
-  if (probe_req_ids.length > 0) {
+export async function deleteFromAlerts(
+  probeReqIds: ProbeReqIdDate[]
+): Promise<void> {
+  if (probeReqIds.length > 0) {
     await Promise.all(
-      probe_req_ids.map(async (item) => {
-        const deleteFromAlerts = `DELETE FROM alerts WHERE probe_request_id = ${item.id} and created_at = ${item.created_at}`
+      probeReqIds.map(async (item) => {
+        const deleteFromAlerts = `DELETE FROM alerts WHERE probe_request_id = ${item.id} and created_at = ${item.createdAt}`
         await db.run(deleteFromAlerts)
       })
     )
   }
 }
 
-export async function deleteFromNotifications(probe_ids: ProbeIdDate[]) {
-  if (probe_ids.length > 0) {
+export async function deleteFromNotifications(
+  probeIds: ProbeIdDate[]
+): Promise<void> {
+  if (probeIds.length > 0) {
     await Promise.all(
-      probe_ids.map(async (item) => {
-        const deleteFromNotifications = `DELETE FROM notifications WHERE probe_id = ${item.id} and created_at = ${item.created_at}`
+      probeIds.map(async (item) => {
+        const deleteFromNotifications = `DELETE FROM notifications WHERE probe_id = ${item.id} and created_at = ${item.createdAt}`
         await db.run(deleteFromNotifications)
       })
     )
   }
 }
 
-const objectNullValueToUndefined = <T extends Record<string, unknown>>(
+const snakeToCamel = (s: string) => {
+  return s.replace(/([_-][a-z])/gi, (g: string) => {
+    return g.toUpperCase().replace('-', '').replace('_', '')
+  })
+}
+
+// const camelToSnake = (s:string) => {
+//   return s.replace(/[A-Z]/g, (g: string) => {
+//     return `_${g.toLowerCase()}`
+//   })
+// }
+
+const mapObjectDbToModel = <T extends Record<string, unknown>>(
   obj: T
 ): { [K in keyof T]: T[K] extends null ? undefined : T[K] } => {
   return Object.entries(obj)
     .map(([k, v]) => [k, v === null ? undefined : v] as [string, unknown])
     .reduce((acc, [k, v]) => {
-      acc[k] = v
+      acc[snakeToCamel(k)] = v
       return acc
     }, {} as any)
 }
+
+// const objectNullValueToUndefined = <T extends Record<string, unknown>>(obj: T): { [K in keyof T]: T[K] extends null ? undefined : T[K] } => {
+//   return Object.entries(obj)
+//     .map(([k, v]) => [k, v === null ? undefined : v] as [string, unknown])
+//     .reduce((acc, [k, v]) => {
+//       acc[k] = v
+//       return acc
+//     }, {} as any)
+// }
 
 /**
  * getAllLogs gets all the history table from sqlite db
@@ -176,7 +202,13 @@ export async function getAllLogs(): Promise<RequestsLog[]> {
   const readRowsSQL =
     'SELECT id, probe_id, response_status, request_url, response_time FROM probe_requests'
 
-  return db.all(readRowsSQL)
+  const dbVal = await db.all(readRowsSQL).then((data: any) => {
+    return data.map((d: any) => ({
+      ...mapObjectDbToModel(d),
+    }))
+  })
+
+  return dbVal
 }
 
 export async function getUnreportedLogsCount(): Promise<number> {
@@ -204,6 +236,9 @@ export async function getUnreportedLogs(ids: string[]): Promise<UnreportedLog> {
       PR.response_header,
       PR.response_time,
       PR.response_size,
+      PR.request_type,
+      PR.socket_host,
+      PR.socket_port,
       CASE
         WHEN A.type IS NULL THEN json_array()
         ELSE json_group_array(A.type)
@@ -229,15 +264,14 @@ export async function getUnreportedLogs(ids: string[]): Promise<UnreportedLog> {
     db.all(readUnreportedRequestsSQL).then(
       (data) =>
         data.map((d) => ({
-          ...objectNullValueToUndefined(d),
+          ...mapObjectDbToModel(d),
           alerts: JSON.parse(d.alerts),
         })) as UnreportedRequestsLog[]
     ),
     db
       .all(readUnreportedNotificationsSQL)
       .then(
-        (data) =>
-          data.map(objectNullValueToUndefined) as UnreportedNotificationsLog[]
+        (data) => data.map(mapObjectDbToModel) as UnreportedNotificationsLog[]
       ),
   ])
 
@@ -247,14 +281,18 @@ export async function getUnreportedLogs(ids: string[]): Promise<UnreportedLog> {
   }
 }
 
-export async function deleteRequestLogs(ids: string[]) {
+export async function deleteRequestLogs(
+  ids: string[]
+): Promise<ISqlite.RunResult> {
   const idsString = ids.join("','")
   const sql = `DELETE FROM probe_requests WHERE probe_id IN ('${idsString}');`
 
   return db.run(sql)
 }
 
-export async function deleteNotificationLogs(ids: string[]) {
+export async function deleteNotificationLogs(
+  ids: string[]
+): Promise<ISqlite.RunResult> {
   const idsString = ids.join("','")
   const sql = `DELETE FROM notifications WHERE probe_id IN ('${idsString}');`
 
@@ -263,8 +301,9 @@ export async function deleteNotificationLogs(ids: string[]) {
 
 /**
  * flushAllLogs drops the table and recreates it
+ * @returns Promise<void>
  */
-export async function flushAllLogs() {
+export async function flushAllLogs(): Promise<void> {
   const dropProbeRequestsTableSQL = 'DROP TABLE IF EXISTS probe_requests;'
   const dropAlertsTableSQL = 'DROP TABLE IF EXISTS alerts;'
   const dropNotificationsTableSQL = 'DROP TABLE IF EXISTS notifications;'
@@ -289,6 +328,7 @@ export async function flushAllLogs() {
  * saveProbeRequestLog inserts probe request log information into the database
  *
  * @param {object} data is the log data containing information about probe request
+ * @returns Promise<void>
  */
 export async function saveProbeRequestLog({
   probe,
@@ -302,7 +342,7 @@ export async function saveProbeRequestLog({
   probeRes: ProbeRequestResponse
   alertQueries?: string[]
   error?: string
-}) {
+}): Promise<void> {
   const insertProbeRequestSQL = `
     INSERT INTO probe_requests (
         created_at,
@@ -317,9 +357,12 @@ export async function saveProbeRequestLog({
         response_body,
         response_time,
         response_size,
-        error
+        error,
+        request_type,
+        socket_host,
+        socket_port
       )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`
 
   const insertAlertSQL = `
     INSERT INTO alerts (
@@ -330,10 +373,10 @@ export async function saveProbeRequestLog({
     VALUES (?, ?, ?);`
 
   const now = Math.round(Date.now() / 1000)
-  const requestConfig = probe.requests[requestIndex]
+  const requestConfig = probe.requests?.[requestIndex]
 
   // TODO: limit data stored.
-  const responseBody = requestConfig.saveBody
+  const responseBody = requestConfig?.saveBody
     ? typeof probeRes.data === 'string'
       ? probeRes.data
       : JSON.stringify(probeRes.data)
@@ -344,16 +387,19 @@ export async function saveProbeRequestLog({
       now,
       probe.id,
       probe.name,
-      requestConfig.method,
-      requestConfig.url,
-      JSON.stringify(requestConfig.headers),
-      JSON.stringify(requestConfig.body),
+      requestConfig?.method || 'TCP', // if TCP, there's no method, so just set to TCP
+      requestConfig?.url || 'http://', // if TCP, there's no URL so just set to this http://
+      JSON.stringify(requestConfig?.headers),
+      JSON.stringify(requestConfig?.body),
       probeRes.status,
       JSON.stringify(probeRes.headers),
       responseBody,
       probeRes?.responseTime ?? 0,
       probeRes.headers['content-length'],
       errorResp,
+      probe.socket ? 'tcp' : 'http',
+      probe.socket?.host || '',
+      probe.socket?.port || '',
     ])
 
     await Promise.all(
@@ -373,13 +419,14 @@ export async function saveProbeRequestLog({
  * @param {object} notification is the notification config
  * @param {string} type is the type of notification 'NOTIFY-INCIDENT' | 'NOTIFY-RECOVER'
  * @param {string} alertQuery the alerts triggered
+ * @returns Promise<void>
  */
 export async function saveNotificationLog(
   probe: Probe,
   notification: Notification,
   type: 'NOTIFY-INCIDENT' | 'NOTIFY-RECOVER' | 'NOTIFY-TLS',
   alertQuery: string
-) {
+): Promise<void> {
   const insertNotificationSQL = `
     INSERT INTO notifications (
         created_at,
@@ -409,7 +456,7 @@ export async function saveNotificationLog(
   }
 }
 
-export async function getSummary() {
+export async function getSummary(): Promise<any> {
   const getNotificationsSummaryByTypeSQL = `SELECT type, COUNT(*) as count FROM notifications WHERE created_at > strftime('%s', datetime('now', '-24 hours')) GROUP BY type;`
 
   const notificationsSummaryByType = await db.all(
@@ -439,7 +486,8 @@ export async function getSummary() {
 
 /**
  * closeLog closes the database
+ * @returns Promise<void>
  */
-export async function closeLog() {
+export async function closeLog(): Promise<void> {
   await db?.close()
 }

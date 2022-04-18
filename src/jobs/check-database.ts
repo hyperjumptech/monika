@@ -33,11 +33,11 @@ import {
 import { Config } from '../interfaces/config'
 const dbPath = path.resolve(process.cwd(), 'monika-logs.db')
 
-export function check_db_size() {
+export function check_db_size(): void {
   const config = getConfig()
   deleteData(config)
 }
-
+/* eslint-disable camelcase */
 async function deleteData(config: Config) {
   const { db_limit } = config
   const stats = fs.statSync(dbPath)
@@ -52,9 +52,10 @@ async function deleteData(config: Config) {
 
   if (stats.size > db_limit.max_db_size) {
     const probe_res = await deleteFromProbeRequests(db_limit.deleted_data)
-    await deleteFromNotifications(probe_res.probe_ids)
-    await deleteFromAlerts(probe_res.probe_request_ids)
+    await deleteFromNotifications(probe_res.probeIds)
+    await deleteFromAlerts(probe_res.probeRequestIds)
 
     deleteData(config) // recursive until reached expected file size
   }
 }
+/* eslint-enable */
