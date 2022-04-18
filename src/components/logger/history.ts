@@ -34,39 +34,38 @@ import { getConfig } from '../config'
 const sqlite3 = SQLite3.verbose()
 const dbPath = path.resolve(process.cwd(), 'monika-logs.db')
 
-/* eslint-disable camelcase */
 type RequestsLog = {
   id: number
-  probe_id: string
-  response_status: number
-  request_url: string
-  response_time: number
+  probeId: string
+  responseStatus: number
+  requestUrl: string
+  responseTime: number
 }
 
 export type UnreportedRequestsLog = {
   id: number
   timestamp: number
-  probe_id: string
-  probe_name?: string
-  request_method: string
-  request_url: string
-  request_header?: string
-  request_body?: string
-  response_status: number
-  response_header?: string
-  response_time: number
-  response_size?: number
+  probeId: string
+  probeName?: string
+  requestMethod: string
+  requestUrl: string
+  requestHeader?: string
+  requestBody?: string
+  responseStatus: number
+  responseHeader?: string
+  responseTime: number
+  responseSize?: number
   alerts: string[]
 }
 
 export type UnreportedNotificationsLog = {
   id: number
   timestamp: number
-  probe_id: string
-  probe_name: string
-  alert_type: string
+  probeId: string
+  probeName: string
+  alertType: string
   type: string
-  notification_id: string
+  notificationId: string
   channel: string
 }
 
@@ -77,17 +76,17 @@ export type UnreportedLog = {
 
 export type ProbeIdDate = {
   id: string
-  created_at: number
+  createdAt: number
 }
 
 export type ProbeReqIdDate = {
   id: number
-  created_at: number
+  createdAt: number
 }
 
 export type DeleteProbeRes = {
-  probe_ids: ProbeIdDate[]
-  probe_request_ids: ProbeReqIdDate[]
+  probeIds: ProbeIdDate[]
+  probeRequestIds: ProbeReqIdDate[]
 }
 
 let db: Database<SQLite3.Database, SQLite3.Statement>
@@ -121,10 +120,10 @@ export async function deleteFromProbeRequests(
 ): Promise<DeleteProbeRes> {
   const getIdsToBeDeleted = `SELECT id, probe_id, created_at FROM probe_requests order by created_at asc limit ${limit}`
   const idsres = await db.all(getIdsToBeDeleted)
-  const ids = idsres.map((res) => ({ id: res.id, created_at: res.created_at }))
+  const ids = idsres.map((res) => ({ id: res.id, createdAt: res.createdAt }))
   const probeIds = idsres.map((res) => ({
     id: res.probe_id,
-    created_at: res.created_at,
+    createdAt: res.created_at,
   }))
   if (idsres.length > 0) {
     const deleteFromProbeRequests = `DELETE FROM probe_requests WHERE id IN (${getIdsToBeDeleted})`
@@ -132,18 +131,18 @@ export async function deleteFromProbeRequests(
   }
 
   return {
-    probe_ids: probeIds,
-    probe_request_ids: ids,
+    probeIds: probeIds,
+    probeRequestIds: ids,
   }
 }
 
 export async function deleteFromAlerts(
-  probe_req_ids: ProbeReqIdDate[]
+  probeReqIds: ProbeReqIdDate[]
 ): Promise<void> {
-  if (probe_req_ids.length > 0) {
+  if (probeReqIds.length > 0) {
     await Promise.all(
-      probe_req_ids.map(async (item) => {
-        const deleteFromAlerts = `DELETE FROM alerts WHERE probe_request_id = ${item.id} and created_at = ${item.created_at}`
+      probeReqIds.map(async (item) => {
+        const deleteFromAlerts = `DELETE FROM alerts WHERE probe_request_id = ${item.id} and created_at = ${item.createdAt}`
         await db.run(deleteFromAlerts)
       })
     )
@@ -151,28 +150,49 @@ export async function deleteFromAlerts(
 }
 
 export async function deleteFromNotifications(
-  probe_ids: ProbeIdDate[]
+  probeIds: ProbeIdDate[]
 ): Promise<void> {
-  if (probe_ids.length > 0) {
+  if (probeIds.length > 0) {
     await Promise.all(
-      probe_ids.map(async (item) => {
-        const deleteFromNotifications = `DELETE FROM notifications WHERE probe_id = ${item.id} and created_at = ${item.created_at}`
+      probeIds.map(async (item) => {
+        const deleteFromNotifications = `DELETE FROM notifications WHERE probe_id = ${item.id} and created_at = ${item.createdAt}`
         await db.run(deleteFromNotifications)
       })
     )
   }
 }
 
-const objectNullValueToUndefined = <T extends Record<string, unknown>>(
+const snakeToCamel = (s: string) => {
+  return s.replace(/([_-][a-z])/gi, (g: string) => {
+    return g.toUpperCase().replace('-', '').replace('_', '')
+  })
+}
+
+// const camelToSnake = (s:string) => {
+//   return s.replace(/[A-Z]/g, (g: string) => {
+//     return `_${g.toLowerCase()}`
+//   })
+// }
+
+const mapObjectDbToModel = <T extends Record<string, unknown>>(
   obj: T
 ): { [K in keyof T]: T[K] extends null ? undefined : T[K] } => {
   return Object.entries(obj)
     .map(([k, v]) => [k, v === null ? undefined : v] as [string, unknown])
     .reduce((acc, [k, v]) => {
-      acc[k] = v
+      acc[snakeToCamel(k)] = v
       return acc
     }, {} as any)
 }
+
+// const objectNullValueToUndefined = <T extends Record<string, unknown>>(obj: T): { [K in keyof T]: T[K] extends null ? undefined : T[K] } => {
+//   return Object.entries(obj)
+//     .map(([k, v]) => [k, v === null ? undefined : v] as [string, unknown])
+//     .reduce((acc, [k, v]) => {
+//       acc[k] = v
+//       return acc
+//     }, {} as any)
+// }
 
 /**
  * getAllLogs gets all the history table from sqlite db
@@ -182,7 +202,13 @@ export async function getAllLogs(): Promise<RequestsLog[]> {
   const readRowsSQL =
     'SELECT id, probe_id, response_status, request_url, response_time FROM probe_requests'
 
-  return db.all(readRowsSQL)
+  const dbVal = await db.all(readRowsSQL).then((data: any) => {
+    return data.map((d: any) => ({
+      ...mapObjectDbToModel(d),
+    }))
+  })
+
+  return dbVal
 }
 
 export async function getUnreportedLogsCount(): Promise<number> {
@@ -235,15 +261,14 @@ export async function getUnreportedLogs(ids: string[]): Promise<UnreportedLog> {
     db.all(readUnreportedRequestsSQL).then(
       (data) =>
         data.map((d) => ({
-          ...objectNullValueToUndefined(d),
+          ...mapObjectDbToModel(d),
           alerts: JSON.parse(d.alerts),
         })) as UnreportedRequestsLog[]
     ),
     db
       .all(readUnreportedNotificationsSQL)
       .then(
-        (data) =>
-          data.map(objectNullValueToUndefined) as UnreportedNotificationsLog[]
+        (data) => data.map(mapObjectDbToModel) as UnreportedNotificationsLog[]
       ),
   ])
 
@@ -457,5 +482,3 @@ export async function getSummary(): Promise<any> {
 export async function closeLog(): Promise<void> {
   await db?.close()
 }
-
-/* eslint-enable */

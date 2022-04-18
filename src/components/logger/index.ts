@@ -56,10 +56,10 @@ export async function printAllLogs(): Promise<void> {
 
   for (const row of data) {
     log.info(
-      `${row.id} id: ${row.probe_id} responseCode: ${chalk.keyword(
-        getStatusColor(row.response_status)
-      )(String(row.response_status))} - ${row.request_url}, ${
-        row.response_time || '- '
+      `${row.id} id: ${row.probeId} responseCode: ${chalk.keyword(
+        getStatusColor(row.responseStatus)
+      )(String(row.responseStatus))} - ${row.requestUrl}, ${
+        row.responseTime || '- '
       }ms`
     )
   }

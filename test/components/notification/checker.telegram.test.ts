@@ -25,6 +25,7 @@ describe('notificationChecker - telegramNotification', () => {
         {
           ...notificationConfig,
           data: {
+            // eslint-disable-next-line camelcase
             bot_token: 'ABC-EFG-HIJ-KLM-NOP-QRS-TUV-WXY-Z',
           } as TelegramData,
         },
@@ -45,6 +46,7 @@ describe('notificationChecker - telegramNotification', () => {
         {
           ...notificationConfig,
           data: {
+            // eslint-disable-next-line camelcase
             group_id: 'ABC-EFG-HIJ-KLM-NOP-QRS-TUV-WXY-Z',
           } as TelegramData,
         },

@@ -67,13 +67,14 @@ export async function getSummaryAndSendNotif(): Promise<void> {
       getMonikaInstance(privateIpAddress),
     ])
     const responseTimelogLifeTimeInHour = getLogLifeTimeInHour()
+    /* eslint-disable camelcase */
     const tweetMessage = createTweetMessage({
       average_response_time: averageResponseTime,
       number_of_incidents: summary.numberOfIncidents,
       number_of_probes: summary.numberOfProbes,
       number_of_recoveries: summary.numberOfRecoveries,
     })
-
+    /* eslint-enable */
     sendNotifications(notifications, {
       subject: `Monika Status`,
       body: `Status Update ${format(new Date(), 'yyyy-MM-dd HH:mm:ss XXX')}
@@ -155,6 +156,7 @@ function readPidFile(): PidObject {
  * savePidFile saves a monika.pid file with some useful information
  * @param {string} configFile is the configuration file used
  * @param {obj} config is a Config object
+ * @returns void
  */
 export function savePidFile(configFile: string[], config: Config): void {
   const data = JSON.stringify({
@@ -206,8 +208,9 @@ function getDaysHours(startTime: Date): string {
 /**
  * printSummary gathers and print some stats
  * @param {object} cliConfig is oclif config structure
+ * @returns Promise<void>
  */
-export async function printSummary(cliConfig: IConfig) {
+export async function printSummary(cliConfig: IConfig): Promise<void> {
   try {
     const pidObject = readPidFile()
     const summary = await getSummary()
@@ -228,15 +231,15 @@ export async function printSummary(cliConfig: IConfig) {
     Number of notifications \t: ${summary.numberOfSentNotifications} in last 24h
 
     Up time \t: ${uptime}
-    Running on \t: ${host}   
-    App version : ${cliConfig.userAgent} 
-        
+    Running on \t: ${host}
+    App version : ${cliConfig.userAgent}
+
     `)
   } catch (error: any) {
     log.error(`Summary notification: ${error.message}`)
   }
 }
-
+/* eslint-disable camelcase */
 function createTweetMessage({
   number_of_probes,
   average_response_time,
@@ -248,7 +251,7 @@ function createTweetMessage({
   number_of_incidents: number
   number_of_recoveries: number
 }): string {
-  const message = `I am using Monika by @hyperjump_tech to monitor ${number_of_probes} probes! In the last 24 hours, 
+  const message = `I am using Monika by @hyperjump_tech to monitor ${number_of_probes} probes! In the last 24 hours,
 
 ⏱ the average response time is ${average_response_time} ms
 ⚠️ there were ${number_of_incidents} incidents
@@ -262,3 +265,4 @@ https://monika.hyperjump.tech`
     message
   )}&hashtags=opensource,monika>Tweet this status!</a>`
 }
+/* eslint-enable */

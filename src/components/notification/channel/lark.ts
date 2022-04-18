@@ -34,7 +34,7 @@ export const sendLark = async (
   const notifType =
     message.meta.type[0].toUpperCase() + message.meta.type.substring(1)
   let larkMessage
-
+  /* eslint-disable camelcase */
   switch (message.meta.type) {
     case 'start':
     case 'termination':
@@ -153,7 +153,7 @@ export const sendLark = async (
     default:
       break
   }
-
+  /* eslint-enable */
   try {
     const res = await axios({
       method: 'POST',

@@ -332,8 +332,8 @@ class SymonClient {
       )
 
       await Promise.all([
-        deleteRequestLogs(logs.requests.map((log) => log.probe_id)),
-        deleteNotificationLogs(logs.notifications.map((log) => log.probe_id)),
+        deleteRequestLogs(logs.requests.map((log) => log.probeId)),
+        deleteNotificationLogs(logs.notifications.map((log) => log.probeId)),
       ])
 
       log.debug(
@@ -353,7 +353,7 @@ class SymonClient {
     }
   }
 
-  async setReportInterval() {
+  async setReportInterval(): Promise<void> {
     try {
       if (!isTestEnvironment && !reportIntervalId) {
         reportIntervalId = setInterval(
@@ -366,7 +366,7 @@ class SymonClient {
     }
   }
 
-  async sendStatus({ isOnline }: { isOnline: boolean }) {
+  async sendStatus({ isOnline }: { isOnline: boolean }): Promise<void> {
     try {
       await this.httpClient({
         url: '/status',

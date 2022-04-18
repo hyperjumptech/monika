@@ -26,7 +26,7 @@ import axios from 'axios'
 
 import { WorkplaceData } from '../../../interfaces/data'
 
-export const sendWorkplace = async (data: WorkplaceData) => {
+export const sendWorkplace = async (data: WorkplaceData): Promise<any> => {
   try {
     const httpClient = axios.create({
       baseURL: 'https://graph.workplace.com',
@@ -40,6 +40,7 @@ export const sendWorkplace = async (data: WorkplaceData) => {
       url: '/me/messages',
       data: {
         recipient: {
+          // eslint-disable-next-line camelcase
           thread_key: data.thread_id,
         },
         message: {

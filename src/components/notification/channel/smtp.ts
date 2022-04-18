@@ -29,7 +29,7 @@ import Mailgen from 'mailgen'
 import { SMTPData } from '../../../interfaces/data'
 import { convertTextToHTML } from '../../../utils/text'
 
-export const createSmtpTransport = (cfg: SMTPData) => {
+export const createSmtpTransport = (cfg: SMTPData): any => {
   return nodemailer.createTransport({
     host: cfg.hostname,
     port: cfg.port,
@@ -37,7 +37,10 @@ export const createSmtpTransport = (cfg: SMTPData) => {
   })
 }
 
-export const sendSmtpMail = async (transporter: Mail, opt: Mail.Options) => {
+export const sendSmtpMail = async (
+  transporter: Mail,
+  opt: Mail.Options
+): Promise<any> => {
   const mailGenerator = new Mailgen({
     theme: 'default',
     product: {

@@ -28,7 +28,7 @@ import { authorize } from '../../../utils/authorization'
 import { log } from 'console'
 import { WhatsappData } from '../../../interfaces/data'
 
-export const loginUser = async (data: WhatsappData) => {
+export const loginUser = async (data: WhatsappData): Promise<any> => {
   try {
     const auth = authorize('basic', {
       username: data.username,
@@ -91,7 +91,10 @@ export const sendTextMessage = async ({
   }
 }
 
-export const sendWhatsapp = async (data: WhatsappData, message: string) => {
+export const sendWhatsapp = async (
+  data: WhatsappData,
+  message: string
+): Promise<void> => {
   const token = await loginUser(data)
   if (token) {
     await Promise.all(

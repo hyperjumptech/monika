@@ -41,6 +41,7 @@ export const authBearer = (token: string): string => {
   return `Bearer ${token}`
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const authorize = (type: string, args: any): any => {
   switch (type) {
     case 'basic':

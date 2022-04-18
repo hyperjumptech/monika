@@ -102,6 +102,7 @@ export async function sendNotifications(
             )
             break
           }
+
           case 'sendgrid': {
             await sendSendgrid(
               {
@@ -117,6 +118,7 @@ export async function sendNotifications(
             )
             break
           }
+
           case 'webhook': {
             await sendWebhook({
               ...notification.data,
@@ -124,6 +126,7 @@ export async function sendNotifications(
             })
             break
           }
+
           case 'discord': {
             await sendDiscord({
               ...notification.data,
@@ -131,10 +134,12 @@ export async function sendNotifications(
             })
             break
           }
+
           case 'slack': {
             await sendSlack(notification.data, message)
             break
           }
+
           case 'telegram': {
             await sendTelegram({
               ...notification.data,
@@ -142,6 +147,7 @@ export async function sendNotifications(
             })
             break
           }
+
           case 'smtp': {
             const transporter = createSmtpTransport(notification.data)
             await sendSmtpMail(transporter, {
@@ -153,14 +159,17 @@ export async function sendNotifications(
             })
             break
           }
+
           case 'whatsapp': {
             await sendWhatsapp(notification.data, message.body)
             break
           }
+
           case 'teams': {
             await sendTeams(notification.data, message)
             break
           }
+
           case 'monika-notif': {
             let body: MonikaNotifDataBody
 
@@ -212,6 +221,7 @@ export async function sendNotifications(
             })
             break
           }
+
           case 'workplace': {
             await sendWorkplace({
               ...notification.data,
@@ -219,6 +229,7 @@ export async function sendNotifications(
             })
             break
           }
+
           case 'desktop': {
             await sendDesktop({
               title: message.subject,
