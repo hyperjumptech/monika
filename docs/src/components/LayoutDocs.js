@@ -44,6 +44,7 @@ import MDXComponents from './MDXComponents'
 import Head from 'next/head'
 import { getManifest } from 'manifests/getManifest'
 import StarButton from './StarButton'
+import NavIndex from './NavIndex'
 
 const getSlugAndTag = (path) => {
   const parts = path.split('/')
@@ -109,16 +110,19 @@ export const LayoutDocs = (props) => {
                   </Sidebar>
                 )}
 
-                <div className={s['markdown'] + ' w-full docs'}>
+                <div className={s['markdown'] + ' w-full docs pr-5'}>
+                  <NavIndex props={props} forMedium="true" />
                   <div className="flex">
                     <h1 id="_top" className="mr-auto">
                       {props.meta.title}
                     </h1>{' '}
                     <StarButton />
                   </div>
+
                   <MDXProvider components={MDXComponents}>
                     {props.children}
                   </MDXProvider>
+
                   <DocsPageFooter
                     href={route?.path || ''}
                     route={route}
@@ -126,6 +130,8 @@ export const LayoutDocs = (props) => {
                     nextRoute={nextRoute}
                   />
                 </div>
+
+                <NavIndex props={props} />
               </div>
             </div>
           </>
