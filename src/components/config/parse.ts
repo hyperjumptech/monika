@@ -32,6 +32,11 @@ import parseInsomnia from './parse-insomnia'
 import isUrl from 'is-url'
 import { fetchConfig } from './fetch'
 
+function sleep(ms: number): Promise<void> {
+  // eslint-disable-next-line no-promise-executor-return
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
 export const parseConfig = async (
   source: string,
   type: string
@@ -41,8 +46,17 @@ export const parseConfig = async (
       ? await fetchConfig(source)
       : readFileSync(source, 'utf-8')
 
-    if (configString.length === 0)
-      throw new Error(`Failed to read ${source}, got empty.`)
+    if (configString.length === 0) {
+      if (isUrl(source))
+        // was the remote file empty
+        throw new Error(
+          `The remote file ${source} is empty. Please check the URL again.`
+        )
+
+      await sleep(300) // wait a bit and re-read the config file again
+      if (readFileSync(source, 'utf-8').length === 0)
+        throw new Error(`Failed to read ${source}, got empty.`)
+    }
     const ext = path.extname(source)
 
     if (type === 'har') return parseHarFile(configString)
