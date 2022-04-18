@@ -236,6 +236,9 @@ export async function getUnreportedLogs(ids: string[]): Promise<UnreportedLog> {
       PR.response_header,
       PR.response_time,
       PR.response_size,
+      PR.request_type,
+      PR.socket_host,
+      PR.socket_port,
       CASE
         WHEN A.type IS NULL THEN json_array()
         ELSE json_group_array(A.type)
@@ -354,9 +357,12 @@ export async function saveProbeRequestLog({
         response_body,
         response_time,
         response_size,
-        error
+        error,
+        request_type,
+        socket_host,
+        socket_port
       )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`
 
   const insertAlertSQL = `
     INSERT INTO alerts (
@@ -367,10 +373,10 @@ export async function saveProbeRequestLog({
     VALUES (?, ?, ?);`
 
   const now = Math.round(Date.now() / 1000)
-  const requestConfig = probe.requests[requestIndex]
+  const requestConfig = probe.requests?.[requestIndex]
 
   // TODO: limit data stored.
-  const responseBody = requestConfig.saveBody
+  const responseBody = requestConfig?.saveBody
     ? typeof probeRes.data === 'string'
       ? probeRes.data
       : JSON.stringify(probeRes.data)
@@ -381,16 +387,19 @@ export async function saveProbeRequestLog({
       now,
       probe.id,
       probe.name,
-      requestConfig.method,
-      requestConfig.url,
-      JSON.stringify(requestConfig.headers),
-      JSON.stringify(requestConfig.body),
+      requestConfig?.method || 'TCP', // if TCP, there's no method, so just set to TCP
+      requestConfig?.url || 'http://', // if TCP, there's no URL so just set to this http://
+      JSON.stringify(requestConfig?.headers),
+      JSON.stringify(requestConfig?.body),
       probeRes.status,
       JSON.stringify(probeRes.headers),
       responseBody,
       probeRes?.responseTime ?? 0,
       probeRes.headers['content-length'],
       errorResp,
+      probe.socket ? 'tcp' : 'http',
+      probe.socket?.host || '',
+      probe.socket?.port || '',
     ])
 
     await Promise.all(

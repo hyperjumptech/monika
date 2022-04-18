@@ -34,10 +34,7 @@ import { getEventEmitter } from '../../utils/events'
 import { log } from '../../utils/pino'
 import { RequestLog } from '../logger'
 import { sendAlerts } from '../notification'
-import {
-  processThresholds,
-  getNotificationState,
-} from '../notification/process-server-status'
+import { processThresholds } from '../notification/process-server-status'
 import { probing } from './probing'
 import { logResponseTime } from '../logger/response-time-log'
 import { check } from '../tcp-request'
@@ -81,7 +78,7 @@ async function checkThresholdsAndSendAlert(
     } = data
 
     const statusString = probeState?.state ?? 'UP'
-    const url = probe.requests[requestIndex].url ?? ''
+    const url = probe.requests?.[requestIndex]?.url ?? ''
     const validation =
       validatedResponseStatuses.find(
         (validateResponse: ValidatedResponse) =>
@@ -98,7 +95,7 @@ async function checkThresholdsAndSendAlert(
     if ((notifications?.length ?? 0) > 0) {
       await sendAlerts({
         probeID: probe.id,
-        url: url,
+        url,
         probeState: statusString,
         notifications: notifications ?? [],
         validation,
@@ -168,11 +165,11 @@ export async function doProbe(
     processTCPRequestResult({
       probe,
       tcpRequestID,
-      tcpRequestURL: url,
       responseTime: duration,
       isAlertTriggered,
       notifications,
       requestIndex: TCPrequestIndex,
+      verboseLogs,
     }).catch((error) => log.error(error.message))
   }
 
@@ -181,7 +178,7 @@ export async function doProbe(
     requestIndex < probe?.requests?.length;
     requestIndex++
   ) {
-    const request = probe.requests[requestIndex]
+    const request = probe.requests?.[requestIndex]
     const requestLog = new RequestLog(probe, requestIndex, checkOrder)
 
     try {
@@ -269,51 +266,65 @@ export async function doProbe(
 type ProcessTCPRequestResult = {
   probe: Probe
   tcpRequestID: string
-  tcpRequestURL: string
   responseTime: number
   isAlertTriggered: boolean
   notifications: Array<Notification>
   requestIndex: number // to support multiple tcp requests/chaining
+  verboseLogs: boolean
 }
 
 async function processTCPRequestResult({
   probe,
-  tcpRequestURL,
   responseTime,
   isAlertTriggered,
   notifications,
   requestIndex,
+  verboseLogs,
 }: ProcessTCPRequestResult) {
-  const defaultAlertQuery = 'response.size < 1'
-  const defaultMessage = 'Response size is 0, expecting more than 0'
-  const { id } = probe
-  const { state, isFirstTime, shouldSendNotification } = getNotificationState({
+  const probeRes: ProbeRequestResponse = {
+    requestType: 'tcp',
+    data: '',
+    status: isAlertTriggered ? 0 : 200, // set to 0 if down, and 200 if ok
+    headers: {},
+    responseTime,
+  }
+  const validatedResponse = validateResponse(
+    probe.socket?.alerts || [
+      {
+        query: 'response.status < 200 or response.status > 299',
+        message: 'TCP server cannot be accessed',
+      },
+    ],
+    probeRes
+  )
+  const requestLog = new RequestLog(probe, 0, 0)
+
+  requestLog.addAlerts(
+    validatedResponse
+      .filter((item) => item.isAlertTriggered)
+      .map((item) => item.alert)
+  )
+  const statuses = processThresholds({
     probe,
-    alertQuery: defaultAlertQuery,
-    isAlertTriggered,
     requestIndex,
+    validatedResponse,
   })
 
-  if (shouldSendNotification && !isFirstTime) {
-    // TODO: Remove validation below
-    // validation is used because it is needed to send alert
-    const validation: ValidatedResponse = {
-      alert: { query: defaultAlertQuery, message: defaultMessage },
-      isAlertTriggered: true,
-      response: {
-        status: 5,
-        responseTime,
-        data: {},
-        headers: {},
-      },
-    }
+  requestLog.setResponse(probeRes)
+  checkThresholdsAndSendAlert(
+    {
+      probe,
+      statuses,
+      notifications,
+      requestIndex,
+      validatedResponseStatuses: validatedResponse,
+    },
+    requestLog
+  ).catch((error) => {
+    requestLog.addError(error.message)
+  })
 
-    await sendAlerts({
-      probeID: id,
-      url: tcpRequestURL,
-      probeState: state,
-      notifications: notifications ?? [],
-      validation,
-    })
+  if (verboseLogs || requestLog.hasIncidentOrRecovery) {
+    requestLog.saveToDatabase().catch((error) => log.error(error.message))
   }
 }
