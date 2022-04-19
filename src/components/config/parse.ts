@@ -42,7 +42,7 @@ export const parseConfig = async (
   type: string
 ): Promise<Partial<Config>> => {
   try {
-    const configString = isUrl(source)
+    let configString = isUrl(source)
       ? await fetchConfig(source)
       : readFileSync(source, 'utf-8')
 
@@ -50,12 +50,21 @@ export const parseConfig = async (
       if (isUrl(source))
         // was the remote file empty
         throw new Error(
-          `The remote file ${source} is empty. Please check the URL again.`
+          `The remote file ${source} is empty. Please check the URL or your connection again.`
         )
 
-      await sleep(300) // wait a bit and re-read the config file again
-      if (readFileSync(source, 'utf-8').length === 0)
-        throw new Error(`Failed to read ${source}, got empty.`)
+      let tries = 10 // tries multiple times to load the file
+      while (configString.length === 0 && tries > 0) {
+        sleep(700)
+        configString = readFileSync(source, 'utf-8')
+        if (configString.length > 0) {
+          break
+        }
+        tries--
+      }
+      // await sleep(300) // wait a bit and re-read the config file again
+      if (configString.length === 0)
+        throw new Error(`Failed to read ${source}, got empty config string.`)
     }
     const ext = path.extname(source)
 
