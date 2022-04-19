@@ -322,7 +322,9 @@ describe('send alerts', () => {
           id: 'one',
           type: 'telegram',
           data: {
+            // eslint-disable-next-line camelcase
             group_id: '123',
+            // eslint-disable-next-line camelcase
             bot_token: '123',
             body: `url: 'https://hyperjump.tech'`,
           } as TelegramData,

@@ -281,6 +281,7 @@ export const validateConfig = (configuration: Config): Validation => {
   // Check probes properties
   for (const probe of probes) {
     const { alerts = [], requests, socket } = probe
+    const socketAlerts = probe.socket?.alerts ?? []
     const tcpConfigError = validateTCPConfig(socket)
 
     if (tcpConfigError) {
@@ -308,8 +309,10 @@ export const validateConfig = (configuration: Config): Validation => {
       }
     }
 
+    const allAlerts = [...alerts, ...socketAlerts]
+
     // Check probe alert properties
-    for (const alert of alerts) {
+    for (const alert of allAlerts) {
       const check = isValidProbeAlert(alert)
       if (!check) {
         return setInvalidResponse(`Probe alert format is invalid! (${alert})`)
@@ -317,7 +320,7 @@ export const validateConfig = (configuration: Config): Validation => {
     }
 
     // convert old alert format to new format
-    probe.alerts = alerts.map((alert: any) => {
+    probe.alerts = allAlerts.map((alert: any) => {
       if (typeof alert === 'string') {
         let query = ''
         let message = ''

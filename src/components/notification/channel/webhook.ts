@@ -26,7 +26,7 @@ import axios from 'axios'
 
 import { WebhookData } from '../../../interfaces/data'
 
-export const sendWebhook = async (data: WebhookData) => {
+export const sendWebhook = async (data: WebhookData): Promise<any> => {
   try {
     const res = await axios({
       method: 'POST',

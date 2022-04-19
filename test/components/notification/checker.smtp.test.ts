@@ -92,7 +92,7 @@ describe('notificationChecker - smtpNotification', () => {
           ...smtpNotificationConfig,
           data: {
             hostname: 'localhost',
-            port: 65536, // valid port 0 - 65535
+            port: 65_536, // valid port 0 - 65535
             username: 'username',
             password: 'password',
           } as SMTPData,

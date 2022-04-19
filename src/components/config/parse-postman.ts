@@ -56,14 +56,14 @@ const getConvertedProbeFromPostmanItem = (item: any) => {
 
 const parsePostmanItem = (item: any) => {
   if (item && item.length > 0) {
-    item.forEach((child: any) => {
+    for (const child of item) {
       if (!child.item) {
         probes.push(getConvertedProbeFromPostmanItem(child))
         return
       }
 
       parsePostmanItem(child.item)
-    })
+    }
   }
 }
 

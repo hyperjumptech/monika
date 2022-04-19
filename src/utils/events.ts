@@ -26,6 +26,6 @@ import { EventEmitter } from 'events'
 
 const em = new EventEmitter()
 
-export const getEventEmitter = () => {
+export const getEventEmitter = (): EventEmitter => {
   return em
 }

@@ -25,8 +25,9 @@
 import axios from 'axios'
 
 import { WebhookData } from '../../../interfaces/data'
+import { log } from '../../../utils/pino'
 
-export const sendDiscord = async (data: WebhookData) => {
+export const sendDiscord = async (data: WebhookData): Promise<any> => {
   try {
     const res = await axios({
       method: 'POST',
@@ -41,7 +42,9 @@ export const sendDiscord = async (data: WebhookData) => {
     })
 
     return res
-  } catch (error) {
-    throw error
+  } catch (error: any) {
+    log.error(
+      "Couldn't send notification to Discord. Got this error: " + error.message
+    )
   }
 }

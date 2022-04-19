@@ -34,6 +34,7 @@ export type Socket = {
   host: string
   port: number
   data: string | Uint8Array
+  alerts?: ProbeAlert[]
 }
 
 export interface Probe {
