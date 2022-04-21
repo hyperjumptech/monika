@@ -36,6 +36,7 @@ import { open } from '../../utils/open-website'
 import { log } from '../../utils/pino'
 import { parseConfig } from './parse'
 import { validateConfig } from './validate'
+import { createConfigFile } from './create-config'
 import yml from 'js-yaml'
 
 export const DEFAULT_CONFIG_INTERVAL = 900
@@ -191,9 +192,9 @@ export const setupConfig = async (flags: any): Promise<void> => {
     flags.postman === undefined &&
     flags.insomnia === undefined
   ) {
-    throw new Error(
-      'Configuration file not found. By default, Monika looks for monika.yml configuration file in the current directory.\n\nOtherwise, you can also specify a configuration file using -c flag as follows:\n\nmonika -c <path_to_configuration_file>\n\nYou can create a configuration file via web interface by opening this web app: https://hyperjumptech.github.io/monika-config-generator/'
-    )
+    const configFileName = 'monika.yml'
+    await createConfigFile(configFileName)
+    flags.config = [configFileName]
   }
 
   defaultConfigs = await parseDefaultConfig(flags)

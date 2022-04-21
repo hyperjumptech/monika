@@ -22,56 +22,13 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Config } from '../../interfaces/config'
-import { readFileSync } from 'fs'
-import { parseConfigFromPostman } from './parse-postman'
-import { parseHarFile } from './parse-har'
-import { createConfigFile } from './create-config'
-import path from 'path'
-import yml from 'js-yaml'
-import parseInsomnia from './parse-insomnia'
-import isUrl from 'is-url'
-import { fetchConfig } from './fetch'
+import fs from 'fs'
+import axios from 'axios'
 
-export const parseConfig = async (
-  source: string,
-  type: string
-): Promise<Partial<Config>> => {
-  try {
-    let configString = isUrl(source)
-      ? await fetchConfig(source)
-      : readFileSync(source, 'utf-8')
-
-    if (configString.length === 0) {
-      const configFileName = 'monika.yml'
-      await createConfigFile(configFileName)
-      configString = readFileSync(configFileName, 'utf-8')
-    }
-
-    if (configString.length === 0)
-      throw new Error(`Failed to read ${source}, got empty.`)
-    const ext = path.extname(source)
-
-    if (type === 'har') return parseHarFile(configString)
-    if (type === 'postman') return parseConfigFromPostman(configString)
-    if (type === 'insomnia')
-      return parseInsomnia(configString, ext.replace('.', ''))
-
-    if (ext === '.yml' || ext === '.yaml') {
-      const cfg = yml.load(configString, { json: true })
-      return cfg as unknown as Config
-    }
-
-    return JSON.parse(configString)
-  } catch (error: any) {
-    if (error.code === 'ENOENT' && error.path === source) {
-      throw new Error(`Configuration file not found: ${source}.`)
-    }
-
-    if (error.name === 'SyntaxError') {
-      throw new Error('JSON configuration file is in invalid JSON format!')
-    }
-
-    throw new Error(error.message)
-  }
+export const createConfigFile = async (filename: string): Promise<void> => {
+  const url =
+    'https://raw.githubusercontent.com/hyperjumptech/monika/main/monika.example.yml'
+  await axios.get(url).then((resp) => {
+    fs.writeFileSync(filename, resp.data, 'utf-8')
+  })
 }

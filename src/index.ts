@@ -115,7 +115,7 @@ class Monika extends Command {
     config: Flags.string({
       char: 'c',
       description:
-        'JSON configuration filename or URL. If none is supplied, will look for monika.json in the current directory',
+        'JSON configuration filename or URL. If none is supplied, will look for monika.yml in the current directory',
       default: () => Promise.resolve(getDefaultConfig()),
       env: 'MONIKA_JSON_CONFIG',
       multiple: true,
