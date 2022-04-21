@@ -24,11 +24,17 @@
 
 import fs from 'fs'
 import axios from 'axios'
+import { log } from '../../utils/pino'
 
 export const createConfigFile = async (filename: string): Promise<void> => {
+  log.info(`No Monika configuration available, initializing...`)
+
   const url =
     'https://raw.githubusercontent.com/hyperjumptech/monika/main/monika.example.yml'
   await axios.get(url).then((resp) => {
     fs.writeFileSync(filename, resp.data, 'utf-8')
   })
+  log.info(
+    `monika.yml file has been created in this directory. Change the URL in the probe section to your URL.`
+  )
 }
