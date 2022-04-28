@@ -45,15 +45,6 @@ describe('monika', () => {
     })
   })
 
-  it('shows config generator link when no config', (done) => {
-    exec(`monika`, (_, _stdout, stderr) => {
-      expect(stderr).to.contain(
-        'https://hyperjumptech.github.io/monika-config-generator/'
-      )
-      done()
-    })
-  })
-
   it('shows starting message with valid json config', (done) => {
     exec(`monika -c ./monika.example.json`, (_, stdout) => {
       expect(stdout).to.contain('Starting Monika.')
