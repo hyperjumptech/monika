@@ -39,9 +39,6 @@ describe('monika', () => {
       expect(stdout).to.contain(
         'No Monika configuration available, initializing...'
       )
-      expect(stdout).to.contain(
-        'monika.yml file has been created in this directory. Change the URL in the probe section to your URL.'
-      )
       done()
     })
   })
