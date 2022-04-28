@@ -62,7 +62,6 @@ export const parseConfig = async (
         }
         tries--
       }
-      // await sleep(300) // wait a bit and re-read the config file again
       if (configString.length === 0)
         throw new Error(`Failed to read ${source}, got empty config string.`)
     }
