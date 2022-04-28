@@ -24,7 +24,6 @@
 
 import { expect } from 'chai'
 import { exec } from 'child_process'
-import { stdout } from 'process'
 
 describe('monika', () => {
   it('shows version', (done) => {
@@ -35,9 +34,12 @@ describe('monika', () => {
   })
 
   it('shows initializing file when no config', (done) => {
-    exec(`monika`, (_, _stdout) => {
+    exec(`monika`, (_, stdout) => {
       expect(stdout).to.contain(
         'No Monika configuration available, initializing...'
+      )
+      expect(stdout).to.contain(
+        'monika.yml file has been created in this directory. Change the URL in the probe section to your URL.'
       )
       done()
     })
