@@ -25,10 +25,29 @@
 import axios from 'axios'
 
 import { WebhookData } from '../../../interfaces/data'
+import { NotificationMessage } from '../../../interfaces/notification'
 import { log } from '../../../utils/pino'
 
-export const sendDiscord = async (data: WebhookData): Promise<any> => {
+export const sendDiscord = async (
+  data: WebhookData,
+  message: NotificationMessage
+): Promise<any> => {
   try {
+    const notificationType =
+      message.meta.type[0].toUpperCase() + message.meta.type.substring(1)
+    let content
+    switch (message.meta.type) {
+      case 'incident':
+      case 'recovery': {
+        content = `New *\`${notificationType}\`* event from Monika\n\n${message.body}`
+        content = content.replaceAll('\n\n', '\n')
+        break
+      }
+      default:
+        content = message.body
+        break
+    }
+
     const res = await axios({
       method: 'POST',
       url: data.url,
@@ -37,10 +56,9 @@ export const sendDiscord = async (data: WebhookData): Promise<any> => {
         'Content-type': 'application/json',
       },
       data: {
-        content: data.body,
+        content: content,
       },
     })
-
     return res
   } catch (error: any) {
     log.error(

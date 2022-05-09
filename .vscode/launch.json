@@ -7,10 +7,13 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Launch Insomnia",
+      "name": "Launch Symon",
       "skipFiles": ["<node_internals>/**"],
       "program": "${workspaceFolder}\\bin\\run_dev",
-      "args": ["-I", "./insomnia.json"],
+      "args": [
+        "--symonUrl", "http://localhost:3000/", 
+        "--symonKey", "dc5b4caa-46f1-435f-9e23-7141b9b1a85a",
+      ],
       "sourceMap": true
     },
     {
