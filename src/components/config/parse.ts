@@ -26,12 +26,16 @@ import { Config } from '../../interfaces/config'
 import { readFileSync } from 'fs'
 import { parseConfigFromPostman } from './parse-postman'
 import { parseHarFile } from './parse-har'
-import { createConfigFile } from './create-config'
 import path from 'path'
 import yml from 'js-yaml'
 import parseInsomnia from './parse-insomnia'
 import isUrl from 'is-url'
 import { fetchConfig } from './fetch'
+
+function sleep(ms: number): Promise<void> {
+  // eslint-disable-next-line no-promise-executor-return
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
 
 export const parseConfig = async (
   source: string,
@@ -43,13 +47,24 @@ export const parseConfig = async (
       : readFileSync(source, 'utf-8')
 
     if (configString.length === 0) {
-      const configFileName = 'monika.yml'
-      await createConfigFile(configFileName)
-      configString = readFileSync(configFileName, 'utf-8')
-    }
+      if (isUrl(source))
+        // was the remote file empty
+        throw new Error(
+          `The remote file ${source} is empty. Please check the URL or your connection again.`
+        )
 
-    if (configString.length === 0)
-      throw new Error(`Failed to read ${source}, got empty.`)
+      let tries = 10 // tries multiple times to load the file
+      while (configString.length === 0 && tries > 0) {
+        sleep(700)
+        configString = readFileSync(source, 'utf-8')
+        if (configString.length > 0) {
+          break
+        }
+        tries--
+      }
+      if (configString.length === 0)
+        throw new Error(`Failed to read ${source}, got empty config string.`)
+    }
     const ext = path.extname(source)
 
     if (type === 'har') return parseHarFile(configString)
