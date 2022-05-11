@@ -35,6 +35,6 @@ export const createConfigFile = async (filename: string): Promise<void> => {
     fs.writeFileSync(filename, resp.data, 'utf-8')
   })
   log.info(
-    `monika.yml file has been created in this directory. Change the URL in the probe section to your URL.`
+    `${filename} file has been created in this directory. Change the URL in the probe section to your URL.`
   )
 }
