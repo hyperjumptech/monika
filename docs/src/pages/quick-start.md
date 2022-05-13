@@ -7,47 +7,65 @@ At the center of Monika is a configuration file. Follow the steps below to quick
 
 ## Installation
 
-There are many ways to install Monika
+There are many ways to install Monika.
 
-1. Install using [npm](https://npmjs.com) or [yarn](https://yarnpkg.com) (**Windows/Linux/Mac**).
+Please note that currently, only x64 architecture is supported.
 
-   If you're using NPM or Yarn, you can simply run this command in your terminal:
+### Windows
 
-   ```bash
-   $ npm i -g @hyperjumptech/monika
-   # or
-   $ yarn global add @hyperjumptech/monika
-   ```
+The recommendeded approach is to use [Chocolatey](https://community.chocolatey.org/packages/monika), a popular package manager for Windows. Please check [Monika page on Chocolatey](https://community.chocolatey.org/packages/monika) for more detailed information.
 
-2. Install script (Linux)
+If Chocolatey is already available, then run the following command to install Monika:
 
-   1. Download and install Monika pre-built binaries.
+```
+choco install monika
+```
 
-   ```bash
-   $ curl https://raw.githubusercontent.com/hyperjumptech/monika/main/scripts/monika-install.sh | sh
-   ```
+If it does not work right away, try again on a command prompt or PowerShell with the Administrator permission.
 
-   You will be able to run the latest monika by the time it is done. This script will install monika to path `~/.local/bin`.
+Alternatively, Monika for Windows can be installed from its prebuilt binary. Head over to [Monika Releases page](https://github.com/hyperjumptech/monika/releases) and download the release archive marked with `win-x64`. Extract the contents of the archive and the executable `monika.exe` is ready to use.
 
-3. Download and run standalone binary (Windows/Linux)
+### macOS
 
-   Head over to [Monika Release](https://github.com/hyperjumptech/monika/releases) page, download the Monika file according to your operating system, and rename it to `monika`.
+The recommended approach is to use [Homebrew](https://brew.sh/), a popular package manager for macOS. Please check [Monika page on Homebrew](https://formulae.brew.sh/formula/monika) for more detailed information.
 
-   UNIX-based users may have to run `sudo chmod +x monika` in order to execute Monika binary file. Please note that currently, only x64 architecture is supported.
+If Homebrew is already available, then run the following command to install Monika:
 
-   In order to run Monika binary file, you must download the `node_sqlite3-<os>-<arch>.node` file according to your OS, rename it to `node_sqlite3.node` and put it in one folder with the Monika binary file.
+```
+brew install monika
+```
 
-4. Install via Snapcraft
+Alternatively, Monika for macOS can be installed from its prebuilt binary. Head over to [Monika Releases page](https://github.com/hyperjumptech/monika/releases) and download the release archive marked with `macos-x64`. Extract the contents of the archive and the executable `monika` is ready to use. If necessary, make the file executable with `sudo chmod +x monika`.
 
-   [![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-black.svg)](https://snapcraft.io/monika)
+### Linux
 
-5. Install via [Chocolatey](https://community.chocolatey.org/packages/monika) (**Windows**)
+[![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-black.svg)](https://snapcraft.io/monika)
 
-   If you are using Windows and familliar with chocolatey, you can search the monika package in [Chocolatey Community Repository](https://community.chocolatey.org/). Type in `monika` in the search bar and you will find the package, then you can see the package detail and install it with just this command in Windows Power Shell (With Administrator permission)
+The recommended approach is to use [Snapcraft](https://snapcraft.io/), a universal package manager for Linux. Please check [Monika page on Snapcraft](https://snapcraft.io/monika) for more detailed information.
 
-   ```
-   choco install monika
-   ```
+Alternatively, Monika for Linux can be automatically downloaded and installed by running an installation script as follows:
+
+```
+$ curl https://raw.githubusercontent.com/hyperjumptech/monika/main/scripts/monika-install.sh | sh
+```
+
+The binary will be placed in placed into `~/.local/bin`.
+
+If you prefer to perform the installation manually, head over to [Monika Releases page](https://github.com/hyperjumptech/monika/releases) and download the release archive marked with `linux-x64`. Extract the contents of the archive and the executable `monika` is ready to use. If necessary, make the file executable with `sudo chmod +x monika`.
+
+### via Node.js
+
+With Node.js, Monika is also installable with [npm](https://npmjs.com):
+
+```bash
+$ npm i -g @hyperjumptech/monika
+```
+
+or [yarn](https://yarnpkg.com):
+
+```bash
+$ yarn global add @hyperjumptech/monika
+```
 
 ## Download the configuration file
 
