@@ -37,7 +37,7 @@ const isTestEnvironment = process.env.CI || process.env.NODE_ENV === 'test'
 
 /**
  * pokeStun sends a poke/request to stun server
- * @returns {Promise<string>}
+ * @returns Promise<string>
  */
 async function pokeStun(): Promise<string> {
   // for testing, bypass ping/stun server... apparently ping cannot run in github actions
@@ -55,7 +55,7 @@ async function pokeStun(): Promise<string> {
   return Promise.reject(new Error('stun inaccessible')) // could not connect to STUN server
 }
 
-export async function getPublicNetworkInfo() {
+export async function getPublicNetworkInfo(): Promise<any> {
   try {
     const ip = await pokeStun()
     const response = await axios.get(`http://ip-api.com/json/${ip}`)
@@ -70,13 +70,15 @@ export async function getPublicNetworkInfo() {
     log.warn(`Failed to obtain location/ISP info. Got: ${error}`)
     return Promise.resolve() // couldn't resolve publicNetworkInfo, fail gracefully and continue
   }
+
+  return null
 }
 
 /**
  * getPublicIP sends a request to stun server getting IP address
- * @returns {Promise}
+ * @returns Promise<any>
  */
-export async function getPublicIp() {
+export async function getPublicIp(): Promise<any> {
   const time = new Date().toISOString()
 
   try {
@@ -93,4 +95,6 @@ export async function getPublicIp() {
     log.warn(`${time} STUN Server is temporarily unreachable. Check network.`)
     return Promise.resolve() // couldn't access public stun but resolve and retry
   }
+
+  return null
 }

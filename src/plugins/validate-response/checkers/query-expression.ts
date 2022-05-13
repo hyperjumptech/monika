@@ -31,7 +31,7 @@ import { ProbeRequestResponse } from '../../../interfaces/request'
  * @param {string} query is the query string to operate on the res object
  * @returns {boolean} true or false result of the query a
  */
-const queryExpression = (res: ProbeRequestResponse, query: string) => {
+const queryExpression = (res: ProbeRequestResponse, query: string): boolean => {
   const object = {
     response: {
       size: Number(res.headers['content-length']),

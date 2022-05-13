@@ -68,7 +68,7 @@ const em = getEventEmitter()
 let symonClient: SymonClient
 
 function getDefaultConfig(): Array<string> {
-  const filesArray = fs.readdirSync('../')
+  const filesArray = fs.readdirSync(path.dirname('../'))
   const monikaDotJsonFile = filesArray.find((x) => x === 'monika.json')
   const monikaDotYamlFile = filesArray.find(
     (x) => x === 'monika.yml' || x === 'monika.yaml'

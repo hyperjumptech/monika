@@ -1,7 +1,7 @@
 {
   "name": "@hyperjumptech/monika",
   "description": "Synthetic monitoring made easy",
-  "version": "1.7.1",
+  "version": "1.7.2",
   "license": "MIT",
   "author": "@hyperjumptech",
   "main": "lib/index.js",
@@ -35,6 +35,7 @@
     "posttest": "eslint . --ext .ts --config .eslintrc",
     "prepack": "npm run clean && tsc -b && oclif manifest",
     "start": "npm run prepack && ./bin/dev",
+    "start:windows": "npm run prepack && /bin/dev",
     "start:prod": "npm run prepack && ./bin/run",
     "test": "npm run clean && cross-env NODE_ENV=test nyc --reporter=lcov --extension .ts mocha --config .mocharc.json --forbid-only \"{src,test}/**/*.test.ts\"",
     "cli-test": "npx bats test/bats/cli.bats",
@@ -80,7 +81,7 @@
     "ping": "^0.4.1",
     "pino": "6.11.2",
     "pino-pretty": "4.7.1",
-    "pkg": "^5.3.1",
+    "pkg": "^5.6.0",
     "prom-client": "13.1.0",
     "sinon": "^11.1.2",
     "smtp-server": "^3.8.0",
@@ -172,12 +173,13 @@
       "./lib/**/*.js"
     ],
     "assets": [
-      "./db/migrations/*.sql"
+      "db/migrations/*.sql",
+      "node_modules/sqlite3/lib/binding/**/*"
     ],
     "targets": [
-      "node12-linux-x64",
-      "node12-macos-x64",
-      "node12-win-x64"
+      "node14-linux-x64",
+      "node14-macos-x64",
+      "node14-win-x64"
     ],
     "outputPath": "dist"
   }

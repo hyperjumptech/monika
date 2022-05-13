@@ -29,7 +29,7 @@ import { TeamsData } from './../../../interfaces/data'
 export const sendTeams = async (
   data: TeamsData,
   message: NotificationMessage
-) => {
+): Promise<void> => {
   switch (message.meta.type) {
     case 'start':
     case 'termination': {
@@ -56,6 +56,7 @@ export const sendTeams = async (
       })
       break
     }
+
     case 'incident':
     case 'recovery': {
       const notifType =
@@ -98,6 +99,7 @@ export const sendTeams = async (
       })
       break
     }
+
     case 'status-update': {
       await axios({
         method: 'POST',

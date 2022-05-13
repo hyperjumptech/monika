@@ -22,10 +22,67 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { EventEmitter } from 'events'
+export default function NavIndex(props) {
+  const childrens = props.props.children
+  const forMedium = props.forMedium
 
-const em = new EventEmitter()
+  let containerClass = 'csticky'
+  if (forMedium == 'true') {
+    containerClass = 'cmedium'
+  }
 
-export const getEventEmitter = (): EventEmitter => {
-  return em
+  const indexing = childrens.map((item) =>
+    item.props.originalType == 'h2' ? (
+      <li key={item.props.id.toString()}>
+        <span className="pr-2">•</span>
+        <a href={'#' + item.props.id}>{item.props.children[0]}</a>
+      </li>
+    ) : (
+      ''
+    )
+  )
+  return (
+    <>
+      <div className={containerClass}>
+        <div className="relative w-full">
+          <div className="sticky">
+            <ul className="text-sm">{indexing}</ul>
+          </div>
+        </div>
+      </div>
+
+      <style jsx>{`
+        @media (max-width: 1535px) {
+          .csticky {
+            display: none;
+          }
+
+          .cmedium {
+            border: solid #e3e3e3 2px;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+          }
+        }
+        @media (min-width: 1536px) {
+          .cmedium {
+            display: none;
+          }
+          .csticky {
+            min-width: 225px;
+            display: flex;
+            flex-direction: row-reverse;
+          }
+          ul > li:hover {
+            font-weight: bold;
+          }
+          .sticky {
+            top: 3.75rem;
+          }
+          .sticky ul {
+            padding-top: 5rem;
+          }
+        }
+      `}</style>
+    </>
+  )
 }

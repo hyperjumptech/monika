@@ -30,7 +30,7 @@ import { log } from '../../../utils/pino'
 export const sendGoogleChat = async (
   data: GoogleChatData,
   message: NotificationMessage
-) => {
+): Promise<any> => {
   const notifType =
     message.meta.type[0].toUpperCase() + message.meta.type.substring(1)
   let chatMessage
