@@ -39,7 +39,7 @@ export const sendDiscord = async (
     switch (message.meta.type) {
       case 'incident':
       case 'recovery': {
-        content = `New *\`${notificationType}\`* event from Monika\n\n${message.body}`
+        content = `New *\`${notificationType}\`* event from Monika\n${message.body}`
         content = content.replaceAll('\n\n', '\n')
         break
       }
