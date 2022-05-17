@@ -32,8 +32,8 @@ export default function NavIndex(props) {
   }
 
   const indexing = childrens.map((item) =>
-    item.props.originalType == 'h2' ? (
-      <li key={item.props.id.toString()}>
+    item?.props?.originalType === 'h2' ? (
+      <li key={item?.props?.id.toString()}>
         <span className="pr-2">•</span>
         <a href={'#' + item.props.id}>{item.props.children[0]}</a>
       </li>
@@ -41,6 +41,7 @@ export default function NavIndex(props) {
       ''
     )
   )
+
   return (
     <>
       <div className={containerClass}>
