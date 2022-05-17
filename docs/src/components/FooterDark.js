@@ -41,6 +41,9 @@ export default function FooterDark(props) {
         <a className="text-xs pt-2" href="/overview" rel="noopener noreferrer">
           Documentation
         </a>
+        <a className="text-xs pt-1" href="/articles" rel="noopener noreferrer">
+          How-to
+        </a>
         <a
           className="text-xs pt-1"
           href="/guides/examples"
@@ -101,7 +104,6 @@ export default function FooterDark(props) {
           <img src={HyperjumpSvg} />
         </a>
         <p className="text-xs pt-2">
-          {' '}
           PT Artha Rajamas Mandiri (Hyperjump) is an open-source-first company
           providing engineering excellence service. We aim to build and
           commercialize open-source tools to help companies streamline,
