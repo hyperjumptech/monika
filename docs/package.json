@@ -36,6 +36,7 @@
     "docsearch.js": "^2.6.3",
     "fast-xml-parser": "^4.0.0-beta.7",
     "framer-motion": "^1.11.1",
+    "globby": "^11.0.1",
     "gray-matter": "^4.0.2",
     "imagemin-mozjpeg": "^9.0.0",
     "imagemin-optipng": "^8.0.0",
