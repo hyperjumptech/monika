@@ -2,7 +2,7 @@ import React from 'react'
 import Head from 'next/head'
 import { withRouter } from 'next/router'
 
-const ogImage = require('images/monika-og.png?url')
+const ogImage = 'images/monika-og.png'
 
 export const Seo = withRouter(
   ({ title, description, image = ogImage, router, children }) => {

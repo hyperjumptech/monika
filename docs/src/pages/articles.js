@@ -68,8 +68,13 @@ export default function ArticlesPage({ articles }) {
 // This function gets called at build time on server-side.
 // It may be called again, on a serverless function, if
 // revalidation is enabled and a new request comes in
-export async function getStaticProps() {
+export async function getServerSideProps({ res }) {
   try {
+    res.setHeader(
+      'Cache-Control',
+      'public, s-maxage=10, stale-while-revalidate=59'
+    )
+
     const { data } = await axios({
       method: 'GET',
       url: 'https://medium.com/feed/hyperjump-tech',
@@ -93,43 +98,12 @@ export async function getStaticProps() {
       props: {
         articles,
       },
-      revalidate: 10,
     }
   } catch (e) {
     return {
       props: {
         articles: [],
       },
-      revalidate: 10,
     }
   }
-}
-
-// This function gets called at build time on server-side.
-// It may be called again, on a serverless function, if
-// the path has not been generated.
-export async function getStaticPaths() {
-  const { data } = await axios({
-    method: 'GET',
-    url: 'https://medium.com/feed/hyperjump-tech',
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Content-Type': 'application/rss+xml',
-    },
-  })
-
-  if (!data) {
-    throw new Error('Failed to fetch RSS Feed.')
-  }
-
-  const parser = new XMLParser()
-  const parsed = parser.parse(data)
-  const { rss } = parsed
-  const { channel } = rss
-  const { item: articles } = channel
-
-  // We'll pre-render only these paths at build time.
-  // { fallback: blocking } will server-render pages
-  // on-demand if the path doesn't exist.
-  return { paths: [], fallback: true }
 }
