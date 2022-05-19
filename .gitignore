@@ -241,3 +241,4 @@ oclif.manifest.json
 
 # Archives
 *.tar.gz
+docs/public/sitemap.xml

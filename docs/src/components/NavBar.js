@@ -26,9 +26,10 @@ import Link from 'next/link'
 import { siteConfig } from 'siteConfig'
 import ButtonLink from 'components/ButtonLink'
 import MonikaSvg from '../../public/monika.svg'
+import { useState } from 'react'
 
 export default function NavBar() {
-  const [navbarOpen, setNavbarOpen] = React.useState(false)
+  const [navbarOpen, setNavbarOpen] = useState(false)
   return (
     <nav className="relative flex flex-wrap items-center bg-black-monika justify-between px-2 py-3">
       <div className="container px-4 mx-auto flex flex-wrap items-center justify-between">
