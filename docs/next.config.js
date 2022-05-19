@@ -95,6 +95,10 @@ module.exports = optimizedImages({
       ],
     })
 
+    if (isServer) {
+      require('./scripts/sitemap-generator')
+    }
+
     // only compile build-rss in production server build
     if (dev || !isServer) {
       return config
