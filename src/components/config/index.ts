@@ -192,9 +192,8 @@ export const setupConfig = async (flags: any): Promise<void> => {
     flags.postman === undefined &&
     flags.insomnia === undefined
   ) {
-    const configFileName = 'monika.yml'
-    await createConfigFile(configFileName)
-    flags.config = [configFileName]
+    log.info(`No Monika configuration available, initializing...`)
+    await createConfigFile(flags)
   }
 
   defaultConfigs = await parseDefaultConfig(flags)

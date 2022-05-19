@@ -26,15 +26,37 @@ import fs from 'fs'
 import axios from 'axios'
 import { log } from '../../utils/pino'
 
-export const createConfigFile = async (filename: string): Promise<void> => {
-  log.info(`No Monika configuration available, initializing...`)
+export const DEFAULT_CONFIG_FILENAME = 'monika.yml'
 
-  const url =
-    'https://raw.githubusercontent.com/hyperjumptech/monika/main/monika.example.yml'
-  await axios.get(url).then((resp) => {
-    fs.writeFileSync(filename, resp.data, 'utf-8')
-  })
-  log.info(
-    `${filename} file has been created in this directory. You can change the URL to probe and other configurations in that ${filename} file.`
-  )
+export const createConfigFile = async (flags: any): Promise<void> => {
+  const filename: string = flags['config-interval'] || DEFAULT_CONFIG_FILENAME
+  try {
+    const url =
+      'https://raw.githubusercontent.com/hyperjumptech/monika/main/monika.example.yml'
+    await axios.get(url).then((resp) => {
+      fs.writeFileSync(filename, resp.data, 'utf-8')
+    })
+    log.info(
+      `${filename} file has been created in this directory. You can change the URL to probe and other configurations in that ${filename} file.`
+    )
+
+    flags.config = filename
+  } catch (error) {
+    // throw new Error(
+    //   'Configuration file not found. By default, Monika looks for monika.yml configuration file in the current directory.\n\nOtherwise, you can also specify a configuration file using -c flag as follows:\n\nmonika -c <path_to_configuration_file>\n\nYou can create a configuration file via web interface by opening this web app: https://hyperjumptech.github.io/monika-config-generator/'
+    // )
+    const ymlConfig = `
+    probes:
+    - id: '1'
+      requests:
+        - url: http://github.com
+    
+    db_limit:
+      max_db_size: 1000000000
+      deleted_data: 1
+      cron_schedule: '*/1 * * * *'
+    `
+
+    fs.writeFileSync(filename, ymlConfig, 'utf-8')
+  }
 }

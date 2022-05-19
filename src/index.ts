@@ -63,6 +63,7 @@ import path from 'path'
 import isUrl from 'is-url'
 import SymonClient from './symon'
 import { Errors } from '@oclif/core'
+import { DEFAULT_CONFIG_FILENAME } from './components/config/create-config'
 
 const em = getEventEmitter()
 let symonClient: SymonClient
@@ -130,6 +131,13 @@ class Monika extends Command {
       description:
         'The interval (in seconds) for periodic config checking if url is used as config source',
       default: DEFAULT_CONFIG_INTERVAL,
+      dependsOn: ['config'],
+    }),
+
+    'config-filename': Flags.string({
+      description:
+        'The configuration filename for config file created if there is no config file found ',
+      default: DEFAULT_CONFIG_FILENAME,
       dependsOn: ['config'],
     }),
 
