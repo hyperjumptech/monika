@@ -193,7 +193,8 @@ export const setupConfig = async (flags: any): Promise<void> => {
     flags.insomnia === undefined
   ) {
     log.info(`No Monika configuration available, initializing...`)
-    await createConfigFile(flags)
+    const filename = await createConfigFile(flags)
+    flags.config = [filename]
   }
 
   defaultConfigs = await parseDefaultConfig(flags)
