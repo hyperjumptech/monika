@@ -22,40 +22,38 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { expect } from 'chai'
-import { exec } from 'child_process'
+import fs from 'fs'
+import axios from 'axios'
+import { log } from '../../utils/pino'
 
-describe('monika', () => {
-  it('shows version', (done) => {
-    exec(`monika -v`, (_, stdout) => {
-      expect(stdout).to.contain('@hyperjumptech/monika/')
-      done()
-    })
-  })
+export const DEFAULT_CONFIG_FILENAME = 'monika.yml'
 
-  it('shows initializing file when no config', (done) => {
-    exec(`monika`, (_, stdout) => {
-      expect(stdout).to.contain(
-        'No Monika configuration available, initializing...'
-      )
-      expect(stdout).to.contain(
-        'monika.yml file has been created in this directory. You can change the URL to probe and other configurations in that monika.yml file.'
-      )
-      done()
+export const createConfigFile = async (flags: any): Promise<string> => {
+  const filename: string = flags['config-filename'] || DEFAULT_CONFIG_FILENAME
+  try {
+    const url =
+      'https://raw.githubusercontent.com/hyperjumptech/monika/main/monika.example.yml'
+    await axios.get(url).then((resp) => {
+      fs.writeFileSync(filename, resp.data, 'utf-8')
     })
-  })
+    log.info(
+      `${filename} file has been created in this directory. You can change the URL to probe and other configurations in that ${filename} file.`
+    )
+  } catch (error) {
+    const ymlConfig = `
+    probes:
+    - id: '1'
+      requests:
+        - url: http://github.com
+    
+    db_limit:
+      max_db_size: 1000000000
+      deleted_data: 1
+      cron_schedule: '*/1 * * * *'
+    `
 
-  it('shows starting message with valid json config', (done) => {
-    exec(`monika -c ./monika.example.json`, (_, stdout) => {
-      expect(stdout).to.contain('Starting Monika.')
-      done()
-    })
-  })
+    fs.writeFileSync(filename, ymlConfig, 'utf-8')
+  }
 
-  it('shows starting message with valid yaml config', (done) => {
-    exec(`monika -c ./monika.example.yml`, (_, stdout) => {
-      expect(stdout).to.contain('Starting Monika.')
-      done()
-    })
-  })
-})
+  return filename
+}
