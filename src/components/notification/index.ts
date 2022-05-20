@@ -138,10 +138,7 @@ export async function sendNotifications(
           }
 
           case 'telegram': {
-            await sendTelegram({
-              ...notification.data,
-              body: message.body,
-            })
+            await sendTelegram(notification.data, message)
             break
           }
 
