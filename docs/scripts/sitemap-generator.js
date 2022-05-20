@@ -22,37 +22,38 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios from 'axios'
-
-import { TelegramData } from '../../../interfaces/data'
-import { NotificationMessage } from '../../../interfaces/notification'
-
-export const sendTelegram = async (
-  data: TelegramData,
-  message: NotificationMessage
-) => {
-  try {
-    const notificationType =
-      message.meta.type[0].toUpperCase() + message.meta.type.substring(1)
-
-    let content
-    switch (message.meta.type) {
-      case 'incident':
-      case 'recovery': {
-        content = `New ${notificationType} event from Monika\n\n${message.body}`
-        break
-      }
-      default:
-        content = message.body
-        break
-    }
-
-    const res = await axios({
-      url: `https://api.telegram.org/bot${data.bot_token}/sendMessage?chat_id=${data.group_id}&text=${content}`,
-    })
-
-    return res
-  } catch (error) {
-    throw error
+const fs = require('fs')
+const globby = require('globby')
+function addPage(page) {
+  const path = page
+    .replace('pages', '')
+    .replace('.js', '')
+    .replace('.mdx', '')
+    .replace('.md', '')
+  const route = path === '/index' ? '' : path.replace('src/', '')
+  const excludesPage = ['/404', '/index-component']
+  if (!excludesPage.includes(route)) {
+    return `<url>
+    <loc>${`https://monika.hyperjump.tech${route}`}</loc>
+    <lastmod>${new Date().toISOString()}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>1.0</priority>
+</url>`
   }
+  return null
 }
+
+async function generateSitemap() {
+  // excludes Nextjs files and API routes.
+  const pages = await globby([
+    'src/pages/**/*{.js,.md,.mdx}',
+    '!src/pages/_*.js',
+    '!src/pages/api',
+  ])
+  const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${pages.map(addPage).join('\n')}
+</urlset>`
+  fs.writeFileSync('public/sitemap.xml', sitemap)
+}
+generateSitemap()

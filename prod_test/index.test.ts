@@ -33,17 +33,13 @@ describe('monika', () => {
     })
   })
 
-  it('shows error when no config', (done) => {
-    exec(`monika`, (_, _stdout, stderr) => {
-      expect(stderr).to.contain('Error')
-      done()
-    })
-  })
-
-  it('shows config generator link when no config', (done) => {
-    exec(`monika`, (_, _stdout, stderr) => {
-      expect(stderr).to.contain(
-        'https://hyperjumptech.github.io/monika-config-generator/'
+  it('shows initializing file when no config', (done) => {
+    exec(`monika`, (_, stdout) => {
+      expect(stdout).to.contain(
+        'No Monika configuration available, initializing...'
+      )
+      expect(stdout).to.contain(
+        'monika.yml file has been created in this directory. You can change the URL to probe and other configurations in that monika.yml file.'
       )
       done()
     })

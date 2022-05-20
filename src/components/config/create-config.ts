@@ -22,37 +22,38 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import fs from 'fs'
 import axios from 'axios'
+import { log } from '../../utils/pino'
 
-import { TelegramData } from '../../../interfaces/data'
-import { NotificationMessage } from '../../../interfaces/notification'
+export const DEFAULT_CONFIG_FILENAME = 'monika.yml'
 
-export const sendTelegram = async (
-  data: TelegramData,
-  message: NotificationMessage
-) => {
+export const createConfigFile = async (flags: any): Promise<string> => {
+  const filename: string = flags['config-filename'] || DEFAULT_CONFIG_FILENAME
   try {
-    const notificationType =
-      message.meta.type[0].toUpperCase() + message.meta.type.substring(1)
-
-    let content
-    switch (message.meta.type) {
-      case 'incident':
-      case 'recovery': {
-        content = `New ${notificationType} event from Monika\n\n${message.body}`
-        break
-      }
-      default:
-        content = message.body
-        break
-    }
-
-    const res = await axios({
-      url: `https://api.telegram.org/bot${data.bot_token}/sendMessage?chat_id=${data.group_id}&text=${content}`,
+    const url =
+      'https://raw.githubusercontent.com/hyperjumptech/monika/main/monika.example.yml'
+    await axios.get(url).then((resp) => {
+      fs.writeFileSync(filename, resp.data, 'utf-8')
     })
-
-    return res
+    log.info(
+      `${filename} file has been created in this directory. You can change the URL to probe and other configurations in that ${filename} file.`
+    )
   } catch (error) {
-    throw error
+    const ymlConfig = `
+    probes:
+    - id: '1'
+      requests:
+        - url: http://github.com
+    
+    db_limit:
+      max_db_size: 1000000000
+      deleted_data: 1
+      cron_schedule: '*/1 * * * *'
+    `
+
+    fs.writeFileSync(filename, ymlConfig, 'utf-8')
   }
+
+  return filename
 }

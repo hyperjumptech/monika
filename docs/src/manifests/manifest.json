@@ -15,7 +15,7 @@
           "editUrl": "/quick-start.md"
         },
         {
-          "title": "Articles",
+          "title": "How-to",
           "path": "/articles",
           "editUrl": "/articles.js"
         }
