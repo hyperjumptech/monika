@@ -10,27 +10,13 @@ jobs:
     name: Bump Homebrew formula
     runs-on: ubuntu-latest
     steps:
-      - run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
-        name: Get version
-        id: get_version
-        shell: bash
-
-      - run: echo ${{ steps.get_version.outputs.VERSION }} | sed 's/^.//' > version_number.txt
-        name: Write version number without prefix
-
-      - name: See version_number.txt content
-        run: cat version_number.txt
-
-      - name: Read version number without prefix
-        id: read_version
-        uses: juliangruber/read-file-action@v1
-        with:
-          path: version_number.txt
-          trim: true
+      - name: Get Package Version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@master
 
       - uses: mislav/bump-homebrew-formula-action@v2
         with:
           formula-name: monika
-          download-url: https://registry.npmjs.org/@hyperjumptech/monika/-/monika-${{ steps.read_version.outputs.content }}.tgz
+          download-url: https://registry.npmjs.org/@hyperjumptech/monika/-/monika-${{ steps.package-version.outputs.current-version }}.tgz
         env:
           COMMITTER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
