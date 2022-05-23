@@ -56,7 +56,10 @@ export class NotificationSendingError extends Error {
     this.notificationType = notificationType
   }
 
-  static create(notificationType: string, originalErrorMessage?: string) {
+  static create(
+    notificationType: string,
+    originalErrorMessage?: string
+  ): NotificationSendingError {
     // for the sake of passing test
     const notificationTypeformatted = notificationType
       .split('-')
@@ -74,7 +77,7 @@ export class NotificationSendingError extends Error {
 export async function sendNotifications(
   notifications: Notification[],
   message: NotificationMessage
-) {
+): Promise<void> {
   const pagerduty = newPagerDuty()
 
   await Promise.all(
@@ -99,6 +102,7 @@ export async function sendNotifications(
             )
             break
           }
+
           case 'sendgrid': {
             await sendSendgrid(
               {
@@ -114,6 +118,7 @@ export async function sendNotifications(
             )
             break
           }
+
           case 'webhook': {
             await sendWebhook({
               ...notification.data,
@@ -121,24 +126,22 @@ export async function sendNotifications(
             })
             break
           }
+
           case 'discord': {
-            await sendDiscord({
-              ...notification.data,
-              body: message.body,
-            })
+            await sendDiscord(notification.data, message)
             break
           }
+
           case 'slack': {
             await sendSlack(notification.data, message)
             break
           }
+
           case 'telegram': {
-            await sendTelegram({
-              ...notification.data,
-              body: message.body,
-            })
+            await sendTelegram(notification.data, message)
             break
           }
+
           case 'smtp': {
             const transporter = createSmtpTransport(notification.data)
             await sendSmtpMail(transporter, {
@@ -150,50 +153,59 @@ export async function sendNotifications(
             })
             break
           }
+
           case 'whatsapp': {
             await sendWhatsapp(notification.data, message.body)
             break
           }
+
           case 'teams': {
             await sendTeams(notification.data, message)
             break
           }
+
           case 'monika-notif': {
             let body: MonikaNotifDataBody
 
-            if (
-              message.meta.type === 'start' ||
-              message.meta.type === 'termination'
-            ) {
-              body = {
-                type: message.meta.type,
-                ip_address: message.body,
+            switch (message.meta.type) {
+              case 'start':
+              case 'termination': {
+                body = {
+                  type: message.meta.type,
+                  ip_address: message.body,
+                }
+                break
               }
-            } else if (
-              message.meta.type === 'incident' ||
-              message.meta.type === 'recovery'
-            ) {
-              body = {
-                type: message.meta.type,
-                alert: message.summary,
-                url: message.meta.url,
-                time: message.meta.time,
-                monika: message.meta.monikaInstance,
+              case 'incident':
+              case 'recovery': {
+                body = {
+                  type: message.meta.type,
+                  alert: message.summary,
+                  url: message.meta.url,
+                  time: message.meta.time,
+                  monika: message.meta.monikaInstance,
+                }
+                break
               }
-            } else if (message.meta.type === 'status-update') {
-              body = {
-                type: message.meta.type,
-                time: message.meta.time,
-                monika: message.meta.monikaInstance,
-                numberOfProbes: String(message.meta.numberOfProbes),
-                maxResponseTime: String(message.meta.maxResponseTime),
-                minResponseTime: String(message.meta.minResponseTime),
-                averageResponseTime: String(message.meta.averageResponseTime),
-                numberOfIncidents: String(message.meta.numberOfIncidents),
-                numberOfRecoveries: String(message.meta.numberOfRecoveries),
-                numberOfSentNotifications: String(
-                  message.meta.numberOfSentNotifications
-                ),
+              case 'status-update': {
+                body = {
+                  type: message.meta.type,
+                  time: message.meta.time,
+                  monika: message.meta.monikaInstance,
+                  numberOfProbes: String(message.meta.numberOfProbes),
+                  maxResponseTime: String(message.meta.maxResponseTime),
+                  minResponseTime: String(message.meta.minResponseTime),
+                  averageResponseTime: String(message.meta.averageResponseTime),
+                  numberOfIncidents: String(message.meta.numberOfIncidents),
+                  numberOfRecoveries: String(message.meta.numberOfRecoveries),
+                  numberOfSentNotifications: String(
+                    message.meta.numberOfSentNotifications
+                  ),
+                }
+                break
+              }
+              default: {
+                break
               }
             }
 
@@ -203,6 +215,7 @@ export async function sendNotifications(
             })
             break
           }
+
           case 'workplace': {
             await sendWorkplace({
               ...notification.data,
@@ -210,6 +223,7 @@ export async function sendNotifications(
             })
             break
           }
+
           case 'desktop': {
             await sendDesktop({
               title: message.subject,

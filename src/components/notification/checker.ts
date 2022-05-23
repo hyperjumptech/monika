@@ -46,7 +46,9 @@ import {
 // reexported with alias because this `errorMessage` function is used in test file
 export const errorMessage = NotificationSendingError.create
 
-export const notificationChecker = async (notifications: Notification[]) => {
+export const notificationChecker = async (
+  notifications: Notification[]
+): Promise<any> => {
   const pagerduty = newPagerDuty()
   const validators = {
     desktop: null,

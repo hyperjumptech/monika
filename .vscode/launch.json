@@ -5,6 +5,29 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch Symon",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}\\bin\\run_dev",
+      "args": [
+        "--symonUrl",
+        "http://localhost:3000/",
+        "--symonKey",
+        "insert-key-here"
+      ],
+      "sourceMap": true
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch Run Dev",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}\\bin\\run_dev",
+      "args": ["-c", "./monika.yml"],
+      "sourceMap": true
+    },
+    {
       "type": "pwa-node",
       "request": "launch",
       "name": "Launch Program",

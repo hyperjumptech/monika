@@ -25,8 +25,9 @@
 import axios from 'axios'
 
 import { MonikaNotifData } from '../../../interfaces/data'
+import { log } from '../../../utils/pino'
 
-export const sendMonikaNotif = async (data: MonikaNotifData) => {
+export const sendMonikaNotif = async (data: MonikaNotifData): Promise<any> => {
   try {
     const res = await axios({
       method: 'POST',
@@ -35,7 +36,10 @@ export const sendMonikaNotif = async (data: MonikaNotifData) => {
     })
 
     return res
-  } catch (error) {
-    throw error
+  } catch (error: any) {
+    log.error(
+      "Couldn't send notification to Lark Suite. Got this error: " +
+        error.message
+    )
   }
 }

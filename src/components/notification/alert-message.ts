@@ -36,7 +36,7 @@ import { publicIpAddress, publicNetworkInfo } from '../../utils/public-ip'
 
 const getLinuxDistro = promisify(getos)
 
-export const getMonikaInstance = async (ipAddress: string) => {
+export const getMonikaInstance = async (ipAddress: string): Promise<string> => {
   const osHostname = hostname()
 
   if (publicNetworkInfo) {
@@ -90,7 +90,7 @@ export async function getMessageForAlert({
     alert: ProbeAlert,
     response: ProbeRequestResponse,
     isRecovery: boolean
-  ) => {
+  ): string | number => {
     const { status } = response
     const isHTTPStatusCode = status >= 100 && status <= 599
 
@@ -103,7 +103,7 @@ export async function getMessageForAlert({
     if (!isHTTPStatusCode) {
       switch (status) {
         case 0:
-          return 'URI not found'
+          return 'Host cannot be reached'
         case 1:
           return 'Connection reset'
         case 2:
@@ -229,7 +229,7 @@ export const getMessageForTerminate = async (
   }
 }
 
-export async function getOSName() {
+export async function getOSName(): Promise<string> {
   const osPlatform = platform()
   const isLinux = osPlatform === 'linux'
 

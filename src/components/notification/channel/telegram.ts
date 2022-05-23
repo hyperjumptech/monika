@@ -25,11 +25,30 @@
 import axios from 'axios'
 
 import { TelegramData } from '../../../interfaces/data'
+import { NotificationMessage } from '../../../interfaces/notification'
 
-export const sendTelegram = async (data: TelegramData) => {
+export const sendTelegram = async (
+  data: TelegramData,
+  message: NotificationMessage
+) => {
   try {
+    const notificationType =
+      message.meta.type[0].toUpperCase() + message.meta.type.substring(1)
+
+    let content
+    switch (message.meta.type) {
+      case 'incident':
+      case 'recovery': {
+        content = `New ${notificationType} event from Monika\n\n${message.body}`
+        break
+      }
+      default:
+        content = message.body
+        break
+    }
+
     const res = await axios({
-      url: `https://api.telegram.org/bot${data.bot_token}/sendMessage?chat_id=${data.group_id}&text=${data.body}`,
+      url: `https://api.telegram.org/bot${data.bot_token}/sendMessage?chat_id=${data.group_id}&text=${content}`,
     })
 
     return res

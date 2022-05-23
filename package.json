@@ -1,7 +1,7 @@
 {
   "name": "@hyperjumptech/monika",
   "description": "Synthetic monitoring made easy",
-  "version": "1.7.2",
+  "version": "1.7.3",
   "license": "MIT",
   "author": "@hyperjumptech",
   "main": "lib/index.js",
@@ -35,6 +35,7 @@
     "posttest": "eslint . --ext .ts --config .eslintrc",
     "prepack": "npm run clean && tsc -b && oclif manifest",
     "start": "npm run prepack && ./bin/dev",
+    "start:windows": "npm run prepack && /bin/dev",
     "start:prod": "npm run prepack && ./bin/run",
     "test": "npm run clean && cross-env NODE_ENV=test nyc --reporter=lcov --extension .ts mocha --config .mocharc.json --forbid-only \"{src,test}/**/*.test.ts\"",
     "cli-test": "npx bats test/bats/cli.bats",

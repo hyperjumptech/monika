@@ -52,7 +52,7 @@ import { Notification } from '../interfaces/notification'
 import { Probe } from '../interfaces/probe'
 const eventEmitter = getEventEmitter()
 
-export async function getSummaryAndSendNotif() {
+export async function getSummaryAndSendNotif(): Promise<void> {
   const config = getConfig()
   const { notifications } = config
 
@@ -67,13 +67,14 @@ export async function getSummaryAndSendNotif() {
       getMonikaInstance(privateIpAddress),
     ])
     const responseTimelogLifeTimeInHour = getLogLifeTimeInHour()
+    /* eslint-disable camelcase */
     const tweetMessage = createTweetMessage({
       average_response_time: averageResponseTime,
       number_of_incidents: summary.numberOfIncidents,
       number_of_probes: summary.numberOfProbes,
       number_of_recoveries: summary.numberOfRecoveries,
     })
-
+    /* eslint-enable */
     sendNotifications(notifications, {
       subject: `Monika Status`,
       body: `Status Update ${format(new Date(), 'yyyy-MM-dd HH:mm:ss XXX')}
@@ -137,6 +138,7 @@ function readPidFile(): PidObject {
         'Could not find the file: monika.pid. Monika is probably not running or ran from a diffent directory'
       )
     }
+
     throw error
   }
 
@@ -154,8 +156,9 @@ function readPidFile(): PidObject {
  * savePidFile saves a monika.pid file with some useful information
  * @param {string} configFile is the configuration file used
  * @param {obj} config is a Config object
+ * @returns void
  */
-export function savePidFile(configFile: string[], config: Config) {
+export function savePidFile(configFile: string[], config: Config): void {
   const data = JSON.stringify({
     monikaStartTime: new Date(),
     monikaConfigFile: configFile,
@@ -187,13 +190,13 @@ eventEmitter.on(events.application.terminated, async () => {
  */
 function getDaysHours(startTime: Date): string {
   let duration = Math.abs(
-    (new Date().getTime() - new Date(startTime).getTime()) / 1000
+    (new Date().getTime() - new Date(startTime).getTime()) / 1_000
   )
-  const numDays = Math.floor(duration / 86400)
-  duration -= numDays * 86400 // get the remaining hours
+  const numDays = Math.floor(duration / 86_400)
+  duration -= numDays * 86_400 // get the remaining hours
 
-  const numHours = Math.floor(duration / 3600) % 24
-  duration -= numHours * 3600 // get the remaining minutes
+  const numHours = Math.floor(duration / 3_600) % 24
+  duration -= numHours * 3_600 // get the remaining minutes
 
   const numMinutes = Math.floor(duration / 60) % 60
 
@@ -205,8 +208,9 @@ function getDaysHours(startTime: Date): string {
 /**
  * printSummary gathers and print some stats
  * @param {object} cliConfig is oclif config structure
+ * @returns Promise<void>
  */
-export async function printSummary(cliConfig: IConfig) {
+export async function printSummary(cliConfig: IConfig): Promise<void> {
   try {
     const pidObject = readPidFile()
     const summary = await getSummary()
@@ -227,15 +231,15 @@ export async function printSummary(cliConfig: IConfig) {
     Number of notifications \t: ${summary.numberOfSentNotifications} in last 24h
 
     Up time \t: ${uptime}
-    Running on \t: ${host}   
-    App version : ${cliConfig.userAgent} 
-        
+    Running on \t: ${host}
+    App version : ${cliConfig.userAgent}
+
     `)
   } catch (error: any) {
     log.error(`Summary notification: ${error.message}`)
   }
 }
-
+/* eslint-disable camelcase */
 function createTweetMessage({
   number_of_probes,
   average_response_time,
@@ -247,7 +251,7 @@ function createTweetMessage({
   number_of_incidents: number
   number_of_recoveries: number
 }): string {
-  const message = `I am using Monika by @hyperjump_tech to monitor ${number_of_probes} probes! In the last 24 hours, 
+  const message = `I am using Monika by @hyperjump_tech to monitor ${number_of_probes} probes! In the last 24 hours,
 
 ⏱ the average response time is ${average_response_time} ms
 ⚠️ there were ${number_of_incidents} incidents
@@ -261,3 +265,4 @@ https://monika.hyperjump.tech`
     message
   )}&hashtags=opensource,monika>Tweet this status!</a>`
 }
+/* eslint-enable */

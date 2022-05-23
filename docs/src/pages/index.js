@@ -498,14 +498,17 @@ export default function IndexPage() {
                 <Link href="/overview">
                   <a className="link17">Documentation</a>
                 </Link>
+                <Link href="/articles">
+                  <a className="link18">How-to</a>
+                </Link>
                 <Link href="/guides/examples">
-                  <a className="link18">Example</a>
+                  <a className="link19">Example</a>
                 </Link>
                 <a
                   href="https://monika-config.hyperjump.tech/"
                   target="_blank"
                   rel="noreferrer noopener"
-                  className="link19"
+                  className="link20"
                 >
                   Config Generator
                 </a>

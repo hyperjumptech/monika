@@ -25,6 +25,7 @@ describe('notificationChecker - workplaceNotification', () => {
         {
           ...notificationConfig,
           data: {
+            // eslint-disable-next-line camelcase
             access_token: 'ABC-EFG-HIJ-KLM-NOP-QRS-TUV-WXY-Z',
           } as WorkplaceData,
         },
@@ -45,6 +46,7 @@ describe('notificationChecker - workplaceNotification', () => {
         {
           ...notificationConfig,
           data: {
+            // eslint-disable-next-line camelcase
             thread_id: 'ABC-EFG-HIJ-KLM-NOP-QRS-TUV-WXY-Z',
           } as WorkplaceData,
         },

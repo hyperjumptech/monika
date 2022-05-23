@@ -22,10 +22,38 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { EventEmitter } from 'events'
+import fs from 'fs'
+import axios from 'axios'
+import { log } from '../../utils/pino'
 
-const em = new EventEmitter()
+export const DEFAULT_CONFIG_FILENAME = 'monika.yml'
 
-export const getEventEmitter = (): EventEmitter => {
-  return em
+export const createConfigFile = async (flags: any): Promise<string> => {
+  const filename: string = flags['config-filename'] || DEFAULT_CONFIG_FILENAME
+  try {
+    const url =
+      'https://raw.githubusercontent.com/hyperjumptech/monika/main/monika.example.yml'
+    await axios.get(url).then((resp) => {
+      fs.writeFileSync(filename, resp.data, 'utf-8')
+    })
+    log.info(
+      `${filename} file has been created in this directory. You can change the URL to probe and other configurations in that ${filename} file.`
+    )
+  } catch (error) {
+    const ymlConfig = `
+    probes:
+    - id: '1'
+      requests:
+        - url: http://github.com
+    
+    db_limit:
+      max_db_size: 1000000000
+      deleted_data: 1
+      cron_schedule: '*/1 * * * *'
+    `
+
+    fs.writeFileSync(filename, ymlConfig, 'utf-8')
+  }
+
+  return filename
 }
