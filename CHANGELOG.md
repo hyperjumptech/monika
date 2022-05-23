@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.3] - 2022-05-20
+
+## Fixed
+
+- Fix telegram notification (#665)
+- Discord notification message (#657)
+- Articles page in docs (#660)
+- retries when re-reading configuration file (#653)
+- eslint warnings (#646)
+- TCP probing for symon (#642)
+- default monika config directory (#645)
+
+## Updated
+
+- create default config file when there is none specified (#654)
+- the installation quick-start guide (#659)
+- allow manual trigger for GitHub Action's workflows (#641)
+
+## Added
+
+- Sitemap for docs (#664)
+- ToC on docs (#651)
+
 ## [1.7.2] - 2022-04-11
 
 ## Fixed
