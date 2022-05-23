@@ -1,3 +1,4 @@
+# This file is generated using https://github.com/zmwangx/homebrew-npm-noob
 require "language/node"
 
 class Monika < Formula

@@ -1,0 +1,22 @@
+name: Publish to Homebrew
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+jobs:
+  homebrew:
+    name: Bump Homebrew formula
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract version
+        id: extract-version
+        run: |
+          printf "::set-output name=%s::%s\n" tag-name "${GITHUB_REF#refs/tags/}"
+      - uses: mislav/bump-homebrew-formula-action@v2
+        with:
+          formula-name: monika
+          download-url: https://registry.npmjs.org/@hyperjumptech/monika/-/monika-${{ github.event.inputs.tag-name }}.tgz
+        env:
+          COMMITTER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
