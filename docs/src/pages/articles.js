@@ -22,35 +22,60 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import React from 'react'
 import axios from 'axios'
+import React from 'react'
+import { useQuery } from 'react-query'
 import { LayoutDocs } from '../components/LayoutDocs'
-import { XMLParser } from 'fast-xml-parser'
 
-export default function ArticlesPage({ articles }) {
+export default function ArticlesPage() {
+  const { data, isLoading, isError } = useQuery('articles', async () => {
+    await axios({
+      method: 'GET',
+      url: 'https://medium.com/feed/hyperjump-tech',
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'application/rss+xml',
+      },
+    })
+  })
+
+  if (isLoading) {
+    return (
+      <LayoutDocs meta={{}}>
+        <h1>Articles</h1>
+        <p>Fetching latest article, please wait...</p>
+      </LayoutDocs>
+    )
+  }
+
+  if (isError) {
+    return (
+      <LayoutDocs meta={{}}>
+        <h1>Articles</h1>
+        <p>Failed to fetch latest article. Please refresh this page.</p>
+      </LayoutDocs>
+    )
+  }
+
   return (
     <LayoutDocs meta={{}}>
       <h1>Articles</h1>
-      {articles.length > 0 ? (
-        articles.map(({ title, pubDate, link }) => {
-          return (
-            <div key={title} className="flex flex-col mb-4">
-              <div className="flex">
-                <a href={link} rel="noopener noreferrer" target="_blank">
-                  <h2>
-                    <b>{title}</b>
-                  </h2>
-                </a>
-              </div>
-              <div className="flex">
-                <span>Published at {pubDate}</span>
-              </div>
+      {data.map(({ title, pubDate, link }) => {
+        return (
+          <div key={title} className="flex flex-col mb-4">
+            <div className="flex">
+              <a href={link} rel="noopener noreferrer" target="_blank">
+                <h2>
+                  <b>{title}</b>
+                </h2>
+              </a>
             </div>
-          )
-        })
-      ) : (
-        <p>There are no articles available at the moment.</p>
-      )}
+            <div className="flex">
+              <span>Published at {pubDate}</span>
+            </div>
+          </div>
+        )
+      })}
       <div className="flex articles-center justify-end">
         <a
           href="https://medium.com/hyperjump-tech"
@@ -63,47 +88,4 @@ export default function ArticlesPage({ articles }) {
       </div>
     </LayoutDocs>
   )
-}
-
-// This function gets called at build time on server-side.
-// It may be called again, on a serverless function, if
-// revalidation is enabled and a new request comes in
-export async function getServerSideProps({ res }) {
-  try {
-    res.setHeader(
-      'Cache-Control',
-      'public, s-maxage=10, stale-while-revalidate=59'
-    )
-
-    const { data } = await axios({
-      method: 'GET',
-      url: 'https://medium.com/feed/hyperjump-tech',
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Content-Type': 'application/rss+xml',
-      },
-    })
-
-    if (!data) {
-      throw new Error('Failed to fetch RSS Feed.')
-    }
-
-    const parser = new XMLParser()
-    const parsed = parser.parse(data)
-    const { rss } = parsed
-    const { channel } = rss
-    const { item: articles } = channel
-
-    return {
-      props: {
-        articles,
-      },
-    }
-  } catch (e) {
-    return {
-      props: {
-        articles: [],
-      },
-    }
-  }
 }
