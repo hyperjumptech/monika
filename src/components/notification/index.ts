@@ -33,6 +33,7 @@ import getIp from '../../utils/ip'
 import { getMessageForAlert } from './alert-message'
 import { sendDesktop } from './channel/desktop'
 import { sendDiscord } from './channel/discord'
+import { sendDingtalk } from './channel/dingtalk'
 import { sendMailgun } from './channel/mailgun'
 import { sendMonikaNotif } from './channel/monika-notif'
 import { sendSendgrid } from './channel/sendgrid'
@@ -129,6 +130,11 @@ export async function sendNotifications(
 
           case 'discord': {
             await sendDiscord(notification.data, message)
+            break
+          }
+
+          case 'dingtalk': {
+            await sendDingtalk(notification.data, message)
             break
           }
 

@@ -169,6 +169,10 @@ probes:
 #     data:
 #       thread_id: "1234567890"
 #       access_token: YOUR_CUSTOM_INTEGRATION_ACCESS_TOKEN
+#   - id: random-string-dingtalk
+#     type: dingtalk
+#     data:
+#       access_token: YOUR_CUSTOM_INTEGRATION_ACCESS_TOKEN
 
 # limit log database size in bytes
 db_limit:

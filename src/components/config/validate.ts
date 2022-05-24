@@ -107,6 +107,11 @@ const WEBHOOK_NO_URL = setInvalidResponse('URL not found')
 // Discord
 const DISCORD_NO_URL = setInvalidResponse('Discord URL not found')
 
+// Dingtalk
+const DINGTALK_NO_ACCESS_TOKEN = setInvalidResponse(
+  'Dingtalk Access Token not found'
+)
+
 // Whatsapp
 const WHATSAPP_NO_URL = setInvalidResponse('Whatsapp URL not found')
 const WHATSAPP_NO_USERNAME = setInvalidResponse('Whatsapp Username not found')
@@ -224,6 +229,11 @@ function validateNotification(notifications: Notification[]): Validation {
 
       case 'google-chat': {
         if (!notification.data.url) return WEBHOOK_NO_URL
+        break
+      }
+
+      case 'dingtalk': {
+        if (!notification.data.access_token) return DINGTALK_NO_ACCESS_TOKEN
         break
       }
 

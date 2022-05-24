@@ -30,6 +30,7 @@ import { getMessageForStart } from './alert-message'
 import { newPagerDuty } from './channel/pagerduty'
 import {
   dataDiscordSchemaValidator,
+  dataDingtalkSchemaValidator,
   dataMailgunSchemaValidator,
   dataMonikaNotifSchemaValidator,
   dataSendgridSchemaValidator,
@@ -53,6 +54,7 @@ export const notificationChecker = async (
   const validators = {
     desktop: null,
     discord: dataDiscordSchemaValidator,
+    dingtalk: dataDingtalkSchemaValidator,
     mailgun: dataMailgunSchemaValidator,
     'monika-notif': dataMonikaNotifSchemaValidator,
     sendgrid: dataSendgridSchemaValidator,

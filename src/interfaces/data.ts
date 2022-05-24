@@ -57,6 +57,11 @@ export interface WebhookData {
   body: string
 }
 
+export interface DingtalkData {
+  access_token: string
+  body: string
+}
+
 export interface MonikaNotifData {
   url: string
   body: MonikaNotifDataBody
