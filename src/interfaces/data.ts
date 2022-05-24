@@ -99,6 +99,12 @@ export interface TelegramData {
   body: string
 }
 
+export interface PushoverData {
+  token: string
+  user: string
+  message: string
+}
+
 export interface WebhookDataBody {
   url: string
   time: string
