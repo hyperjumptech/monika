@@ -36,6 +36,7 @@ import {
   LarkData,
   SlackData,
   GoogleChatData,
+  PushoverData,
 } from './data'
 
 export type Notification =
@@ -54,7 +55,7 @@ export type Notification =
   | LarkNotification
   | GoogleChatNotification
   | PagerDutyNotification
-
+  | PushoverNotification
 interface BaseNotification {
   id: string
 }
@@ -129,6 +130,11 @@ interface LarkNotification extends BaseNotification {
 interface GoogleChatNotification extends BaseNotification {
   type: 'google-chat'
   data: GoogleChatData
+}
+
+interface PushoverNotification extends BaseNotification {
+  type: 'pushover'
+  data: PushoverData
 }
 
 export interface NotificationMessage {
