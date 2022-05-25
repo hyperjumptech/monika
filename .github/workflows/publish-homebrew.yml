@@ -2,8 +2,10 @@ name: Publish to Homebrew
 
 on:
   workflow_dispatch:
-  release:
-    types: [published]
+  workflow_run: # Only trigger, when the npm-publish workflow succeeded
+    workflows: ["Node.js Package"]
+    types:
+      - completed
 
 jobs:
   homebrew:
