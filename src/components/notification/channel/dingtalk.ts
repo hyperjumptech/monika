@@ -24,6 +24,7 @@
 
 import axios from 'axios'
 
+import format from 'date-fns/format'
 import { DingtalkData } from '../../../interfaces/data'
 import { NotificationMessage } from '../../../interfaces/notification'
 
@@ -36,19 +37,63 @@ export const sendDingtalk = async (
       message.meta.type[0].toUpperCase() + message.meta.type.substring(1)
 
     let content
+    let bodyJson
     switch (message.meta.type) {
       case 'incident':
       case 'recovery': {
         content = `New ${notificationType} event from Monika\n\n${message.body}`
+        bodyJson = {
+          msgtype: 'text',
+          text: {
+            content: content,
+          },
+        }
         break
       }
       case 'status-update': {
-        content = message.body.replace('<a href=', '[Tweet this status!](')
-        content = content.replace('Tweet this status!</a>', ')')
+        content = `Status Update ${format(
+          new Date(),
+          'yyyy-MM-dd HH:mm:ss XXX'
+        )}\n
+Host: ${message.meta.monikaInstance}\n
+Number of Probes: ${message.meta.numberOfProbes}\n
+Maximum Response Time: ${message.meta.maxResponseTime} ms in the last ${
+          message.meta.responseTimelogLifeTimeInHour
+        } hours\n
+Minimum Response Time: ${message.meta.maxResponseTime} ms in the last ${
+          message.meta.responseTimelogLifeTimeInHour
+        } hours\n
+Average Response Time: ${message.meta.averageResponseTime} ms in the last ${
+          message.meta.responseTimelogLifeTimeInHour
+        } hours\n
+Incidents: ${message.meta.numberOfIncidents} in the last 24 hours\n
+Recoveries: ${message.meta.numberOfRecoveries} in the last 24 hours\n
+Notifications: ${message.meta.numberOfSentNotifications}\n
+ \n
+`
+        const indexTweet = message.body.indexOf('<a href')
+        let tweet = message.body.substring(indexTweet)
+        tweet = tweet.replace('<a href=', '[Tweet this status!](')
+        tweet = tweet.replace('Tweet this status!</a>', ')')
+
+        bodyJson = {
+          msgtype: 'markdown',
+          markdown: {
+            title: message.meta.type,
+            text: content + tweet,
+          },
+        }
         break
       }
+
       default:
         content = message.body
+        bodyJson = {
+          msgtype: 'text',
+          text: {
+            content: content,
+          },
+        }
         break
     }
 
@@ -58,13 +103,7 @@ export const sendDingtalk = async (
       headers: {
         'Content-Type': 'application/json',
       },
-      data: {
-        msgtype: 'markdown',
-        markdown: {
-          title: message.meta.type,
-          text: content,
-        },
-      },
+      data: bodyJson,
     })
 
     return res
