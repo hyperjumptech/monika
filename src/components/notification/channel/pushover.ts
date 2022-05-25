@@ -22,117 +22,47 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-export interface MailData {
-  recipients: string[]
-}
+import axios from 'axios'
 
-export interface MailgunData extends MailData {
-  apiKey: string
-  domain: string
-  username?: string
-}
+import { PushoverData } from '../../../interfaces/data'
+import { NotificationMessage } from '../../../interfaces/notification'
 
-export interface SendgridData extends MailData {
-  apiKey: string
-  sender: string
-}
+export const sendPushover = async (
+  data: PushoverData,
+  message: NotificationMessage
+) => {
+  try {
+    const notificationType =
+      message.meta.type[0].toUpperCase() + message.meta.type.substring(1)
 
-export interface SMTPData extends MailData {
-  hostname: string
-  port: number
-  username: string
-  password: string
-}
+    let content
+    switch (message.meta.type) {
+      case 'incident':
+      case 'recovery': {
+        content = `New ${notificationType} event from Monika\n\n${message.body}`
+        break
+      }
+      default:
+        content = message.body
+        break
+    }
 
-export interface TeamsData {
-  url: string
-}
+    const res = await axios.request({
+      method: 'POST',
+      url: `https://api.pushover.net/1/messages.json`,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      data: {
+        user: data.user,
+        token: data.token,
+        message: content,
+        html: 1,
+      },
+    })
 
-export interface SlackData {
-  url: string
-}
-
-export interface WebhookData {
-  url: string
-  body: string
-}
-
-export interface MonikaNotifData {
-  url: string
-  body: MonikaNotifDataBody
-}
-
-export type MonikaNotifDataBody =
-  | MonikaAlertNotifDataBody
-  | MonikaStartAndTerminationNotifDataBody
-  | MonikaStatusUpdateNotifDataBody
-
-interface MonikaAlertNotifDataBody {
-  type: 'incident' | 'recovery'
-  alert: string
-  url: string
-  time: string
-  monika: string
-}
-
-interface MonikaStartAndTerminationNotifDataBody {
-  type: 'start' | 'termination'
-  ip_address: string
-}
-
-interface MonikaStatusUpdateNotifDataBody {
-  type: 'status-update'
-  time: string
-  monika: string
-  numberOfProbes: string
-  maxResponseTime: string
-  minResponseTime: string
-  averageResponseTime: string
-  numberOfIncidents: string
-  numberOfRecoveries: string
-  numberOfSentNotifications: string
-}
-
-export interface TelegramData {
-  group_id: string
-  bot_token: string
-  body: string
-}
-
-export interface PushoverData {
-  token: string
-  user: string
-  message: string
-}
-
-export interface WebhookDataBody {
-  url: string
-  time: string
-  alert: string
-}
-
-export interface WhatsappData extends MailData {
-  url: string
-  username: string
-  password: string
-}
-
-export interface WorkplaceData {
-  thread_id: string
-  access_token: string
-  body: string
-}
-
-export interface LarkData {
-  url: string
-}
-
-export interface DBLimit {
-  max_db_size: number
-  deleted_data: number
-  cron_schedule: string
-}
-
-export interface GoogleChatData {
-  url: string
+    return res
+  } catch (error) {
+    throw error
+  }
 }
