@@ -24,6 +24,7 @@ At this moment, Monika support these channel of notifications (You can use just 
 13. [Telegram](https://hyperjumptech.github.io/monika/guides/notifications#telegram)
 14. [Webhook](https://hyperjumptech.github.io/monika/guides/notifications#webhook)
 15. [WhatsApp Business](https://hyperjumptech.github.io/monika/guides/notifications#whatsapp)
+16. [Dingtalk](https://hyperjumptech.github.io/monika/guides/notifications#dingtalk)
 
 ## Configurations
 
@@ -392,3 +393,18 @@ Monika supports Whatsapp notification. To enable notification via whatsapp, you 
 | Url          | The URL of your whatsapp api server                                                       | `https://yourwhatsappapiserver.com` |
 | Username     | Your whatsapp api user name                                                               | `username`                          |
 | Userpassword | Your whatsapp api user password                                                           | `userpassword`                      |
+
+## Dingtalk
+
+Monika supports Dingtalk. To enable notification via Dingtalk, you must create a robot webhook first. More info at [Dingtalk robot webhook documentation](https://open.dingtalk.com/document/group/assign-a-webhook-url-to-an-internal-chatbot).
+
+```yml
+id: unique-id-webhook,
+type: dingtalk,
+data:
+  access_token: 'your-access-token'
+```
+
+| Key          | Description                        | Example        |
+| ------------ | ---------------------------------- | -------------- |
+| Access Token | The token of your Dingtalk account | `Dingtalk1234` |
