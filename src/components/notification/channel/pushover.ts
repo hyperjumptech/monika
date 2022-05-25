@@ -57,6 +57,7 @@ export const sendPushover = async (
         user: data.user,
         token: data.token,
         message: content,
+        html: 1,
       },
     })
 
