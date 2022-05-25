@@ -122,3 +122,10 @@ export const dataGoogleChatSchemaValidator = dataBaseEmailSchemaValidator(
 ).keys({
   url: Joi.string().uri().required().label('Google URL'),
 })
+
+export const dataPushoverSchemaValidator = dataBaseEmailSchemaValidator(
+  'pushover'
+).keys({
+  token: Joi.string().required().label('Pushover token'),
+  user: Joi.string().required().label('Pushover user'),
+})

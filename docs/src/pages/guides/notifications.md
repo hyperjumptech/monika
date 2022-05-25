@@ -24,6 +24,7 @@ At this moment, Monika support these channel of notifications (You can use just 
 13. [Telegram](https://hyperjumptech.github.io/monika/guides/notifications#telegram)
 14. [Webhook](https://hyperjumptech.github.io/monika/guides/notifications#webhook)
 15. [WhatsApp Business](https://hyperjumptech.github.io/monika/guides/notifications#whatsapp)
+16. [Pushover](https://hyperjumptech.github.io/monika/guides/notifications#pushover)
 
 ## Configurations
 
@@ -392,3 +393,20 @@ Monika supports Whatsapp notification. To enable notification via whatsapp, you 
 | Url          | The URL of your whatsapp api server                                                       | `https://yourwhatsappapiserver.com` |
 | Username     | Your whatsapp api user name                                                               | `username`                          |
 | Userpassword | Your whatsapp api user password                                                           | `userpassword`                      |
+
+## Pushover
+
+Monika supports Pushover. To enable notification via Pushover, you must create a pushover application first. More info at [Pushover documentation](https://pushover.net/api).
+
+```yml
+  -id: unique-id-webhook,
+    type: pushover,
+    data:
+      token: "pushover-token"
+      user: "pushover-user"
+```
+
+| Key   | Description                | Example                    |
+| ----- | -------------------------- | -------------------------- |
+| Token | Pushover application token | `pushoverApplicationToken` |
+| User  | Pushover user key          | `pushoverUserKey`          |

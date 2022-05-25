@@ -70,6 +70,7 @@ export const updateConfig = (config: Config, validate = true): void => {
   log.info('Updating config')
   if (validate) {
     const validated = validateConfig(config)
+
     if (!validated.valid) {
       throw new Error(validated.message)
     }
