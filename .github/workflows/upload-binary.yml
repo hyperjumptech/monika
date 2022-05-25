@@ -133,14 +133,14 @@ jobs:
         run: cat ./chocolatey/tools/chocolateyinstall.ps1
 
       - run: echo ${{ steps.get_version.outputs.VERSION }} | sed 's/^.//' > version_number.txt
-        name: Write version number without preftix
+        name: Write version number without prefix
         if: runner.os == 'Windows'
 
       - name: See version_number.txt content
         if: runner.os == 'Windows'
         run: cat version_number.txt
 
-      - name: Read version number without preftix
+      - name: Read version number without prefix
         if: runner.os == 'Windows'
         id: read_version
         uses: juliangruber/read-file-action@v1
