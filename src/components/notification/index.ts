@@ -47,6 +47,7 @@ import { sendWorkplace } from './channel/workplace'
 import { sendLark } from './channel/lark'
 import { sendGoogleChat } from './channel/googlechat'
 import { newPagerDuty } from './channel/pagerduty'
+import { sendPushover } from './channel/pushover'
 
 export class NotificationSendingError extends Error {
   notificationType: string
@@ -145,6 +146,11 @@ export async function sendNotifications(
 
           case 'telegram': {
             await sendTelegram(notification.data, message)
+            break
+          }
+
+          case 'pushover': {
+            await sendPushover(notification.data, message)
             break
           }
 

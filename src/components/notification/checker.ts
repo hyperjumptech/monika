@@ -42,6 +42,7 @@ import {
   dataWorkplaceSchemaValidator,
   dataLarkSchemaValidator,
   dataGoogleChatSchemaValidator,
+  dataPushoverSchemaValidator,
 } from './validator'
 
 // reexported with alias because this `errorMessage` function is used in test file
@@ -68,6 +69,7 @@ export const notificationChecker = async (
     lark: dataLarkSchemaValidator,
     'google-chat': dataGoogleChatSchemaValidator,
     pagerduty: pagerduty.validator,
+    pushover: dataPushoverSchemaValidator,
   }
 
   await Promise.all(

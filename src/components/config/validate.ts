@@ -104,6 +104,10 @@ const MONIKA_NOTIF_NO_URL = setInvalidResponse(
 // Webhook
 const WEBHOOK_NO_URL = setInvalidResponse('URL not found')
 
+// Pushover
+const PUSHOVER_NO_TOKEN = setInvalidResponse('TOKEN not found')
+const PUSHOVER_NO_USER = setInvalidResponse('USER not found')
+
 // Discord
 const DISCORD_NO_URL = setInvalidResponse('Discord URL not found')
 
@@ -243,6 +247,12 @@ function validateNotification(notifications: Notification[]): Validation {
           return setInvalidResponse(error)
         }
 
+        break
+      }
+
+      case 'pushover': {
+        if (!notification.data.token) return PUSHOVER_NO_TOKEN
+        if (!notification.data.user) return PUSHOVER_NO_USER
         break
       }
 

@@ -25,6 +25,7 @@ At this moment, Monika support these channel of notifications (You can use just 
 14. [Webhook](https://hyperjumptech.github.io/monika/guides/notifications#webhook)
 15. [WhatsApp Business](https://hyperjumptech.github.io/monika/guides/notifications#whatsapp)
 16. [Dingtalk](https://hyperjumptech.github.io/monika/guides/notifications#dingtalk)
+17. [Pushover](https://hyperjumptech.github.io/monika/guides/notifications#pushover)
 
 ## Configurations
 
@@ -408,3 +409,20 @@ data:
 | Key          | Description                        | Example        |
 | ------------ | ---------------------------------- | -------------- |
 | Access Token | The token of your Dingtalk account | `Dingtalk1234` |
+
+## Pushover
+
+Monika supports Pushover. To enable notification via Pushover, you must create a pushover application first. More info at [Pushover documentation](https://pushover.net/api).
+
+```yml
+  -id: unique-id-webhook,
+    type: pushover,
+    data:
+      token: "pushover-token"
+      user: "pushover-user"
+```
+
+| Key   | Description                | Example                    |
+| ----- | -------------------------- | -------------------------- |
+| Token | Pushover application token | `pushoverApplicationToken` |
+| User  | Pushover user key          | `pushoverUserKey`          |
