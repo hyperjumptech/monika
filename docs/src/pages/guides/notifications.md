@@ -396,7 +396,7 @@ Monika supports Whatsapp notification. To enable notification via whatsapp, you 
 
 ## Pushover
 
-Monika supports Pushover. To enable notification via Pushover, you must create a pushover application first. More info at [Pushover documentation](https://pushover.net/api)
+Monika supports Pushover. To enable notification via Pushover, you must create a pushover application first. More info at [Pushover documentation](https://pushover.net/api).
 
 ```yml
   -id: unique-id-webhook,
