@@ -42,6 +42,11 @@ export const sendDingtalk = async (
         content = `New ${notificationType} event from Monika\n\n${message.body}`
         break
       }
+      case 'status-update': {
+        content = message.body.replace('<a href=', '[Tweet this status!](')
+        content = content.replace('Tweet this status!</a>', ')')
+        break
+      }
       default:
         content = message.body
         break
@@ -54,9 +59,10 @@ export const sendDingtalk = async (
         'Content-Type': 'application/json',
       },
       data: {
-        msgtype: 'text',
-        text: {
-          content: content,
+        msgtype: 'markdown',
+        markdown: {
+          title: message.meta.type,
+          text: content,
         },
       },
     })
