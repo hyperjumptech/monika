@@ -1,3 +1,27 @@
+/**********************************************************************************
+ * MIT License                                                                    *
+ *                                                                                *
+ * Copyright (c) 2021 Hyperjump Technology                                        *
+ *                                                                                *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy   *
+ * of this software and associated documentation files (the "Software"), to deal  *
+ * in the Software without restriction, including without limitation the rights   *
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell      *
+ * copies of the Software, and to permit persons to whom the Software is          *
+ * furnished to do so, subject to the following conditions:                       *
+ *                                                                                *
+ * The above copyright notice and this permission notice shall be included in all *
+ * copies or substantial portions of the Software.                                *
+ *                                                                                *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR     *
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,       *
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE    *
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER         *
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,  *
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  *
+ * SOFTWARE.                                                                      *
+ **********************************************************************************/
+
 import React, { createElement, Fragment, useEffect, useRef } from 'react'
 import { render } from 'react-dom'
 import { siteConfig } from 'siteConfig'
@@ -48,7 +72,7 @@ export const SearchBox = (props) => {
               )
             },
           },
-          getItems({}) {
+          getItems() {
             const pattern = getQueryPattern(query)
             return [pattern].filter(({ label }) => pattern.test(label))
           },
@@ -64,17 +88,15 @@ export const SearchBox = (props) => {
           templates: {
             item({ item, components }) {
               return (
-                <a href={item.url}>
-                  <divc className="py-px">
-                    <div className="font-bold text-sm m-1">
-                      {item.data.title}
-                    </div>
-                    <div className="text-sm m-1 justify-center items-cente">
-                      <components.Highlight hit={item} attribute="data.title" />
-                      <components.Snippet hit={item} attribute="content" />
-                    </div>
-                  </divc>
-                </a>
+                // <a href={item.url}>
+                <divc className="py-px">
+                  <div className="font-bold text-sm m-1">{item.title}</div>
+                  <div className="text-sm m-1 justify-center items-cente">
+                    <components.Highlight hit={item} attribute="title" />
+                    <components.Snippet hit={item} attribute="content" />
+                  </div>
+                </divc>
+                // </a>
               )
             },
             noResults() {
@@ -92,7 +114,7 @@ export const SearchBox = (props) => {
                   indexName: options.indexName,
                   query,
                   params: {
-                    attributesToSnippet: ['data.title:10', 'content:20'],
+                    attributesToSnippet: ['title:25', 'content:25'],
                     snippetEllipsisText: '…',
                   },
                 },
