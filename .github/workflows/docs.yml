@@ -4,6 +4,8 @@ on:
   workflow_dispatch:
   release:
     types: [created]
+  schedule:
+    - cron: "0 */12 * * *" # Every 12 AM/PM every day
   
 jobs:
   build-and-deploy:
