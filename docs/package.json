@@ -8,7 +8,8 @@
     "dev": "next",
     "build": "next build && next export",
     "start": "next start",
-    "index-docs": "node ./.next/serverless/scripts/index-docs.js"
+    "index-docs": "node ./.next/serverless/scripts/index-docs.js",
+    "buildsearch": "node ./src/pages/build-search.js"
   },
   "dependencies": {
     "@algolia/autocomplete-js": "^1.6.3",
@@ -48,6 +49,7 @@
     "next-images": "^1.5.0",
     "next-optimized-images": "^2.6.2",
     "node-fetch": "^2.6.1",
+    "path": "^0.12.7",
     "prismjs": "^1.21.0",
     "react": "^16.14.0",
     "react-cookie-consent": "^6.2.4",
