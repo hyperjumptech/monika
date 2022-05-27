@@ -11,6 +11,8 @@
     "index-docs": "node ./.next/serverless/scripts/index-docs.js"
   },
   "dependencies": {
+    "@algolia/autocomplete-js": "^1.6.3",
+    "@algolia/autocomplete-theme-classic": "^1.6.3",
     "@babel/preset-typescript": "^7.10.4",
     "@docsearch/react": "1.0.0-alpha.14",
     "@fortawesome/fontawesome-svg-core": "^1.2.34",
