@@ -27,6 +27,7 @@ import { siteConfig } from 'siteConfig'
 import ButtonLink from 'components/ButtonLink'
 import MonikaSvg from '../../public/monika.svg'
 import { useState } from 'react'
+import { SearchBox } from './SearchBox'
 
 export default function NavBar() {
   const [navbarOpen, setNavbarOpen] = useState(false)
@@ -70,6 +71,9 @@ export default function NavBar() {
           }
         >
           <ul className="flex flex-col lg:flex-row list-none lg:ml-auto">
+            <li className="nav-item">
+              <SearchBox />
+            </li>
             <li className="nav-item">
               <a
                 className="px-3 py-2 flex items-center text-white font-sans font-bold leading-snug hover:opacity-75"
