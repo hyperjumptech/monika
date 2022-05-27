@@ -89,13 +89,13 @@ export const SearchBox = (props) => {
             item({ item, components }) {
               return (
                 // <a href={item.url}>
-                <divc className="py-px">
+                <div className="py-px">
                   <div className="font-bold text-sm m-1">{item.title}</div>
                   <div className="text-sm m-1 justify-center items-cente">
                     <components.Highlight hit={item} attribute="title" />
                     <components.Snippet hit={item} attribute="content" />
                   </div>
-                </divc>
+                </div>
                 // </a>
               )
             },
