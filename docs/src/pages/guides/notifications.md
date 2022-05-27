@@ -426,3 +426,18 @@ Monika supports Pushover. To enable notification via Pushover, you must create a
 | ----- | -------------------------- | -------------------------- |
 | Token | Pushover application token | `pushoverApplicationToken` |
 | User  | Pushover user key          | `pushoverUserKey`          |
+
+## Opsgenie
+
+Monika supports Opsgenie. To enable notification via Opsgenie, you must create teams, under team create integration, add API. More info at [Opsgenie documentation](https://community.atlassian.com/t5/Opsgenie-questions/API-authentication-for-create-alerts/qaq-p/1477556).
+
+```yml
+  -id: unique-id-opsgenie,
+    type: opsgenie,
+    data:
+      geniekey: 'genie-key'
+```
+
+| Key      | Description                | Example                    |
+| -------- | -------------------------- | -------------------------- |
+| Geniekey | Opsgenie application token | `opsgenieApplicationToken` |

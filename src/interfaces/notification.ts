@@ -38,6 +38,7 @@ import {
   SlackData,
   GoogleChatData,
   PushoverData,
+  OpsgenieData,
 } from './data'
 
 export type Notification =
@@ -58,6 +59,7 @@ export type Notification =
   | GoogleChatNotification
   | PagerDutyNotification
   | PushoverNotification
+  | OpsgenieNotification
 interface BaseNotification {
   id: string
 }
@@ -132,6 +134,11 @@ interface LarkNotification extends BaseNotification {
 interface DingtalkNotification extends BaseNotification {
   type: 'dingtalk'
   data: DingtalkData
+}
+
+interface OpsgenieNotification extends BaseNotification {
+  type: 'opsgenie'
+  data: OpsgenieData
 }
 
 interface GoogleChatNotification extends BaseNotification {

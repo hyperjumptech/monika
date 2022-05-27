@@ -116,6 +116,9 @@ const DINGTALK_NO_ACCESS_TOKEN = setInvalidResponse(
   'Dingtalk Access Token not found'
 )
 
+// Opsgenie
+const OPSGENIE_NO_GENIE_KEY = setInvalidResponse('Opsgenie Geniekey not found')
+
 // Whatsapp
 const WHATSAPP_NO_URL = setInvalidResponse('Whatsapp URL not found')
 const WHATSAPP_NO_USERNAME = setInvalidResponse('Whatsapp Username not found')
@@ -238,6 +241,11 @@ function validateNotification(notifications: Notification[]): Validation {
 
       case 'dingtalk': {
         if (!notification.data.access_token) return DINGTALK_NO_ACCESS_TOKEN
+        break
+      }
+
+      case 'opsgenie': {
+        if (!notification.data.geniekey) return OPSGENIE_NO_GENIE_KEY
         break
       }
 
