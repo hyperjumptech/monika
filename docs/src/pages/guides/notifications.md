@@ -26,6 +26,7 @@ At this moment, Monika support these channel of notifications (You can use just 
 15. [WhatsApp Business](https://hyperjumptech.github.io/monika/guides/notifications#whatsapp)
 16. [Dingtalk](https://hyperjumptech.github.io/monika/guides/notifications#dingtalk)
 17. [Pushover](https://hyperjumptech.github.io/monika/guides/notifications#pushover)
+18. [Opsgenie](https://hyperjumptech.github.io/monika/guides/notifications#opsgenie)
 
 ## Configurations
 
