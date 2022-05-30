@@ -178,6 +178,11 @@ probes:
 #     data:
 #       token: "app-token => please register app on pushover first"
 #       user: "user-token"
+#   - id: random-string-opsgenie
+#     type: opsgenie
+#     data:
+#       geniekey: "genie-key"
+
 # limit log database size in bytes
 db_limit:
   max_db_size: 1000000000

@@ -26,6 +26,7 @@ At this moment, Monika support these channel of notifications (You can use just 
 15. [WhatsApp Business](https://hyperjumptech.github.io/monika/guides/notifications#whatsapp)
 16. [Dingtalk](https://hyperjumptech.github.io/monika/guides/notifications#dingtalk)
 17. [Pushover](https://hyperjumptech.github.io/monika/guides/notifications#pushover)
+18. [Opsgenie](https://hyperjumptech.github.io/monika/guides/notifications#opsgenie)
 
 ## Configurations
 
@@ -426,3 +427,18 @@ Monika supports Pushover. To enable notification via Pushover, you must create a
 | ----- | -------------------------- | -------------------------- |
 | Token | Pushover application token | `pushoverApplicationToken` |
 | User  | Pushover user key          | `pushoverUserKey`          |
+
+## Opsgenie
+
+Monika supports Opsgenie. To enable notification via Opsgenie, you must create a team, then create an integration, and finally add API. More info at [Opsgenie documentation](https://support.atlassian.com/opsgenie/docs/create-a-default-api-integration/#%E2%80%8BUsing-API-Integration).
+
+```yml
+  -id: unique-id-opsgenie,
+    type: opsgenie,
+    data:
+      geniekey: 'genie-key'
+```
+
+| Key      | Description                | Example                    |
+| -------- | -------------------------- | -------------------------- |
+| Geniekey | Opsgenie application token | `opsgenieApplicationToken` |
