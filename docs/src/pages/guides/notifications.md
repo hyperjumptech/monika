@@ -430,7 +430,7 @@ Monika supports Pushover. To enable notification via Pushover, you must create a
 
 ## Opsgenie
 
-Monika supports Opsgenie. To enable notification via Opsgenie, you must create teams, under team create integration, add API. More info at [Opsgenie documentation](https://community.atlassian.com/t5/Opsgenie-questions/API-authentication-for-create-alerts/qaq-p/1477556).
+Monika supports Opsgenie. To enable notification via Opsgenie, you must create a team, then create an integration, and finally add API. More info at [Opsgenie documentation](https://support.atlassian.com/opsgenie/docs/create-a-default-api-integration/#%E2%80%8BUsing-API-Integration).
 
 ```yml
   -id: unique-id-opsgenie,
