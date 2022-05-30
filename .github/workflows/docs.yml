@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   release:
     types: [created]
-  
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -38,13 +38,11 @@ jobs:
           folder: docs/out # The folder the action should deploy.
           clean: true # Automatically remove deleted files from the deploy branch
 
-      - name: Algolia
-        uses: wangchucheng/algolia-uploader@master
-        with:
-          app_id: ${{secrets.ALGOLIA_APPLICATION_ID}}# You can store token in your project's 'Setting > Secrets' and reference the name here. Such as ${{ secrets.ALGOLIA_ADMIN_KEY }}
-          admin_key: ${{secrets.ALGOLIA_SEARCH_API_KEY}}
-          # The index name. 
-          index_name: ${{secrets.ALGOLIA_INDEX_NAME}}
-          # The index file path relative to repo root.
-          index_file_path: ${{secrets.ALGOLIA_INDEX_FILE_PATH}}
-          
+      - name: Generate and Save Algolia Object
+        uses: actions/setup-node@v2
+      - run: yarn
+      - run: yarn run buildsearch
+        env:
+          CI: true
+          ALGOLIA_APPLICATION_ID: ${{secrets.ALGOLIA_APPLICATION_ID}}
+          ALGOLIA_ADMIN_API_KEY: ${{secrets.ALGOLIA_ADMIN_API_KEY}}
