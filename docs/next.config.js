@@ -67,6 +67,11 @@ module.exports = optimizedImages({
     NEXT_PUBLIC_GA_TRACKING_ID: process.env.GA_TRACKING_ID || '',
     SENTRY_RELEASE: process.env.VERCEL_GITHUB_COMMIT_SHA || '',
   },
+  eslint: {
+    // Warning: This allows production builds to successfully complete even if
+    // your project has ESLint errors.
+    ignoreDuringBuilds: true,
+  },
   async redirects() {
     return [
       {

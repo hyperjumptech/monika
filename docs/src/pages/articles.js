@@ -65,16 +65,8 @@ export default function ArticlesPage({ articles }) {
   )
 }
 
-// This function gets called at build time on server-side.
-// It may be called again, on a serverless function, if
-// revalidation is enabled and a new request comes in
-export async function getServerSideProps({ res }) {
+export async function getStaticProps() {
   try {
-    res.setHeader(
-      'Cache-Control',
-      'public, s-maxage=10, stale-while-revalidate=59'
-    )
-
     const { data } = await axios({
       method: 'GET',
       url: 'https://medium.com/feed/hyperjump-tech',
