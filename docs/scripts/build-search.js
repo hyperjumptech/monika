@@ -29,14 +29,11 @@ const path = require('path')
 
 const options = {
   indexName: 'monika-documentation',
-  appId: process.env.ALGOLIA_APPLICATION_ID || '',
-  adminAPIKey: process.env.ALGOLIA_ADMIN_API_KEY || '',
+  appId: process.env.ALGOLIA_APPLICATION_ID || '5O2YZGK4NG',
+  adminAPIKey:
+    process.env.ALGOLIA_ADMIN_API_KEY || '45f684bf6230e7980f10b4a9209fce83',
 }
-const file =
-  ('./src/pages/tutorial',
-  './src/pages/deployment',
-  './src/pages',
-  './src/pages/guides')
+const file = './src/pages'
 
 main()
 
@@ -44,20 +41,55 @@ async function main() {
   try {
     validateKey(options)
 
-    const articles = await getAllBlogPosts()
-    const algoliaObjects = transformPostsToSearchObjects(articles)
-    const algoliaResponse = await saveObjectToAlgolia(
-      options.indexName,
-      algoliaObjects
-    )
+    const newFile = [
+      file,
+      `${file}/deployment`,
+      `${file}/guides`,
+      `${file}/tutorial`,
+    ]
 
-    console.log(
-      `Successfully added ${
-        algoliaResponse.objectIDs.length
-      } records to Algolia search! Object IDs:\n${algoliaResponse.objectIDs.join(
-        '\n'
-      )}`
-    )
+    // eslint-disable-next-line guard-for-in
+    for (let i in newFile) {
+      const CONTENT_PATH = path.join(process.cwd(), newFile[i])
+      const contentFilePaths = fs
+        .readdirSync(CONTENT_PATH)
+        // Only include md files
+        .filter((path) => /\.md?$/.test(path))
+
+      const articles = contentFilePaths.map((filePath) => {
+        const source = fs.readFileSync(path.join(CONTENT_PATH, filePath))
+        const { content, data } = matter(source)
+        return {
+          content, // this is the .md content
+          data, // this is the frontmatter
+          filePath, // this is the file path
+        }
+      })
+
+      const transformPostsToSearchObjects = articles.map((article) => {
+        return {
+          objectID: article.data.id,
+          title: article.data.title,
+          content: article.content,
+          slug: article.filePath,
+          type: 'article',
+        }
+      })
+
+      // eslint-disable-next-line no-await-in-loop
+      const algoliaResponse = await saveObjectToAlgolia(
+        options.indexName,
+        transformPostsToSearchObjects
+      )
+
+      console.log(
+        `Successfully added ${
+          algoliaResponse.objectIDs.length
+        } records to Algolia search! Object IDs:\n${algoliaResponse.objectIDs.join(
+          '\n'
+        )}`
+      )
+    }
   } catch (error) {
     console.error(error)
   }
@@ -75,37 +107,6 @@ function validateKey(options) {
   if (!options.adminAPIKey) {
     throw new Error('ALGOLIA_SEARCH_API_KEY is not defined')
   }
-}
-
-async function getAllBlogPosts() {
-  const CONTENT_PATH = path.join(process.cwd(), file)
-  const contentFilePaths = fs
-    .readdirSync(CONTENT_PATH)
-    // Only include md files
-    .filter((path) => /\.md?$/.test(path))
-  const articles = contentFilePaths.map((filePath) => {
-    const source = fs.readFileSync(path.join(CONTENT_PATH, filePath))
-    const { content, data } = matter(source)
-    return {
-      content, // this is the .md content
-      data, // this is the frontmatter
-      filePath, // this is the file path
-    }
-  })
-  return articles
-}
-
-function transformPostsToSearchObjects(articles) {
-  const transformed = articles.map((article) => {
-    return {
-      objectID: article.data.id,
-      title: article.data.title,
-      content: article.content,
-      slug: article.filePath,
-      type: 'article',
-    }
-  })
-  return transformed
 }
 
 async function saveObjectToAlgolia(indexName, algoliaObject) {

@@ -5,9 +5,9 @@ export const siteConfig = {
   npmUrl: 'https://www.npmjs.com/package/@hyperjumptech/monika',
   repoUrl: 'https://github.com/hyperjumptech/monika',
   algolia: {
-    appId: process.env.ALGOLIA_APPLICATION_ID || '',
-    apiKey: process.env.ALGOLIA_SEARCH_API_KEY || '',
-    indexName: process.env.ALGOLIA_INDEX_NAME || '',
+    appId: process.env.NEXT_PUBLIC_ALGOLIA_APPLICATION_ID || '',
+    apiKey: process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY || '',
+    indexName: 'monika-documentation',
     // algoliaOptions: {
     //   facetFilters: ['version:VERSION'],
     // },
