@@ -9,7 +9,7 @@
     "build": "next build && next export",
     "start": "next start",
     "index-docs": "node ./.next/serverless/scripts/index-docs.js",
-    "buildsearch": "node ./src/pages/build-search.js"
+    "buildsearch": "node ./scripts/build-search.js"
   },
   "dependencies": {
     "@algolia/autocomplete-js": "^1.6.3",
