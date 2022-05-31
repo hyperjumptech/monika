@@ -5,7 +5,7 @@ on:
   release:
     types: [created]
   schedule:
-    - cron: "0 */12 * * *" # Every 12 AM/PM every day
+    - cron: "0 9 * * 3" # Every 9AM on Wednesday
   
 jobs:
   build-and-deploy:
