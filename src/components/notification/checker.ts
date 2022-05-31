@@ -31,6 +31,7 @@ import { newPagerDuty } from './channel/pagerduty'
 import {
   dataDiscordSchemaValidator,
   dataDingtalkSchemaValidator,
+  dataOpsgenieSchemaValidator,
   dataMailgunSchemaValidator,
   dataMonikaNotifSchemaValidator,
   dataSendgridSchemaValidator,
@@ -56,6 +57,7 @@ export const notificationChecker = async (
     desktop: null,
     discord: dataDiscordSchemaValidator,
     dingtalk: dataDingtalkSchemaValidator,
+    opsgenie: dataOpsgenieSchemaValidator,
     mailgun: dataMailgunSchemaValidator,
     'monika-notif': dataMonikaNotifSchemaValidator,
     sendgrid: dataSendgridSchemaValidator,

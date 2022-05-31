@@ -62,6 +62,11 @@ export interface DingtalkData {
   body: string
 }
 
+export interface OpsgenieData {
+  geniekey: string
+  body: string
+}
+
 export interface MonikaNotifData {
   url: string
   body: MonikaNotifDataBody

@@ -104,6 +104,12 @@ export const dataDingtalkSchemaValidator = dataBaseEmailSchemaValidator(
   access_token: Joi.string().required().label('Dingtalk access token'),
 })
 
+export const dataOpsgenieSchemaValidator = dataBaseEmailSchemaValidator(
+  'Opsgenie'
+).keys({
+  geniekey: Joi.string().required().label('Opsgenie geniekey'),
+})
+
 export const dataMonikaNotifSchemaValidator = dataBaseEmailSchemaValidator(
   'MonikaNotif'
 ).keys({
