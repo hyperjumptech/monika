@@ -98,6 +98,12 @@ export const dataDiscordSchemaValidator = dataBaseEmailSchemaValidator(
   url: Joi.string().uri().required().label('Discord URL'),
 })
 
+export const dataDingtalkSchemaValidator = dataBaseEmailSchemaValidator(
+  'Discord'
+).keys({
+  access_token: Joi.string().required().label('Dingtalk access token'),
+})
+
 export const dataMonikaNotifSchemaValidator = dataBaseEmailSchemaValidator(
   'MonikaNotif'
 ).keys({
@@ -121,4 +127,11 @@ export const dataGoogleChatSchemaValidator = dataBaseEmailSchemaValidator(
   'google-chat'
 ).keys({
   url: Joi.string().uri().required().label('Google URL'),
+})
+
+export const dataPushoverSchemaValidator = dataBaseEmailSchemaValidator(
+  'pushover'
+).keys({
+  token: Joi.string().required().label('Pushover token'),
+  user: Joi.string().required().label('Pushover user'),
 })
