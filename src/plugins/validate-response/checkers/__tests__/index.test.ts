@@ -28,12 +28,14 @@ import { ProbeRequestResponse } from '../../../../interfaces/request'
 
 describe('responseChecker', () => {
   describe('status-not-2xx', () => {
+    /* eslint-disable unicorn/consistent-function-scoping */
     const generateMockedResponse = (status: number) => {
       return {
         status,
         headers: {},
       } as ProbeRequestResponse
     }
+    /* eslint-enable */
 
     it('should handle when response status is 100', () => {
       const res = generateMockedResponse(100)
@@ -115,6 +117,7 @@ describe('responseChecker', () => {
   })
 
   describe('res-time-greater-than-x', () => {
+    /* eslint-disable unicorn/consistent-function-scoping */
     const generateMockedResponse = (responseTime: number) => {
       return {
         data: '',
@@ -123,6 +126,7 @@ describe('responseChecker', () => {
         headers: {},
       }
     }
+    /* eslint-enable */
 
     it('seconds - should handle when response time is greater than alert defined response time', () => {
       const res = generateMockedResponse(20_000)

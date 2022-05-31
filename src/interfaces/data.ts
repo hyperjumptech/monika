@@ -57,26 +57,31 @@ export interface WebhookData {
   body: string
 }
 
+/* eslint-disable camelcase */
 export interface DingtalkData {
   access_token: string
   body: string
 }
+/* eslint-enable */
 
 export interface OpsgenieData {
   geniekey: string
   body: string
 }
 
+/* eslint-disable no-use-before-define */
 export interface MonikaNotifData {
   url: string
   body: MonikaNotifDataBody
 }
+/* eslint-enable */
 
+/* eslint-disable no-use-before-define */
 export type MonikaNotifDataBody =
   | MonikaAlertNotifDataBody
   | MonikaStartAndTerminationNotifDataBody
   | MonikaStatusUpdateNotifDataBody
-
+/* eslint-enable */
 interface MonikaAlertNotifDataBody {
   type: 'incident' | 'recovery'
   alert: string
@@ -85,10 +90,12 @@ interface MonikaAlertNotifDataBody {
   monika: string
 }
 
+/* eslint-disable camelcase */
 interface MonikaStartAndTerminationNotifDataBody {
   type: 'start' | 'termination'
   ip_address: string
 }
+/* eslint-enable */
 
 interface MonikaStatusUpdateNotifDataBody {
   type: 'status-update'
@@ -103,6 +110,7 @@ interface MonikaStatusUpdateNotifDataBody {
   numberOfSentNotifications: string
 }
 
+/* eslint-disable camelcase */
 export interface TelegramData {
   group_id: string
   bot_token: string
@@ -146,3 +154,4 @@ export interface DBLimit {
 export interface GoogleChatData {
   url: string
 }
+/* eslint-enable */

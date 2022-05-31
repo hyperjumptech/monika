@@ -34,6 +34,7 @@ import { compileExpression } from '../../utils/expression-parser'
 import type { SymonConfig } from '../reporter'
 import { newPagerDuty } from '../notification/channel/pagerduty'
 
+// eslint-disable-next-line unicorn/prefer-set-has
 const HTTPMethods = [
   'DELETE',
   'GET',
@@ -304,11 +305,13 @@ export const validateConfig = (configuration: Config): Validation => {
   }
 
   // Validate probes
+  // eslint-disable-next-line unicorn/consistent-destructuring
   if ((configuration?.probes?.length ?? 0) === 0) return NO_PROBES
 
   // Check probes properties
   for (const probe of probes) {
     const { alerts = [], requests, socket } = probe
+    // eslint-disable-next-line unicorn/consistent-destructuring
     const socketAlerts = probe.socket?.alerts ?? []
     const tcpConfigError = validateTCPConfig(socket)
 

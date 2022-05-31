@@ -23,8 +23,8 @@
  **********************************************************************************/
 
 import { createHash } from 'crypto'
-
-export const md5Hash = (data: string | object): string => {
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export const md5Hash = (data: any): string => {
   const str = typeof data === 'string' ? data : JSON.stringify(data)
   return createHash('md5').update(str).digest('hex')
 }

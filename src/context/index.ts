@@ -22,6 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+/* eslint-disable no-use-before-define */
 type Context = {
   // userAgent example: @hyperjumptech/monika/1.2.3 linux-x64 node-14.17.0
   userAgent: string
@@ -32,6 +33,7 @@ type NewContext = {
   userAgent?: string
   incidents?: Incident[]
 }
+/* eslint-enable */
 
 type Incident = {
   probeID: string
@@ -50,10 +52,10 @@ export function getContext(): Context {
   return context
 }
 
-export function setContext(newContext: NewContext) {
+export function setContext(newContext: NewContext): void {
   context = { ...context, ...newContext }
 }
 
-export function resetContext() {
+export function resetContext(): void {
   context = initialContext
 }

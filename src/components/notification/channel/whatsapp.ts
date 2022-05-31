@@ -47,7 +47,7 @@ export const loginUser = async (data: WhatsappData): Promise<any> => {
     const loginResp: LoginUserSuccessResponse = resp?.data
 
     if (loginResp.users?.length > 0) return loginResp.users[0].token
-  } catch (error) {
+  } catch {
     log('Something wrong with your whatsapp config please check again.')
   }
 }
@@ -62,11 +62,11 @@ export const sendTextMessage = async ({
   message: string
   token: string
   baseUrl: string
-}) => {
+}): Promise<any> => {
   try {
     const auth = authorize('bearer', token)
     const url = `${baseUrl}/v1/messages`
-
+    /* eslint-disable camelcase */
     return axios.request({
       method: 'POST',
       url: url,
@@ -83,7 +83,8 @@ export const sendTextMessage = async ({
         },
       },
     })
-  } catch (error) {
+    /* eslint-enable */
+  } catch {
     log(
       'Something wrong with your recipient no, Please check your country code: ',
       recipient

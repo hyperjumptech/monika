@@ -41,6 +41,7 @@ import {
   OpsgenieData,
 } from './data'
 
+/* eslint-disable no-use-before-define */
 export type Notification =
   | SMTPNotification
   | MailgunNotification
@@ -60,6 +61,8 @@ export type Notification =
   | PagerDutyNotification
   | PushoverNotification
   | OpsgenieNotification
+
+/* eslint-enable */
 interface BaseNotification {
   id: string
 }
@@ -151,6 +154,7 @@ interface PushoverNotification extends BaseNotification {
   data: PushoverData
 }
 
+/* eslint-disable no-use-before-define */
 export interface NotificationMessage {
   subject: string
   body: string
@@ -160,6 +164,7 @@ export interface NotificationMessage {
     | NotificationStartTerminationMessageMeta
     | NotificationStatusUpdateMessageMeta
 }
+/* eslint-enable */
 
 interface BaseNotificationMessageMeta {
   type: string

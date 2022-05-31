@@ -28,7 +28,7 @@ export const isValidURL = (data: string): boolean => {
   try {
     const url = new URL(data)
     return url.protocol === 'http:' || url.protocol === 'https:'
-  } catch (_) {
+  } catch {
     return false
   }
 }

@@ -178,7 +178,6 @@ function loopProbe(
  * @param {boolean} verboseLogs store all requests to database
  * @returns {function} abort function
  */
-// eslint-disable-next-line max-params
 export function idFeeder(
   sanitizedProbes: Probe[],
   notifications: Notification[],
@@ -195,11 +194,13 @@ export function idFeeder(
     intervals.push(interval)
   }
 
+  /* eslint-disable unicorn/consistent-function-scoping */
   const abort = () => {
     for (const i of intervals) {
       clearInterval(i)
     }
   }
+  /* eslint-enable */
 
   return abort
 }

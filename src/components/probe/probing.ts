@@ -31,8 +31,8 @@ import * as qs from 'querystring'
 import { sendPing, PING_TIMEDOUT } from '../../utils/ping'
 
 /**
- * probing() is the heart of monika requests generation
- * @param requestConfig
+ * probing is the heart of monika requests generation
+ * @param requestConfig config
  * @param responses an array of previous responses
  * @returns ProbeRequestResponse, response to the probe request
  */

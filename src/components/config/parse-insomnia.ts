@@ -95,12 +95,14 @@ function mapInsomniaToConfig(data: InsomniaResource[]): Config {
       // skip binary upload requests
       body?.mimeType !== 'application/octet-stream'
   )
+  // eslint-disable-next-line unicorn/no-array-callback-reference
   const probes = insomniaRequests.map<Probe>(mapInsomniaRequestToConfig)
 
   return { probes }
 }
 
 function mapInsomniaRequestToConfig(res: InsomniaResource): Probe {
+  // eslint-disable-next-line camelcase
   const url = compile(res.url)({ base_url: baseUrl })
   const authorization = getAuthorizationHeader(res)
   let headers: { [key: string]: string | undefined } | undefined

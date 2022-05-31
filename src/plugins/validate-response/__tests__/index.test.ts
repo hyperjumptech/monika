@@ -35,6 +35,7 @@ describe('validateResponse', () => {
     { query: 'response.time > 10', message: '' },
   ]
 
+  /* eslint-disable unicorn/consistent-function-scoping */
   const generateMockedResponse = (
     status: number,
     responseTime: number
@@ -46,6 +47,7 @@ describe('validateResponse', () => {
       headers: {},
     }
   }
+  /* eslint-enable */
 
   it('status-not-2xx = true && response-time-greater-than-10-ms = true', () => {
     const res = generateMockedResponse(300, 20)

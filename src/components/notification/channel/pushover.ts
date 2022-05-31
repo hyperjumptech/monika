@@ -30,10 +30,10 @@ import { NotificationMessage } from '../../../interfaces/notification'
 export const sendPushover = async (
   data: PushoverData,
   message: NotificationMessage
-) => {
+): Promise<any> => {
   try {
     const notificationType =
-      message.meta.type[0].toUpperCase() + message.meta.type.substring(1)
+      message.meta.type[0].toUpperCase() + message.meta.type.slice(1)
 
     let content
     switch (message.meta.type) {
@@ -42,6 +42,7 @@ export const sendPushover = async (
         content = `New ${notificationType} event from Monika\n\n${message.body}`
         break
       }
+
       default:
         content = message.body
         break
@@ -63,6 +64,7 @@ export const sendPushover = async (
 
     return res
   } catch (error) {
+    console.log(error)
     throw error
   }
 }

@@ -28,6 +28,7 @@ import { log } from '../../utils/pino'
 
 export const DEFAULT_CONFIG_FILENAME = 'monika.yml'
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const createConfigFile = async (flags: any): Promise<string> => {
   const filename: string = flags['config-filename'] || DEFAULT_CONFIG_FILENAME
   try {
@@ -39,13 +40,13 @@ export const createConfigFile = async (flags: any): Promise<string> => {
     log.info(
       `${filename} file has been created in this directory. You can change the URL to probe and other configurations in that ${filename} file.`
     )
-  } catch (error) {
+  } catch (error: any) {
     const ymlConfig = `
     probes:
     - id: '1'
       requests:
         - url: http://github.com
-    
+
     db_limit:
       max_db_size: 1000000000
       deleted_data: 1
@@ -53,6 +54,7 @@ export const createConfigFile = async (flags: any): Promise<string> => {
     `
 
     fs.writeFileSync(filename, ymlConfig, 'utf-8')
+    log.warn('createConfigFile : ', { error })
   }
 
   return filename

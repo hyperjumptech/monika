@@ -23,6 +23,7 @@
  **********************************************************************************/
 
 import { expect, test } from '@oclif/test'
+// eslint-disable-next-line unicorn/import-style
 import { resolve } from 'path'
 import chai from 'chai'
 import spies from 'chai-spies'

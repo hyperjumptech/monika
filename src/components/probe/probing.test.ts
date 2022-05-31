@@ -1,4 +1,3 @@
-/* eslint-disable max-depth */
 /**********************************************************************************
  * MIT License                                                                    *
  *                                                                                *
@@ -91,6 +90,7 @@ describe('Probing', () => {
       const results: any = []
       for (let i = 0; i < 2; i++) {
         const responses: any = []
+        // eslint-disable-next-line unicorn/no-for-loop
         for (let j = 0; j < requests.length; j++) {
           try {
             // eslint-disable-next-line no-await-in-loop
@@ -106,6 +106,7 @@ describe('Probing', () => {
         }
       }
 
+      // eslint-disable-next-line unicorn/no-for-loop
       for (let k = 0; k < results.length; k++) {
         expect(results[k].sentToken).to.be.equals(results[k].expectedToken)
       }

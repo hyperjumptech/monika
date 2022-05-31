@@ -105,6 +105,7 @@ async function test() {
       changefile()
       console.log('changeing file. iteration:', iteration, 'delay:', ms)
     }
+
     flag = !flag // toggle
   }
 }

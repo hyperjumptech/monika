@@ -85,6 +85,7 @@ export class RequestLog {
 
   // print() generates the text and prints the logs for the past request iteration
   print(): void {
+    // eslint-disable-next-line unicorn/prefer-spread
     const reversedSentNotifications = this.sentNotifications.slice().reverse()
     const printedNotification =
       reversedSentNotifications.find(
@@ -113,12 +114,6 @@ export class RequestLog {
       } ${this.request?.url} ${
         this.response?.alive ? this.response?.responseTime : '-'
       }ms packetLoss:${this.response?.alive ? this.response?.packetLoss : '-'}%`
-    } else {
-      probeMsg = `${this.iteration} id:${this.probe.id} ${
-        this.response?.status || '-'
-      } ${this.request?.method} ${this.request?.url} ${
-        this.response?.responseTime || '-'
-      }ms`
     }
 
     if (printedNotification) {

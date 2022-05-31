@@ -362,6 +362,7 @@ class SymonClient {
         )
       }
     } catch (error: any) {
+      // eslint-disable-next-line no-unsafe-optional-chaining
       log.warn("Warning: Can't set report interval. " + error?.message)
     }
   }
@@ -379,6 +380,7 @@ class SymonClient {
 
       log.debug('Status successfully sent to Symon.')
     } catch (error: any) {
+      // eslint-disable-next-line no-unsafe-optional-chaining
       log.warn("Warning: Can't send status to Symon. " + error?.message)
     }
   }

@@ -30,7 +30,7 @@ import { Notification } from '../interfaces/notification'
 import type { ValidatedResponse } from '../plugins/validate-response'
 import { log } from '../utils/pino'
 
-export function tlsChecker() {
+export function tlsChecker(): void {
   const config = getConfig()
   const isCertificateConfigEmpty =
     config?.certificate && config?.certificate?.domains.length > 0
@@ -39,6 +39,7 @@ export function tlsChecker() {
     const { certificate } = config
     const defaultExpiryReminder = 30
 
+    // eslint-disable-next-line unicorn/no-array-for-each
     certificate?.domains.forEach((domain: string | TLSHostArg) => {
       const host = (domain as TLSHostArg)?.domain ?? (domain as string)
       const reminder = certificate?.reminder ?? defaultExpiryReminder
@@ -61,6 +62,7 @@ export function tlsChecker() {
             alerts: [],
           }
 
+          // eslint-disable-next-line unicorn/no-array-for-each
           notifications.forEach((notification: Notification) => {
             // TODO: Remove validation below
             // validation is used because it is needed to send alert
@@ -80,7 +82,7 @@ export function tlsChecker() {
               notification,
               'NOTIFY-TLS',
               error.message
-            ).catch((err) => log.error(err.message))
+            ).catch((error_) => log.error(error_.message))
 
             // TODO: invoke sendNotifications function instead
             // looks like the sendAlerts function does not handle this
@@ -90,7 +92,7 @@ export function tlsChecker() {
               probeState: 'invalid',
               notifications: notifications ?? [],
               validation,
-            }).catch((err) => log.error(err.message))
+            }).catch((error_) => log.error(error_.message))
           })
         }
       })

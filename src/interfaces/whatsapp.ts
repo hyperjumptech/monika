@@ -37,6 +37,7 @@ export interface SendMessageBody {
   }
 }
 
+/* eslint-disable camelcase */
 export interface User {
   token: string
   expires_after: string
@@ -46,6 +47,7 @@ export interface Meta {
   version: string
   api_status: string
 }
+/* eslint-enable */
 
 export interface LoginUserSuccessResponse {
   users: User[]

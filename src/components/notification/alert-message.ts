@@ -86,6 +86,7 @@ export async function getMessageForAlert({
     monikaInstance,
     version: userAgent,
   }
+  /* eslint-disable unicorn/consistent-function-scoping */
   const getExpectedMessage = (
     alert: ProbeAlert,
     response: ProbeRequestResponse,
@@ -95,9 +96,11 @@ export async function getMessageForAlert({
     const isHTTPStatusCode = status >= 100 && status <= 599
 
     if (!alert.message) {
-      if (isRecovery)
-        return `The request is back to normal and pass the query: ${alert.query}`
-      return `The request failed because the response does not pass the query: ${alert.query}. The actual response status is ${response.status} and the response time is ${response.responseTime}.`
+      /* eslint-disable unicorn/consistent-destructuring */
+      return isRecovery
+        ? `The request is back to normal and pass the query: ${alert.query}`
+        : `The request failed because the response does not pass the query: ${alert.query}. The actual response status is ${response.status} and the response time is ${response.responseTime}.`
+      /* eslint-enable */
     }
 
     if (!isHTTPStatusCode) {
@@ -117,6 +120,7 @@ export async function getMessageForAlert({
       }
     }
 
+    /* eslint-disable unicorn/consistent-destructuring */
     return Handlebars.compile(alert.message)({
       response: {
         size: Number(response.headers['content-length']),
@@ -126,7 +130,9 @@ export async function getMessageForAlert({
         headers: response.headers,
       },
     })
+    /* eslint-enable */
   }
+  /* eslint-enable */
 
   const lastIncident = incidents.find(
     (incident) =>

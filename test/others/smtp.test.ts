@@ -30,6 +30,7 @@ import {
 import Mail from 'nodemailer/lib/mailer'
 import { SMTPData } from '../../src/interfaces/data'
 
+// eslint-disable-next-line unicorn/prefer-module
 const mailMock = require('nodemailer-mock')
 
 const transport: Mail = mailMock.createTransport({

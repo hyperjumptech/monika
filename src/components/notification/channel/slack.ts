@@ -32,7 +32,7 @@ export const sendSlack = async (
   message: NotificationMessage
 ): Promise<void> => {
   const notificationType =
-    message.meta.type[0].toUpperCase() + message.meta.type.substring(1)
+    message.meta.type[0].toUpperCase() + message.meta.type.slice(1)
 
   let content
   switch (message.meta.type) {

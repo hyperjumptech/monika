@@ -92,9 +92,11 @@ export type DeleteProbeRes = {
 let db: Database<SQLite3.Database, SQLite3.Statement>
 
 async function migrate() {
+  /* eslint-disable unicorn/prefer-module */
   await db.migrate({
     migrationsPath: path.join(__dirname, '../../../db/migrations'),
   })
+  /* eslint-enable */
 }
 
 /**
@@ -177,12 +179,14 @@ const snakeToCamel = (s: string) => {
 const mapObjectDbToModel = <T extends Record<string, unknown>>(
   obj: T
 ): { [K in keyof T]: T[K] extends null ? undefined : T[K] } => {
+  /* eslint-disable unicorn/no-array-reduce */
   return Object.entries(obj)
     .map(([k, v]) => [k, v === null ? undefined : v] as [string, unknown])
     .reduce((acc, [k, v]) => {
       acc[snakeToCamel(k)] = v
       return acc
     }, {} as any)
+  /* eslint-enable */
 }
 
 // const objectNullValueToUndefined = <T extends Record<string, unknown>>(obj: T): { [K in keyof T]: T[K] extends null ? undefined : T[K] } => {
@@ -260,6 +264,7 @@ export async function getUnreportedLogs(ids: string[]): Promise<UnreportedLog> {
     FROM notifications
     WHERE reported = 0 AND probe_id IN ('${ids.join("','")}');`
 
+  /* eslint-disable unicorn/no-array-callback-reference */
   const [unreportedRequests, unreportedNotifications] = await Promise.all([
     db.all(readUnreportedRequestsSQL).then(
       (data) =>
@@ -274,6 +279,7 @@ export async function getUnreportedLogs(ids: string[]): Promise<UnreportedLog> {
         (data) => data.map(mapObjectDbToModel) as UnreportedNotificationsLog[]
       ),
   ])
+  /* eslint-enable */
 
   return {
     requests: unreportedRequests,

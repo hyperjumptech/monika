@@ -37,6 +37,7 @@ interface NotifyData {
  */
 export const psEscape = (str: string): string => {
   let result = ''
+  // eslint-disable-next-line unicorn/no-for-loop
   for (let i = 0; i < str.length; i++) {
     const ch = str[i]
     if (ch.charCodeAt(0) === 39) {
