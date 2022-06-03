@@ -32,8 +32,8 @@ import { sendPing, PING_TIMEDOUT } from '../../utils/ping'
 
 /**
  * probing() is the heart of monika requests generation
- * @param requestConfig
- * @param responses an array of previous responses
+ * @param {obj} requestConfig is a config object
+ * @param {array} responses an array of previous responses
  * @returns ProbeRequestResponse, response to the probe request
  */
 export async function probing(
