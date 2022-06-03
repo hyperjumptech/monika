@@ -87,15 +87,17 @@ export const SearchBox = (props) => {
           sourceId: options.indexName,
           templates: {
             item({ item, components }) {
+              const { title, url } = item
+
               return (
-                // <a href={item.url}>
-                <div className="py-px">
-                  <div className="font-bold text-sm m-1">{item.title}</div>
-                  <div className="text-sm m-1 justify-center items-center">
-                    <components.Snippet hit={item} attribute="content" />
+                <a href={url}>
+                  <div className="py-px">
+                    <div className="font-bold text-sm m-1">{title}</div>
+                    <div className="text-sm m-1 justify-center items-center">
+                      <components.Snippet hit={item} attribute="content" />
+                    </div>
                   </div>
-                </div>
-                // </a>
+                </a>
               )
             },
             noResults() {

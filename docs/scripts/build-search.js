@@ -33,7 +33,6 @@ const options = {
   appId: process.env.NEXT_PUBLIC_ALGOLIA_APPLICATION_ID || '',
   adminAPIKey: process.env.ALGOLIA_ADMIN_API_KEY || '',
 }
-const file = './src/pages'
 
 main()
 
@@ -41,6 +40,7 @@ async function main() {
   try {
     validateKey(options)
 
+    const file = './src/pages'
     const newFile = [
       file,
       `${file}/deployment`,
@@ -55,32 +55,35 @@ async function main() {
         .readdirSync(CONTENT_PATH)
         // Only include md files
         .filter((path) => /\.md?$/.test(path))
+      const urlPrefix = newFile[i].replace(file, '')
 
       const articles = contentFilePaths.map((filePath) => {
         const source = fs.readFileSync(path.join(CONTENT_PATH, filePath))
-        // for (let x in contentFilePaths){
-        //   let urlPages = newFile[i].concat('/'+contentFilePaths[x]).slice(12).replace('.md', '')
-        //   return { urlPages }
-        // }
         const { content, data } = matter(source)
         // Convert Markdown to HTML
         const converter = new showdown.Converter()
         const contentFormatHtml = converter.makeHtml(`${content}`)
+        const removeFileExtension = (fileName) =>
+          fileName.split('.').slice(0, -1).join('.')
+        const endpoint = removeFileExtension(filePath)
+        const url = `${urlPrefix}/${endpoint}`
 
         return {
           contentFormatHtml, // this is the .html content
           data, // this is the frontmatter
-          filePath, // this is the file path
+          url,
         }
       })
 
       const transformPostsToSearchObjects = articles.map((article) => {
+        const { contentFormatHtml, data, url } = article
+        const { id, title } = data
+
         return {
-          objectID: article.data.id,
-          title: article.data.title,
-          content: article.contentFormatHtml,
-          slug: article.filePath,
-          // url: `https://monika.hyperjump.tech/${urlPages}`
+          objectID: id,
+          title,
+          content: contentFormatHtml,
+          url,
         }
       })
 
