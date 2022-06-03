@@ -91,8 +91,7 @@ export const SearchBox = (props) => {
                 // <a href={item.url}>
                 <div className="py-px">
                   <div className="font-bold text-sm m-1">{item.title}</div>
-                  <div className="text-sm m-1 justify-center items-cente">
-                    <components.Highlight hit={item} attribute="title" />
+                  <div className="text-sm m-1 justify-center items-center">
                     <components.Snippet hit={item} attribute="content" />
                   </div>
                 </div>

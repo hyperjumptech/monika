@@ -25,13 +25,13 @@
 const algoliasearch = require('algoliasearch')
 const fs = require('fs')
 const matter = require('gray-matter')
+const showdown = require('showdown')
 const path = require('path')
 
 const options = {
   indexName: 'monika-documentation',
-  appId: process.env.ALGOLIA_APPLICATION_ID || '5O2YZGK4NG',
-  adminAPIKey:
-    process.env.ALGOLIA_ADMIN_API_KEY || '45f684bf6230e7980f10b4a9209fce83',
+  appId: process.env.ALGOLIA_APPLICATION_ID || '',
+  adminAPIKey: process.env.ALGOLIA_ADMIN_API_KEY || '',
 }
 const file = './src/pages'
 
@@ -58,9 +58,17 @@ async function main() {
 
       const articles = contentFilePaths.map((filePath) => {
         const source = fs.readFileSync(path.join(CONTENT_PATH, filePath))
+        // for (let x in contentFilePaths){
+        //   let urlPages = newFile[i].concat('/'+contentFilePaths[x]).slice(12).replace('.md', '')
+        //   return { urlPages }
+        // }
         const { content, data } = matter(source)
+        // Convert Markdown to HTML
+        const converter = new showdown.Converter()
+        const contentFormatHtml = converter.makeHtml(`${content}`)
+
         return {
-          content, // this is the .md content
+          contentFormatHtml, // this is the .html content
           data, // this is the frontmatter
           filePath, // this is the file path
         }
@@ -70,9 +78,9 @@ async function main() {
         return {
           objectID: article.data.id,
           title: article.data.title,
-          content: article.content,
+          content: article.contentFormatHtml,
           slug: article.filePath,
-          type: 'article',
+          // url: `https://monika.hyperjump.tech/${urlPages}`
         }
       })
 
