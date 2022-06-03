@@ -32,6 +32,7 @@ import { getPublicIp, isConnectedToSTUNServer } from '../utils/public-ip'
 const MILLISECONDS = 1000
 export const DEFAULT_THRESHOLD = 5
 let checkSTUNinterval: NodeJS.Timeout
+let isPaused = false
 const intervals: Array<NodeJS.Timeout> = []
 
 /**
@@ -158,7 +159,7 @@ function loopProbe(
       clearInterval(probeInterval)
       clearInterval(checkSTUNinterval)
       process.kill(process.pid, 'SIGINT')
-    } else if (isConnectedToSTUNServer) {
+    } else if (isConnectedToSTUNServer && !isPaused) {
       doProbe(++counter, probe, notifications, verboseLogs)
     }
   }, (probe.interval ?? 10) * MILLISECONDS)
@@ -212,4 +213,13 @@ export function clearProbeInterval(): void {
   for (const i of intervals) {
     clearInterval(i)
   }
+}
+
+/**
+ * setPauseProbeInterval pause probing process
+ * @param {boolean} pause for pausing probes
+ * @returns void
+ */
+export function setPauseProbeInterval(pause: boolean): void {
+  isPaused = pause
 }
