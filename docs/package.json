@@ -8,9 +8,12 @@
     "dev": "next",
     "build": "next build && next export",
     "start": "next start",
-    "index-docs": "node ./.next/serverless/scripts/index-docs.js"
+    "index-docs": "node ./.next/serverless/scripts/index-docs.js",
+    "buildsearch": "node ./scripts/build-search.js"
   },
   "dependencies": {
+    "@algolia/autocomplete-js": "^1.6.3",
+    "@algolia/autocomplete-theme-classic": "^1.6.3",
     "@babel/preset-typescript": "^7.10.4",
     "@docsearch/react": "1.0.0-alpha.14",
     "@fortawesome/fontawesome-svg-core": "^1.2.34",
@@ -66,6 +69,7 @@
     "remark-unwrap-images": "^2.0.0",
     "scroll-into-view-if-needed": "^2.2.26",
     "semver-regex": "^3.1.1",
+    "showdown": "^2.1.0",
     "unist-util-visit": "^2.0.3"
   },
   "devDependencies": {
