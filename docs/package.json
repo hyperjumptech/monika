@@ -70,6 +70,7 @@
     "remark-unwrap-images": "^2.0.0",
     "scroll-into-view-if-needed": "^2.2.26",
     "semver-regex": "^3.1.1",
+    "showdown": "^2.1.0",
     "unist-util-visit": "^2.0.3"
   },
   "devDependencies": {
