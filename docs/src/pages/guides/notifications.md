@@ -24,6 +24,9 @@ At this moment, Monika support these channel of notifications (You can use just 
 13. [Telegram](https://hyperjumptech.github.io/monika/guides/notifications#telegram)
 14. [Webhook](https://hyperjumptech.github.io/monika/guides/notifications#webhook)
 15. [WhatsApp Business](https://hyperjumptech.github.io/monika/guides/notifications#whatsapp)
+16. [Dingtalk](https://hyperjumptech.github.io/monika/guides/notifications#dingtalk)
+17. [Pushover](https://hyperjumptech.github.io/monika/guides/notifications#pushover)
+18. [Opsgenie](https://hyperjumptech.github.io/monika/guides/notifications#opsgenie)
 
 ## Configurations
 
@@ -392,3 +395,50 @@ Monika supports Whatsapp notification. To enable notification via whatsapp, you 
 | Url          | The URL of your whatsapp api server                                                       | `https://yourwhatsappapiserver.com` |
 | Username     | Your whatsapp api user name                                                               | `username`                          |
 | Userpassword | Your whatsapp api user password                                                           | `userpassword`                      |
+
+## Dingtalk
+
+Monika supports Dingtalk. To enable notification via Dingtalk, you must create a robot webhook first. More info at Dingtalk robot webhook [Dingtalk documentation](https://open.dingtalk.com/document/group/assign-a-webhook-url-to-an-internal-chatbot) and [Alibaba cloud documentation](https://www.alibabacloud.com/help/en/application-real-time-monitoring-service/latest/obtain-the-webhook-url-of-a-dingtalk-chatbot).
+
+```yml
+id: unique-id-webhook,
+type: dingtalk,
+data:
+  access_token: 'your-access-token'
+```
+
+| Key          | Description                        | Example        |
+| ------------ | ---------------------------------- | -------------- |
+| Access Token | The token of your Dingtalk account | `Dingtalk1234` |
+
+## Pushover
+
+Monika supports Pushover. To enable notification via Pushover, you must create a pushover application first. More info at [Pushover documentation](https://pushover.net/api).
+
+```yml
+  -id: unique-id-webhook,
+    type: pushover,
+    data:
+      token: "pushover-token"
+      user: "pushover-user"
+```
+
+| Key   | Description                | Example                    |
+| ----- | -------------------------- | -------------------------- |
+| Token | Pushover application token | `pushoverApplicationToken` |
+| User  | Pushover user key          | `pushoverUserKey`          |
+
+## Opsgenie
+
+Monika supports Opsgenie. To enable notification via Opsgenie, you must create a team, then create an integration, and finally add API. More info at [Opsgenie documentation](https://support.atlassian.com/opsgenie/docs/create-a-default-api-integration/#%E2%80%8BUsing-API-Integration).
+
+```yml
+  -id: unique-id-opsgenie,
+    type: opsgenie,
+    data:
+      geniekey: 'genie-key'
+```
+
+| Key      | Description                | Example                    |
+| -------- | -------------------------- | -------------------------- |
+| Geniekey | Opsgenie application token | `opsgenieApplicationToken` |

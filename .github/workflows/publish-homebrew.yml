@@ -1,0 +1,24 @@
+name: Publish to Homebrew
+
+on:
+  workflow_dispatch:
+  workflow_run: # Only trigger, when the npm-publish workflow succeeded
+    workflows: ["Node.js Package"]
+    types:
+      - completed
+
+jobs:
+  homebrew:
+    name: Bump Homebrew formula
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get Package Version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@master
+
+      - uses: mislav/bump-homebrew-formula-action@v2
+        with:
+          formula-name: monika
+          download-url: https://registry.npmjs.org/@hyperjumptech/monika/-/monika-${{ steps.package-version.outputs.current-version }}.tgz
+        env:
+          COMMITTER_TOKEN: ${{ secrets.GITHUB_TOKEN }}

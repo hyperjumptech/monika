@@ -30,6 +30,8 @@ import { getMessageForStart } from './alert-message'
 import { newPagerDuty } from './channel/pagerduty'
 import {
   dataDiscordSchemaValidator,
+  dataDingtalkSchemaValidator,
+  dataOpsgenieSchemaValidator,
   dataMailgunSchemaValidator,
   dataMonikaNotifSchemaValidator,
   dataSendgridSchemaValidator,
@@ -41,6 +43,7 @@ import {
   dataWorkplaceSchemaValidator,
   dataLarkSchemaValidator,
   dataGoogleChatSchemaValidator,
+  dataPushoverSchemaValidator,
 } from './validator'
 
 // reexported with alias because this `errorMessage` function is used in test file
@@ -53,6 +56,8 @@ export const notificationChecker = async (
   const validators = {
     desktop: null,
     discord: dataDiscordSchemaValidator,
+    dingtalk: dataDingtalkSchemaValidator,
+    opsgenie: dataOpsgenieSchemaValidator,
     mailgun: dataMailgunSchemaValidator,
     'monika-notif': dataMonikaNotifSchemaValidator,
     sendgrid: dataSendgridSchemaValidator,
@@ -66,6 +71,7 @@ export const notificationChecker = async (
     lark: dataLarkSchemaValidator,
     'google-chat': dataGoogleChatSchemaValidator,
     pagerduty: pagerduty.validator,
+    pushover: dataPushoverSchemaValidator,
   }
 
   await Promise.all(

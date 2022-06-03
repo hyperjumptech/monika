@@ -22,80 +22,47 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import React from 'react'
 import axios from 'axios'
-import { LayoutDocs } from '../components/LayoutDocs'
-import { XMLParser } from 'fast-xml-parser'
 
-export default function ArticlesPage({ articles }) {
-  return (
-    <LayoutDocs meta={{}}>
-      <h1>Articles</h1>
-      {articles.length > 0 ? (
-        articles.map(({ title, pubDate, link }) => {
-          return (
-            <div key={title} className="flex flex-col mb-4">
-              <div className="flex">
-                <a href={link} rel="noopener noreferrer" target="_blank">
-                  <h2>
-                    <b>{title}</b>
-                  </h2>
-                </a>
-              </div>
-              <div className="flex">
-                <span>Published at {pubDate}</span>
-              </div>
-            </div>
-          )
-        })
-      ) : (
-        <p>There are no articles available at the moment.</p>
-      )}
-      <div className="flex articles-center justify-end">
-        <a
-          href="https://medium.com/hyperjump-tech"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="cursor-pointer text-purple-monika hover:underline"
-        >
-          RSS Feed from Medium.com
-        </a>
-      </div>
-    </LayoutDocs>
-  )
-}
+import { PushoverData } from '../../../interfaces/data'
+import { NotificationMessage } from '../../../interfaces/notification'
 
-export async function getStaticProps() {
+export const sendPushover = async (
+  data: PushoverData,
+  message: NotificationMessage
+) => {
   try {
-    const { data } = await axios({
-      method: 'GET',
-      url: 'https://medium.com/feed/hyperjump-tech',
+    const notificationType =
+      message.meta.type[0].toUpperCase() + message.meta.type.substring(1)
+
+    let content
+    switch (message.meta.type) {
+      case 'incident':
+      case 'recovery': {
+        content = `New ${notificationType} event from Monika\n\n${message.body}`
+        break
+      }
+      default:
+        content = message.body
+        break
+    }
+
+    const res = await axios.request({
+      method: 'POST',
+      url: `https://api.pushover.net/1/messages.json`,
       headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Content-Type': 'application/rss+xml',
+        'Content-Type': 'application/json',
+      },
+      data: {
+        user: data.user,
+        token: data.token,
+        message: content,
+        html: 1,
       },
     })
 
-    if (!data) {
-      throw new Error('Failed to fetch RSS Feed.')
-    }
-
-    const parser = new XMLParser()
-    const parsed = parser.parse(data)
-    const { rss } = parsed
-    const { channel } = rss
-    const { item: articles } = channel
-
-    return {
-      props: {
-        articles,
-      },
-    }
-  } catch (e) {
-    return {
-      props: {
-        articles: [],
-      },
-    }
+    return res
+  } catch (error) {
+    throw error
   }
 }

@@ -169,6 +169,19 @@ probes:
 #     data:
 #       thread_id: "1234567890"
 #       access_token: YOUR_CUSTOM_INTEGRATION_ACCESS_TOKEN
+#   - id: random-string-dingtalk
+#     type: dingtalk
+#     data:
+#       access_token: YOUR_CUSTOM_INTEGRATION_ACCESS_TOKEN
+#   - id: random-string-pushover
+#     type: pushover
+#     data:
+#       token: "app-token => please register app on pushover first"
+#       user: "user-token"
+#   - id: random-string-opsgenie
+#     type: opsgenie
+#     data:
+#       geniekey: "genie-key"
 
 # limit log database size in bytes
 db_limit:

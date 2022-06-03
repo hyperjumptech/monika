@@ -57,6 +57,16 @@ export interface WebhookData {
   body: string
 }
 
+export interface DingtalkData {
+  access_token: string
+  body: string
+}
+
+export interface OpsgenieData {
+  geniekey: string
+  body: string
+}
+
 export interface MonikaNotifData {
   url: string
   body: MonikaNotifDataBody
@@ -97,6 +107,12 @@ export interface TelegramData {
   group_id: string
   bot_token: string
   body: string
+}
+
+export interface PushoverData {
+  token: string
+  user: string
+  message: string
 }
 
 export interface WebhookDataBody {

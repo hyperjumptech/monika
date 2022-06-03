@@ -33,6 +33,8 @@ import getIp from '../../utils/ip'
 import { getMessageForAlert } from './alert-message'
 import { sendDesktop } from './channel/desktop'
 import { sendDiscord } from './channel/discord'
+import { sendDingtalk } from './channel/dingtalk'
+import { sendOpsgenie } from './channel/opsgenie'
 import { sendMailgun } from './channel/mailgun'
 import { sendMonikaNotif } from './channel/monika-notif'
 import { sendSendgrid } from './channel/sendgrid'
@@ -46,6 +48,7 @@ import { sendWorkplace } from './channel/workplace'
 import { sendLark } from './channel/lark'
 import { sendGoogleChat } from './channel/googlechat'
 import { newPagerDuty } from './channel/pagerduty'
+import { sendPushover } from './channel/pushover'
 
 export class NotificationSendingError extends Error {
   notificationType: string
@@ -132,6 +135,16 @@ export async function sendNotifications(
             break
           }
 
+          case 'dingtalk': {
+            await sendDingtalk(notification.data, message)
+            break
+          }
+
+          case 'opsgenie': {
+            await sendOpsgenie(notification.data, message)
+            break
+          }
+
           case 'slack': {
             await sendSlack(notification.data, message)
             break
@@ -139,6 +152,11 @@ export async function sendNotifications(
 
           case 'telegram': {
             await sendTelegram(notification.data, message)
+            break
+          }
+
+          case 'pushover': {
+            await sendPushover(notification.data, message)
             break
           }
 

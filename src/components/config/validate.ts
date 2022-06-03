@@ -104,8 +104,20 @@ const MONIKA_NOTIF_NO_URL = setInvalidResponse(
 // Webhook
 const WEBHOOK_NO_URL = setInvalidResponse('URL not found')
 
+// Pushover
+const PUSHOVER_NO_TOKEN = setInvalidResponse('TOKEN not found')
+const PUSHOVER_NO_USER = setInvalidResponse('USER not found')
+
 // Discord
 const DISCORD_NO_URL = setInvalidResponse('Discord URL not found')
+
+// Dingtalk
+const DINGTALK_NO_ACCESS_TOKEN = setInvalidResponse(
+  'Dingtalk Access Token not found'
+)
+
+// Opsgenie
+const OPSGENIE_NO_GENIE_KEY = setInvalidResponse('Opsgenie Geniekey not found')
 
 // Whatsapp
 const WHATSAPP_NO_URL = setInvalidResponse('Whatsapp URL not found')
@@ -227,12 +239,28 @@ function validateNotification(notifications: Notification[]): Validation {
         break
       }
 
+      case 'dingtalk': {
+        if (!notification.data.access_token) return DINGTALK_NO_ACCESS_TOKEN
+        break
+      }
+
+      case 'opsgenie': {
+        if (!notification.data.geniekey) return OPSGENIE_NO_GENIE_KEY
+        break
+      }
+
       case pagerduty.slug: {
         const error = pagerduty.validateConfig(notification.data)
         if (error) {
           return setInvalidResponse(error)
         }
 
+        break
+      }
+
+      case 'pushover': {
+        if (!notification.data.token) return PUSHOVER_NO_TOKEN
+        if (!notification.data.user) return PUSHOVER_NO_USER
         break
       }
 
