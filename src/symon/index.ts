@@ -47,7 +47,7 @@ import {
   publicIpAddress,
   publicNetworkInfo,
 } from '../utils/public-ip'
-import { clearProbeInterval } from '../looper'
+import { setPauseProbeInterval } from '../looper'
 
 type SymonHandshakeData = {
   macAddress: string
@@ -271,6 +271,7 @@ class SymonClient {
       for (const listener of this.configListeners) {
         listener(newConfig)
       }
+      setPauseProbeInterval(false)
     } else {
       log.debug(`Received config does not change.`)
     }
@@ -342,12 +343,13 @@ class SymonClient {
     } catch (error) {
       hasConnectionToSymon = false
       if (reportIntervalId) {
-        clearProbeInterval()
+        setPauseProbeInterval(true)
+
         reportIntervalId = clearInterval(reportIntervalId)
         this.configHash = ''
       }
 
-      log.warn(
+      log.error(
         "Warning: Can't report history to Symon. " + (error as any).message
       )
     }
