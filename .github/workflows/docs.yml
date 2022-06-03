@@ -46,5 +46,6 @@ jobs:
       - run: yarn run buildsearch
         env:
           CI: true
-          ALGOLIA_APPLICATION_ID: ${{secrets.ALGOLIA_APPLICATION_ID}}
+          NEXT_PUBLIC_ALGOLIA_APPLICATION_ID: ${{secrets.NEXT_PUBLIC_ALGOLIA_APPLICATION_ID}}
           ALGOLIA_ADMIN_API_KEY: ${{secrets.ALGOLIA_ADMIN_API_KEY}}
+          NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY: ${{secrets.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY}}
