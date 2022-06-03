@@ -30,7 +30,7 @@ const path = require('path')
 
 const options = {
   indexName: 'monika-documentation',
-  appId: process.env.ALGOLIA_APPLICATION_ID || '',
+  appId: process.env.NEXT_PUBLIC_ALGOLIA_APPLICATION_ID || '',
   adminAPIKey: process.env.ALGOLIA_ADMIN_API_KEY || '',
 }
 const file = './src/pages'
@@ -109,11 +109,11 @@ function validateKey(options) {
   }
 
   if (!options.appId) {
-    throw new Error('ALGOLIA_APPLICATION_ID is not defined')
+    throw new Error('NEXT_PUBLIC_ALGOLIA_APPLICATION_ID is not defined')
   }
 
   if (!options.adminAPIKey) {
-    throw new Error('ALGOLIA_SEARCH_API_KEY is not defined')
+    throw new Error('ALGOLIA_ADMIN_API_KEY is not defined')
   }
 }
 
