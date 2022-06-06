@@ -34,7 +34,7 @@ jobs:
           node-version: 16
 
       - name: 📥 Install deps
-        uses: bahmutov/npm-install@v1
+        run: npm install
 
       - name: 👷‍♂️ Build
         run: npm run build
@@ -66,7 +66,7 @@ jobs:
           node-version: 16
 
       - name: 📥 Install deps
-        uses: bahmutov/npm-install@v1
+        run: npm install
 
       - name: 🔎 Send to Algolia
         run: npm run buildsearch
