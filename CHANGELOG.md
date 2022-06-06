@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0] - 2022-06-06
+
+## Added
+
+- Nightly release script (#682)
+- Deployment pipeline for Homebrew (#669)
+- Docs: Algolia for searching docs (#668)
+- Opsgenie integration (#677)
+- Dingtalk notification (#673)
+- Pushover notification (#671)
+
+## Fixed
+
+- Fix probes interval (#678)
+- Fix unknown properties error (#675)
+- Fix the medium articles in docs (#676)
+
 ## [1.7.3] - 2022-05-20
 
 ## Fixed
