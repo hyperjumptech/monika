@@ -144,7 +144,7 @@ const Code = ({
       >
         {({ className, style, tokens, getLineProps, getTokenProps }) => (
           <pre
-            className={className + ' bg-gray-50 pb-4 pt-4 pr-4 overflow-scroll'}
+            className={className + ' bg-gray-50 pb-4 pt-4 pr-4 overflow-auto'}
             style={{
               ...style,
               border: '1px solid #eee',
