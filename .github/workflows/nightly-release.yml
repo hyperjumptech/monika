@@ -62,12 +62,10 @@ jobs:
       - name: 🏷 Push Tag
         run: git push origin --tags
 
-      - name: 🔐 Setup npm auth
-        run: |
-          echo "registry=https://registry.npmjs.org" >> ~/.npmrc
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> ~/.npmrc
       - name: 🚀 Publish
-        run: npm run publish
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: 🐱 Create GitHub release
         uses: actions/create-release@v1
@@ -76,3 +74,9 @@ jobs:
           prerelease: true
           release_name: v${{ steps.version.outputs.NEXT_VERSION }}
           tag_name: v${{ steps.version.outputs.NEXT_VERSION }}
+
+      - name: Notify Teams
+        uses: joelwmale/webhook-action@fd99bb3b8272237103e349e9bb4d9b0ead9a217c
+        with:
+          url: ${{secrets.HYPERJUMP_TEAMS_SYMON_WEBHOOK}}
+          body: '{"title": "Monika Nightly NPM Release", "Text": "Version: ${{ steps.version.outputs.NEXT_VERSION }}"}'
