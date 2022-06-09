@@ -36,6 +36,7 @@ export const sendWebhook = async (data: WebhookData): Promise<any> => {
 
     return res
   } catch (error) {
+    console.log(error)
     throw error
   }
 }

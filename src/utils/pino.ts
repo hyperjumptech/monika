@@ -26,6 +26,7 @@ import fs from 'fs'
 import path from 'path'
 import pino, { LoggerOptions } from 'pino'
 
+// eslint-disable-next-line unicorn/prefer-module
 const project = path.join(__dirname, '../../tsconfig.json')
 const dev = fs.existsSync(project)
 

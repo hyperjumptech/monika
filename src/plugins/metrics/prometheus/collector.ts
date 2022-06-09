@@ -76,8 +76,11 @@ export class PrometheusCollector {
     const { method, url } = request
     const { headers } = response
     const milliSecond = 1000
+    // eslint-disable-next-line no-unsafe-optional-chaining
     const responseTimeInSecond = response?.responseTime / milliSecond ?? 0
     const responseSizeBytes = Number(headers['content-length'])
+
+    /* eslint-disable unicorn/consistent-destructuring */
     const labels = {
       id,
       name,
@@ -89,6 +92,7 @@ export class PrometheusCollector {
       this.prometheusCustomCollector
 
     // collect metrics
+    /* eslint-disable unicorn/prefer-number-properties */
     statusCode
       ?.labels({
         id,
@@ -101,5 +105,8 @@ export class PrometheusCollector {
     responseSize
       ?.labels(labels)
       .set(isNaN(responseSizeBytes) ? 0 : responseSizeBytes)
+
+    /* eslint-enable */
+    /* eslint-enable */
   }
 }

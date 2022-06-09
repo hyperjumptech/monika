@@ -60,7 +60,7 @@ export const sendTeams = async (
     case 'incident':
     case 'recovery': {
       const notifType =
-        message.meta.type[0].toUpperCase() + message.meta.type.substring(1)
+        message.meta.type[0].toUpperCase() + message.meta.type.slice(1)
       const notifColor = message.meta.type === 'incident' ? 'DF202E' : '8CC152'
 
       await axios({

@@ -28,6 +28,7 @@ import { Probe } from './probe'
 import { SymonConfig } from '../components/reporter'
 import { DBLimit } from './data'
 
+/* eslint-disable camelcase */
 export interface Config {
   certificate?: Certificate
   interval?: number
@@ -38,3 +39,4 @@ export interface Config {
   version?: string
   db_limit?: DBLimit
 }
+/* eslint-enable */

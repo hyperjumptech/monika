@@ -32,7 +32,7 @@ export const sendGoogleChat = async (
   message: NotificationMessage
 ): Promise<any> => {
   const notifType =
-    message.meta.type[0].toUpperCase() + message.meta.type.substring(1)
+    message.meta.type[0].toUpperCase() + message.meta.type.slice(1)
   let chatMessage
 
   switch (message.meta.type) {

@@ -189,14 +189,19 @@ eventEmitter.on(events.application.terminated, async () => {
  * @returns {string} text of the date to print
  */
 function getDaysHours(startTime: Date): string {
+  /* eslint-disable unicorn/numeric-separators-style */
   let duration = Math.abs(
+    // eslint-disable-next-line unicorn/prefer-date-now
     (new Date().getTime() - new Date(startTime).getTime()) / 1_000
   )
+  /* eslint-enable */
   const numDays = Math.floor(duration / 86_400)
   duration -= numDays * 86_400 // get the remaining hours
 
+  /* eslint-disable unicorn/numeric-separators-style */
   const numHours = Math.floor(duration / 3_600) % 24
   duration -= numHours * 3_600 // get the remaining minutes
+  /* eslint-enable */
 
   const numMinutes = Math.floor(duration / 60) % 60
 
@@ -239,6 +244,7 @@ export async function printSummary(cliConfig: IConfig): Promise<void> {
     log.error(`Summary notification: ${error.message}`)
   }
 }
+
 /* eslint-disable camelcase */
 function createTweetMessage({
   number_of_probes,

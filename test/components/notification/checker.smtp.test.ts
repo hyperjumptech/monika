@@ -25,6 +25,7 @@ describe('notificationChecker - smtpNotification', () => {
       sendMail: () => true,
     }))
 
+    /* eslint-disable unicorn/consistent-function-scoping */
     const fn = () =>
       notificationChecker([
         {
@@ -37,6 +38,7 @@ describe('notificationChecker - smtpNotification', () => {
           } as SMTPData,
         },
       ])
+    /* eslint-enable */
 
     expect(fn).not.to.throws()
   })

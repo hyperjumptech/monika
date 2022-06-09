@@ -51,6 +51,7 @@ export const sendWorkplace = async (data: WorkplaceData): Promise<any> => {
 
     return res
   } catch (error) {
+    console.log(error)
     throw error
   }
 }

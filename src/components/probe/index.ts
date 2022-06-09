@@ -104,6 +104,7 @@ async function checkThresholdsAndSendAlert(
     validatedResponseStatuses,
   } = data
 
+  /* eslint-disable unicorn/no-array-for-each */
   statuses
     ?.filter((probeState) => !probeState.isFirstTime)
     ?.filter((probeState) => probeState.shouldSendNotification)
@@ -126,6 +127,7 @@ async function checkThresholdsAndSendAlert(
         }))
       )
     })
+  /* eslint-enable */
 }
 
 /**
@@ -216,6 +218,7 @@ export async function doProbe(
 
       // combine global probe alerts with all individual request alerts
       const probeAlerts = probe.alerts ?? []
+      // eslint-disable-next-line unicorn/prefer-spread
       const combinedAlerts = probeAlerts.concat(...(request.alerts || []))
 
       // Responses have been processed and validated

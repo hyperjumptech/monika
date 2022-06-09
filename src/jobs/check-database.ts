@@ -33,10 +33,12 @@ import {
 import { Config } from '../interfaces/config'
 const dbPath = path.resolve(process.cwd(), 'monika-logs.db')
 
+// eslint-disable-next-line camelcase
 export function check_db_size(): void {
   const config = getConfig()
   deleteData(config)
 }
+
 /* eslint-disable camelcase */
 async function deleteData(config: Config) {
   const { db_limit } = config

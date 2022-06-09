@@ -90,6 +90,7 @@ async function send(
     if (!routingKey) {
       return
     }
+
     const eventPayload = transformMessageToEventPayload(routingKey, message)
 
     if (!eventPayload) {
@@ -143,5 +144,6 @@ function transformMessageToEventPayload(
     }
   }
   /* eslint-enable */
+
   return null
 }

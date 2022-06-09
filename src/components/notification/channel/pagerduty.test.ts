@@ -126,7 +126,7 @@ describe('PagerDuty notification', () => {
       )
       server.close()
 
-      // assert
+      /* eslint-disable camelcase */
       expect(body).to.deep.eq({
         routing_key: routingKey,
         dedup_key: dedupKey,
@@ -138,6 +138,7 @@ describe('PagerDuty notification', () => {
           group: probeID,
         },
       })
+      /* eslint-enable */
     })
 
     it('should send recovery event', async () => {
@@ -182,12 +183,13 @@ describe('PagerDuty notification', () => {
       )
       server.close()
 
-      // assert
+      /* eslint-disable camelcase */
       expect(body).to.deep.eq({
         routing_key: routingKey,
         dedup_key: dedupKey,
         event_action: 'resolve',
       })
+      /* eslint-enable */
     })
   })
 })

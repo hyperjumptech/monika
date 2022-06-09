@@ -23,8 +23,8 @@
  **********************************************************************************/
 
 import Joi from 'joi'
-
-export const dataBaseEmailSchemaValidator = (type: string) => {
+/* eslint-disable camelcase */
+export const dataBaseEmailSchemaValidator = (type: string): any => {
   return Joi.object().keys({
     recipients: Joi.array()
       .items(Joi.string().email().label(`${type} Recipients`))
@@ -141,3 +141,5 @@ export const dataPushoverSchemaValidator = dataBaseEmailSchemaValidator(
   token: Joi.string().required().label('Pushover token'),
   user: Joi.string().required().label('Pushover user'),
 })
+
+/* eslint-enable */
