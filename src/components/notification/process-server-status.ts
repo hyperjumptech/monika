@@ -123,10 +123,12 @@ export const processThresholds = ({
   requestIndex: number
   validatedResponse: ValidatedResponse[]
 }) => {
-  const { requests, incidentThreshold, recoveryThreshold, socket } = probe
+  const { requests, incidentThreshold, recoveryThreshold, socket, name } = probe
   const request = requests?.[requestIndex]
-  const id = `${probe?.id}-${request?.id || ''}-${
-    request?.url || socket ? `${socket?.host}:${socket?.port}` : ''
+  const id = `${probe?.id}:${name}:${requestIndex}:${
+    request?.id || ''
+  }-${incidentThreshold}:${recoveryThreshold} ${
+    request?.url || (socket ? `${socket?.host}:${socket?.port}` : '')
   }`
 
   const results: Array<ServerAlertState> = []

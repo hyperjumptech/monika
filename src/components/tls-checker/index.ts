@@ -31,7 +31,7 @@ export type TLSHostArg = {
 export async function checkTLS(
   host: string | TLSHostArg,
   expiryThreshold = 30
-): Promise<any> {
+): Promise<null> {
   const hostOptions = (host as TLSHostArg)?.options ?? {}
   const domain = (host as TLSHostArg)?.domain ?? (host as string)
 

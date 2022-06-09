@@ -53,6 +53,45 @@ interface ProbeSendNotification extends Omit<ProbeStatusProcessed, 'statuses'> {
   probeState?: ServerAlertState
 }
 
+// eslint-disable-next-line unicorn/consistent-function-scoping
+const probeSendNotification = async (data: ProbeSendNotification) => {
+  const eventEmitter = getEventEmitter()
+
+  const {
+    index,
+    probe,
+    probeState,
+    notifications,
+    requestIndex,
+    validatedResponseStatuses,
+  } = data
+
+  const statusString = probeState?.state ?? 'UP'
+  const url = probe.requests?.[requestIndex]?.url ?? ''
+  const validation =
+    validatedResponseStatuses.find(
+      (validateResponse: ValidatedResponse) =>
+        validateResponse.alert.query === probeState?.alertQuery
+    ) || validatedResponseStatuses[index]
+
+  eventEmitter.emit(events.probe.notification.willSend, {
+    probeID: probe.id,
+    url: url,
+    probeState: statusString,
+    validation,
+  })
+
+  if ((notifications?.length ?? 0) > 0) {
+    await sendAlerts({
+      probeID: probe.id,
+      url,
+      probeState: statusString,
+      notifications: notifications ?? [],
+      validation,
+    })
+  }
+}
+
 // Probes Thresholds processed, Send out notifications/alerts.
 async function checkThresholdsAndSendAlert(
   data: ProbeStatusProcessed,
@@ -65,45 +104,6 @@ async function checkThresholdsAndSendAlert(
     requestIndex,
     validatedResponseStatuses,
   } = data
-
-  // eslint-disable-next-line unicorn/consistent-function-scoping
-  const probeSendNotification = async (data: ProbeSendNotification) => {
-    const eventEmitter = getEventEmitter()
-
-    const {
-      index,
-      probe,
-      probeState,
-      notifications,
-      requestIndex,
-      validatedResponseStatuses,
-    } = data
-
-    const statusString = probeState?.state ?? 'UP'
-    const url = probe.requests?.[requestIndex]?.url ?? ''
-    const validation =
-      validatedResponseStatuses.find(
-        (validateResponse: ValidatedResponse) =>
-          validateResponse.alert.query === probeState?.alertQuery
-      ) || validatedResponseStatuses[index]
-
-    eventEmitter.emit(events.probe.notification.willSend, {
-      probeID: probe.id,
-      url: url,
-      probeState: statusString,
-      validation,
-    })
-
-    if ((notifications?.length ?? 0) > 0) {
-      await sendAlerts({
-        probeID: probe.id,
-        url,
-        probeState: statusString,
-        notifications: notifications ?? [],
-        validation,
-      })
-    }
-  }
 
   /* eslint-disable unicorn/no-array-for-each */
   statuses
