@@ -6,6 +6,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "next",
+    "build-only": "next build",
     "build": "next build && next export",
     "start": "next start",
     "index-docs": "node ./.next/serverless/scripts/index-docs.js",
