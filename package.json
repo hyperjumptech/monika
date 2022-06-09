@@ -96,7 +96,6 @@
     "yaml": "1.10.2"
   },
   "devDependencies": {
-    "@oclif/dev-cli": "^1.26.10",
     "@oclif/test": "^2.1.0",
     "@types/boxen": "^3.0.1",
     "@types/chai": "^4.2.15",
