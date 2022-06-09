@@ -6,11 +6,6 @@ on:
     - cron: "0 7 * * *" # every day at 12AM PST
 
 jobs:
-  # HEADS UP! this "nightly" job will only ever run on the `main` branch due to it being a cron job,
-  # and the last commit on main will be what github shows as the trigger
-  # however in the checkout below we specify the `dev` branch, so all the scripts
-  # in this job will be ran from that, confusing i know, so in some cases we'll need to create
-  # multiple PRs when modifying nightly release processes
   nightly:
     name: 🌒 Nightly Release
     if: github.repository == 'hyperjumptech/monika'
@@ -66,14 +61,6 @@ jobs:
         run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: 🐱 Create GitHub release
-        uses: actions/create-release@v1
-        with:
-          draft: false
-          prerelease: true
-          release_name: v${{ steps.version.outputs.NEXT_VERSION }}
-          tag_name: v${{ steps.version.outputs.NEXT_VERSION }}
 
       - name: Notify Teams
         uses: joelwmale/webhook-action@fd99bb3b8272237103e349e9bb4d9b0ead9a217c
