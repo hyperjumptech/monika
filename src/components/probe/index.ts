@@ -53,7 +53,6 @@ interface ProbeSendNotification extends Omit<ProbeStatusProcessed, 'statuses'> {
   probeState?: ServerAlertState
 }
 
-// eslint-disable-next-line unicorn/consistent-function-scoping
 const probeSendNotification = async (data: ProbeSendNotification) => {
   const eventEmitter = getEventEmitter()
 
