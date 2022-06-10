@@ -49,18 +49,21 @@ export const sendSmtpMail = async (
       logo: 'https://raw.githubusercontent.com/hyperjumptech/monika/main/docs/public/monika.svg',
     },
   })
+
+  const toNew = (opt.to as string).replace(',', ', ')
   const email = {
     body: {
-      name: `${opt.to}`,
+      name: `${toNew}`,
       intro: [`${opt.subject}`, convertTextToHTML(`${opt.text}`)],
     },
   }
 
   const emailTemplate = mailGenerator.generate(email)
+  const to = (opt.to as string).split(',')
 
   return transporter.sendMail({
     from: opt.from,
-    to: opt.to,
+    to: to,
     subject: opt.subject,
     html: emailTemplate,
   })
