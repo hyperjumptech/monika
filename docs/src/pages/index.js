@@ -341,14 +341,11 @@ export default function IndexPage() {
             </div>
             <div className="container11">
               <FeatureCard
-                text="If you're using NPM or Yarn, you can simply run this command in your terminal:"
+                text="Get Monika using the popular package manager: Homebrew (macOS), Snap (Linux), or Chocolatey (Windows)"
                 title="2. Install "
                 image_src="/playground_assets/downloading-400w.png"
                 rootClassName="rootClassName2"
               ></FeatureCard>
-              <div className="container12">
-                <span className="text17">npm i -g @hyperjumptech/monika</span>
-              </div>
             </div>
             <div className="container13">
               <FeatureCard
