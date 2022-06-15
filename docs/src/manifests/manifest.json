@@ -68,6 +68,17 @@
       ]
     },
     {
+      "title": "Contributions",
+      "heading": true,
+      "routes": [
+        {
+          "title": "New Notifications",
+          "path": "/guides/new-notifications",
+          "editUrl": "/guides/new-notifications.md"
+        }
+      ]
+    },
+    {
       "title": "Examples",
       "heading": true,
       "routes": [
