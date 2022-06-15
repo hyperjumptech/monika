@@ -31,4 +31,4 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: hyperjump/monika:latest
+          tags: hyperjump/monika:${GITHUB_REF#refs/tags/}
