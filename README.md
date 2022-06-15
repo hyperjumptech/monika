@@ -48,6 +48,8 @@ Finally you can also run `npm run test` to prevent regression.
 
 Once you have made the changes, open a Pull Request and explain the issue your change will fix or the feature your change will add.
 
+For contribution details on see how to add custom notification [see the guide here]()
+
 ## Development References
 
 The tools and frameworks we used in this project are listed below:
