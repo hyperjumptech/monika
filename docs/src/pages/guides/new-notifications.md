@@ -9,7 +9,7 @@ Out of the box, Monika support a multitude of notification channels, from chat a
 
 ## Prerequisites
 
-Adding a custom notification to Monika is quite straight forward. There are just a few requirements.
+There are few requirements to start adding a new notification to Monika:
 
 1. Some basic Typescript may be helpful.
 2. Some familiarity with git is required to clone and create pull requests.
@@ -42,7 +42,7 @@ export interface GoogleChatData {
 }
 ```
 
-The WhatAapp application however, requires more data to be passed to it such as the following:
+The WhatsApp application however, requires more data to be passed to it such as the following:
 
 ```javascript
 export interface WhatsappData extends MailData {
@@ -160,7 +160,7 @@ Finally, head over to `src/components/config/validate.ts` and look for the `vali
       }
 ```
 
-In the example above, we made sure that the `google-chat` identifier is properly labeled, and that the `url` field is set. Otherwise a standardized "no-url-found" message is displayed.
+In the example above, we made sure that the user provided the `url` when using the notification type `google-chat`. Otherwise a standardized "no-url-found" message is displayed.
 
 ## Testing
 
@@ -168,6 +168,6 @@ To make sure your integration won't break in the future, add your unit test(s) i
 
 ## Documentation
 
-To wrap it up, add some documentation about your new app, how to set it up for other users to use. Users will love you for it.
+To wrap it up, add some documentation about your new app, specifically how to set it up for others to use. Users will love you for it.
 
 That's it. Finally push your changes and create a pull request back to Monika's mainline repository and we'll merge it.
