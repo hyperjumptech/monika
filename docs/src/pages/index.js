@@ -38,6 +38,116 @@ import { event } from 'lib/gtag'
 
 export default function IndexPage() {
   const [isOpenMobileMenu, setOpenMobileMenu] = useState(false)
+  const integrations = [
+    {
+      url: 'https://hyperjumptech.github.io/monika/guides/notifications#desktop-notifications',
+      img: 'desktop.png',
+      title: 'Desktop Notification',
+      tag: '',
+    },
+    {
+      url: 'https://hyperjumptech.github.io/monika/guides/notifications#discord',
+      img: 'discord.png',
+      title: 'Discord',
+      tag: '',
+    },
+    {
+      url: 'https://hyperjumptech.github.io/monika/guides/notifications#facebook-workplace',
+      img: 'facebook.png',
+      title: 'Facebook workplace',
+      tag: '',
+    },
+    {
+      url: 'https://hyperjumptech.github.io/monika/guides/notifications#google-chat',
+      img: 'google.png',
+      title: 'Google Chat',
+      tag: '',
+    },
+    {
+      url: 'https://hyperjumptech.github.io/monika/guides/notifications#larksuite-notifications',
+      img: 'lark.png',
+      title: 'Lark Suite',
+      tag: '',
+    },
+    {
+      url: 'https://hyperjumptech.github.io/monika/guides/notifications#mailgun',
+      img: 'mailgun.png',
+      title: 'Mailgun',
+      tag: '',
+    },
+    {
+      url: 'https://hyperjumptech.github.io/monika/guides/notifications#microsoft-teams',
+      img: 'teams.png',
+      title: 'Microsoft Teams',
+      tag: '',
+    },
+    {
+      url: 'https://hyperjumptech.github.io/monika/guides/notifications#monika-whatsapp-notifier',
+      img: 'whatsapp.png',
+      title: 'Monika WA Notifier',
+      tag: '',
+    },
+    {
+      url: 'https://hyperjumptech.github.io/monika/guides/notifications#pagerduty',
+      img: 'pagerduty.png',
+      title: 'PagerDuty',
+      tag: '',
+    },
+    {
+      url: 'https://hyperjumptech.github.io/monika/guides/notifications#sendgrid',
+      img: 'sendgrid.png',
+      title: 'SendGrid',
+      tag: '',
+    },
+    {
+      url: 'https://hyperjumptech.github.io/monika/guides/notifications#slack-incoming-webhook',
+      img: 'slack.png',
+      title: 'Slack',
+      tag: '',
+    },
+    {
+      url: 'https://hyperjumptech.github.io/monika/guides/notifications#smtp',
+      img: 'smtp.png',
+      title: 'SMTP',
+      tag: '',
+    },
+    {
+      url: 'https://hyperjumptech.github.io/monika/guides/notifications#telegram',
+      img: 'telegram.png',
+      title: 'Telegram',
+      tag: '',
+    },
+    {
+      url: 'https://hyperjumptech.github.io/monika/guides/notifications#webhook',
+      img: 'webhook.png',
+      title: 'Webhook',
+      tag: '',
+    },
+    {
+      url: 'https://hyperjumptech.github.io/monika/guides/notifications#whatsapp',
+      img: 'whatsapp.png',
+      title: 'WhatsApp Business',
+      tag: '',
+    },
+    {
+      url: 'https://hyperjumptech.github.io/monika/guides/notifications#dingtalk',
+      img: 'dingtalk.png',
+      title: 'Dingtalk',
+      tag: '',
+    },
+    {
+      url: 'https://hyperjumptech.github.io/monika/guides/notifications#pushover',
+      img: 'pushover.png',
+      title: 'Pushover',
+      tag: '',
+    },
+    {
+      url: 'https://hyperjumptech.github.io/monika/guides/notifications#opsgenie',
+      img: 'opsgenie.png',
+      title: 'Opsgenie',
+      tag: '',
+    },
+  ]
 
   return (
     <>
@@ -387,7 +497,38 @@ export default function IndexPage() {
             send you notification if something happens.
           </span>
         </div>
-        <div className="use-case">
+
+        <div class="integrationSection bg-white block w-full text-center py-8 md:py-10 md:px-5">
+          <h3 className="text20 headline3">Integrations</h3>
+          <p class="block text-black -mt-1">
+            Set up multiple ways to get notified:
+          </p>
+          <div class="container pt-10 pb-5 max-w-5xl mx-auto">
+            <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
+              {integrations.map((integration) => {
+                return (
+                  <div class="text-center">
+                    <a
+                      class="block border-solid border-2 border-black-900 py-3 px-1"
+                      href={integration.url}
+                    >
+                      <img
+                        alt={integration.title}
+                        src={`/playground_assets/partner/${integration.img}`}
+                        className="w-1/3 mx-auto"
+                      />
+                      <p class="text-xs mt-3 text-bold min-h-[36px]">
+                        {integration.title}
+                      </p>
+                    </a>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+
+        <div className="use-case pt-8 md:pt-10">
           <img
             alt="image"
             src="/playground_assets/assets%20%5B1%5D-600w.png"
