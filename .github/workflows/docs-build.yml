@@ -32,7 +32,7 @@ jobs:
       - name: ✍🏻 Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 16.14
 
       - name: 📥 Install deps
         run: npm install
