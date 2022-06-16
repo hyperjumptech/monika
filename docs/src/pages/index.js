@@ -509,7 +509,7 @@ export default function IndexPage() {
                 return (
                   <div class="text-center">
                     <a
-                      class="block border-solid border-2 border-black-900 py-3 px-1"
+                      class="block bg-white shadow py-3 px-1"
                       href={integration.url}
                     >
                       <img
