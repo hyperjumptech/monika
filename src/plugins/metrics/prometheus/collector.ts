@@ -74,19 +74,22 @@ export class PrometheusCollector {
     const { id, name, requests } = probe
     const request = requests[requestIndex]
     const { method, url } = request
-    const { headers } = response
+    const { headers, responseTime, status } = response
     const milliSecond = 1000
-    const responseTimeInSecond = response?.responseTime / milliSecond ?? 0
+    const responseTimeInSecond = responseTime / milliSecond ?? 0
     const responseSizeBytes = Number(headers['content-length'])
     const labels = {
       id,
       name,
       url,
       method: method ?? 'GET',
-      statusCode: response?.status,
+      statusCode: status,
     }
-    const { statusCode, responseTime, responseSize } =
-      this.prometheusCustomCollector
+    const {
+      statusCode,
+      responseTime: resposeTimeCollector,
+      responseSize,
+    } = this.prometheusCustomCollector
 
     // collect metrics
     statusCode
@@ -96,10 +99,10 @@ export class PrometheusCollector {
         url,
         method: method ?? 'GET',
       })
-      .set(response?.status)
-    responseTime?.labels(labels).observe(responseTimeInSecond)
+      .set(status)
+    resposeTimeCollector?.labels(labels).observe(responseTimeInSecond)
     responseSize
       ?.labels(labels)
-      .set(isNaN(responseSizeBytes) ? 0 : responseSizeBytes)
+      .set(Number.isNaN(responseSizeBytes) ? 0 : responseSizeBytes)
   }
 }
