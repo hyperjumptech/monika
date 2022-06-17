@@ -8,7 +8,7 @@ on:
 jobs:
   nightly:
     name: 🌒 Nightly Release
-    if: github.repository == 'hyperjumptech/monika'
+    # if: github.repository == 'hyperjumptech/monika'
     runs-on: ubuntu-latest
     outputs:
       # allows this to be used in the `comment` job below
