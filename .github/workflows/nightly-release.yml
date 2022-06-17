@@ -84,7 +84,7 @@ jobs:
 
       - name: 🚀 Publish
         if: steps.version.outputs.NEXT_VERSION
-        run: npm publish --access public --tag ${{ steps.version.outputs.NEXT_VERSION }}
+        run: npm publish --access public --tag nightly
         
       - name: 🐱 Create GitHub release
         if: steps.version.outputs.NEXT_VERSION
