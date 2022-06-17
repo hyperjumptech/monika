@@ -85,9 +85,7 @@ jobs:
       - name: 🚀 Publish
         if: steps.version.outputs.NEXT_VERSION
         run: npm publish --access public --tag ${{ steps.version.outputs.NEXT_VERSION }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
+        
       - name: 🐱 Create GitHub release
         if: steps.version.outputs.NEXT_VERSION
         uses: actions/create-release@v1

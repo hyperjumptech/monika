@@ -48,6 +48,8 @@ Finally you can also run `npm run test` to prevent regression.
 
 Once you have made the changes, open a Pull Request and explain the issue your change will fix or the feature your change will add.
 
+For contribution details on how to add custom notifications [see the New Notifications guide here](https://monika.hyperjump.tech/guides/new-notifications).
+
 ## Development References
 
 The tools and frameworks we used in this project are listed below:
