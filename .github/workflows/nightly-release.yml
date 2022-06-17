@@ -86,15 +86,6 @@ jobs:
         if: steps.version.outputs.NEXT_VERSION
         run: npm publish --access public --tag nightly
         
-      - name: 🐱 Create GitHub release
-        if: steps.version.outputs.NEXT_VERSION
-        uses: actions/create-release@v1
-        with:
-          draft: false
-          prerelease: true
-          release_name: v${{ steps.version.outputs.NEXT_VERSION }}
-          tag_name: v${{ steps.version.outputs.NEXT_VERSION }}
-
       - name: 💬 Notify Teams
         if: steps.version.outputs.NEXT_VERSION
         uses: joelwmale/webhook-action@fd99bb3b8272237103e349e9bb4d9b0ead9a217c
