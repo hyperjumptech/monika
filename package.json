@@ -1,7 +1,7 @@
 {
   "name": "@hyperjumptech/monika",
   "description": "Synthetic monitoring made easy",
-  "version": "1.7.3",
+  "version": "1.8.0",
   "license": "MIT",
   "author": "@hyperjumptech",
   "main": "lib/index.js",
@@ -47,7 +47,7 @@
   },
   "dependencies": {
     "@alicloud/dingtalk": "^1.3.53",
-    "@oclif/core": "^1.3.0",
+    "@oclif/core": "^1.9.0",
     "@oclif/plugin-help": "^5.1.11",
     "@oclif/plugin-version": "^1",
     "@sendgrid/mail": "^7.4.2",
@@ -57,7 +57,6 @@
     "chalk": "^4.1.2",
     "chokidar": "^3.5.1",
     "cli-table3": "^0.6.0",
-    "cli-ux": "^5.5.1",
     "date-fns": "^2.23.0",
     "express": "4.17.1",
     "filtrex": "^2.2.3",
@@ -97,7 +96,6 @@
     "yaml": "1.10.2"
   },
   "devDependencies": {
-    "@oclif/dev-cli": "^1.26.10",
     "@oclif/test": "^2.1.0",
     "@types/boxen": "^3.0.1",
     "@types/chai": "^4.2.15",
@@ -134,7 +132,7 @@
     "node-request-interceptor": "^0.6.3",
     "nodemailer-mock": "^1.5.4",
     "nyc": "^15.1.0",
-    "oclif": "^2.4.5",
+    "oclif": "^3.0.1",
     "prettier": "2.5.1",
     "ts-node": "^10.4.0",
     "typescript": "4.4.4"
