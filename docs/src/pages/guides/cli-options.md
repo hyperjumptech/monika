@@ -20,13 +20,19 @@ You may want to store different configurations for different environments or pro
 monika --config staging-set.yml
 ```
 
-Configuration files may be placed remotely which you can specify using the same flag and using a URI.
+A neat feature is that the configuration file is watched and any changes will cause Monika to reload.
+
+You may also specify a configuration from some remote resource, which you can specify using the same `-c` flag and using a URI.
 
 ```bash
 monika -c https://raw.githubusercontent.com/hyperjumptech/monika/main/config_sample/config.desktop.example.yml
 ```
 
-A neat feature is that the configuration file is watched and any changes will cause Monika to reload.
+For remote configuration files, you can additionaly specify how often (in seconds) Monika check for changes using the `--config-interval` switch like this:
+
+```bash
+monika -c https://raw.githubusercontent.com/hyperjumptech/monika/main/config_sample/config.desktop.example.yml --config-interval 10
+```
 
 ### Multiple configurations
 
