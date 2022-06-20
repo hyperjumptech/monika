@@ -22,13 +22,13 @@ monika --config staging-set.yml
 
 A neat feature is that the configuration file is watched and any changes will cause Monika to reload.
 
-You may also specify a configuration from some remote resource, which you can specify using the same `-c` flag and using a URI.
+You can also use a configuration from some remote resource, which you specify using the same `-c` flag and a URI address.
 
 ```bash
 monika -c https://raw.githubusercontent.com/hyperjumptech/monika/main/config_sample/config.desktop.example.yml
 ```
 
-For remote configuration files, you can additionaly specify how often (in seconds) Monika check for changes using the `--config-interval` switch like this:
+For remote configuration files, you can additionaly specify how often (in seconds) Monika checks for changes with the `--config-interval` switch like this:
 
 ```bash
 monika -c https://raw.githubusercontent.com/hyperjumptech/monika/main/config_sample/config.desktop.example.yml --config-interval 10
