@@ -34,6 +34,8 @@ For remote configuration files, you can additionaly specify how often (in second
 monika -c https://raw.githubusercontent.com/hyperjumptech/monika/main/config_sample/config.desktop.example.yml --config-interval 10
 ```
 
+By default, monika will check remote locations once every 15 minutes.
+
 ### Multiple configurations
 
 Monika also supports multiple sources of configuration at the same time.
