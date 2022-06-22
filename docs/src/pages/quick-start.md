@@ -17,7 +17,7 @@ The recommendeded approach is to use [Chocolatey](https://community.chocolatey.o
 
 If Chocolatey is already available, then run the following command to install Monika:
 
-```
+```bash
 choco install monika
 ```
 
@@ -31,7 +31,7 @@ The recommended approach is to use [Homebrew](https://brew.sh/), a popular packa
 
 If Homebrew is already available, then run the following command to install Monika:
 
-```
+```bash
 brew install monika
 ```
 
@@ -45,8 +45,8 @@ The recommended approach is to use [Snapcraft](https://snapcraft.io/), a univers
 
 Alternatively, Monika for Linux can be automatically downloaded and installed by running an installation script as follows:
 
-```
-$ curl https://raw.githubusercontent.com/hyperjumptech/monika/main/scripts/monika-install.sh | sh
+```bash
+curl https://raw.githubusercontent.com/hyperjumptech/monika/main/scripts/monika-install.sh | sh
 ```
 
 The binary will be placed in placed into `~/.local/bin`.
@@ -58,13 +58,13 @@ If you prefer to perform the installation manually, head over to [Monika Release
 With Node.js, Monika is also installable with [npm](https://npmjs.com):
 
 ```bash
-$ npm i -g @hyperjumptech/monika
+npm i -g @hyperjumptech/monika
 ```
 
 or [yarn](https://yarnpkg.com):
 
 ```bash
-$ yarn global add @hyperjumptech/monika
+yarn global add @hyperjumptech/monika
 ```
 
 ## Download the configuration file
@@ -89,6 +89,12 @@ Better yet, you can provide a URL that contains monika configuration
 
 ```bash
 monika -c https://domain.com/path/to/your/configuration.yml
+```
+
+If you are using a remote url to fetch the configuration, you might want to periodically check for changes. You can use the `--config-interval` to check every 10 seconds like this:
+
+```bash
+monika -c https://raw.githubusercontent.com/hyperjumptech/monika/main/config_sample/config.desktop.example.yml --config-interval 10
 ```
 
 Congratulations, you have successfully run Monika in your machine!

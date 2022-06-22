@@ -10,6 +10,17 @@ html {
   -moz-osx-font-smoothing: grayscale;
 }
 
+@media (min-width: 1024px) {
+  body {
+    position: relative;
+  }
+  .aa-Panel {
+    position: fixed !important;
+    z-index: 99;
+    top: 60px !important;
+  }
+}
+
 .top-24 {
   top: 6rem;
 }
