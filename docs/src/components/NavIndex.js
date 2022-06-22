@@ -31,24 +31,36 @@ export default function NavIndex(props) {
     containerClass = 'cmedium'
   }
 
-  const indexing = childrens.map((item) =>
-    item?.props?.originalType === 'h2' ? (
-      <li key={item?.props?.id.toString()}>
-        <span className="pr-2">•</span>
-        <a href={'#' + item.props.id}>{item.props.children[0]}</a>
-      </li>
-    ) : (
-      ''
-    )
-  )
+  const indexing = childrens.map((item) => {
+    switch (item?.props?.originalType) {
+      case 'h2':
+        return (
+          <ul className="text-sm">
+            <li key={item?.props?.id.toString()}>
+              <span className="pr-2">•</span>
+              <a href={'#' + item.props.id}>{item.props.children[0]}</a>
+            </li>
+          </ul>
+        )
+      case 'h3':
+        return (
+          <ul className="text-sm">
+            <li key={item?.props?.id.toString()}>
+              <span className="pr-2">-</span>
+              <a href={'#' + item.props.id}>{item.props.children[0]}</a>
+            </li>
+          </ul>
+        )
+      default:
+        return ''
+    }
+  })
 
   return (
     <>
       <div className={containerClass}>
         <div className="relative w-full">
-          <div className="sticky">
-            <ul className="text-sm">{indexing}</ul>
-          </div>
+          <div className="sticky">{indexing}</div>
         </div>
       </div>
 
