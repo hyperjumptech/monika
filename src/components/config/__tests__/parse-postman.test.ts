@@ -45,7 +45,7 @@ describe('parseConfigFromPostman', () => {
       } catch (error) {
         expect(() => {
           throw error
-        }).to.throw('Postman file is in invalid JSON format!')
+        }).to.throw('Your Postman file contains an invalid JSON format!')
       }
     })
   })
