@@ -3,7 +3,7 @@ id: configuration-file
 title: Configuration File
 ---
 
-Monika uses a YAML file format to describe all the settings and configurations. A sample is included in the project can be seen `monika.example.yml`
+Monika uses a YAML file format to describe all the settings and configurations. A sample is included in the project in the file `monika.example.yml`
 
 The following are a summary of their settings. In general Monika and its configuration file, `monika.yml` is divided into three sections. A probe, an alert and a notification section.
 

@@ -14,7 +14,7 @@ monika -h
 ## Configuration
 
 Monika by default will look for the `monika.yml` config file.
-You may want to store different configurations for different environments or projects. Using different configurations is straightforward by using the `-c` or `--config` flag followed by the filename.
+You may want to store different configurations for different environments or projects. Applying custom configurations is straightforward by using the `-c` or `--config` flag followed by the filename.
 
 ```bash
 monika --config staging-set.yml
@@ -60,7 +60,7 @@ monika --auto-update patch
 
 ## Create Config
 
-Just starting out? Want to make a new configuration? Running `monika` without any parameters (and without any default config found in the working directory) will pull a default configuration `monika.yml`. Looking for more options? The `--create-config` flag will spin up an easy Web based configuration file generator.
+Just starting out? Want to make a new configuration? Running `monika` without any parameters (and without any default config found in the working directory) will pull a default configuration `monika.yml` as a starting point. Looking for more options? The `--create-config` flag will spin up an easy Web based configuration file generator.
 
 ```bash
 monika --create-config
