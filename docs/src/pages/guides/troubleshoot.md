@@ -15,4 +15,4 @@ If you have issues probing a particular target we suggest:
 2. Isolate the problem probes in your `monika.yml` configuration file, perhaps try the probe alone removing others while you troubleshoot.
 3. Check the examples in our [documentations here](https://monika.hyperjump.tech/guides/examples).
 
-Found something you can't solve, have questions or feedback? By all means reach out through email or through our [discussion forums in github](https://github.com/hyperjumptech/monika/discussions).
+Found something you can't solve, have questions or feedback? By all means reach out through email or through our [discussion forums in github](https://github.com/hyperjumptech/monika/discussions). We would love to hear from you.

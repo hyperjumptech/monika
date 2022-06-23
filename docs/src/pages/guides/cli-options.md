@@ -80,7 +80,7 @@ The above example creates a config file from an existing HAR archive. Auto gener
 monika --create-config --postman mypostman.json -o new-monika.yml
 ```
 
-When generating config files, if an existing monika.yml file already exists, the user will be prompted before overwriting. To bypass the user prompt, use the `--force` flag.
+When generating config files, if an existing `monika.yml` already exists, the user will be prompted before overwriting. To bypass the user prompt, use the `--force` flag.
 
 ## Force
 

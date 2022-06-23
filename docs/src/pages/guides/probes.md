@@ -136,7 +136,7 @@ Probe response data could be used for [Request Chaining](https://hyperjumptech.g
 
 In a configuration with multiple probes, `Monika` will load the requests in the order that they are entered, one after another. However, probes may be performed out of sequence depending on their interval setting, network latency and response times. By default Monika loops through all the probe configurations in the order they are entered, but you can use the `--id` or the `--repeat` flags to specify or repeat a particular sequence. See the [cli options here](https://monika.hyperjump.tech/guides/cli-options) for more information.
 
-In general, Monika will sleep until the next `interval` timer to repeat a probe. If no `interval` time is specified for a probe, the default value will be used. If the probe `interval` is shorter than the amount of time to dispatch all the requests, then `Monika` will immediately repeat after the last response and any notification alerts sent.
+In general, Monika will sleep until the next `interval` timer to repeat a probe. If no `interval` time is specified for a probe, the default value will be used. If the configured probe `interval` is shorter than the amount of time to dispatch all the requests, then `Monika` will immediately repeat after the last response and any notification alerts sent.
 
 ## Content-Type header
 
