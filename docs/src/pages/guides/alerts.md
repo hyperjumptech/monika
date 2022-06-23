@@ -3,7 +3,7 @@ id: alerts
 title: Alerts
 ---
 
-Alerts are the types of condition that will trigger Monika to send notification. It is an array defined in the config file `monika.yml` like so.
+Alerts are the types of conditions that will trigger Monika to send notification. It is an array defined in the config file `monika.yml` like so.
 
 ```yaml
 probes:
@@ -87,7 +87,7 @@ Inside the query expression you can get the response object.
 
 These are values that are available:
 
-- response.status: HTTP status code of the reponse
+- response.status: HTTP status code of the response
 - response.time: the time it takes to perform a HTTP request
 - response.size: size of the response in bytes
 - response.headers: HTTP response headers
@@ -109,7 +109,7 @@ alerts:
   - query: response.body.data.todos[0].title != "Drink water"
 ```
 
-Additionaly you can have proccessing done in your queries. For instance, to ensure case insensitivity, you might want to convert to lower case. It might look something like this:
+Additionally you can have processing done in your queries. For instance, to ensure case insensitivity, you might want to convert to lowercase. It might look something like this:
 
 ```yaml
 alerts:
@@ -145,7 +145,7 @@ These operators are available:
 | x and y       | Boolean and                   |
 | not x         | Boolean not                   |
 | x ? y : z     | If boolean x, value y, else z |
-| ( x )         | Explicity operator precedence |
+| ( x )         | Explicit operator precedence  |
 
 There are also several helper functions available:
 
@@ -153,13 +153,13 @@ There are also several helper functions available:
 
   example: `has(response.body, "data")` checks if there is "data" property inside response.body
 
-- **lowerCase(string)**: Converts string to lower case
+- **lowerCase(string)**: Converts string to lowercase
 
-  example: `lowerCase(response.body.message)` converts message string value to lower case
+  example: `lowerCase(response.body.message)` converts message string value to lowercase
 
-- **upperCase(string)**: Converts string to upper case
+- **upperCase(string)**: Converts string to uppercase
 
-  example: `upperCase(response.body.message)` converts message string value to upper case
+  example: `upperCase(response.body.message)` converts message string value to uppercase
 
 - **startsWith(string, target)**: Checks if string starts with the given target string
 
@@ -171,9 +171,9 @@ There are also several helper functions available:
 
 - **includes(collection, value)**: Checks if value is in collection. If collection is a string, it's checked for a substring of value
 
-  example 1: `includes(response.body.prizes, "gold")` checks if "gold" exists in prizes array.
+  example 1: `includes(response.body.prizes, "gold")` checks if "gold" exists in the prizes array.
 
-  example 2: `includes(response.body.message, "ello")` checks if "ello" is substring of message string.
+  example 2: `includes(response.body.message, "ello")` checks if "ello" is a substring of the message string.
 
 - **size(collection)**: Gets length of array or string values.
 
@@ -181,7 +181,7 @@ There are also several helper functions available:
 
 - **isEmpty(value)**: Checks if value is an empty object, empty array, empty string, null, or undefined.
 
-  example: `isEmpty(response.body.data)` checks whether the data propery is empty or not
+  example: `isEmpty(response.body.data)` checks whether the data property is empty or not
 
 ## Alert Message
 
