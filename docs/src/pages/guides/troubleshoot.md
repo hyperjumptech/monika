@@ -12,7 +12,7 @@ sudo npm i -g @hyperjumptech/monika --unsafe-perm=true --allow-root
 If you have issues probing a particular target we suggest:
 
 1. Try sending the request through curl or a separate tool such as Insomnia.
-2. Isolate the problem probes in your `monika.yml` configuration file, perhaps try the probe alone removing others while you troubleshoot.
+2. Isolate the problematic probes in your `monika.yml` configuration file by removing others while you troubleshoot.
 3. Check the examples in our [documentations here](https://monika.hyperjump.tech/guides/examples).
 
-Found something you can't solve, have questions or feedback? By all means reach out through email or through our [discussion forums in github](https://github.com/hyperjumptech/monika/discussions). We would love to hear from you.
+Found something you can't solve, have questions or feedback? By all means reach out through our [discussion forums in github](https://github.com/hyperjumptech/monika/discussions). We would love to hear from you.
