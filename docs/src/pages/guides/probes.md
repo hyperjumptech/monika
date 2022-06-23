@@ -23,7 +23,7 @@ probes:
     alerts: []
 ```
 
-Monika goes through each probe object, sends it out, and determines whether an alert or notification need to be sent out.
+Monika goes through each probe object, sends it out, and determines whether an alert or notification needs to be sent out.
 
 ## Probe Request Anatomy
 
@@ -54,7 +54,7 @@ An actual probe request may be something like below.
   ]
 ```
 
-Details of the field are give in the table below.
+Details of the field are given in the table below.
 
 | Topic                        | Description                                                                                                                                                                                                                                                                                                                                               |
 | :--------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -67,13 +67,13 @@ Details of the field are give in the table below.
 | incidentThreshold (optional) | Number of times an alert should return true before Monika sends notifications. For example, when incidentThreshold is 3, Monika will only send notifications when the probed URL returns non-2xx status 3 times in a row. After sending the notifications, Monika will not send notifications anymore until the alert status changes. Default value is 5. |
 | recoveryThreshold (optional) | Number of times an alert should return false before Monika sends notifications. For example, when recoveryThreshold is 3, Monika will only send notifications when the probed URL returns status 2xx 3 times in a row. After sending the notifications, Monika will not send notifications anymore until the alert status changes. Default value is 5.    |
 | alerts                       | The condition which will trigger an alert, and the subsequent notification method to send out the alert. See below for further details on alerts and notifications.                                                                                                                                                                                       |
-| saveBody (optional)          | When set to true, the response body of the request is stored in the internal database. The default is off when not defined. This is to keep the log files size small as some responses can be sizeable. The setting is for each probe request.                                                                                                            |
+| saveBody (optional)          | When set to true, the response body of the request is stored in the internal database. The default is off when not defined. This is to keep the log file size small as some responses can be sizable. The setting is for each probe request.                                                                                                              |
 | alerts (optional)            | See [alerts](./alerts) section for detailed information.                                                                                                                                                                                                                                                                                                  |
 | ping (optional)              | (boolean), If set true then send a PING to the specified url instead.                                                                                                                                                                                                                                                                                     |
 
 ### PING
 
-You can send an ICMP echo request, to a specific url by enabling the `ping: true` field.
+You can send an ICMP echo request to a specific url by enabling the `ping: true` field.
 In this mode the http method is ignored and a PING echo request is sent to the specified url.
 
 ```yaml
@@ -134,9 +134,9 @@ Probe response data could be used for [Request Chaining](https://hyperjumptech.g
 
 ## Execution order
 
-In a configuration with multiple probes, `Monika` will perform the requests in sequence in the order that they are entered, one after another. When the `--id` flag is used, the sequence of IDs are executed as entered.
+In a configuration with multiple probes, `Monika` will load the requests in the order that they are entered, one after another. However, probes may be performed out of sequence depending on their interval setting, network latency and response times. By default Monika loops through all the probe configurations in the order they are entered, but you can use the `--id` or the `--repeat` flags to modify the sequence. See the [cli options here](https://monika.hyperjump.tech/guides/cli-options) for more information.
 
-On completion, `Monika` will sleep until the next interval to start again. At the top of the `monika.yml` file there is an `interval` setting. The execution will be restarted after every `interval`. If interval is shorter than the amount of time to dispatch all the requests, then `Monika` will immediately repeat after the last probe response and any notification alerts sent. When the `--repeat` flag is set with a value, Monika will not run indefinitely, instead, it will stop after executing the probes as many times as specified.
+Monika will sleep until the next `interval` timer to repeat a probe. If no `interval` time is specified for a probe, the default value will be used. If the probe `interval` is shorter than the amount of time to dispatch all the requests, then `Monika` will immediately repeat after the last response and any notification alerts sent.
 
 ## Content-Type header
 
@@ -144,7 +144,7 @@ Currently, Monika only supports Content-Type value `application/x-www-form-urlen
 
 ## Request Body
 
-By default, request body will be treated as-is. If request header's `Content-Type` is set to `application/x-www-form-urlencoded`, it will be serialized into URL-safe string in UTF-8 encoding.
+By default, the request body will be treated as-is. If the request header's `Content-Type` is set to `application/x-www-form-urlencoded`, it will be serialized into URL-safe string in UTF-8 encoding.
 
 ## Postman JSON file support
 

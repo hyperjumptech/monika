@@ -3,7 +3,7 @@ id: status-notification
 title: Status Notification
 ---
 
-Monika sends status notification periodically based on a set schedule with the following information:
+Monika sends status notifications periodically based on a set schedule with the following information:
 
 - Host
 - Number of probes
@@ -47,9 +47,9 @@ status-notification: false
 
 ## Cron Syntax
 
-To schedule the status notification we use standard cron syntax. You can tryout your configuration on [crontab.guru](https://crontab.guru/).
+To schedule the status notification we use standard cron syntax. You can try out your configuration on [crontab.guru](https://crontab.guru/).
 
-In addition to the standard 5 cron syntax, Monika supports an optional `seconds` field. So if you wrote 6 cron syntax, please be advised that the status notification could be sent so frequent.
+In addition to the standard 5 cron syntax, Monika supports an optional `seconds` field. So if you wrote 6 cron syntax, please be advised that the status notification could be sent very frequently.
 
 ```bash
  ┌────────────── second (optional)
@@ -80,7 +80,7 @@ Examples:
 status-notification "1,2,5,7 * * * *"
 ```
 
-Notifies every minutes 1, 2, 5 and 7. In other words every xx:01, xx:02, xx:05, xx:07 of every hour.
+Notifies every minute 1, 2, 5 and 7. In other words every xx:01, xx:02, xx:05, xx:07 of every hour.
 
 ```bash
 status-notification "1-5 * * * *"
