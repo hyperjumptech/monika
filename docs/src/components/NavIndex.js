@@ -65,7 +65,7 @@ export default function NavIndex(props) {
       </div>
 
       <style jsx>{`
-        @media (max-width: 1535px) {
+        @media (max-width: 1023px) {
           .csticky {
             display: none;
           }
@@ -76,7 +76,7 @@ export default function NavIndex(props) {
             margin-bottom: 15px;
           }
         }
-        @media (min-width: 1536px) {
+        @media (min-width: 1024px) {
           .cmedium {
             display: none;
           }
