@@ -13,7 +13,7 @@ probes:
       - url: https://github.com
 ```
 
-If you didn't define the http method, it will use the GET method by default. Please note that with this configuration, you will not get any notifications when <github.com> is down since the notification configuration is not defined.
+If you didn't define the http method, it will use the GET method by default. Please note that with this configuration, you will not get any notifications when the site github.com is down since the notification configuration is not defined.
 
 ## Enabling Notification
 
