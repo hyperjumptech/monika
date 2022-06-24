@@ -3,6 +3,8 @@ id: alerts
 title: Alerts
 ---
 
+This is a test
+
 Alerts are the types of conditions that will trigger Monika to send notification. It is an array defined in the config file `monika.yml` like so.
 
 ```yaml
