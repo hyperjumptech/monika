@@ -155,7 +155,9 @@ You must respond with a capital `"Y"` to confirm if you want to flush the logs o
 
 ## Postman
 
-Have an existing request on Postman you want to automate? Monika supports reading postman.yml as configuration input. Use the `-p` or the `--postman` switches.
+> NOTE: We only support Postman collection v2.0 and v2.1 files.
+
+Have an existing request on postman you want to automate? Monika supports reading postman.yml as configuration input. Use the `-p` or the `--postman` switches.
 
 ```bash
 monika -p postman.json

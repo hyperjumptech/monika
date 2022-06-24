@@ -148,6 +148,8 @@ By default, the request body will be treated as-is. If the request header's `Con
 
 ## Postman JSON file support
 
+> NOTE: We only support Postman collection v2.0 and v2.1 files.
+
 To run monika using a [Postman](https://www.postman.com/) JSON file, use `--postman` flag as follows:
 
 ```bash

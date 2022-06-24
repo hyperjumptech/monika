@@ -24,16 +24,21 @@
 
 import { expect } from 'chai'
 import fs from 'fs'
-import { createConfig } from '..'
 import _ from 'lodash'
+
+import { createConfig } from '../'
 
 beforeEach(() => {
   if (fs.existsSync('monika.har.yml')) {
     fs.unlinkSync('monika.har.yml')
   }
 
-  if (fs.existsSync('monika.postman.yml')) {
-    fs.unlinkSync('monika.postman.yml')
+  if (fs.existsSync('monika.postman-basic.yml')) {
+    fs.unlinkSync('monika.postman-basic.yml')
+  }
+
+  if (fs.existsSync('monika.postman-grouped.yml')) {
+    fs.unlinkSync('monika.postman-grouped.yml')
   }
 
   if (fs.existsSync('monika.insomnia.yml')) {
@@ -61,22 +66,83 @@ describe('Har config', () => {
   })
 })
 
+const getPostmanConfig = ({ grouped }: { grouped: boolean }) => {
+  if (grouped) {
+    const generated = fs.readFileSync('monika.postman-grouped.yml', 'utf-8')
+
+    const expected = fs.readFileSync(
+      './src/components/config/__tests__/mock_files/expected.postman-grouped.yml',
+      'utf-8'
+    )
+
+    return { generated, expected }
+  }
+
+  const generated = fs.readFileSync('monika.postman-basic.yml', 'utf-8')
+
+  const expected = fs.readFileSync(
+    './src/components/config/__tests__/mock_files/expected.postman-basic.yml',
+    'utf-8'
+  )
+
+  return { generated, expected }
+}
+
 describe('Postman config', () => {
   describe('Create config from postman file', () => {
-    it('should create config from postman file', async () => {
+    it('[v2.0] - should create config from basic postman file', async () => {
       const flags = {
         postman:
-          './src/components/config/__tests__/simple.postman_collection.json',
-        output: 'monika.postman.yml',
+          './src/components/config/__tests__/mock_files/basic-postman_collection-v2.0.json',
+        output: 'monika.postman-basic.yml',
       }
-      await createConfig(flags)
-      expect(fs.lstatSync('monika.postman.yml').isFile()).to.be.true
 
-      const generated = fs.readFileSync('monika.postman.yml', 'utf-8')
-      const expected = fs.readFileSync(
-        './src/components/config/__tests__/expected.postman.yml',
-        'utf-8'
-      )
+      await createConfig(flags)
+      expect(fs.lstatSync('monika.postman-basic.yml').isFile()).to.be.true
+
+      const { generated, expected } = getPostmanConfig({ grouped: false })
+      expect(_.isEqual(generated, expected)).to.be.true
+    })
+
+    it('[v2.1] - should create config from basic postman file', async () => {
+      const flags = {
+        postman:
+          './src/components/config/__tests__/mock_files/basic-postman_collection-v2.1.json',
+        output: 'monika.postman-basic.yml',
+      }
+
+      await createConfig(flags)
+      expect(fs.lstatSync('monika.postman-basic.yml').isFile()).to.be.true
+
+      const { generated, expected } = getPostmanConfig({ grouped: false })
+      expect(_.isEqual(generated, expected)).to.be.true
+    })
+
+    it('[v2.0] - should create config from grouped postman file', async () => {
+      const flags = {
+        postman:
+          './src/components/config/__tests__/mock_files/grouped-postman_collection-v2.0.json',
+        output: 'monika.postman-grouped.yml',
+      }
+
+      await createConfig(flags)
+      expect(fs.lstatSync('monika.postman-grouped.yml').isFile()).to.be.true
+
+      const { generated, expected } = getPostmanConfig({ grouped: true })
+      expect(_.isEqual(generated, expected)).to.be.true
+    })
+
+    it('[v2.1] - should create config from grouped postman file', async () => {
+      const flags = {
+        postman:
+          './src/components/config/__tests__/mock_files/grouped-postman_collection-v2.1.json',
+        output: 'monika.postman-grouped.yml',
+      }
+
+      await createConfig(flags)
+      expect(fs.lstatSync('monika.postman-grouped.yml').isFile()).to.be.true
+
+      const { generated, expected } = getPostmanConfig({ grouped: true })
       expect(_.isEqual(generated, expected)).to.be.true
     })
   })
