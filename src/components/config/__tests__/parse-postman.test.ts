@@ -23,44 +23,131 @@
  **********************************************************************************/
 
 import { expect } from 'chai'
+import { values } from 'lodash'
 import { Config } from '../../../interfaces/config'
 import { parseConfigFromPostman } from '../parse-postman'
-import simpleEndpointsPostmanJson from './simple.postman_collection.json'
-import groupedEndpointsPostmanJson from './grouped.postman_collection.json'
+import basicCollectionV20 from './mock_files/basic-postman_collection-v2.0.json'
+import basicCollectionV21 from './mock_files/basic-postman_collection-v2.1.json'
+import groupedCollectionV20 from './mock_files/grouped-postman_collection-v2.0.json'
+import groupedCollectionV21 from './mock_files/grouped-postman_collection-v2.1.json'
+import unsupportedCollection from './mock_files/postman_collection-unsupported.json'
 
 describe('parseConfigFromPostman', () => {
-  describe('simple endpoints', () => {
-    it('should converted to json', () => {
-      const config: Config = parseConfigFromPostman(
-        JSON.stringify(simpleEndpointsPostmanJson)
+  it('throws invalid JSON format', () => {
+    try {
+      parseConfigFromPostman('../fetch.ts')
+    } catch (error) {
+      expect(() => {
+        throw error
+      }).to.throw('Your Postman file contains an invalid JSON format!')
+    }
+  })
+
+  it('throws unsupported collection version', () => {
+    try {
+      const collectionStr = JSON.stringify(unsupportedCollection)
+
+      parseConfigFromPostman(collectionStr)
+    } catch (error) {
+      expect(() => {
+        throw error
+      }).to.throw(
+        'Your Postman collection version is not supported. Please use v2.0 or v2.1!'
       )
-      expect(config.probes[0].requests[0].url).to.equals(
-        simpleEndpointsPostmanJson.item[0].request.url.raw
-      )
+    }
+  })
+
+  describe('basic Postman collection', () => {
+    it('[v2.0] - should converted to Monika config', () => {
+      const collectionStr = JSON.stringify(basicCollectionV20)
+      const config: Config = parseConfigFromPostman(collectionStr)
+
+      expect(config.probes.length).to.equals(2)
+
+      for (const [index, item] of basicCollectionV20.item.entries()) {
+        expect(item.name).to.equals(config.probes[index].name)
+
+        for (const req of config.probes[index].requests) {
+          expect(req.url).to.equals(item.request.url)
+          expect(req.method).to.equals(item.request.method)
+          expect(values(req.headers).length).to.equals(
+            item.request.header.length
+          )
+          expect(req.body).to.deep.equal(
+            JSON.parse(item.request.body?.raw ?? '{}')
+          )
+        }
+      }
     })
 
-    it('should return not valid', () => {
-      try {
-        parseConfigFromPostman('../fetch.ts')
-      } catch (error) {
-        expect(() => {
-          throw error
-        }).to.throw('Postman file is in invalid JSON format!')
+    it('[v2.1] - should converted to Monika config', () => {
+      const collectionStr = JSON.stringify(basicCollectionV21)
+      const config: Config = parseConfigFromPostman(collectionStr)
+
+      expect(config.probes.length).to.equals(2)
+
+      for (const [index, item] of (basicCollectionV21 as any).item.entries()) {
+        expect(item.name).to.equals(config.probes[index].name)
+
+        for (const req of config.probes[index].requests) {
+          expect(req.url).to.equals(item.request.url?.raw)
+          expect(req.method).to.equals(item.request.method)
+          expect(values(req.headers).length).to.equals(
+            item.request.header.length
+          )
+          expect(req.body).to.deep.equals(
+            JSON.parse(item.request.body?.raw ?? '{}')
+          )
+        }
       }
     })
   })
 
-  describe('grouped endpoints', () => {
-    it('should converted to json', () => {
-      const config: Config = parseConfigFromPostman(
-        JSON.stringify(groupedEndpointsPostmanJson)
-      )
-      expect(config.probes[0].requests[0].url).to.equals(
-        groupedEndpointsPostmanJson.item[0].item[0].request.url.raw
-      )
-      expect(config.probes[1].requests[0].url).to.equals(
-        groupedEndpointsPostmanJson.item[1].item[0].request.url.raw
-      )
+  describe('grouped Postman collection', () => {
+    it('[v2.0] - should converted to Monika config', () => {
+      const collectionStr = JSON.stringify(groupedCollectionV20)
+      const config: Config = parseConfigFromPostman(collectionStr)
+
+      expect(config.probes.length).to.equals(2)
+
+      for (const [index, item] of groupedCollectionV20.item.entries()) {
+        expect(item.name).to.equals(config.probes[index].name)
+
+        for (const [rIndex, req] of config.probes[index].requests.entries()) {
+          expect(req.url).to.equals(item.item[rIndex].request.url)
+          expect(req.method).to.equals(item.item[rIndex].request.method)
+          expect(values(req.headers).length).to.equals(
+            item.item[rIndex].request.header.length
+          )
+          expect(req.body).to.deep.equals(
+            JSON.parse(item.item[rIndex].request.body?.raw ?? '{}')
+          )
+        }
+      }
+    })
+
+    it('[v2.1] - should converted to Monika config', () => {
+      const collectionStr = JSON.stringify(groupedCollectionV21)
+      const config: Config = parseConfigFromPostman(collectionStr)
+
+      expect(config.probes.length).to.equals(2)
+
+      for (const [index, item] of (
+        groupedCollectionV21 as any
+      ).item.entries()) {
+        expect(item.name).to.equals(config.probes[index].name)
+
+        for (const [rIndex, req] of config.probes[index].requests.entries()) {
+          expect(req.url).to.equals(item.item[rIndex].request.url?.raw)
+          expect(req.method).to.equals(item.item[rIndex].request.method)
+          expect(values(req.headers).length).to.equals(
+            item.item[rIndex].request.header.length
+          )
+          expect(req.body).to.deep.equals(
+            JSON.parse(item.item[rIndex].request.body?.raw ?? '{}')
+          )
+        }
+      }
     })
   })
 })

@@ -14,19 +14,27 @@ monika -h
 ## Configuration
 
 Monika by default will look for the `monika.yml` config file.
-You may want to store different configurations for different environments or projects. This is straight forward by using the `-c` or `--config` flag followed by the filename.
+You may want to store different configurations for different environments or projects. Applying custom configurations is straightforward by using the `-c` or `--config` flag followed by the filename.
 
 ```bash
 monika --config staging-set.yml
 ```
 
-Configuration files may be placed remotely which you can specify using the same flag and using a URI.
+A neat feature is that the configuration file is watched and any changes will cause Monika to reload.
+
+You can also use a configuration from some remote resource, which you specify using the same `-c` flag and a URI address.
 
 ```bash
 monika -c https://raw.githubusercontent.com/hyperjumptech/monika/main/config_sample/config.desktop.example.yml
 ```
 
-A neat feature is that the configuration file is watched and any changes will cause Monika to reload.
+For remote configuration files, you can additionally specify how often (in seconds) Monika checks for changes with the `--config-interval` switch like this:
+
+```bash
+monika -c https://raw.githubusercontent.com/hyperjumptech/monika/main/config_sample/config.desktop.example.yml --config-interval 10
+```
+
+By default, monika will check remote locations once every 15 minutes.
 
 ### Multiple configurations
 
@@ -48,11 +56,11 @@ Monika supports automatic update with `--auto-update major|minor|patch`. Where `
 monika --auto-update patch
 ```
 
-**Note that** auto-update will make Monika terminate itself after succesful update. To automatically restart Monika when terminated, you need to run Monika with a process manager applications, e.g., monit, pm2, nodemon.
+**Note that** auto-update will make Monika terminate itself after successful update. To automatically restart Monika when terminated, you need to run Monika with a process manager application, e.g., monit, pm2, nodemon.
 
 ## Create Config
 
-Just starting out? Want to make a new configuration? The `--create-config` flag will spin up an easy Web based configuration file generator.
+Just starting out? Want to make a new configuration? Running `monika` without any parameters (and without any default config found in the working directory) will pull a default configuration `monika.yml` as a starting point. Looking for more options? The `--create-config` flag will spin up an easy Web based configuration file generator.
 
 ```bash
 monika --create-config
@@ -72,7 +80,7 @@ The above example creates a config file from an existing HAR archive. Auto gener
 monika --create-config --postman mypostman.json -o new-monika.yml
 ```
 
-When generating config files, if an existing monika.yml file already exist, the user is prompted before overwriting. To bypass the user prompt, use the `--force` flag.
+When generating config files, if an existing `monika.yml` already exists, the user will be prompted before overwriting. To bypass the user prompt, use the `--force` flag.
 
 ## Force
 
@@ -82,11 +90,11 @@ The `--force` flag forces the execution of a command. The force flag will bypass
 monika --flush --force
 ```
 
-The example above flushes the database bypassing without waiting for user confirmation.
+The example above flushes the database without waiting for user confirmation.
 
 ## HAR
 
-Monika supports HAR files as input. HAR are JSON formatted HTTP ARchive file. Follow [these steps](https://medium.com/hyperjump-tech/generate-your-monika-configuration-using-http-archive-har-764944cbb9e6) to generate your own HAR file from the site you've visited then use Monika to refetch the pages and ensure they still work.
+Monika supports HAR files as input. HAR are JSON formatted HTTP ARchive files. Follow [these steps](https://medium.com/hyperjump-tech/generate-your-monika-configuration-using-http-archive-har-764944cbb9e6) to generate your own HAR file from the site you've visited then use Monika to refetch the pages and ensure they still work.
 
 You use the `-H` or `--har` to specify a HAR file.
 
@@ -96,7 +104,7 @@ monika -H my-file.har
 
 ### Create config from HAR file
 
-You can use the combination of `--create-config` and `--har` flags to convert the HAR archive into to a monika.yml configuration file.
+You can use the combination of `--create-config` and `--har` flags to convert the HAR archive into a `monika.yml` configuration file.
 
 ```bash
 # default to monika.yml
@@ -115,7 +123,7 @@ monika --config monika-notifications.yml -H my-file.har
 
 ## Id
 
-By default Monika loops through all the probe configuration in order they are entered. However, you can specify any run order you want using the `-i` or `--id` flags.
+By default Monika loops through all the probe configurations in the order they are entered. However, you can specify any run order you want using the `-i` or `--id` flags.
 
 ```bash
 monika -i 1,3,1,2,4,5,7,7
@@ -125,7 +133,7 @@ The above example will run probe id 1, 3, 1, 2, 4, 5, 7, 7 in that order just on
 
 ## Logging
 
-Monika stores requests and responses data in an internal log file. By default, it only stores data when incident or recovery happens. You may choose to store all requests using `--keep-verbose-logs` flag.
+Monika stores requests and responses data in an internal log file. By default, it only stores data when an incident or recovery occurs. You may choose to store all requests using the `--keep-verbose-logs` flag.
 
 ```bash
 monika --keep-verbose-logs
@@ -146,6 +154,8 @@ monika --flush
 You must respond with a capital `"Y"` to confirm if you want to flush the logs or use the `--force` flag to force a Yes without prompting.
 
 ## Postman
+
+> NOTE: We only support Postman collection v2.0 and v2.1 files.
 
 Have an existing request on postman you want to automate? Monika supports reading postman.yml as configuration input. Use the `-p` or the `--postman` switches.
 
@@ -179,7 +189,7 @@ monika -I /your/insomnia/collection.yaml # JSON / YAML
 
 ### Create config from Insomnia file
 
-Generate your Monika configuration with combining `--create-config` and `--insomnia` flags to convert your Insomnia collection file to a monika config file.
+Generate your Monika configuration by combining `--create-config` and `--insomnia` flags to convert your Insomnia collection file to a monika config file.
 
 ```bash
 monika --create-config --insomnia /your/insomnia/collection.yaml # JSON / YAML
@@ -216,7 +226,7 @@ Monika exposes [Prometheus default metrics](https://prometheus.io/docs/instrumen
 
 ## Repeat
 
-By default monika will continuously loop through all your probes in the configuration. You can specify the number of repeats using `-r` or `--repeat` flags followed by a number. For example to repeat only 3 times type the command below:
+By default monika will continuously loop through all your probes in the configuration. To loop for a specific number of repeats use the `-r` or `--repeat` flags followed by a number. For example to repeat only 3 times type the command below:
 
 ```bash
 monika -r 3
@@ -230,13 +240,13 @@ monika -r 3 -i 1,3,1
 
 ## STUN
 
-By default monika will continuously checking the [STUN](https://en.wikipedia.org/wiki/STUN) server in 20 seconds interval. You can specify the number of interval using `-s` or `--stun` flags followed by a number in seconds. For example to set the interval to 10 seconds type the command below:
+By default monika will continuously check the [STUN](https://en.wikipedia.org/wiki/STUN) server in 20 second intervals. You can specify the number of intervals using the `-s` or `--stun` flags followed by a number in seconds. For example to set the interval to 10 seconds type the command below:
 
 ```bash
 monika -s 10
 ```
 
-If the number is zero or less, monika will check the STUN server just once, not repeteadly, to get public IP.
+If the number is zero or less, monika will check the STUN server just once, not repeatedly, to get public IP.
 
 ## Summary
 
@@ -259,7 +269,7 @@ monika --verbose
 
 ## Version
 
-The `-v` or `--version` flag prints current application version.
+The `-v` or `--version` flag prints the current application version.
 
 ```bash
 monika -v

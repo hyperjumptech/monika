@@ -13,7 +13,7 @@ probes:
       - url: https://github.com
 ```
 
-By default if you didn't define the method, it will be set as GET. Please note that with this configuration, you will not get any notifications when github.com is down since the notification configuration is not defined.
+If you didn't define the http method, it will use the GET method by default. Please note that with this configuration, you will not get any notifications when the site github.com is down since the notification configuration is not defined.
 
 ## Enabling Notification
 
@@ -65,7 +65,7 @@ probes:
           password: somepassword
 ```
 
-Using the configuration above, Monika will send a POST request to http://www.foo.com/login.php with the defined request's body.
+Using the configuration above, Monika will send a POST request to `http://www.foo.com/login.php` with the defined request's body.
 
 ## Multiple request
 

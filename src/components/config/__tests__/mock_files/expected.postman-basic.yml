@@ -1,0 +1,28 @@
+probes:
+  - id: '[GitHub API] Hyperjump Repos'
+    name: '[GitHub API] Hyperjump Repos'
+    requests:
+      - url: https://api.github.com/users/hyperjumptech/repos
+        method: GET
+        headers: {}
+        body: {}
+        timeout: 10000
+    incidentThreshold: 5
+    recoveryThreshold: 5
+    alerts: []
+  - id: '[GitHub API] Hyperjump'
+    name: '[GitHub API] Hyperjump'
+    requests:
+      - url: https://api.github.com/users/hyperjumptech
+        method: GET
+        headers:
+          Authorization: any
+        body:
+          any: any
+        timeout: 10000
+    incidentThreshold: 5
+    recoveryThreshold: 5
+    alerts: []
+notifications:
+  - id: default
+    type: desktop
