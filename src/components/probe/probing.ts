@@ -83,25 +83,38 @@ export async function probing(
   }
 
   if (body) {
-    for (const bk of Object.keys(body)) {
-      const rawBody = (body as any)[bk]
-      const renderBody = Handlebars.compile(rawBody)
+    if (typeof body === 'string') {
+      const renderBody = Handlebars.compile(body)
       const renderedBody = renderBody({ responses })
 
-      newReq.body = {
-        ...newReq.body,
-        [bk]: renderedBody,
+      newReq.body = renderedBody as any
+    } else {
+      for (const bk of Object.keys(body)) {
+        const rawBody = (body as any)[bk]
+        const renderBody = Handlebars.compile(rawBody)
+        const renderedBody = renderBody({ responses })
+
+        newReq.body = { ...newReq.body, [bk]: renderedBody }
       }
+    }
 
-      if (headers) {
-        const contentType = Object.keys(headers).find((hk) => {
-          return hk.toLocaleLowerCase() === 'content-type'
-        })
+    if (newReq.headers) {
+      const contentTypeKey = Object.keys(headers).find((hk) => {
+        return hk.toLocaleLowerCase() === 'content-type'
+      })
 
-        if (contentType) {
-          const { content } = transformContentByType(newReq.body, contentType)
+      if (contentTypeKey) {
+        const { content, contentType } = transformContentByType(
+          newReq.body,
+          headers[contentTypeKey]
+        )
 
-          newReq.body = content
+        delete newReq.headers[contentTypeKey]
+
+        newReq.body = content
+        newReq.headers = {
+          ...newReq.headers,
+          'content-type': contentType,
         }
       }
     }
