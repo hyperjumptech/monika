@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.1] - 2022-06-7
+
+## Fixed
+
+- Fix not running all requests in the Postman collection (#731)
+- Fix dockerfile and docs (#717)
+- Add docker tag when pushing image to dockerhub (#704)
+- Fix Mailgen Emails Breaks in iOS Email App when there is more than 1 recipients (#699)
+- Docs: fix wrong options in docs workflow (#686)
+- Docs: responsive table of content placement (#702) (#733)
+- Docs: Fix docs build error (#734)
+- Docs: Fix documentations erros (#732)
+- Docs: Add missing entries to Table of Content (#729)
+- Docs: Search Algolia error on mobile view (#728)
+- Docs: Add Missing Documentation (#718)
+- Docs: fix search-popup (#721)
+
+## Updated
+
+- Docs: Show list of integrations in the landing page (#707)
+- Docs: Add Notification contributing how-to (#703)
+
+## Removed
+
+- Remove deprecated cli-ux and oclif packages (#693)
+
 ## [1.8.0] - 2022-06-06
 
 ## Added
