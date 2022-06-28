@@ -42,10 +42,9 @@ export async function probing(
 ): Promise<ProbeRequestResponse> {
   // Compile URL using handlebars to render URLs that uses previous responses data
   const { method, url, headers, timeout, body, ping } = requestConfig
-  const newReq = { method, headers, timeout, ping }
+  const newReq = { method, headers, timeout, body, ping }
   const renderURL = Handlebars.compile(url)
   const renderedURL = renderURL({ responses })
-  let requestBody: any = body
 
   // Compile headers using handlebars to render URLs that uses previous responses data.
   // In some case such as value is not string, it will be returned as is without being compiled.
@@ -63,10 +62,7 @@ export async function probing(
 
       // evaluate "Content-Type" header in case-insensitive manner
       if (header.toLocaleLowerCase() === 'content-type') {
-        const { content, contentType } = transformContentByType(body, rawHeader)
-
-        // change request body with the transformed request body
-        requestBody = content
+        const { contentType } = transformContentByType(body, rawHeader)
 
         if (rawHeader === 'multipart/form-data') {
           // delete the previous content-type header and add a new header with boundary
@@ -81,6 +77,31 @@ export async function probing(
             ...newReq.headers,
             'content-type': contentType,
           }
+        }
+      }
+    }
+  }
+
+  if (body) {
+    for (const bk of Object.keys(body)) {
+      const rawBody = (body as any)[bk]
+      const renderBody = Handlebars.compile(rawBody)
+      const renderedBody = renderBody({ responses })
+
+      newReq.body = {
+        ...newReq.body,
+        [bk]: renderedBody,
+      }
+
+      if (headers) {
+        const contentType = Object.keys(headers).find((hk) => {
+          return hk.toLocaleLowerCase() === 'content-type'
+        })
+
+        if (contentType) {
+          const { content } = transformContentByType(newReq.body, contentType)
+
+          newReq.body = content
         }
       }
     }
@@ -121,7 +142,7 @@ export async function probing(
     const resp = await axiosInstance.request({
       ...newReq,
       url: renderedURL,
-      data: requestBody,
+      data: newReq.body,
     })
 
     const responseTime = Date.now() - requestStartedAt
