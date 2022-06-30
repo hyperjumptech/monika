@@ -41,6 +41,7 @@ describe('validateResponse', () => {
   ): ProbeRequestResponse => {
     return {
       data: '',
+      body: '',
       status,
       responseTime,
       headers: {},

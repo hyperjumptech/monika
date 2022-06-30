@@ -108,6 +108,7 @@ export async function probing(
       return {
         requestType,
         data,
+        body: data,
         status,
         headers,
         responseTime,
@@ -131,6 +132,7 @@ export async function probing(
     return {
       requestType,
       data,
+      body: data,
       status,
       headers,
       responseTime,
@@ -143,6 +145,7 @@ export async function probing(
     if (error?.response) {
       return {
         data: error?.response?.data,
+        body: error?.response?.data,
         status: error?.response?.status,
         headers: error?.response?.headers,
         responseTime,
@@ -156,6 +159,7 @@ export async function probing(
 
       return {
         data: '',
+        body: '',
         status,
         headers: '',
         responseTime,
@@ -165,6 +169,7 @@ export async function probing(
     // other errors
     return {
       data: '',
+      body: '',
       status: error.code || 'Unknown error',
       headers: '',
       responseTime,
