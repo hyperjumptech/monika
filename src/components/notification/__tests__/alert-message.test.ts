@@ -48,6 +48,7 @@ describe('Alert message', () => {
         isRecovery: false,
         response: {
           data: '',
+          body: '',
           status: 404,
           headers: '',
           responseTime: 1000,
@@ -75,6 +76,7 @@ describe('Alert message', () => {
         isRecovery: false,
         response: {
           data: '',
+          body: '',
           status: 404,
           headers: '',
           responseTime: 1000,
@@ -109,6 +111,7 @@ describe('Alert message', () => {
         isRecovery: true,
         response: {
           data: '',
+          body: '',
           status: 404,
           headers: '',
           responseTime: 1000,
@@ -158,6 +161,7 @@ describe('Alert message', () => {
         isRecovery: true,
         response: {
           data: '',
+          body: '',
           status: 404,
           headers: '',
           responseTime: 1000,

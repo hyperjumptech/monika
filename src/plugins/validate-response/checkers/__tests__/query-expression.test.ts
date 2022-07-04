@@ -29,6 +29,7 @@ describe('queryExpression', () => {
   it('should handle response time query', () => {
     const res = {
       data: '',
+      body: '',
       status: 200,
       headers: {},
       responseTime: 150,
@@ -42,6 +43,7 @@ describe('queryExpression', () => {
   it('should handle response status query', () => {
     const res = {
       data: '',
+      body: '',
       status: 200,
       headers: {},
       responseTime: 200,
@@ -55,6 +57,7 @@ describe('queryExpression', () => {
   it('should handle response size query', () => {
     const res = {
       data: '',
+      body: '',
       status: 200,
       headers: { 'content-length': 2000 },
       responseTime: 200,
@@ -68,6 +71,7 @@ describe('queryExpression', () => {
   it('should handle response headers query', () => {
     const res = {
       data: '',
+      body: '',
       status: 200,
       headers: { 'Content-Type': 'application/json' },
       responseTime: 200,
@@ -87,6 +91,9 @@ describe('queryExpression', () => {
       headers: {},
       responseTime: 200,
       data: {
+        message: 'Hello',
+      },
+      body: {
         message: 'Hello',
       },
     }

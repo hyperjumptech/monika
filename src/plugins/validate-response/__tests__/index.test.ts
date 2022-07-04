@@ -41,6 +41,7 @@ describe('validateResponse', () => {
   ): ProbeRequestResponse => {
     return {
       data: '',
+      body: '',
       status,
       responseTime,
       headers: {},
@@ -60,6 +61,7 @@ describe('validateResponse', () => {
         isAlertTriggered: true,
         response: {
           data: '',
+          body: '',
           responseTime: 20,
           headers: {},
           status: 300,
@@ -72,6 +74,7 @@ describe('validateResponse', () => {
         },
         response: {
           data: '',
+          body: '',
           responseTime: 20,
           headers: {},
           status: 300,
@@ -93,6 +96,7 @@ describe('validateResponse', () => {
         },
         response: {
           data: '',
+          body: '',
           responseTime: 20,
           headers: {},
           status: 200,
@@ -106,6 +110,7 @@ describe('validateResponse', () => {
         },
         response: {
           data: '',
+          body: '',
           responseTime: 20,
           headers: {},
           status: 200,
@@ -127,6 +132,7 @@ describe('validateResponse', () => {
         },
         response: {
           data: '',
+          body: '',
           responseTime: 10,
           headers: {},
           status: 300,
@@ -140,6 +146,7 @@ describe('validateResponse', () => {
         },
         response: {
           data: '',
+          body: '',
           responseTime: 10,
           headers: {},
           status: 300,
@@ -161,6 +168,7 @@ describe('validateResponse', () => {
         },
         response: {
           data: '',
+          body: '',
           responseTime: 10,
           headers: {},
           status: 200,
@@ -174,6 +182,7 @@ describe('validateResponse', () => {
         },
         response: {
           data: '',
+          body: '',
           responseTime: 10,
           headers: {},
           status: 200,

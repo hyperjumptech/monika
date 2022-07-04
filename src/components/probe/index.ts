@@ -285,6 +285,7 @@ async function processTCPRequestResult({
   const probeRes: ProbeRequestResponse = {
     requestType: 'tcp',
     data: '',
+    body: '',
     status: isAlertTriggered ? 0 : 200, // set to 0 if down, and 200 if ok
     headers: {},
     responseTime,
