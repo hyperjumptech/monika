@@ -1,0 +1,258 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "id": "https://raw.githubusercontent.com/hyperjumptech/monika/main/monika-configuration.json",
+  "description": "Monika monitoring configuration schema",
+  "additionalProperties": false,
+  "type": "object",
+  "properties": {
+    "probes": {
+      "type": "array",
+      "description": "Probe is a description of the target, methods, timing and payloads to begin monitoring/probing a target.",
+      "additionalProperties": false,
+      "additionalItems": false,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique string identification of the probe"
+          },
+          "name": {
+            "type": "string",
+            "description": "A human-readible probe name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description of the probe"
+          },
+          "interval": {
+            "$ref": "#/definitions/interval"
+          },
+          "requests": {
+            "$ref": "#/definitions/requests"
+          },
+          "socket": {
+            "$ref": "#/definitions/socket"
+          },
+          "incidentThreshold": {
+            "$ref": "#/definitions/incidentThreshold"
+          },
+          "recoveryThreshold": {
+            "$ref": "#/definitions/recoveryThreshold"
+          },
+          "alerts": {
+            "$ref": "#/definitions/alerts"
+          }
+        }
+      },
+      "required": [
+        "id"
+      ]
+    },
+    "notifications": {
+      "type": "array",
+      "description": "Alerts of incidents and recoveries will be sent via these notification channels",
+      "items": {
+        "anyOf": [
+          {
+            "type": "object",
+            "required": ["id", "type", "data"],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "type": {
+                "enum": [ "monika-notif" ]
+              },
+              "data": {
+                "type": "object",
+                "description": "Data for your paylaod",
+                "additionalProperties": false,
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "description": "Url of your target"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["id", "type", "data"],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "type": {
+                "enum": [ "mailgun" ]
+              },
+              "data": {
+                "type": "object",
+                "description": "Data for your paylaod",
+                "additionalProperties": false,
+                "properties": {
+                  "recipients": {
+                    "type": "string",
+                    "description": "An array of email addresses that will receive the e-mail from Monika"
+                  },
+                  "apiKey": {
+                    "type": "string",
+                    "description": "Mailgun account ASPI key, mailgun registered key to identify your account"
+                  },
+                  "domain": {
+                    "type": "string",
+                    "description": "The domain to set in Mailgun"
+                  }
+                }
+              }
+            }
+
+          }
+        ]
+
+      }
+    },
+    "db_limit": {
+      "type": "object",
+      "description": "Database internal configuration",
+      "additionalProperties": false,
+      "properties": {
+        "max_db_size": {
+          "type": "number",
+          "description": "Maximum Monika database size",
+          "default": 1000000000
+        },
+        "deleted_data": {
+          "type": "integer",
+          "description": "Delete strategy when limit reached",
+          "default": 1
+        },
+        "cron_schedule": {
+          "type": "string",
+          "description": "Schedule to trim the db in crontab",
+          "default": "*/1 * * * *"
+        }
+      },
+      "required": [
+        "max_db_size",
+        "deleted_data",
+        "cron_schedule"
+      ]
+    }
+  },
+  "definitions": {
+    "incidentThreshold": {
+      "type": "integer",
+      "description": "Number of times an alert should return true before Monika sends incident notifications",
+      "default": 5
+    },
+    "recoveryThreshold": {
+      "type": "integer",
+      "description": "Number of times an alert should return false before Monika sends recovery notifications",
+      "default": 5
+    },
+    "interval": {
+      "type": "integer",
+      "description": "The number of seconds to repeat the probe",
+      "default": 10
+    },
+    "requests": {
+      "type": "array",
+      "description": "The http or ping request to probe for",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "method": {
+            "type": "string",
+            "description": "The http method",
+            "enum": [
+              "GET",
+              "POST",
+              "DELETE",
+              "PUT",
+              "PATCH"
+            ]
+          },
+          "url": {
+            "type": "string",
+            "description": "The remote URL address to probe"
+          },
+          "timeout": {
+            "type": "integer",
+            "description": "Set the timout for the request in seconds",
+            "default": 10
+          },
+          "saveBody": {
+            "type": "boolean",
+            "description": "Should response body be saved in the database",
+            "default": false
+          },
+          "headers": {
+            "type": "string",
+            "description": "Any http headers you might need for your request"
+          },
+          "body": {
+            "type": "string",
+            "description": "Any http body payload for your request"
+          },
+          "alerts": {
+            "$ref": "#/definitions/alerts"
+          },
+          "ping": {
+            "type": "boolean",
+            "description": "If defined and to true, the request is an ICMP ping"
+          }
+        }
+      }
+    },
+    "socket": {
+      "type": "object",
+      "description": "Socket is a TCP type request",
+      "additionalProperties": false,
+      "required": [ "host", "port", "data" ],
+      "properties": {
+        "host": {
+          "type": "string",
+          "description": "Address to your host"
+        },
+        "port": {
+          "type": "integer",
+          "description": "Host port to connect to"
+        },
+        "data": {
+          "type": "string",
+          "description": "Data payload for the request"
+        }
+      }
+    },
+    "alerts": {
+      "type": "array",
+      "description": "The condition which will trigger an alert and the subsequent notification",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Query contains any arbitrary expression that will trigger an alert when its is logically true",
+            "default": "response.status != 200"
+          },
+          "message": {
+            "type": "string",
+            "description": "Message that will be sent to the notification channel"
+          }
+        },
+        "required": [
+          "query",
+          "message"
+        ]
+      }
+    }
+  }
+}
