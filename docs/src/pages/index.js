@@ -325,11 +325,15 @@ export default function IndexPage() {
             />
             <div className="container01">
               <div className="container02">
-                <pre className="text01">
-                  Get WhatsApp {'\n'}
-                  notification when {'\n'}
-                  your <span className="text05">web app is down</span>
-                </pre>
+                <h1 className="text01">
+                  <span>Get WhatsApp</span>
+                  <br></br>
+                  <span>notification when</span>
+                  <br></br>
+                  <span>
+                    your <span className="text05">web app is down</span>
+                  </span>
+                </h1>
                 <span className="text06">
                   <span className="text07">
                     Or from any other communication channel. It&apos;s quick,
