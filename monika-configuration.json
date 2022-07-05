@@ -46,9 +46,7 @@
           }
         }
       },
-      "required": [
-        "id"
-      ]
+      "required": ["id"]
     },
     "notifications": {
       "type": "array",
@@ -57,13 +55,27 @@
         "anyOf": [
           {
             "type": "object",
+            "required": ["id", "type"],
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "unique notification id"
+              },
+              "type": {
+                "enum": ["desktop"]
+              }
+            }
+          },
+          {
+            "type": "object",
             "required": ["id", "type", "data"],
             "properties": {
               "id": {
-                "type": "string"
+                "type": "string",
+                "description": "unique notification id"
               },
               "type": {
-                "enum": [ "monika-notif" ]
+                "enum": ["monika-notif"]
               },
               "data": {
                 "type": "object",
@@ -86,12 +98,13 @@
                 "type": "string"
               },
               "type": {
-                "enum": [ "mailgun" ]
+                "enum": ["mailgun"]
               },
               "data": {
                 "type": "object",
                 "description": "Data for your paylaod",
                 "additionalProperties": false,
+                "required": ["recipients", "apiKey", "domain"],
                 "properties": {
                   "recipients": {
                     "type": "string",
@@ -108,10 +121,8 @@
                 }
               }
             }
-
           }
         ]
-
       }
     },
     "db_limit": {
@@ -135,11 +146,7 @@
           "default": "*/1 * * * *"
         }
       },
-      "required": [
-        "max_db_size",
-        "deleted_data",
-        "cron_schedule"
-      ]
+      "required": ["max_db_size", "deleted_data", "cron_schedule"]
     }
   },
   "definitions": {
@@ -164,20 +171,12 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": [
-          "url"
-        ],
+        "required": ["url"],
         "properties": {
           "method": {
             "type": "string",
             "description": "The http method",
-            "enum": [
-              "GET",
-              "POST",
-              "DELETE",
-              "PUT",
-              "PATCH"
-            ]
+            "enum": ["GET", "POST", "DELETE", "PUT", "PATCH"]
           },
           "url": {
             "type": "string",
@@ -215,7 +214,7 @@
       "type": "object",
       "description": "Socket is a TCP type request",
       "additionalProperties": false,
-      "required": [ "host", "port", "data" ],
+      "required": ["host", "port", "data"],
       "properties": {
         "host": {
           "type": "string",
@@ -248,10 +247,7 @@
             "description": "Message that will be sent to the notification channel"
           }
         },
-        "required": [
-          "query",
-          "message"
-        ]
+        "required": ["query", "message"]
       }
     }
   }
