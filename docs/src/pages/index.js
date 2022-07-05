@@ -325,12 +325,11 @@ export default function IndexPage() {
             />
             <div className="container01">
               <div className="container02">
-                <h1 className="text01">
-                  <span>Get WhatsApp</span>
-                  <br></br>
-                  <span>notification when your</span>
-                </h1>
-                <h1 className="text05">web app is down</h1>
+                <pre className="text01">
+                  Get WhatsApp {'\n'}
+                  notification when {'\n'}
+                  your <span className="text05">web app is down</span>
+                </pre>
                 <span className="text06">
                   <span className="text07">
                     Or from any other communication channel. It&apos;s quick,
@@ -964,24 +963,27 @@ export default function IndexPage() {
           }
           .text01 {
             color: var(--dl-color-gray-white);
-            width: 582px;
+            width: 560px;
             font-size: 52px;
             text-align: left;
             font-family: Inter;
-            font-weight: 800;
+            font-weight: 700;
             text-transform: none;
             text-decoration: none;
+            line-height: 120%;
           }
           .text05 {
             font-size: 52px;
             font-style: normal;
-            font-weight: 800;
+            font-weight: 700;
             margin-bottom: var(--dl-space-space-unit);
             background-image: linear-gradient(310deg, #2fdcdc, #987ce8);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            line-height: 120%;
           }
           .text06 {
+            margin-top: var(--dl-space-space-unit);
             margin-bottom: var(--dl-space-space-unit);
           }
           .text07 {
