@@ -2,17 +2,18 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "id": "https://raw.githubusercontent.com/hyperjumptech/monika/main/monika-configuration.json",
   "description": "Monika monitoring configuration schema",
-  "additionalProperties": false,
+  "additionalProperties": false,  
   "type": "object",
   "properties": {
     "probes": {
       "type": "array",
       "description": "Probe is a description of the target, methods, timing and payloads to begin monitoring/probing a target.",
       "additionalProperties": false,
-      "additionalItems": false,
       "items": {
         "type": "object",
         "additionalProperties": false,
+
+        "required": ["id"],
         "properties": {
           "id": {
             "type": "string",
@@ -45,21 +46,22 @@
             "$ref": "#/definitions/alerts"
           }
         }
-      },
-      "required": ["id"]
+      }
     },
     "notifications": {
       "type": "array",
       "description": "Alerts of incidents and recoveries will be sent via these notification channels",
+      "additionalItems": false,    
       "items": {
         "anyOf": [
           {
             "type": "object",
             "required": ["id", "type"],
+            "additionalProperties": false,
             "properties": {
               "id": {
                 "type": "string",
-                "description": "unique notification id"
+                "description": "Unique notification id"
               },
               "type": {
                 "enum": ["desktop"]
@@ -69,22 +71,27 @@
           {
             "type": "object",
             "required": ["id", "type", "data"],
+            "additionalProperties": false,
             "properties": {
               "id": {
                 "type": "string",
-                "description": "unique notification id"
+                "description": "Unique notification id"
               },
               "type": {
-                "enum": ["monika-notif"]
+                "enum": ["discord"]
               },
               "data": {
                 "type": "object",
-                "description": "Data for your paylaod",
+                "description": "Data for your payload",
                 "additionalProperties": false,
+                "required": [ "url" ],
                 "properties": {
                   "url": {
                     "type": "string",
-                    "description": "Url of your target"
+                    "description": "The URL of the Discord Webhook that will receive notification",
+                    "examples": [
+                      "https://discord.com/api/webhook/<webhook.id>/<webhook.token>"
+                    ]
                   }
                 }
               }
@@ -93,6 +100,95 @@
           {
             "type": "object",
             "required": ["id", "type", "data"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Unique notification id"
+              },
+              "type": {
+                "enum": ["workplace"]
+              },
+              "data": {
+                "type": "object",
+                "description": "Data for your payload",
+                "additionalProperties": false,
+                "required": [ "thread_id", "access_token"],
+                "properties": {
+                  "thread_id": {
+                    "type": "string",
+                    "description": "Thread id is the set of numbers at the end of the url"
+                  },
+                  "access_token": {
+                    "type": "string",
+                    "description": "Workplace access token for custom integration"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["id", "type", "data"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Unique notification id"
+              },
+              "type": {
+                "enum": ["google-chat"]
+              },
+              "data": {
+                "type": "object",
+                "description": "Data for your payload",
+                "additionalProperties": false,
+                "required": [ "url" ],
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "description": "The webhook URL for your google chat",
+                    "examples": [
+                      "https://chat.googleapis.com/v1/spaces/XXXXX/messages?key=1122334455"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["id", "type", "data"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Unique notification id"
+              },
+              "type": {
+                "enum": ["lark"]
+              },
+              "data": {
+                "type": "object",
+                "description": "Data for your payload",
+                "additionalProperties": false,
+                "required": [ "url" ],
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "description": "The webhook URL for your lark suite",
+                    "examples": [
+                      "https://open.larksuite.com/open-apis/bot/v2/hook/your-webhook-key-here"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["id", "type", "data"],
+            "additionalProperties": false,
             "properties": {
               "id": {
                 "type": "string"
@@ -102,7 +198,7 @@
               },
               "data": {
                 "type": "object",
-                "description": "Data for your paylaod",
+                "description": "Data for your payload",
                 "additionalProperties": false,
                 "required": ["recipients", "apiKey", "domain"],
                 "properties": {
@@ -117,6 +213,375 @@
                   "domain": {
                     "type": "string",
                     "description": "The domain to set in Mailgun"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["id", "type", "data"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Unique notification id"
+              },
+              "type": {
+                "enum": ["teams"]
+              },
+              "data": {
+                "type": "object",
+                "description": "Data for your payload",
+                "additionalProperties": false,
+                "required": [ "url" ],
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "description": "Your teams webhook URL"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["id", "type", "data"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Unique notification id"
+              },
+              "type": {
+                "enum": ["monika-notif"]
+              },
+              "data": {
+                "type": "object",
+                "description": "Data for your payload",
+                "additionalProperties": false,
+                "required": [ "url" ],
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "description": "Your Monika notification URL"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["id", "type", "data"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Unique pagerduty notif id"
+              },
+              "type": {
+                "enum": ["pagerduty"]
+              },
+              "data": {
+                "type": "object",
+                "description": "Data for your payload",
+                "additionalProperties": false,
+                "required": [ "key", "probeID"],
+                "properties": {
+                  "key": {
+                    "type": "string",
+                    "description": "Pagerduty integration key"
+                  },
+                  "probeID": {
+                    "type": "string",
+                    "description": "Monika Probe ID"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["id", "type", "data"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Unique sendgrid notification id"
+              },
+              "type": {
+                "enum": ["sendgrid"]
+              },
+              "data": {
+                "type": "object",
+                "description": "Data for your payload",
+                "additionalProperties": false,
+                "required": ["sender", "recipients", "apiKey"],
+                "properties": {
+                  "sender": {
+                    "type": "string",
+                    "description": "A string of email addresses that has been verified in your sendgrid account"
+                  },
+                  "recipients": {
+                    "type": "array",
+                    "description": "An array of email addresses that will receive the e-mail from Monika",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "apiKey": {
+                    "type": "string",
+                    "description": "Sendgrid account api key, sendgrid registered key to identify your account"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["id", "type", "data"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Unique slack notification id"
+              },
+              "type": {
+                "enum": ["slack"]
+              },
+              "data": {
+                "type": "object",
+                "description": "Data for your payload",
+                "additionalProperties": false,
+                "required": [ "url" ],
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "description": "The URL webhook for Slack"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["id", "type", "data"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Unique smtp notification id"
+              },
+              "type": {
+                "enum": ["smtp"]
+              },
+              "data": {
+                "type": "object",
+                "description": "Data for your payload",
+                "additionalProperties": false,
+                "required": [ "recipients", "hostname", "port", "username", "password"],
+                "properties": {
+                  "recipients": {
+                    "type": "array",
+                    "description": "An array of email address that will receive the email from Monika",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "hostname": {
+                    "type": "string",
+                    "description": "The smtp host that you will be using for sending the email"
+                  },
+                  "port": {
+                    "type": "integer",
+                    "description": "The port allowed to be used for sending mail in your host"
+                  },
+                  "username": {
+                    "type": "string",
+                    "description": "Registered username on your smtp server"
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "The password set for your username"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["id", "type", "data"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Unique telegram notification id"
+              },
+              "type": {
+                "enum": ["telegram"]
+              },
+              "data": {
+                "type": "object",
+                "description": "Data for your payload",
+                "additionalProperties": false,
+                "required": [ "group_id", "bot_token" ],
+                "properties": {
+                  "group_id": {
+                    "type": "string",
+                    "description": "The ID of the group where the bot should send the messages"
+                  },
+                  "bot_token": {
+                    "type": "string",
+                    "description": "Token for your telegram bot"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["id", "type", "data"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Unique webhook notification id"
+              },
+              "type": {
+                "enum": ["webhook"]
+              },
+              "data": {
+                "type": "object",
+                "description": "Data for your payload",
+                "additionalProperties": false,
+                "required": [ "url" ],
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "description": "The URL of the server that will receive the webhook notification"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["id", "type", "data"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Unique whatsapp notification id"
+              },
+              "type": {
+                "enum": ["whatsapp"]
+              },
+              "data": {
+                "type": "object",
+                "description": "Data for your payload",
+                "additionalProperties": false,
+                "required": [ "recipients", "url", "username", "password" ],
+                "properties": {
+                  "recipients": {
+                    "type": "string",
+                    "description": "An array of phone numbers registered for WhatsApp, should start with your controu code number",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "url": {
+                    "type": "string",
+                    "description": "The URL of the server that will receive the webhook notification"
+                  },
+                  "username": {
+                    "type": "string",
+                    "description": "Your WhatsApp API username"
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "Your Whatsapp API user password"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["id", "type", "data"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Unique Dingtalk notification id"
+              },
+              "type": {
+                "enum": ["dingtalk"]
+              },
+              "data": {
+                "type": "object",
+                "description": "Data for your payload",
+                "additionalProperties": false,
+                "required": [ "access_token" ],
+                "properties": {
+                  "access_token": {
+                    "type": "string",
+                    "description": "the token of your Dingtalk account"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["id", "type", "data"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Unique Pushover notification id"
+              },
+              "type": {
+                "enum": ["pushover"]
+              },
+              "data": {
+                "type": "object",
+                "description": "Data for your payload",
+                "additionalProperties": false,
+                "required": [ "token", "user" ],
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "description": "Pushover application token"
+                  },
+                  "user": {
+                    "type": "string",
+                    "description": "Pushover user key"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": ["id", "type", "data"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Unique opsgenie notification id"
+              },
+              "type": {
+                "enum": ["opsgenie"]
+              },
+              "data": {
+                "type": "object",
+                "description": "Data for your payload",
+                "additionalProperties": false,
+                "required": [ "geniekey" ],
+                "properties": {
+                  "geniekey": {
+                    "type": "string",
+                    "description": "Opsgenie application token"
                   }
                 }
               }
