@@ -1,18 +1,19 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "id": "https://raw.githubusercontent.com/hyperjumptech/monika/main/monika-configuration.json",
+  "$id": "https://github.com/hyperjumptech/monika/main/monika-configuration.json",
+  "name": "Monika Configuration Schema",
   "description": "Monika monitoring configuration schema",
-  "additionalProperties": false,  
+  "fileMatch": ["monika.yaml", "monika.yml"],
+  "url": "https://raw.githubusercontent.com/hyperjumptech/monika/main/monika-configuration.json",
+  "additionalProperties": false,
   "type": "object",
   "properties": {
     "probes": {
       "type": "array",
-      "description": "Probe is a description of the target, methods, timing and payloads to begin monitoring/probing a target.",
-      "additionalProperties": false,
+      "description": "Probe is a description of the target, methods, timing and payloads to begin monitoring/probing a target.",      
       "items": {
         "type": "object",
         "additionalProperties": false,
-
         "required": ["id"],
         "properties": {
           "id": {
@@ -50,8 +51,7 @@
     },
     "notifications": {
       "type": "array",
-      "description": "Alerts of incidents and recoveries will be sent via these notification channels",
-      "additionalItems": false,    
+      "description": "Alerts of incidents and recoveries will be sent via these notification channels",      
       "items": {
         "anyOf": [
           {
@@ -84,7 +84,7 @@
                 "type": "object",
                 "description": "Data for your payload",
                 "additionalProperties": false,
-                "required": [ "url" ],
+                "required": ["url"],
                 "properties": {
                   "url": {
                     "type": "string",
@@ -113,7 +113,7 @@
                 "type": "object",
                 "description": "Data for your payload",
                 "additionalProperties": false,
-                "required": [ "thread_id", "access_token"],
+                "required": ["thread_id", "access_token"],
                 "properties": {
                   "thread_id": {
                     "type": "string",
@@ -143,7 +143,7 @@
                 "type": "object",
                 "description": "Data for your payload",
                 "additionalProperties": false,
-                "required": [ "url" ],
+                "required": ["url"],
                 "properties": {
                   "url": {
                     "type": "string",
@@ -172,7 +172,7 @@
                 "type": "object",
                 "description": "Data for your payload",
                 "additionalProperties": false,
-                "required": [ "url" ],
+                "required": ["url"],
                 "properties": {
                   "url": {
                     "type": "string",
@@ -234,7 +234,7 @@
                 "type": "object",
                 "description": "Data for your payload",
                 "additionalProperties": false,
-                "required": [ "url" ],
+                "required": ["url"],
                 "properties": {
                   "url": {
                     "type": "string",
@@ -260,7 +260,7 @@
                 "type": "object",
                 "description": "Data for your payload",
                 "additionalProperties": false,
-                "required": [ "url" ],
+                "required": ["url"],
                 "properties": {
                   "url": {
                     "type": "string",
@@ -286,7 +286,7 @@
                 "type": "object",
                 "description": "Data for your payload",
                 "additionalProperties": false,
-                "required": [ "key", "probeID"],
+                "required": ["key", "probeID"],
                 "properties": {
                   "key": {
                     "type": "string",
@@ -353,7 +353,7 @@
                 "type": "object",
                 "description": "Data for your payload",
                 "additionalProperties": false,
-                "required": [ "url" ],
+                "required": ["url"],
                 "properties": {
                   "url": {
                     "type": "string",
@@ -379,7 +379,13 @@
                 "type": "object",
                 "description": "Data for your payload",
                 "additionalProperties": false,
-                "required": [ "recipients", "hostname", "port", "username", "password"],
+                "required": [
+                  "recipients",
+                  "hostname",
+                  "port",
+                  "username",
+                  "password"
+                ],
                 "properties": {
                   "recipients": {
                     "type": "array",
@@ -424,7 +430,7 @@
                 "type": "object",
                 "description": "Data for your payload",
                 "additionalProperties": false,
-                "required": [ "group_id", "bot_token" ],
+                "required": ["group_id", "bot_token"],
                 "properties": {
                   "group_id": {
                     "type": "string",
@@ -454,7 +460,7 @@
                 "type": "object",
                 "description": "Data for your payload",
                 "additionalProperties": false,
-                "required": [ "url" ],
+                "required": ["url"],
                 "properties": {
                   "url": {
                     "type": "string",
@@ -480,7 +486,7 @@
                 "type": "object",
                 "description": "Data for your payload",
                 "additionalProperties": false,
-                "required": [ "recipients", "url", "username", "password" ],
+                "required": ["recipients", "url", "username", "password"],
                 "properties": {
                   "recipients": {
                     "type": "string",
@@ -521,7 +527,7 @@
                 "type": "object",
                 "description": "Data for your payload",
                 "additionalProperties": false,
-                "required": [ "access_token" ],
+                "required": ["access_token"],
                 "properties": {
                   "access_token": {
                     "type": "string",
@@ -547,7 +553,7 @@
                 "type": "object",
                 "description": "Data for your payload",
                 "additionalProperties": false,
-                "required": [ "token", "user" ],
+                "required": ["token", "user"],
                 "properties": {
                   "token": {
                     "type": "string",
@@ -577,7 +583,7 @@
                 "type": "object",
                 "description": "Data for your payload",
                 "additionalProperties": false,
-                "required": [ "geniekey" ],
+                "required": ["geniekey"],
                 "properties": {
                   "geniekey": {
                     "type": "string",
