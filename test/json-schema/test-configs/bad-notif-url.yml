@@ -28,7 +28,7 @@ probes:
     description: return 200
     interval: 10
     requests:
-      - url: "https://google.com"
+      - url: 'https://google.com'
         method: GET
         timeout: 3000
     alerts:
@@ -43,5 +43,4 @@ notifications:
   - id: google-chat-123
     type: google-chat
     data:
-      bad_url: "http://hello"     
-  
+      bad_url: 'http://hello'

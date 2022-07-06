@@ -25,7 +25,7 @@
 probes:
   - id: '123-123-123'
     name: httpbin_200
-    extrafields: "true"
+    extrafields: 'true'
     description: return 200
     interval: 10
     requests:

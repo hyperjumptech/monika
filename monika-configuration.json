@@ -10,7 +10,7 @@
   "properties": {
     "probes": {
       "type": "array",
-      "description": "Probe is a description of the target, methods, timing and payloads to begin monitoring/probing a target.",      
+      "description": "Probe is a description of the target, methods, timing and payloads to begin monitoring/probing a target.",
       "items": {
         "type": "object",
         "additionalProperties": false,
@@ -51,7 +51,7 @@
     },
     "notifications": {
       "type": "array",
-      "description": "Alerts of incidents and recoveries will be sent via these notification channels",      
+      "description": "Alerts of incidents and recoveries will be sent via these notification channels",
       "items": {
         "anyOf": [
           {
