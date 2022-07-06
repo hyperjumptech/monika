@@ -1,0 +1,22 @@
+probes:
+  - id: https://ottencoffee.co.id/page/rok-presso
+    name: https://ottencoffee.co.id/page/rok-presso
+    requests:
+      - url: https://ottencoffee.co.id/page/rok-presso
+        method: GET
+        timeout: 10000
+    incidentThreshold: 5
+    recoveryThreshold: 5
+    alerts: []
+  - id: https://ottencoffee.co.id/page/hariov60e
+    name: https://ottencoffee.co.id/page/hariov60e
+    requests:
+      - url: https://ottencoffee.co.id/page/hariov60e
+        method: GET
+        timeout: 10000
+    incidentThreshold: 5
+    recoveryThreshold: 5
+    alerts: []
+notifications:
+  - id: default
+    type: desktop
