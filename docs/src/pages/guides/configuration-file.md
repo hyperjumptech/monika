@@ -3,7 +3,7 @@ id: configuration-file
 title: Configuration File
 ---
 
-Monika uses a YAML file format to describe all the settings and configurations. A sample is included in the pproject can be seen `monika.example.yml`
+Monika uses a YAML file format to describe all the settings and configurations. A sample is included in the project in the file `monika.example.yml`
 
 The following are a summary of their settings. In general Monika and its configuration file, `monika.yml` is divided into three sections. A probe, an alert and a notification section.
 
@@ -31,14 +31,14 @@ For further details on probes, check the [guide here](https://monika.hyperjump.t
 
 ## Alerts
 
-Alerts are part of probes, and describe the conditions to trigger an alert. Alerts are basicaly test condition for your service, such as http status, response time, or a particular response body.
+Alerts are part of probes, and describe the conditions to trigger an alert. Alerts are basically test conditions for your service, such as http status, response time, or a particular response body.
 
 The sample below shows an alert will be generated if http response status is 500 or the response time is greater than 150ms.
 
 ```bash
 alerts:
   - query: response.status == 500
-    message: resonse status is 500
+    message: response status is 500
   - query: response.time > 150
     message: response time is slow
 ```

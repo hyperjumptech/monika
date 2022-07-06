@@ -23,65 +23,75 @@
  **********************************************************************************/
 
 import { Config } from '../../interfaces/config'
-import { Probe } from '../../interfaces/probe'
 import { DEFAULT_THRESHOLD } from '../../looper'
 
-let probes: Probe[] = []
+type CollectionVersion = 'v2.0' | 'v2.1'
 
-const getConvertedProbeFromPostmanItem = (item: any) => {
-  const req = item.request
-  const probe: Probe = {
-    id: item.name,
-    name: item.name,
-    requests: [
-      {
-        id: req.name,
-        url: req.url.raw,
-        method: req.method,
-        headers: req?.header?.reduce(
-          (obj: any, it: any) => Object.assign(obj, { [it.key]: it.value }),
-          {}
-        ),
-        body: req?.body?.raw || JSON.parse('{}'),
-        timeout: 10_000,
-      },
-    ],
-    incidentThreshold: DEFAULT_THRESHOLD,
-    recoveryThreshold: DEFAULT_THRESHOLD,
-    alerts: [],
+const getCollectionVersion = (config: any) => {
+  if (config?.info?.schema?.includes('v2.0')) {
+    return 'v2.0'
   }
 
-  return probe
+  if (config?.info?.schema?.includes('v2.1')) {
+    return 'v2.1'
+  }
+
+  throw new Error('UnsupportedVersion')
 }
 
-const parsePostmanItem = (item: any) => {
-  if (item && item.length > 0) {
-    for (const child of item) {
-      if (!child.item) {
-        probes.push(getConvertedProbeFromPostmanItem(child))
-        return
-      }
+const generateEachRequest = (request: any, version: CollectionVersion) => ({
+  url: version === 'v2.0' ? request?.url : request?.url.raw,
+  method: request?.method,
+  headers: request?.header?.reduce((obj: any, it: any) => {
+    return Object.assign(obj, { [it.key]: it.value })
+  }, {}),
+  body: JSON.parse(request?.body?.raw ?? '{}'),
+  timeout: 10_000,
+})
 
-      parsePostmanItem(child.item)
-    }
+const generateRequests = (item: any, version: CollectionVersion) => {
+  const subitems = item?.item
+
+  if (subitems?.length > 0) {
+    return subitems?.map((subitem: any) => {
+      return generateEachRequest(subitem?.request, version)
+    })
   }
+
+  return [generateEachRequest(item?.request, version)]
+}
+
+const generateProbesFromConfig = (config: any, version: CollectionVersion) => {
+  const probes = config?.item?.map((item: any) => {
+    return {
+      id: item?.name,
+      name: item?.name,
+      requests: generateRequests(item, version),
+      incidentThreshold: DEFAULT_THRESHOLD,
+      recoveryThreshold: DEFAULT_THRESHOLD,
+      alerts: [],
+    }
+  })
+
+  return probes ?? []
 }
 
 export const parseConfigFromPostman = (configString: string): Config => {
   try {
-    const parsed = JSON.parse(configString)
-    probes = []
+    const config = JSON.parse(configString)
+    const version = getCollectionVersion(config)
+    const probes = generateProbesFromConfig(config, version)
 
-    parsePostmanItem(parsed.item)
-
-    const configMonika: any = {
-      probes,
-    }
-
-    return configMonika
+    return { probes }
   } catch (error: any) {
     if (error.name === 'SyntaxError') {
-      throw new Error('Postman file is in invalid JSON format!')
+      throw new Error('Your Postman file contains an invalid JSON format!')
+    }
+
+    if (error.message === 'UnsupportedVersion') {
+      throw new Error(
+        'Your Postman collection version is not supported. Please use v2.0 or v2.1!'
+      )
     }
 
     throw new Error(error.message)
