@@ -498,33 +498,26 @@ export default function IndexPage() {
           </span>
         </div>
 
-        <div class="integrationSection bg-white block w-full text-center py-8 md:py-10 md:px-5">
-          <h3 className="text20 headline3">Integrations</h3>
-          <p class="block text-black -mt-1">
-            Set up multiple ways to get notified:
-          </p>
-          <div class="container pt-10 pb-5 max-w-5xl mx-auto">
-            <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
-              {integrations.map((integration) => {
-                return (
-                  <div class="text-center">
-                    <a
-                      class="block bg-white shadow py-3 px-1"
-                      href={integration.url}
-                    >
-                      <img
-                        alt={integration.title}
-                        src={`/playground_assets/partner/${integration.img}`}
-                        className="w-1/3 mx-auto"
-                      />
-                      <p class="text-xs mt-3 text-bold min-h-[36px]">
-                        {integration.title}
-                      </p>
-                    </a>
-                  </div>
-                )
-              })}
-            </div>
+        <div className="bg-white w-full py-10">
+          <div className="flex flex-col text-center pb-12">
+            <h3 className="text20 headline3">Integrations</h3>
+            <p class="text-black">Set up multiple ways to get notified:</p>
+          </div>
+          <div className="container text-center grid grid-cols-3 pb-12 md:grid-cols-6 gap-4 max-w-5xl mx-auto">
+            {integrations.map((integration) => {
+              return (
+                <div className="border-1 flex flex-wrap justify-center bg-white shadow py-2 px-4">
+                  <a href={integration.url}>
+                    <img
+                      alt={integration.title}
+                      src={`/playground_assets/partner/${integration.img}`}
+                      className="w-14 mx-auto"
+                    />
+                    <p class="text-xs text-bold">{integration.title}</p>
+                  </a>
+                </div>
+              )
+            })}
           </div>
         </div>
 
