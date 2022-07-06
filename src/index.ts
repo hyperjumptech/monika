@@ -147,13 +147,6 @@ class Monika extends Command {
       dependsOn: ['config'],
     }),
 
-    sitemap: Flags.string({
-      char: 's', // (s)itemap
-      description: 'Run Monika using a Sitemap xml file.',
-      multiple: false,
-      exclusive: ['postman', 'insomnia', 'har'],
-    }),
-
     postman: Flags.string({
       char: 'p', // (p)ostman
       description: 'Run Monika using a Postman json file.',
