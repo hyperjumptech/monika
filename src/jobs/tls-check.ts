@@ -71,6 +71,7 @@ export function tlsChecker() {
                 status: 500,
                 responseTime: 0,
                 data: {},
+                body: {},
                 headers: {},
               },
             }

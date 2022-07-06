@@ -61,6 +61,7 @@ describe('send alerts', () => {
         isAlertTriggered: false,
         response: {
           data: '',
+          body: '',
           status: 500,
           responseTime: 0,
           headers: {},
@@ -92,6 +93,7 @@ describe('send alerts', () => {
         isAlertTriggered: true,
         response: {
           data: '',
+          body: '',
           status: 500,
           responseTime: 0,
           headers: {},
@@ -123,6 +125,7 @@ describe('send alerts', () => {
         isAlertTriggered: true,
         response: {
           data: '',
+          body: '',
           status: 500,
           responseTime: 0,
           headers: {},
@@ -155,6 +158,7 @@ describe('send alerts', () => {
         isAlertTriggered: true,
         response: {
           data: '',
+          body: '',
           status: 500,
           responseTime: 0,
           headers: {},
@@ -188,6 +192,7 @@ describe('send alerts', () => {
         isAlertTriggered: true,
         response: {
           data: '',
+          body: '',
           status: 500,
           responseTime: 0,
           headers: {},
@@ -226,6 +231,7 @@ describe('send alerts', () => {
         isAlertTriggered: true,
         response: {
           data: '',
+          body: '',
           status: 500,
           responseTime: 0,
           headers: {},
@@ -260,6 +266,7 @@ describe('send alerts', () => {
         isAlertTriggered: true,
         response: {
           data: '',
+          body: '',
           status: 500,
           responseTime: 0,
           headers: {},
@@ -312,6 +319,7 @@ describe('send alerts', () => {
         isAlertTriggered: true,
         response: {
           data: '',
+          body: '',
           status: 500,
           responseTime: 0,
           headers: {},
@@ -347,6 +355,7 @@ describe('send alerts', () => {
         isAlertTriggered: true,
         response: {
           data: '',
+          body: '',
           status: 500,
           responseTime: 0,
           headers: {},
@@ -378,6 +387,7 @@ describe('send alerts', () => {
         isAlertTriggered: true,
         response: {
           data: '',
+          body: '',
           status: 500,
           responseTime: 0,
           headers: {},
@@ -409,6 +419,7 @@ describe('send alerts', () => {
         isAlertTriggered: true,
         response: {
           data: '',
+          body: '',
           status: 500,
           responseTime: 0,
           headers: {},
@@ -440,6 +451,7 @@ describe('send alerts', () => {
         isAlertTriggered: true,
         response: {
           data: '',
+          body: '',
           status: 500,
           responseTime: 0,
           headers: {},

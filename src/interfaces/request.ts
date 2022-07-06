@@ -32,6 +32,7 @@ export type RequestTypes = 'http' | 'HTTP' | 'icmp' | 'ICMP' | 'tcp'
 export interface ProbeRequestResponse<T = any> {
   requestType?: RequestTypes // is this for http (default) or icmp  or others
   data: T
+  body: T
   status: number // todo: Improve status management. Status as number is pretty limiting here if we want to support other protocols other than http
   headers: any
   responseTime: number
