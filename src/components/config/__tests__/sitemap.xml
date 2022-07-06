@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://ottencoffee.co.id/page/rok-presso</loc>
-    <lastmod>2021-12-06T16:03:18+07:00</lastmod>
-    <changefreq>daily</changefreq>
-  </url>
-  <url>
-    <loc>https://ottencoffee.co.id/page/hariov60e</loc>
-    <lastmod>2021-12-06T16:03:18+07:00</lastmod>
-    <changefreq>daily</changefreq>
-  </url>
+    <url>
+        <loc>https://monika.hyperjump.tech/articles</loc>
+        <lastmod>2022-07-04T08:11:51.821Z</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>1.0</priority>
+    </url>
+    <url>
+        <loc>https://monika.hyperjump.tech/index</loc>
+        <lastmod>2022-07-04T08:11:51.821Z</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>1.0</priority>
+    </url>
 </urlset>
