@@ -13,7 +13,7 @@ probes:
       - url: https://github.com
 ```
 
-By default if you didn't define the method, it will be set as GET. Please note that with this configuration, you will not get any notifications when github.com is down since the notification configuration is not defined.
+If you didn't define the http method, it will use the GET method by default. Please note that with this configuration, you will not get any notifications when the site github.com is down since the notification configuration is not defined.
 
 ## Enabling Notification
 
@@ -65,7 +65,7 @@ probes:
           password: somepassword
 ```
 
-Using the configuration above, Monika will send a POST request to http://www.foo.com/login.php with the defined request's body.
+Using the configuration above, Monika will send a POST request to `http://www.foo.com/login.php` with the defined request's body.
 
 ## Multiple request
 
@@ -105,7 +105,7 @@ Here is an example on how you could get previous request(s) response data into y
 
 ```shell
 {{ response.[0].status }} ==> Get status code from first request response
-{{ response.[1].data.token }} ==> Get token from second request response
+{{ response.[1].body.token }} ==> Get token from second request response
 {{ response.[2].headers.SetCookie[0] }} ==> Get first cookie from third request response
 ```
 
@@ -130,7 +130,7 @@ probes:
         url: https://reqres.in/api/users
         timeout: 7000
       - method: GET
-        url: https://reqres.in/api/users/{{ responses.[0].data.data.[0].id }}
+        url: https://reqres.in/api/users/{{ responses.[0].body.data.[0].id }}
         timeout: 7000
     incidentThreshold: 3
     recoveryThreshold: 3
@@ -139,7 +139,7 @@ probes:
       - response-time-greater-than-2000-ms
 ```
 
-In the configuration above, the first request will fetch all users from `https://reqres.in/api/users`. Then in the second request, Monika will fetch the details of the first user from the first request. If there are no triggered alerts, the response returned from the first request is ready to be used by the second request using values from `{{ responses.[0].data }}`.
+In the configuration above, the first request will fetch all users from `https://reqres.in/api/users`. Then in the second request, Monika will fetch the details of the first user from the first request. If there are no triggered alerts, the response returned from the first request is ready to be used by the second request using values from `{{ responses.[0].body }}`.
 
 Let's say the response from fetching all users in JSON format as follows:
 
@@ -162,7 +162,7 @@ Let's say the response from fetching all users in JSON format as follows:
 }
 ```
 
-To use the user ID of the first user in the second request, we define the url of the second request as `{{ responses.[0].data.data.[0].id }}`.
+To use the user ID of the first user in the second request, we define the url of the second request as `{{ responses.[0].body.data.[0].id }}`.
 
 ### Pass Response Data as Headers value
 
@@ -188,7 +188,7 @@ probes:
           name: morpheus
           job: leader
         headers:
-          Authorization: Bearer {{ responses.[0].data.token }}
+          Authorization: Bearer {{ responses.[0].body.token }}
     incidentThreshold: 3
     recoveryThreshold: 3
     alerts:

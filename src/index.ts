@@ -113,6 +113,12 @@ class Monika extends Command {
       required: false,
     }),
 
+    symonMonikaId: Flags.string({
+      description: 'Monika ID for Symon (optional)',
+      dependsOn: ['symonKey', 'symonUrl'],
+      required: false,
+    }),
+
     config: Flags.string({
       char: 'c',
       description:
@@ -294,7 +300,8 @@ class Monika extends Command {
         symonClient = new SymonClient(
           _flags.symonUrl as string,
           _flags.symonKey as string,
-          _flags.symonLocationId as string
+          _flags.symonLocationId as string,
+          _flags.symonMonikaId as string
         )
         await symonClient.initiate()
         symonClient.onConfig((config) => updateConfig(config, false))

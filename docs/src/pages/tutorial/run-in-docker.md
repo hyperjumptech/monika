@@ -9,17 +9,17 @@ Monika is available as a docker image. You can find the image in the docker hub 
 docker pull hyperjump/monika
 ```
 
-Once you've pulled the latest image, pass it your monika yaml configuration to the container. From the same directory, you can run:
+Once you've pulled the latest image, you can run it using:
 
 ```bash
 # Run Monika in foreground
-docker run --name monika -v ${PWD}/monika.yml:/config/monika.yml -it hyperjump/monika:latest
+docker run --name monika --net=host -it hyperjump/monika:latest
 
 # Or, if you prefer to run Monika in the background
-docker run --name monika -v ${PWD}/monika.yml:/config/monika.yml --detach hyperjump/monika:latest
+docker run --name monika --net=host --detach hyperjump/monika:latest
 ```
 
-In the example above, we create a container from the monika image, map the current directory with a yaml config into the container, and let it run in the backround using the `--detach` switch.
+In the example above, we create a container from the hyperjump/monika base image naming it with`--name monika`, indicate we'll use the host machine's network configuration with `--net=host` and let it run in the backround using the `--detach` switch (or interactively with `-it`).
 
 Once monika is up and running, you can see its log using
 
@@ -33,29 +33,30 @@ Or you can stop the container with
 docker stop monika
 ```
 
-For more complex containers, you can pass it monika parameters. Using prometheus with monika in a docker, you would pass the parameters like so:
+For more complex probing, for example to use your existing customized configuration and have the prometheus plugin. First copy your personalized config to a directory, say /config. Then create your container with the directory mounted as a `--volume (-v)` for the container to use, like so:
 
 ```bash
 docker run --name monika_interactive \
-    -v ${PWD}/myConfig.yml:/config/monika.yml \
+    --net=host \
+    -v ${PWD}/config:/config \
     -d hyperjump/monika:latest \
-    monika -c /config/monika.yml --prometheus 3001
+    monika -c /config/myConfig.yml --prometheus 3001
+
 ```
 
 ## Troubleshooting
 
-Genererally when facing issues with your container, try the parameters using regular monika. For instance:
+Genererally when facing issues with your container or configuration, try the same configuration YAML using regular monika. For instance:
 
 ```bash
-monika -c /config/monika.yml --prometheus 3001
+monika -c myConfig.yml --prometheus 3001
 ```
 
-Ensure your container is up and running by running simple commands/parameters:
+Ensure your container is up and running by issuing simple commands/parameters:
 
 ```bash
 docker run --name monika_interactive \
-    -v ${PWD}/myConfig.yml:/config/monika.yml \
-    -d hyperjump/monika:latest monika --help
+    -it hyperjump/monika:latest monika --help
 ```
 
 For further docker commands and documentation, visit the official Docker [documentation here](https://docs.docker.com/engine/reference/commandline/run/).

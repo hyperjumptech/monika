@@ -2,17 +2,17 @@ name: Build the docs
 
 on:
   workflow_dispatch:
-  pull_request_target:
-    types: [opened, reopened]
+  pull_request:
+    types: [opened, synchronize, reopened]
     branches: [main]
     paths:
         - 'docs/**' # only run if the PR makes changes to the docs content.
 
 env:
   CI: true
-  NEXT_PUBLIC_ALGOLIA_APPLICATION_ID: ${{secrets.NEXT_PUBLIC_ALGOLIA_APPLICATION_ID}}
-  ALGOLIA_ADMIN_API_KEY: ${{secrets.ALGOLIA_ADMIN_API_KEY}}
-  NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY: ${{secrets.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY}}
+  NEXT_PUBLIC_ALGOLIA_APPLICATION_ID: undefined
+  ALGOLIA_ADMIN_API_KEY: undefined
+  NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY: undefined
 
 jobs:
   build:
@@ -32,7 +32,7 @@ jobs:
       - name: ✍🏻 Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 16.14
 
       - name: 📥 Install deps
         run: npm install

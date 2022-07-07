@@ -1,0 +1,45 @@
+{
+  "info": {
+    "_postman_id": "7b82602a-a95c-4b91-b783-e7e9251a300a",
+    "name": "Monika Monitor Collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "[GitHub API] Hyperjump Repos",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "https://api.github.com/users/hyperjumptech/repos"
+      },
+      "response": []
+    },
+    {
+      "name": "[GitHub API] Hyperjump",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "any",
+            "type": "default"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"any\": \"any\"\n}\n",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "https://api.github.com/users/hyperjumptech"
+      },
+      "response": []
+    }
+  ]
+}
