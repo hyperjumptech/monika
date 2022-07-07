@@ -90,8 +90,6 @@ export const parseConfigFromSitemap = (configString: string): Config => {
 
     return { probes }
   } catch (error: any) {
-    throw new Error(
-      'Your Sitemap file contains an invalid Sitemap XML format !'
-    )
+    throw new Error('Your Sitemap file contains an invalid Sitemap XML format!')
   }
 }
