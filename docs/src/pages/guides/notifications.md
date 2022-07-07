@@ -123,12 +123,12 @@ You can send Monika notifications to your Google Chat. First you need to generat
 1. Open Google Chat
 2. Go to the space to add notification
 3. Select **Manage webhook** from the top of the page
-4. Under Incoming webhook, click **Add another** if one already exist, in either case you need to provdie a name.
+4. Under Incoming webhook, click **Add another** if one already exists, in either case you need to provede a name.
 5. Name the new webhook and **Save**
 6. Copy the URL in the webhook modal
 7. You will need the URL in your monika configuration
 
-For futher information check the Google Chat [documentations here](https://developers.google.com/chat/how-tos/webhooks)
+For further information check the Google Chat [documentations here](https://developers.google.com/chat/how-tos/webhooks)
 
 Example of Google Chat configuration may be something similar to below:
 
@@ -160,7 +160,7 @@ Keep watch on these pages, new notification methods are being developed.
 
 ## Mailgun
 
-Mailgun is an email notification delivery provided by Mailgun email service. To use mailgun for your notification,
+Mailgun is an email notification delivery service provided by Mailgun email service. To use mailgun for your notification,
 
 1. You would need a [mailgun account](https://app.mailgun.com/).
 2. Get your **API key** by referring to [this documentation](https://help.mailgun.com/hc/en-us/articles/203380100-Where-Can-I-Find-My-API-Key-and-SMTP-Credentials).
@@ -182,7 +182,7 @@ Mailgun is an email notification delivery provided by Mailgun email service. To 
 | ---------- | ------------------------------------------------------------------------ | ----------------------------------------------- |
 | ID         | Notification identity number                                             | `Mailgun12345`                                  |
 | Type       | Notification types                                                       | `mailgun`                                       |
-| Recipients | An array of email addresses that will receive the e-mail from Monika     | `["monika@testmail.com", "symon@testmail.com"]` |
+| Recipients | An array of email addresses that will receive the email from Monika      | `["monika@testmail.com", "symon@testmail.com"]` |
 | Api Key    | Mailgun account api key, mailgun registered key to identify your account | `MAILGUN_API_KEY`                               |
 | Domain     | The domain to set in Mailgun                                             | `sandboxmail.mailgun.com`                       |
 
@@ -225,7 +225,7 @@ data:
 PagerDuty is a platform for agile incident management. You need the integration key to use PagerDuty. You can get the integration key by following the steps in [the documentation](https://support.pagerduty.com/docs/services-and-integrations). To give you the flexibility to choose which probe belongs to which PagerDuty service. You need to map the PagerDuty integration key with your Monika probe id in the configuration.
 
 ```yaml
-- id: unique-id-pagerdut-notif
+- id: unique-id-pagerduty-notify
   type: pagerduty
   data:
     - key: YOUR_PAGERDUTY_INTEGRATION_KEY
@@ -257,12 +257,12 @@ Similar to mailgun, sendgrid is also an email delivery service. Make sure you ha
 | ID         | Notification identity number                                                | `Sendgrid12345`                                 |
 | Type       | Notification types                                                          | `sendgrid`                                      |
 | sender     | A string of email addresses that has been verified in your sendgrid account | `your@email.com`                                |
-| Recipients | An array of email addresses that will receive the e-mail from Monika        | `["monika@testmail.com", "symon@testmail.com"]` |
+| Recipients | An array of email addresses that will receive the email from Monika         | `["monika@testmail.com", "symon@testmail.com"]` |
 | Api Key    | Sendgrid account api key, sendgrid registered key to identify your account  | `70e34aba-0ea908325`                            |
 
 ## Slack Incoming Webhook
 
-Monika supports Slack Incoming Webhook. To enable notification via Slack, you must have a `Slack's Incoming Webhook URL`. Please consult to [Sending messages using Incoming Webhooks](https://api.slack.com/messaging/webhooks) documentation.
+Monika supports Slack Incoming Webhook. To enable notification via Slack, you must have a `Slack's Incoming Webhook URL`. Please consult the [Sending messages using Incoming Webhooks](https://api.slack.com/messaging/webhooks) documentation.
 
 ```yml
 id: unique-id-slack
@@ -292,15 +292,15 @@ data:
     password: SMTP_PASSWORD
 ```
 
-| Key        | Description                                                          | Example                                         |
-| ---------- | -------------------------------------------------------------------- | ----------------------------------------------- |
-| ID         | Notification identity number                                         | `Smtp12345`                                     |
-| Type       | Notification types                                                   | `smtp`                                          |
-| Recipients | An array of email addresses that will receive the e-mail from Monika | `["monika@testmail.com", "symon@testmail.com"]` |
-| Hostname   | The smtp host that you will be using for sending the email           | `smtp.gmail.com`                                |
-| Port       | The port allowed to be used for sending mail in your host            | `587`                                           |
-| Username   | Registered username on your smtp server                              | `yourusername@gmail.com`                        |
-| Password   | The password set for your username                                   | `thepasswordforyourusername`                    |
+| Key        | Description                                                         | Example                                         |
+| ---------- | ------------------------------------------------------------------- | ----------------------------------------------- |
+| ID         | Notification identity number                                        | `Smtp12345`                                     |
+| Type       | Notification types                                                  | `smtp`                                          |
+| Recipients | An array of email addresses that will receive the email from Monika | `["monika@testmail.com", "symon@testmail.com"]` |
+| Hostname   | The smtp host that you will be using for sending the email          | `smtp.gmail.com`                                |
+| Port       | The port allowed to be used for sending mail in your host           | `587`                                           |
+| Username   | Registered username on your smtp server                             | `yourusername@gmail.com`                        |
+| Password   | The password set for your username                                  | `thepasswordforyourusername`                    |
 
 ### Example using Gmail SMTP
 
@@ -315,7 +315,7 @@ To use Gmail SMTP with Monika,
 
 ## Telegram
 
-Monika supports Telegram. To enable notification via Telegram, you must have a Telegram bot. Please consult to [Bots: An introduction for developers](https://core.telegram.org/bots).
+Monika supports Telegram. To enable notification via Telegram, you must have a Telegram bot. Please consult [Bots: An introduction for developers](https://core.telegram.org/bots).
 
 ```yml
 - id: unique-id-telegram
@@ -417,7 +417,7 @@ Monika supports Pushover. To enable notification via Pushover, you must create a
 
 ## Opsgenie
 
-Monika supports Opsgenie. To enable notification via Opsgenie, you must create a team, then create an integration, and finally add API. More info at [Opsgenie documentation](https://support.atlassian.com/opsgenie/docs/create-a-default-api-integration/#%E2%80%8BUsing-API-Integration).
+Monika supports Opsgenie. To enable notification via Opsgenie, you must create a team, then create an integration, and finally add an API. More info at [Opsgenie documentation](https://support.atlassian.com/opsgenie/docs/create-a-default-api-integration/#%E2%80%8BUsing-API-Integration).
 
 ```yml
   -id: unique-id-opsgenie,

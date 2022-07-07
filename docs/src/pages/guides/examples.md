@@ -95,11 +95,11 @@ probes:
 
 In the configuration above, Monika will first check `https://github.com/` then `https://github.com/hyperjumptech`. If the status code of `https://github.com/` is not 2xx (e.g., 200, 201), Monika **will not** check `https://github.com/hyperjumptech`.
 
-If there is a case where executing GET request to `https://github.com` triggers an alert, the next request will not be executed.
+If there is a case where executing a GET request to `https://github.com` triggers an alert, the next request will not be executed.
 
 ## Requests Chaining
 
-Monika supports request chaining, which enables you to do multiple requests and the ability to use past responses from earlier requests. For example, after executing a GET request to certain API, the next request could use the previous request(s) response into their path/query parameters or headers.
+Monika supports request chaining, which enables you to do multiple requests and the ability to use past responses from earlier requests. For example, after executing a GET request to certain a API, the next request could use the previous request(s) response into their path/query parameters or headers.
 
 Here is an example on how you could get previous request(s) response data into your next request:
 
@@ -113,7 +113,7 @@ In the example above, `response.[0]` refers to the response from the first reque
 
 Please refer to [Probe Response Anatomy](https://hyperjumptech.github.io/monika/guides/probes#probe-response-anatomy) in order to know which value could be used from the response body for the next request(s).
 
-In the sections below, you can find several examples of configuration file which contains chaining requests.
+In the sections below, you can find several examples of configuration files which contain chaining requests.
 
 ### Pass Response Data as Path/Query Parameters
 
@@ -196,4 +196,4 @@ probes:
       - response-time-greater-than-2000-ms
 ```
 
-Using the above configuration, Monika will perform login request in the first request, then use the returned token in the Authorization header of the second request.
+Using the above configuration, Monika will perform a login request in the first request, then use the returned token in the Authorization header of the second request.
