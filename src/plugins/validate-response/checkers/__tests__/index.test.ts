@@ -118,6 +118,7 @@ describe('responseChecker', () => {
     const generateMockedResponse = (responseTime: number) => {
       return {
         data: '',
+        body: '',
         status: 200,
         responseTime, // milliseconds
         headers: {},
