@@ -102,15 +102,11 @@ data:
 Monika supports Facebook Workplace. To enable notification via Workplace, you must create custom integration first. More info at [Facebook Workplace Custom Integrations](https://developers.facebook.com/docs/workplace/custom-integrations-new/)
 
 ```yml
-{
-  'id': 'unique-workplace-id',
-  'type': 'workplace',
-  'data':
-    {
-      'thread_id': '12345678910',
-      'access_token': 'your_custom_integration_access_token',
-    },
-}
+id: unique-workplace-id
+type: workplace
+data:
+  thread_id': 12345678910
+  access_token': your_custom_integration_access_token
 ```
 
 | Key         | Description                                     | Example                         |
@@ -201,18 +197,18 @@ data:
   url: https://YOUR_TEAMS_WEBHOOK_URL
 ```
 
-| Key  | Description                             | Example                                 |
-| ---- | --------------------------------------- | --------------------------------------- |
-| ID   | Notification identity number            | `Webhook12345`                          |
-| Type | Notification types                      | `webhook`                               |
-| Url  | The URL of your Microsoft Teams Webhook | `https://<company>.webhook.office.com/` |
+| Key  | Description                             | Example                                                      |
+| ---- | --------------------------------------- | ------------------------------------------------------------ |
+| ID   | Notification identity number            | `MyTeamsNotif123`                                            |
+| Type | Notification types                      | `teams`                                                      |
+| Url  | The URL of your Microsoft Teams Webhook | `https://<company>.webhook.office.com/webhookb2/1234-abcdef` |
 
 ## Monika Whatsapp Notifier
 
 You can get a notification from Monika to your Whatsapp number without having a Whatsapp Business account. First, you must create a [Monika Whatsapp Notifier account](https://whatsapp.hyperjump.tech).
 
 ```yml
-id: unique-id-monika-notif
+id: unique-monika-notif-id
 type: monika-notif
 data:
   url: https://YOUR_MONIKA_NOTIF_URL
@@ -234,15 +230,6 @@ PagerDuty is a platform for agile incident management. You need the integration 
   data:
     - key: YOUR_PAGERDUTY_INTEGRATION_KEY
       probeID: ZN32nw_KsvTKtLFNu55JV
-    - key: YOUR_PAGERDUTY_INTEGRATION_KEY_2
-      probeID: 8SeUFIud-xV9Ac5mFLRx8
-  probes:
-    - id: ZN32nw_KsvTKtLFNu55JV
-      requests:
-        - url: https://example.com
-    - id: 8SeUFIud-xV9Ac5mFLRx8
-      requests:
-        - url: https://example.com.login
 ```
 
 | Key          | Description                  | Example                            |
@@ -265,13 +252,13 @@ Similar to mailgun, sendgrid is also an email delivery service. Make sure you ha
     apiKey: YOUR_API_KEY
 ```
 
-| Key        | Description                                                                  | Example                                         |
-| ---------- | ---------------------------------------------------------------------------- | ----------------------------------------------- |
-| ID         | Notification identity number                                                 | `Sendgrid12345`                                 |
-| Type       | Notification types                                                           | `sendgrid`                                      |
-| sender     | An string of email addresses that has been verified in your sendgrid account | `your@email.com`                                |
-| Recipients | An array of email addresses that will receive the e-mail from Monika         | `["monika@testmail.com", "symon@testmail.com"]` |
-| Api Key    | Sendgrid account api key, sendgrid registered key to identify your account   | `70e34aba-0ea908325`                            |
+| Key        | Description                                                                 | Example                                         |
+| ---------- | --------------------------------------------------------------------------- | ----------------------------------------------- |
+| ID         | Notification identity number                                                | `Sendgrid12345`                                 |
+| Type       | Notification types                                                          | `sendgrid`                                      |
+| sender     | A string of email addresses that has been verified in your sendgrid account | `your@email.com`                                |
+| Recipients | An array of email addresses that will receive the e-mail from Monika        | `["monika@testmail.com", "symon@testmail.com"]` |
+| Api Key    | Sendgrid account api key, sendgrid registered key to identify your account  | `70e34aba-0ea908325`                            |
 
 ## Slack Incoming Webhook
 
@@ -372,12 +359,12 @@ body: {
 }
 ```
 
-## Whatsapp
+## Whatsapp Business
 
-Monika supports Whatsapp notification. To enable notification via whatsapp, you must have a registered user in whatsapp business api server. Please refer to [WhatsApp Business API](https://developers.facebook.com/docs/whatsapp) documentation.
+Monika supports notifications from Whatsapp for business accounts. To enable notifications via WhatsApp for business, you must have a registered user in the WhatsApp business API server. Please refer to [WhatsApp Business API](https://developers.facebook.com/docs/whatsapp) documentation.
 
 ```yml
-  - id: unique-id-whatsapp,
+  - id: unique-whatsapp-id,
     type: whatsapp,
     data:
       recipients: [628123456789],
