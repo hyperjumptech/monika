@@ -2,6 +2,18 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
         <loc>https://monika.hyperjump.tech/articles</loc>
+        <xhtml:link
+          rel="alternate"
+          hreflang="de"
+          href="https://de.wiktionary.org/wiki/hyperjump"/>
+        <xhtml:link
+          rel="alternate"
+          hreflang="id"
+          href="https://id.wiktionary.org/wiki/hyperjump"/>
+        <xhtml:link
+          rel="alternate"
+          hreflang="en"
+          href="https://en.wiktionary.org/wiki/hyperjump"/>
         <lastmod>2022-07-04T08:11:51.821Z</lastmod>
         <changefreq>monthly</changefreq>
         <priority>1.0</priority>

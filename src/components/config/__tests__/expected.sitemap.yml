@@ -5,6 +5,15 @@ probes:
       - url: https://monika.hyperjump.tech/articles
         method: GET
         timeout: 10000
+      - url: https://de.wiktionary.org/wiki/hyperjump
+        method: GET
+        timeout: 10000
+      - url: https://id.wiktionary.org/wiki/hyperjump
+        method: GET
+        timeout: 10000
+      - url: https://en.wiktionary.org/wiki/hyperjump
+        method: GET
+        timeout: 10000
     incidentThreshold: 5
     recoveryThreshold: 5
     alerts: []
