@@ -323,73 +323,87 @@ export default function IndexPage() {
               src="/playground_assets/world%20dot-logo%20%5B2%5D-700w.png"
               className="image03"
             />
-            <div className="container01">
-              <div className="container02">
-                <h1 className="text01">
-                  <span>Get WhatsApp</span>
-                  <br></br>
-                  <span>notification when</span>
-                  <br></br>
-                  <span>
-                    your <span className="text05">web app is down</span>
+            <div className="relative">
+              <div className="md:w-128 w-full">
+                <h1 className="lg:text-left text-center md:text-52 text-3xl font-bold md:leading-62 leading-tight text-white">
+                  Get WhatsApp notification when your
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-aqua-monika to-purple-monika md:text-52 text-4x font-bold md:leading-62 leading-tight">
+                    {' '}
+                    web app is down
                   </span>
                 </h1>
-                <span className="text06">
-                  <span className="text07">
-                    Or from any other communication channel. It&apos;s quick,
-                    <span
-                      dangerouslySetInnerHTML={{
-                        __html: ' ',
-                      }}
-                    />
-                  </span>
-                  <br></br>
-                  <span className="text08">​easy, and completely free!</span>
-                </span>
+                <p className="my-5 text-white md:text-xl text-sm font-normal lg:text-left text-center">
+                  Or from any other communication channel. It&apos;s quick,
+                  easy, and completely free!
+                </p>
+              </div>
+              <div className="flex flex-col justify-center lg:items-start items-center">
                 <img
                   alt="image"
                   src="/playground_assets/socials-group-200h.png"
-                  className="image04"
+                  className="grid grid-cols-4 gap-4 max-w-full h-auto"
                 />
-                <Link href="/quick-start">
-                  <a
-                    className="link11"
-                    style={{ display: 'block' }}
-                    onClick={() =>
-                      event({
-                        action: 'cta_button_hero',
-                        category: 'cta_button',
-                      })
-                    }
-                  >
-                    <PrimaryButton
-                      button="Get Started in 30 seconds"
-                      rootClassName="rootClassName"
-                      className="component02"
-                    ></PrimaryButton>
-                  </a>
-                </Link>
-                <div className="container03 space-x-4">
-                  <a
-                    href="https://github.com/hyperjumptech/monika"
-                    target="_blank"
-                    rel="noreferrer noopener"
-                  >
-                    <img
-                      alt="GitHub stars"
-                      src="https://img.shields.io/github/stars/hyperjumptech/monika?style=for-the-badge"
-                    />
-                  </a>
-                  <img
-                    alt="npm"
-                    src="https://img.shields.io/npm/dt/@hyperjumptech/monika?style=for-the-badge"
-                  />
+                <div className="lg:w-full w-full md:w-4/5">
+                  <Link href="/quick-start">
+                    <a
+                      onClick={() =>
+                        event({
+                          action: 'cta_button_hero',
+                          category: 'cta_button',
+                        })
+                      }
+                    >
+                      <PrimaryButton
+                        button="Get Started in 30 seconds"
+                        rootClassName="rootClassName"
+                        className="w-full"
+                      ></PrimaryButton>
+                    </a>
+                  </Link>
+                  <div className="flex flex-row justify-between">
+                    <div className="flex flex-1 items-center bg-gradient-to-r from-aqua-monika to-purple-monika rounded-full p-08 mr-2 h-9">
+                      <a
+                        className="flex flex-row justify-items-center justify-center bg-black w-full rounded-full md:p-1 pl-1 h-8"
+                        href="https://github.com/hyperjumptech/monika"
+                        target="_blank"
+                        rel="noreferrer noopener"
+                      >
+                        <img
+                          alt="stars"
+                          src="/playground_assets/github_icons.svg"
+                        />
+                        <p className="text-transparent bg-clip-text bg-gradient-to-r from-aqua-monika to-purple-monika text-xs md:text-base font-bold md:m-08 m-2">
+                          Start (388)
+                        </p>
+                      </a>
+                    </div>
+                    <div className="flex flex-1 items-center bg-gradient-to-r from-aqua-monika to-purple-monika rounded-full p-08 h-9">
+                      <a
+                        className="flex justify-items-start"
+                        href="https://github.com/hyperjumptech/monika"
+                        target="_blank"
+                        rel="noreferrer noopener"
+                      >
+                        <div className="w-2/3 justify-center bg-black rounded-l-3xl p-1 md:px-5 h-8">
+                          <p className="text-white text-base font-bold mx-2">
+                            Downloads
+                          </p>
+                        </div>
+
+                        <div className="flex-initial justify-center p-1 h-8">
+                          <p className="text-white text-base font-bold mx-2">
+                            1.8k/month
+                          </p>
+                        </div>
+                      </a>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-            <div className="container04">
+            <div>
               <iframe
-                className="my-auto md:w-96 md:h-72 w-56 h-32 video"
+                className="md:w-38r w-full mt-5 md:mt-2 h-72 md:h-32r md:ml-10"
                 src="https://www.youtube.com/embed/po1XHcIbJVw"
                 title="YouTube video player"
                 frameBorder="0"

@@ -87,6 +87,18 @@ module.exports = {
       width: {
         96: '24rem',
       },
+      fontSize: {
+        52: '52px',
+      },
+      lineHeight: {
+        62: '62.4px',
+      },
+      spacing: {
+        128: '34rem',
+        '08': '0.8px',
+        '38r': '38rem',
+        '32r': '30rem',
+      },
     },
     fontFamily: {
       sans: ['IBM Plex Sans', ...defaultTheme.fontFamily.sans],
