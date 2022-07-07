@@ -47,13 +47,13 @@
  **********************************************************************************/
 
 import yaml from 'js-yaml'
-import Ajv from 'ajv'
-import { expect } from 'chai'
 import fs from 'fs'
+import { expect } from 'chai'
+import Ajv from 'ajv'
 
 const ajv = new Ajv()
 const defaultConfig = yaml.load(fs.readFileSync('monika.example.yml', 'utf8'))
-import mySchema from '../../monika-configuration.json'
+import mySchema from '../../monika-config-schema.json'
 
 ajv.addVocabulary(['name', 'fileMatch', 'url']) // add custom Scheme Store keywords, reference: https://www.schemastore.org/json/
 
