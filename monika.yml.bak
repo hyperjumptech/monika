@@ -1,0 +1,18 @@
+probes:
+  - id: 'test'
+    name: 'original Config'
+    requests:
+      - url: https://httpbin.org/status/400
+        method: GET
+        timeout: 5000
+        saveBody: false
+        interval: 1
+    alerts:
+      - query: response.status == 500
+        subject: response status
+        message: response status message
+    incidentThreshold: 3
+    recoveryThreshold: 3
+notifications:
+  - id: my-desktop
+    type: desktop

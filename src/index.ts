@@ -130,7 +130,7 @@ class Monika extends Command {
 
     'create-config': Flags.boolean({
       description:
-        'Create config from HAR (-H), postman (-p), insomnia (-I), sitemap (--sitemap) export file, or open Monika Configuration Generator using default browser',
+        'Create config from HAR (-H), postman (-p), insomnia (-I), sitemap (-s) export file, or open Monika Configuration Generator using default browser',
     }),
 
     'config-interval': Flags.integer({

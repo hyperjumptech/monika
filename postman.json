@@ -1,0 +1,48 @@
+{
+  "info": {
+    "_postman_id": "3ae26851-a41b-4201-a853-0d96d2771a23",
+    "name": "mycollection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "ottencoffee-page",
+      "protocolProfileBehavior": {
+        "disabledSystemHeaders": {
+          "user-agent": true
+        }
+      },
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "User-Agent",
+            "value": "APIs-Google",
+            "type": "default"
+          }
+        ],
+        "url": {
+          "raw": "https://ottencoffee.co.id/sitemap.page.xml",
+          "protocol": "https",
+          "host": ["ottencoffee", "co", "id"],
+          "path": ["sitemap.page.xml"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "monika-page",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://monika.hyperjump.tech/sitemap.xml",
+          "protocol": "https",
+          "host": ["monika", "hyperjump", "tech"],
+          "path": ["sitemap.xml"]
+        }
+      },
+      "response": []
+    }
+  ]
+}
