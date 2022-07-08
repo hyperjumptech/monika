@@ -403,7 +403,7 @@ export default function IndexPage() {
             </div>
             <div>
               <iframe
-                className="md:w-38r w-full mt-5 md:mt-2 h-72 md:h-32r md:ml-10"
+                className="relative md:w-28r w-full justify-center mt-5 lg:my-2 h-96 ml-3"
                 src="https://www.youtube.com/embed/po1XHcIbJVw"
                 title="YouTube video player"
                 frameBorder="0"
