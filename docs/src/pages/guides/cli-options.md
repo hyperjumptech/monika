@@ -203,6 +203,22 @@ Merge your existing configurations with an Insomnia collection file using `-c/--
 monika --config monika-notifications.yml --insomnia /insomnia/collection.yml
 ```
 
+## Sitemap
+
+Monika supports reading sitemap.xml as configuration input. Use the `--sitemap` switches.
+
+```bash
+monika --sitemap sitemap.xml
+```
+
+### Create config from Postman file
+
+You can use the combination of `--create-config` and `--sitemap` flags to convert the sitemap xml file to a monika.yml config file.
+
+```bash
+monika --create-config --sitemap sitemap.xml
+```
+
 ## Prometheus
 
 You can expose the [Prometheus](https://prometheus.io/) metrics server with the `--prometheus` flag and server port as a value.
