@@ -31,7 +31,7 @@ import { Seo } from '../components/Seo'
 import ButtonLink from '../components/ButtonLink'
 import GithubButton from '../components/homepage/github-button'
 import PrimaryButton from '../components/homepage/primary-button'
-import TestimonialsCard from '../components/homepage/testimonials-card'
+import TestimonialCard from '../components/homepage/testimonial-card'
 import FeatureCard from '../components/homepage/feature-card'
 import ArticleCard from '../components/homepage/article-card'
 import { event } from 'lib/gtag'
@@ -413,27 +413,38 @@ export default function IndexPage() {
             </div>
           </div>
         </div>
+        <div className="line">
+          <div className="absolute right-0 top-0 bg-gradient-to-r from-aqua-monika to-purple-monika w-1/2 md:w-96 h-6"></div>
+        </div>
         <div className="testimonials">
-          <div className="container05">
+          <div className="container05 my-10">
             <div className="container">
-              <h1 className="text09 headline2">What They Say</h1>
+              <p className="md:text-3xl text-xl md:text-left text-center">
+                Let’s Hear What{' '}
+                <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-aqua-monika to-purple-monika">
+                  They Say
+                </span>
+              </p>
               <h1 className="text10 headline2">About Monika</h1>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-10">
-                <TestimonialsCard
-                  text="Thank you Monika by Hyperjump.  With Monika, we can improve our services SLA, get notified early when we have a server issue. Easy to install, have multi notification channels, can be setup from different server regions, and is easy to integrate on the dashboard make it all complete and help us to analyze the issue asap."
-                  text1="Eric Sudadyo"
-                  text2="DevOps Manager, Yummycorp"
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
+                <TestimonialCard
+                  description="Thank you Monika by Hyperjump.  With Monika, we can improve our services SLA, get notified early when we have a server issue. Easy to install, have multi notification channels, can be setup from different server regions, and is easy to integrate on the dashboard make it all complete and help us to analyze the issue asap."
+                  name="Eric Sudadyo"
+                  text="DevOps Manager, Yummycorp"
                   image_src="/playground_assets/yummy-200h.png"
                 />
-                <TestimonialsCard
-                  text="Before using Monika, we were unaware when our website is down until our users reported it. We don’t want it to happen again. Now with Monika, we are notified much faster so our team can react quicker to solve the issue. Thank you, Monika!"
-                  text1="Marsya Nurmaranti"
-                  text2="Executive Director, Indorelawan"
+                <TestimonialCard
+                  description="Before using Monika, we were unaware when our website is down until our users reported it. We don’t want it to happen again. Now with Monika, we are notified much faster so our team can react quicker to solve the issue. Thank you, Monika!"
+                  name="Marsya Nurmaranti"
+                  text="Executive Director, Indorelawan"
                   image_src="/playground_assets/indorelawan_logomerah%20panjang_png-200h.png"
                 />
               </div>
             </div>
           </div>
+        </div>
+        <div className="line">
+          <div className="absolute left-0 top-0 bg-gradient-to-r from-aqua-monika to-purple-monika w-1/2 md:w-96 h-6"></div>
         </div>
         <img
           alt="image"
@@ -950,6 +961,7 @@ export default function IndexPage() {
             align-items: center;
             flex-direction: row;
             justify-content: space-between;
+            margin-bottom: 30px;
           }
           .image03 {
             left: 0px;
@@ -1068,6 +1080,12 @@ export default function IndexPage() {
             padding-bottom: var(--dl-space-space-tripleunit);
             justify-content: center;
             background-color: var(--dl-color-gray-white);
+            transform: skew(0deg, -5deg);
+          }
+          .line {
+            width: 100%;
+            padding: 10px;
+            transform: skew(0deg, -5deg);
           }
           .container05 {
             display: flex;
@@ -1076,6 +1094,7 @@ export default function IndexPage() {
             align-items: center;
             flex-direction: row;
             justify-content: center;
+            transform: skew(0deg, 5deg);
           }
           .container06 {
             flex: 0 0 auto;

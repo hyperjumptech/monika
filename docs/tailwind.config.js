@@ -89,6 +89,7 @@ module.exports = {
       },
       fontSize: {
         52: '52px',
+        22: '22px',
       },
       lineHeight: {
         62: '62.4px',
