@@ -3,7 +3,7 @@ id: new-notifications
 title: New Notifications
 ---
 
-## New Notifications
+## Introduction
 
 Out of the box, Monika support a multitude of notification channels, from chat applications such as Slack, Discourse, Microsoft Teams, Google Chats to email based platform such as Mailgun, to generic webhooks and the SMTP protocol ([full list can be found in Notifications here](https://monika.hyperjump.tech/guides/notifications)). Should you have a favorite tool we haven't supported, we invite you to add it to Monika's growing list. Here's how.
 

@@ -9,14 +9,9 @@
       "request": "launch",
       "name": "Launch Symon",
       "skipFiles": ["<node_internals>/**"],
-      "program": "${workspaceFolder}\\bin\\run_dev",
-      "args": [
-        "--symonUrl",
-        "http://localhost:3000/",
-        "--symonKey",
-        "insert-key-here"
-      ],
-      "sourceMap": true
+      "program": "${workspaceFolder}/bin/run_dev",
+      "args": ["--sitemap", "./src/components/config/__tests__/sitemap.xml"],
+      "sourceMap": false
     },
     {
       "type": "node",
