@@ -425,7 +425,9 @@ export default function IndexPage() {
                   They Say
                 </span>
               </p>
-              <h1 className="text10 headline2">About Monika</h1>
+              <h1 className="text-transparent bg-clip-text bg-gradient-to-r from-aqua-monika to-purple-monika md:text-52 text-4xl font-bold md:text-left text-center">
+                About Monika
+              </h1>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
                 <TestimonialCard
                   description="Thank you Monika by Hyperjump.  With Monika, we can improve our services SLA, get notified early when we have a server issue. Easy to install, have multi notification channels, can be setup from different server regions, and is easy to integrate on the dashboard make it all complete and help us to analyze the issue asap."
@@ -452,8 +454,12 @@ export default function IndexPage() {
           className="image06"
         />
         <div className="features">
-          <h2 className="text11 headline2">4 Simple Steps to Start</h2>
-          <h2 className="text12">Monika</h2>
+          <h1 className="md:text-52 text-3xl md:text-left text-center text-white mb-3">
+            4 Simple Steps to Start{' '}
+            <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-aqua-monika to-purple-monika">
+              Monika
+            </span>
+          </h1>
           <span className="text13">
             <span className="text14">
               Here are the steps to guide you to use Monika.
@@ -480,7 +486,8 @@ export default function IndexPage() {
             <div className="container11">
               <FeatureCard
                 text="Get Monika using the popular package manager: Homebrew (macOS), Snap (Linux), or Chocolatey (Windows)"
-                title="2. Install "
+                title="2. Install"
+                title3="npm i -g @hyperjumptech/monika"
                 image_src="/playground_assets/downloading-400w.png"
                 rootClassName="rootClassName2"
               ></FeatureCard>
@@ -493,20 +500,23 @@ export default function IndexPage() {
                 image_src="/playground_assets/configuration%20file-400w.png"
                 link_text="https://monika-config.hyperjump.tech/"
                 rootClassName="rootClassName1"
-              ></FeatureCard>
-              <a
-                href="https://monika-config.hyperjump.tech/"
-                target="_blank"
-                rel="noreferrer noopener"
-                className="link14"
-              >
-                Monika Config Generator
-              </a>
+              />
+              <p className="mt-5 text-center">
+                <a
+                  href="https://monika-config.hyperjump.tech/"
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="text-aqua-monika text-sm"
+                >
+                  Monika Config Generator
+                </a>
+              </p>
             </div>
             <div className="container14">
               <FeatureCard
                 text="Monika by default reads a yaml configuration file called monika.yml in the current working directory if it exists. Run this command in the Terminal from the directory that contains the monika.yml file:"
-                title="4. Run Monika"
+                title="4. Run"
+                title2="Monika"
                 image_src="/playground_assets/step%204-400w.png"
                 rootClassName="rootClassName3"
               ></FeatureCard>
@@ -514,16 +524,18 @@ export default function IndexPage() {
                 <span className="text18">monika</span>
               </div>
             </div>
+          </div>
+          <div className="flex justify-center items-center flex-col mb-10">
             <img
               alt="image"
               src="/playground_assets/success%20%5B1%5D-500w.png"
-              className="image07"
+              className="w-32r mb-5 object-cover"
             />
+            <p className="text-2xl w-3/4 text-white text-center font-semibold">
+              Congratulations! Your web app is being monitored and Monika will
+              send you notification if something happens.
+            </p>
           </div>
-          <span className="text19">
-            Congratulations! Your web app is being monitored and Monika will
-            send you notification if something happens.
-          </span>
         </div>
 
         <div className="bg-white w-full py-10">
@@ -1158,6 +1170,7 @@ export default function IndexPage() {
           }
           .features {
             flex: 0 0 auto;
+            margin-top: 2rem;
             width: 100%;
             display: flex;
             padding: var(--dl-space-space-doubleunit);
@@ -1192,10 +1205,9 @@ export default function IndexPage() {
           }
           .features1 {
             display: flex;
-            padding: var(--dl-space-space-doubleunit);
             flex-wrap: wrap;
             margin-top: var(--dl-space-space-doubleunit);
-            align-items: flex-start;
+            align-items: flex-center;
             flex-direction: row;
             justify-content: center;
           }
@@ -1240,7 +1252,7 @@ export default function IndexPage() {
             flex: 0 0 auto;
             display: flex;
             padding: var(--dl-space-space-doubleunit);
-            align-items: flex-start;
+            // align-items: flex-start;
             flex-direction: column;
           }
           .link14 {
