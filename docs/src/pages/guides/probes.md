@@ -3,7 +3,8 @@ id: probes
 title: Probes
 ---
 
-Probes are the heart of the monitoring requests. Probes are arrays of request objects defined in the config file `monika.yml` like so.
+Probes are the heart of the monitoring requests. Probes are made out of an array of "requests" and some controls. The control parameters determine how the probes are performed, such as repetition intervals, probe name, identification and text descriptions. Requests are either Ping, TCP or HTTP(S) requests to some location.
+Monika goes through each probe object in the `monika.yml` config file, sends it out, and determines whether an alert or notification needs to be sent out.
 
 ```yaml
 probes:
@@ -23,11 +24,9 @@ probes:
     alerts: []
 ```
 
-Monika goes through each probe object, sends it out, and determines whether an alert or notification needs to be sent out.
+Basically probes are arranged as arrays of request objects.
 
-## Probe Request Anatomy
-
-An actual probe request may be something like below.
+## HTTP Request Anatomy
 
 ```yaml
   probes: [
@@ -71,7 +70,7 @@ Details of the field are given in the table below.
 | alerts (optional)            | See [alerts](./alerts) section for detailed information.                                                                                                                                                                                                                                                                                                  |
 | ping (optional)              | (boolean), If set true then send a PING to the specified url instead.                                                                                                                                                                                                                                                                                     |
 
-### PING
+### PING Request
 
 You can send an ICMP echo request to a specific url by enabling the `ping: true` field.
 In this mode the http method is ignored and a PING echo request is sent to the specified url.
