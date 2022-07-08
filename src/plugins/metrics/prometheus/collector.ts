@@ -22,18 +22,33 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Gauge, register, collectDefaultMetrics, Histogram } from 'prom-client'
-import { Probe } from '../../../interfaces/probe'
+import {
+  Gauge,
+  register,
+  collectDefaultMetrics,
+  Histogram,
+  Counter,
+} from 'prom-client'
+import type { Probe } from '../../../interfaces/probe'
+import type { ProbeRequestResponse } from '../../../interfaces/request'
 
 type PrometheusCustomCollector = {
   statusCode: Gauge<'id' | 'name' | 'url' | 'method'>
   responseTime: Histogram<'id' | 'name' | 'url' | 'method' | 'statusCode'>
   responseSize: Gauge<'id' | 'name' | 'url' | 'method' | 'statusCode'>
+  alertTriggeredTotal: Counter<'id' | 'name' | 'url' | 'method' | 'alertQuery'>
 }
-export class PrometheusCollector {
-  private prometheusCustomCollector: Partial<PrometheusCustomCollector> = {}
 
-  registerCollectorFromProbes(probes: Probe[]): void {
+type ProbeResult = {
+  probe: Probe
+  requestIndex: number
+  response: ProbeRequestResponse
+}
+
+let prometheusCustomCollector: PrometheusCustomCollector
+
+export class PrometheusCollector {
+  constructor() {
     // remove all registered metrics
     register.clear()
 
@@ -53,23 +68,36 @@ export class PrometheusCollector {
       help: 'Size of response size in bytes',
       labelNames: ['id', 'name', 'url', 'method', 'statusCode'] as const,
     })
+    const alertTriggeredTotal = new Counter({
+      name: 'monika_alert_total',
+      help: 'Total alert triggered',
+      labelNames: ['id', 'name', 'url', 'method', 'alertQuery'] as const,
+    })
 
     // register and collect default Node.js metrics
     collectDefaultMetrics({ register })
+
+    prometheusCustomCollector = {
+      statusCode,
+      responseTime,
+      responseSize,
+      alertTriggeredTotal,
+    }
+  }
+
+  collectProbeTotal(total: number): void {
     // register and collect probe total
     new Gauge({
       name: 'monika_probes_total',
       help: 'Total of all probe',
-    }).set(probes.length)
-
-    this.prometheusCustomCollector = {
-      statusCode,
-      responseTime,
-      responseSize,
-    }
+    }).set(total)
   }
 
-  collectProbeRequestMetrics(probeResult: Record<string, any>): void {
+  collectProbeRequestMetrics(probeResult: ProbeResult): void {
+    if (!prometheusCustomCollector) {
+      throw new Error('Prometheus collector is not registered')
+    }
+
     const { probe, requestIndex, response } = probeResult
     const { id, name, requests } = probe
     const request = requests[requestIndex]
@@ -89,7 +117,7 @@ export class PrometheusCollector {
       statusCode,
       responseTime: resposeTimeCollector,
       responseSize,
-    } = this.prometheusCustomCollector
+    } = prometheusCustomCollector
 
     // collect metrics
     statusCode
@@ -104,5 +132,29 @@ export class PrometheusCollector {
     responseSize
       ?.labels(labels)
       .set(Number.isNaN(responseSizeBytes) ? 0 : responseSizeBytes)
+  }
+
+  collectTriggeredAlert(
+    probeResult: Omit<ProbeResult, 'response'> & { alertQuery: string }
+  ): void {
+    if (!prometheusCustomCollector) {
+      throw new Error('Prometheus collector is not registered')
+    }
+
+    const { alertQuery, probe, requestIndex } = probeResult
+    const { id, name, requests } = probe
+    const request = requests[requestIndex]
+    const { method, url } = request
+    const labels = {
+      id,
+      name,
+      url,
+      method: method ?? 'GET',
+      alertQuery,
+    }
+    const { alertTriggeredTotal } = prometheusCustomCollector
+
+    // collect metrics
+    alertTriggeredTotal?.labels(labels).inc()
   }
 }
