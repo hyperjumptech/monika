@@ -99,7 +99,7 @@ If there is a case where executing a GET request to `https://github.com` trigger
 
 ## Requests Chaining
 
-Monika supports request chaining, which enables you to do multiple requests and the ability to use past responses from earlier requests. For example, after executing a GET request to certain a API, the next request could use the previous request(s) response into their path/query parameters or headers.
+Monika supports request chaining, which enables you to do multiple requests and the ability to use past responses from earlier requests. For example, after executing a GET request to a certain API, the next request could use the previous request(s) response into their path/query parameters or headers.
 
 Here is an example on how you could get previous request(s) response data into your next request:
 

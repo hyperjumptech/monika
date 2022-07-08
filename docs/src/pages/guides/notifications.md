@@ -123,7 +123,7 @@ You can send Monika notifications to your Google Chat. First you need to generat
 1. Open Google Chat
 2. Go to the space to add notification
 3. Select **Manage webhook** from the top of the page
-4. Under Incoming webhook, click **Add another** if one already exists, in either case you need to provede a name.
+4. Under Incoming webhook, click **Add another** if one already exists, in either case you need to provide a name.
 5. Name the new webhook and **Save**
 6. Copy the URL in the webhook modal
 7. You will need the URL in your monika configuration
