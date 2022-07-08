@@ -74,7 +74,7 @@ describe('parseConfigFromPostman', () => {
             item.request.header.length
           )
           expect(req.body).to.deep.equal(
-            JSON.parse(item.request.body?.raw ?? '{}')
+            JSON.parse(item.request.body?.raw || '{}')
           )
         }
       }
@@ -96,7 +96,7 @@ describe('parseConfigFromPostman', () => {
             item.request.header.length
           )
           expect(req.body).to.deep.equals(
-            JSON.parse(item.request.body?.raw ?? '{}')
+            JSON.parse(item.request.body?.raw || '{}')
           )
         }
       }
@@ -120,7 +120,7 @@ describe('parseConfigFromPostman', () => {
             item.item[rIndex].request.header.length
           )
           expect(req.body).to.deep.equals(
-            JSON.parse(item.item[rIndex].request.body?.raw ?? '{}')
+            JSON.parse(item.item[rIndex].request.body?.raw || '{}')
           )
         }
       }
@@ -144,7 +144,7 @@ describe('parseConfigFromPostman', () => {
             item.item[rIndex].request.header.length
           )
           expect(req.body).to.deep.equals(
-            JSON.parse(item.item[rIndex].request.body?.raw ?? '{}')
+            JSON.parse(item.item[rIndex].request.body?.raw || '{}')
           )
         }
       }

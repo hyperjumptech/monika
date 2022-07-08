@@ -45,7 +45,7 @@ const generateEachRequest = (request: any, version: CollectionVersion) => ({
   headers: request?.header?.reduce((obj: any, it: any) => {
     return Object.assign(obj, { [it.key]: it.value })
   }, {}),
-  body: JSON.parse(request?.body?.raw ?? '{}'),
+  body: JSON.parse(request?.body?.raw || '{}'),
   timeout: 10_000,
 })
 
