@@ -78,7 +78,7 @@ Looking for **other versions?** Check [here](https://github.com/hyperjumptech/mo
 npm install && npm run prepack
 ```
 
-### Run Monika
+## Run Monika
 
 To run Monika, use this command
 
