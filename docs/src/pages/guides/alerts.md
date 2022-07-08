@@ -17,7 +17,7 @@ probes:
 
 You can define two types of alerts: **request alerts** and **probe alerts**
 
-### Request Alerts
+## Request Alerts
 
 Request alerts are `alerts` configurations that are scoped under the `requests` key. Alerts defined under a specific request will run for that specific request only. Take a look at the example below:
 
@@ -38,7 +38,7 @@ probes:
           message: Status not 2xx # (This alert is only triggered for the gitlab.com request)
 ```
 
-### Probe Alerts
+## Probe Alerts
 
 Probe alerts are `alerts` configurations that are defined under the `probe` key. Alerts scoped under the probe key will run for all requests for that probe. Take a look at the example below:
 

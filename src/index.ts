@@ -130,7 +130,7 @@ class Monika extends Command {
 
     'create-config': Flags.boolean({
       description:
-        'Create config from HAR (-H), postman (-p), insomnia (-I) export file, or open Monika Configuration Generator using default browser',
+        'Create config from HAR (-H), postman (-p), insomnia (-I), sitemap (--sitemap) export file, or open Monika Configuration Generator using default browser',
     }),
 
     'config-interval': Flags.integer({
@@ -147,25 +147,31 @@ class Monika extends Command {
       dependsOn: ['config'],
     }),
 
+    sitemap: Flags.string({
+      description: 'Run Monika using a Sitemap xml file.',
+      multiple: false,
+      exclusive: ['har', 'insomnia', 'postman'],
+    }),
+
     postman: Flags.string({
       char: 'p', // (p)ostman
       description: 'Run Monika using a Postman json file.',
       multiple: false,
-      exclusive: ['har', 'insomnia'],
+      exclusive: ['har', 'insomnia', 'sitemap'],
     }),
 
     har: Flags.string({
       char: 'H', // (H)ar file to
       description: 'Run Monika using a HAR file',
       multiple: false,
-      exclusive: ['postman', 'insomnia'],
+      exclusive: ['postman', 'insomnia', 'sitemap'],
     }),
 
     insomnia: Flags.string({
       char: 'I', // (I)nsomnia file to
       description: 'Run Monika using an Insomnia json/yaml file',
       multiple: false,
-      exclusive: ['har', 'postman'],
+      exclusive: ['har', 'postman', 'sitemap'],
     }),
 
     logs: Flags.boolean({
@@ -482,7 +488,7 @@ Please refer to the Monika documentations on how to how to configure notificatio
 
         for (const item of notifications) {
           startupMessage += `- Notification ID: ${item.id}
-    Type: ${item.type}      
+    Type: ${item.type}
 `
           // Only show recipients if type is mailgun, smtp, or sendgrid
           // check one-by-one instead of using indexOf to avoid using type assertion
