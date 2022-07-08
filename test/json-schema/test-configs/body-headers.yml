@@ -32,14 +32,14 @@ probes:
         method: GET
         timeout: 3000
         headers:
-          - allowAny: true
-            anyheader: 321
-          - variableCaps: false
-            Any123-Combo: yes
+          allowAny: true
+          anyheader: 321
+          variableCaps: false
+          Any123-Combo: yes
         body:
-          - username: someuser
-            password: somepassword
-            age: 201
+          username: bart
+          password: simpson
+          age: 201
     alerts:
       - query: response.status != 200
         message: response status message
