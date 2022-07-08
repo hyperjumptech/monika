@@ -751,7 +751,7 @@
             "type": "string",
             "description": "Authentication credentials for HTTP authentication"
           },
-          "Cache-Control":{
+          "Cache-Control": {
             "type": "string",
             "description": "Used to specify directives that must be obeyed by all caching mechanisms along the request-response chain"
           },
