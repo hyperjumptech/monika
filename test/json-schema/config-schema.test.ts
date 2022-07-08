@@ -118,4 +118,15 @@ describe('json schema validation tests', () => {
     const valid = validate(badDataUrl)
     expect(valid).to.be.false
   })
+
+  it('should allow probe.request.body and probe.request.headers with any fields', () => {
+    const requestBodyHeader = yaml.load(
+      fs.readFileSync(
+        './test/json-schema/test-configs/body-headers.yml',
+        'utf8'
+      )
+    )
+    const valid = validate(requestBodyHeader)
+    expect(valid).to.be.true
+  })
 })

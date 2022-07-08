@@ -663,20 +663,18 @@
             "description": "Should response body be saved in the database",
             "default": false
           },
-          "headers": {
-            "type": "string",
-            "description": "Any http headers you might need for your request"
-          },
-          "body": {
-            "type": "string",
-            "description": "Any http body payload for your request"
-          },
           "alerts": {
             "$ref": "#/definitions/alerts"
           },
           "ping": {
             "type": "boolean",
             "description": "If defined and to true, the request is an ICMP ping"
+          },
+          "body": {
+            "$ref": "#/definitions/body"
+          },
+          "headers": {
+            "$ref": "#/definitions/headers"
           }
         }
       }
@@ -719,6 +717,73 @@
           }
         },
         "required": ["query", "message"]
+      }
+    },
+    "body": {
+      "type": "array",
+      "description": "The data bytes transmitted in an HTTP transaction message immediately following the headers if there are any",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {}
+      }
+    },
+    "headers": {
+      "type": "array",
+      "description": "A list of strings sent and received by both the client program and server on every HTTP request and response",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "Accept": {
+            "type": "string",
+            "description": "Media type(s) that is/are acceptable for the response"
+          },
+          "Accept-Charset": {
+            "type": "string",
+            "description": "Character sets that are acceptable"
+          },
+          "Accept-Encoding": {
+            "type": "string",
+            "description": "List of acceptable encodings"
+          },
+          "Authorization": {
+            "type": "string",
+            "description": "Authentication credentials for HTTP authentication"
+          },
+          "Cache-Control":{
+            "type": "string",
+            "description": "Used to specify directives that must be obeyed by all caching mechanisms along the request-response chain"
+          },
+          "Cookie": {
+            "type": "string",
+            "description": "An HTTP cookie previously sent by the server with Set-Cookie"
+          },
+          "Connection": {
+            "type": "string",
+            "description": "General header that allows the sender or client to specify options that are desired for that particular connection"
+          },
+          "Content-Type": {
+            "type": "string",
+            "description": "The Media type of the body of the request (used with POST and PUT requests"
+          },
+          "Keep-Alive": {
+            "type": "string",
+            "description": "General header used to inform how long a persistent connection should stay open"
+          },
+          "Origin": {
+            "type": "string",
+            "description": "Initiates a request for cross-origin resource sharing (asks server for Access-Control-* response fields)"
+          },
+          "Referer": {
+            "type": "string",
+            "description": "This is the address of the previous web page (referrer) from which a link to the currently requested page was followed"
+          },
+          "User-Agent": {
+            "type": "string",
+            "description": "The user agent string of the user agent"
+          }
+        }
       }
     }
   }
