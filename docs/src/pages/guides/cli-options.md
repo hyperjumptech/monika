@@ -211,7 +211,7 @@ Monika supports reading sitemap.xml as configuration input. Use the `--sitemap` 
 monika --sitemap sitemap.xml
 ```
 
-### Create config from Postman file
+### Create config from Sitemap file
 
 You can use the combination of `--create-config` and `--sitemap` flags to convert the sitemap xml file to a monika.yml config file.
 
