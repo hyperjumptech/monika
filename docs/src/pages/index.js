@@ -621,17 +621,19 @@ export default function IndexPage() {
           </div>
         </div>
         <div className="c-t-a">
+          <img
+            src="/playground_assets/hero-bg-line.svg"
+            className="absolute mt-20 w-100%"
+          />
           <div className="container20">
             <div className="container21">
-              <h2 className="text23 headline2">
-                <span className="text24">Get Started with Monika Now!</span>
+              <h2 className="text-white md:text-left lg:text-44 text-3xl text-center font-bold">
+                Get Started with Monika Now!
               </h2>
-              <span className="text25 lead1">
-                <span className="text26">
-                  Monika is an open source synthetic monitoring command line
-                  application. It is actively developed and completely free!
-                </span>
-              </span>
+              <p className="text-white font-medium lg:text-2xl lg:w-3/4 w-full md:my-0 my-4 md:text-left text-center">
+                Monika is an open source synthetic monitoring command line
+                application. It is actively developed and completely free!
+              </p>
             </div>
             <div className="container22">
               <Link href="/quick-start">
@@ -1386,7 +1388,7 @@ export default function IndexPage() {
             justify-content: flex-start;
           }
           .c-t-a {
-            width: 100%;
+            width: 96%;
             display: flex;
             overflow: hidden;
             align-items: center;
@@ -1399,20 +1401,22 @@ export default function IndexPage() {
             display: flex;
             z-index: 100;
             max-width: 1110px;
-            background: linear-gradient(310deg, #2fdcdc, #987ce8);
+            background: linear-gradient(350deg, #2fdcdc, rgba(255, 0, 0, 0) 20%),
+              linear-gradient(45deg, #2fdcdc, rgba(0, 255, 0, 0) 30.71%),
+              linear-gradient(336deg, #987ce8, #987ce8 80.71%);
             align-items: center;
             padding-top: var(--dl-space-space-doubleunit);
             padding-left: var(--dl-space-space-doubleunit);
             padding-right: var(--dl-space-space-tripleunit);
-            flex-direction: column;
+            flex-direction: row;
             padding-bottom: var(--dl-space-space-doubleunit);
             justify-content: space-between;
+            border-radius: 10px;
           }
           .container21 {
-            flex: 1;
+            flex: 2;
             display: flex;
-            padding: var(--dl-space-space-unit);
-            align-items: center;
+            padding: var(--dl-space-space-doubleunit);
             flex-direction: column;
             justify-content: flex-start;
           }
@@ -1435,8 +1439,9 @@ export default function IndexPage() {
           .container22 {
             flex: 0 0 auto;
             display: flex;
+            width: 250px;
             align-items: center;
-            border-radius: var(--dl-radius-radius-radius6);
+            border-radius: 20px;
             flex-direction: column;
             justify-content: center;
             background-color: var(--dl-color-gray-white);
@@ -1466,6 +1471,7 @@ export default function IndexPage() {
             flex: 0 0 auto;
             width: 100%;
             display: flex;
+            margin-top: 2rem;
             padding: var(--dl-space-space-doubleunit);
             z-index: 100;
             flex-wrap: wrap;
@@ -1618,6 +1624,18 @@ export default function IndexPage() {
             }
           }
           @media (max-width: 767px) {
+            .container20 {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              border-radius: 0;
+            }
+            .container21 {
+              padding: var(--dl-space-space-singleunit);
+            }
+            .c-t-a {
+              width: 100%;
+            }
             .menu {
               display: none;
             }
@@ -1727,6 +1745,7 @@ export default function IndexPage() {
             }
             .container23 {
               flex-direction: column;
+              margin-top: 0;
             }
           }
         `}
