@@ -87,7 +87,7 @@
                 "required": ["url"],
                 "properties": {
                   "url": {
-                    "type": "string",
+                    "$ref": "#/definitions/urlFormat",
                     "description": "The URL of the Discord Webhook that will receive notification",
                     "examples": [
                       "https://discord.com/api/webhook/<webhook.id>/<webhook.token>"
@@ -146,7 +146,7 @@
                 "required": ["url"],
                 "properties": {
                   "url": {
-                    "type": "string",
+                    "$ref": "#/definitions/urlFormat",
                     "description": "The webhook URL for your google chat",
                     "examples": [
                       "https://chat.googleapis.com/v1/spaces/XXXXX/messages?key=1122334455"
@@ -175,7 +175,7 @@
                 "required": ["url"],
                 "properties": {
                   "url": {
-                    "type": "string",
+                    "$ref": "#/definitions/urlFormat",
                     "description": "The webhook URL for your lark suite",
                     "examples": [
                       "https://open.larksuite.com/open-apis/bot/v2/hook/your-webhook-key-here"
@@ -203,12 +203,13 @@
                 "required": ["recipients", "apiKey", "domain"],
                 "properties": {
                   "recipients": {
-                    "type": "string",
-                    "description": "An array of email addresses that will receive the e-mail from Monika"
+                    "type": "array",
+                    "description": "An array of email addresses that will receive the e-mail from Monika",
+                    "items": { "type": "string" }
                   },
                   "apiKey": {
                     "type": "string",
-                    "description": "Mailgun account ASPI key, mailgun registered key to identify your account"
+                    "description": "Mailgun account API key, mailgun registered key to identify your account"
                   },
                   "domain": {
                     "type": "string",
@@ -237,7 +238,7 @@
                 "required": ["url"],
                 "properties": {
                   "url": {
-                    "type": "string",
+                    "$ref": "#/definitions/urlFormat",
                     "description": "Your teams webhook URL"
                   }
                 }
@@ -263,8 +264,11 @@
                 "required": ["url"],
                 "properties": {
                   "url": {
-                    "type": "string",
-                    "description": "Your Monika notification URL"
+                    "$ref": "#/definitions/urlFormat",
+                    "description": "Your Monika notification URL",
+                    "examples": [
+                      "https://whatsapp.hyperjump.tech/api/notify?token=<webhook.token>"
+                    ]
                   }
                 }
               }
@@ -356,8 +360,9 @@
                 "required": ["url"],
                 "properties": {
                   "url": {
-                    "type": "string",
-                    "description": "The URL webhook for Slack"
+                    "$ref": "#/definitions/urlFormat",
+                    "description": "The URL webhook for Slack",
+                    "examples": ["https://slackwebhook.com/channel"]
                   }
                 }
               }
@@ -463,8 +468,9 @@
                 "required": ["url"],
                 "properties": {
                   "url": {
-                    "type": "string",
-                    "description": "The URL of the server that will receive the webhook notification"
+                    "$ref": "#/definitions/urlFormat",
+                    "description": "The URL of the server that will receive the webhook notification",
+                    "examples": ["https://yourwebsite.com/webhook"]
                   }
                 }
               }
@@ -496,7 +502,7 @@
                     }
                   },
                   "url": {
-                    "type": "string",
+                    "$ref": "#/definitions/urlFormat",
                     "description": "The URL of the server that will receive the webhook notification"
                   },
                   "username": {
@@ -621,6 +627,10 @@
     }
   },
   "definitions": {
+    "urlFormat": {
+      "format": "uri",
+      "pattern": "^https?://"
+    },
     "incidentThreshold": {
       "type": "integer",
       "description": "Number of times an alert should return true before Monika sends incident notifications",
@@ -719,7 +729,7 @@
         "required": ["query", "message"]
       }
     },
-    "body": {      
+    "body": {
       "description": "The data bytes transmitted in an HTTP transaction message immediately following the headers if there are any",
       "additionalProperties": true
     },
