@@ -26,9 +26,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Head from 'next/head'
 
-import { siteConfig } from '../siteConfig'
 import { Seo } from '../components/Seo'
-import ButtonLink from '../components/ButtonLink'
 import GithubButton from '../components/homepage/github-button'
 import PrimaryButton from '../components/homepage/primary-button'
 import TestimonialCard from '../components/homepage/testimonial-card'
@@ -209,7 +207,7 @@ export default function IndexPage() {
                   rel="noreferrer noopener"
                 >
                   <img alt="stars" src="/playground_assets/github_icons.svg" />
-                  <p className="text-transparent bg-clip-text bg-gradient-to-r from-aqua-monika to-purple-monika text-xs md:text-base font-bold md:m-08 m-2">
+                  <p className="text-transparent bg-clip-text bg-gradient-to-r from-aqua-monika to-purple-monika pl-2 text-xs md:text-base font-bold md:m-08 m-2">
                     Github
                   </p>
                 </a>
@@ -363,11 +361,20 @@ export default function IndexPage() {
                         rel="noreferrer noopener"
                       >
                         <img
+                          className="py-1 md:py-0"
                           alt="stars"
                           src="/playground_assets/github_icons.svg"
                         />
-                        <p className="text-transparent bg-clip-text bg-gradient-to-r from-aqua-monika to-purple-monika text-xs md:text-base font-bold md:m-08 m-2">
-                          Start (388)
+                        <p className="pl-2 text-transparent bg-clip-text bg-gradient-to-r from-aqua-monika to-purple-monika text-base font-bold md:m-08 my-1">
+                          Stars (
+                        </p>
+                        <img
+                          className="md:w-auto md:py-0 py-1"
+                          alt="Github stars"
+                          src="https://img.shields.io/github/stars/hyperjumptech/monika?color=%2366000000%20&label=%20&logo=%20%20&style=flat-square"
+                        />
+                        <p className="text-transparent bg-clip-text bg-gradient-to-r from-aqua-monika to-purple-monika text-base font-bold md:m-08 my-1">
+                          )
                         </p>
                       </a>
                     </div>
@@ -378,17 +385,16 @@ export default function IndexPage() {
                         target="_blank"
                         rel="noreferrer noopener"
                       >
-                        <div className="w-2/3 justify-center bg-black rounded-l-3xl p-1 md:px-5 h-8">
+                        <div className="w-2/3 justify-center bg-black rounded-l-3xl mr-2 md:mr-5 p-1 md:px-5 h-8">
                           <p className="text-white text-base font-bold mx-2">
                             Downloads
                           </p>
                         </div>
-
-                        <div className="flex-initial justify-center p-1 h-8">
-                          <p className="text-white text-base font-bold mx-2">
-                            1.8k/month
-                          </p>
-                        </div>
+                        <img
+                          className="w-10 md:p-0 py-08"
+                          alt="Github downloads"
+                          src="https://img.shields.io/github/downloads/hyperjumptech/monika/total?color=%2366000000%20&label=%20&logo=%20&style=flat-square"
+                        />
                       </a>
                     </div>
                   </div>
