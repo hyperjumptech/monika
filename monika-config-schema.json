@@ -628,7 +628,7 @@
   },
   "definitions": {
     "urlFormat": {
-      "format": "uri",
+      "type": "string",
       "pattern": "^https?://"
     },
     "incidentThreshold": {
@@ -730,8 +730,7 @@
       }
     },
     "body": {
-      "description": "The data bytes transmitted in an HTTP transaction message immediately following the headers if there are any",
-      "additionalProperties": true
+      "description": "The data bytes transmitted in an HTTP transaction message immediately following the headers if there are any"
     },
     "headers": {
       "type": "object",

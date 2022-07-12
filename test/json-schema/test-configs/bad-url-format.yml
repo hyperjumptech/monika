@@ -31,18 +31,6 @@ probes:
       - url: 'https://google.com'
         method: GET
         timeout: 3000
-        headers:
-          allowAny: true
-          anyheader: 321
-          variableCaps: false
-          Any123-Combo: yes
-        body:
-          username: bart
-          password: simpson
-          age: 201
-      - url: https://hello.com
-        body: thisshouldwork
-
     alerts:
       - query: response.status != 200
         message: response status message
@@ -50,9 +38,9 @@ probes:
     recoveryThreshold: 1
 
 notifications:
-  - id: my-desktop-notif
+  - id: 123-123
     type: desktop
-  - id: discord-123
-    type: discord
+  - id: google-chat-123
+    type: google-chat
     data:
-      url: https://123.321.123 #url must have http(s)://
+      url: htt://hello

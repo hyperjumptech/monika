@@ -59,7 +59,7 @@ ajv.addVocabulary(['name', 'fileMatch', 'url']) // add custom Scheme Store keywo
 
 const validate = ajv.compile(mySchema)
 
-describe('json schema validation tests', () => {
+describe.only('json schema validation tests', () => {
   it('should return all ok for our sample config', () => {
     const valid = validate(defaultConfig)
     expect(valid).to.be.true
@@ -116,6 +116,17 @@ describe('json schema validation tests', () => {
       )
     )
     const valid = validate(badDataUrl)
+    expect(valid).to.be.false
+  })
+
+  it('should detect bad url formatting', () => {
+    const badUrlFormat = yaml.load(
+      fs.readFileSync(
+        './test/json-schema/test-configs/bad-url-format.yml',
+        'utf8'
+      )
+    )
+    const valid = validate(badUrlFormat)
     expect(valid).to.be.false
   })
 
