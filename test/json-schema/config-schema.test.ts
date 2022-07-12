@@ -59,7 +59,7 @@ ajv.addVocabulary(['name', 'fileMatch', 'url']) // add custom Scheme Store keywo
 
 const validate = ajv.compile(mySchema)
 
-describe.only('json schema validation tests', () => {
+describe('json schema validation tests', () => {
   it('should return all ok for our sample config', () => {
     const valid = validate(defaultConfig)
     expect(valid).to.be.true
