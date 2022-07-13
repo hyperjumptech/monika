@@ -250,6 +250,18 @@ export async function doProbe(
 
       // Exit the loop if there is any alert triggered
       if (validatedResponse.some((item) => item.isAlertTriggered)) {
+        const triggeredAlertResponse = validatedResponse.find(
+          (item) => item.isAlertTriggered
+        )
+
+        if (triggeredAlertResponse) {
+          eventEmitter.emit(events.probe.alert.triggered, {
+            probe,
+            requestIndex,
+            alertQuery: triggeredAlertResponse.alert.query,
+          })
+        }
+
         break
       }
     } catch (error) {
