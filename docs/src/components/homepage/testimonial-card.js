@@ -22,27 +22,33 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-// format is: SCOPE_ITEM_STATE
-// scope : is where it came from ie: probe, or config or maybe timer
-// item  : is the "item" that the listener will be processing/handling
-// state : is the state of that item, is it ready? is it received?
-export default {
-  application: {
-    terminated: 'APPLICATION_TERMINATED',
-  },
-  config: {
-    sanitized: 'CONFIG_SANITIZED',
-    updated: 'CONFIG_UPDATED',
-  },
-  probe: {
-    alert: {
-      triggered: 'PROBE_ALERT_TRIGGERED',
-    },
-    response: {
-      received: 'PROBE_RESPONSE_RECEIVED',
-    },
-    notification: {
-      willSend: 'PROBE_NOTIFICATION_WILL_SEND',
-    },
-  },
+import React from 'react'
+
+import PropTypes from 'prop-types'
+
+const TestimonialCard = (props) => {
+  return (
+    <div className="flex flex-col justify-between items-center p-6 w-full bg-white rounded-lg shadow-md">
+      <div className="w-28 h-28 rounded-full shadow-lg flex justify-center items-center p-2">
+        <img alt={props.image_alt} src={props.image_src} />
+      </div>
+      <p className="text-lg text-center py-5">{props.description}</p>
+      <div>
+        <h2 className="text-center text-aqua-monika text-22 font-semibold">
+          {props.name}
+        </h2>
+        <p className="text-center text-xs">{props.text}</p>
+      </div>
+    </div>
+  )
 }
+
+TestimonialCard.propTypes = {
+  image_alt: PropTypes.string,
+  image_src: PropTypes.string,
+  description: PropTypes.string,
+  name: PropTypes.string,
+  text: PropTypes.string,
+}
+
+export default TestimonialCard
