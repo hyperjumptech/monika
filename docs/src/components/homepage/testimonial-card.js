@@ -26,67 +26,29 @@ import React from 'react'
 
 import PropTypes from 'prop-types'
 
-const FeatureCard = (props) => {
+const TestimonialCard = (props) => {
   return (
-    <>
-      <div className={`container ${props.rootClassName} `}>
-        <img alt={props.image_alt} src={props.image_src} className="image" />
-        <h4 className="text-2xl text-white font-semibold text-center mt-5">
-          {props.title}
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-aqua-monika to-purple-monika">
-            {' '}
-            {props.title2}
-          </span>
-        </h4>
-        <p className="text-center p-2 text-xs text-transparent bg-clip-text bg-gradient-to-r from-aqua-monika to-purple-monika">
-          {props.title3}
-        </p>
-        <p className="text-md text-gray-200 text-center">{props.text}</p>
+    <div className="flex flex-col justify-between items-center p-6 w-full bg-white rounded-lg shadow-md">
+      <div className="w-28 h-28 rounded-full shadow-lg flex justify-center items-center p-2">
+        <img alt={props.image_alt} src={props.image_src} />
       </div>
-      <style jsx>
-        {`
-          .container {
-            width: 197px;
-            display: flex;
-            position: relative;
-            align-items: center;
-            flex-direction: column;
-          }
-          .image {
-            object-fit: cover;
-          }
-          @media only screen and (max-width: 1200px) {
-            .container {
-              width: 310px;
-            }
-          }
-          @media only screen and (max-width: 768px) {
-            .container {
-              width: 350px;
-            }
-          }
-        `}
-      </style>
-    </>
+      <p className="text-lg text-center py-5">{props.description}</p>
+      <div>
+        <h2 className="text-center text-aqua-monika text-22 font-semibold">
+          {props.name}
+        </h2>
+        <p className="text-center text-xs">{props.text}</p>
+      </div>
+    </div>
   )
 }
 
-FeatureCard.defaultProps = {
-  title: 'Title',
-  text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed erat nibh tristique ipsum.',
-  image_src: '/playground_assets/01.svg',
-  rootClassName: '',
-  image_alt: 'image',
-}
-
-FeatureCard.propTypes = {
-  title: PropTypes.string,
-  title2: PropTypes.string,
-  title3: PropTypes.string,
-  text: PropTypes.string,
-  image_src: PropTypes.string,
-  rootClassName: PropTypes.string,
+TestimonialCard.propTypes = {
   image_alt: PropTypes.string,
+  image_src: PropTypes.string,
+  description: PropTypes.string,
+  name: PropTypes.string,
+  text: PropTypes.string,
 }
 
-export default FeatureCard
+export default TestimonialCard
