@@ -85,10 +85,11 @@ notifications:
 Monika supports Discord. To enable notification via Discord, you must create a discord webhook first. More info at [Discord webhook documentation](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks)
 
 ```yml
-id: unique-id-webhook,
-type: discord,
-data:
-  url: https://YOUR_DISCORD_URL
+notifications:
+  id: unique-id-webhook
+  type: discord
+  data:
+    url: https://YOUR_DISCORD_URL
 ```
 
 | Key  | Description                                                   | Example                                                        |
