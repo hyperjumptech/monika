@@ -13,7 +13,7 @@ Probes describe the request(s) to perform on your service to test. A probe will 
 
 Here is an example probe:
 
-```bash
+```yaml
 probes:
   - id: 'submission_test'
     name: HTML form submission
@@ -35,7 +35,7 @@ Alerts are part of probes, and describe the conditions to trigger an alert. Aler
 
 The sample below shows an alert will be generated if http response status is 500 or the response time is greater than 150ms.
 
-```bash
+```yaml
 alerts:
   - query: response.status == 500
     message: response status is 500
@@ -51,16 +51,15 @@ Once an alert is triggered, Monika can send a notification through any of the su
 
 A simple desktop alert for instance is done in two lines, see below:
 
-```bash
+```yaml
 notifications:
   - id: my-desktop-notif
     type: desktop
-
 ```
 
 Monika supports standard channels such as email smtp:
 
-```bash
+```yaml
 notifications:
   - id: random-string-smtp
     type: smtp
@@ -74,13 +73,12 @@ notifications:
 
 Monika also support a wide variety of chat channels such as whatsapp, discord, Google chat, and even Lark Suite:
 
-```bash
+```yaml
 notifications:
   - id: myGoogleChatNotif
     type: google-chat
     data:
       url: https://chat.googleapis.com/v1/spaces/XXXXX/messages?key=1122334455
-
 ```
 
 For the complete list of the different notification channels supported, visit the [guide here](https://monika.hyperjump.tech/guides/notifications).
