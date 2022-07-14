@@ -103,11 +103,12 @@ notifications:
 Monika supports Facebook Workplace. To enable notification via Workplace, you must create custom integration first. More info at [Facebook Workplace Custom Integrations](https://developers.facebook.com/docs/workplace/custom-integrations-new/)
 
 ```yml
-id: unique-workplace-id
-type: workplace
-data:
-  thread_id': abcd-123-456
-  access_token': your_custom_integration_access_token
+notifications:
+  id: unique-workplace-id
+  type: workplace
+  data:
+    thread_id': abcd-123-456
+    access_token: your_custom_integration_access_token
 ```
 
 | Key         | Description                                     | Example                         |
