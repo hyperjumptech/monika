@@ -33,36 +33,35 @@ At this moment, Monika support these channel of notifications (You can use just 
 To use one or more notifications, you need to define the settings in the monika.yml file as shown below.
 
 ```yml
-notifications: [
-    - id: unique-id-mailgun
-      type: mailgun
-      data:
-        recipients: ["RECIPIENT_EMAIL_ADDRESS1","RECIPIENT_EMAIL_ADDRESS2"]
-        apiKey: YOUR_API_KEY
-        domain: YOUR_DOMAIN
+notifications:
+  - id: unique-id-mailgun
+    type: mailgun
+    data:
+      recipients: ["RECIPIENT_EMAIL_ADDRESS1","RECIPIENT_EMAIL_ADDRESS2"]
+      apiKey: YOUR_API_KEY
+      domain: YOUR_DOMAIN
 
-    - id: unique-id-sendgrid
-      type: sendgrid
-      data:
+  - id: unique-id-sendgrid
+    type: sendgrid
+    data:
         sender: YOUR_VERIFIED_EMAIL_BY_SENDGRID
         recipients: ["RECIPIENT_EMAIL_ADDRESS"]
         apiKey: YOUR_API_KEY
 
-    - id: unique-id-smtp
-      type: smtp
-      data:
-        recipients: ["RECIPIENT_EMAIL_ADDRESS"]
-        hostname: SMTP_HOSTNAME
-        port: 587
-        username: SMTP_USERNAME
-        password: SMTP_PASSWORD
+  - id: unique-id-smtp
+    type: smtp
+    data:
+      recipients: ["RECIPIENT_EMAIL_ADDRESS"]
+      hostname: SMTP_HOSTNAME
+      port: 587
+      username: SMTP_USERNAME
+      password: SMTP_PASSWORD
 
-    - id: unique-id-webhook
-      type: webhook
-      data:
-        method: POST
-        url: https://WEBHOOK_URL
-  ]
+  - id: unique-id-webhook
+    type: webhook
+    data:
+      method: POST
+      url: https://WEBHOOK_URL
 ```
 
 Note that every triggered alert will be sent to you through all the notifications you defined in the configuration file, e.g., if you added `webhook` and `smtp` settings, you will receive the alert messages through both.
