@@ -1,25 +1,62 @@
 probes:
-  - id: '[GitHub API] Hyperjump Repos'
-    name: '[GitHub API] Hyperjump Repos'
+  - id: '[BODY-NONE] Hyperjump GitHub'
+    name: '[BODY-NONE] Hyperjump GitHub'
     requests:
-      - url: https://api.github.com/users/hyperjumptech/repos
+      - url: https://api.github.com/users/hyperjumptech
         method: GET
         headers: {}
-        body: {}
         timeout: 10000
     incidentThreshold: 5
     recoveryThreshold: 5
     alerts: []
-  - id: '[GitHub API] Hyperjump'
-    name: '[GitHub API] Hyperjump'
+  - id: '[BODY-FORMDATA] Hyperjump GitHub'
+    name: '[BODY-FORMDATA] Hyperjump GitHub'
     requests:
       - url: https://api.github.com/users/hyperjumptech
         method: GET
         headers:
-          Authorization: any
-        body:
-          any: any
+          Content-Type: multipart/form-data
         timeout: 10000
+        body:
+          message: Hello, world!
+    incidentThreshold: 5
+    recoveryThreshold: 5
+    alerts: []
+  - id: '[BODY-URLENCODED] Hyperjump GitHub'
+    name: '[BODY-URLENCODED] Hyperjump GitHub'
+    requests:
+      - url: https://api.github.com/users/hyperjumptech
+        method: GET
+        headers:
+          Content-Type: application/x-www-form-urlencoded
+        timeout: 10000
+        body:
+          message: Hello, world!
+    incidentThreshold: 5
+    recoveryThreshold: 5
+    alerts: []
+  - id: '[BODY-RAW-TEXT] Hyperjump GitHub'
+    name: '[BODY-RAW-TEXT] Hyperjump GitHub'
+    requests:
+      - url: https://api.github.com/users/hyperjumptech
+        method: GET
+        headers:
+          Content-Type: text/plain
+        timeout: 10000
+        body: Hello, world!
+    incidentThreshold: 5
+    recoveryThreshold: 5
+    alerts: []
+  - id: '[BODY-RAW-JSON] Hyperjump GitHub'
+    name: '[BODY-RAW-JSON] Hyperjump GitHub'
+    requests:
+      - url: https://api.github.com/users/hyperjumptech
+        method: GET
+        headers:
+          Content-Type: application/json
+        timeout: 10000
+        body:
+          message: Hello, world!
     incidentThreshold: 5
     recoveryThreshold: 5
     alerts: []
