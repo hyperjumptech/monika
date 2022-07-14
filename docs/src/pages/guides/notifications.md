@@ -75,8 +75,9 @@ Monika supports desktop notifications. Here are the prerequisites for enabling t
 - Windows: Uses Powershell. Refer to [Microsoft Official Documentation](https://docs.microsoft.com/en-us/powershell/scripting/windows-powershell/install/windows-powershell-system-requirements?view=powershell-7.1) for System Requirements.
 
 ```yml
-id: unique-id-monika-notif,
-type: desktop
+notifications:
+  id: unique-id-monika-notif
+  type: desktop
 ```
 
 ## Discord
