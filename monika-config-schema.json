@@ -495,7 +495,7 @@
                 "required": ["recipients", "url", "username", "password"],
                 "properties": {
                   "recipients": {
-                    "type": "string",
+                    "type": "array",
                     "description": "An array of phone numbers registered for WhatsApp, should start with your controu code number",
                     "items": {
                       "type": "string"
