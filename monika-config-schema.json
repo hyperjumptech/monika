@@ -64,7 +64,7 @@
                 "description": "Unique notification id"
               },
               "type": {
-                "enum": ["desktop"]
+                "const": "desktop"
               }
             }
           },
@@ -78,7 +78,7 @@
                 "description": "Unique notification id"
               },
               "type": {
-                "enum": ["discord"]
+                "const": "discord"
               },
               "data": {
                 "type": "object",
@@ -107,7 +107,7 @@
                 "description": "Unique notification id"
               },
               "type": {
-                "enum": ["workplace"]
+                "const": "workplace"
               },
               "data": {
                 "type": "object",
@@ -137,7 +137,7 @@
                 "description": "Unique notification id"
               },
               "type": {
-                "enum": ["google-chat"]
+                "const": "google-chat"
               },
               "data": {
                 "type": "object",
@@ -166,7 +166,7 @@
                 "description": "Unique notification id"
               },
               "type": {
-                "enum": ["lark"]
+                "const": "lark"
               },
               "data": {
                 "type": "object",
@@ -194,7 +194,7 @@
                 "type": "string"
               },
               "type": {
-                "enum": ["mailgun"]
+                "const": "mailgun"
               },
               "data": {
                 "type": "object",
@@ -229,7 +229,7 @@
                 "description": "Unique notification id"
               },
               "type": {
-                "enum": ["teams"]
+                "const": "teams"
               },
               "data": {
                 "type": "object",
@@ -255,7 +255,7 @@
                 "description": "Unique notification id"
               },
               "type": {
-                "enum": ["monika-notif"]
+                "const": "monika-notif"
               },
               "data": {
                 "type": "object",
@@ -284,7 +284,7 @@
                 "description": "Unique pagerduty notif id"
               },
               "type": {
-                "enum": ["pagerduty"]
+                "const": "pagerduty"
               },
               "data": {
                 "type": "object",
@@ -314,7 +314,7 @@
                 "description": "Unique sendgrid notification id"
               },
               "type": {
-                "enum": ["sendgrid"]
+                "const": "sendgrid"
               },
               "data": {
                 "type": "object",
@@ -351,7 +351,7 @@
                 "description": "Unique slack notification id"
               },
               "type": {
-                "enum": ["slack"]
+                "const": "slack"
               },
               "data": {
                 "type": "object",
@@ -378,7 +378,7 @@
                 "description": "Unique smtp notification id"
               },
               "type": {
-                "enum": ["smtp"]
+                "const": "smtp"
               },
               "data": {
                 "type": "object",
@@ -429,7 +429,7 @@
                 "description": "Unique telegram notification id"
               },
               "type": {
-                "enum": ["telegram"]
+                "const": "telegram"
               },
               "data": {
                 "type": "object",
@@ -459,7 +459,7 @@
                 "description": "Unique webhook notification id"
               },
               "type": {
-                "enum": ["webhook"]
+                "const": "webhook"
               },
               "data": {
                 "type": "object",
@@ -486,7 +486,7 @@
                 "description": "Unique whatsapp notification id"
               },
               "type": {
-                "enum": ["whatsapp"]
+                "const": "whatsapp"
               },
               "data": {
                 "type": "object",
@@ -527,7 +527,7 @@
                 "description": "Unique Dingtalk notification id"
               },
               "type": {
-                "enum": ["dingtalk"]
+                "const": "dingtalk"
               },
               "data": {
                 "type": "object",
@@ -553,7 +553,7 @@
                 "description": "Unique Pushover notification id"
               },
               "type": {
-                "enum": ["pushover"]
+                "const": "pushover"
               },
               "data": {
                 "type": "object",
@@ -583,7 +583,7 @@
                 "description": "Unique opsgenie notification id"
               },
               "type": {
-                "enum": ["opsgenie"]
+                "const": "opsgenie"
               },
               "data": {
                 "type": "object",
