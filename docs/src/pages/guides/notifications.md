@@ -367,7 +367,7 @@ Monika supports notifications from Whatsapp for business accounts. To enable not
   - id: unique-whatsapp-id,
     type: whatsapp,
     data:
-      recipients: [628123456789],
+      recipients: ["628123456789"],
       url: https://yourwhatsappapiserver.com,
       username: whatsappusername,
       password: whatsapppassword

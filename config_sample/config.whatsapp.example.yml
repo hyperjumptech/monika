@@ -1,12 +1,13 @@
 probes:
-  - requests:
+  - id: probe-01
+    requests:
       - url: http://github.com
 
 notifications:
   - id: unique-id-webhook
-    type: webhook
+    type: whatsapp
     data:
-      recipients: [628123456789]
+      recipients: ['628123456789']
       url: https://yourwhatsappapiserver.com
       username: whatsappusername
       password: whatsapppassword
