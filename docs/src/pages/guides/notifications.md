@@ -172,12 +172,13 @@ Mailgun is an email notification delivery service provided by Mailgun email serv
 4. After that, put them in `monika.yml` configuration as follows:
 
 ```yml
-- id: unique-id-mailgun
-  type: mailgun
-  data:
-    recipients: ['RECIPIENT_EMAIL_ADDRESS']
-    apiKey: YOUR_API_KEY
-    domain: YOUR_DOMAIN
+notifications:
+  - id: unique-id-mailgun
+    type: mailgun
+    data:
+      recipients: ['RECIPIENT_EMAIL_ADDRESS']
+      apiKey: YOUR_API_KEY
+      domain: YOUR_DOMAIN
 ```
 
 | Key        | Description                                                              | Example                                         |
