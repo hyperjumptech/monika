@@ -39,15 +39,55 @@ const getCollectionVersion = (config: any) => {
   throw new Error('UnsupportedVersion')
 }
 
-const generateEachRequest = (request: any, version: CollectionVersion) => ({
-  url: version === 'v2.0' ? request?.url : request?.url.raw,
-  method: request?.method,
-  headers: request?.header?.reduce((obj: any, it: any) => {
-    return Object.assign(obj, { [it.key]: it.value })
-  }, {}),
-  body: JSON.parse(request?.body?.raw || '{}'),
-  timeout: 10_000,
-})
+const generateHeaderContentType = (mode: string, rawType?: string) => {
+  switch (mode) {
+    case 'formdata':
+      return { 'Content-Type': 'multipart/form-data' }
+    case 'urlencoded':
+      return { 'Content-Type': 'application/x-www-form-urlencoded' }
+    case 'raw':
+      if (rawType === 'json') return { 'Content-Type': 'application/json' }
+      return { 'Content-Type': 'text/plain' }
+    default:
+      return {}
+  }
+}
+
+const generateBody = (body: any, mode: string, rawType?: string) => {
+  switch (mode) {
+    case 'formdata':
+    case 'urlencoded':
+      return {
+        body: body?.reduce((obj: any, it: any) => {
+          return Object.assign(obj, { [it.key]: it.value })
+        }, {}),
+      }
+    case 'raw':
+      if (rawType === 'json') return { body: JSON.parse(body) }
+      return { body }
+    default:
+      return {}
+  }
+}
+
+const generateEachRequest = (request: any, version: CollectionVersion) => {
+  const mode = request?.body?.mode
+  const body = mode ? request?.body[mode] : {}
+  const language = request?.body?.options?.raw?.language
+
+  return {
+    url: version === 'v2.0' ? request?.url : request?.url.raw,
+    method: request?.method,
+    headers: {
+      ...request?.header?.reduce((obj: any, it: any) => {
+        return Object.assign(obj, { [it.key]: it.value })
+      }, {}),
+      ...generateHeaderContentType(mode, language),
+    },
+    timeout: 10_000,
+    ...generateBody(body, mode, language),
+  }
+}
 
 const generateRequests = (item: any, version: CollectionVersion) => {
   const subitems = item?.item

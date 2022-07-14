@@ -9,36 +9,120 @@
       "name": "Group1",
       "item": [
         {
-          "name": "[GitHub API] Hyperjump Repos",
+          "name": "[BODY-NONE] Hyperjump GitHub",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "https://api.github.com/users/hyperjumptech/repos",
+              "raw": "https://api.github.com/users/hyperjumptech",
               "protocol": "https",
               "host": ["api", "github", "com"],
-              "path": ["users", "hyperjumptech", "repos"]
+              "path": ["users", "hyperjumptech"]
             }
           },
           "response": []
         },
         {
-          "name": "[GitHub API] Hyperjump",
+          "name": "[BODY-FORMDATA] Hyperjump GitHub",
           "protocolProfileBehavior": {
             "disableBodyPruning": true
           },
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "any",
-                "type": "default"
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "message",
+                  "value": "Hello, world!",
+                  "type": "default"
+                }
+              ],
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
               }
-            ],
+            },
+            "url": {
+              "raw": "https://api.github.com/users/hyperjumptech",
+              "protocol": "https",
+              "host": ["api", "github", "com"],
+              "path": ["users", "hyperjumptech"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[BODY-URLENCODED] Hyperjump GitHub",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "message",
+                  "value": "Hello, world!",
+                  "type": "default"
+                }
+              ],
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://api.github.com/users/hyperjumptech",
+              "protocol": "https",
+              "host": ["api", "github", "com"],
+              "path": ["users", "hyperjumptech"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[BODY-RAW-TEXT] Hyperjump GitHub",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"any\": \"any\"\n}\n",
+              "raw": "Hello, world!",
+              "options": {
+                "raw": {
+                  "language": "text"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://api.github.com/users/hyperjumptech",
+              "protocol": "https",
+              "host": ["api", "github", "com"],
+              "path": ["users", "hyperjumptech"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[BODY-RAW-JSON] Hyperjump GitHub",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"message\": \"Hello, world!\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -60,36 +144,120 @@
       "name": "Group2",
       "item": [
         {
-          "name": "[GitHub API] Hyperjump Repos",
+          "name": "[BODY-NONE] Hyperjump GitHub",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "https://api.github.com/users/hyperjumptech/repos",
+              "raw": "https://api.github.com/users/hyperjumptech",
               "protocol": "https",
               "host": ["api", "github", "com"],
-              "path": ["users", "hyperjumptech", "repos"]
+              "path": ["users", "hyperjumptech"]
             }
           },
           "response": []
         },
         {
-          "name": "[GitHub API] Hyperjump",
+          "name": "[BODY-FORMDATA] Hyperjump GitHub",
           "protocolProfileBehavior": {
             "disableBodyPruning": true
           },
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "any",
-                "type": "default"
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "message",
+                  "value": "Hello, world!",
+                  "type": "default"
+                }
+              ],
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
               }
-            ],
+            },
+            "url": {
+              "raw": "https://api.github.com/users/hyperjumptech",
+              "protocol": "https",
+              "host": ["api", "github", "com"],
+              "path": ["users", "hyperjumptech"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[BODY-URLENCODED] Hyperjump GitHub",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                {
+                  "key": "message",
+                  "value": "Hello, world!",
+                  "type": "default"
+                }
+              ],
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://api.github.com/users/hyperjumptech",
+              "protocol": "https",
+              "host": ["api", "github", "com"],
+              "path": ["users", "hyperjumptech"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[BODY-RAW-TEXT] Hyperjump GitHub",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"any\": \"any\"\n}\n",
+              "raw": "Hello, world!",
+              "options": {
+                "raw": {
+                  "language": "text"
+                }
+              }
+            },
+            "url": {
+              "raw": "https://api.github.com/users/hyperjumptech",
+              "protocol": "https",
+              "host": ["api", "github", "com"],
+              "path": ["users", "hyperjumptech"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "[BODY-RAW-JSON] Hyperjump GitHub",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"message\": \"Hello, world!\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
