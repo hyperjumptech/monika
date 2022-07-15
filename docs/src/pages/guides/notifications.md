@@ -230,11 +230,12 @@ notifications:
 PagerDuty is a platform for agile incident management. You need the integration key to use PagerDuty. You can get the integration key by following the steps in [the documentation](https://support.pagerduty.com/docs/services-and-integrations). To give you the flexibility to choose which probe belongs to which PagerDuty service. You need to map the PagerDuty integration key with your Monika probe id in the configuration.
 
 ```yaml
-- id: unique-id-pagerduty-notify
-  type: pagerduty
-  data:
-    - key: YOUR_PAGERDUTY_INTEGRATION_KEY
-      probeID: ZN32nw_KsvTKtLFNu55JV
+notifications:
+  - id: unique-id-pagerduty-notify
+    type: pagerduty
+    data:
+      - key: YOUR_PAGERDUTY_INTEGRATION_KEY
+        probeID: ZN32nw_KsvTKtLFNu55JV
 ```
 
 | Key          | Description                  | Example                            |
@@ -249,12 +250,13 @@ PagerDuty is a platform for agile incident management. You need the integration 
 Similar to mailgun, sendgrid is also an email delivery service. Make sure you have a [sendgrid account](https://app.sendgrid.com/). To obtain your API key, refer to [sendgrid documentation](https://sendgrid.com/docs/ui/account-and-settings/api-keys/). Then put the API key in Monika's configuration as follows:
 
 ```yml
-- id: unique-id-sendgrid
-  type: sendgrid
-  data:
-    sender: YOUR_VERIFIED_EMAIL_BY_SENDGRID
-    recipients: ['RECIPIENT_EMAIL_ADDRESS1', 'RECIPEIENT_EMAIL_ADDRESS2']
-    apiKey: YOUR_API_KEY
+notifications:
+  - id: unique-id-sendgrid
+    type: sendgrid
+    data:
+      sender: YOUR_VERIFIED_EMAIL_BY_SENDGRID
+      recipients: ['RECIPIENT_EMAIL_ADDRESS1', 'RECIPEIENT_EMAIL_ADDRESS2']
+      apiKey: YOUR_API_KEY
 ```
 
 | Key        | Description                                                                 | Example                                         |
@@ -270,10 +272,11 @@ Similar to mailgun, sendgrid is also an email delivery service. Make sure you ha
 Monika supports Slack Incoming Webhook. To enable notification via Slack, you must have a `Slack's Incoming Webhook URL`. Please consult the [Sending messages using Incoming Webhooks](https://api.slack.com/messaging/webhooks) documentation.
 
 ```yml
-id: unique-id-slack
-type: slack
-data:
-  url: https://YOUR_SLACK_INCOMING_WEBHOOK_URL
+notifications:
+  id: unique-id-slack
+  type: slack
+  data:
+    url: https://YOUR_SLACK_INCOMING_WEBHOOK_URL
 ```
 
 | Key  | Description                            | Example                            |
