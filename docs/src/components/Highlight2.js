@@ -1,5 +1,31 @@
+/**********************************************************************************
+ * MIT License                                                                    *
+ *                                                                                *
+ * Copyright (c) 2021 Hyperjump Technology                                        *
+ *                                                                                *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy   *
+ * of this software and associated documentation files (the "Software"), to deal  *
+ * in the Software without restriction, including without limitation the rights   *
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell      *
+ * copies of the Software, and to permit persons to whom the Software is          *
+ * furnished to do so, subject to the following conditions:                       *
+ *                                                                                *
+ * The above copyright notice and this permission notice shall be included in all *
+ * copies or substantial portions of the Software.                                *
+ *                                                                                *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR     *
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,       *
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE    *
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER         *
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,  *
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  *
+ * SOFTWARE.                                                                      *
+ **********************************************************************************/
+
 import * as React from 'react'
 import Highlight, { defaultProps } from 'prism-react-renderer'
+import { useClipboard } from './useClipboard'
+
 // Original: https://raw.githubusercontent.com/PrismJS/prism-themes/master/themes/prism-ghcolors.css
 
 /*:: import type { PrismTheme } from '../src/types' */
@@ -89,6 +115,7 @@ const Code = ({
   className = 'language-js',
   ...props
 }) => {
+  const [hasCopied, onCopy] = useClipboard(children.trim(), 1000)
   const language = className.replace(/language-/, '')
   return (
     <Highlight
@@ -98,45 +125,60 @@ const Code = ({
       theme={theme}
     >
       {({ className, style, tokens, getLineProps, getTokenProps }) => (
-        <pre
-          className={className + ' bg-gray-50 pb-4 pt-4 pr-4 overflow-auto'}
-          style={{
-            ...style,
-            border: '1px solid #eee',
-            fontSize: 13,
-            lineHeight: '1.5',
-          }}
-        >
-          {tokens.map((line, i) => (
-            <div
-              key={i}
-              {...getLineProps({
-                line,
-                key: i,
-              })}
-            >
-              {tokens.length > 1 ? (
-                <span
-                  aria-hidden="true"
-                  className="select-none text-gray-300 text-right w-5 inline-block mx-2"
-                >
-                  {i + 1}
-                </span>
-              ) : (
-                <span className="mx-2 w-5" />
-              )}{' '}
-              {line.map((token, key) => (
-                <span
-                  key={key}
-                  {...getTokenProps({
-                    token,
-                    key,
-                  })}
-                />
-              ))}
-            </div>
-          ))}
-        </pre>
+        <div className="relative">
+          <pre
+            className={className + ' bg-gray-50 pb-4 pt-4 pr-4 overflow-auto'}
+            style={{
+              ...style,
+              border: '1px solid #eee',
+              fontSize: 13,
+              lineHeight: '1.5',
+            }}
+          >
+            {tokens.map((line, i) => (
+              <div
+                key={i}
+                {...getLineProps({
+                  line,
+                  key: i,
+                })}
+              >
+                {tokens.length > 1 ? (
+                  <span
+                    aria-hidden="true"
+                    className="select-none text-gray-300 text-right w-5 inline-block mx-2"
+                  >
+                    {i + 1}
+                  </span>
+                ) : (
+                  <span className="mx-2 w-5" />
+                )}{' '}
+                {line.map((token, key) => (
+                  <span
+                    key={key}
+                    {...getTokenProps({
+                      token,
+                      key,
+                    })}
+                  />
+                ))}
+              </div>
+            ))}
+          </pre>
+          <button
+            className="absolute top-0 right-0 outline-0 text-black text-xs px-2 py-1 inline-block"
+            type="button"
+            onClick={() => {
+              onCopy(true)
+              console.log('copied')
+            }}
+          >
+            <img
+              src="/playground_assets/copy.svg"
+              className="w-5 h-5 opacity-65"
+            />
+          </button>
+        </div>
       )}
     </Highlight>
   )
