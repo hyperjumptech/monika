@@ -212,10 +212,11 @@ notifications:
 You can get a notification from Monika to your Whatsapp number without having a Whatsapp Business account. First, you must create a [Monika Whatsapp Notifier account](https://whatsapp.hyperjump.tech).
 
 ```yml
-id: unique-monika-notif-id
-type: monika-notif
-data:
-  url: https://YOUR_MONIKA_NOTIF_URL
+notifications:
+  id: unique-monika-notif-id
+  type: monika-notif
+  data:
+    url: https://YOUR_MONIKA_NOTIF_URL
 ```
 
 | Key  | Description                              | Example                                                            |
