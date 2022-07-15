@@ -23,7 +23,6 @@
  **********************************************************************************/
 
 import { expect } from 'chai'
-import { values } from 'lodash'
 import { Config } from '../../../interfaces/config'
 import { parseConfigFromPostman } from '../parse-postman'
 import basicCollectionV20 from './mock_files/basic-postman_collection-v2.0.json'
@@ -62,20 +61,45 @@ describe('parseConfigFromPostman', () => {
       const collectionStr = JSON.stringify(basicCollectionV20)
       const config: Config = parseConfigFromPostman(collectionStr)
 
-      expect(config.probes.length).to.equals(2)
+      expect(config.probes.length).to.equals(5)
 
       for (const [index, item] of basicCollectionV20.item.entries()) {
         expect(item.name).to.equals(config.probes[index].name)
 
         for (const req of config.probes[index].requests) {
+          const mode = item.request.body?.mode
+          const language = item.request.body?.options?.raw?.language
+
           expect(req.url).to.equals(item.request.url)
           expect(req.method).to.equals(item.request.method)
-          expect(values(req.headers).length).to.equals(
-            item.request.header.length
-          )
-          expect(req.body).to.deep.equal(
-            JSON.parse(item.request.body?.raw || '{}')
-          )
+
+          if (
+            mode === 'formdata' ||
+            mode === 'urlencoded' ||
+            (mode === 'raw' && language === 'json')
+          ) {
+            expect(req.body).to.deep.equals({ message: 'Hello, world!' })
+          }
+
+          if (mode === 'formdata') {
+            expect(req.headers['Content-Type']).to.equals('multipart/form-data')
+          }
+
+          if (mode === 'urlencoded') {
+            expect(req.headers['Content-Type']).to.equals(
+              'application/x-www-form-urlencoded'
+            )
+          }
+
+          if (mode === 'raw') {
+            if (language === 'json') {
+              expect(req.headers['Content-Type']).to.equals('application/json')
+            }
+
+            if (language === 'text') {
+              expect(req.headers['Content-Type']).to.equals('text/plain')
+            }
+          }
         }
       }
     })
@@ -84,20 +108,45 @@ describe('parseConfigFromPostman', () => {
       const collectionStr = JSON.stringify(basicCollectionV21)
       const config: Config = parseConfigFromPostman(collectionStr)
 
-      expect(config.probes.length).to.equals(2)
+      expect(config.probes.length).to.equals(5)
 
       for (const [index, item] of (basicCollectionV21 as any).item.entries()) {
         expect(item.name).to.equals(config.probes[index].name)
 
         for (const req of config.probes[index].requests) {
-          expect(req.url).to.equals(item.request.url?.raw)
+          const mode = item.request.body?.mode
+          const language = item.request.body?.options?.raw?.language
+
+          expect(req.url).to.equals(item.request.url.raw)
           expect(req.method).to.equals(item.request.method)
-          expect(values(req.headers).length).to.equals(
-            item.request.header.length
-          )
-          expect(req.body).to.deep.equals(
-            JSON.parse(item.request.body?.raw || '{}')
-          )
+
+          if (
+            mode === 'formdata' ||
+            mode === 'urlencoded' ||
+            (mode === 'raw' && language === 'json')
+          ) {
+            expect(req.body).to.deep.equals({ message: 'Hello, world!' })
+          }
+
+          if (mode === 'formdata') {
+            expect(req.headers['Content-Type']).to.equals('multipart/form-data')
+          }
+
+          if (mode === 'urlencoded') {
+            expect(req.headers['Content-Type']).to.equals(
+              'application/x-www-form-urlencoded'
+            )
+          }
+
+          if (mode === 'raw') {
+            if (language === 'json') {
+              expect(req.headers['Content-Type']).to.equals('application/json')
+            }
+
+            if (language === 'text') {
+              expect(req.headers['Content-Type']).to.equals('text/plain')
+            }
+          }
         }
       }
     })
@@ -114,14 +163,40 @@ describe('parseConfigFromPostman', () => {
         expect(item.name).to.equals(config.probes[index].name)
 
         for (const [rIndex, req] of config.probes[index].requests.entries()) {
+          const mode = item.item[rIndex].request.body?.mode
+          const language =
+            item.item[rIndex].request.body?.options?.raw?.language
+
           expect(req.url).to.equals(item.item[rIndex].request.url)
           expect(req.method).to.equals(item.item[rIndex].request.method)
-          expect(values(req.headers).length).to.equals(
-            item.item[rIndex].request.header.length
-          )
-          expect(req.body).to.deep.equals(
-            JSON.parse(item.item[rIndex].request.body?.raw || '{}')
-          )
+
+          if (
+            mode === 'formdata' ||
+            mode === 'urlencoded' ||
+            (mode === 'raw' && language === 'json')
+          ) {
+            expect(req.body).to.deep.equals({ message: 'Hello, world!' })
+          }
+
+          if (mode === 'formdata') {
+            expect(req.headers['Content-Type']).to.equals('multipart/form-data')
+          }
+
+          if (mode === 'urlencoded') {
+            expect(req.headers['Content-Type']).to.equals(
+              'application/x-www-form-urlencoded'
+            )
+          }
+
+          if (mode === 'raw') {
+            if (language === 'json') {
+              expect(req.headers['Content-Type']).to.equals('application/json')
+            }
+
+            if (language === 'text') {
+              expect(req.headers['Content-Type']).to.equals('text/plain')
+            }
+          }
         }
       }
     })
@@ -138,14 +213,40 @@ describe('parseConfigFromPostman', () => {
         expect(item.name).to.equals(config.probes[index].name)
 
         for (const [rIndex, req] of config.probes[index].requests.entries()) {
+          const mode = item.item[rIndex].request.body?.mode
+          const language =
+            item.item[rIndex].request.body?.options?.raw?.language
+
           expect(req.url).to.equals(item.item[rIndex].request.url?.raw)
           expect(req.method).to.equals(item.item[rIndex].request.method)
-          expect(values(req.headers).length).to.equals(
-            item.item[rIndex].request.header.length
-          )
-          expect(req.body).to.deep.equals(
-            JSON.parse(item.item[rIndex].request.body?.raw || '{}')
-          )
+
+          if (
+            mode === 'formdata' ||
+            mode === 'urlencoded' ||
+            (mode === 'raw' && language === 'json')
+          ) {
+            expect(req.body).to.deep.equals({ message: 'Hello, world!' })
+          }
+
+          if (mode === 'formdata') {
+            expect(req.headers['Content-Type']).to.equals('multipart/form-data')
+          }
+
+          if (mode === 'urlencoded') {
+            expect(req.headers['Content-Type']).to.equals(
+              'application/x-www-form-urlencoded'
+            )
+          }
+
+          if (mode === 'raw') {
+            if (language === 'json') {
+              expect(req.headers['Content-Type']).to.equals('application/json')
+            }
+
+            if (language === 'text') {
+              expect(req.headers['Content-Type']).to.equals('text/plain')
+            }
+          }
         }
       }
     })
