@@ -44,9 +44,15 @@ notifications:
   - id: unique-id-sendgrid
     type: sendgrid
     data:
+<<<<<<< HEAD
         sender: YOUR_VERIFIED_EMAIL_BY_SENDGRID
         recipients: ["RECIPIENT_EMAIL_ADDRESS"]
         apiKey: YOUR_API_KEY
+=======
+      sender: YOUR_VERIFIED_EMAIL_BY_SENDGRID
+      recipients: [RECIPIENT_EMAIL_ADDRESS]
+      apiKey: YOUR_API_KEY
+>>>>>>> d9daf5e (Fix: changes yaml example)
 
   - id: unique-id-smtp
     type: smtp
@@ -76,8 +82,8 @@ Monika supports desktop notifications. Here are the prerequisites for enabling t
 
 ```yml
 notifications:
-  id: unique-id-monika-notif
-  type: desktop
+  - id: unique-id-monika-notif
+    type: desktop
 ```
 
 ## Discord
@@ -86,10 +92,10 @@ Monika supports Discord. To enable notification via Discord, you must create a d
 
 ```yml
 notifications:
-  id: unique-id-webhook
-  type: discord
-  data:
-    url: https://YOUR_DISCORD_URL
+  - id: unique-id-webhook
+    type: discord
+    data:
+      url: https://YOUR_DISCORD_URL
 ```
 
 | Key  | Description                                                   | Example                                                        |
@@ -104,11 +110,19 @@ Monika supports Facebook Workplace. To enable notification via Workplace, you mu
 
 ```yml
 notifications:
+<<<<<<< HEAD
   id: unique-workplace-id
   type: workplace
   data:
     thread_id': abcd-123-456
     access_token: your_custom_integration_access_token
+=======
+  - id: unique-workplace-id
+    type: workplace
+    data:
+      thread_id: 12345678910
+      access_token: your_custom_integration_access_token
+>>>>>>> d9daf5e (Fix: changes yaml example)
 ```
 
 | Key         | Description                                     | Example                         |
@@ -195,10 +209,10 @@ Monika supports sending notifications via Microsoft Teams. In order to be able t
 
 ```yml
 notifications:
-  id: unique-id-teams
-  type: teams
-  data:
-    url: https://YOUR_TEAMS_WEBHOOK_URL
+  - id: unique-id-teams
+    type: teams
+    data:
+      url: https://YOUR_TEAMS_WEBHOOK_URL
 ```
 
 | Key  | Description                             | Example                                                      |
@@ -213,10 +227,10 @@ You can get a notification from Monika to your Whatsapp number without having a 
 
 ```yml
 notifications:
-  id: unique-monika-notif-id
-  type: monika-notif
-  data:
-    url: https://YOUR_MONIKA_NOTIF_URL
+  - id: unique-monika-notif-id
+    type: monika-notif
+    data:
+      url: https://YOUR_MONIKA_NOTIF_URL
 ```
 
 | Key  | Description                              | Example                                                            |
@@ -273,10 +287,10 @@ Monika supports Slack Incoming Webhook. To enable notification via Slack, you mu
 
 ```yml
 notifications:
-  id: unique-id-slack
-  type: slack
-  data:
-    url: https://YOUR_SLACK_INCOMING_WEBHOOK_URL
+  - id: unique-id-slack
+    type: slack
+    data:
+      url: https://YOUR_SLACK_INCOMING_WEBHOOK_URL
 ```
 
 | Key  | Description                            | Example                            |
@@ -410,6 +424,7 @@ Monika supports Dingtalk. To enable notification via Dingtalk, you must create a
 =======
 notifications:
 <<<<<<< HEAD
+<<<<<<< HEAD
   id: unique-id-webhook,
 >>>>>>> 5a84fbd ([766/Docs-1]: Edit The YAML example in SMTP,Telegram, Webhook, Whatsapp Business and Dingtalk)
   type: dingtalk,
@@ -419,6 +434,12 @@ notifications:
 >>>>>>> bdb0237 ([766/Docs-1]: Edit The YAML example in Whatsapp Business, Dingtalk, Pushover and Opsgenie)
   data:
     access_token: 'your-access-token'
+=======
+  - id: unique-id-webhook
+    type: dingtalk
+    data:
+      access_token: YOUR_ACCESS_TOKEN
+>>>>>>> d9daf5e (Fix: changes yaml example)
 ```
 
 | Key          | Description                        | Example        |
@@ -438,12 +459,17 @@ Monika supports Pushover. To enable notification via Pushover, you must create a
     user: 'pushover-user'
 =======
 notifications:
-  -id: unique-id-webhook
+  - id: unique-id-webhook
     type: pushover
     data:
+<<<<<<< HEAD
       token: "pushover-token"
       user: "pushover-user"
 >>>>>>> 5394ff5 ([766/Docs-1]: Edit The YAML example in Pushover and Opsgenie)
+=======
+      token: PUSHOVER_TOKEN
+      user: PUSHOVER_USER
+>>>>>>> d9daf5e (Fix: changes yaml example)
 ```
 
 | Key   | Description                | Example                    |
@@ -463,11 +489,15 @@ Monika supports Opsgenie. To enable notification via Opsgenie, you must create a
     geniekey: 'genie-key'
 =======
 notifications:
-  -id: unique-id-opsgenie
+  - id: unique-id-opsgenie
     type: opsgenie
     data:
+<<<<<<< HEAD
       geniekey: 'genie-key'
 >>>>>>> 5394ff5 ([766/Docs-1]: Edit The YAML example in Pushover and Opsgenie)
+=======
+      geniekey: GENIE_KEY
+>>>>>>> d9daf5e (Fix: changes yaml example)
 ```
 
 | Key      | Description                | Example                    |
