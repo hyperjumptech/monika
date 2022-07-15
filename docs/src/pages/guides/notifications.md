@@ -290,14 +290,15 @@ notifications:
 [SMTP (Simple Mail Transfer Protocol)](https://en.wikipedia.org/wiki/Simple_Mail_Transfer_Protocol) is a way to send email using the TCP/IP protocol. This is the easiest way to get notified when alerts are triggered. Use the following configuration to set up SMTP notification.
 
 ```yml
-- id: unique-id-smtp
-  type: smtp
-  data:
-    recipients: ['RECIPIENT_EMAIL_ADDRESS']
-    hostname: smtp.mail.com
-    port: 587
-    username: SMTP_USERNAME
-    password: SMTP_PASSWORD
+notifications:
+  - id: unique-id-smtp
+    type: smtp
+    data:
+      recipients: ['RECIPIENT_EMAIL_ADDRESS']
+      hostname: smtp.mail.com
+      port: 587
+      username: SMTP_USERNAME
+      password: SMTP_PASSWORD
 ```
 
 | Key        | Description                                                         | Example                                         |
@@ -326,11 +327,12 @@ To use Gmail SMTP with Monika,
 Monika supports Telegram. To enable notification via Telegram, you must have a Telegram bot. Please consult [Bots: An introduction for developers](https://core.telegram.org/bots).
 
 ```yml
-- id: unique-id-telegram
-  type: telegram
-  data:
-    group_id: YOUR_GROUP_ID
-    bot_token: YOUR_BOT_TOKEN
+notifications:
+  - id: unique-id-telegram
+    type: telegram
+    data:
+      group_id: YOUR_GROUP_ID
+      bot_token: YOUR_BOT_TOKEN
 ```
 
 | Key       | Description                                            | Example                       |
@@ -345,10 +347,11 @@ Monika supports Telegram. To enable notification via Telegram, you must have a T
 Monika supports Webhook. To enable notification via Webhook.
 
 ```yml
-- id: unique-id-webhook
-  type: webhook
-  data:
-    url: https://YOUR_WEBHOOK_URL
+notifications:
+  - id: unique-id-webhook
+    type: webhook
+    data:
+      url: https://YOUR_WEBHOOK_URL
 ```
 
 | Key  | Description                                                      | Example                           |
@@ -372,6 +375,7 @@ body: {
 Monika supports notifications from Whatsapp for business accounts. To enable notifications via WhatsApp for business, you must have a registered user in the WhatsApp business API server. Please refer to [WhatsApp Business API](https://developers.facebook.com/docs/whatsapp) documentation.
 
 ```yml
+notifications:
   - id: unique-whatsapp-id,
     type: whatsapp,
     data:
@@ -396,7 +400,12 @@ Monika supports notifications from Whatsapp for business accounts. To enable not
 Monika supports Dingtalk. To enable notification via Dingtalk, you must create a robot webhook first. More info at Dingtalk robot webhook [Dingtalk documentation](https://open.dingtalk.com/document/group/assign-a-webhook-url-to-an-internal-chatbot) and [Alibaba cloud documentation](https://www.alibabacloud.com/help/en/application-real-time-monitoring-service/latest/obtain-the-webhook-url-of-a-dingtalk-chatbot).
 
 ```yml
+<<<<<<< HEAD
 - id: unique-id-webhook,
+=======
+notifications:
+  id: unique-id-webhook,
+>>>>>>> 5a84fbd ([766/Docs-1]: Edit The YAML example in SMTP,Telegram, Webhook, Whatsapp Business and Dingtalk)
   type: dingtalk,
   data:
     access_token: 'your-access-token'
