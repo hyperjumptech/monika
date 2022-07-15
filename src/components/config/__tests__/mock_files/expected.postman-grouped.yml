@@ -2,36 +2,74 @@ probes:
   - id: Group1
     name: Group1
     requests:
-      - url: https://api.github.com/users/hyperjumptech/repos
+      - url: https://api.github.com/users/hyperjumptech
         method: GET
         headers: {}
-        body: {}
         timeout: 10000
       - url: https://api.github.com/users/hyperjumptech
         method: GET
         headers:
-          Authorization: any
-        body:
-          any: any
+          Content-Type: multipart/form-data
         timeout: 10000
+        body:
+          message: Hello, world!
+      - url: https://api.github.com/users/hyperjumptech
+        method: GET
+        headers:
+          Content-Type: application/x-www-form-urlencoded
+        timeout: 10000
+        body:
+          message: Hello, world!
+      - url: https://api.github.com/users/hyperjumptech
+        method: GET
+        headers:
+          Content-Type: text/plain
+        timeout: 10000
+        body: Hello, world!
+      - url: https://api.github.com/users/hyperjumptech
+        method: GET
+        headers:
+          Content-Type: application/json
+        timeout: 10000
+        body:
+          message: Hello, world!
     incidentThreshold: 5
     recoveryThreshold: 5
     alerts: []
   - id: Group2
     name: Group2
     requests:
-      - url: https://api.github.com/users/hyperjumptech/repos
+      - url: https://api.github.com/users/hyperjumptech
         method: GET
         headers: {}
-        body: {}
         timeout: 10000
       - url: https://api.github.com/users/hyperjumptech
         method: GET
         headers:
-          Authorization: any
-        body:
-          any: any
+          Content-Type: multipart/form-data
         timeout: 10000
+        body:
+          message: Hello, world!
+      - url: https://api.github.com/users/hyperjumptech
+        method: GET
+        headers:
+          Content-Type: application/x-www-form-urlencoded
+        timeout: 10000
+        body:
+          message: Hello, world!
+      - url: https://api.github.com/users/hyperjumptech
+        method: GET
+        headers:
+          Content-Type: text/plain
+        timeout: 10000
+        body: Hello, world!
+      - url: https://api.github.com/users/hyperjumptech
+        method: GET
+        headers:
+          Content-Type: application/json
+        timeout: 10000
+        body:
+          message: Hello, world!
     incidentThreshold: 5
     recoveryThreshold: 5
     alerts: []
