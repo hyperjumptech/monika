@@ -376,14 +376,19 @@ Monika supports notifications from Whatsapp for business accounts. To enable not
 
 ```yml
 notifications:
-  - id: unique-whatsapp-id,
-    type: whatsapp,
+  - id: unique-whatsapp-id
+    type: whatsapp
     data:
+<<<<<<< HEAD
       recipients: ["628123456789", "3804321234"],
       url: https://yourwhatsappapiserver.com,
       username: whatsappusername,
+=======
+      recipients: [628123456789]
+      url: https://yourwhatsappapiserver.com
+      username: whatsappusername
+>>>>>>> bdb0237 ([766/Docs-1]: Edit The YAML example in Whatsapp Business, Dingtalk, Pushover and Opsgenie)
       password: whatsapppassword
-
 ```
 
 | Key          | Description                                                                               | Example                             |
@@ -404,9 +409,14 @@ Monika supports Dingtalk. To enable notification via Dingtalk, you must create a
 - id: unique-id-webhook,
 =======
 notifications:
+<<<<<<< HEAD
   id: unique-id-webhook,
 >>>>>>> 5a84fbd ([766/Docs-1]: Edit The YAML example in SMTP,Telegram, Webhook, Whatsapp Business and Dingtalk)
   type: dingtalk,
+=======
+  id: unique-id-webhook
+  type: dingtalk
+>>>>>>> bdb0237 ([766/Docs-1]: Edit The YAML example in Whatsapp Business, Dingtalk, Pushover and Opsgenie)
   data:
     access_token: 'your-access-token'
 ```
@@ -428,8 +438,8 @@ Monika supports Pushover. To enable notification via Pushover, you must create a
     user: 'pushover-user'
 =======
 notifications:
-  -id: unique-id-webhook,
-    type: pushover,
+  -id: unique-id-webhook
+    type: pushover
     data:
       token: "pushover-token"
       user: "pushover-user"
@@ -453,8 +463,8 @@ Monika supports Opsgenie. To enable notification via Opsgenie, you must create a
     geniekey: 'genie-key'
 =======
 notifications:
-  -id: unique-id-opsgenie,
-    type: opsgenie,
+  -id: unique-id-opsgenie
+    type: opsgenie
     data:
       geniekey: 'genie-key'
 >>>>>>> 5394ff5 ([766/Docs-1]: Edit The YAML example in Pushover and Opsgenie)
