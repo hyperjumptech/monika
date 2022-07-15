@@ -37,27 +37,21 @@ notifications:
   - id: unique-id-mailgun
     type: mailgun
     data:
-      recipients: ["RECIPIENT_EMAIL_ADDRESS1","RECIPIENT_EMAIL_ADDRESS2"]
+      recipients: ['RECIPIENT_EMAIL_ADDRESS1', 'RECIPIENT_EMAIL_ADDRESS2']
       apiKey: YOUR_API_KEY
       domain: YOUR_DOMAIN
 
   - id: unique-id-sendgrid
     type: sendgrid
     data:
-<<<<<<< HEAD
-        sender: YOUR_VERIFIED_EMAIL_BY_SENDGRID
-        recipients: ["RECIPIENT_EMAIL_ADDRESS"]
-        apiKey: YOUR_API_KEY
-=======
       sender: YOUR_VERIFIED_EMAIL_BY_SENDGRID
-      recipients: [RECIPIENT_EMAIL_ADDRESS]
+      recipients: ['RECIPIENT_EMAIL_ADDRESS']
       apiKey: YOUR_API_KEY
->>>>>>> d9daf5e (Fix: changes yaml example)
 
   - id: unique-id-smtp
     type: smtp
     data:
-      recipients: ["RECIPIENT_EMAIL_ADDRESS"]
+      recipients: ['RECIPIENT_EMAIL_ADDRESS']
       hostname: SMTP_HOSTNAME
       port: 587
       username: SMTP_USERNAME
@@ -110,19 +104,11 @@ Monika supports Facebook Workplace. To enable notification via Workplace, you mu
 
 ```yml
 notifications:
-<<<<<<< HEAD
   id: unique-workplace-id
   type: workplace
   data:
-    thread_id': abcd-123-456
+    thread_id: abcd-123-456
     access_token: your_custom_integration_access_token
-=======
-  - id: unique-workplace-id
-    type: workplace
-    data:
-      thread_id: 12345678910
-      access_token: your_custom_integration_access_token
->>>>>>> d9daf5e (Fix: changes yaml example)
 ```
 
 | Key         | Description                                     | Example                         |
@@ -393,15 +379,9 @@ notifications:
   - id: unique-whatsapp-id
     type: whatsapp
     data:
-<<<<<<< HEAD
-      recipients: ["628123456789", "3804321234"],
-      url: https://yourwhatsappapiserver.com,
-      username: whatsappusername,
-=======
-      recipients: [628123456789]
+      recipients: ['628123456789', '3804321234']
       url: https://yourwhatsappapiserver.com
       username: whatsappusername
->>>>>>> bdb0237 ([766/Docs-1]: Edit The YAML example in Whatsapp Business, Dingtalk, Pushover and Opsgenie)
       password: whatsapppassword
 ```
 
@@ -419,27 +399,11 @@ notifications:
 Monika supports Dingtalk. To enable notification via Dingtalk, you must create a robot webhook first. More info at Dingtalk robot webhook [Dingtalk documentation](https://open.dingtalk.com/document/group/assign-a-webhook-url-to-an-internal-chatbot) and [Alibaba cloud documentation](https://www.alibabacloud.com/help/en/application-real-time-monitoring-service/latest/obtain-the-webhook-url-of-a-dingtalk-chatbot).
 
 ```yml
-<<<<<<< HEAD
-- id: unique-id-webhook,
-=======
 notifications:
-<<<<<<< HEAD
-<<<<<<< HEAD
-  id: unique-id-webhook,
->>>>>>> 5a84fbd ([766/Docs-1]: Edit The YAML example in SMTP,Telegram, Webhook, Whatsapp Business and Dingtalk)
-  type: dingtalk,
-=======
   id: unique-id-webhook
   type: dingtalk
->>>>>>> bdb0237 ([766/Docs-1]: Edit The YAML example in Whatsapp Business, Dingtalk, Pushover and Opsgenie)
   data:
-    access_token: 'your-access-token'
-=======
-  - id: unique-id-webhook
-    type: dingtalk
-    data:
-      access_token: YOUR_ACCESS_TOKEN
->>>>>>> d9daf5e (Fix: changes yaml example)
+    access_token: YOUR_ACCESS_TOKEN
 ```
 
 | Key          | Description                        | Example        |
@@ -451,25 +415,12 @@ notifications:
 Monika supports Pushover. To enable notification via Pushover, you must create a pushover application first. More info at [Pushover documentation](https://pushover.net/api).
 
 ```yml
-<<<<<<< HEAD
-- id: unique-id-webhook,
-  type: pushover,
-  data:
-    token: 'pushover-token'
-    user: 'pushover-user'
-=======
 notifications:
-  - id: unique-id-webhook
+  -id: unique-id-webhook
     type: pushover
     data:
-<<<<<<< HEAD
-      token: "pushover-token"
-      user: "pushover-user"
->>>>>>> 5394ff5 ([766/Docs-1]: Edit The YAML example in Pushover and Opsgenie)
-=======
       token: PUSHOVER_TOKEN
       user: PUSHOVER_USER
->>>>>>> d9daf5e (Fix: changes yaml example)
 ```
 
 | Key   | Description                | Example                    |
@@ -482,22 +433,11 @@ notifications:
 Monika supports Opsgenie. To enable notification via Opsgenie, you must create a team, then create an integration, and finally add an API. More info at [Opsgenie documentation](https://support.atlassian.com/opsgenie/docs/create-a-default-api-integration/#%E2%80%8BUsing-API-Integration).
 
 ```yml
-<<<<<<< HEAD
-- id: unique-id-opsgenie,
-  type: opsgenie,
-  data:
-    geniekey: 'genie-key'
-=======
 notifications:
   - id: unique-id-opsgenie
     type: opsgenie
     data:
-<<<<<<< HEAD
-      geniekey: 'genie-key'
->>>>>>> 5394ff5 ([766/Docs-1]: Edit The YAML example in Pushover and Opsgenie)
-=======
       geniekey: GENIE_KEY
->>>>>>> d9daf5e (Fix: changes yaml example)
 ```
 
 | Key      | Description                | Example                    |
