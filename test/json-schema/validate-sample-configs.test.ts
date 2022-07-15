@@ -53,7 +53,7 @@ const getAllFiles = function (dirPath: string, arrayOfFiles: string[]) {
   return arrayOfFiles
 }
 
-describe.only('validate example configs', () => {
+describe('validate example configs', () => {
   it('should detect examples that does not conform to the schema', () => {
     const files = getAllFiles('./config_sample', [])
 
@@ -70,7 +70,7 @@ describe.only('validate example configs', () => {
           break
         default:
           sampleFile = null
-          continue // skip for other file.ext
+          continue // skip for other file.extension
       }
 
       const isValid = validate(sampleFile)
