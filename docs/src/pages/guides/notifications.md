@@ -194,10 +194,11 @@ notifications:
 Monika supports sending notifications via Microsoft Teams. In order to be able to send notifications via Microsoft Teams, you may need to add Connectors and webhooks to your channel. Please refer to [Microsoft Teams Documentation](https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/connectors-using) to enable connectors and webhooks.
 
 ```yml
-id: unique-id-teams
-type: teams
-data:
-  url: https://YOUR_TEAMS_WEBHOOK_URL
+notifications:
+  id: unique-id-teams
+  type: teams
+  data:
+    url: https://YOUR_TEAMS_WEBHOOK_URL
 ```
 
 | Key  | Description                             | Example                                                      |
