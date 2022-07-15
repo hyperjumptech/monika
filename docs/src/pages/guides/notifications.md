@@ -416,7 +416,7 @@ Monika supports Pushover. To enable notification via Pushover, you must create a
 
 ```yml
 notifications:
-  -id: unique-id-webhook
+  - id: unique-id-webhook
     type: pushover
     data:
       token: PUSHOVER_TOKEN
