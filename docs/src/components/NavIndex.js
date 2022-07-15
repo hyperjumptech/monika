@@ -35,7 +35,7 @@ export default function NavIndex(props) {
     switch (item?.props?.originalType) {
       case 'h2':
         return (
-          <ul className="text-sm">
+          <ul key={'ul' + item?.props?.id.toString()} className="text-sm">
             <li key={item?.props?.id.toString()}>
               <span className="pr-2">•</span>
               <a href={'#' + item.props.id}>{item.props.children[0]}</a>
@@ -44,7 +44,7 @@ export default function NavIndex(props) {
         )
       case 'h3':
         return (
-          <ul className="pl-3 text-sm">
+          <ul key={'ul' + item?.props?.id.toString()} className="pl-3 text-sm">
             <li key={item?.props?.id.toString()}>
               <span className="pr-2">-</span>
               <a href={'#' + item.props.id}>{item.props.children[0]}</a>

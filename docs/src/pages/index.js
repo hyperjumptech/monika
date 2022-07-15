@@ -122,7 +122,7 @@ export default function IndexPage() {
       tag: '',
     },
     {
-      url: 'https://hyperjumptech.github.io/monika/guides/notifications#whatsapp',
+      url: 'https://hyperjumptech.github.io/monika/guides/notifications#whatsapp-business',
       img: 'whatsapp.png',
       title: 'WhatsApp Business',
       tag: '',
