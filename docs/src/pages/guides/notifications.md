@@ -23,7 +23,7 @@ At this moment, Monika support these channel of notifications (You can use just 
 12. [SMTP](https://hyperjumptech.github.io/monika/guides/notifications#smtp)
 13. [Telegram](https://hyperjumptech.github.io/monika/guides/notifications#telegram)
 14. [Webhook](https://hyperjumptech.github.io/monika/guides/notifications#webhook)
-15. [WhatsApp Business](https://hyperjumptech.github.io/monika/guides/notifications#whatsapp)
+15. [WhatsApp Business](https://hyperjumptech.github.io/monika/guides/notifications#whatsapp-business)
 16. [Dingtalk](https://hyperjumptech.github.io/monika/guides/notifications#dingtalk)
 17. [Pushover](https://hyperjumptech.github.io/monika/guides/notifications#pushover)
 18. [Opsgenie](https://hyperjumptech.github.io/monika/guides/notifications#opsgenie)
@@ -37,7 +37,7 @@ notifications: [
     - id: unique-id-mailgun
       type: mailgun
       data:
-        recipients: [RECIPIENT_EMAIL_ADDRESS]
+        recipients: ["RECIPIENT_EMAIL_ADDRESS1","RECIPIENT_EMAIL_ADDRESS2"]
         apiKey: YOUR_API_KEY
         domain: YOUR_DOMAIN
 
@@ -45,13 +45,13 @@ notifications: [
       type: sendgrid
       data:
         sender: YOUR_VERIFIED_EMAIL_BY_SENDGRID
-        recipients: [RECIPIENT_EMAIL_ADDRESS]
+        recipients: ["RECIPIENT_EMAIL_ADDRESS"]
         apiKey: YOUR_API_KEY
 
     - id: unique-id-smtp
       type: smtp
       data:
-        recipients: [RECIPIENT_EMAIL_ADDRESS]
+        recipients: ["RECIPIENT_EMAIL_ADDRESS"]
         hostname: SMTP_HOSTNAME
         port: 587
         username: SMTP_USERNAME
@@ -105,7 +105,7 @@ Monika supports Facebook Workplace. To enable notification via Workplace, you mu
 id: unique-workplace-id
 type: workplace
 data:
-  thread_id': 12345678910
+  thread_id': abcd-123-456
   access_token': your_custom_integration_access_token
 ```
 
@@ -173,7 +173,7 @@ Mailgun is an email notification delivery service provided by Mailgun email serv
 - id: unique-id-mailgun
   type: mailgun
   data:
-    recipients: [RECIPIENT_EMAIL_ADDRESS]
+    recipients: ['RECIPIENT_EMAIL_ADDRESS']
     apiKey: YOUR_API_KEY
     domain: YOUR_DOMAIN
 ```
@@ -248,7 +248,7 @@ Similar to mailgun, sendgrid is also an email delivery service. Make sure you ha
   type: sendgrid
   data:
     sender: YOUR_VERIFIED_EMAIL_BY_SENDGRID
-    recipients: [RECIPIENT_EMAIL_ADDRESS]
+    recipients: ['RECIPIENT_EMAIL_ADDRESS1', 'RECIPEIENT_EMAIL_ADDRESS2']
     apiKey: YOUR_API_KEY
 ```
 
@@ -285,7 +285,7 @@ data:
 - id: unique-id-smtp
   type: smtp
   data:
-    recipients: [RECIPIENT_EMAIL_ADDRESS]
+    recipients: ['RECIPIENT_EMAIL_ADDRESS']
     hostname: smtp.mail.com
     port: 587
     username: SMTP_USERNAME
@@ -367,7 +367,7 @@ Monika supports notifications from Whatsapp for business accounts. To enable not
   - id: unique-whatsapp-id,
     type: whatsapp,
     data:
-      recipients: [628123456789],
+      recipients: ["628123456789", "3804321234"],
       url: https://yourwhatsappapiserver.com,
       username: whatsappusername,
       password: whatsapppassword
@@ -388,10 +388,10 @@ Monika supports notifications from Whatsapp for business accounts. To enable not
 Monika supports Dingtalk. To enable notification via Dingtalk, you must create a robot webhook first. More info at Dingtalk robot webhook [Dingtalk documentation](https://open.dingtalk.com/document/group/assign-a-webhook-url-to-an-internal-chatbot) and [Alibaba cloud documentation](https://www.alibabacloud.com/help/en/application-real-time-monitoring-service/latest/obtain-the-webhook-url-of-a-dingtalk-chatbot).
 
 ```yml
-id: unique-id-webhook,
-type: dingtalk,
-data:
-  access_token: 'your-access-token'
+- id: unique-id-webhook,
+  type: dingtalk,
+  data:
+    access_token: 'your-access-token'
 ```
 
 | Key          | Description                        | Example        |
@@ -403,11 +403,11 @@ data:
 Monika supports Pushover. To enable notification via Pushover, you must create a pushover application first. More info at [Pushover documentation](https://pushover.net/api).
 
 ```yml
-  -id: unique-id-webhook,
-    type: pushover,
-    data:
-      token: "pushover-token"
-      user: "pushover-user"
+- id: unique-id-webhook,
+  type: pushover,
+  data:
+    token: 'pushover-token'
+    user: 'pushover-user'
 ```
 
 | Key   | Description                | Example                    |
@@ -420,10 +420,10 @@ Monika supports Pushover. To enable notification via Pushover, you must create a
 Monika supports Opsgenie. To enable notification via Opsgenie, you must create a team, then create an integration, and finally add an API. More info at [Opsgenie documentation](https://support.atlassian.com/opsgenie/docs/create-a-default-api-integration/#%E2%80%8BUsing-API-Integration).
 
 ```yml
-  -id: unique-id-opsgenie,
-    type: opsgenie,
-    data:
-      geniekey: 'genie-key'
+- id: unique-id-opsgenie,
+  type: opsgenie,
+  data:
+    geniekey: 'genie-key'
 ```
 
 | Key      | Description                | Example                    |
