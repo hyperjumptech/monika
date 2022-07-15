@@ -420,11 +420,20 @@ notifications:
 Monika supports Pushover. To enable notification via Pushover, you must create a pushover application first. More info at [Pushover documentation](https://pushover.net/api).
 
 ```yml
+<<<<<<< HEAD
 - id: unique-id-webhook,
   type: pushover,
   data:
     token: 'pushover-token'
     user: 'pushover-user'
+=======
+notifications:
+  -id: unique-id-webhook,
+    type: pushover,
+    data:
+      token: "pushover-token"
+      user: "pushover-user"
+>>>>>>> 5394ff5 ([766/Docs-1]: Edit The YAML example in Pushover and Opsgenie)
 ```
 
 | Key   | Description                | Example                    |
@@ -437,10 +446,18 @@ Monika supports Pushover. To enable notification via Pushover, you must create a
 Monika supports Opsgenie. To enable notification via Opsgenie, you must create a team, then create an integration, and finally add an API. More info at [Opsgenie documentation](https://support.atlassian.com/opsgenie/docs/create-a-default-api-integration/#%E2%80%8BUsing-API-Integration).
 
 ```yml
+<<<<<<< HEAD
 - id: unique-id-opsgenie,
   type: opsgenie,
   data:
     geniekey: 'genie-key'
+=======
+notifications:
+  -id: unique-id-opsgenie,
+    type: opsgenie,
+    data:
+      geniekey: 'genie-key'
+>>>>>>> 5394ff5 ([766/Docs-1]: Edit The YAML example in Pushover and Opsgenie)
 ```
 
 | Key      | Description                | Example                    |
