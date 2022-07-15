@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.2] - 2022-07-06
+
+## Added
+
+- JSON Schema for Monika configuration (#743)
+- Prometheus Alert Metric (#761)
+- Support reading sitemap (#751)
+- Docs: copy code to clipboard (#772)
+
+## Updated
+
+- Check body type when parse the Postman collection file (#765)
+- Docs: Various landing page refinement (#749)
+
+## Fixed
+
+- Postman parser doesn't parse correctly when contains body (#762)
+- Docs: Wrong language in the code blocks in Configuration File page (#768) (#774)
+- Docs: Fix Whatsapp toc link in notification page (#776)
+- Docs: Change link in Notification page(#767) (#771)
+- Docs: Improve documentation details (#758)
+- Docs: Redundant title in New Notifications page(#754) (#759)
+- Docs: Wrong tags in Alert and Raspberry pi pages (#753) (#760)
+
 ## [1.9.1] - 2022-07-06
 
 ## Updated
