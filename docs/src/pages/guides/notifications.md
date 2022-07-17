@@ -33,36 +33,35 @@ At this moment, Monika support these channel of notifications (You can use just 
 To use one or more notifications, you need to define the settings in the monika.yml file as shown below.
 
 ```yml
-notifications: [
-    - id: unique-id-mailgun
-      type: mailgun
-      data:
-        recipients: ["RECIPIENT_EMAIL_ADDRESS1","RECIPIENT_EMAIL_ADDRESS2"]
-        apiKey: YOUR_API_KEY
-        domain: YOUR_DOMAIN
+notifications:
+  - id: unique-id-mailgun
+    type: mailgun
+    data:
+      recipients: ['RECIPIENT_EMAIL_ADDRESS1', 'RECIPIENT_EMAIL_ADDRESS2']
+      apiKey: YOUR_API_KEY
+      domain: YOUR_DOMAIN
 
-    - id: unique-id-sendgrid
-      type: sendgrid
-      data:
-        sender: YOUR_VERIFIED_EMAIL_BY_SENDGRID
-        recipients: ["RECIPIENT_EMAIL_ADDRESS"]
-        apiKey: YOUR_API_KEY
+  - id: unique-id-sendgrid
+    type: sendgrid
+    data:
+      sender: YOUR_VERIFIED_EMAIL_BY_SENDGRID
+      recipients: ['RECIPIENT_EMAIL_ADDRESS']
+      apiKey: YOUR_API_KEY
 
-    - id: unique-id-smtp
-      type: smtp
-      data:
-        recipients: ["RECIPIENT_EMAIL_ADDRESS"]
-        hostname: SMTP_HOSTNAME
-        port: 587
-        username: SMTP_USERNAME
-        password: SMTP_PASSWORD
+  - id: unique-id-smtp
+    type: smtp
+    data:
+      recipients: ['RECIPIENT_EMAIL_ADDRESS']
+      hostname: SMTP_HOSTNAME
+      port: 587
+      username: SMTP_USERNAME
+      password: SMTP_PASSWORD
 
-    - id: unique-id-webhook
-      type: webhook
-      data:
-        method: POST
-        url: https://WEBHOOK_URL
-  ]
+  - id: unique-id-webhook
+    type: webhook
+    data:
+      method: POST
+      url: https://WEBHOOK_URL
 ```
 
 Note that every triggered alert will be sent to you through all the notifications you defined in the configuration file, e.g., if you added `webhook` and `smtp` settings, you will receive the alert messages through both.
@@ -76,8 +75,9 @@ Monika supports desktop notifications. Here are the prerequisites for enabling t
 - Windows: Uses Powershell. Refer to [Microsoft Official Documentation](https://docs.microsoft.com/en-us/powershell/scripting/windows-powershell/install/windows-powershell-system-requirements?view=powershell-7.1) for System Requirements.
 
 ```yml
-id: unique-id-monika-notif,
-type: desktop
+notifications:
+  - id: unique-id-monika-notif
+    type: desktop
 ```
 
 ## Discord
@@ -85,10 +85,11 @@ type: desktop
 Monika supports Discord. To enable notification via Discord, you must create a discord webhook first. More info at [Discord webhook documentation](https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks)
 
 ```yml
-id: unique-id-webhook,
-type: discord,
-data:
-  url: https://YOUR_DISCORD_URL
+notifications:
+  - id: unique-id-webhook
+    type: discord
+    data:
+      url: https://YOUR_DISCORD_URL
 ```
 
 | Key  | Description                                                   | Example                                                        |
@@ -102,11 +103,12 @@ data:
 Monika supports Facebook Workplace. To enable notification via Workplace, you must create custom integration first. More info at [Facebook Workplace Custom Integrations](https://developers.facebook.com/docs/workplace/custom-integrations-new/)
 
 ```yml
-id: unique-workplace-id
-type: workplace
-data:
-  thread_id': abcd-123-456
-  access_token': your_custom_integration_access_token
+notifications:
+  id: unique-workplace-id
+  type: workplace
+  data:
+    thread_id: abcd-123-456
+    access_token: your_custom_integration_access_token
 ```
 
 | Key         | Description                                     | Example                         |
@@ -170,12 +172,13 @@ Mailgun is an email notification delivery service provided by Mailgun email serv
 4. After that, put them in `monika.yml` configuration as follows:
 
 ```yml
-- id: unique-id-mailgun
-  type: mailgun
-  data:
-    recipients: ['RECIPIENT_EMAIL_ADDRESS']
-    apiKey: YOUR_API_KEY
-    domain: YOUR_DOMAIN
+notifications:
+  - id: unique-id-mailgun
+    type: mailgun
+    data:
+      recipients: ['RECIPIENT_EMAIL_ADDRESS']
+      apiKey: YOUR_API_KEY
+      domain: YOUR_DOMAIN
 ```
 
 | Key        | Description                                                              | Example                                         |
@@ -191,10 +194,11 @@ Mailgun is an email notification delivery service provided by Mailgun email serv
 Monika supports sending notifications via Microsoft Teams. In order to be able to send notifications via Microsoft Teams, you may need to add Connectors and webhooks to your channel. Please refer to [Microsoft Teams Documentation](https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/connectors-using) to enable connectors and webhooks.
 
 ```yml
-id: unique-id-teams
-type: teams
-data:
-  url: https://YOUR_TEAMS_WEBHOOK_URL
+notifications:
+  - id: unique-id-teams
+    type: teams
+    data:
+      url: https://YOUR_TEAMS_WEBHOOK_URL
 ```
 
 | Key  | Description                             | Example                                                      |
@@ -208,10 +212,11 @@ data:
 You can get a notification from Monika to your Whatsapp number without having a Whatsapp Business account. First, you must create a [Monika Whatsapp Notifier account](https://whatsapp.hyperjump.tech).
 
 ```yml
-id: unique-monika-notif-id
-type: monika-notif
-data:
-  url: https://YOUR_MONIKA_NOTIF_URL
+notifications:
+  - id: unique-monika-notif-id
+    type: monika-notif
+    data:
+      url: https://YOUR_MONIKA_NOTIF_URL
 ```
 
 | Key  | Description                              | Example                                                            |
@@ -225,11 +230,12 @@ data:
 PagerDuty is a platform for agile incident management. You need the integration key to use PagerDuty. You can get the integration key by following the steps in [the documentation](https://support.pagerduty.com/docs/services-and-integrations). To give you the flexibility to choose which probe belongs to which PagerDuty service. You need to map the PagerDuty integration key with your Monika probe id in the configuration.
 
 ```yaml
-- id: unique-id-pagerduty-notify
-  type: pagerduty
-  data:
-    - key: YOUR_PAGERDUTY_INTEGRATION_KEY
-      probeID: ZN32nw_KsvTKtLFNu55JV
+notifications:
+  - id: unique-id-pagerduty-notify
+    type: pagerduty
+    data:
+      - key: YOUR_PAGERDUTY_INTEGRATION_KEY
+        probeID: ZN32nw_KsvTKtLFNu55JV
 ```
 
 | Key          | Description                  | Example                            |
@@ -244,12 +250,13 @@ PagerDuty is a platform for agile incident management. You need the integration 
 Similar to mailgun, sendgrid is also an email delivery service. Make sure you have a [sendgrid account](https://app.sendgrid.com/). To obtain your API key, refer to [sendgrid documentation](https://sendgrid.com/docs/ui/account-and-settings/api-keys/). Then put the API key in Monika's configuration as follows:
 
 ```yml
-- id: unique-id-sendgrid
-  type: sendgrid
-  data:
-    sender: YOUR_VERIFIED_EMAIL_BY_SENDGRID
-    recipients: ['RECIPIENT_EMAIL_ADDRESS1', 'RECIPEIENT_EMAIL_ADDRESS2']
-    apiKey: YOUR_API_KEY
+notifications:
+  - id: unique-id-sendgrid
+    type: sendgrid
+    data:
+      sender: YOUR_VERIFIED_EMAIL_BY_SENDGRID
+      recipients: ['RECIPIENT_EMAIL_ADDRESS1', 'RECIPEIENT_EMAIL_ADDRESS2']
+      apiKey: YOUR_API_KEY
 ```
 
 | Key        | Description                                                                 | Example                                         |
@@ -265,10 +272,11 @@ Similar to mailgun, sendgrid is also an email delivery service. Make sure you ha
 Monika supports Slack Incoming Webhook. To enable notification via Slack, you must have a `Slack's Incoming Webhook URL`. Please consult the [Sending messages using Incoming Webhooks](https://api.slack.com/messaging/webhooks) documentation.
 
 ```yml
-id: unique-id-slack
-type: slack
-data:
-  url: https://YOUR_SLACK_INCOMING_WEBHOOK_URL
+notifications:
+  - id: unique-id-slack
+    type: slack
+    data:
+      url: https://YOUR_SLACK_INCOMING_WEBHOOK_URL
 ```
 
 | Key  | Description                            | Example                            |
@@ -282,14 +290,15 @@ data:
 [SMTP (Simple Mail Transfer Protocol)](https://en.wikipedia.org/wiki/Simple_Mail_Transfer_Protocol) is a way to send email using the TCP/IP protocol. This is the easiest way to get notified when alerts are triggered. Use the following configuration to set up SMTP notification.
 
 ```yml
-- id: unique-id-smtp
-  type: smtp
-  data:
-    recipients: ['RECIPIENT_EMAIL_ADDRESS']
-    hostname: smtp.mail.com
-    port: 587
-    username: SMTP_USERNAME
-    password: SMTP_PASSWORD
+notifications:
+  - id: unique-id-smtp
+    type: smtp
+    data:
+      recipients: ['RECIPIENT_EMAIL_ADDRESS']
+      hostname: smtp.mail.com
+      port: 587
+      username: SMTP_USERNAME
+      password: SMTP_PASSWORD
 ```
 
 | Key        | Description                                                         | Example                                         |
@@ -318,11 +327,12 @@ To use Gmail SMTP with Monika,
 Monika supports Telegram. To enable notification via Telegram, you must have a Telegram bot. Please consult [Bots: An introduction for developers](https://core.telegram.org/bots).
 
 ```yml
-- id: unique-id-telegram
-  type: telegram
-  data:
-    group_id: YOUR_GROUP_ID
-    bot_token: YOUR_BOT_TOKEN
+notifications:
+  - id: unique-id-telegram
+    type: telegram
+    data:
+      group_id: YOUR_GROUP_ID
+      bot_token: YOUR_BOT_TOKEN
 ```
 
 | Key       | Description                                            | Example                       |
@@ -337,10 +347,11 @@ Monika supports Telegram. To enable notification via Telegram, you must have a T
 Monika supports Webhook. To enable notification via Webhook.
 
 ```yml
-- id: unique-id-webhook
-  type: webhook
-  data:
-    url: https://YOUR_WEBHOOK_URL
+notifications:
+  - id: unique-id-webhook
+    type: webhook
+    data:
+      url: https://YOUR_WEBHOOK_URL
 ```
 
 | Key  | Description                                                      | Example                           |
@@ -364,14 +375,14 @@ body: {
 Monika supports notifications from Whatsapp for business accounts. To enable notifications via WhatsApp for business, you must have a registered user in the WhatsApp business API server. Please refer to [WhatsApp Business API](https://developers.facebook.com/docs/whatsapp) documentation.
 
 ```yml
-  - id: unique-whatsapp-id,
-    type: whatsapp,
+notifications:
+  - id: unique-whatsapp-id
+    type: whatsapp
     data:
-      recipients: ["628123456789", "3804321234"],
-      url: https://yourwhatsappapiserver.com,
-      username: whatsappusername,
+      recipients: ['628123456789', '3804321234']
+      url: https://yourwhatsappapiserver.com
+      username: whatsappusername
       password: whatsapppassword
-
 ```
 
 | Key          | Description                                                                               | Example                             |
@@ -388,10 +399,11 @@ Monika supports notifications from Whatsapp for business accounts. To enable not
 Monika supports Dingtalk. To enable notification via Dingtalk, you must create a robot webhook first. More info at Dingtalk robot webhook [Dingtalk documentation](https://open.dingtalk.com/document/group/assign-a-webhook-url-to-an-internal-chatbot) and [Alibaba cloud documentation](https://www.alibabacloud.com/help/en/application-real-time-monitoring-service/latest/obtain-the-webhook-url-of-a-dingtalk-chatbot).
 
 ```yml
-- id: unique-id-webhook,
-  type: dingtalk,
+notifications:
+  id: unique-id-webhook
+  type: dingtalk
   data:
-    access_token: 'your-access-token'
+    access_token: YOUR_ACCESS_TOKEN
 ```
 
 | Key          | Description                        | Example        |
@@ -403,11 +415,12 @@ Monika supports Dingtalk. To enable notification via Dingtalk, you must create a
 Monika supports Pushover. To enable notification via Pushover, you must create a pushover application first. More info at [Pushover documentation](https://pushover.net/api).
 
 ```yml
-- id: unique-id-webhook,
-  type: pushover,
-  data:
-    token: 'pushover-token'
-    user: 'pushover-user'
+notifications:
+  - id: unique-id-webhook
+    type: pushover
+    data:
+      token: PUSHOVER_TOKEN
+      user: PUSHOVER_USER
 ```
 
 | Key   | Description                | Example                    |
@@ -420,10 +433,11 @@ Monika supports Pushover. To enable notification via Pushover, you must create a
 Monika supports Opsgenie. To enable notification via Opsgenie, you must create a team, then create an integration, and finally add an API. More info at [Opsgenie documentation](https://support.atlassian.com/opsgenie/docs/create-a-default-api-integration/#%E2%80%8BUsing-API-Integration).
 
 ```yml
-- id: unique-id-opsgenie,
-  type: opsgenie,
-  data:
-    geniekey: 'genie-key'
+notifications:
+  - id: unique-id-opsgenie
+    type: opsgenie
+    data:
+      geniekey: GENIE_KEY
 ```
 
 | Key      | Description                | Example                    |
