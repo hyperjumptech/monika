@@ -22,80 +22,64 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-export default function NavIndex(props) {
-  const childrens = props.props.children
-  const forMedium = props.forMedium
+import yaml from 'js-yaml'
+import fs from 'fs'
+import path from 'path'
+import { expect } from 'chai'
+import Ajv from 'ajv'
 
-  let containerClass = 'csticky'
-  if (forMedium == 'true') {
-    containerClass = 'cmedium'
+const ajv = new Ajv()
+
+import mySchema from '../../monika-config-schema.json'
+
+ajv.addVocabulary(['name', 'fileMatch', 'url']) // add custom Scheme Store keywords, reference: https://www.schemastore.org/json/
+
+const validate = ajv.compile(mySchema)
+
+const getAllFiles = function (dirPath: string, arrayOfFiles: string[]) {
+  const files = fs.readdirSync(dirPath)
+
+  arrayOfFiles = arrayOfFiles || []
+
+  // files.forEach(function(file) {
+  for (const file of files) {
+    if (fs.statSync(dirPath + '/' + file).isDirectory()) {
+      arrayOfFiles = getAllFiles(dirPath + '/' + file, arrayOfFiles)
+    } else {
+      arrayOfFiles.push(path.join(dirPath, '/', file))
+    }
   }
 
-  const indexing = childrens.map((item) => {
-    switch (item?.props?.originalType) {
-      case 'h2':
-        return (
-          <ul key={'ul' + item?.props?.id.toString()} className="text-sm">
-            <li key={item?.props?.id.toString()}>
-              <span className="pr-2">•</span>
-              <a href={'#' + item.props.id}>{item.props.children[0]}</a>
-            </li>
-          </ul>
-        )
-      case 'h3':
-        return (
-          <ul key={'ul' + item?.props?.id.toString()} className="pl-3 text-sm">
-            <li key={item?.props?.id.toString()}>
-              <span className="pr-2">-</span>
-              <a href={'#' + item.props.id}>{item.props.children[0]}</a>
-            </li>
-          </ul>
-        )
-      default:
-        return ''
+  return arrayOfFiles
+}
+
+describe('validate example configs', () => {
+  it('should detect examples that does not conform to the schema', () => {
+    const files = getAllFiles('./config_sample', [])
+
+    let sampleFile: any
+
+    for (const file of files) {
+      switch (path.extname(file)) {
+        case '.yml':
+        case '.yaml':
+          sampleFile = yaml.load(fs.readFileSync(file, 'utf8'))
+          break
+        case '.json':
+          sampleFile = JSON.parse(fs.readFileSync(file, 'utf8'))
+          break
+        default:
+          sampleFile = null
+          continue // skip for other file.extension
+      }
+
+      const isValid = validate(sampleFile)
+      if (isValid === false) {
+        console.error('file:', file, 'validity:', isValid)
+        console.error('error:', validate.errors)
+      }
+
+      expect(isValid).to.be.true
     }
   })
-
-  return (
-    <>
-      <div className={containerClass}>
-        <div className="relative w-full">
-          <div className="sticky">{indexing}</div>
-        </div>
-      </div>
-
-      <style jsx>{`
-        @media (max-width: 1023px) {
-          .csticky {
-            display: none;
-          }
-
-          .cmedium {
-            border: solid #e3e3e3 2px;
-            padding: 10px 15px;
-            margin-bottom: 15px;
-          }
-        }
-        @media (min-width: 1024px) {
-          .cmedium {
-            display: none;
-          }
-          .csticky {
-            min-width: 225px;
-            display: flex;
-            flex-direction: row-reverse;
-          }
-          ul > li:hover {
-            font-weight: bold;
-          }
-          .sticky {
-            top: 3.75rem;
-          }
-          .sticky ul {
-            padding-top: 5rem;
-          }
-        }
-      `}</style>
-    </>
-  )
-}
+})

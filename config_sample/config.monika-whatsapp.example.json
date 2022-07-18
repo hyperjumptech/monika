@@ -4,12 +4,13 @@
       "id": "monika-webhook",
       "type": "monika-notif",
       "data": {
-        "url": "YOUR_MONIKA_WHATSAPP_WEBHOOK"
+        "url": "https://YOUR_MONIKA_WHATSAPP_WEBHOOK"
       }
     }
   ],
   "probes": [
     {
+      "id": "probe-01",
       "requests": [
         {
           "url": "https://github.com"
