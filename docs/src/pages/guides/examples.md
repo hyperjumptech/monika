@@ -216,12 +216,12 @@ Continuing with the examples from wwwh.reqres.in above, say we would like to use
 }
 ```
 
-Then your chain request to get the user email would look something like:
+Then your chain request to get the user body.email would look something like:
 
 ```yaml
 probes:
   - id: probe-01
-    name: 'body from resonse'
+    name: 'body from response'
     interval: 10
 
     requests:
@@ -249,4 +249,4 @@ notifications:
     type: desktop
 ```
 
-Note: Please do not forget the tick marks before and after the opening and closing double braces to explicitely indicate a string value. YAML parsers will generate warnings without it.
+Note: Please do not forget the tick marks before and after the opening and closing double braces to explicitly indicate a string value. YAML parsers will generate warnings without it.
