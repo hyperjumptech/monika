@@ -14,6 +14,7 @@
   ],
   "probes": [
     {
+      "id": "probe-01",
       "requests": [
         {
           "url": "https://github.com"

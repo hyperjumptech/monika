@@ -1,9 +1,10 @@
 probes:
-  - requests:
-      - url: http://github.com
+  - id: probe-01
+    requests:
+      - url: https://github.com
 
 notifications:
   - id: monika-webhook
     type: monika-notif
     data:
-      url: YOUR_MONIKA_WHATSAPP_WEBHOOK
+      url: https://YOUR_MONIKA_WHATSAPP_WEBHOOK

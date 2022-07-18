@@ -4,7 +4,7 @@
       "id": "unique-id-mailgun",
       "type": "mailgun",
       "data": {
-        "recipients": ["RECIPIENT_EMAIL_ADDRESS"],
+        "recipients": ["RECIPIENT_EMAIL_ADDRESS", "RECIPIENT_EMAIL_ADDRESS2"],
         "apiKey": "YOUR_API_KEY",
         "domain": "YOUR_DOMAIN"
       }
@@ -12,6 +12,7 @@
   ],
   "probes": [
     {
+      "id": "probe-01",
       "requests": [
         {
           "url": "https://github.com"
