@@ -39,7 +39,12 @@ probes:
       - url: https://hyperjumptech.github.io/monika
         timeout: 7000
     alerts:
-      - status-not-2xx
+      - query: response.status < 200 or response.status > 299
+        message: Target is not healthy. It has not been returning status code 2xx.
+      - query: response.time > 2000
+        message:
+          Target is not healthy. The response time has been greater than 2000
+          ms.
 ```
 
 Using the above configuration, Monika will check the landing page every 10 seconds and will send a notification by email when the landing page is down 5 times in a row. For more information about available notification channels, refer to [Notifications](https://hyperjumptech.github.io/monika/guides/notifications).
@@ -89,8 +94,12 @@ probes:
     incidentThreshold: 3
     recoveryThreshold: 3
     alerts:
-      - status-not-2xx
-      - response-time-greater-than-200-ms
+      - query: response.status > 299
+        message: Target is not healthy. It has not been returning status code 2xx.
+      - query: response.time > 2000
+        message:
+          Target is not healthy. The response time has been greater than 2000
+          ms.
 ```
 
 In the configuration above, Monika will first check `https://github.com/` then `https://github.com/hyperjumptech`. If the status code of `https://github.com/` is not 2xx (e.g., 200, 201), Monika **will not** check `https://github.com/hyperjumptech`.
@@ -135,8 +144,12 @@ probes:
     incidentThreshold: 3
     recoveryThreshold: 3
     alerts:
-      - status-not-2xx
-      - response-time-greater-than-2000-ms
+      - query: response.status > 299
+        message: Target is not healthy. It has not been returning status code 2xx.
+      - query: response.time > 2000
+        message:
+          Target is not healthy. The response time has been greater than 2000
+          ms.
 ```
 
 In the configuration above, the first request will fetch all users from `https://reqres.in/api/users`. Then in the second request, Monika will fetch the details of the first user from the first request. If there are no triggered alerts, the response returned from the first request is ready to be used by the second request using values from `{{ responses.[0].body }}`.
@@ -192,8 +205,12 @@ probes:
     incidentThreshold: 3
     recoveryThreshold: 3
     alerts:
-      - status-not-2xx
-      - response-time-greater-than-2000-ms
+      - query: response.status > 299
+        message: Target is not healthy. It has not been returning status code 2xx.
+      - query: response.time > 2000
+        message:
+          Target is not healthy. The response time has been greater than 2000
+          ms.
 ```
 
 Using the above configuration, Monika will perform a login request in the first request, then use the returned token in the Authorization header of the second request.
