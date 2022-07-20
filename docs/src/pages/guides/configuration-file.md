@@ -3,13 +3,17 @@ id: configuration-file
 title: Configuration File
 ---
 
-Monika uses a YAML file format to describe all the settings and configurations. A sample is included in the project in the file `monika.example.yml`
+Monika uses a YAML file to define all the settings and configurations. You can find a sample configuration file in the repository called [monika.example.yml](https://github.com/hyperjumptech/monika/blob/main/monika.example.yml).
 
-The following are a summary of their settings. In general Monika and its configuration file, `monika.yml` is divided into three sections. A probe, an alert and a notification section.
+> **Pro tips**: If you use VSCode in regular basis, you can write the configuration file with the help of auto completion by installing the [YAML extension for VSCode](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml). More information can be found our [Creating Monika Configuration from Scratch using Autocomplete in Visual Studio Code](https://medium.com/hyperjump-tech/creating-monika-configuration-from-scratch-using-autocomplete-in-visual-studio-code-d7bc86c1d36a) blog post.
+
+> **Another pro tips**: If you'd rather use a GUI to create the configuration file, you can use the [Monika Config Generator web app](https://monika-config.hyperjump.tech/).
+
+In general Monika and its configuration file, `monika.yml` is divided into three sections. A probe, an alert and a notification section.
 
 ## Probes
 
-Probes describe the request(s) to perform on your service to test. A probe will include the request, the http url to test, its method, timeout and any headers that you might wish to add..
+Probes describe one or more requests to perform on your service to test. A probe will include the request, the URL to test, its method, timeout and any headers and body that you might wish to add.
 
 Here is an example probe:
 
@@ -27,13 +31,13 @@ probes:
           Content-Type: application/x-www-form-urlencoded
 ```
 
-For further details on probes, check the [guide here](https://monika.hyperjump.tech/guides/probes).
+For further details on probes, check the [Probes guide](/guides/probes).
 
 ## Alerts
 
-Alerts are part of probes, and describe the conditions to trigger an alert. Alerts are basically test conditions for your service, such as http status, response time, or a particular response body.
+Alerts describe the conditions to trigger a notification. Alerts are basically test conditions for your service, such as http status, response time, or a particular response body.
 
-The sample below shows an alert will be generated if http response status is 500 or the response time is greater than 150ms.
+The example below defines two alerts that will send notification if the HTTP response status is 500 or if the response time is greater than 150 ms.
 
 ```yaml
 alerts:
@@ -43,13 +47,13 @@ alerts:
     message: response time is slow
 ```
 
-For details on alerts and how you can configure different triggers, see the [guide here](https://monika.hyperjump.tech/guides/alerts) here.
+For details on alerts and how you can define different kind of queries, see the [Alerts guide](/guides/alerts).
 
 ## Notifications
 
-Once an alert is triggered, Monika can send a notification through any of the supported channels.
+Once an alert is triggered, Monika will send one or more notifications through any of the supported channels that you defined.
 
-A simple desktop alert for instance is done in two lines, see below:
+For instance, a simple desktop notification needs to be defined as follows:
 
 ```yaml
 notifications:
@@ -57,7 +61,7 @@ notifications:
     type: desktop
 ```
 
-Monika supports standard channels such as email smtp:
+Or an e-mail notification via your own SMTP server can be done by defining the following configuration:
 
 ```yaml
 notifications:
@@ -71,14 +75,8 @@ notifications:
       password: SMTP_PASSWORD
 ```
 
-Monika also support a wide variety of chat channels such as whatsapp, discord, Google chat, and even Lark Suite:
+Note that you can define more than one notification and Monika will notify you through them all when an alert is triggered.
 
-```yaml
-notifications:
-  - id: myGoogleChatNotif
-    type: google-chat
-    data:
-      url: https://chat.googleapis.com/v1/spaces/XXXXX/messages?key=1122334455
-```
+Monika supports a wide variety of communication channels such as WhatsApp, Discord, Google Chat, and many more. For the complete list of the different notification channels that Monika supports, visit the [Notifications](/guides/notifications) page.
 
-For the complete list of the different notification channels supported, visit the [guide here](https://monika.hyperjump.tech/guides/notifications).
+> **Pro tips**: If the communication app you are using with your team is not supported by Monika, you can follow our guide to add it to Monika in [Add your choice of notification channels to Monika](https://medium.com/hyperjump-tech/add-your-choice-of-notification-channels-to-monika-640f398aa265) blog post. Some of the notification channels that Monika supports are thanks to fellow developers' open source contributions!
