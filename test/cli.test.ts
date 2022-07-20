@@ -27,12 +27,13 @@ import { expect } from 'chai'
 
 describe('CLI Testing', () => {
   it('Detect config file changes successfully', async () => {
-    const { execute, cleanup, writeFile, readFile } = await prepareEnvironment()
+    const { spawn, cleanup, writeFile } = await prepareEnvironment()
 
     const initFile = `
 probes:
   - id: 1
     name: Google
+    interval: 1
     incidentThreshold: 6
     recoveryThreshold: 6
     requests:
@@ -44,42 +45,68 @@ notifications:
     const changeFile = `
 probes:
   - id: 1
-    name: Google & Github
-    incidentThreshold: 6
-    recoveryThreshold: 6
+    name: Google
+    interval: 2
+    incidentThreshold: 4
+    recoveryThreshold: 4
     requests:
       - url: https://google.com
+  - id: 2
+    name: Github
+    interval: 2
+    incidentThreshold: 4
+    recoveryThreshold: 4
+    requests:
       - url: https://github.com
-  notifications:
-  - id: unique-id-monika-notif,
-    type: desktop
+notifications:
+- id: unique-id-monika-notif,
+  type: desktop
 `
 
     // write initial yml
     await writeFile('./cli-test.yml', initFile)
 
     // run monika
-    const { stdout, stderr } = await execute(
+    const { getStdout, wait, kill, debug } = await spawn(
       'node',
       './bin/run -c cli-test.yml'
     )
+    debug()
+    await wait(8000)
+
+    // write new yml containing github url
+    await writeFile('./cli-test.yml', changeFile)
+    await wait(5000)
+
+    const stdout = getStdout().join('\r\n')
+    const updatedString = 'WARN: config file update detected'
+    const stdoutBeforeConfigChange = stdout.split(updatedString)[0]
+    const stdoutAfterConfigChange = stdout.split(updatedString)[1]
+
+    console.log('stdout:\r\n', getStdout())
+    console.log('stdoutBeforeConfigChange:\r\n', stdoutBeforeConfigChange)
+    console.log('stdoutAfterConfigChange:', stdoutAfterConfigChange)
 
     // expect starting monika
-    expect(stdout[3]).to.contain('Using config file: {{base}}/cli-test.yml')
-    expect(stdout[4]).to.contain('Starting Monika. Probes: 1. Notifications: 1')
-    // expect(true).to.equal(true)
-
-    console.log(stdout, 'lala')
-    console.log(stderr, 'lili')
-
-    // write yml containing github url
-    await writeFile('./cli-test.yml', changeFile)
-    const content = await readFile('./cli-test.yml')
-    console.log(content, 'con')
+    expect(stdoutBeforeConfigChange).to.contain(
+      'Using config file: {{base}}/cli-test.yml'
+    )
+    expect(stdoutBeforeConfigChange).to.contain(
+      'Starting Monika. Probes: 1. Notifications: 1'
+    )
+    expect(stdoutBeforeConfigChange).to.contain('GET https://google.com')
 
     // expect new yml including url github
-    // expect(stdout[3]).to.contain('Using config file: {{base}}/cli-test.yml')
-    // expect(stdout[4]).to.contain('Starting Monika. Probes: 2. Notifications: 1')
+    expect(stdoutAfterConfigChange).to.contain(
+      'Using config file: {{base}}/cli-test.yml'
+    )
+    expect(stdoutAfterConfigChange).to.contain(
+      'Restarting Monika. Probes: 2. Notifications: 1'
+    )
+    expect(stdoutAfterConfigChange).to.contain('GET https://github.com')
+
+    // Stop monika
+    kill('SIGINT')
 
     await cleanup()
   })
