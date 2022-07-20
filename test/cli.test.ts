@@ -67,11 +67,10 @@ notifications:
     await writeFile('./cli-test.yml', initFile)
 
     // run monika
-    const { getStdout, wait, kill, debug } = await spawn(
+    const { getStdout, wait, kill } = await spawn(
       'node',
       './bin/run -c cli-test.yml'
     )
-    debug()
     await wait(8000)
 
     // write new yml containing github url
