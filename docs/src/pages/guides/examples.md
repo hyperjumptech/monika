@@ -219,7 +219,7 @@ Using the above configuration, Monika will perform a login request in the first 
 
 Continuing with the examples from www.reqres.in above, say we would like to use the previous GET request to perform a POST /login. If the data from the initial request is something like below:
 
-```yaml
+```json
 {
   'data':
     {
@@ -227,9 +227,9 @@ Continuing with the examples from www.reqres.in above, say we would like to use 
       'email': 'george.bluth@reqres.in',
       'first_name': 'George',
       'last_name': 'Bluth',
-      'avatar': 'https://reqres.in/img/faces/1-image.jpg',
+      'avatar': 'https://reqres.in/img/faces/1-image.jpg'
     },
-  ....,
+  ....
 }
 ```
 
