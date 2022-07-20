@@ -43,7 +43,8 @@
     "version": "oclif readme && git add README.md",
     "format": "prettier --write .",
     "check-format": "prettier --check .",
-    "pkg": "npm run prepack && pkg . --compress brotli"
+    "pkg": "npm run prepack && pkg . --compress brotli",
+    "teh": "cross-env NODE_ENV=test ./node_modules/mocha/bin/mocha test/cli.test.ts --timeout=10000"
   },
   "dependencies": {
     "@alicloud/dingtalk": "^1.3.53",
@@ -98,6 +99,7 @@
     "yaml": "1.10.2"
   },
   "devDependencies": {
+    "@gmrchk/cli-testing-library": "^0.1.2",
     "@oclif/test": "^2.1.0",
     "@types/boxen": "^3.0.1",
     "@types/chai": "^4.2.15",
