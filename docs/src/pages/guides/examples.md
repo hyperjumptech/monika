@@ -154,7 +154,7 @@ probes:
 
 In the configuration above, the first request will fetch all users from `https://reqres.in/api/users`. Then in the second request, Monika will fetch the details of the first user from the first request. If there are no triggered alerts, the response returned from the first request is ready to be used by the second request using values from `{{ responses.[0].body }}`.
 
-Let's say the response from fetching all users in JSON format as follows:
+Let's say the response from fetching all users in JSON format is as follows:
 
 ```json
 {
@@ -214,3 +214,56 @@ probes:
 ```
 
 Using the above configuration, Monika will perform a login request in the first request, then use the returned token in the Authorization header of the second request.
+
+### Pass Response Data to Request Body
+
+Continuing with the examples from www.reqres.in above, say we would like to use the previous GET request to perform a POST /login. If the data from the initial request is something like below:
+
+```json
+{
+  'data':
+    {
+      'id': 1,
+      'email': 'george.bluth@reqres.in',
+      'first_name': 'George',
+      'last_name': 'Bluth',
+      'avatar': 'https://reqres.in/img/faces/1-image.jpg'
+    },
+  ....
+}
+```
+
+Then you can use the user's email in the login request body as follows:
+
+```yaml
+probes:
+  - id: probe-01
+    name: 'body from response'
+    interval: 10
+
+    requests:
+      - url: https://reqres.in/api/users/1
+        method: GET
+        timeout: 5000
+        saveBody: false
+        headers:
+          Content-Type: application/json; charset=utf-8
+
+      - url: https://reqres.in/api/login
+        method: POST
+        timeout: 1000
+        headers:
+          Content-Type: application/json; charset=utf-8
+        body:
+          email: '{{ responses.[0].body.data.email }}'
+          password: password
+
+        alerts:
+          - query: response.status != 200
+            message: Http Response status code is not 200!
+notifications:
+  - id: unique-id-desktop
+    type: desktop
+```
+
+Note: Please do not forget the single quotes before and after the opening and closing double braces to explicitly indicate a string value. YAML parsers will generate warnings without it.
