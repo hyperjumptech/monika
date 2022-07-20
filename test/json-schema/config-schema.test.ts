@@ -31,8 +31,6 @@ const ajv = new Ajv()
 const defaultConfig = yaml.load(fs.readFileSync('monika.example.yml', 'utf8'))
 import mySchema from '../../monika-config-schema.json'
 
-ajv.addVocabulary(['name', 'fileMatch', 'url']) // add custom Scheme Store keywords, reference: https://www.schemastore.org/json/
-
 const validate = ajv.compile(mySchema)
 
 describe('json schema validation tests', () => {
