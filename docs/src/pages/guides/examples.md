@@ -233,7 +233,7 @@ Continuing with the examples from www.reqres.in above, say we would like to use 
 }
 ```
 
-Then your chain request to get the user body.email would look something like:
+Then you can use the user's email in the login request body as follows:
 
 ```yaml
 probes:
