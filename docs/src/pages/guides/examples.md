@@ -217,7 +217,7 @@ Using the above configuration, Monika will perform a login request in the first 
 
 ### Pass Response Data to Request Body
 
-Continuing with the examples from wwwh.reqres.in above, say we would like to use the previous GET request to perform a POST /login. If the initial data from reqres returned is something like below:
+Continuing with the examples from www.reqres.in above, say we would like to use the previous GET request to perform a POST /login. If the data from the initial request is something like below:
 
 ```yaml
 {
@@ -266,4 +266,4 @@ notifications:
     type: desktop
 ```
 
-Note: Please do not forget the tick marks before and after the opening and closing double braces to explicitly indicate a string value. YAML parsers will generate warnings without it.
+Note: Please do not forget the single quotes before and after the opening and closing double braces to explicitly indicate a string value. YAML parsers will generate warnings without it.
