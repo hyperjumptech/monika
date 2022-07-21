@@ -87,18 +87,16 @@ notifications:
     console.log('stdoutAfterConfigChange:', stdoutAfterConfigChange)
 
     // expect starting monika
-    expect(stdoutBeforeConfigChange).to.contain(
-      'Using config file: {{base}}/cli-test.yml'
-    )
+    expect(stdoutBeforeConfigChange).to.contain('Using config file')
+    expect(stdoutBeforeConfigChange).to.contain('cli-test.yml')
     expect(stdoutBeforeConfigChange).to.contain(
       'Starting Monika. Probes: 1. Notifications: 1'
     )
     expect(stdoutBeforeConfigChange).to.contain('GET https://google.com')
 
     // expect new yml including url github
-    expect(stdoutAfterConfigChange).to.contain(
-      'Using config file: {{base}}/cli-test.yml'
-    )
+    expect(stdoutAfterConfigChange).to.contain('Using config file:')
+    expect(stdoutAfterConfigChange).to.contain('cli-test.yml')
     expect(stdoutAfterConfigChange).to.contain(
       'Restarting Monika. Probes: 2. Notifications: 1'
     )

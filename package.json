@@ -44,7 +44,7 @@
     "format": "prettier --write .",
     "check-format": "prettier --check .",
     "pkg": "npm run prepack && pkg . --compress brotli",
-    "test:e2e": "mocha test/cli.test.ts --timeout=20000"
+    "test:e2e": "npm run prepack && mocha test/cli.test.ts --timeout=20000"
   },
   "dependencies": {
     "@alicloud/dingtalk": "^1.3.53",
