@@ -5,7 +5,7 @@ title: Configuration File
 
 Monika uses a YAML file to define all the settings and configurations. You can find a sample configuration file in the repository called [monika.example.yml](https://github.com/hyperjumptech/monika/blob/main/monika.example.yml).
 
-> **Pro tips**: If you use VSCode in regular basis, you can write the configuration file with the help of auto completion by installing the [YAML extension for VSCode](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml). More information can be found our [Creating Monika Configuration from Scratch using Autocomplete in Visual Studio Code](https://medium.com/hyperjump-tech/creating-monika-configuration-from-scratch-using-autocomplete-in-visual-studio-code-d7bc86c1d36a) blog post.
+> **Pro tips**: If you use [Visual Studio Code (VSCode)](https://code.visualstudio.com/) on regular basis, you can write the configuration file with the help of auto completion by installing the [YAML extension for VSCode](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml). More information can be found our [Creating Monika Configuration from Scratch using Autocomplete in Visual Studio Code](https://medium.com/hyperjump-tech/creating-monika-configuration-from-scratch-using-autocomplete-in-visual-studio-code-d7bc86c1d36a) blog post.
 
 > **Another pro tips**: If you'd rather use a GUI to create the configuration file, you can use the [Monika Config Generator web app](https://monika-config.hyperjump.tech/).
 
