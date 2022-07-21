@@ -671,6 +671,9 @@ export default function IndexPage() {
                 <Link href="/overview">
                   <a className="link17">Documentation</a>
                 </Link>
+                <Link href="https://medium.com/hyperjump-tech">
+                  <a className="link17">Blog</a>
+                </Link>
                 <Link href="/articles">
                   <a className="link18">How-to</a>
                 </Link>
