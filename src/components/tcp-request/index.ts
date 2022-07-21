@@ -44,16 +44,14 @@ export async function check(tcpRequest: TCPRequest): Promise<Result> {
 
   try {
     const startTime = new Date()
-    const resp = await send({ host, port, data, timeout: timeout ?? 10 })
+    const resp = await send({ host, port, data, timeout })
     const endTime = new Date()
     const duration = differenceInMilliseconds(endTime, startTime)
-    const responseData = Buffer.from(resp, 'utf8')
-    const isAlertTriggered = responseData?.length < 1
 
     return {
       duration,
-      responseData,
-      status: isAlertTriggered ? 'DOWN' : 'UP',
+      responseData: resp,
+      status: 'UP',
       message: '',
     }
   } catch (error: any) {
@@ -66,46 +64,35 @@ export async function check(tcpRequest: TCPRequest): Promise<Result> {
   }
 }
 
-async function send(
-  tcpRequest: Omit<TCPRequest, 'timeout'> & { timeout: number }
-): Promise<any> {
+async function send(tcpRequest: TCPRequest): Promise<any> {
   const { host, port, data, timeout } = tcpRequest
 
   return new Promise((resolve, reject) => {
-    const client = new net.Socket()
-    client.setKeepAlive(true)
-    client.setTimeout(timeout)
-    let isConnect = false
-
-    client.connect(port, host, () => {
-      if (data) {
-        client.write(data)
-      }
+    const client = net.createConnection({ host, port }, () => {
+      data ? client.write(data) : client.end()
     })
+
+    client.setTimeout(timeout || 10_000)
 
     client.on('data', (data) => {
-      resolve(data)
-
-      client.destroy()
-    })
-
-    client.on('error', (err) => {
-      reject(err)
-    })
-
-    client.on('connect', () => {
-      isConnect = true
-    })
-
-    client.on('timeout', () => {
-      client.destroy()
+      resolve(data.toString())
+      client.end()
     })
 
     client.on('close', (hadError) => {
-      if (!isConnect || hadError) {
-        const err = new Error('Connection error')
-        reject(err)
-      }
+      if (hadError) reject(new Error('unknown'))
+
+      resolve(null)
+    })
+
+    client.on('timeout', () => {
+      reject(new Error('timeout'))
+      client.end()
+    })
+
+    client.on('error', (error) => {
+      reject(error)
+      client.end()
     })
   })
 }

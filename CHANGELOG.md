@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.3] - 2022-07-21
+
+## Added
+
+- Add test to validate example configs (#773)
+- Integration test for auto reload on config change (#785)
+- Docs: Add example for request chaining in body payload (#780)
+- Docs: Add link to Hyperjump's Medium in the footer (#790)
+
+## Updated
+
+- Update config-schema (#778)
+- Docs: fix yaml examples (#775)
+- Docs: The alerts in Enabling Notification page still uses the old way (#781)
+
+## Fixed
+
+- TCP request doesn't make any request (#784)
+
 ## [1.9.2] - 2022-07-06
 
 ## Added
