@@ -46,7 +46,7 @@ export default function FooterDark(props) {
           href="https://medium.com/hyperjump-tech"
           rel="noopener noreferrer"
         >
-          Hyperjump's Medium
+          Blog
         </a>
         <a className="text-xs pt-1" href="/articles" rel="noopener noreferrer">
           How-to
