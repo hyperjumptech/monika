@@ -34,14 +34,14 @@ probes:
   - id: '1'
     name: Monika Landing Page
     description: Landing page of awesome Monika
-    interval: 10
+    interval: 10 # in seconds
     requests:
       - url: https://hyperjumptech.github.io/monika
-        timeout: 7000
+        timeout: 7000 # in milliseconds
     alerts:
       - query: response.status < 200 or response.status > 299
         message: Target is not healthy. It has not been returning status code 2xx.
-      - query: response.time > 2000
+      - query: response.time > 2000 # in milliseconds
         message:
           Target is not healthy. The response time has been greater than 2000
           ms.
@@ -58,11 +58,11 @@ probes:
   - id: '1'
     name: HTML form submission
     description: simulate html form submission
-    interval: 10
+    interval: 10 # in seconds
     requests:
       - method: POST
         url: http://www.foo.com/login.php
-        timeout: 7000
+        timeout: 7000 # in milliseconds
         headers:
           Content-Type: application/x-www-form-urlencoded
         body:
@@ -81,22 +81,22 @@ probes:
   - id: '1'
     name: Probing Github
     description: simulate html form submission
-    interval: 10
+    interval: 10 # in seconds
     requests:
       - method: GET
         url: https://github.com/
-        timeout: 7000
+        timeout: 7000 # in milliseconds
         saveBody: false
       - method: GET
         url: https://github.com/hyperjumptech
-        timeout: 7000
+        timeout: 7000 # in milliseconds
         saveBody: true
     incidentThreshold: 3
     recoveryThreshold: 3
     alerts:
       - query: response.status > 299
         message: Target is not healthy. It has not been returning status code 2xx.
-      - query: response.time > 2000
+      - query: response.time > 2000 # in milliseconds
         message:
           Target is not healthy. The response time has been greater than 2000
           ms.
@@ -133,20 +133,20 @@ probes:
   - id: '1'
     name: Probing Github
     description: simulate html form submission
-    interval: 10
+    interval: 10 # in seconds
     requests:
       - method: GET
         url: https://reqres.in/api/users
-        timeout: 7000
+        timeout: 7000 # in milliseconds
       - method: GET
         url: https://reqres.in/api/users/{{ responses.[0].body.data.[0].id }}
-        timeout: 7000
+        timeout: 7000 # in milliseconds
     incidentThreshold: 3
     recoveryThreshold: 3
     alerts:
       - query: response.status > 299
         message: Target is not healthy. It has not been returning status code 2xx.
-      - query: response.time > 2000
+      - query: response.time > 2000 # in milliseconds
         message:
           Target is not healthy. The response time has been greater than 2000
           ms.
@@ -186,17 +186,17 @@ probes:
   - id: '1'
     name: Probing Github
     description: simulate html form submission
-    interval: 10
+    interval: 10 # in seconds
     requests:
       - method: POST
         url: https://reqres.in/api/login
-        timeout: 7000
+        timeout: 7000 # in milliseconds
         body:
           email: eve.holt@reqres.in
           password: cityslicka
       - method: POST
         url: https://reqres.in/api/users/
-        timeout: 7000
+        timeout: 7000 # in milliseconds
         body:
           name: morpheus
           job: leader
@@ -207,7 +207,7 @@ probes:
     alerts:
       - query: response.status > 299
         message: Target is not healthy. It has not been returning status code 2xx.
-      - query: response.time > 2000
+      - query: response.time > 2000 # in milliseconds
         message:
           Target is not healthy. The response time has been greater than 2000
           ms.
@@ -239,19 +239,19 @@ Then you can use the user's email in the login request body as follows:
 probes:
   - id: probe-01
     name: 'body from response'
-    interval: 10
+    interval: 10 # in seconds
 
     requests:
       - url: https://reqres.in/api/users/1
         method: GET
-        timeout: 5000
+        timeout: 5000 # in milliseconds
         saveBody: false
         headers:
           Content-Type: application/json; charset=utf-8
 
       - url: https://reqres.in/api/login
         method: POST
-        timeout: 1000
+        timeout: 1000 # in milliseconds
         headers:
           Content-Type: application/json; charset=utf-8
         body:

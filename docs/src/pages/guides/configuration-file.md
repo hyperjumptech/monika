@@ -22,11 +22,11 @@ probes:
   - id: 'submission_test'
     name: HTML form submission
     description: simulate html form submission
-    interval: 10
+    interval: 10 # in seconds
     requests:
       - url: https://httpbin.org/status/200
         method: POST
-        timeout: 7000
+        timeout: 7000 # in milliseconds
         headers:
           Content-Type: application/x-www-form-urlencoded
 ```
@@ -43,7 +43,7 @@ The example below defines two alerts that will send notification if the HTTP res
 alerts:
   - query: response.status == 500
     message: response status is 500
-  - query: response.time > 150
+  - query: response.time > 150 # in milliseconds
     message: response time is slow
 ```
 

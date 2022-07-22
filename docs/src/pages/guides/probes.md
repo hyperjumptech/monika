@@ -11,14 +11,14 @@ probes:
   - id: '1'
     name: Name of the probe
     description: Probe to check GET time
-    interval: 10
+    interval: 10 # in seconds
     requests:
       - {}
     alerts: []
   - id: '2'
     name: Name of the probe 2
     description: Probe to check GET health
-    interval: 10
+    interval: 10 # in seconds
     requests:
       - {}
     alerts: []
@@ -33,7 +33,7 @@ Basically probes are arranged as arrays of request objects.
     id: '1'
     name: 'Example: get Time'
     description: Probe
-    interval: 10
+    interval: 10 # in seconds
     requests:
     - method: POST
       url: https://mybackend.org/user/login
@@ -80,7 +80,7 @@ probes:
   - id: 'ping_test'
     name: ping_test
     description: requesting icmp ping
-    interval: 10
+    interval: 10 # in seconds
     requests:
       - url: http://google.com
         ping: true

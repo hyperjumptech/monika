@@ -58,7 +58,7 @@ probes:
         - query: response.status != 200
           message: Status not 2xx # (This alert is only triggered for the gitlab.com request)
   alerts:
-    - query: response.time > 10000
+    - query: response.time > 10000 # in milliseconds
       message: Response time is longer than 10 seconds # (This alert is triggered for all request)
 ```
 
