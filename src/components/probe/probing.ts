@@ -90,7 +90,11 @@ export async function probing(
       newReq.body = renderedBody as any
     } else {
       for (const bk of Object.keys(body)) {
-        const rawBody = (body as any)[bk]
+        let rawBody = (body as any)[bk]
+        if (typeof rawBody !== 'string') {
+          rawBody = JSON.stringify(rawBody)
+        }
+
         const renderBody = Handlebars.compile(rawBody)
         const renderedBody = renderBody({ responses })
 
