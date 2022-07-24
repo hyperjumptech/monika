@@ -3,11 +3,11 @@ id: overview
 title: Overview
 ---
 
-Monika is an open source and free synthetic monitoring command line application. The name Monika stands for "**Moni**toring Ber**ka**la", which means "periodic monitoring" in the Indonesian language.
+Monika is an **open source** and **free synthetic monitoring** command line application. The name Monika stands for "**Moni**toring Ber**ka**la", which means "periodic monitoring" in the Indonesian language.
 
 ## How it works
 
-Monika operates by reading everything from a config file. Based on the configuration it will build and send out http requests. If the request response is not as expected, Monika will generate an alert. The alert can be sent via various notification channel (email, webhook, telegram, whatsapp, etc.).
+Monika operates by reading everything from a configuration file. Based on the configuration, it will build and send out HTTP or TCP requests. If the request's response is not as expected, Monika will send notification via various channels (E-mail, webhook, Telegram, WhatsApp, and many more).
 
 For more information, please refer to the detailed documentations below.
 
@@ -19,22 +19,32 @@ For more information, please refer to the detailed documentations below.
 | [TLS Checkers](/guides/tls-checkers)   | Check TLS validity and send notification before the expiry time |
 | [CLI Options](/guides/cli-options)     | How to run monika from the command line                         |
 
+## Features
+
+Monika has grown rapidly since its conception and currently it has variety of the following features.
+
+- Monitor [multiple probes](/guides/probes) in which each probes can contain multiple HTTP requests.
+- [Request chaining](/guides/examples#requests-chaining) to use data from a response in subsequent requests.
+- Monitor [TCP servers](/guides/probes#tcp).
+- Get notifications when an alert is triggered via a growing number of [notification channels](/guides/notifications).
+- Run Monika or create configuration file from [HAR](/guides/probes#har-file-support), [Postman](/guides/probes#postman-json-file-support), [Insomnia](/guides/probes#insomnia-file-support), and [sitemap](/guides/cli-options#sitemap).
+- Check [TLS certificate status](/guides/tls-checkers).
+- Create complex [alert's query](/guides/alerts#alert-query) to trigger an alert based on the response's status code, response time, size, headers, and received data.
+- [Run Monika from a URL](/quick-start#run-monika).
+- Receive periodical [status notification](/guides/status-notification) about the status of Monika and the probes.
+- Connect to [Prometheus](/guides/cli-options#prometheus).
+- Run Monika from [multiple configuration files](/guides/cli-options#multiple-configurations).
+
 ## Motivation
 
-Anyone who has created a website or a backend service would want them to be fast, robust and perform well all the time. Good design, engineering excellence and proper processes will contribute to these goals. Yet, what is often overlooked is the importance monitoring tools have on a project's success. Hence the budget for some type of monitoring tool is often marked as optional rather than a must have. This is our motivation. Proper monitoring tools must be setup from the very beginning. Any development team should integrate monitoring tools in their development process. Then they should extend it into production deployment.
+Anyone who has created a website or a backend service would want them to be fast, robust and perform well all the time. Good design, engineering excellence, and proper processes will contribute to these goals. Yet, what is often overlooked is the importance of monitoring tools have on a project's success. Hence the budget for some type of monitoring tool is often marked as optional rather than a must have. This what motivates us. We believe proper monitoring tools must be setup from the very beginning. Any development team should integrate monitoring tools in their development process. Then they should be able to extend it into production deployment.
 
-With this in mind, we created Monika, a synthetic monitoring tool.
+### Not just another tool
 
-## Not just another tool
+There are plenty of free monitoring tools online, but many fall short of our requirements. Free uptime monitors exists, but they only ping for service's availability. Most users don't use services only with pings. There are also plenty of real time monitoring tools. These tools need real users, which make them less suitable during development. Monika however, can synthesize usage scenarios during development, and you can use the same scenarios in production. **Synthetic monitoring** tool like Monika enables you to generate complex usage flows for quality assurance. Those same flows later on can be deployed to check the production environment. All without the need to install agents or third party libraries.
 
-There are plenty of free monitoring tools online, but many fall short of our requirements. Free uptime monitors exists, but they only ping for service availability. Most users don't use services only with pings. There are also plenty of real time monitoring tools. These tools need real users, which make them less suitable during development. Monika however, can synthesize usage scenarios during development, and you can use the same scenarios in production. Synthetic monitoring tool enable you to generate complex usage flows for quality assurance. Those same flows later on can be deployed to check the production environment. All without the need to install agents or third party libraries.
+In addition, Monika is relatively easy to deploy. You can deploy Monika to multiple servers in different locations (for example via [Docker](/tutorial/run-in-docker)). Afterwards, Monika can generate and send notifications if any of those location experience service degradation. **All these features are available for free**.
 
-In addition, Monika is easy to deploy. You can deploy Monika to multiple servers in different locations. Afterwards, Monika can generate and send notifications if any of those location experience service degradation. All these features are available for free.
+### Open source
 
-## Open source
-
-Monika is open sourced. How many of you click the "Pricing" menu every time after reading the feature page of a new product? Since Monika is open sourced, we are removing barrier for budget strapped teams. Monika's source code is always open for inspection. Follow any updates or give feedbacks through our discussion forum [here](https://github.com/hyperjumptech/monika/discussions).
-
-## You talked me into it, what now?
-
-[Let's install Monika](https://monika.hyperjump.tech/quick-start)
+Monika is **open source** and **free** because we want to remove barrier for budget strapped teams. Monika's source code is always open for inspection. Follow any updates or give feedbacks through our [discussion forum](https://github.com/hyperjumptech/monika/discussions). You can also contribute to this project by for example, [adding a new notification channel](/guides/new-notifications).
