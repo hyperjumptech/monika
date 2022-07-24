@@ -27,9 +27,9 @@ Monika has grown rapidly since its conception and currently it has variety of th
 - [Request chaining](/guides/examples#requests-chaining) to use data from a response in subsequent requests.
 - Monitor [TCP servers](/guides/probes#tcp).
 - Get notifications when an alert is triggered via a growing number of [notification channels](/guides/notifications).
-- Run Monika or create configuration file from [HAR](/guides/probes#har-file-support), [Postman](/guides/probes#postman-json-file-support), [Insomnia](/guides/probes#insomnia-file-support), and [sitemap](/guides/cli-options#sitemap).
+- Run Monika or create configuration file from a [HAR file](/guides/probes#har-file-support), a [Postman file](/guides/probes#postman-json-file-support), an [Insomnia file](/guides/probes#insomnia-file-support), and a [sitemap file](/guides/cli-options#sitemap).
 - Check [TLS certificate status](/guides/tls-checkers).
-- Create complex [alert's query](/guides/alerts#alert-query) to trigger an alert based on the response's status code, response time, size, headers, and received data.
+- Create complex [alert's query](/guides/alerts#alert-query) to trigger an alert based on the response's status code, response's time, size, headers, and the received data.
 - [Run Monika from a URL](/quick-start#run-monika).
 - Receive periodical [status notification](/guides/status-notification) about the status of Monika and the probes.
 - Connect to [Prometheus](/guides/cli-options#prometheus).
@@ -43,8 +43,8 @@ Anyone who has created a website or a backend service would want them to be fast
 
 There are plenty of free monitoring tools online, but many fall short of our requirements. Free uptime monitors exists, but they only ping for service's availability. Most users don't use services only with pings. There are also plenty of real time monitoring tools. These tools need real users, which make them less suitable during development. Monika however, can synthesize usage scenarios during development, and you can use the same scenarios in production. **Synthetic monitoring** tool like Monika enables you to generate complex usage flows for quality assurance. Those same flows later on can be deployed to check the production environment. All without the need to install agents or third party libraries.
 
-In addition, Monika is relatively easy to deploy. You can deploy Monika to multiple servers in different locations (for example via [Docker](/tutorial/run-in-docker)). Afterwards, Monika can generate and send notifications if any of those location experience service degradation. **All these features are available for free**.
+In addition, Monika is relatively easy to deploy. You can deploy Monika to multiple servers in different locations (for example via [Docker](/tutorial/run-in-docker)). Afterwards, Monika can generate and send notifications when service's degradation is detected from any of the locations. **All these features are available for free**.
 
 ### Open source
 
-Monika is **open source** and **free** because we want to remove barrier for budget strapped teams. Monika's source code is always open for inspection. Follow any updates or give feedbacks through our [discussion forum](https://github.com/hyperjumptech/monika/discussions). You can also contribute to this project by for example, [adding a new notification channel](/guides/new-notifications).
+Monika is **open source** and **free** because we want it to be available even for budget strapped teams. Monika's source code is always open for inspection. Follow any updates or give feedbacks through our [discussion forum](https://github.com/hyperjumptech/monika/discussions). You can also contribute to this project by reporting and fixing bugs or by [adding a new notification channel](/guides/new-notifications).
