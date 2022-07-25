@@ -788,7 +788,8 @@
     },
     "status-notification": {
       "type": "string",
-      "description": "Set to periodically send status notifications. To disable set to false.",
+      "title": "Status notification",
+      "description": "Sends status notification periodically according to a cron schedule. To disable set to false.",
       "default": "0 6 * * *"
     }
   },
