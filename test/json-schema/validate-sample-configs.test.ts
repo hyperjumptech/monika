@@ -32,8 +32,6 @@ const ajv = new Ajv()
 
 import mySchema from '../../monika-config-schema.json'
 
-ajv.addVocabulary(['name', 'fileMatch', 'url']) // add custom Scheme Store keywords, reference: https://www.schemastore.org/json/
-
 const validate = ajv.compile(mySchema)
 
 const getAllFiles = function (dirPath: string, arrayOfFiles: string[]) {

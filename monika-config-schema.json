@@ -18,11 +18,13 @@
       "default": 5
     },
     "interval": {
+      "title": "Interval",
       "type": "integer",
       "description": "The number of seconds to repeat the probe",
       "default": 10
     },
     "requests": {
+      "title": "Requests",
       "type": "array",
       "description": "The http or ping request to probe for",
       "items": {
@@ -31,20 +33,27 @@
         "required": ["url"],
         "properties": {
           "method": {
+            "title": "HTTP Method",
             "type": "string",
             "description": "The http method",
-            "enum": ["GET", "POST", "DELETE", "PUT", "PATCH"]
+            "enum": ["GET", "POST", "DELETE", "PUT", "PATCH"],
+            "default": "GET"
           },
           "url": {
+            "title": "Url",
             "type": "string",
-            "description": "The remote URL address to probe"
+            "description": "The remote URL address to probe",
+            "default": "https://api.github.com/zen",
+            "examples": ["https://github.com", "https://httpbin.org/status/200"]
           },
           "timeout": {
+            "title": "Timeout",
             "type": "integer",
-            "description": "Set the timout for the request in seconds",
+            "description": "Set the timeout for the request in seconds",
             "default": 10
           },
           "saveBody": {
+            "title": "SaveBody",
             "type": "boolean",
             "description": "Should response body be saved in the database",
             "default": false
@@ -53,6 +62,7 @@
             "$ref": "#/definitions/alerts"
           },
           "ping": {
+            "title": "Ping",
             "type": "boolean",
             "description": "If defined and to true, the request is an ICMP ping"
           },
@@ -66,6 +76,7 @@
       }
     },
     "socket": {
+      "title": "Socket",
       "type": "object",
       "description": "Socket is a TCP type request",
       "additionalProperties": false,
@@ -76,16 +87,19 @@
           "description": "Address to your host"
         },
         "port": {
+          "title": "Port",
           "type": "integer",
           "description": "Host port to connect to"
         },
         "data": {
+          "title": "Data",
           "type": "string",
           "description": "Data payload for the request"
         }
       }
     },
     "alerts": {
+      "title": "Alerts",
       "type": "array",
       "description": "The condition which will trigger an alert and the subsequent notification",
       "items": {
@@ -93,11 +107,13 @@
         "additionalProperties": false,
         "properties": {
           "query": {
+            "title": "Query",
             "type": "string",
             "description": "An expression that will trigger an alert when its is logically true. See the queries here: https://monika.hyperjump.tech/guides/alerts#alert-query",
             "default": "response.status != 200"
           },
           "message": {
+            "title": "Message",
             "type": "string",
             "description": "Message that will be sent to the notification channel",
             "default": "Http Response status code is not 200!"
@@ -107,9 +123,11 @@
       }
     },
     "body": {
+      "title": "Body",
       "description": "The data bytes transmitted in an HTTP transaction message immediately following the headers if there are any"
     },
     "headers": {
+      "title": "Headers",
       "type": "object",
       "description": "A list of strings sent and received by both the client program and server on every HTTP request and response",
       "additionalProperties": true,
@@ -176,16 +194,25 @@
         "required": ["id"],
         "properties": {
           "id": {
+            "title": "Id",
             "type": "string",
-            "description": "Unique string identification of the probe"
+            "description": "Unique string identification of the probe",
+            "examples": ["probe-01", "login-probe-01"],
+            "default": "probe-01"
           },
           "name": {
+            "title": "Name",
             "type": "string",
-            "description": "A human-readible probe name"
+            "description": "A human-readible probe name",
+            "examples": ["get-user", "login-check", "web-heatlh-check"],
+            "default": "zen-check-01"
           },
           "description": {
+            "title": "Description",
             "type": "string",
-            "description": "Description of the probe"
+            "description": "Description of the probe",
+            "examples": ["ensure service health is good"],
+            "default": "Ensure connectivity to github is successful"
           },
           "interval": {
             "$ref": "#/definitions/interval"
@@ -221,7 +248,8 @@
             "properties": {
               "id": {
                 "type": "string",
-                "description": "Unique notification id"
+                "description": "Unique notification id",
+                "default": "desktop-01"
               },
               "type": {
                 "const": "desktop"
@@ -236,7 +264,8 @@
             "properties": {
               "id": {
                 "type": "string",
-                "description": "Unique notification id"
+                "description": "Unique notification id",
+                "default": "discord-01"
               },
               "type": {
                 "const": "discord"
@@ -266,7 +295,8 @@
             "properties": {
               "id": {
                 "type": "string",
-                "description": "Unique notification id"
+                "description": "Unique notification id",
+                "default": "workplace-01"
               },
               "type": {
                 "const": "workplace"
@@ -297,7 +327,8 @@
             "properties": {
               "id": {
                 "type": "string",
-                "description": "Unique notification id"
+                "description": "Unique notification id",
+                "default": "google-chat-01"
               },
               "type": {
                 "const": "google-chat"
@@ -327,7 +358,8 @@
             "properties": {
               "id": {
                 "type": "string",
-                "description": "Unique notification id"
+                "description": "Unique notification id",
+                "default": "lark-01"
               },
               "type": {
                 "const": "lark"
@@ -394,7 +426,8 @@
             "properties": {
               "id": {
                 "type": "string",
-                "description": "Unique notification id"
+                "description": "Unique notification id",
+                "default": "teams-01"
               },
               "type": {
                 "const": "teams"
@@ -421,7 +454,8 @@
             "properties": {
               "id": {
                 "type": "string",
-                "description": "Unique notification id"
+                "description": "Unique notification id",
+                "default": "monika-01"
               },
               "type": {
                 "const": "monika-notif"
@@ -451,7 +485,8 @@
             "properties": {
               "id": {
                 "type": "string",
-                "description": "Unique pagerduty notif id"
+                "description": "Unique pagerduty notif id",
+                "default": "pagerduty-01"
               },
               "type": {
                 "const": "pagerduty"
@@ -482,7 +517,8 @@
             "properties": {
               "id": {
                 "type": "string",
-                "description": "Unique sendgrid notification id"
+                "description": "Unique sendgrid notification id",
+                "id": "sendgrid-01"
               },
               "type": {
                 "const": "sendgrid"
@@ -520,7 +556,8 @@
             "properties": {
               "id": {
                 "type": "string",
-                "description": "Unique slack notification id"
+                "description": "Unique slack notification id",
+                "default": "slack-01"
               },
               "type": {
                 "const": "slack"
@@ -548,7 +585,8 @@
             "properties": {
               "id": {
                 "type": "string",
-                "description": "Unique smtp notification id"
+                "description": "Unique smtp notification id",
+                "default": "smtp-01"
               },
               "type": {
                 "const": "smtp"
@@ -600,7 +638,8 @@
             "properties": {
               "id": {
                 "type": "string",
-                "description": "Unique telegram notification id"
+                "description": "Unique telegram notification id",
+                "default": "telegram-01"
               },
               "type": {
                 "const": "telegram"
@@ -631,7 +670,8 @@
             "properties": {
               "id": {
                 "type": "string",
-                "description": "Unique webhook notification id"
+                "description": "Unique webhook notification id",
+                "default": "webhook-01"
               },
               "type": {
                 "const": "webhook"
@@ -659,7 +699,8 @@
             "properties": {
               "id": {
                 "type": "string",
-                "description": "Unique whatsapp notification id"
+                "description": "Unique whatsapp notification id",
+                "default": "whatsapp-01"
               },
               "type": {
                 "const": "whatsapp"
@@ -701,7 +742,8 @@
             "properties": {
               "id": {
                 "type": "string",
-                "description": "Unique Dingtalk notification id"
+                "description": "Unique Dingtalk notification id",
+                "default": "dingtalk-01"
               },
               "type": {
                 "const": "dingtalk"
@@ -728,7 +770,8 @@
             "properties": {
               "id": {
                 "type": "string",
-                "description": "Unique Pushover notification id"
+                "description": "Unique Pushover notification id",
+                "default": "pushover-01"
               },
               "type": {
                 "const": "pushover"
@@ -759,7 +802,8 @@
             "properties": {
               "id": {
                 "type": "string",
-                "description": "Unique opsgenie notification id"
+                "description": "Unique opsgenie notification id",
+                "default": "opsgenie-01"
               },
               "type": {
                 "const": "opsgenie"
