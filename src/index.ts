@@ -242,6 +242,12 @@ class Monika extends Command {
       description:
         'Enable auto-update for Monika. Available options: major, minor, patch. This will make Monika terminate itself on successful update but does not restart',
     }),
+
+    'max-start-delay': Flags.integer({
+      default: 1 * 60 * 1000, // 1 minutes in milliseconds
+      description:
+        'The maximum delay (in milliseconds) to start probing when there are many probes. When this is set to value greater than zero, all of the probes will start at slightly different time but within the value set here.',
+    }),
   }
 
   /* eslint-disable complexity */
@@ -416,7 +422,8 @@ class Monika extends Command {
           sanitizedProbe,
           config.notifications ?? [],
           Number(_flags.repeat),
-          verboseLogs
+          verboseLogs,
+          _flags['max-start-delay']
         )
       }
     } catch (error) {

@@ -171,6 +171,19 @@ function loopProbe(
   return probeInterval
 }
 
+// const BATCH_SIZE = 100
+const delayForProbe = (
+  index: number,
+  totalProbes: number,
+  maxStartDelay: number
+) => {
+  const delay =
+    Math.max(Math.ceil(maxStartDelay / totalProbes) * index, 100) +
+    Math.random() * 1000
+
+  return delay
+}
+
 /**
  * idFeeder feeds Prober with actual ids to process
  * @param {object} sanitizedProbes probes that has been sanitized
@@ -184,16 +197,23 @@ export function idFeeder(
   sanitizedProbes: Probe[],
   notifications: Notification[],
   repeats: number,
-  verboseLogs: boolean
+  verboseLogs: boolean,
+  maxStartDelay: number
 ): any {
-  for (const probe of sanitizedProbes) {
-    const interval = loopProbe(
-      probe,
-      notifications ?? [],
-      repeats ?? 0,
-      verboseLogs
-    )
-    intervals.push(interval)
+  for (const [i, probe] of sanitizedProbes.entries()) {
+    const delay =
+      maxStartDelay === 0
+        ? 0
+        : delayForProbe(i, sanitizedProbes.length, maxStartDelay)
+    setTimeout(() => {
+      const interval = loopProbe(
+        probe,
+        notifications ?? [],
+        repeats ?? 0,
+        verboseLogs
+      )
+      intervals.push(interval)
+    }, delay)
   }
 
   const abort = () => {
