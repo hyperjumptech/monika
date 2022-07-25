@@ -106,9 +106,7 @@ export const LayoutDocs = (props) => {
               <div className="flex relative">
                 {!isMobile && (
                   <Sidebar fixed>
-                    <div className="mt-8 ">
-                      <SidebarRoutes routes={routes} />
-                    </div>
+                    <SidebarRoutes routes={routes} />
                   </Sidebar>
                 )}
 
@@ -133,9 +131,7 @@ export const LayoutDocs = (props) => {
                   />
                 </div>
                 <Sidebar fixed>
-                  <div className="mt-8 ">
-                    <NavIndex props={props} />
-                  </div>
+                  <NavIndex props={props} />
                 </Sidebar>
               </div>
             </div>
