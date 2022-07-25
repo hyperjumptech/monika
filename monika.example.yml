@@ -188,3 +188,5 @@ db_limit:
   max_db_size: 1000000000
   deleted_data: 1
   cron_schedule: '*/1 * * * *'
+
+# status-notification: 0 6 * * *

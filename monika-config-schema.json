@@ -785,6 +785,11 @@
         }
       },
       "required": ["max_db_size", "deleted_data", "cron_schedule"]
+    },
+    "status-notification": {
+      "type": "string",
+      "description": "Set to periodically send status notifications. To disable set to false.",
+      "default": "0 6 * * *"
     }
   },
   "type": "object"
