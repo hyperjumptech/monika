@@ -263,6 +263,14 @@ When there are many probes, Monika by default will not start the probing all at 
 monika --max-start-delay 300000 # this will set max-start-delay to 5 minutes.
 ```
 
+## Follow Redirects
+
+By default Monika will follow redirects once. You can set the value of `--follow-redirects` flag to tell Monika to follow redirects as many as you want. If you don't want to follow redirects, set the value to zero.
+
+```bash
+monika --follow-redirects 0 # disable following redirects
+```
+
 ## STUN
 
 By default monika will continuously check the [STUN](https://en.wikipedia.org/wiki/STUN) server in 20 second intervals. You can specify the number of intervals using the `-s` or `--stun` flags followed by a number in seconds. For example to set the interval to 10 seconds type the command below:
