@@ -172,7 +172,6 @@ function loopProbe(
   return probeInterval
 }
 
-// const BATCH_SIZE = 100
 const delayForProbe = (
   index: number,
   totalProbes: number,
