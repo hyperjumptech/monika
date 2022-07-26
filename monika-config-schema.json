@@ -789,7 +789,7 @@
     "status-notification": {
       "type": "string",
       "title": "Status notification",
-      "description": "Sends status notification periodically according to a cron schedule. To disable set to false.",
+      "description": "Sends status notification periodically according to a cron schedule. Set to false to disable.",
       "default": "0 6 * * *"
     }
   },
