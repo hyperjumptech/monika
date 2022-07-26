@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.0] - 2022-07-26
+
+## Added
+
+- Add max-start-delay flag to prevent probes from starting at the same time (#817)
+- Add follow-redirects flag (#819)
+- Add status notification validation for JSON Schema (#816)
+
+## Updated
+
+- Docs: overview with list of features (#814)
+- Docs: timeout information in probes page (#806)
+- Docs: comments on all interval, timeout, and response time (#810)
+- Docs: configuration file page (#787)
+
+## Fixed
+
+- chaining body response (#792)
+- Docs: TOC obscured by header when scrolling down (#788) (#802)
+
 ## [1.9.3] - 2022-07-21
 
 ## Added
