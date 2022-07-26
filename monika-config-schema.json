@@ -49,7 +49,7 @@
           "timeout": {
             "title": "Timeout",
             "type": "integer",
-            "description": "Set the timeout for the request in seconds",
+            "description": "Set the timeout for the request in milliseconds",
             "default": 10
           },
           "saveBody": {
