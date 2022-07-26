@@ -24,7 +24,6 @@
 
 import Link from 'next/link'
 import { siteConfig } from 'siteConfig'
-import ButtonLink from 'components/ButtonLink'
 import MonikaSvg from '../../public/monika.svg'
 import { useState } from 'react'
 import { SearchBox } from './SearchBox'
@@ -32,7 +31,7 @@ import { SearchBox } from './SearchBox'
 export default function NavBar() {
   const [navbarOpen, setNavbarOpen] = useState(false)
   return (
-    <nav className="relative flex flex-wrap items-center bg-black-monika justify-between px-2 py-3">
+    <nav className="relative flex flex-wrap items-center bg-black-monika justify-between px-2 py-1">
       <div className="container px-4 mx-auto flex flex-wrap items-center justify-between">
         <div className="w-full relative flex justify-between lg:w-auto lg:static lg:block lg:justify-start">
           <div className="w-60 flex items-center h-16 pt-4 md:pt-0">
@@ -117,8 +116,8 @@ export default function NavBar() {
               </a>
             </li>
             <li className="nav-item">
-              <ButtonLink
-                className="ml-4 flex items-center leading-snug hover:opacity-75"
+              <a
+                className="ml-4 flex items-center leading-snug hover:opacity-75 px-4 py-1.5 bg-gradient-to-r from-purple-monika to-aqua-monika rounded-full font-sans text-white"
                 href={siteConfig.repoUrl}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -135,7 +134,7 @@ export default function NavBar() {
                   />
                 </svg>{' '}
                 Github
-              </ButtonLink>
+              </a>
             </li>
           </ul>
         </div>

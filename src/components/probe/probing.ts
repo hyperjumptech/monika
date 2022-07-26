@@ -29,16 +29,28 @@ import YAML from 'yaml'
 import { ProbeRequestResponse, RequestConfig } from '../../interfaces/request'
 import * as qs from 'querystring'
 import { sendPing, PING_TIMEDOUT } from '../../utils/ping'
+import http from 'http'
+import https from 'https'
+
+// Keep the agenst alive to reduce the overhead of DNS queries and creating TCP connection.
+// More information here: https://rakshanshetty.in/nodejs-http-keep-alive/
+const httpAgent = new http.Agent({ keepAlive: true })
+const httpsAgent = new https.Agent({ keepAlive: true })
+
+// Create an instance of axios here so it will be reused instead of creating a new one all the time.
+const axiosInstance = axios.create()
 
 /**
  * probing() is the heart of monika requests generation
  * @param {obj} requestConfig is a config object
  * @param {array} responses an array of previous responses
+ * @param {number} followRedirects number of times monika should follow redirects
  * @returns ProbeRequestResponse, response to the probe request
  */
 export async function probing(
   requestConfig: Omit<RequestConfig, 'saveBody' | 'alert'>,
-  responses: Array<ProbeRequestResponse>
+  responses: Array<ProbeRequestResponse>,
+  followRedirects: number
 ): Promise<ProbeRequestResponse> {
   // Compile URL using handlebars to render URLs that uses previous responses data
   const { method, url, headers, timeout, body, ping } = requestConfig
@@ -124,7 +136,6 @@ export async function probing(
     }
   }
 
-  const axiosInstance = axios.create()
   const requestStartedAt = Date.now()
 
   try {
@@ -161,6 +172,9 @@ export async function probing(
       ...newReq,
       url: renderedURL,
       data: newReq.body,
+      maxRedirects: followRedirects,
+      httpAgent,
+      httpsAgent,
     })
 
     const responseTime = Date.now() - requestStartedAt

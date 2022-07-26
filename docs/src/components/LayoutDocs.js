@@ -102,7 +102,7 @@ export const LayoutDocs = (props) => {
         />
         <div className="block">
           <>
-            <div className="container mx-auto pb-12 pt-6 content">
+            <div className="container mx-auto pb-6 content">
               <div className="flex relative">
                 {!isMobile && (
                   <Sidebar fixed>
@@ -112,7 +112,7 @@ export const LayoutDocs = (props) => {
 
                 <div className={s['markdown'] + ' w-full docs pr-5'}>
                   <NavIndex props={props} forMedium="true" />
-                  <div className="flex">
+                  <div className="flex mt-8">
                     <h1 id="_top" className="mr-auto">
                       {props.meta.title}
                     </h1>{' '}
@@ -130,8 +130,9 @@ export const LayoutDocs = (props) => {
                     nextRoute={nextRoute}
                   />
                 </div>
-
-                <NavIndex props={props} />
+                <Sidebar fixed>
+                  <NavIndex props={props} />
+                </Sidebar>
               </div>
             </div>
           </>

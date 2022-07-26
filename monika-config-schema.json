@@ -849,6 +849,12 @@
         }
       },
       "required": ["max_db_size", "deleted_data", "cron_schedule"]
+    },
+    "status-notification": {
+      "type": "string",
+      "title": "Status notification",
+      "description": "Sends status notification periodically according to a cron schedule. Set to false to disable.",
+      "default": "0 6 * * *"
     }
   },
   "type": "object"

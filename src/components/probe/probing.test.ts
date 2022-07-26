@@ -94,7 +94,7 @@ describe('Probing', () => {
         for (let j = 0; j < requests.length; j++) {
           try {
             // eslint-disable-next-line no-await-in-loop
-            const resp = await probing(requests[j], responses)
+            const resp = await probing(requests[j], responses, 0)
             responses.push(resp)
             if (j !== 0) {
               results.push({
@@ -131,7 +131,7 @@ describe('Probing', () => {
         timeout: 10,
       }
 
-      const result = await probing(request, [])
+      const result = await probing(request, [], 0)
       expect(result.status).to.be.equals(200)
     })
 
@@ -163,7 +163,7 @@ describe('Probing', () => {
 
       // act
       server.listen()
-      const res = await probing(request, [])
+      const res = await probing(request, [], 0)
       server.close()
 
       // assert
@@ -199,7 +199,7 @@ describe('Probing', () => {
 
       // act
       server.listen()
-      const res = await probing(request, [])
+      const res = await probing(request, [], 0)
       server.close()
 
       // assert
@@ -235,7 +235,7 @@ describe('Probing', () => {
 
       // act
       server.listen()
-      const res = await probing(request, [])
+      const res = await probing(request, [], 0)
       server.close()
 
       // assert
@@ -272,7 +272,7 @@ describe('Probing', () => {
 
       // act
       server.listen()
-      const res = await probing(request, [])
+      const res = await probing(request, [], 0)
       server.close()
 
       // assert
