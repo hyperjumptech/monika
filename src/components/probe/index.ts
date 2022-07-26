@@ -134,13 +134,15 @@ async function checkThresholdsAndSendAlert(
  * @param {object} probe contains all the probes
  * @param {array} notifications contains all the notifications
  * @param {boolean} verboseLogs flag for log verbosity
+ * @param {number} followRedirects number of times monika should follow redirects
  * @returns {Promise<void>} void
  */
 export async function doProbe(
   checkOrder: number,
   probe: Probe,
   notifications: Notification[],
-  verboseLogs: boolean
+  verboseLogs: boolean,
+  followRedirects: number
 ): Promise<void> {
   const eventEmitter = getEventEmitter()
   const responses = []
@@ -185,7 +187,11 @@ export async function doProbe(
     try {
       // intentionally wait for a request to finish before processing next request in loop
       // eslint-disable-next-line no-await-in-loop
-      const probeRes: ProbeRequestResponse = await probing(request, responses)
+      const probeRes: ProbeRequestResponse = await probing(
+        request,
+        responses,
+        followRedirects
+      )
 
       logResponseTime(probeRes.responseTime)
 

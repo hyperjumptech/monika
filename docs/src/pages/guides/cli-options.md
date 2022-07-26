@@ -255,6 +255,14 @@ You can combine this flag with the `--id` flag to repeat custom sequences.
 monika -r 3 -i 1,3,1
 ```
 
+## Follow Redirects
+
+By default Monika will follow redirects once. You can set the value of `--follow-redirects` flag to tell Monika to follow redirects as many as you want. If you don't want to follow redirects, set the value to zero.
+
+```bash
+monika --follow-redirects 0 # disable following redirects
+```
+
 ## STUN
 
 By default monika will continuously check the [STUN](https://en.wikipedia.org/wiki/STUN) server in 20 second intervals. You can specify the number of intervals using the `-s` or `--stun` flags followed by a number in seconds. For example to set the interval to 10 seconds type the command below:
