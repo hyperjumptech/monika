@@ -230,17 +230,23 @@ class Monika extends Command {
     }),
 
     'status-notification': Flags.string({
-      description: 'cron syntax for status notification schedule',
+      description: 'Cron syntax for status notification schedule',
     }),
 
     'keep-verbose-logs': Flags.boolean({
-      description: 'store all requests logs to database',
+      description: 'Store all requests logs to database',
       default: false,
     }),
 
     'auto-update': Flags.string({
       description:
         'Enable auto-update for Monika. Available options: major, minor, patch. This will make Monika terminate itself on successful update but does not restart',
+    }),
+
+    'follow-redirects': Flags.integer({
+      default: 1,
+      description:
+        'Monika will follow redirects as many times as the specified value here. By default, Monika will follow redirects once. To disable redirects following, set the value to zero.',
     }),
   }
 
@@ -416,7 +422,8 @@ class Monika extends Command {
           sanitizedProbe,
           config.notifications ?? [],
           Number(_flags.repeat),
-          verboseLogs
+          verboseLogs,
+          Number(_flags['follow-redirects'])
         )
       }
     } catch (error) {

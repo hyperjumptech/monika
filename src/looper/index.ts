@@ -149,7 +149,8 @@ function loopProbe(
   probe: Probe,
   notifications: Notification[],
   repeats: number,
-  verboseLogs: boolean
+  verboseLogs: boolean,
+  followRedirects: number
 ) {
   let counter = 0
 
@@ -160,7 +161,7 @@ function loopProbe(
       clearInterval(checkSTUNinterval)
       process.kill(process.pid, 'SIGINT')
     } else if (isConnectedToSTUNServer && !isPaused) {
-      doProbe(++counter, probe, notifications, verboseLogs)
+      doProbe(++counter, probe, notifications, verboseLogs, followRedirects)
     }
   }, (probe.interval ?? 10) * MILLISECONDS)
 
@@ -184,14 +185,16 @@ export function idFeeder(
   sanitizedProbes: Probe[],
   notifications: Notification[],
   repeats: number,
-  verboseLogs: boolean
+  verboseLogs: boolean,
+  followRedirects: number
 ): any {
   for (const probe of sanitizedProbes) {
     const interval = loopProbe(
       probe,
       notifications ?? [],
       repeats ?? 0,
-      verboseLogs
+      verboseLogs,
+      followRedirects
     )
     intervals.push(interval)
   }
