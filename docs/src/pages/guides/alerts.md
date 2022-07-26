@@ -7,12 +7,14 @@ Alerts are the types of conditions that will trigger Monika to send notification
 
 ```yaml
 probes:
-  id: '1'
-  name: Name of the probe
-  requests:
-    - alerts:
-        - query: response.size >= 10000
-          message: Response size is {{ response.size }}, expecting less than 10000
+  - id: '1'
+    name: Name of the probe
+    requests:
+      - method: GET
+        url: https://github.com
+        alerts:
+          - query: response.size >= 10000
+            message: Response size is {{ response.size }}, expecting less than 10000
 ```
 
 You can define two types of alerts: **request alerts** and **probe alerts**
@@ -23,19 +25,19 @@ Request alerts are `alerts` configurations that are scoped under the `requests` 
 
 ```yaml
 probes:
-  id: '1'
-  name: Name of the probe
-  requests:
-    - method: GET
-      url: https://github.com
-      alerts:
-        - query: response.status != 200
-          message: Status not 2xx # (This alert is only triggered for the github.com request)
-    - method: GET
-      url: https://gitlab.com
-      alerts:
-        - query: response.status != 200
-          message: Status not 2xx # (This alert is only triggered for the gitlab.com request)
+  - id: '1'
+    name: Name of the probe
+    requests:
+      - method: GET
+        url: https://github.com
+        alerts:
+          - query: response.status != 200
+            message: Status not 2xx # (This alert is only triggered for the github.com request)
+      - method: GET
+        url: https://gitlab.com
+        alerts:
+          - query: response.status != 200
+            message: Status not 2xx # (This alert is only triggered for the gitlab.com request)
 ```
 
 ## Probe Alerts
@@ -44,22 +46,22 @@ Probe alerts are `alerts` configurations that are defined under the `probe` key.
 
 ```yaml
 probes:
-  id: '1'
-  name: Name of the probe
-  requests:
-    - method: GET
-      url: https://github.com
-      alerts:
-        - query: response.status != 200
-          message: Status not 2xx # (This alert is only triggered for the github.com request)
-    - method: GET
-      url: https://gitlab.com
-      alerts:
-        - query: response.status != 200
-          message: Status not 2xx # (This alert is only triggered for the gitlab.com request)
-  alerts:
-    - query: response.time > 10000 # in milliseconds
-      message: Response time is longer than 10 seconds # (This alert is triggered for all request)
+  - id: '1'
+    name: Name of the probe
+    requests:
+      - method: GET
+        url: https://github.com
+        alerts:
+          - query: response.status != 200
+            message: Status not 2xx # (This alert is only triggered for the github.com request)
+      - method: GET
+        url: https://gitlab.com
+        alerts:
+          - query: response.status != 200
+            message: Status not 2xx # (This alert is only triggered for the gitlab.com request)
+    alerts:
+      - query: response.time > 10000 # in milliseconds
+        message: Response time is longer than 10 seconds # (This alert is triggered for all request)
 ```
 
 ## Alert Timing
