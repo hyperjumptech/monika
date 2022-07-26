@@ -29,6 +29,14 @@ import YAML from 'yaml'
 import { ProbeRequestResponse, RequestConfig } from '../../interfaces/request'
 import * as qs from 'querystring'
 import { sendPing, PING_TIMEDOUT } from '../../utils/ping'
+import http from 'http'
+import https from 'https'
+
+// Keep the agenst alive to reduce the overhead of DNS queries and creating TCP connection.
+// More information here: https://rakshanshetty.in/nodejs-http-keep-alive/
+const httpAgent = new http.Agent({ keepAlive: true })
+const httpsAgent = new https.Agent({ keepAlive: true })
+const axiosInstance = axios.create()
 
 /**
  * probing() is the heart of monika requests generation
@@ -124,7 +132,6 @@ export async function probing(
     }
   }
 
-  const axiosInstance = axios.create()
   const requestStartedAt = Date.now()
 
   try {
@@ -161,6 +168,9 @@ export async function probing(
       ...newReq,
       url: renderedURL,
       data: newReq.body,
+      maxRedirects: 0,
+      httpAgent,
+      httpsAgent,
     })
 
     const responseTime = Date.now() - requestStartedAt
