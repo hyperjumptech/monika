@@ -324,9 +324,8 @@ export const validateConfig = (configuration: Config): Validation => {
     const timeouts = requests.map((req) => req.timeout)
     const totalTimeout = timeouts.reduce((a, b) => a + b)
     const totalTimeoutSeconds = totalTimeout / 1000
-    const intervalMs = interval * 1000
 
-    if (totalTimeout < intervalMs) {
+    if (totalTimeoutSeconds > interval) {
       return setInvalidResponse(
         `The interval in the probe with name "${name}" should be greater than the total timeout value of all requests in this probe (${totalTimeoutSeconds} seconds). Current interval value is ${interval} seconds but the expected value is greater than ${totalTimeoutSeconds} seconds.`
       )
