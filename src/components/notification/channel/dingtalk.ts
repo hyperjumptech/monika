@@ -60,7 +60,7 @@ Number of Probes: ${message.meta.numberOfProbes}\n
 Maximum Response Time: ${message.meta.maxResponseTime} ms in the last ${
           message.meta.responseTimelogLifeTimeInHour
         } hours\n
-Minimum Response Time: ${message.meta.maxResponseTime} ms in the last ${
+Minimum Response Time: ${message.meta.minResponseTime} ms in the last ${
           message.meta.responseTimelogLifeTimeInHour
         } hours\n
 Average Response Time: ${message.meta.averageResponseTime} ms in the last ${
