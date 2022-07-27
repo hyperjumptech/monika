@@ -178,7 +178,7 @@ export const sendGoogleChat = async (
                   },
                   {
                     textParagraph: {
-                      text: `<b>Minimum Response Time:</b> ${message.meta.maxResponseTime} ms in the last ${message.meta.responseTimelogLifeTimeInHour} hours`,
+                      text: `<b>Minimum Response Time:</b> ${message.meta.minResponseTime} ms in the last ${message.meta.responseTimelogLifeTimeInHour} hours`,
                     },
                   },
                   {
