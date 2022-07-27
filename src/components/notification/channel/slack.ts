@@ -140,7 +140,7 @@ export const sendSlack = async (
             type: 'section',
             text: {
               type: 'mrkdwn',
-              text: `*Minimum Response Time*: ${message.meta.maxResponseTime} ms in the last ${message.meta.responseTimelogLifeTimeInHour} hours`,
+              text: `*Minimum Response Time*: ${message.meta.minResponseTime} ms in the last ${message.meta.responseTimelogLifeTimeInHour} hours`,
             },
           },
           {
