@@ -304,12 +304,12 @@ export const validateConfig = (configuration: Config): Validation => {
   }
 
   // Validate probes
-  if ((configuration?.probes?.length ?? 0) === 0) return NO_PROBES
+  if ((probes?.length ?? 0) === 0) return NO_PROBES
 
   // Check probes properties
   for (const probe of probes) {
-    const { alerts = [], requests, socket } = probe
-    const socketAlerts = probe.socket?.alerts ?? []
+    const { name, interval, alerts = [], requests, socket } = probe
+    const socketAlerts = socket?.alerts ?? []
     const tcpConfigError = validateTCPConfig(socket)
 
     if (tcpConfigError) {
@@ -319,6 +319,25 @@ export const validateConfig = (configuration: Config): Validation => {
     }
 
     if ((!socket && (requests?.length ?? 0)) === 0) return PROBE_NO_REQUESTS
+
+    // Validate Interval
+    const timeouts = requests.map((req) => req.timeout ?? 10_000)
+    const totalTimeout = timeouts.reduce((a, b) => a + b)
+    const totalTimeoutSeconds = totalTimeout / 1000
+
+    if (interval) {
+      const intervalMs = interval * 1000
+
+      if (intervalMs < totalTimeout) {
+        return setInvalidResponse(
+          `The interval in the probe with name "${name}" should be greater than the total timeout value of all requests in this probe (${totalTimeoutSeconds} seconds). Current interval value is ${interval} seconds but the expected value is greater than ${totalTimeoutSeconds} seconds.`
+        )
+      }
+    } else {
+      return setInvalidResponse(
+        `The total timeout values of all requests in the probe with name "${name}" should be less than 10 seconds. Current interval value is 10 seconds (default value) but the timeout values of this probe is ${totalTimeout} seconds. To fix this, define the interval value to be greater than ${totalTimeoutSeconds} seconds or reduce the timeout values of each requests so that the sum of all timeout is less than 10 seconds.`
+      )
+    }
 
     // Check probe request properties
     if (requests?.length > 0) {
