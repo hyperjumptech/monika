@@ -25,10 +25,10 @@ jobs:
         id: cpr
         uses: peter-evans/create-pull-request@v4
         with:         
-          token: ${{ secrets.AUTO-PR-TOKEN }}
+          token: ${{ secrets.AUTO_PR_TOKEN }}
           
           commit-message: Updating to latest monika-config-schema 
-          committer: GitHub <noreply@github.com>
+          committer: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
           author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
           base: main
           branch: feat/Update-monika-schema          
