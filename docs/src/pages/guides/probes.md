@@ -13,14 +13,16 @@ probes:
     description: Probe to check GET time
     interval: 10 # in seconds
     requests:
-      - {}
+      - method: GET
+        url: https://github.com
     alerts: []
   - id: '2'
     name: Name of the probe 2
     description: Probe to check GET health
     interval: 10 # in seconds
     requests:
-      - {}
+      - method: GET
+        url: https://github.com
     alerts: []
 ```
 
@@ -29,28 +31,29 @@ Basically probes are arranged as arrays of request objects.
 ## HTTP Request Anatomy
 
 ```yaml
-  probes: [
-    id: '1'
+probes:
+  - id: '1'
     name: 'Example: get Time'
     description: Probe
     interval: 10 # in seconds
     requests:
-    - method: POST
-      url: https://mybackend.org/user/login
-      timeout: 7000 # in milliseconds
-      saveBody: true
-      headers:
-        Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkhlbGxvIGZyb20gSHlwZXJqdW1wIiwiaWF0IjoxNTE2MjM5MDIyfQ.T2SbP1G39CMD4MMfkOZYGFgNIQgNkyi0sPdiFi_DfVA
-      body:
-        username: someusername
-        password: somepassword
-      alerts: ARRAY-HERE
+      - method: POST
+        url: https://mybackend.org/user/login
+        timeout: 7000 # in milliseconds
+        saveBody: true
+        headers:
+          Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkhlbGxvIGZyb20gSHlwZXJqdW1wIiwiaWF0IjoxNTE2MjM5MDIyfQ.T2SbP1G39CMD4MMfkOZYGFgNIQgNkyi0sPdiFi_DfVA
+        body:
+          username: someusername
+          password: somepassword
+        alerts:
+          - query: response.status != 200
+            message: Status not 2xx
     incidentThreshold: 3
     recoveryThreshold: 3
     alerts:
-    - query: response.status != 200
-      message: HTTP response status is {{ response.status }}, expecting 200
-  ]
+      - query: response.status != 200
+        message: HTTP response status is {{ response.status }}, expecting 200
 ```
 
 Details of the field are given in the table below.
