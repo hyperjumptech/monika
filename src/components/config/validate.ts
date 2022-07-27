@@ -291,11 +291,11 @@ const isValidProbeAlert = (alert: ProbeAlert | string): boolean => {
 }
 
 export const validateConfig = (configuration: Config): Validation => {
-  const { notifications, probes, symon } = configuration
+  const { notifications = [], probes = [], symon } = configuration
   const symonConfigError = validateSymonConfig(symon)
 
   // validate notification
-  if (notifications && notifications.length > 0) {
+  if (notifications.length > 0) {
     const validateValue = validateNotification(notifications)
 
     if (validateValue !== VALID_CONFIG) {
@@ -304,7 +304,7 @@ export const validateConfig = (configuration: Config): Validation => {
   }
 
   // Validate probes
-  if ((probes?.length ?? 0) === 0) return NO_PROBES
+  if (probes.length === 0) return NO_PROBES
 
   // Check probes properties
   for (const probe of probes) {
@@ -321,21 +321,14 @@ export const validateConfig = (configuration: Config): Validation => {
     if ((!socket && (requests?.length ?? 0)) === 0) return PROBE_NO_REQUESTS
 
     // Validate Interval
-    const timeouts = requests.map((req) => req.timeout ?? 10_000)
+    const timeouts = requests.map((req) => req.timeout)
     const totalTimeout = timeouts.reduce((a, b) => a + b)
     const totalTimeoutSeconds = totalTimeout / 1000
+    const intervalMs = interval * 1000
 
-    if (interval) {
-      const intervalMs = interval * 1000
-
-      if (intervalMs < totalTimeout) {
-        return setInvalidResponse(
-          `The interval in the probe with name "${name}" should be greater than the total timeout value of all requests in this probe (${totalTimeoutSeconds} seconds). Current interval value is ${interval} seconds but the expected value is greater than ${totalTimeoutSeconds} seconds.`
-        )
-      }
-    } else {
+    if (totalTimeout < intervalMs) {
       return setInvalidResponse(
-        `The total timeout values of all requests in the probe with name "${name}" should be less than 10 seconds. Current interval value is 10 seconds (default value) but the timeout values of this probe is ${totalTimeout} seconds. To fix this, define the interval value to be greater than ${totalTimeoutSeconds} seconds or reduce the timeout values of each requests so that the sum of all timeout is less than 10 seconds.`
+        `The interval in the probe with name "${name}" should be greater than the total timeout value of all requests in this probe (${totalTimeoutSeconds} seconds). Current interval value is ${interval} seconds but the expected value is greater than ${totalTimeoutSeconds} seconds.`
       )
     }
 

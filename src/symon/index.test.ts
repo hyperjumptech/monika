@@ -126,6 +126,7 @@ describe('Symon initiate', () => {
         {
           id: '1',
           name: 'test',
+          interval: 10,
           requests: [],
           incidentThreshold: 5,
           recoveryThreshold: 5,

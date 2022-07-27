@@ -164,7 +164,19 @@ const parseConfigType = async (
     watchConfigFile(source, configType, index, flags.repeat)
   }
 
-  return parseConfig(source, configType)
+  const parsed = await parseConfig(source, configType)
+
+  return {
+    ...parsed,
+    probes: parsed.probes?.map((probe) => ({
+      ...probe,
+      interval: probe?.interval || 10,
+      requests: probe?.requests?.map((request) => ({
+        ...request,
+        timeout: 10_000,
+      })),
+    })),
+  }
 }
 
 const parseDefaultConfig = async (flags: any): Promise<Partial<Config>[]> => {
