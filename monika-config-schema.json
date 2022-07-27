@@ -869,7 +869,7 @@
           "items": {
             "anyOf": [
               {
-                "$ref": "#/definitions/urlFormat"
+                "type": "string"
               },
               {
                 "type": "object",
@@ -877,7 +877,7 @@
                 "additionalProperties": false,
                 "properties": {
                   "domain": {
-                    "$ref": "#/definitions/urlFormat",
+                    "type": "string",
                     "description": "Hostname to check",
                     "examples": ["https://github.com"]
                   },
