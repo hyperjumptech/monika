@@ -49,8 +49,8 @@
           "timeout": {
             "title": "Timeout",
             "type": "integer",
-            "description": "Set the timeout for the request in milliseconds",
-            "default": 10
+            "description": "Set the timeout for the request in milliseconds, default is 10 seconds",
+            "default": 10000
           },
           "saveBody": {
             "title": "SaveBody",
