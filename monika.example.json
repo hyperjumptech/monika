@@ -4,7 +4,6 @@
       "id": "1",
       "name": "Probing Github",
       "description": "Multiple",
-      "interval": 10,
       "requests": [
         {
           "url": "https://github.com/",
