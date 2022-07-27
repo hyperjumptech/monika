@@ -169,12 +169,16 @@ const parseConfigType = async (
   return {
     ...parsed,
     probes: parsed.probes?.map((probe) => {
-      const requests = probe?.requests?.map((request) => ({
-        ...request,
-        timeout: 10_000,
-      }))
+      const requests =
+        probe?.requests?.map((request) => ({
+          ...request,
+          timeout: 10_000,
+        })) ?? []
 
-      const interval = probe?.interval || (requests?.length || 0) * 10 || 10
+      const interval =
+        probe?.interval || requests.length * 10 === 0
+          ? 10
+          : requests.length * 10
 
       return { ...probe, interval, requests }
     }),
