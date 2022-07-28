@@ -30,7 +30,7 @@ jobs:
           commit-message: Updating to latest monika-config-schema 
           committer: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
           author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
-          base: main
+          base: master
           branch: feat/Update-monika-schema          
 
           title: '[PR] Update monika config schema'
