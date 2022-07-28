@@ -60,7 +60,6 @@ notifications:
   - id: unique-id-webhook
     type: webhook
     data:
-      method: POST
       url: https://WEBHOOK_URL
 ```
 
@@ -104,11 +103,11 @@ Monika supports Facebook Workplace. To enable notification via Workplace, you mu
 
 ```yml
 notifications:
-  id: unique-workplace-id
-  type: workplace
-  data:
-    thread_id: abcd-123-456
-    access_token: your_custom_integration_access_token
+  - id: unique-workplace-id
+    type: workplace
+    data:
+      thread_id: abcd-123-456
+      access_token: your_custom_integration_access_token
 ```
 
 | Key         | Description                                     | Example                         |
@@ -234,8 +233,8 @@ notifications:
   - id: unique-id-pagerduty-notify
     type: pagerduty
     data:
-      - key: YOUR_PAGERDUTY_INTEGRATION_KEY
-        probeID: ZN32nw_KsvTKtLFNu55JV
+      key: YOUR_PAGERDUTY_INTEGRATION_KEY
+      probeID: ZN32nw_KsvTKtLFNu55JV
 ```
 
 | Key          | Description                  | Example                            |
@@ -400,10 +399,10 @@ Monika supports Dingtalk. To enable notification via Dingtalk, you must create a
 
 ```yml
 notifications:
-  id: unique-id-webhook
-  type: dingtalk
-  data:
-    access_token: YOUR_ACCESS_TOKEN
+  - id: unique-id-webhook
+    type: dingtalk
+    data:
+      access_token: YOUR_ACCESS_TOKEN
 ```
 
 | Key          | Description                        | Example        |
