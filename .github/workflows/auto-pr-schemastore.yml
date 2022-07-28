@@ -3,6 +3,8 @@ name: Auto PR to Schemastore/schemastore.git
 on:
   workflow_dispatch:
   push:
+    paths:
+      - 'monika-config-schema.json' # only run the workflow if the schema file is changed
     branches:
       - main
      
