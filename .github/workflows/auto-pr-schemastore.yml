@@ -1,0 +1,52 @@
+name: Auto PR to Schemastore/schemastore.git
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+     
+jobs:
+  create-auto-PR:
+    runs-on: ubuntu-latest
+    steps: 
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          repository: SchemaStore/schemastore.git
+      
+      - name: Update schema file
+        run: |
+          cd src/schemas/json
+          rm monika-config-schema.json
+          wget https://raw.githubusercontent.com/hyperjumptech/monika/main/monika-config-schema.json
+
+      - name: Create Pull Request
+        id: cpr
+        uses: peter-evans/create-pull-request@v4
+        with:         
+          token: ${{ secrets.AUTO_PR_TOKEN }}
+          
+          commit-message: Updating to latest monika-config-schema 
+          committer: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
+          author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
+          base: main
+          branch: feat/Update-monika-schema          
+
+          title: '[PR] Update monika config schema'
+          body: |
+            In this PR:
+            - Synced schema with latest version in github.com/hyperjumptech/monika/
+
+            - Auto-generated PR by [create-pull-request][1]
+            [1]: https://github.com/peter-evans/create-pull-request
+          
+          draft: false
+          delete-branch: true
+
+      - name: Check outputs
+        if: ${{ steps.cpr.outputs.pull-request-number }}
+        run: |
+          echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
+          echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
+
