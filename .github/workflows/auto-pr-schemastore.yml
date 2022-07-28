@@ -3,6 +3,8 @@ name: Auto PR to Schemastore/schemastore.git
 on:
   workflow_dispatch:
   push:
+    paths:
+      - 'monika-config-schema.json' # only run the workflow if the schema file is changed
     branches:
       - main
      
@@ -26,13 +28,12 @@ jobs:
         uses: peter-evans/create-pull-request@v4
         with:         
           token: ${{ secrets.AUTO_PR_TOKEN }}
-          
           commit-message: Updating to latest monika-config-schema 
           committer: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
           author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
           base: master
+          push-to-fork: hyperjumptech/schemastore
           branch: feat/Update-monika-schema          
-
           title: '[PR] Update monika config schema'
           body: |
             In this PR:
@@ -40,7 +41,6 @@ jobs:
 
             - Auto-generated PR by [create-pull-request][1]
             [1]: https://github.com/peter-evans/create-pull-request
-          
           draft: false
           delete-branch: true
 
