@@ -18,7 +18,7 @@ jobs:
       
       - name: Sync local fork 
         run: | 
-          git remote localfork git@github.com:hyperjumptech/schemastore.git  
+          git remote add localfork git@github.com:hyperjumptech/schemastore.git  
           git push localfork main        
       
       - name: Update schema file
