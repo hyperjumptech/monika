@@ -14,18 +14,21 @@ jobs:
     steps: 
       - uses: actions/checkout@v3
         with:
-          repository: SchemaStore/schemastore
+          repository: hyperjumptech/schemastore
+          token: ${{ secrets.AUTO_PR_TOKEN }}
+          ref: master          
       
       - name: Sync local fork 
-        run: | 
-          git remote add localfork git@github.com:hyperjumptech/schemastore.git  
-          git push localfork master        
+        run: |           
+          git remote add upstream https://github.com/SchemaStore/schemastore.git
+          git pull upstream master --ff-only
+          git push origin master        
       
       - name: Update schema file
         run: |
           cd src/schemas/json
           rm monika-config-schema.json
-          wget https://raw.githubusercontent.com/hyperjumptech/monika/main/monika-config-schema.json
+          wget https://raw.githubusercontent.com/hyperjumptech/monika/main/monika-config-schema.json          
 
       - name: Create Pull Request
         id: cpr
