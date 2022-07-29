@@ -14,8 +14,12 @@ jobs:
     steps: 
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 0
           repository: SchemaStore/schemastore
+      
+      - name: Sync local fork 
+        run: | 
+          git remote localfork git@github.com:hyperjumptech/schemastore.git  
+          git push localfork main        
       
       - name: Update schema file
         run: |
@@ -28,7 +32,7 @@ jobs:
         uses: peter-evans/create-pull-request@v4
         with:         
           token: ${{ secrets.AUTO_PR_TOKEN }}
-          commit-message: Updating to latest monika-config-schema 
+          commit-message: Update monika-config-schema 
           committer: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
           author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
           base: master
@@ -37,10 +41,9 @@ jobs:
           title: '[PR] Update monika config schema'
           body: |
             In this PR:
-            - Synced schema with latest version in github.com/hyperjumptech/monika/
+            - Update config json schema to improve suggestions
+            - Update keys, default values and fix typos
 
-            - Auto-generated PR by [create-pull-request][1]
-            [1]: https://github.com/peter-evans/create-pull-request
           draft: false
           delete-branch: true
 
