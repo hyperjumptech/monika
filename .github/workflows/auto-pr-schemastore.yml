@@ -4,44 +4,44 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - 'monika-config-schema.json' # only run the workflow if the schema file is changed
+      - "monika-config-schema.json" # only run the workflow if the schema file is changed
     branches:
       - main
-     
+
 jobs:
   create-auto-PR:
     runs-on: ubuntu-latest
-    steps: 
+    steps:
       - uses: actions/checkout@v3
         with:
           repository: hyperjumptech/schemastore
           token: ${{ secrets.AUTO_PR_TOKEN }}
-          ref: master          
-      
-      - name: Sync local fork 
-        run: |           
+          ref: master
+
+      - name: Sync local fork
+        run: |
           git remote add upstream https://github.com/SchemaStore/schemastore.git
           git pull upstream master --ff-only
-          git push origin master        
-      
+          git push origin master
+
       - name: Update schema file
         run: |
           cd src/schemas/json
           rm monika-config-schema.json
-          wget https://raw.githubusercontent.com/hyperjumptech/monika/main/monika-config-schema.json          
+          wget https://raw.githubusercontent.com/hyperjumptech/monika/main/monika-config-schema.json
 
       - name: Create Pull Request
         id: cpr
         uses: peter-evans/create-pull-request@v4
-        with:         
+        with:
           token: ${{ secrets.AUTO_PR_TOKEN }}
-          commit-message: Update monika-config-schema 
+          commit-message: Update monika-config-schema
           committer: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
           author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
           base: master
           push-to-fork: hyperjumptech/schemastore
-          branch: feat/Update-monika-schema          
-          title: '[PR] Update monika config schema'
+          branch: feat/Update-monika-schema
+          title: "[PR] Update monika config schema"
           body: |
             In this PR:
             - Update config json schema to improve suggestions
@@ -55,4 +55,3 @@ jobs:
         run: |
           echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
           echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
-
