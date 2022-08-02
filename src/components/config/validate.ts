@@ -321,8 +321,21 @@ export const validateConfig = (configuration: Config): Validation => {
     if ((!socket && (requests?.length ?? 0)) === 0) return PROBE_NO_REQUESTS
 
     // Validate Interval
-    const timeouts = requests.map((req) => req.timeout)
-    const totalTimeout = timeouts.reduce((a, b) => a + b)
+    if (interval <= 0) {
+      return setInvalidResponse(
+        `The interval in the probe with name "${name}" should be greater than 0.`
+      )
+    }
+
+    for (const req of requests) {
+      if (req.timeout <= 0) {
+        return setInvalidResponse(
+          `The timeout in the request with id "${req.id}" should be greater than 0.`
+        )
+      }
+    }
+
+    const totalTimeout = requests.reduce((prev, curr) => prev + curr.timeout, 0)
     const totalTimeoutSeconds = totalTimeout / 1000
 
     if (totalTimeoutSeconds > interval) {
