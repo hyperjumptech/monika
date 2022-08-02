@@ -10,7 +10,7 @@ probes:
   - id: '1'
     name: Example
     description: Probe
-    interval: 0
+    interval: 10
     requests:
       - method: POST
         url: https://something/login
