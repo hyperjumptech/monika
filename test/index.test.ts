@@ -48,17 +48,6 @@ describe('monika', () => {
   })
 
   test
-    .stdout()
-    .do(() =>
-      cmd.run(['--config', resolve('./test/testConfigs/noInterval.yml')])
-    )
-    .catch((error) => {
-      expect(error.message).to.contain(
-        'The total timeout values of all requests in the probe with name "Example" should be less than 10 seconds. Current interval value is 10 seconds (default value) but the timeout values of this probe is 10000 seconds. To fix this, define the interval value to be greater than 10 seconds or reduce the timeout values of each requests so that the sum of all timeout is less than 10 seconds.'
-      )
-    })
-
-  test
     .stderr()
     .do(() =>
       cmd.run([
@@ -71,7 +60,7 @@ describe('monika', () => {
     })
     .it('runs with config with invalid notification type')
 
-  // Probes Test
+  // Probes Test`
   test
     .stderr()
     .do(() =>

@@ -175,12 +175,14 @@ const parseConfigType = async (
           timeout: 10_000,
         })) ?? []
 
-      const interval =
-        probe?.interval || requests.length * 10 === 0
-          ? 10
-          : requests.length * 10
+      const interval = () => {
+        if (probe?.interval) return probe.interval
+        if (requests.length * 10 === 0) return 10
 
-      return { ...probe, interval, requests }
+        return requests.length * 10
+      }
+
+      return { ...probe, interval: interval(), requests }
     }),
   }
 }
