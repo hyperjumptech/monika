@@ -3,116 +3,116 @@
 
 <url>
     <loc>https://monika.hyperjump.tech/articles</loc>
-    <lastmod>2022-07-27T09:16:26.066Z</lastmod>
+    <lastmod>2022-08-03T09:16:14.713Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
 </url>
 
 <url>
     <loc>https://monika.hyperjump.tech/index</loc>
-    <lastmod>2022-07-27T09:16:26.066Z</lastmod>
+    <lastmod>2022-08-03T09:16:14.713Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
 </url>
 <url>
     <loc>https://monika.hyperjump.tech/overview</loc>
-    <lastmod>2022-07-27T09:16:26.066Z</lastmod>
+    <lastmod>2022-08-03T09:16:14.713Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
 </url>
 <url>
     <loc>https://monika.hyperjump.tech/quick-start</loc>
-    <lastmod>2022-07-27T09:16:26.066Z</lastmod>
+    <lastmod>2022-08-03T09:16:14.713Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
 </url>
 <url>
     <loc>https://monika.hyperjump.tech/deployment/deploy-to-fly-io</loc>
-    <lastmod>2022-07-27T09:16:26.066Z</lastmod>
+    <lastmod>2022-08-03T09:16:14.713Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
 </url>
 <url>
     <loc>https://monika.hyperjump.tech/guides/alerts</loc>
-    <lastmod>2022-07-27T09:16:26.066Z</lastmod>
+    <lastmod>2022-08-03T09:16:14.713Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
 </url>
 <url>
     <loc>https://monika.hyperjump.tech/guides/cli-options</loc>
-    <lastmod>2022-07-27T09:16:26.066Z</lastmod>
+    <lastmod>2022-08-03T09:16:14.713Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
 </url>
 <url>
     <loc>https://monika.hyperjump.tech/guides/configuration-file</loc>
-    <lastmod>2022-07-27T09:16:26.066Z</lastmod>
+    <lastmod>2022-08-03T09:16:14.713Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
 </url>
 <url>
     <loc>https://monika.hyperjump.tech/guides/examples</loc>
-    <lastmod>2022-07-27T09:16:26.066Z</lastmod>
+    <lastmod>2022-08-03T09:16:14.713Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
 </url>
 <url>
     <loc>https://monika.hyperjump.tech/guides/new-notifications</loc>
-    <lastmod>2022-07-27T09:16:26.066Z</lastmod>
+    <lastmod>2022-08-03T09:16:14.713Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
 </url>
 <url>
     <loc>https://monika.hyperjump.tech/guides/notifications</loc>
-    <lastmod>2022-07-27T09:16:26.066Z</lastmod>
+    <lastmod>2022-08-03T09:16:14.713Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
 </url>
 <url>
     <loc>https://monika.hyperjump.tech/guides/probes</loc>
-    <lastmod>2022-07-27T09:16:26.066Z</lastmod>
+    <lastmod>2022-08-03T09:16:14.713Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
 </url>
 <url>
     <loc>https://monika.hyperjump.tech/guides/status-notification</loc>
-    <lastmod>2022-07-27T09:16:26.066Z</lastmod>
+    <lastmod>2022-08-03T09:16:14.713Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
 </url>
 <url>
     <loc>https://monika.hyperjump.tech/guides/tls-checkers</loc>
-    <lastmod>2022-07-27T09:16:26.066Z</lastmod>
+    <lastmod>2022-08-03T09:16:14.713Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
 </url>
 <url>
     <loc>https://monika.hyperjump.tech/guides/troubleshoot</loc>
-    <lastmod>2022-07-27T09:16:26.066Z</lastmod>
+    <lastmod>2022-08-03T09:16:14.713Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
 </url>
 <url>
     <loc>https://monika.hyperjump.tech/tutorial/run-in-background</loc>
-    <lastmod>2022-07-27T09:16:26.066Z</lastmod>
+    <lastmod>2022-08-03T09:16:14.713Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
 </url>
 <url>
     <loc>https://monika.hyperjump.tech/tutorial/run-in-docker</loc>
-    <lastmod>2022-07-27T09:16:26.066Z</lastmod>
+    <lastmod>2022-08-03T09:16:14.713Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
 </url>
 <url>
     <loc>https://monika.hyperjump.tech/tutorial/run-in-raspberry-pi</loc>
-    <lastmod>2022-07-27T09:16:26.066Z</lastmod>
+    <lastmod>2022-08-03T09:16:14.713Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
 </url>
 <url>
     <loc>https://monika.hyperjump.tech/tutorial/run-with-gmail-notification</loc>
-    <lastmod>2022-07-27T09:16:26.066Z</lastmod>
+    <lastmod>2022-08-03T09:16:14.713Z</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
 </url>
