@@ -1,0 +1,62 @@
+# This worklofw will trigger on a push to main when the file "monika-config-schema.json" is updated
+# 1. Checkout the schemastore fork
+# 2. Refresh it from upstream
+# 3. Create a PR for the json update
+
+name: Auto PR to Schemastore/schemastore.git
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "monika-config-schema.json" # only run the workflow if the schema file is changed
+    branches:
+      - main
+
+jobs:
+  create-auto-PR:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: hyperjumptech/schemastore
+          token: ${{ secrets.AUTO_PR_TOKEN }}
+          ref: master
+
+      - name: Sync local fork
+        run: |
+          git remote add upstream https://github.com/SchemaStore/schemastore.git
+          git pull upstream master --ff-only
+          git push origin master
+
+      - name: Update schema file
+        run: |
+          cd src/schemas/json
+          rm monika-config-schema.json
+          wget https://raw.githubusercontent.com/hyperjumptech/monika/main/monika-config-schema.json
+
+      - name: Create Pull Request
+        id: cpr
+        uses: peter-evans/create-pull-request@v4
+        with:
+          token: ${{ secrets.AUTO_PR_TOKEN }}
+          commit-message: Update monika-config-schema
+          committer: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
+          author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
+          base: master
+          push-to-fork: hyperjumptech/schemastore
+          branch: feat/Update-monika-schema
+          title: "[PR] Update monika config schema"
+          body: |
+            In this PR:
+            - Update config json schema to improve suggestions
+            - Update keys, default values and fix typos
+
+          draft: false
+          delete-branch: true
+
+      - name: Check outputs
+        if: ${{ steps.cpr.outputs.pull-request-number }}
+        run: |
+          echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
+          echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
