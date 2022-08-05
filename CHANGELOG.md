@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.0] - 2022-08-05
+
+## Added
+
+- Validation for timeout value (#832)
+- Auto pr to schema store workflow (#839) (#838) (#836) (#829) (#837)
+- TLS Certificate validation for JSON Schema (#831)
+
+## Fixed
+
+- Cannot run in symon mode via docker (#845)
+- Docs: Examples in Notification page (#835)
+- Wrong minimum response time in status notification (#822)
+
+## Updated
+
+- Docs: change link color in docs to purple (#840)
+- Docs: configuration examples on probe page (#825)
+- Docs: alert example (#823)
+- Probe and Notification in JSON Schema (#820)
+
 ## [1.10.0] - 2022-07-26
 
 ## Added
