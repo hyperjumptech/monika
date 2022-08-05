@@ -1,0 +1,31 @@
+probes:
+  - id: https://monika.hyperjump.tech/articles
+    name: https://monika.hyperjump.tech/articles
+    requests:
+      - url: https://monika.hyperjump.tech/articles
+        method: GET
+        timeout: 10000
+      - url: https://de.wiktionary.org/wiki/hyperjump
+        method: GET
+        timeout: 10000
+      - url: https://id.wiktionary.org/wiki/hyperjump
+        method: GET
+        timeout: 10000
+      - url: https://en.wiktionary.org/wiki/hyperjump
+        method: GET
+        timeout: 10000
+    incidentThreshold: 5
+    recoveryThreshold: 5
+    alerts: []
+  - id: https://monika.hyperjump.tech/index
+    name: https://monika.hyperjump.tech/index
+    requests:
+      - url: https://monika.hyperjump.tech/index
+        method: GET
+        timeout: 10000
+    incidentThreshold: 5
+    recoveryThreshold: 5
+    alerts: []
+notifications:
+  - id: default
+    type: desktop
