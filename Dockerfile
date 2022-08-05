@@ -1,3 +1,4 @@
+# Need to use 16.15 because npm ci fails with 16.15
 FROM node:16.14-alpine AS builder
 
 WORKDIR /monika
