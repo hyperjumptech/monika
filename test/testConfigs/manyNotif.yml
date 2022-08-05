@@ -5,3 +5,8 @@ notifications:
       url: https://www.example.com
   - id: unique-id
     type: desktop
+probes:
+  - id: '1'
+    requests:
+      - id: '1'
+        url: https://github.com

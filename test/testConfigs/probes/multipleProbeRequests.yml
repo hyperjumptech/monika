@@ -3,14 +3,13 @@ probes:
   - id: '1'
     name: Probing Github
     description: simulate html form submission
-    interval: 10
     requests:
       - method: GET
         url: https://github.com/
-        timeout: 7000
+        timeout: 1000
       - method: GET
         url: https://github.com/hyperjumptech
-        timeout: 7000
+        timeout: 1000
     incidentThreshold: 3
     recoveryThreshold: 3
     alerts:

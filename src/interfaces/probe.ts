@@ -41,7 +41,7 @@ export interface Probe {
   id: string
   name: string
   description?: string
-  interval?: number
+  interval: number
   requests: RequestConfig[]
   socket?: Socket
   incidentThreshold: number

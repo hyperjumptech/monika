@@ -27,7 +27,6 @@ probes:
     name: httpbin_200
     extrafields: 'true'
     description: return 200
-    interval: 10
     requests:
       - url: https://httpbin.org/status/400
         method: GET

@@ -1,5 +1,9 @@
 probes:
-  - requests:
-      - url: https://github.com
-  - requests:
-      - url: https://example.com
+  - id: '1'
+    requests:
+      - id: '1'
+        url: https://github.com
+  - id: '2'
+    requests:
+      - id: '2'
+        url: https://example.com

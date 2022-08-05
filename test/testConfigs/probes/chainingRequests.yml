@@ -3,17 +3,16 @@ probes:
   - id: '1'
     name: Probing Github
     description: simulate html form submission
-    interval: 10
     requests:
       - method: GET
         url: https://reqres.in/api/users
-        timeout: 7000
+        timeout: 1000
       - method: GET
         url: https://reqres.in/api/users/{{ responses.[0].data.data.[0].id }}
-        timeout: 7000
+        timeout: 1000
       - method: GET
         url: https://reqres.in/api/users/{{ responses.[0].data.data.[1].id }}
-        timeout: 7000
+        timeout: 1000
     incidentThreshold: 3
     recoveryThreshold: 3
     alerts:

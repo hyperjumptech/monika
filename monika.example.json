@@ -2,9 +2,8 @@
   "probes": [
     {
       "id": "1",
-      "name": "Probing Github",
+      "name": "GitHub",
       "description": "Multiple",
-      "interval": 10,
       "requests": [
         {
           "url": "https://github.com/",

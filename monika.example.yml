@@ -3,8 +3,13 @@
 # Monika can run by its minimal configuration such as :
 probes:
   - id: '1'
+    name: GitHub
+    description: Multiple
     requests:
-      - url: http://github.com
+      - url: https://github.com
+        timeout: 7000
+      - url: https://github.com/hyperjump
+        timeout: 7000
 # Configuration example for sending HTML Form Submission
 # Using this configuration Monika will send a POST request to http://www.foo.com/login.php
 # with the defined headers and request's body.

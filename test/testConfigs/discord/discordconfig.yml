@@ -7,7 +7,7 @@ probes:
   - id: '1'
     name: Example
     description: Probe
-    interval: 0
+    interval: 10
     requests:
       - url: https://something/
     incidentThreshold: 2

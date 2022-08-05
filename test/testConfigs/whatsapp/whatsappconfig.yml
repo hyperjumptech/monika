@@ -1,4 +1,4 @@
-interval: 0
+interval: 10
 notifications:
   - id: unique-id-whatsapp
     type: whatsapp
