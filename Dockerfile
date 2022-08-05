@@ -1,4 +1,5 @@
-# Need to use 16.15 because npm ci fails with 16.15
+# Need to use node 16 because symon mode doesn't work in lower version.
+# Also need to use 16.15 because npm ci fails with 16.15.
 FROM node:16.14-alpine AS builder
 
 WORKDIR /monika
