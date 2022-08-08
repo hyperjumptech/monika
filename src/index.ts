@@ -391,6 +391,20 @@ class Monika extends Command {
             sanitized.alerts = []
           }
 
+          if (_flags.verbose) {
+            const { probes } = config
+            for (const probe of probes) {
+              for (const request of probe.requests) {
+                log.info(`verbose: ${request.url} - ${
+                  request.method
+                } - request-headers: ${JSON.stringify(
+                  request.headers
+                )} - request-body: ${JSON.stringify(request.body)}
+                `)
+              }
+            }
+          }
+
           return sanitized
         })
 

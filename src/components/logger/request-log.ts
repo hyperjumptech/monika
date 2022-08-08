@@ -107,6 +107,7 @@ export class RequestLog {
     if (this.request?.ping) {
       probeMsg = `${this.iteration} id:${this.probe.id} ${this.response?.body}`
     } else {
+<<<<<<< HEAD
       probeMsg = flags.verbose
         ? `${this.iteration} id:${this.probe.id} ${
             this.response?.status || '-'
@@ -121,6 +122,25 @@ export class RequestLog {
           } ${this.request?.method} ${this.request?.url} ${
             this.response?.responseTime || '-'
           }ms`
+=======
+      probeMsg = `${this.iteration} id:${this.probe.id} ${
+        this.response?.status || '-'
+      } ${this.request?.method} ${this.request?.url} ${
+        this.response?.responseTime || '-'
+      }ms`
+<<<<<<< HEAD
+      probeMsg = flags.verbose
+        ? `${probeMsg} 
+      Request Headers:
+      ${JSON.stringify(this.request?.headers) || '-'} 
+      Request Body:
+      ${JSON.stringify(this.request?.body) || '-'} 
+      Response Body:
+      ${JSON.stringify(this.response?.body) || '-'}`
+        : probeMsg
+=======
+>>>>>>> b16b5be (Fix: add request URL, method, body, headers)
+>>>>>>> 914069a (Fix: add request URL, method, body, headers)
     }
 
     if (printedNotification) {
