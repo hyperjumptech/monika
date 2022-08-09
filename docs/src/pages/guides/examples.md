@@ -81,7 +81,7 @@ probes:
   - id: '1'
     name: Probing Github
     description: simulate html form submission
-    interval: 10 # in seconds
+    interval: 15 # in seconds
     requests:
       - method: GET
         url: https://github.com/
@@ -113,12 +113,12 @@ Monika supports request chaining, which enables you to do multiple requests and 
 Here is an example on how you could get previous request(s) response data into your next request:
 
 ```shell
-{{ response.[0].status }} ==> Get status code from first request response
-{{ response.[1].body.token }} ==> Get token from second request response
-{{ response.[2].headers.SetCookie[0] }} ==> Get first cookie from third request response
+{{ responses.[0].status }} ==> Get status code from first request response
+{{ responses.[1].body.token }} ==> Get token from second request response
+{{ responses.[2].headers.SetCookie[0] }} ==> Get first cookie from third request response
 ```
 
-In the example above, `response.[0]` refers to the response from the first request in the probe, `response.[1]` refers to the response from the second request in the probe, and so on. Please note that you can only use the response from previous requests in the same probe.
+In the example above, `responses.[0]` refers to the response from the first request in the probe, `responses.[1]` refers to the response from the second request in the probe, and so on. Please note that you can only use the response from previous requests in the same probe.
 
 Please refer to [Probe Response Anatomy](https://hyperjumptech.github.io/monika/guides/probes#probe-response-anatomy) in order to know which value could be used from the response body for the next request(s).
 
@@ -133,7 +133,7 @@ probes:
   - id: '1'
     name: Probing Github
     description: simulate html form submission
-    interval: 10 # in seconds
+    interval: 15 # in seconds
     requests:
       - method: GET
         url: https://reqres.in/api/users
@@ -186,7 +186,7 @@ probes:
   - id: '1'
     name: Probing Github
     description: simulate html form submission
-    interval: 10 # in seconds
+    interval: 15 # in seconds
     requests:
       - method: POST
         url: https://reqres.in/api/login
@@ -221,13 +221,13 @@ Continuing with the examples from www.reqres.in above, say we would like to use 
 
 ```json
 {
-  'data':
+  "data":
     {
-      'id': 1,
-      'email': 'george.bluth@reqres.in',
-      'first_name': 'George',
-      'last_name': 'Bluth',
-      'avatar': 'https://reqres.in/img/faces/1-image.jpg'
+      "id": 1,
+      "email": "george.bluth@reqres.in",
+      "first_name": "George",
+      "last_name": "Bluth",
+      "avatar": "https://reqres.in/img/faces/1-image.jpg"
     },
   ....
 }
@@ -239,7 +239,7 @@ Then you can use the user's email in the login request body as follows:
 probes:
   - id: probe-01
     name: 'body from response'
-    interval: 10 # in seconds
+    interval: 15 # in seconds
 
     requests:
       - url: https://reqres.in/api/users/1
