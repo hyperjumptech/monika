@@ -79,7 +79,7 @@ Here is an example configuration with multiple requests:
 ```yaml
 probes:
   - id: '1'
-    name: Probing Github
+    name: Simulate form submit
     description: simulate html form submission
     interval: 15 # in seconds
     requests:
@@ -131,7 +131,7 @@ Here is an example of using previous request's response in the path/query parame
 ```yaml
 probes:
   - id: '1'
-    name: Probing Github
+    name: Simulate form submit
     description: simulate html form submission
     interval: 15 # in seconds
     requests:
@@ -184,7 +184,7 @@ Here is an example of using previous request's response in the headers:
 ```yaml
 probes:
   - id: '1'
-    name: Probing Github
+    name: Simulate form submit
     description: simulate html form submission
     interval: 15 # in seconds
     requests:
