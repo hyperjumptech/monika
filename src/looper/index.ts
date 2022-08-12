@@ -122,6 +122,9 @@ export function isIDValid(config: Config, ids: string): boolean {
 }
 
 export async function loopCheckSTUNServer(interval: number): Promise<any> {
+  // if stun is disabled, no need to create interval
+  if (interval === -1) return
+
   // if interval = 0 get ip once and exit. No need to setup interval.
   if (interval === 0 || process.env.CI || process.env.NODE_ENV === 'test') {
     await getPublicIp()
@@ -136,32 +139,40 @@ export async function loopCheckSTUNServer(interval: number): Promise<any> {
 }
 
 /**
- * loopProbes fires off the probe requests after every x interval, and handles repeats.
+ * loopProbe fires off the probe requests after every x interval, and handles repeats.
  * This function receives the probe id from idFeeder.
- * @param {object} probe is the target to request
- * @param {object} notifications is the array of channels to notify the user if probes does not work
- * @param {number} repeats handle controls test interaction/repetition
- * @param {boolean} verboseLogs store all requests to database
+ * @param {object} input params
  * @returns {function} func with isAborted true if interrupted
  */
-
-function loopProbe(
-  probe: Probe,
-  notifications: Notification[],
-  repeats: number,
-  verboseLogs: boolean,
-  followRedirects: number
-) {
+function loopProbe({
+  probe,
+  notifications,
+  flags,
+}: {
+  probe: Probe // probe is the target to request
+  notifications: Notification[] // notifications is the array of channels to notify the user if probes does not work
+  flags: any // flags is the monika parameter flags
+  // flags.repeats: number,
+  // flags.verboseLogs: boolean,
+  // flags.followRedirects: number
+}) {
   let counter = 0
 
   const probeInterval = setInterval(() => {
-    if (counter === repeats) {
+    if (counter === flags.repeats) {
       // for fixed repeat loops: check repeat flag, if equal to counter, the we'll stop the loop
       clearInterval(probeInterval)
       clearInterval(checkSTUNinterval)
       process.kill(process.pid, 'SIGINT')
-    } else if (isConnectedToSTUNServer && !isPaused) {
-      doProbe(++counter, probe, notifications, verboseLogs, followRedirects)
+    } else if ((isConnectedToSTUNServer && !isPaused) || flags.stun !== -1) {
+      doProbe({
+        checkOrder: ++counter,
+        probe,
+        notifications,
+        flags,
+        // verboseLogs,
+        // followRedirects
+      })
     }
   }, (probe.interval ?? 10) * MILLISECONDS)
 
@@ -184,44 +195,39 @@ const delayForProbe = (
   return delay
 }
 
+const abort = () => {
+  for (const i of intervals) {
+    clearInterval(i)
+  }
+}
+
 /**
  * idFeeder feeds Prober with actual ids to process
- * @param {object} sanitizedProbes probes that has been sanitized
- * @param {object} notifications probe notifications
- * @param {number} repeats number of repeats
- * @param {boolean} verboseLogs store all requests to database
+ * @param {object} input parameters
  * @returns {function} abort function
  */
-// eslint-disable-next-line max-params
-export function idFeeder(
-  sanitizedProbes: Probe[],
-  notifications: Notification[],
-  repeats: number,
-  verboseLogs: boolean,
-  maxStartDelay: number,
-  followRedirects: number
-): any {
+export function idFeeder({
+  sanitizedProbes,
+  notifications,
+  flags,
+}: {
+  sanitizedProbes: Probe[] // {object} sanitizedProbes probes that has been sanitized
+  notifications: Notification[] // {object} notifications probe notifications
+  flags: any // {object} flags is the monika cli parameters/flags
+}): any {
   for (const [i, probe] of sanitizedProbes.entries()) {
     const delay =
-      maxStartDelay === 0
+      flags.maxStartDelay === 0
         ? 0
-        : delayForProbe(i, sanitizedProbes.length, maxStartDelay)
+        : delayForProbe(i, sanitizedProbes.length, flags.maxStartDelay)
     setTimeout(() => {
-      const interval = loopProbe(
+      const interval = loopProbe({
         probe,
-        notifications ?? [],
-        repeats ?? 0,
-        verboseLogs,
-        followRedirects
-      )
+        notifications: notifications ?? [],
+        flags,
+      })
       intervals.push(interval)
     }, delay)
-  }
-
-  const abort = () => {
-    for (const i of intervals) {
-      clearInterval(i)
-    }
   }
 
   return abort
