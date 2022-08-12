@@ -422,6 +422,7 @@ class Monika extends Command {
           scheduledTasks.push(scheduledStatusUpdateTask)
         }
 
+        // feed the configs and probes to be processed
         abortCurrentLooper = idFeeder({
           sanitizedProbes: sanitizedProbe,
           notifications: config.notifications ?? [],

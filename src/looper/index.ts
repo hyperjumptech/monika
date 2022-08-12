@@ -35,6 +35,8 @@ let checkSTUNinterval: NodeJS.Timeout
 let isPaused = false
 const intervals: Array<NodeJS.Timeout> = []
 
+const DISABLE_STUN = -1 // -1 is disable stun checking
+
 /**
  * sanitizeProbe sanitize currently mapped probe name, alerts, and threshold
  * @param {object} probe is the probe configuration
@@ -138,24 +140,22 @@ export async function loopCheckSTUNServer(interval: number): Promise<any> {
   return checkSTUNinterval
 }
 
-/**
- * loopProbe fires off the probe requests after every x interval, and handles repeats.
- * This function receives the probe id from idFeeder.
- * @param {object} input params
- * @returns {function} func with isAborted true if interrupted
- */
-function loopProbe({
-  probe,
-  notifications,
-  flags,
-}: {
+type loopProbeParams = {
   probe: Probe // probe is the target to request
   notifications: Notification[] // notifications is the array of channels to notify the user if probes does not work
   flags: any // flags is the monika parameter flags
   // flags.repeats: number,
   // flags.verboseLogs: boolean,
   // flags.followRedirects: number
-}) {
+}
+
+/**
+ * loopProbe fires off the probe requests after every x interval, and handles repeats.
+ * This function receives the probe id from idFeeder.
+ * @param {object} input params
+ * @returns {function} func with isAborted true if interrupted
+ */
+function loopProbe({ probe, notifications, flags }: loopProbeParams) {
   let counter = 0
 
   const probeInterval = setInterval(() => {
@@ -164,14 +164,17 @@ function loopProbe({
       clearInterval(probeInterval)
       clearInterval(checkSTUNinterval)
       process.kill(process.pid, 'SIGINT')
-    } else if ((isConnectedToSTUNServer && !isPaused) || flags.stun === -1) {
+      // else, isSTUNServer connected? if not connected, skip doing probes.
+      // or are we disabling STUN connection
+    } else if (
+      (isConnectedToSTUNServer && !isPaused) ||
+      flags.stun === DISABLE_STUN
+    ) {
       doProbe({
         checkOrder: ++counter,
         probe,
         notifications,
         flags,
-        // verboseLogs,
-        // followRedirects
       })
     }
   }, (probe.interval ?? 10) * MILLISECONDS)

@@ -40,6 +40,12 @@ const httpsAgent = new https.Agent({ keepAlive: true })
 // Create an instance of axios here so it will be reused instead of creating a new one all the time.
 const axiosInstance = axios.create()
 
+type probingParams = {
+  requestConfig: Omit<RequestConfig, 'saveBody' | 'alert'> // is a config object
+  responses: Array<ProbeRequestResponse> // an array of previous responses
+  flags: any // monika context flags, from parameters etc.
+}
+
 /**
  * probing() is the heart of monika requests generation
  * @param {obj} parameter as input object
@@ -49,11 +55,7 @@ export async function probing({
   requestConfig,
   responses,
   flags,
-}: {
-  requestConfig: Omit<RequestConfig, 'saveBody' | 'alert'> // is a config object
-  responses: Array<ProbeRequestResponse> // an array of previous responses
-  flags: any // monika context flags, from parameters etc.
-}): Promise<ProbeRequestResponse> {
+}: probingParams): Promise<ProbeRequestResponse> {
   // Compile URL using handlebars to render URLs that uses previous responses data
   const { method, url, headers, timeout, body, ping } = requestConfig
   const newReq = { method, headers, timeout, body, ping }

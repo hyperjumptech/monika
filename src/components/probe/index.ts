@@ -128,6 +128,12 @@ async function checkThresholdsAndSendAlert(
     })
 }
 
+type doProbeParams = {
+  checkOrder: number // the order of probe being processed
+  probe: Probe // probe contains all the probes
+  notifications: Notification[] // notifications contains all the notifications
+  flags: any // contain all monika command params, ex: verboseLogs, followRedirects
+}
 /**
  * doProbe sends out the http request
  * @param {object} param object parameter
@@ -138,12 +144,7 @@ export async function doProbe({
   probe,
   notifications,
   flags,
-}: {
-  checkOrder: number // the order of probe being processed
-  probe: Probe // probe contains all the probes
-  notifications: Notification[] // notifications contains all the notifications
-  flags: any // contain all monika command params, ex: verboseLogs, followRedirects
-}): Promise<void> {
+}: doProbeParams): Promise<void> {
   const eventEmitter = getEventEmitter()
   const responses = []
 
