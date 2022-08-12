@@ -391,20 +391,6 @@ class Monika extends Command {
             sanitized.alerts = []
           }
 
-          if (_flags.verbose) {
-            const { probes } = config
-            for (const probe of probes) {
-              for (const request of probe.requests) {
-                log.info(`verbose: ${request.url} - ${
-                  request.method
-                } - request-headers: ${JSON.stringify(
-                  request.headers
-                )} - request-body: ${JSON.stringify(request.body)}
-                `)
-              }
-            }
-          }
-
           return sanitized
         })
 
@@ -498,14 +484,18 @@ Please refer to the Monika documentations on how to how to configure notificatio
     Interval: ${probe.interval}
 `
         for (const request of probe.requests) {
-          startupMessage += `    Request Method: ${request.method}
+          startupMessage += `    Request Method: ${request.method || `GET`}
     Request URL: ${request.url}
     Request Headers: ${JSON.stringify(request.headers)}
     Request Body: ${JSON.stringify(request.body)}
 `
         }
-
-        startupMessage += `    Alerts: ${probe.alerts.join(', ')}\n`
+        startupMessage += `    Alerts: ${
+          probe.alerts !== null || probe.alerts !== undefined
+            ? probe.alerts
+            : `- HTTP Status is {{ response.status }}, expecting 200 
+           - Response time is {{ response.time }}ms, expecting less than 2000ms`
+        }\n`
       }
 
       if (notifications && notifications.length > 0) {
