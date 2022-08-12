@@ -204,7 +204,7 @@ class Monika extends Command {
       char: 's', // (s)stun
       description: 'Interval in seconds to check STUN server',
       multiple: false,
-      default: -1, // default is STUN lookup unblocking
+      default: 20, // default is 20s interval lookup
     }),
 
     id: Flags.string({
