@@ -164,7 +164,7 @@ function loopProbe({
       clearInterval(probeInterval)
       clearInterval(checkSTUNinterval)
       process.kill(process.pid, 'SIGINT')
-    } else if ((isConnectedToSTUNServer && !isPaused) || flags.stun !== -1) {
+    } else if ((isConnectedToSTUNServer && !isPaused) || flags.stun === -1) {
       doProbe({
         checkOrder: ++counter,
         probe,
