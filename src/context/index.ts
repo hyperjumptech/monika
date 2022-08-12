@@ -26,7 +26,11 @@ type Context = {
   // userAgent example: @hyperjumptech/monika/1.2.3 linux-x64 node-14.17.0
   userAgent: string
   incidents: Incident[]
+<<<<<<< HEAD
   flags: any // monika parameter flags
+=======
+  flags?: any
+>>>>>>> f1bb734 (fix: add request and response in verbose mode)
 }
 
 type NewContext = {

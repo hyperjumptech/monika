@@ -486,15 +486,15 @@ Please refer to the Monika documentations on how to how to configure notificatio
         for (const request of probe.requests) {
           startupMessage += `    Request Method: ${request.method || `GET`}
     Request URL: ${request.url}
-    Request Headers: ${JSON.stringify(request.headers)}
-    Request Body: ${JSON.stringify(request.body)}
+    Request Headers: ${JSON.stringify(request.headers) || `-`}
+    Request Body: ${JSON.stringify(request.body) || `-`}
 `
         }
         startupMessage += `    Alerts: ${
-          probe.alerts !== null || probe.alerts !== undefined
-            ? probe.alerts
-            : `- HTTP Status is {{ response.status }}, expecting 200 
-           - Response time is {{ response.time }}ms, expecting less than 2000ms`
+          probe?.alerts === undefined || probe?.alerts.length === 0
+            ? `[{ "query": "response.status < 200 or response.status > 299", "message": "HTTP Status is not 200"}, 
+            { "query": "response.time > 2000", "message": "Response time is more than 2000ms" }]`
+            : JSON.stringify(probe.alerts)
         }\n`
       }
 
