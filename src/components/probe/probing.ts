@@ -42,16 +42,18 @@ const axiosInstance = axios.create()
 
 /**
  * probing() is the heart of monika requests generation
- * @param {obj} requestConfig is a config object
- * @param {array} responses an array of previous responses
- * @param {number} followRedirects number of times monika should follow redirects
+ * @param {obj} parameter as input object
  * @returns ProbeRequestResponse, response to the probe request
  */
-export async function probing(
-  requestConfig: Omit<RequestConfig, 'saveBody' | 'alert'>,
-  responses: Array<ProbeRequestResponse>,
-  followRedirects: number
-): Promise<ProbeRequestResponse> {
+export async function probing({
+  requestConfig,
+  responses,
+  flags,
+}: {
+  requestConfig: Omit<RequestConfig, 'saveBody' | 'alert'> // is a config object
+  responses: Array<ProbeRequestResponse> // an array of previous responses
+  flags: any // monika context flags, from parameters etc.
+}): Promise<ProbeRequestResponse> {
   // Compile URL using handlebars to render URLs that uses previous responses data
   const { method, url, headers, timeout, body, ping } = requestConfig
   const newReq = { method, headers, timeout, body, ping }
@@ -172,7 +174,7 @@ export async function probing(
       ...newReq,
       url: renderedURL,
       data: newReq.body,
-      maxRedirects: followRedirects,
+      maxRedirects: flags.followRedirects,
       httpAgent,
       httpsAgent,
     })

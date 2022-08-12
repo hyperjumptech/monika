@@ -85,7 +85,7 @@ export class RequestLog {
 
   // print() generates the text and prints the logs for the past request iteration
   print(): void {
-    const reversedSentNotifications = this.sentNotifications.slice().reverse()
+    const reversedSentNotifications = [...this.sentNotifications].reverse()
     const printedNotification =
       reversedSentNotifications.find(
         (notif) => notif.type === 'NOTIFY-INCIDENT'
@@ -107,19 +107,19 @@ export class RequestLog {
       this.response?.responseTime || '-'
     }ms`
     // generate logs from ping request or probe request
-    if (this.request?.ping) {
-      probeMsg = `${this.iteration} id:${this.probe.id} PING:${
-        this.response?.alive ? 'alive' : 'dead'
-      } ${this.request?.url} ${
-        this.response?.alive ? this.response?.responseTime : '-'
-      }ms packetLoss:${this.response?.alive ? this.response?.packetLoss : '-'}%`
-    } else {
-      probeMsg = `${this.iteration} id:${this.probe.id} ${
-        this.response?.status || '-'
-      } ${this.request?.method} ${this.request?.url} ${
-        this.response?.responseTime || '-'
-      }ms`
-    }
+    probeMsg = this.request?.ping
+      ? `${this.iteration} id:${this.probe.id} PING:${
+          this.response?.alive ? 'alive' : 'dead'
+        } ${this.request?.url} ${
+          this.response?.alive ? this.response?.responseTime : '-'
+        }ms packetLoss:${
+          this.response?.alive ? this.response?.packetLoss : '-'
+        }%`
+      : `${this.iteration} id:${this.probe.id} ${
+          this.response?.status || '-'
+        } ${this.request?.method} ${this.request?.url} ${
+          this.response?.responseTime || '-'
+        }ms`
 
     if (printedNotification) {
       notifMsg = `, NOTIF: ${

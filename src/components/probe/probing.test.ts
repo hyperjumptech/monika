@@ -89,12 +89,17 @@ describe('Probing', () => {
       ]
 
       const results: any = []
+      const flags: { followRedirects: number } = { followRedirects: 0 }
       for (let i = 0; i < 2; i++) {
         const responses: any = []
         for (let j = 0; j < requests.length; j++) {
           try {
             // eslint-disable-next-line no-await-in-loop
-            const resp = await probing(requests[j], responses, 0)
+            const resp = await probing({
+              requestConfig: requests[j],
+              responses,
+              flags,
+            })
             responses.push(resp)
             if (j !== 0) {
               results.push({
@@ -131,7 +136,12 @@ describe('Probing', () => {
         timeout: 10,
       }
 
-      const result = await probing(request, [], 0)
+      const flags: { followRedirects: number } = { followRedirects: 0 }
+      const result = await probing({
+        requestConfig: request,
+        responses: [],
+        flags,
+      })
       expect(result.status).to.be.equals(200)
     })
 
@@ -161,9 +171,14 @@ describe('Probing', () => {
         timeout: 10,
       }
 
+      const flags: { followRedirects: number } = { followRedirects: 0 }
       // act
       server.listen()
-      const res = await probing(request, [], 0)
+      const res = await probing({
+        requestConfig: request,
+        responses: [],
+        flags,
+      })
       server.close()
 
       // assert
@@ -199,7 +214,12 @@ describe('Probing', () => {
 
       // act
       server.listen()
-      const res = await probing(request, [], 0)
+      const flags: { followRedirects: number } = { followRedirects: 0 }
+      const res = await probing({
+        requestConfig: request,
+        responses: [],
+        flags,
+      })
       server.close()
 
       // assert
@@ -235,7 +255,12 @@ describe('Probing', () => {
 
       // act
       server.listen()
-      const res = await probing(request, [], 0)
+      const flags: { followRedirects: number } = { followRedirects: 0 }
+      const res = await probing({
+        requestConfig: request,
+        responses: [],
+        flags,
+      })
       server.close()
 
       // assert
@@ -272,7 +297,12 @@ describe('Probing', () => {
 
       // act
       server.listen()
-      const res = await probing(request, [], 0)
+      const flags: { followRedirects: number } = { followRedirects: 0 }
+      const res = await probing({
+        requestConfig: request,
+        responses: [],
+        flags,
+      })
       server.close()
 
       // assert

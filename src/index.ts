@@ -204,7 +204,7 @@ class Monika extends Command {
       char: 's', // (s)stun
       description: 'Interval in seconds to check STUN server',
       multiple: false,
-      default: 20,
+      default: -1, // default is STUN lookup unblocking
     }),
 
     id: Flags.string({
@@ -422,16 +422,11 @@ class Monika extends Command {
           scheduledTasks.push(scheduledStatusUpdateTask)
         }
 
-        const verboseLogs = isSymonMode || _flags['keep-verbose-logs']
-
-        abortCurrentLooper = idFeeder(
-          sanitizedProbe,
-          config.notifications ?? [],
-          Number(_flags.repeat),
-          verboseLogs,
-          Number(_flags['max-start-delay']),
-          Number(_flags['follow-redirects'])
-        )
+        abortCurrentLooper = idFeeder({
+          sanitizedProbes: sanitizedProbe,
+          notifications: config.notifications ?? [],
+          flags: _flags,
+        })
       }
     } catch (error) {
       await closeLog()
