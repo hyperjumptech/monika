@@ -121,7 +121,6 @@
     "@types/unzipper": "^0.10.5",
     "bats": "^1.5.0",
     "bats-assert": "^2.0.0",
-    "bats-support": "^0.3.0",
     "chai": "^4.3.4",
     "chai-spies": "^1.0.0",
     "cross-env": "^7.0.3",
