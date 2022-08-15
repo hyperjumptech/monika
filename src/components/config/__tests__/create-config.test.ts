@@ -48,6 +48,10 @@ beforeEach(() => {
   if (fs.existsSync('monika.insomnia.yml')) {
     fs.unlinkSync('monika.insomnia.yml')
   }
+
+  if (fs.existsSync('monika.sitemap.yml')) {
+    fs.unlinkSync('monika.sitemap.yml')
+  }
 })
 
 describe('Har config', () => {
