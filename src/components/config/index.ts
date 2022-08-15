@@ -41,8 +41,6 @@ import yml from 'js-yaml'
 
 export const DEFAULT_CONFIG_INTERVAL = 900
 
-const isTestEnvironment = process.env.NODE_ENV === 'test'
-
 const emitter = getEventEmitter()
 
 let cfg: Config
@@ -287,8 +285,6 @@ export const createConfig = async (flags: any): Promise<void> => {
     const parse = await parseConfig(path, type)
     const result = await addDefaultNotifications(parse)
     const file = flags.output || 'monika.yml'
-
-    if (isTestEnvironment) flags.force = true // when testing, force overwrite to prevent timeout
 
     if (existsSync(file) && !flags.force) {
       const ans = await CliUx.ux.prompt(
