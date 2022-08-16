@@ -273,9 +273,9 @@ monika --follow-redirects 0 # disable following redirects
 
 ## STUN
 
-By default monika will continuously check the [STUN](https://en.wikipedia.org/wiki/STUN) server every 20 second intervals. Continuously STUN checking ensures that connectivity to the outside world is guaranteed. When the network is down, STUN checking fails, probing will be paused.
+By default monika will continuously check the [STUN](https://en.wikipedia.org/wiki/STUN) server every 20 second intervals. Continuously STUN checking ensures that connectivity to the outside world is guaranteed. When STUN checking fails, Monika assumes the network is down and probing will be paused.
 
-You can specify the number of intervals using the `-s` or `--stun` flags followed by a number in seconds. For example to set the interval to 10 seconds type the parameter below:
+You can specify the number of checking intervals using the `-s` or `--stun` flags followed by a number in seconds. For example to set the interval to every 10 seconds type the parameter below:
 
 ```bash
 monika -s 10
@@ -283,7 +283,7 @@ monika -s 10
 
 If the number is zero or less, monika will check the STUN server just once, not repeatedly, to get public IP.
 
-For internal networks where no outside connection is provided, you can disable the STUN checking. To disable STUN checking, set -s to `-1`.
+For internal networks where no outside connection is needed, you can disable the STUN checking by setting the `-s` flag to `-1` as follows.
 
 ```bash
 monika -s -1
