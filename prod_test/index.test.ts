@@ -25,16 +25,20 @@
 import { expect } from 'chai'
 import { exec } from 'child_process'
 
+beforeEach(() => {
+  exec('rm -rf monika.yml')
+})
+
 describe('monika', () => {
   it('shows version', (done) => {
-    exec(`monika -v`, (_, stdout) => {
+    exec('monika -v', (_, stdout) => {
       expect(stdout).to.contain('@hyperjumptech/monika/')
       done()
     })
   })
 
   it('shows initializing file when no config', (done) => {
-    exec(`monika`, (_, stdout) => {
+    const proc = exec('monika', (_, stdout) => {
       expect(stdout).to.contain(
         'No Monika configuration available, initializing...'
       )
@@ -43,19 +47,31 @@ describe('monika', () => {
       )
       done()
     })
+
+    setTimeout(() => {
+      process.kill(proc.pid)
+    }, 3000)
   })
 
   it('shows starting message with valid json config', (done) => {
-    exec(`monika -c ./monika.example.json`, (_, stdout) => {
+    const proc = exec(`monika -c ./monika.example.json`, (_, stdout) => {
       expect(stdout).to.contain('Starting Monika.')
       done()
     })
+
+    setTimeout(() => {
+      process.kill(proc.pid)
+    }, 3000)
   })
 
   it('shows starting message with valid yaml config', (done) => {
-    exec(`monika -c ./monika.example.yml`, (_, stdout) => {
+    const proc = exec(`monika -c ./monika.example.yml`, (_, stdout) => {
       expect(stdout).to.contain('Starting Monika.')
       done()
     })
+
+    setTimeout(() => {
+      process.kill(proc.pid)
+    }, 3000)
   })
 })
