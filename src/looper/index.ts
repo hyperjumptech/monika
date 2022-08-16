@@ -28,6 +28,7 @@ import { doProbe } from '../components/probe'
 import { log } from '../utils/pino'
 import { Notification } from '../interfaces/notification'
 import { getPublicIp, isConnectedToSTUNServer } from '../utils/public-ip'
+import { getContext } from '../context'
 
 const MILLISECONDS = 1000
 export const DEFAULT_THRESHOLD = 5
@@ -143,10 +144,6 @@ export async function loopCheckSTUNServer(interval: number): Promise<any> {
 type loopProbeParams = {
   probe: Probe // probe is the target to request
   notifications: Notification[] // notifications is the array of channels to notify the user if probes does not work
-  flags: any // flags is the monika parameter flags
-  // flags.repeats: number,
-  // flags.verboseLogs: boolean,
-  // flags.followRedirects: number
 }
 
 /**
@@ -155,8 +152,13 @@ type loopProbeParams = {
  * @param {object} input params
  * @returns {function} func with isAborted true if interrupted
  */
-function loopProbe({ probe, notifications, flags }: loopProbeParams) {
+function loopProbe({ probe, notifications }: loopProbeParams) {
   let counter = 0
+  const flags = getContext().flags
+  // flags is the monika parameter flags... these are used:
+  // flags.repeats: number,
+  // flags.verboseLogs: boolean,
+  // flags.followRedirects: number
 
   const probeInterval = setInterval(() => {
     if (counter === flags.repeats) {
@@ -174,7 +176,6 @@ function loopProbe({ probe, notifications, flags }: loopProbeParams) {
         checkOrder: ++counter,
         probe,
         notifications,
-        flags,
       })
     }
   }, (probe.interval ?? 10) * MILLISECONDS)
@@ -204,6 +205,10 @@ const abort = () => {
   }
 }
 
+type idFeederParam = {
+  sanitizedProbes: Probe[] // {object} sanitizedProbes probes that has been sanitized
+  notifications: Notification[] // {object} notifications probe notifications
+}
 /**
  * idFeeder feeds Prober with actual ids to process
  * @param {object} input parameters
@@ -212,12 +217,9 @@ const abort = () => {
 export function idFeeder({
   sanitizedProbes,
   notifications,
-  flags,
-}: {
-  sanitizedProbes: Probe[] // {object} sanitizedProbes probes that has been sanitized
-  notifications: Notification[] // {object} notifications probe notifications
-  flags: any // {object} flags is the monika cli parameters/flags
-}): any {
+}: idFeederParam): any {
+  const flags = getContext().flags
+
   for (const [i, probe] of sanitizedProbes.entries()) {
     const delay =
       flags.maxStartDelay === 0
@@ -227,7 +229,6 @@ export function idFeeder({
       const interval = loopProbe({
         probe,
         notifications: notifications ?? [],
-        flags,
       })
       intervals.push(interval)
     }, delay)

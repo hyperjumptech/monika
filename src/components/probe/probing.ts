@@ -31,6 +31,7 @@ import * as qs from 'querystring'
 import { sendPing, PING_TIMEDOUT } from '../../utils/ping'
 import http from 'http'
 import https from 'https'
+import { getContext } from '../../context'
 
 // Keep the agenst alive to reduce the overhead of DNS queries and creating TCP connection.
 // More information here: https://rakshanshetty.in/nodejs-http-keep-alive/
@@ -43,7 +44,6 @@ const axiosInstance = axios.create()
 type probingParams = {
   requestConfig: Omit<RequestConfig, 'saveBody' | 'alert'> // is a config object
   responses: Array<ProbeRequestResponse> // an array of previous responses
-  flags: any // monika context flags, from parameters etc.
 }
 
 /**
@@ -54,13 +54,14 @@ type probingParams = {
 export async function probing({
   requestConfig,
   responses,
-  flags,
 }: probingParams): Promise<ProbeRequestResponse> {
   // Compile URL using handlebars to render URLs that uses previous responses data
   const { method, url, headers, timeout, body, ping } = requestConfig
   const newReq = { method, headers, timeout, body, ping }
   const renderURL = Handlebars.compile(url)
   const renderedURL = renderURL({ responses })
+
+  const flags = getContext().flags
 
   // Compile headers using handlebars to render URLs that uses previous responses data.
   // In some case such as value is not string, it will be returned as is without being compiled.

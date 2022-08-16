@@ -38,6 +38,7 @@ import { processThresholds } from '../notification/process-server-status'
 import { probing } from './probing'
 import { logResponseTime } from '../logger/response-time-log'
 import { check } from '../tcp-request'
+import { getContext } from '../../context'
 
 // TODO: move this to interface file?
 interface ProbeStatusProcessed {
@@ -52,6 +53,8 @@ interface ProbeSendNotification extends Omit<ProbeStatusProcessed, 'statuses'> {
   index: number
   probeState?: ServerAlertState
 }
+
+const flags = getContext().flags
 
 const probeSendNotification = async (data: ProbeSendNotification) => {
   const eventEmitter = getEventEmitter()
@@ -132,7 +135,6 @@ type doProbeParams = {
   checkOrder: number // the order of probe being processed
   probe: Probe // probe contains all the probes
   notifications: Notification[] // notifications contains all the notifications
-  flags: any // contain all monika command params, ex: verboseLogs, followRedirects
 }
 /**
  * doProbe sends out the http request
@@ -143,7 +145,6 @@ export async function doProbe({
   checkOrder,
   probe,
   notifications,
-  flags,
 }: doProbeParams): Promise<void> {
   const eventEmitter = getEventEmitter()
   const responses = []
@@ -191,7 +192,6 @@ export async function doProbe({
       const probeRes: ProbeRequestResponse = await probing({
         requestConfig: request,
         responses,
-        flags,
       })
 
       logResponseTime(probeRes.responseTime)

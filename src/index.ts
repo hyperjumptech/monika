@@ -64,6 +64,7 @@ import path from 'path'
 import isUrl from 'is-url'
 import SymonClient from './symon'
 import { DEFAULT_CONFIG_FILENAME } from './components/config/create-config'
+import { setContext } from './context'
 
 const em = getEventEmitter()
 let symonClient: SymonClient
@@ -260,6 +261,7 @@ class Monika extends Command {
   async run(): Promise<void> {
     const monika = await this.parse(Monika)
     const _flags = monika.flags
+    setContext({ flags: _flags })
 
     try {
       if (_flags.help) {
@@ -426,7 +428,6 @@ class Monika extends Command {
         abortCurrentLooper = idFeeder({
           sanitizedProbes: sanitizedProbe,
           notifications: config.notifications ?? [],
-          flags: _flags,
         })
       }
     } catch (error) {
