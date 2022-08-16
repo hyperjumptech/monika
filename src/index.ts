@@ -64,6 +64,7 @@ import path from 'path'
 import isUrl from 'is-url'
 import SymonClient from './symon'
 import { DEFAULT_CONFIG_FILENAME } from './components/config/create-config'
+import { setContext } from './context'
 
 const em = getEventEmitter()
 let symonClient: SymonClient
@@ -204,7 +205,7 @@ class Monika extends Command {
       char: 's', // (s)stun
       description: 'Interval in seconds to check STUN server',
       multiple: false,
-      default: 20,
+      default: 20, // default is 20s interval lookup
     }),
 
     id: Flags.string({
@@ -260,6 +261,7 @@ class Monika extends Command {
   async run(): Promise<void> {
     const monika = await this.parse(Monika)
     const _flags = monika.flags
+    setContext({ flags: _flags })
 
     try {
       if (_flags.help) {
@@ -422,16 +424,11 @@ class Monika extends Command {
           scheduledTasks.push(scheduledStatusUpdateTask)
         }
 
-        const verboseLogs = isSymonMode || _flags['keep-verbose-logs']
-
-        abortCurrentLooper = idFeeder(
-          sanitizedProbe,
-          config.notifications ?? [],
-          Number(_flags.repeat),
-          verboseLogs,
-          Number(_flags['max-start-delay']),
-          Number(_flags['follow-redirects'])
-        )
+        // feed the configs and probes to be processed
+        abortCurrentLooper = idFeeder({
+          sanitizedProbes: sanitizedProbe,
+          notifications: config.notifications ?? [],
+        })
       }
     } catch (error) {
       await closeLog()

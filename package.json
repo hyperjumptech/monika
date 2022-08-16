@@ -184,5 +184,8 @@
       "node14-win-x64"
     ],
     "outputPath": "dist"
+  },
+  "volta": {
+    "node": "16.16.0"
   }
 }
