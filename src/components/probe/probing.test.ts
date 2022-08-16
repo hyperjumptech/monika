@@ -28,6 +28,7 @@ import { rest } from 'msw'
 import { setupServer } from 'msw/node'
 import { RequestInterceptor } from 'node-request-interceptor'
 import withDefaultInterceptors from 'node-request-interceptor/lib/presets/default'
+import { setContext } from '../../context'
 import { RequestConfig } from '../../interfaces/request'
 import { probing } from './probing'
 
@@ -89,7 +90,8 @@ describe('Probing', () => {
       ]
 
       const results: any = []
-      const flags: { followRedirects: number } = { followRedirects: 0 }
+      const flag: { followRedirects: number } = { followRedirects: 0 }
+      setContext({ flags: flag })
       for (let i = 0; i < 2; i++) {
         const responses: any = []
         for (let j = 0; j < requests.length; j++) {
@@ -98,7 +100,6 @@ describe('Probing', () => {
             const resp = await probing({
               requestConfig: requests[j],
               responses,
-              flags,
             })
             responses.push(resp)
             if (j !== 0) {
@@ -136,11 +137,11 @@ describe('Probing', () => {
         timeout: 10,
       }
 
-      const flags: { followRedirects: number } = { followRedirects: 0 }
+      const flag: { followRedirects: number } = { followRedirects: 0 }
+      setContext({ flags: flag })
       const result = await probing({
         requestConfig: request,
         responses: [],
-        flags,
       })
       expect(result.status).to.be.equals(200)
     })
@@ -171,13 +172,13 @@ describe('Probing', () => {
         timeout: 10,
       }
 
-      const flags: { followRedirects: number } = { followRedirects: 0 }
+      const flag: { followRedirects: number } = { followRedirects: 0 }
+      setContext({ flags: flag })
       // act
       server.listen()
       const res = await probing({
         requestConfig: request,
         responses: [],
-        flags,
       })
       server.close()
 
@@ -214,11 +215,11 @@ describe('Probing', () => {
 
       // act
       server.listen()
-      const flags: { followRedirects: number } = { followRedirects: 0 }
+      const flag: { followRedirects: number } = { followRedirects: 0 }
+      setContext({ flags: flag })
       const res = await probing({
         requestConfig: request,
         responses: [],
-        flags,
       })
       server.close()
 
@@ -255,11 +256,11 @@ describe('Probing', () => {
 
       // act
       server.listen()
-      const flags: { followRedirects: number } = { followRedirects: 0 }
+      const flag: { followRedirects: number } = { followRedirects: 0 }
+      setContext({ flags: flag })
       const res = await probing({
         requestConfig: request,
         responses: [],
-        flags,
       })
       server.close()
 
@@ -297,11 +298,11 @@ describe('Probing', () => {
 
       // act
       server.listen()
-      const flags: { followRedirects: number } = { followRedirects: 0 }
+      const flag: { followRedirects: number } = { followRedirects: 0 }
+      setContext({ flags: flag })
       const res = await probing({
         requestConfig: request,
         responses: [],
-        flags,
       })
       server.close()
 

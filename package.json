@@ -186,6 +186,6 @@
     "outputPath": "dist"
   },
   "volta": {
-    "node": "16.14.2"
+    "node": "16.16.0"
   }
 }
