@@ -38,6 +38,7 @@ import { processThresholds } from '../notification/process-server-status'
 import { probing } from './probing'
 import { logResponseTime } from '../logger/response-time-log'
 import { check } from '../tcp-request'
+import { getContext } from '../../context'
 
 // TODO: move this to interface file?
 interface ProbeStatusProcessed {
@@ -52,6 +53,8 @@ interface ProbeSendNotification extends Omit<ProbeStatusProcessed, 'statuses'> {
   index: number
   probeState?: ServerAlertState
 }
+
+const flags = getContext().flags
 
 const probeSendNotification = async (data: ProbeSendNotification) => {
   const eventEmitter = getEventEmitter()
@@ -128,22 +131,21 @@ async function checkThresholdsAndSendAlert(
     })
 }
 
+type doProbeParams = {
+  checkOrder: number // the order of probe being processed
+  probe: Probe // probe contains all the probes
+  notifications: Notification[] // notifications contains all the notifications
+}
 /**
  * doProbe sends out the http request
- * @param {number} checkOrder the order of probe being processed
- * @param {object} probe contains all the probes
- * @param {array} notifications contains all the notifications
- * @param {boolean} verboseLogs flag for log verbosity
- * @param {number} followRedirects number of times monika should follow redirects
+ * @param {object} param object parameter
  * @returns {Promise<void>} void
  */
-export async function doProbe(
-  checkOrder: number,
-  probe: Probe,
-  notifications: Notification[],
-  verboseLogs: boolean,
-  followRedirects: number
-): Promise<void> {
+export async function doProbe({
+  checkOrder,
+  probe,
+  notifications,
+}: doProbeParams): Promise<void> {
   const eventEmitter = getEventEmitter()
   const responses = []
 
@@ -166,13 +168,13 @@ export async function doProbe(
     const TCPrequestIndex = 0
 
     processTCPRequestResult({
-      probe,
+      probe: probe,
       tcpRequestID,
       responseTime: duration,
       isAlertTriggered,
-      notifications,
+      notifications: notifications,
       requestIndex: TCPrequestIndex,
-      verboseLogs,
+      verboseLogs: flags.verboseLogs,
     }).catch((error) => log.error(error.message))
   }
 
@@ -187,16 +189,15 @@ export async function doProbe(
     try {
       // intentionally wait for a request to finish before processing next request in loop
       // eslint-disable-next-line no-await-in-loop
-      const probeRes: ProbeRequestResponse = await probing(
-        request,
+      const probeRes: ProbeRequestResponse = await probing({
+        requestConfig: request,
         responses,
-        followRedirects
-      )
+      })
 
       logResponseTime(probeRes.responseTime)
 
       eventEmitter.emit(events.probe.response.received, {
-        probe,
+        probe: probe,
         requestIndex,
         response: probeRes,
       })
@@ -235,7 +236,7 @@ export async function doProbe(
 
       // done probing, got some result, process it, check for thresholds and notifications
       const statuses = processThresholds({
-        probe,
+        probe: probe,
         requestIndex,
         validatedResponse,
       })
@@ -243,9 +244,9 @@ export async function doProbe(
       // Done processing results, check if need to send out alerts
       checkThresholdsAndSendAlert(
         {
-          probe,
+          probe: probe,
           statuses,
-          notifications,
+          notifications: notifications,
           requestIndex,
           validatedResponseStatuses: validatedResponse,
         },
@@ -262,7 +263,7 @@ export async function doProbe(
 
         if (triggeredAlertResponse) {
           eventEmitter.emit(events.probe.alert.triggered, {
-            probe,
+            probe: probe,
             requestIndex,
             alertQuery: triggeredAlertResponse.alert.query,
           })
@@ -275,7 +276,7 @@ export async function doProbe(
       break
     } finally {
       requestLog.print()
-      if (verboseLogs || requestLog.hasIncidentOrRecovery) {
+      if (flags.verboseLogs || requestLog.hasIncidentOrRecovery) {
         requestLog.saveToDatabase().catch((error) => log.error(error.message))
       }
     }

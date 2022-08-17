@@ -28,12 +28,15 @@ import { doProbe } from '../components/probe'
 import { log } from '../utils/pino'
 import { Notification } from '../interfaces/notification'
 import { getPublicIp, isConnectedToSTUNServer } from '../utils/public-ip'
+import { getContext } from '../context'
 
 const MILLISECONDS = 1000
 export const DEFAULT_THRESHOLD = 5
 let checkSTUNinterval: NodeJS.Timeout
 let isPaused = false
 const intervals: Array<NodeJS.Timeout> = []
+
+const DISABLE_STUN = -1 // -1 is disable stun checking
 
 /**
  * sanitizeProbe sanitize currently mapped probe name, alerts, and threshold
@@ -122,6 +125,9 @@ export function isIDValid(config: Config, ids: string): boolean {
 }
 
 export async function loopCheckSTUNServer(interval: number): Promise<any> {
+  // if stun is disabled, no need to create interval
+  if (interval === -1) return
+
   // if interval = 0 get ip once and exit. No need to setup interval.
   if (interval === 0 || process.env.CI || process.env.NODE_ENV === 'test') {
     await getPublicIp()
@@ -135,33 +141,42 @@ export async function loopCheckSTUNServer(interval: number): Promise<any> {
   return checkSTUNinterval
 }
 
+type loopProbeParams = {
+  probe: Probe // probe is the target to request
+  notifications: Notification[] // notifications is the array of channels to notify the user if probes does not work
+}
+
 /**
- * loopProbes fires off the probe requests after every x interval, and handles repeats.
+ * loopProbe fires off the probe requests after every x interval, and handles repeats.
  * This function receives the probe id from idFeeder.
- * @param {object} probe is the target to request
- * @param {object} notifications is the array of channels to notify the user if probes does not work
- * @param {number} repeats handle controls test interaction/repetition
- * @param {boolean} verboseLogs store all requests to database
+ * @param {object} input params
  * @returns {function} func with isAborted true if interrupted
  */
-
-function loopProbe(
-  probe: Probe,
-  notifications: Notification[],
-  repeats: number,
-  verboseLogs: boolean,
-  followRedirects: number
-) {
+function loopProbe({ probe, notifications }: loopProbeParams) {
   let counter = 0
+  const flags = getContext().flags
+  // flags is the monika parameter flags... these are used:
+  // flags.repeats: number,
+  // flags.verboseLogs: boolean,
+  // flags.followRedirects: number
 
   const probeInterval = setInterval(() => {
-    if (counter === repeats) {
+    if (counter === flags.repeats) {
       // for fixed repeat loops: check repeat flag, if equal to counter, the we'll stop the loop
       clearInterval(probeInterval)
       clearInterval(checkSTUNinterval)
       process.kill(process.pid, 'SIGINT')
-    } else if (isConnectedToSTUNServer && !isPaused) {
-      doProbe(++counter, probe, notifications, verboseLogs, followRedirects)
+      // else, isSTUNServer connected? if not connected, skip doing probes.
+      // or are we disabling STUN connection
+    } else if (
+      (isConnectedToSTUNServer && !isPaused) ||
+      flags.stun === DISABLE_STUN
+    ) {
+      doProbe({
+        checkOrder: ++counter,
+        probe,
+        notifications,
+      })
     }
   }, (probe.interval ?? 10) * MILLISECONDS)
 
@@ -184,44 +199,39 @@ const delayForProbe = (
   return delay
 }
 
+const abort = () => {
+  for (const i of intervals) {
+    clearInterval(i)
+  }
+}
+
+type idFeederParam = {
+  sanitizedProbes: Probe[] // {object} sanitizedProbes probes that has been sanitized
+  notifications: Notification[] // {object} notifications probe notifications
+}
 /**
  * idFeeder feeds Prober with actual ids to process
- * @param {object} sanitizedProbes probes that has been sanitized
- * @param {object} notifications probe notifications
- * @param {number} repeats number of repeats
- * @param {boolean} verboseLogs store all requests to database
+ * @param {object} input parameters
  * @returns {function} abort function
  */
-// eslint-disable-next-line max-params
-export function idFeeder(
-  sanitizedProbes: Probe[],
-  notifications: Notification[],
-  repeats: number,
-  verboseLogs: boolean,
-  maxStartDelay: number,
-  followRedirects: number
-): any {
+export function idFeeder({
+  sanitizedProbes,
+  notifications,
+}: idFeederParam): any {
+  const flags = getContext().flags
+
   for (const [i, probe] of sanitizedProbes.entries()) {
     const delay =
-      maxStartDelay === 0
+      flags.maxStartDelay === 0
         ? 0
-        : delayForProbe(i, sanitizedProbes.length, maxStartDelay)
+        : delayForProbe(i, sanitizedProbes.length, flags.maxStartDelay)
     setTimeout(() => {
-      const interval = loopProbe(
+      const interval = loopProbe({
         probe,
-        notifications ?? [],
-        repeats ?? 0,
-        verboseLogs,
-        followRedirects
-      )
+        notifications: notifications ?? [],
+      })
       intervals.push(interval)
     }, delay)
-  }
-
-  const abort = () => {
-    for (const i of intervals) {
-      clearInterval(i)
-    }
   }
 
   return abort
