@@ -483,11 +483,12 @@ Please refer to the Monika documentations on how to how to configure notificatio
     Description: ${probe.description}
     Interval: ${probe.interval}
 `
+        startupMessage += `    Requests:\n`
         for (const request of probe.requests) {
-          startupMessage += `    Request Method: ${request.method || `GET`}
-    Request URL: ${request.url}
-    Request Headers: ${JSON.stringify(request.headers) || `-`}
-    Request Body: ${JSON.stringify(request.body) || `-`}
+          startupMessage += `      - Request Method: ${request.method || `GET`}
+        Request URL: ${request.url}
+        Request Headers: ${JSON.stringify(request.headers) || `-`}
+        Request Body: ${JSON.stringify(request.body) || `-`}
 `
         }
         startupMessage += `    Alerts: ${
