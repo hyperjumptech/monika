@@ -99,6 +99,7 @@
     "yaml": "1.10.2"
   },
   "devDependencies": {
+    "@faker-js/faker": "^7.4.0",
     "@gmrchk/cli-testing-library": "^0.1.2",
     "@oclif/test": "^2.1.0",
     "@types/boxen": "^3.0.1",
