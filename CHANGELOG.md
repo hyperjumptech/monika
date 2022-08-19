@@ -5,6 +5,96 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.0] - 2022-08-05
+
+## Added
+
+- Validation for timeout value (#832)
+- Auto pr to schema store workflow (#839) (#838) (#836) (#829) (#837)
+- TLS Certificate validation for JSON Schema (#831)
+
+## Fixed
+
+- Cannot run in symon mode via docker (#845)
+- Docs: Examples in Notification page (#835)
+- Wrong minimum response time in status notification (#822)
+
+## Updated
+
+- Docs: change link color in docs to purple (#840)
+- Docs: configuration examples on probe page (#825)
+- Docs: alert example (#823)
+- Probe and Notification in JSON Schema (#820)
+
+## [1.10.0] - 2022-07-26
+
+## Added
+
+- Add max-start-delay flag to prevent probes from starting at the same time (#817)
+- Add follow-redirects flag (#819)
+- Add status notification validation for JSON Schema (#816)
+
+## Updated
+
+- Docs: overview with list of features (#814)
+- Docs: timeout information in probes page (#806)
+- Docs: comments on all interval, timeout, and response time (#810)
+- Docs: configuration file page (#787)
+
+## Fixed
+
+- chaining body response (#792)
+- Docs: TOC obscured by header when scrolling down (#788) (#802)
+
+## [1.9.3] - 2022-07-21
+
+## Added
+
+- Add test to validate example configs (#773)
+- Integration test for auto reload on config change (#785)
+- Docs: Add example for request chaining in body payload (#780)
+- Docs: Add link to Hyperjump's Medium in the footer (#790)
+
+## Updated
+
+- Update config-schema (#778)
+- Docs: fix yaml examples (#775)
+- Docs: The alerts in Enabling Notification page still uses the old way (#781)
+
+## Fixed
+
+- TCP request doesn't make any request (#784)
+
+## [1.9.2] - 2022-07-06
+
+## Added
+
+- JSON Schema for Monika configuration (#743)
+- Prometheus Alert Metric (#761)
+- Support reading sitemap (#751)
+- Docs: copy code to clipboard (#772)
+
+## Updated
+
+- Check body type when parse the Postman collection file (#765)
+- Docs: Various landing page refinement (#749)
+
+## Fixed
+
+- Postman parser doesn't parse correctly when contains body (#762)
+- Docs: Wrong language in the code blocks in Configuration File page (#768) (#774)
+- Docs: Fix Whatsapp toc link in notification page (#776)
+- Docs: Change link in Notification page(#767) (#771)
+- Docs: Improve documentation details (#758)
+- Docs: Redundant title in New Notifications page(#754) (#759)
+- Docs: Wrong tags in Alert and Raspberry pi pages (#753) (#760)
+
+## [1.9.1] - 2022-07-06
+
+## Updated
+
+- Symon: send monika ID during handshake if available (#755)
+
 ## [1.9.0] - 2022-07-04
 
 ## Added

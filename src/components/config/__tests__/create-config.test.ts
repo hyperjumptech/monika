@@ -41,8 +41,16 @@ beforeEach(() => {
     fs.unlinkSync('monika.postman-grouped.yml')
   }
 
+  if (fs.existsSync('sitemap.xml')) {
+    fs.unlinkSync('sitemap.xml')
+  }
+
   if (fs.existsSync('monika.insomnia.yml')) {
     fs.unlinkSync('monika.insomnia.yml')
+  }
+
+  if (fs.existsSync('monika.sitemap.yml')) {
+    fs.unlinkSync('monika.sitemap.yml')
   }
 })
 
@@ -59,6 +67,26 @@ describe('Har config', () => {
       const generated = fs.readFileSync('monika.har.yml', 'utf-8')
       const expected = fs.readFileSync(
         './src/components/config/__tests__/expected.har.yml',
+        'utf-8'
+      )
+      expect(_.isEqual(generated, expected)).to.be.true
+    })
+  })
+})
+
+describe('Sitemap config', () => {
+  describe('Create config from xml file', () => {
+    it('should create config from xml file', async () => {
+      const flags = {
+        sitemap: './src/components/config/__tests__/sitemap.xml',
+        output: 'monika.sitemap.yml',
+      }
+      await createConfig(flags)
+      expect(fs.lstatSync('monika.sitemap.yml').isFile()).to.be.true
+
+      const generated = fs.readFileSync('monika.sitemap.yml', 'utf-8')
+      const expected = fs.readFileSync(
+        './src/components/config/__tests__/expected.sitemap.yml',
         'utf-8'
       )
       expect(_.isEqual(generated, expected)).to.be.true

@@ -20,10 +20,10 @@ probes:
   - id: '1'
     name: Monika Landing Page
     description: Landing page of awesome Monika
-    interval: 10
+    interval: 10 # in seconds
     requests:
       - url: https://hyperjumptech.github.io/monika
-        timeout: 7000
+        timeout: 7000 # in milliseconds
     alerts:
       - status-not-2xx
 ```

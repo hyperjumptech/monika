@@ -291,11 +291,11 @@ const isValidProbeAlert = (alert: ProbeAlert | string): boolean => {
 }
 
 export const validateConfig = (configuration: Config): Validation => {
-  const { notifications, probes, symon } = configuration
+  const { notifications = [], probes = [], symon } = configuration
   const symonConfigError = validateSymonConfig(symon)
 
   // validate notification
-  if (notifications && notifications.length > 0) {
+  if (notifications.length > 0) {
     const validateValue = validateNotification(notifications)
 
     if (validateValue !== VALID_CONFIG) {
@@ -304,12 +304,12 @@ export const validateConfig = (configuration: Config): Validation => {
   }
 
   // Validate probes
-  if ((configuration?.probes?.length ?? 0) === 0) return NO_PROBES
+  if (probes.length === 0) return NO_PROBES
 
   // Check probes properties
   for (const probe of probes) {
-    const { alerts = [], requests, socket } = probe
-    const socketAlerts = probe.socket?.alerts ?? []
+    const { name, interval, alerts = [], requests, socket } = probe
+    const socketAlerts = socket?.alerts ?? []
     const tcpConfigError = validateTCPConfig(socket)
 
     if (tcpConfigError) {
@@ -319,6 +319,30 @@ export const validateConfig = (configuration: Config): Validation => {
     }
 
     if ((!socket && (requests?.length ?? 0)) === 0) return PROBE_NO_REQUESTS
+
+    // Validate Interval
+    if (interval <= 0) {
+      return setInvalidResponse(
+        `The interval in the probe with name "${name}" should be greater than 0.`
+      )
+    }
+
+    for (const req of requests) {
+      if (req.timeout <= 0) {
+        return setInvalidResponse(
+          `The timeout in the request with id "${req.id}" should be greater than 0.`
+        )
+      }
+    }
+
+    const totalTimeout = requests.reduce((prev, curr) => prev + curr.timeout, 0)
+    const totalTimeoutSeconds = totalTimeout / 1000
+
+    if (totalTimeoutSeconds > interval) {
+      return setInvalidResponse(
+        `The interval in the probe with name "${name}" should be greater than the total timeout value of all requests in this probe (${totalTimeoutSeconds} seconds). Current interval value is ${interval} seconds but the expected value is greater than ${totalTimeoutSeconds} seconds.`
+      )
+    }
 
     // Check probe request properties
     if (requests?.length > 0) {

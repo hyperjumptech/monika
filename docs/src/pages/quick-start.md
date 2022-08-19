@@ -3,19 +3,15 @@ id: quick-start
 title: Quick Start
 ---
 
-At the center of Monika is a configuration file. Follow the steps below to quickly setup monitoring and get notification when a website is down via Desktop notifications.
-
 ## Installation
 
-There are many ways to install Monika.
-
-Please note that currently, only x64 architecture is supported.
+There are many ways to install Monika. However, currently only x64 architecture is supported.
 
 ### Windows
 
-The recommendeded approach is to use [Chocolatey](https://community.chocolatey.org/packages/monika), a popular package manager for Windows. Please check [Monika page on Chocolatey](https://community.chocolatey.org/packages/monika) for more detailed information.
+The recommendeded approach is to use [Chocolatey](https://community.chocolatey.org/packages/monika), a popular package manager for Windows. Check [Monika page on Chocolatey](https://community.chocolatey.org/packages/monika) for more detailed information.
 
-If Chocolatey is already available, then run the following command to install Monika:
+If you have installed Chocolatey in your PC, then run the following command to install Monika:
 
 ```bash
 choco install monika
@@ -27,9 +23,9 @@ Alternatively, Monika for Windows can be installed from its prebuilt binary. Hea
 
 ### macOS
 
-The recommended approach is to use [Homebrew](https://brew.sh/), a popular package manager for macOS. Please check [Monika page on Homebrew](https://formulae.brew.sh/formula/monika) for more detailed information.
+The recommended approach is to use [Homebrew](https://brew.sh/), a popular package manager for macOS. Check [Monika page on Homebrew](https://formulae.brew.sh/formula/monika) for more detailed information.
 
-If Homebrew is already available, then run the following command to install Monika:
+If you have installed Homebrew, then run the following command to install Monika:
 
 ```bash
 brew install monika
@@ -39,9 +35,7 @@ Alternatively, Monika for macOS can be installed from its prebuilt binary. Head 
 
 ### Linux
 
-[![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-black.svg)](https://snapcraft.io/monika)
-
-The recommended approach is to use [Snapcraft](https://snapcraft.io/), a universal package manager for Linux. Please check [Monika page on Snapcraft](https://snapcraft.io/monika) for more detailed information.
+The recommended approach is to use [Snapcraft](https://snapcraft.io/), a universal package manager for Linux. Check [Monika page on Snapcraft](https://snapcraft.io/monika) for more detailed information.
 
 Alternatively, Monika for Linux can be automatically downloaded and installed by running an installation script as follows:
 
@@ -49,13 +43,13 @@ Alternatively, Monika for Linux can be automatically downloaded and installed by
 curl https://raw.githubusercontent.com/hyperjumptech/monika/main/scripts/monika-install.sh | sh
 ```
 
-The binary will be placed in placed into `~/.local/bin`.
+The binary will be placed into `~/.local/bin`.
 
 If you prefer to perform the installation manually, head over to [Monika Releases page](https://github.com/hyperjumptech/monika/releases) and download the release archive marked with `linux-x64`. Extract the contents of the archive and the executable `monika` is ready to use. If necessary, make the file executable with `sudo chmod +x monika`.
 
-### via Node.js
+### Via Node.js
 
-With Node.js, Monika is also installable with [npm](https://npmjs.com):
+If you have installed Node.js in your machine, you can install Monika directly from [npm](https://npmjs.com):
 
 ```bash
 npm i -g @hyperjumptech/monika
@@ -69,7 +63,7 @@ yarn global add @hyperjumptech/monika
 
 ## Download the configuration file
 
-Download the example configuration that uses Desktop notification [here](https://raw.githubusercontent.com/hyperjumptech/monika/main/config_sample/config.desktop.example.yml) and rename it as monika.yml
+Once you have installed Monika, let's confirm that it's working by downloading the example configuration that uses Desktop notification called [config.desktop.example.yml](https://raw.githubusercontent.com/hyperjumptech/monika/main/config_sample/config.desktop.example.yml) and rename it as monika.yml.
 
 ## Run Monika
 
@@ -79,7 +73,7 @@ Monika by default reads a yaml configuration file called `monika.yml` in the cur
 monika
 ```
 
-You can specify a path to a YAML configuration file with `-c` flag if you didn't rename your configuration file as monika.yml, as follows
+Otherwise, you can also specify a path to a YAML configuration file with `-c` flag if you didn't rename your configuration file as monika.yml:
 
 ```bash
 monika -c <path_to_configuration_file>
@@ -91,7 +85,7 @@ Better yet, you can provide a URL that contains monika configuration
 monika -c https://domain.com/path/to/your/configuration.yml
 ```
 
-If you are using a remote url to fetch the configuration, you might want to periodically check for changes. You can use the `--config-interval` to check every 10 seconds like this:
+When using remote configuration file, you can use the `--config-interval` to tell Monika to check the configuration file periodically. For example, to check every 10 seconds:
 
 ```bash
 monika -c https://raw.githubusercontent.com/hyperjumptech/monika/main/config_sample/config.desktop.example.yml --config-interval 10
@@ -100,5 +94,7 @@ monika -c https://raw.githubusercontent.com/hyperjumptech/monika/main/config_sam
 Congratulations, you have successfully run Monika in your machine!
 
 ## Next Step
+
+Now it's time to [write your own configuration file](https://monika.hyperjump.tech/guides/configuration-file). You can use [VSCode with YAML extension for the auto completion feature](https://medium.com/hyperjump-tech/creating-monika-configuration-from-scratch-using-autocomplete-in-visual-studio-code-d7bc86c1d36a) or you can also use the[ Monika Config Generator web app](https://monika-config.hyperjump.tech/) if you prefer using Graphical User Interface (GUI).
 
 For advanced configuration such as configuring [notifications](https://monika.hyperjump.tech/guides/notifications), [probes](https://monika.hyperjump.tech/guides/probes), and [alerts](https://monika.hyperjump.tech/guides/alerts), you can find them on the sidebar menu.

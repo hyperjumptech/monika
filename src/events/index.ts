@@ -35,6 +35,9 @@ export default {
     updated: 'CONFIG_UPDATED',
   },
   probe: {
+    alert: {
+      triggered: 'PROBE_ALERT_TRIGGERED',
+    },
     response: {
       received: 'PROBE_RESPONSE_RECEIVED',
     },

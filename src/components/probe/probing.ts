@@ -29,22 +29,39 @@ import YAML from 'yaml'
 import { ProbeRequestResponse, RequestConfig } from '../../interfaces/request'
 import * as qs from 'querystring'
 import { sendPing, PING_TIMEDOUT } from '../../utils/ping'
+import http from 'http'
+import https from 'https'
+import { getContext } from '../../context'
+
+// Keep the agenst alive to reduce the overhead of DNS queries and creating TCP connection.
+// More information here: https://rakshanshetty.in/nodejs-http-keep-alive/
+const httpAgent = new http.Agent({ keepAlive: true })
+const httpsAgent = new https.Agent({ keepAlive: true })
+
+// Create an instance of axios here so it will be reused instead of creating a new one all the time.
+const axiosInstance = axios.create()
+
+type probingParams = {
+  requestConfig: Omit<RequestConfig, 'saveBody' | 'alert'> // is a config object
+  responses: Array<ProbeRequestResponse> // an array of previous responses
+}
 
 /**
  * probing() is the heart of monika requests generation
- * @param {obj} requestConfig is a config object
- * @param {array} responses an array of previous responses
+ * @param {obj} parameter as input object
  * @returns ProbeRequestResponse, response to the probe request
  */
-export async function probing(
-  requestConfig: Omit<RequestConfig, 'saveBody' | 'alert'>,
-  responses: Array<ProbeRequestResponse>
-): Promise<ProbeRequestResponse> {
+export async function probing({
+  requestConfig,
+  responses,
+}: probingParams): Promise<ProbeRequestResponse> {
   // Compile URL using handlebars to render URLs that uses previous responses data
   const { method, url, headers, timeout, body, ping } = requestConfig
   const newReq = { method, headers, timeout, body, ping }
   const renderURL = Handlebars.compile(url)
   const renderedURL = renderURL({ responses })
+
+  const flags = getContext().flags
 
   // Compile headers using handlebars to render URLs that uses previous responses data.
   // In some case such as value is not string, it will be returned as is without being compiled.
@@ -90,7 +107,11 @@ export async function probing(
       newReq.body = renderedBody as any
     } else {
       for (const bk of Object.keys(body)) {
-        const rawBody = (body as any)[bk]
+        let rawBody = (body as any)[bk]
+        if (typeof rawBody !== 'string') {
+          rawBody = JSON.stringify(rawBody)
+        }
+
         const renderBody = Handlebars.compile(rawBody)
         const renderedBody = renderBody({ responses })
 
@@ -120,7 +141,6 @@ export async function probing(
     }
   }
 
-  const axiosInstance = axios.create()
   const requestStartedAt = Date.now()
 
   try {
@@ -157,6 +177,9 @@ export async function probing(
       ...newReq,
       url: renderedURL,
       data: newReq.body,
+      maxRedirects: flags.followRedirects,
+      httpAgent,
+      httpsAgent,
     })
 
     const responseTime = Date.now() - requestStartedAt

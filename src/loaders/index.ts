@@ -27,6 +27,7 @@ import { setupConfig } from '../components/config'
 import { setContext } from '../context'
 import events from '../events'
 import { tlsChecker } from '../jobs/tls-check'
+import type { Probe } from '../interfaces/probe'
 import { loopCheckSTUNServer } from '../looper'
 import {
   PrometheusCollector,
@@ -61,13 +62,18 @@ export default async function init(
 
   // start Promotheus server
   if (flags.prometheus) {
-    const { registerCollectorFromProbes, collectProbeRequestMetrics } =
-      new PrometheusCollector()
+    const {
+      collectProbeTotal,
+      collectProbeRequestMetrics,
+      collectTriggeredAlert,
+    } = new PrometheusCollector()
 
-    // register prometheus metric collectors
-    eventEmitter.on(events.config.sanitized, registerCollectorFromProbes)
     // collect prometheus metrics
+    eventEmitter.on(events.config.sanitized, (probes: Probe[]) => {
+      collectProbeTotal(probes.length)
+    })
     eventEmitter.on(events.probe.response.received, collectProbeRequestMetrics)
+    eventEmitter.on(events.probe.alert.triggered, collectTriggeredAlert)
 
     startPrometheusMetricsServer(flags.prometheus)
   }

@@ -3,55 +3,57 @@ id: probes
 title: Probes
 ---
 
-Probes are the heart of the monitoring requests. Probes are arrays of request objects defined in the config file `monika.yml` like so.
+Probes are the heart of the monitoring requests. Probes are made out of an array of "requests" and some controls. The control parameters determine how the probes are performed, such as repetition intervals, probe name, identification and text descriptions. Requests are either Ping, TCP or HTTP(S) requests to some location.
+Monika goes through each probe object in the `monika.yml` config file, sends it out, and determines whether an alert or notification needs to be sent out.
 
 ```yaml
 probes:
   - id: '1'
     name: Name of the probe
     description: Probe to check GET time
-    interval: 10
+    interval: 10 # in seconds
     requests:
-      - {}
+      - method: GET
+        url: https://github.com
     alerts: []
   - id: '2'
     name: Name of the probe 2
     description: Probe to check GET health
-    interval: 10
+    interval: 10 # in seconds
     requests:
-      - {}
+      - method: GET
+        url: https://github.com
     alerts: []
 ```
 
-Monika goes through each probe object, sends it out, and determines whether an alert or notification needs to be sent out.
+Basically probes are arranged as arrays of request objects.
 
-## Probe Request Anatomy
-
-An actual probe request may be something like below.
+## HTTP Request Anatomy
 
 ```yaml
-  probes: [
-    id: '1'
+probes:
+  - id: '1'
     name: 'Example: get Time'
     description: Probe
-    interval: 10
+    interval: 10 # in seconds
     requests:
-    - method: POST
-      url: https://mybackend.org/user/login
-      timeout: 7000
-      saveBody: true
-      headers:
-        Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkhlbGxvIGZyb20gSHlwZXJqdW1wIiwiaWF0IjoxNTE2MjM5MDIyfQ.T2SbP1G39CMD4MMfkOZYGFgNIQgNkyi0sPdiFi_DfVA
-      body:
-        username: someusername
-        password: somepassword
-      alerts: ARRAY-HERE
+      - method: POST
+        url: https://mybackend.org/user/login
+        timeout: 7000 # in milliseconds
+        saveBody: true
+        headers:
+          Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkhlbGxvIGZyb20gSHlwZXJqdW1wIiwiaWF0IjoxNTE2MjM5MDIyfQ.T2SbP1G39CMD4MMfkOZYGFgNIQgNkyi0sPdiFi_DfVA
+        body:
+          username: someusername
+          password: somepassword
+        alerts:
+          - query: response.status != 200
+            message: Status not 2xx
     incidentThreshold: 3
     recoveryThreshold: 3
     alerts:
-    - query: response.status != 200
-      message: HTTP response status is {{ response.status }}, expecting 200
-  ]
+      - query: response.status != 200
+        message: HTTP response status is {{ response.status }}, expecting 200
 ```
 
 Details of the field are given in the table below.
@@ -60,9 +62,9 @@ Details of the field are given in the table below.
 | :--------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | method                       | Http method such as GET, POST, PUT, DELETE.                                                                                                                                                                                                                                                                                                               |
 | url                          | This is the url endpoint to dispatch the request to.                                                                                                                                                                                                                                                                                                      |
-| timeout                      | Request timeout, after which time, `Monika` will assume timeout.                                                                                                                                                                                                                                                                                          |
-| headers                      | Http headers you might need for your request.                                                                                                                                                                                                                                                                                                             |
-| body                         | Any http body if your method requires it.                                                                                                                                                                                                                                                                                                                 |
+| timeout (optional)           | Request timeout in **milliseconds**, Default value is 10000 which corresponds to 10 seconds. If the request takes longer than `timeout`, the request will be aborted.                                                                                                                                                                                     |
+| headers (optional)           | Http headers you might need for your request.                                                                                                                                                                                                                                                                                                             |
+| body (optional)              | Any http body if your method requires it.                                                                                                                                                                                                                                                                                                                 |
 | interval (optional)          | Number of probe's interval (in seconds). Default value is 10 seconds.                                                                                                                                                                                                                                                                                     |
 | incidentThreshold (optional) | Number of times an alert should return true before Monika sends notifications. For example, when incidentThreshold is 3, Monika will only send notifications when the probed URL returns non-2xx status 3 times in a row. After sending the notifications, Monika will not send notifications anymore until the alert status changes. Default value is 5. |
 | recoveryThreshold (optional) | Number of times an alert should return false before Monika sends notifications. For example, when recoveryThreshold is 3, Monika will only send notifications when the probed URL returns status 2xx 3 times in a row. After sending the notifications, Monika will not send notifications anymore until the alert status changes. Default value is 5.    |
@@ -71,7 +73,7 @@ Details of the field are given in the table below.
 | alerts (optional)            | See [alerts](./alerts) section for detailed information.                                                                                                                                                                                                                                                                                                  |
 | ping (optional)              | (boolean), If set true then send a PING to the specified url instead.                                                                                                                                                                                                                                                                                     |
 
-### PING
+### PING Request
 
 You can send an ICMP echo request to a specific url by enabling the `ping: true` field.
 In this mode the http method is ignored and a PING echo request is sent to the specified url.
@@ -81,7 +83,7 @@ probes:
   - id: 'ping_test'
     name: ping_test
     description: requesting icmp ping
-    interval: 10
+    interval: 10 # in seconds
     requests:
       - url: http://google.com
         ping: true

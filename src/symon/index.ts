@@ -61,6 +61,7 @@ type SymonHandshakeData = {
   os: string
   version: string
   locationId?: string
+  monikaId?: string
 }
 
 type SymonClientEvent = {
@@ -139,7 +140,12 @@ class SymonClient {
 
   private configListeners: ConfigListener[] = []
 
-  constructor(url: string, apiKey: string, locationId?: string | undefined) {
+  constructor(
+    url: string,
+    apiKey: string,
+    locationId?: string | undefined,
+    monikaId?: string | undefined
+  ) {
     this.httpClient = axios.create({
       baseURL: `${url}/api/v1/monika`,
       headers: {
@@ -148,6 +154,8 @@ class SymonClient {
     })
 
     this.locationId = locationId || ''
+
+    this.monikaId = monikaId || ''
 
     this.fetchProbesInterval = Number.parseInt(
       process.env.FETCH_PROBES_INTERVAL ?? '60000',
@@ -227,6 +235,15 @@ class SymonClient {
       }
     }
 
+    // Check if Monika id existed and is valid
+    if (this.monikaId && this.monikaId.trim().length > 0) {
+      const prevHandshakeData = handshakeData
+      handshakeData = {
+        ...prevHandshakeData,
+        monikaId: this.monikaId,
+      }
+    }
+
     return this.httpClient
       .post('/client-handshake', handshakeData)
       .then((res) => res.data?.data.monikaId)
@@ -271,6 +288,7 @@ class SymonClient {
       for (const listener of this.configListeners) {
         listener(newConfig)
       }
+
       setPauseProbeInterval(false)
     } else {
       log.debug(`Received config does not change.`)
@@ -364,7 +382,7 @@ class SymonClient {
         )
       }
     } catch (error: any) {
-      log.warn("Warning: Can't set report interval. " + error?.message)
+      log.warn(`Warning: Can't set report interval. ${error?.message}`)
     }
   }
 
@@ -381,7 +399,7 @@ class SymonClient {
 
       log.debug('Status successfully sent to Symon.')
     } catch (error: any) {
-      log.warn("Warning: Can't send status to Symon. " + error?.message)
+      log.warn(`Warning: Can't send status to Symon. ${error?.message}`)
     }
   }
 }

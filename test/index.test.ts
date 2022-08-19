@@ -48,15 +48,6 @@ describe('monika', () => {
   })
 
   test
-    .stdout()
-    .do(() =>
-      cmd.run(['--config', resolve('./test/testConfigs/noInterval.yml')])
-    )
-    .it('runs with config without interval', (ctx) => {
-      expect(ctx.stdout).to.contain('Starting Monika.')
-    })
-
-  test
     .stderr()
     .do(() =>
       cmd.run([
@@ -69,7 +60,7 @@ describe('monika', () => {
     })
     .it('runs with config with invalid notification type')
 
-  // Probes Test
+  // Probes Test`
   test
     .stderr()
     .do(() =>

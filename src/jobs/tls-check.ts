@@ -56,6 +56,7 @@ export function tlsChecker() {
             id: '',
             name: '',
             requests: [],
+            interval: 10,
             incidentThreshold: 0,
             recoveryThreshold: 0,
             alerts: [],

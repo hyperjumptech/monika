@@ -15,9 +15,14 @@
           "editUrl": "/quick-start.md"
         },
         {
-          "title": "How-to",
-          "path": "/articles",
-          "editUrl": "/articles.js"
+          "title": "Configuration File",
+          "path": "/guides/configuration-file",
+          "editUrl": "/guides/configuration-file.md"
+        },
+        {
+          "title": "CLI Options",
+          "path": "/guides/cli-options",
+          "editUrl": "/guides/cli-options.md"
         }
       ]
     },
@@ -29,16 +34,6 @@
           "title": "Alerts",
           "path": "/guides/alerts",
           "editUrl": "/guides/alerts.md"
-        },
-        {
-          "title": "CLI Options",
-          "path": "/guides/cli-options",
-          "editUrl": "/guides/cli-options.md"
-        },
-        {
-          "title": "Configuration File",
-          "path": "/guides/configuration-file",
-          "editUrl": "/guides/configuration-file.md"
         },
         {
           "title": "Notifications",
@@ -110,20 +105,14 @@
       ]
     },
     {
-      "title": "Deployment",
-      "heading": true,
-      "routes": [
-        {
-          "title": "Deploy to Fly.io",
-          "path": "/deployment/deploy-to-fly-io",
-          "editUrl": "/deployment/deploy-to-fly.io.md"
-        }
-      ]
-    },
-    {
       "title": "Tutorial",
       "heading": true,
       "routes": [
+        {
+          "title": "How-to",
+          "path": "/articles",
+          "editUrl": "/articles.js"
+        },
         {
           "title": "Run with GMail Notification",
           "path": "/tutorial/run-with-gmail-notification",

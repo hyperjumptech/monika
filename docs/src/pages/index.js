@@ -26,12 +26,10 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Head from 'next/head'
 
-import { siteConfig } from '../siteConfig'
 import { Seo } from '../components/Seo'
-import ButtonLink from '../components/ButtonLink'
 import GithubButton from '../components/homepage/github-button'
 import PrimaryButton from '../components/homepage/primary-button'
-import TestimonialsCard from '../components/homepage/testimonials-card'
+import TestimonialCard from '../components/homepage/testimonial-card'
 import FeatureCard from '../components/homepage/feature-card'
 import ArticleCard from '../components/homepage/article-card'
 import { event } from 'lib/gtag'
@@ -124,7 +122,7 @@ export default function IndexPage() {
       tag: '',
     },
     {
-      url: 'https://hyperjumptech.github.io/monika/guides/notifications#whatsapp',
+      url: 'https://hyperjumptech.github.io/monika/guides/notifications#whatsapp-business',
       img: 'whatsapp.png',
       title: 'WhatsApp Business',
       tag: '',
@@ -175,13 +173,13 @@ export default function IndexPage() {
             </div>
             <div className="menu">
               <Link href="/overview">
-                <a className="link01">Documentation</a>
+                <a className="link01 mx-3">Documentation</a>
               </Link>
               <a
                 href="https://monika-config.hyperjump.tech/"
                 target="_blank"
                 rel="noreferrer noopener"
-                className="link02"
+                className="link02 mr-3 text-center"
               >
                 Config Generator
               </a>
@@ -189,7 +187,7 @@ export default function IndexPage() {
                 href="https://whatsapp.hyperjump.tech/"
                 target="_blank"
                 rel="noreferrer noopener"
-                className="link03"
+                className="link03 mr-3 text-center"
               >
                 WhatsApp Notifier
               </a>
@@ -201,6 +199,19 @@ export default function IndexPage() {
               >
                 Discussion
               </a>
+              <div className="md:flex hidden w-36 justify-center items-center bg-gradient-to-r from-aqua-monika to-purple-monika rounded-full p-08 h-9">
+                <a
+                  className="flex flex-row justify-items-center justify-center bg-black w-full rounded-full md:p-1 pl-1 h-8"
+                  href="https://github.com/hyperjumptech/monika"
+                  target="_blank"
+                  rel="noreferrer noopener"
+                >
+                  <img alt="stars" src="/playground_assets/github_icons.svg" />
+                  <p className="text-transparent bg-clip-text bg-gradient-to-r from-aqua-monika to-purple-monika pl-2 text-xs md:text-base font-bold md:m-08 m-2">
+                    Github
+                  </p>
+                </a>
+              </div>
             </div>
             {!isOpenMobileMenu && (
               <div
@@ -215,25 +226,6 @@ export default function IndexPage() {
                 </svg>
               </div>
             )}
-            <ButtonLink
-              className="hidden ml-4 items-center leading-snug hover:opacity-75 md:flex"
-              href={siteConfig.repoUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <svg
-                className="h-6 w-6 mr-2"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
-                  clipRule="evenodd"
-                />
-              </svg>{' '}
-              Github
-            </ButtonLink>
           </header>
           <div
             data-type="MobileMenu"
@@ -323,70 +315,95 @@ export default function IndexPage() {
               src="/playground_assets/world%20dot-logo%20%5B2%5D-700w.png"
               className="image03"
             />
-            <div className="container01">
-              <div className="container02">
-                <h1 className="text01">
-                  <span>Get WhatsApp</span>
-                  <br></br>
-                  <span>notification when your</span>
-                </h1>
-                <h1 className="text05">web app is down</h1>
-                <span className="text06">
-                  <span className="text07">
-                    Or from any other communication channel. It&apos;s quick,
-                    <span
-                      dangerouslySetInnerHTML={{
-                        __html: ' ',
-                      }}
-                    />
+            <div className="relative">
+              <div className="md:w-128 w-full">
+                <h1 className="lg:text-left text-center md:text-52 text-3xl font-bold md:leading-62 leading-tight text-white">
+                  Get WhatsApp notification when your
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-aqua-monika to-purple-monika md:text-52 text-4x font-bold md:leading-62 leading-tight">
+                    {' '}
+                    web app is down
                   </span>
-                  <br></br>
-                  <span className="text08">​easy, and completely free!</span>
-                </span>
+                </h1>
+                <p className="my-5 text-white md:text-xl text-sm font-normal lg:text-left text-center">
+                  Or from any other communication channel. It&apos;s quick,
+                  easy, and completely free!
+                </p>
+              </div>
+              <div className="flex flex-col justify-center lg:items-start items-center">
                 <img
                   alt="image"
                   src="/playground_assets/socials-group-200h.png"
-                  className="image04"
+                  className="grid grid-cols-4 gap-4 max-w-full h-auto"
                 />
-                <Link href="/quick-start">
-                  <a
-                    className="link11"
-                    style={{ display: 'block' }}
-                    onClick={() =>
-                      event({
-                        action: 'cta_button_hero',
-                        category: 'cta_button',
-                      })
-                    }
-                  >
-                    <PrimaryButton
-                      button="Get Started in 30 seconds"
-                      rootClassName="rootClassName"
-                      className="component02"
-                    ></PrimaryButton>
-                  </a>
-                </Link>
-                <div className="container03 space-x-4">
-                  <a
-                    href="https://github.com/hyperjumptech/monika"
-                    target="_blank"
-                    rel="noreferrer noopener"
-                  >
-                    <img
-                      alt="GitHub stars"
-                      src="https://img.shields.io/github/stars/hyperjumptech/monika?style=for-the-badge"
-                    />
-                  </a>
-                  <img
-                    alt="npm"
-                    src="https://img.shields.io/npm/dt/@hyperjumptech/monika?style=for-the-badge"
-                  />
+                <div className="lg:w-full w-full md:w-4/5">
+                  <Link href="/quick-start">
+                    <a
+                      onClick={() =>
+                        event({
+                          action: 'cta_button_hero',
+                          category: 'cta_button',
+                        })
+                      }
+                    >
+                      <PrimaryButton
+                        button="Get Started in 30 seconds"
+                        rootClassName="rootClassName"
+                        className="w-full"
+                      ></PrimaryButton>
+                    </a>
+                  </Link>
+                  <div className="flex flex-row justify-between">
+                    <div className="flex flex-1 items-center bg-gradient-to-r from-aqua-monika to-purple-monika rounded-full p-08 mr-2 h-9">
+                      <a
+                        className="flex flex-row justify-items-center justify-center bg-black w-full rounded-full md:p-1 pl-1 h-8"
+                        href="https://github.com/hyperjumptech/monika"
+                        target="_blank"
+                        rel="noreferrer noopener"
+                      >
+                        <img
+                          className="py-1 md:py-0"
+                          alt="stars"
+                          src="/playground_assets/github_icons.svg"
+                        />
+                        <p className="pl-2 text-transparent bg-clip-text bg-gradient-to-r from-aqua-monika to-purple-monika text-base font-bold md:m-08 my-1">
+                          Stars (
+                        </p>
+                        <img
+                          className="md:w-auto md:py-0 py-1"
+                          alt="Github stars"
+                          src="https://img.shields.io/github/stars/hyperjumptech/monika?color=%2366000000%20&label=%20&logo=%20%20&style=flat-square"
+                        />
+                        <p className="text-transparent bg-clip-text bg-gradient-to-r from-aqua-monika to-purple-monika text-base font-bold md:m-08 my-1">
+                          )
+                        </p>
+                      </a>
+                    </div>
+                    <div className="flex flex-1 items-center bg-gradient-to-r from-aqua-monika to-purple-monika rounded-full p-08 h-9">
+                      <a
+                        className="flex justify-items-start"
+                        href="https://github.com/hyperjumptech/monika"
+                        target="_blank"
+                        rel="noreferrer noopener"
+                      >
+                        <div className="w-2/3 justify-center bg-black rounded-l-3xl mr-2 md:mr-5 p-1 md:px-5 h-8">
+                          <p className="text-white text-base font-bold mx-2">
+                            Downloads
+                          </p>
+                        </div>
+                        <img
+                          className="w-10 md:p-0 py-08"
+                          alt="Github downloads"
+                          src="https://img.shields.io/github/downloads/hyperjumptech/monika/total?color=%2366000000%20&label=%20&logo=%20&style=flat-square"
+                        />
+                      </a>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-            <div className="container04">
+            <div>
               <iframe
-                className="my-auto md:w-96 md:h-72 w-56 h-32 video"
+                className="relative md:w-28r w-full justify-center mt-5 lg:my-2 h-96 ml-3"
                 src="https://www.youtube.com/embed/po1XHcIbJVw"
                 title="YouTube video player"
                 frameBorder="0"
@@ -396,27 +413,40 @@ export default function IndexPage() {
             </div>
           </div>
         </div>
+        <div className="line">
+          <div className="absolute right-0 top-0 bg-gradient-to-r from-aqua-monika to-purple-monika w-1/2 md:w-96 h-6"></div>
+        </div>
         <div className="testimonials">
-          <div className="container05">
+          <div className="container05 my-10">
             <div className="container">
-              <h1 className="text09 headline2">What They Say</h1>
-              <h1 className="text10 headline2">About Monika</h1>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-10">
-                <TestimonialsCard
-                  text="Thank you Monika by Hyperjump.  With Monika, we can improve our services SLA, get notified early when we have a server issue. Easy to install, have multi notification channels, can be setup from different server regions, and is easy to integrate on the dashboard make it all complete and help us to analyze the issue asap."
-                  text1="Eric Sudadyo"
-                  text2="DevOps Manager, Yummycorp"
+              <p className="md:text-3xl text-xl md:text-left text-center">
+                Let’s Hear What{' '}
+                <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-aqua-monika to-purple-monika">
+                  They Say
+                </span>
+              </p>
+              <h1 className="text-transparent bg-clip-text bg-gradient-to-r from-aqua-monika to-purple-monika md:text-52 text-4xl font-bold md:text-left text-center">
+                About Monika
+              </h1>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
+                <TestimonialCard
+                  description="Thank you Monika by Hyperjump.  With Monika, we can improve our services SLA, get notified early when we have a server issue. Easy to install, have multi notification channels, can be setup from different server regions, and is easy to integrate on the dashboard make it all complete and help us to analyze the issue asap."
+                  name="Eric Sudadyo"
+                  text="DevOps Manager, Yummycorp"
                   image_src="/playground_assets/yummy-200h.png"
                 />
-                <TestimonialsCard
-                  text="Before using Monika, we were unaware when our website is down until our users reported it. We don’t want it to happen again. Now with Monika, we are notified much faster so our team can react quicker to solve the issue. Thank you, Monika!"
-                  text1="Marsya Nurmaranti"
-                  text2="Executive Director, Indorelawan"
+                <TestimonialCard
+                  description="Before using Monika, we were unaware when our website is down until our users reported it. We don’t want it to happen again. Now with Monika, we are notified much faster so our team can react quicker to solve the issue. Thank you, Monika!"
+                  name="Marsya Nurmaranti"
+                  text="Executive Director, Indorelawan"
                   image_src="/playground_assets/indorelawan_logomerah%20panjang_png-200h.png"
                 />
               </div>
             </div>
           </div>
+        </div>
+        <div className="line">
+          <div className="absolute left-0 top-0 bg-gradient-to-r from-aqua-monika to-purple-monika w-1/2 md:w-96 h-6"></div>
         </div>
         <img
           alt="image"
@@ -424,8 +454,12 @@ export default function IndexPage() {
           className="image06"
         />
         <div className="features">
-          <h2 className="text11 headline2">4 Simple Steps to Start</h2>
-          <h2 className="text12">Monika</h2>
+          <h1 className="md:text-52 text-3xl md:text-left text-center text-white mb-3">
+            4 Simple Steps to Start{' '}
+            <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-aqua-monika to-purple-monika">
+              Monika
+            </span>
+          </h1>
           <span className="text13">
             <span className="text14">
               Here are the steps to guide you to use Monika.
@@ -452,7 +486,8 @@ export default function IndexPage() {
             <div className="container11">
               <FeatureCard
                 text="Get Monika using the popular package manager: Homebrew (macOS), Snap (Linux), or Chocolatey (Windows)"
-                title="2. Install "
+                title="2. Install"
+                title3="npm i -g @hyperjumptech/monika"
                 image_src="/playground_assets/downloading-400w.png"
                 rootClassName="rootClassName2"
               ></FeatureCard>
@@ -465,20 +500,23 @@ export default function IndexPage() {
                 image_src="/playground_assets/configuration%20file-400w.png"
                 link_text="https://monika-config.hyperjump.tech/"
                 rootClassName="rootClassName1"
-              ></FeatureCard>
-              <a
-                href="https://monika-config.hyperjump.tech/"
-                target="_blank"
-                rel="noreferrer noopener"
-                className="link14"
-              >
-                Monika Config Generator
-              </a>
+              />
+              <p className="mt-5 text-center">
+                <a
+                  href="https://monika-config.hyperjump.tech/"
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="text-aqua-monika text-sm"
+                >
+                  Monika Config Generator
+                </a>
+              </p>
             </div>
             <div className="container14">
               <FeatureCard
                 text="Monika by default reads a yaml configuration file called monika.yml in the current working directory if it exists. Run this command in the Terminal from the directory that contains the monika.yml file:"
-                title="4. Run Monika"
+                title="4. Run"
+                title2="Monika"
                 image_src="/playground_assets/step%204-400w.png"
                 rootClassName="rootClassName3"
               ></FeatureCard>
@@ -486,16 +524,18 @@ export default function IndexPage() {
                 <span className="text18">monika</span>
               </div>
             </div>
+          </div>
+          <div className="flex justify-center items-center flex-col mb-10">
             <img
               alt="image"
               src="/playground_assets/success%20%5B1%5D-500w.png"
-              className="image07"
+              className="w-32r mb-5 object-cover"
             />
+            <p className="text-2xl w-3/4 text-white text-center font-semibold">
+              Congratulations! Your web app is being monitored and Monika will
+              send you notification if something happens.
+            </p>
           </div>
-          <span className="text19">
-            Congratulations! Your web app is being monitored and Monika will
-            send you notification if something happens.
-          </span>
         </div>
 
         <div className="bg-white w-full py-10">
@@ -581,17 +621,19 @@ export default function IndexPage() {
           </div>
         </div>
         <div className="c-t-a">
+          <img
+            src="/playground_assets/hero-bg-line.svg"
+            className="absolute mt-20 w-100%"
+          />
           <div className="container20">
             <div className="container21">
-              <h2 className="text23 headline2">
-                <span className="text24">Get Started with Monika Now!</span>
+              <h2 className="text-white md:text-left lg:text-44 text-3xl text-center font-bold">
+                Get Started with Monika Now!
               </h2>
-              <span className="text25 lead1">
-                <span className="text26">
-                  Monika is an open source synthetic monitoring command line
-                  application. It is actively developed and completely free!
-                </span>
-              </span>
+              <p className="text-white font-medium lg:text-2xl lg:w-3/4 w-full md:my-0 my-4 md:text-left text-center">
+                Monika is an open source synthetic monitoring command line
+                application. It is actively developed and completely free!
+              </p>
             </div>
             <div className="container22">
               <Link href="/quick-start">
@@ -628,6 +670,9 @@ export default function IndexPage() {
                 <span className="text27">Resources</span>
                 <Link href="/overview">
                   <a className="link17">Documentation</a>
+                </Link>
+                <Link href="https://medium.com/hyperjump-tech">
+                  <a className="link17">Blog</a>
                 </Link>
                 <Link href="/articles">
                   <a className="link18">How-to</a>
@@ -764,7 +809,6 @@ export default function IndexPage() {
           .link01 {
             color: var(--dl-color-gray-white);
             transition: 0.3s;
-            margin-right: var(--dl-space-space-doubleunit);
             text-decoration: none;
           }
           .link01:hover {
@@ -773,7 +817,6 @@ export default function IndexPage() {
           .link02 {
             color: var(--dl-color-gray-white);
             transition: 0.3s;
-            margin-right: var(--dl-space-space-doubleunit);
             text-decoration: none;
           }
           .link02:hover {
@@ -782,7 +825,6 @@ export default function IndexPage() {
           .link03 {
             color: var(--dl-color-gray-white);
             transition: 0.3s;
-            margin-right: var(--dl-space-space-doubleunit);
             text-decoration: none;
           }
           .link03:hover {
@@ -933,6 +975,7 @@ export default function IndexPage() {
             align-items: center;
             flex-direction: row;
             justify-content: space-between;
+            margin-bottom: 30px;
           }
           .image03 {
             left: 0px;
@@ -964,24 +1007,27 @@ export default function IndexPage() {
           }
           .text01 {
             color: var(--dl-color-gray-white);
-            width: 582px;
+            width: 560px;
             font-size: 52px;
             text-align: left;
             font-family: Inter;
-            font-weight: 800;
+            font-weight: 700;
             text-transform: none;
             text-decoration: none;
+            line-height: 120%;
           }
           .text05 {
             font-size: 52px;
             font-style: normal;
-            font-weight: 800;
+            font-weight: 700;
             margin-bottom: var(--dl-space-space-unit);
             background-image: linear-gradient(310deg, #2fdcdc, #987ce8);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            line-height: 120%;
           }
           .text06 {
+            margin-top: var(--dl-space-space-unit);
             margin-bottom: var(--dl-space-space-unit);
           }
           .text07 {
@@ -1048,6 +1094,12 @@ export default function IndexPage() {
             padding-bottom: var(--dl-space-space-tripleunit);
             justify-content: center;
             background-color: var(--dl-color-gray-white);
+            transform: skew(0deg, -5deg);
+          }
+          .line {
+            width: 100%;
+            padding: 10px;
+            transform: skew(0deg, -5deg);
           }
           .container05 {
             display: flex;
@@ -1056,6 +1108,7 @@ export default function IndexPage() {
             align-items: center;
             flex-direction: row;
             justify-content: center;
+            transform: skew(0deg, 5deg);
           }
           .container06 {
             flex: 0 0 auto;
@@ -1119,6 +1172,7 @@ export default function IndexPage() {
           }
           .features {
             flex: 0 0 auto;
+            margin-top: 2rem;
             width: 100%;
             display: flex;
             padding: var(--dl-space-space-doubleunit);
@@ -1153,10 +1207,9 @@ export default function IndexPage() {
           }
           .features1 {
             display: flex;
-            padding: var(--dl-space-space-doubleunit);
             flex-wrap: wrap;
             margin-top: var(--dl-space-space-doubleunit);
-            align-items: flex-start;
+            align-items: flex-center;
             flex-direction: row;
             justify-content: center;
           }
@@ -1201,7 +1254,7 @@ export default function IndexPage() {
             flex: 0 0 auto;
             display: flex;
             padding: var(--dl-space-space-doubleunit);
-            align-items: flex-start;
+            // align-items: flex-start;
             flex-direction: column;
           }
           .link14 {
@@ -1335,7 +1388,7 @@ export default function IndexPage() {
             justify-content: flex-start;
           }
           .c-t-a {
-            width: 100%;
+            width: 96%;
             display: flex;
             overflow: hidden;
             align-items: center;
@@ -1348,20 +1401,22 @@ export default function IndexPage() {
             display: flex;
             z-index: 100;
             max-width: 1110px;
-            background: linear-gradient(310deg, #2fdcdc, #987ce8);
+            background: linear-gradient(350deg, #2fdcdc, rgba(255, 0, 0, 0) 20%),
+              linear-gradient(45deg, #2fdcdc, rgba(0, 255, 0, 0) 30.71%),
+              linear-gradient(336deg, #987ce8, #987ce8 80.71%);
             align-items: center;
             padding-top: var(--dl-space-space-doubleunit);
             padding-left: var(--dl-space-space-doubleunit);
             padding-right: var(--dl-space-space-tripleunit);
-            flex-direction: column;
+            flex-direction: row;
             padding-bottom: var(--dl-space-space-doubleunit);
             justify-content: space-between;
+            border-radius: 10px;
           }
           .container21 {
-            flex: 1;
+            flex: 2;
             display: flex;
-            padding: var(--dl-space-space-unit);
-            align-items: center;
+            padding: var(--dl-space-space-doubleunit);
             flex-direction: column;
             justify-content: flex-start;
           }
@@ -1384,8 +1439,9 @@ export default function IndexPage() {
           .container22 {
             flex: 0 0 auto;
             display: flex;
+            width: 250px;
             align-items: center;
-            border-radius: var(--dl-radius-radius-radius6);
+            border-radius: 20px;
             flex-direction: column;
             justify-content: center;
             background-color: var(--dl-color-gray-white);
@@ -1415,6 +1471,7 @@ export default function IndexPage() {
             flex: 0 0 auto;
             width: 100%;
             display: flex;
+            margin-top: 2rem;
             padding: var(--dl-space-space-doubleunit);
             z-index: 100;
             flex-wrap: wrap;
@@ -1567,6 +1624,18 @@ export default function IndexPage() {
             }
           }
           @media (max-width: 767px) {
+            .container20 {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              border-radius: 0;
+            }
+            .container21 {
+              padding: var(--dl-space-space-singleunit);
+            }
+            .c-t-a {
+              width: 100%;
+            }
             .menu {
               display: none;
             }
@@ -1676,6 +1745,7 @@ export default function IndexPage() {
             }
             .container23 {
               flex-direction: column;
+              margin-top: 0;
             }
           }
         `}

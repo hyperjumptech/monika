@@ -46,7 +46,7 @@ probes:
   - id: '1'
     name: something
     description: some description
-    interval: 0
+    interval: 10
     requests:
       - method: POST
         url: https://something/login

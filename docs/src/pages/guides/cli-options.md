@@ -203,6 +203,22 @@ Merge your existing configurations with an Insomnia collection file using `-c/--
 monika --config monika-notifications.yml --insomnia /insomnia/collection.yml
 ```
 
+## Sitemap
+
+Monika supports reading sitemap.xml as configuration input. Use the `--sitemap` switches.
+
+```bash
+monika --sitemap sitemap.xml
+```
+
+### Create config from Sitemap file
+
+You can use the combination of `--create-config` and `--sitemap` flags to convert the sitemap xml file to a monika.yml config file.
+
+```bash
+monika --create-config --sitemap sitemap.xml
+```
+
 ## Prometheus
 
 You can expose the [Prometheus](https://prometheus.io/) metrics server with the `--prometheus` flag and server port as a value.
@@ -223,6 +239,7 @@ Monika exposes [Prometheus default metrics](https://prometheus.io/docs/instrumen
 | `monika_request_status_code_info`      | Gauge     | Collect HTTP status code                     | `id`, `name`, `url`, `method`               |
 | `monika_request_response_time_seconds` | Histogram | Collect duration of probe request in seconds | `id`, `name`, `url`, `method`, `statusCode` |
 | `monika_request_response_size_bytes`   | Gauge     | Collect size of response size in bytes       | `id`, `name`, `url`, `method`, `statusCode` |
+| `monika_alert_total`                   | Counter   | Collect total alert triggered                | `id`, `name`, `url`, `method`, `alertQuery` |
 
 ## Repeat
 
@@ -238,15 +255,39 @@ You can combine this flag with the `--id` flag to repeat custom sequences.
 monika -r 3 -i 1,3,1
 ```
 
+## Maximum start delay
+
+When there are many probes, Monika by default will not start the probing all at the same time. It will delay the start of the probing by dividing the value of `--max-start-delay` flag with the number of the probes plus a random value between 0 to 1 seconds. This is to prevent connection timeout due to probing too many probes at the same time. The default value of `--max-start-delay` is 60000 (milliseconds) which corresponds to 1 minutes.
+
+```bash
+monika --max-start-delay 300000 # this will set max-start-delay to 5 minutes.
+```
+
+## Follow Redirects
+
+By default Monika will follow redirects once. You can set the value of `--follow-redirects` flag to tell Monika to follow redirects as many as you want. If you don't want to follow redirects, set the value to zero.
+
+```bash
+monika --follow-redirects 0 # disable following redirects
+```
+
 ## STUN
 
-By default monika will continuously check the [STUN](https://en.wikipedia.org/wiki/STUN) server in 20 second intervals. You can specify the number of intervals using the `-s` or `--stun` flags followed by a number in seconds. For example to set the interval to 10 seconds type the command below:
+By default monika will continuously check the [STUN](https://en.wikipedia.org/wiki/STUN) server every 20 second intervals. Continuously STUN checking ensures that connectivity to the outside world is guaranteed. When STUN checking fails, Monika assumes the network is down and probing will be paused.
+
+You can specify the number of checking intervals using the `-s` or `--stun` flags followed by a number in seconds. For example to set the interval to every 10 seconds type the parameter below:
 
 ```bash
 monika -s 10
 ```
 
 If the number is zero or less, monika will check the STUN server just once, not repeatedly, to get public IP.
+
+For internal networks where no outside connection is needed, you can disable the STUN checking by setting the `-s` flag to `-1` as follows.
+
+```bash
+monika -s -1
+```
 
 ## Summary
 

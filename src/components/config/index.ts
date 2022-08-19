@@ -131,7 +131,7 @@ const watchConfigFile = (
 
 const scheduleRemoteConfigFetcher = (
   url: string,
-  configType: 'monika' | 'har' | 'insomnia' | 'postman',
+  configType: 'monika' | 'har' | 'insomnia' | 'postman' | 'sitemap',
   interval: number,
   index?: number
 ) => {
@@ -153,7 +153,7 @@ const scheduleRemoteConfigFetcher = (
 
 const parseConfigType = async (
   source: string,
-  configType: 'monika' | 'har' | 'insomnia' | 'postman',
+  configType: 'monika' | 'har' | 'insomnia' | 'postman' | 'sitemap',
   flags: any,
   index?: number
 ): Promise<Partial<Config>> => {
@@ -164,7 +164,25 @@ const parseConfigType = async (
     watchConfigFile(source, configType, index, flags.repeat)
   }
 
-  return parseConfig(source, configType)
+  const parsed = await parseConfig(source, configType)
+
+  return {
+    ...parsed,
+    probes: parsed.probes?.map((probe) => {
+      const requests =
+        probe?.requests?.map((request) => ({
+          ...request,
+          timeout: request.timeout ?? 10_000,
+        })) ?? []
+
+      const interval = () => {
+        if (typeof probe?.interval === 'number') return probe.interval
+        return requests.length * 10 === 0 ? 10 : requests.length * 10
+      }
+
+      return { ...probe, interval: interval(), requests }
+    }),
+  }
 }
 
 const parseDefaultConfig = async (flags: any): Promise<Partial<Config>[]> => {
@@ -191,7 +209,8 @@ export const setupConfig = async (flags: any): Promise<void> => {
     flags.config.length === 0 &&
     flags.har === undefined &&
     flags.postman === undefined &&
-    flags.insomnia === undefined
+    flags.insomnia === undefined &&
+    flags.sitemap === undefined
   ) {
     log.info(`No Monika configuration available, initializing...`)
     const configFilename = await createConfigFile(flags)
@@ -206,6 +225,8 @@ export const setupConfig = async (flags: any): Promise<void> => {
     nonDefaultConfig = await parseConfigType(flags.postman, 'postman', flags)
   } else if (flags.insomnia) {
     nonDefaultConfig = await parseConfigType(flags.insomnia, 'insomnia', flags)
+  } else if (flags.sitemap) {
+    nonDefaultConfig = await parseConfigType(flags.sitemap, 'sitemap', flags)
   }
 
   if (defaultConfigs.length === 0 && nonDefaultConfig !== undefined) {
@@ -234,6 +255,11 @@ const getPathAndTypeFromFlag = (flags: any) => {
     type = 'insomnia'
   }
 
+  if (flags.sitemap) {
+    path = flags.sitemap
+    type = 'sitemap'
+  }
+
   return {
     path,
     type,
@@ -243,7 +269,7 @@ const getPathAndTypeFromFlag = (flags: any) => {
 // disable warn "any" type parameter
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const createConfig = async (flags: any): Promise<void> => {
-  if (!flags.har && !flags.postman && !flags.insomnia) {
+  if (!flags.har && !flags.postman && !flags.insomnia && !flags.sitemap) {
     log.info(
       'Opening Monika Configuration Generator in your default browser...'
     )

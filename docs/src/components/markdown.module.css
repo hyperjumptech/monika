@@ -67,7 +67,7 @@
 .markdown > ol > li > a,
 .markdown > blockquote > p > a,
 .markdown > table > tbody > tr > td > a {
-  @apply bg-gradient-to-r from-purple-monika to-aqua-monika bg-clip-text text-transparent font-semibold transition-colors duration-150 ease-out;
+  @apply text-purple-monika font-semibold transition-colors duration-150 ease-out;
 }
 
 .markdown > p > a:hover,
