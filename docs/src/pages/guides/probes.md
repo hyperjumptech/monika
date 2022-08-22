@@ -190,6 +190,40 @@ probes:
         # This will be rendered as http://github.com/user?id=d8ffd51c-88cd-453e-906e-389b145891e7
 ```
 
+If you want to use it as a request body, you can use it like this:
+
+```
+probes:
+  - id: '0'
+    name: '0'
+    interval: 10
+    requests:
+      - url: https://httpbin.org/post
+        method: POST
+        body:
+          timestamp: '{{ timestamp }}'
+          id: '{{ uuid }}'
+          # This will be rendered as { timestamp: 1661159139803, id: d8ffd51c-88cd-453e-906e-389b145891e7 }
+```
+
+The same goes for the request headers, you can use it like this:
+
+```
+probes:
+  - id: '0'
+    name: '0'
+    interval: 10
+    requests:
+      - url: https://httpbin.org/post
+        method: POST
+        body:
+          timestamp: '{{ timestamp }}'
+          id: '{{ uuid }}'
+        headers:
+          'X-USER-ID': '{{ uuid }}'
+          # This will be rendered as { X-USER-ID: d8ffd51c-88cd-453e-906e-389b145891e7 }
+```
+
 ## Postman JSON file support
 
 > NOTE: We only support Postman collection v2.0 and v2.1 files.
