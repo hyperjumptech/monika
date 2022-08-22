@@ -25,16 +25,22 @@
 import { faker } from '@faker-js/faker'
 
 export default {
+  alpha: (): string => faker.random.alpha({ count: 8 }),
+  alphaNumeric: (): string => faker.random.alphaNumeric(8),
   countryCode: (): string => faker.address.countryCode(),
   color: (): string => faker.color.human(),
   currency: (): string => faker.finance.currencyCode(),
   email: (): string => faker.internet.email(),
-  gender: (): string => faker.name.gender(false),
-  latitude: (): string => faker.address.latitude(),
-  longitude: (): string => faker.address.longitude(),
-  number: (): string => faker.datatype.number().toString(),
+  fullName: (): string => faker.name.fullName(),
+  gender: (): string => faker.name.gender(true),
+  latitude: (): string => faker.address.latitude().toString(),
+  lines: (): string => faker.lorem.lines(),
+  longitude: (): string => faker.address.longitude().toString(),
+  number: (): string => faker.datatype.number({ min: 1, max: 1000 }).toString(),
   objectId: (): string => faker.database.mongodbObjectId(),
   statusCode: (): string => faker.internet.httpStatusCode().toString(),
   timestamp: (): string => Date.now().toString(),
   uuid: (): string => faker.datatype.uuid(),
+  word: (): string => faker.random.word(),
+  words: (): string => faker.random.words(3),
 }
