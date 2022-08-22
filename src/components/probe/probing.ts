@@ -66,8 +66,6 @@ export async function probing({
   const renderURL = Handlebars.compile(url)
   const renderedURL = renderURL({ responses })
 
-  console.log(renderedURL)
-
   const flags = getContext().flags
 
   // Compile headers using handlebars to render URLs that uses previous responses data.
