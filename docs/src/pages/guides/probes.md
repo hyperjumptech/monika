@@ -148,6 +148,48 @@ Currently, Monika only supports Content-Type value `application/x-www-form-urlen
 
 By default, the request body will be treated as-is. If the request header's `Content-Type` is set to `application/x-www-form-urlencoded`, it will be serialized into URL-safe string in UTF-8 encoding.
 
+## Fake Data
+
+You can use fake data to pass through your URLs, request body, and request headers. Here is the list of available fake data:
+
+- **alpha**: Returns a random string with the length of 8 characters. (e.g **abcdefgh**)
+- **alphaNumeric**: Returns a random string with the length of 8 alphanumeric characters. (e.g **ab12efgh**)
+- **countryCode**: Returns a country code (e.g **ID, MY, SG**)
+- **color**: Returns a color (e.g **lime, red, green**)
+- **currency**: Returns a currency (e.g **USD, IDR, JPY**)
+- **email**: Returns an email (e.g **monika@hyperjump.tech**)
+- **fullName**: Returns a full name (e.g **John Doe**)
+- **gender**: Returns a gender (e.g **Male/Female**)
+- **latitude**: Returns a latitude (e.g **-103.44**)
+- **lines**: Returns a lorem ipsum lines (e.g **Lorem ipsum dolor sit amet**)
+- **longitude**: Returns a longitude (e.g **95.45**)
+- **number**: Returns a random number range from 1-to 1000 (e.g **720**, **480**)
+- **objectId**: Returns a MongoDB ObjectID (e.g **63034695eca3670c4e083657**)
+- **statusCode**: Returns a status code (e.g **200, 404, 500**)
+- **timestamp**: Returns current time in a form of a UNIX timestamp (e.g **1661159139803**)
+- **uuid**: Returns a UUID (e.g **d8ffd51c-88cd-453e-906e-389b145891e7**)
+- **word**: Returns a word (e.g **nicely, done**)
+- **words**: Returns 3 words (e.g **such fascinating energies**)
+
+To use the fake data, all you need to do is to wrap them in the double curly brackets like the example below:
+
+```
+probes:
+  - id: '6'
+    name: '6'
+    interval: 10
+    requests:
+      - url: http://github.com?timestamp={{ timestamp }}
+        # This will be rendered as https://github.com?timestamp=1661159139803
+
+  - id: '15'
+    name: '15'
+    interval: 10
+    requests:
+      - url: http://github.com/user?id={{ uuid }}
+        # This will be rendered as http://github.com/user?id=d8ffd51c-88cd-453e-906e-389b145891e7
+```
+
 ## Postman JSON file support
 
 > NOTE: We only support Postman collection v2.0 and v2.1 files.
