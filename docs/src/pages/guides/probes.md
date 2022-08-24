@@ -152,24 +152,93 @@ By default, the request body will be treated as-is. If the request header's `Con
 
 You can use fake data to pass through your URLs, request body, and request headers. Here is the list of available fake data:
 
-- **alpha**: Returns a random string with the length of 8 characters. (e.g **abcdefgh**)
-- **alphaNumeric**: Returns a random string with the length of 8 alphanumeric characters. (e.g **ab12efgh**)
-- **countryCode**: Returns a country code (e.g **ID, MY, SG**)
-- **color**: Returns a color (e.g **lime, red, green**)
-- **currency**: Returns a currency (e.g **USD, IDR, JPY**)
-- **email**: Returns an email (e.g **monika@hyperjump.tech**)
-- **fullName**: Returns a full name (e.g **John Doe**)
-- **gender**: Returns a gender (e.g **Male/Female**)
-- **latitude**: Returns a latitude (e.g **-103.44**)
-- **lines**: Returns a lorem ipsum lines (e.g **Lorem ipsum dolor sit amet**)
-- **longitude**: Returns a longitude (e.g **95.45**)
-- **number**: Returns a random number range from 1-to 1000 (e.g **720**, **480**)
-- **objectId**: Returns a MongoDB ObjectID (e.g **63034695eca3670c4e083657**)
-- **statusCode**: Returns a status code (e.g **200, 404, 500**)
-- **timestamp**: Returns current time in a form of a UNIX timestamp (e.g **1661159139803**)
-- **uuid**: Returns a UUID (e.g **d8ffd51c-88cd-453e-906e-389b145891e7**)
-- **word**: Returns a word (e.g **nicely, done**)
-- **words**: Returns 3 words (e.g **such fascinating energies**)
+- `{{ alpha <count> }}` returns a alphabet characters random string with the length of the `count`.
+
+  The default value for `count` is 8.
+
+  e.g `{{ alpha }}` returns `abcdefgh`, `{{ alpha 3 }}` returns `abcd`
+
+- `{{ alphaNumeric <count> }}` returns an alphanumeric characters random string with the length of `count`.
+
+  The default value for `count` is 8.
+
+  e.g `{{ alphaNumeric }}` returns `ab12ef34`, `{{ alphaNumeric 4 }}` returns `ab12`
+
+- `{{ countryCode }}` returns a country code
+
+  e.g `{{ countryCode }}` returns `US` or `ID`
+
+- `{{ color }}` returns a color
+
+  e.g `{{ color }}` returns `lime` or `green`
+
+- `{{ currency }}` returns a currency
+
+  e.g `{{ currency }}` returns `USD, IDR, JPY`
+
+- `{{ email }}` returns an email
+
+  e.g `{{ email }}` returns `monika@hyperjump.tech`
+
+- `{{ fullName }}` returns a full name
+
+  e.g `{{ fullName }}` returns `John Doe`
+
+- `{{ gender }}` returns a gender
+
+  e.g `{{ gender }}` returns `Male/Female`
+
+- `{{ isostring }}` returns a date in ISO String format
+
+  e.g `{{ isostring }}` returns `2022-08-24T04:36:46.019Z`
+
+- `{{ latitude <min> <max> }}` returns a latitude between `min` and `max` value
+
+  The default value for `min` and `max` are `-90` and `90`.
+
+  e.g `{{ latitude }}` returns `-30.9501`, `{{ latitude 0 30 }}` returns `3.9521`
+
+- `{{ lines <lineCount> }}` returns `<lineCount>` lines of lorem ipsum lines
+
+  e.g `{{ lines }}` returns `Lorem ipsum dolor sit amet`, `{{ lines 2 }}` returns `Commodi non ex voluptatibus quibusdam nisi aliquam dolor nihil. Eos maiores enim praesentium.`
+
+- `{{ longitude <min> <max> }}` returns a longitude between `min` and `max` value
+
+  The default value for `min` and `max` are `-180` and `180`.
+
+  e.g `{{ longitude }}` returns `-30.9501`, `{{ longitude 0 30 }}` returns `3.9521`
+
+- `{{ number <min> <max> }}` returns a random number range from `min` to `max`
+
+  The default value for `min` and `max` are `0` and `1000`.
+
+  e.g `{{ number }}` returns `720`, `{{ number 0 500 }}` returns `480`
+
+- `{{ objectId }}` returns a MongoDB ObjectID
+
+  e.g `{{ objectId }}` returns `63034695eca3670c4e083657`
+
+- `{{ statusCode }}` returns a status code
+
+  e.g `{{ statusCode }}` returns `200`
+
+- `{{ timestamp }}` returns current time in a form of a UNIX timestamp
+
+  e.g `{{ timestamp }}` returns `1661159139803`
+
+- `{{ uuid }}` returns a UUID
+
+  e.g `{{ uuid }}` returns `d8ffd51c-88cd-453e-906e-389b145891e7`
+
+- `{{ word }}` returns a word
+
+  e.g `{{ word }}` returns `nicely`
+
+- `{{ words <count> }}` returns `<count>` words
+
+  The default value for `words` is `3`.
+
+  e.g `{{ words }}` returns `such fascinating energies`
 
 To use the fake data, all you need to do is to wrap them in the double curly brackets like the example below:
 
