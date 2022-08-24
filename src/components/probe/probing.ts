@@ -32,11 +32,10 @@ import { sendPing, PING_TIMEDOUT } from '../../utils/ping'
 import http from 'http'
 import https from 'https'
 import { getContext } from '../../context'
-import fakes from '../../utils/fakes'
+import registerFakes from '../../utils/fakes'
 
-Object.keys(fakes).map((fake: string) =>
-  Handlebars.registerHelper(fake, () => fakes[fake as keyof typeof fakes]())
-)
+// Register Handlebars helpers
+registerFakes(Handlebars)
 
 // Keep the agenst alive to reduce the overhead of DNS queries and creating TCP connection.
 // More information here: https://rakshanshetty.in/nodejs-http-keep-alive/

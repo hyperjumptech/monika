@@ -24,23 +24,113 @@
 
 import { faker } from '@faker-js/faker'
 
-export default {
-  alpha: (): string => faker.random.alpha({ count: 8 }),
-  alphaNumeric: (): string => faker.random.alphaNumeric(8),
-  countryCode: (): string => faker.address.countryCode(),
-  color: (): string => faker.color.human(),
-  currency: (): string => faker.finance.currencyCode(),
-  email: (): string => faker.internet.email(),
-  fullName: (): string => faker.name.fullName(),
-  gender: (): string => faker.name.gender(true),
-  latitude: (): string => faker.address.latitude().toString(),
-  lines: (): string => faker.lorem.lines(),
-  longitude: (): string => faker.address.longitude().toString(),
-  number: (): string => faker.datatype.number({ min: 1, max: 1000 }).toString(),
-  objectId: (): string => faker.database.mongodbObjectId(),
-  statusCode: (): string => faker.internet.httpStatusCode().toString(),
-  timestamp: (): string => Date.now().toString(),
-  uuid: (): string => faker.datatype.uuid(),
-  word: (): string => faker.random.word(),
-  words: (): string => faker.random.words(3),
+export default function registerFakes(
+  handlebarsInstance: typeof Handlebars
+): void {
+  if (handlebarsInstance) {
+    handlebarsInstance.registerHelper('alpha', (count: number) => {
+      return faker.random.alpha({
+        count: typeof count === 'number' ? count : 8,
+      })
+    })
+
+    handlebarsInstance.registerHelper('alphaNumeric', (count: number) => {
+      return faker.random.alphaNumeric(typeof count === 'number' ? count : 8)
+    })
+
+    handlebarsInstance.registerHelper('country', () => {
+      return faker.address.country()
+    })
+
+    handlebarsInstance.registerHelper('countryCode', () => {
+      return faker.address.countryCode()
+    })
+
+    handlebarsInstance.registerHelper('color', () => {
+      return faker.color.human()
+    })
+
+    handlebarsInstance.registerHelper('currency', () => {
+      return faker.finance.currencyCode()
+    })
+
+    handlebarsInstance.registerHelper('email', () => {
+      return faker.internet.email()
+    })
+
+    handlebarsInstance.registerHelper('fullName', () => {
+      return faker.name.fullName()
+    })
+
+    handlebarsInstance.registerHelper('gender', () => {
+      return faker.name.gender(true)
+    })
+
+    handlebarsInstance.registerHelper('isostring', () => {
+      return new Date().toISOString()
+    })
+
+    handlebarsInstance.registerHelper(
+      'latitude',
+      (min: number, max: number) => {
+        return faker.address
+          .latitude(
+            typeof max === 'number' ? max : 90,
+            typeof min === 'number' ? min : -90
+          )
+          .toString()
+      }
+    )
+
+    handlebarsInstance.registerHelper('lines', (lineCount: number) => {
+      return faker.lorem.lines(typeof lineCount === 'number' ? lineCount : 2)
+    })
+
+    handlebarsInstance.registerHelper(
+      'longitude',
+      (min: number, max: number) => {
+        return faker.address
+          .longitude(
+            typeof max === 'number' ? max : 180,
+            typeof min === 'number' ? min : -180
+          )
+          .toString()
+      }
+    )
+
+    handlebarsInstance.registerHelper('number', (min: number, max: number) => {
+      return faker.datatype
+        .number({
+          min: typeof min === 'number' ? min : 1000,
+          max: typeof max === 'number' ? max : 1000,
+        })
+        .toString()
+    })
+
+    handlebarsInstance.registerHelper('objectId', () => {
+      return faker.database.mongodbObjectId()
+    })
+
+    handlebarsInstance.registerHelper('statusCode', () => {
+      return faker.internet.httpStatusCode().toString()
+    })
+
+    handlebarsInstance.registerHelper('timestamp', () => {
+      return Date.now().toString()
+    })
+
+    handlebarsInstance.registerHelper('uuid', () => {
+      return faker.datatype.uuid()
+    })
+
+    handlebarsInstance.registerHelper('word', () => {
+      return faker.random.word()
+    })
+
+    handlebarsInstance.registerHelper('words', (count: number) => {
+      return faker.random.words(typeof count === 'number' ? count : 3)
+    })
+  } else {
+    throw new Error('Handlebars is not defined!')
+  }
 }
