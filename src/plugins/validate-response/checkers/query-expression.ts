@@ -27,9 +27,9 @@ import { ProbeRequestResponse } from '../../../interfaces/request'
 
 /**
  * queryExpression runs a query against probe results
- * @param {object} res is the axios response objet
+ * @param {object} res is the axios response object
  * @param {string} query is the query string to operate on the res object
- * @returns {boolean} true or false result of the query a
+ * @returns {boolean} true or false result of the query against the object
  */
 const queryExpression = (res: ProbeRequestResponse, query: string): boolean => {
   const object = {

@@ -37,7 +37,7 @@ import { sendAlerts } from '../notification'
 import { processThresholds } from '../notification/process-server-status'
 import { probing } from './probing'
 import { logResponseTime } from '../logger/response-time-log'
-import { check } from '../tcp-request'
+import { tcpCheck } from '../tcp-request'
 import { getContext } from '../../context'
 
 // TODO: move this to interface file?
@@ -154,7 +154,7 @@ export async function doProbe({
     const { host, port, data } = socket
     const url = `${host}:${port}`
     const tcpRequestID = `tcp-${id}`
-    const { duration, status } = await check({ host, port, data })
+    const { duration, status } = await tcpCheck({ host, port, data })
     const timeNow = new Date().toISOString()
     const logMessage = `${timeNow} ${checkOrder} id:${id} [TCP] ${url} ${duration}ms`
     const isAlertTriggered = status === 'DOWN'
@@ -207,14 +207,13 @@ export async function doProbe({
 
       requestLog.setResponse(probeRes)
 
-      // store request error log
+      // TODO: MOVE THIS DECODING TO THE PROBE/DRIVERS
       if ([0, 1, 2, 3, 4, 599].includes(probeRes.status)) {
         const errorMessageMap: Record<number, string> = {
           0: 'URI not found', // axios error
           1: 'Connection reset', // axios error
           2: 'Connection refused', // axios error
           3: 'Unknown error', // axios error
-          4: 'Ping timed out', // ping error
           599: 'Request Timed out', // axios error
         }
 

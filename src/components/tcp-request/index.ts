@@ -39,7 +39,7 @@ type Result = {
   responseData: Buffer | null
 }
 
-export async function check(tcpRequest: TCPRequest): Promise<Result> {
+export async function tcpCheck(tcpRequest: TCPRequest): Promise<Result> {
   const { host, port, data, timeout } = tcpRequest
 
   try {
