@@ -52,7 +52,7 @@ type probingParams = {
  * @param {obj} parameter as input object
  * @returns ProbeRequestResponse, response to the probe request
  */
-export async function probing({
+export async function probingHTTP({
   requestConfig,
   responses,
 }: probingParams): Promise<ProbeRequestResponse> {

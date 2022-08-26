@@ -84,7 +84,7 @@ export function processICMPRequstResult(
   // build log message
   const aliveMsg = params.isAlive ? 'alive' : 'dead'
   const packetLossMsg = params.isAlive ? params.packetLoss : '100%'
-  const msg = `PING:${aliveMsg} host:${params.host} avg:${params.average}ms packetLoss:${packetLossMsg}%`
+  const msg = `PING:${aliveMsg} host:${params.host} avg:${params.average}ms packetLoss:${packetLossMsg}`
 
   return {
     requestType: 'ICMP',

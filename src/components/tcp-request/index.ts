@@ -24,6 +24,7 @@
 
 import net from 'net'
 import { differenceInMilliseconds } from 'date-fns'
+import { ProbeRequestResponse } from '../../interfaces/request'
 
 type TCPRequest = {
   host: string
@@ -32,19 +33,45 @@ type TCPRequest = {
   timeout?: number
 }
 
-type Result = {
+type TCPResult = {
   duration: number
   status: 'UP' | 'DOWN'
   message: string
   responseData: Buffer | null
 }
 
-export async function tcpCheck(tcpRequest: TCPRequest): Promise<Result> {
+// tcpRequest sends out the tcp request and returns a monika standard request response
+export async function tcpRequest(
+  param: TCPRequest
+): Promise<ProbeRequestResponse<any>> {
+  const { host, port, data, timeout } = param
+
+  let baseResponse: ProbeRequestResponse = {
+    requestType: 'tcp',
+    data: '',
+    body: '',
+    status: 0,
+    headers: '',
+    responseTime: 0,
+  }
+
+  try {
+    const tcpResp = await tcpCheck({ host, port, data, timeout })
+
+    baseResponse = processTCPRequestResult(tcpResp)
+  } catch (error: any) {
+    baseResponse.body = error
+  }
+
+  return baseResponse
+}
+
+async function tcpCheck(tcpRequest: TCPRequest): Promise<TCPResult> {
   const { host, port, data, timeout } = tcpRequest
 
   try {
     const startTime = new Date()
-    const resp = await send({ host, port, data, timeout })
+    const resp = await sendTCP({ host, port, data, timeout })
     const endTime = new Date()
     const duration = differenceInMilliseconds(endTime, startTime)
 
@@ -64,7 +91,7 @@ export async function tcpCheck(tcpRequest: TCPRequest): Promise<Result> {
   }
 }
 
-async function send(tcpRequest: TCPRequest): Promise<any> {
+async function sendTCP(tcpRequest: TCPRequest): Promise<any> {
   const { host, port, data, timeout } = tcpRequest
 
   return new Promise((resolve, reject) => {
@@ -95,4 +122,28 @@ async function send(tcpRequest: TCPRequest): Promise<any> {
       client.end()
     })
   })
+}
+
+// map tcp request result to monika base response
+function processTCPRequestResult({
+  duration,
+  status,
+  message,
+  responseData,
+}: TCPResult) {
+  console.log('duration:', duration)
+  console.log('status:', status)
+  console.log('message:', message)
+  console.log('responseData:', responseData)
+
+  const baseResp: ProbeRequestResponse = {
+    requestType: 'tcp',
+    data: '',
+    body: '',
+    status: status === 'DOWN' ? 0 : 200, // set to 0 if down, and 200 if ok
+    headers: {},
+    responseTime: duration,
+  }
+
+  return baseResp
 }
