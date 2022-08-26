@@ -52,15 +52,19 @@ const wrapFunctionWithDefaultAndTransform = (
 
 // Functions from faker
 const helpers = [
-  { fn: faker.random.alpha, expr: 'alpha', default: [8] },
-  { fn: faker.random.alphaNumeric, expr: 'alphaNumeric' },
+  {
+    fn: faker.random.alpha,
+    expr: 'alpha',
+    default: [8],
+  },
+  { fn: faker.random.alphaNumeric, expr: 'alphaNumeric', default: [8] },
   { fn: faker.address.country, expr: 'country' },
   { fn: faker.address.countryCode, expr: 'countryCode' },
   { fn: faker.color.human, expr: 'color' },
   { fn: faker.finance.currencyCode, expr: 'currency' },
-  { fn: faker.internet.email, expr: 'email' },
+  { fn: () => faker.internet.email().toLowerCase(), expr: 'email' },
   { fn: faker.name.fullName, expr: 'fullName' },
-  { fn: faker.name.gender, expr: 'gender' },
+  { fn: faker.name.gender, expr: 'gender', default: [true] },
   { fn: faker.address.latitude, expr: 'latitude', default: [90, -90, 4] },
   { fn: faker.address.longitude, expr: 'longitude', default: [180, -180, 4] },
   { fn: faker.lorem.lines, expr: 'lines', default: [1] },
@@ -77,7 +81,7 @@ const helpers = [
   { fn: faker.random.words, expr: 'words', default: [3] },
 
   { fn: () => Date.now().toString(), expr: 'timestamp' },
-  { fn: () => new Date().toISOString(), expr: 'isostring' },
+  { fn: () => new Date().toISOString(), expr: 'isodate' },
 ]
 
 /**
