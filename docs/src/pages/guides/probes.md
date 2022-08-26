@@ -148,6 +148,85 @@ Currently, Monika only supports Content-Type value `application/x-www-form-urlen
 
 By default, the request body will be treated as-is. If the request header's `Content-Type` is set to `application/x-www-form-urlencoded`, it will be serialized into URL-safe string in UTF-8 encoding.
 
+## Fake Data
+
+You can use fake data to pass through your URLs, request body, and request headers. Here is the list of available fake data:
+
+| Expression                    | Description                                                                                                                | Examples                                                                                                                                                                         |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `{{ alpha <count> }}`         | returns random string with length `count` which contains only alphabetical characters. The default value for `count` is 8. | `{{ alpha }}` returns `abcdefgh`<br/>`{{ alpha 3 }}` returns `abcd`                                                                                                              |
+| `{{ alphaNumeric <count> }}`  | returns random string with length `count` which contains alphabets and digits. The default value for `count` is 8.         | `{{ alphaNumeric }}` returns `ab12ef34`<br/>`{{ alphaNumeric 4 }}` returns `ab12`                                                                                                |
+| `{{ countryCode }}`           | returns a random country code.                                                                                             | `{{ countryCode }}` returns `US`                                                                                                                                                 |
+| `{{ color }}`                 | returns a random color string.                                                                                             | `{{ color }}` returns `lime` or `green`                                                                                                                                          |
+| `{{ currency }}`              | returns a random currency code.                                                                                            | `{{ currency }}` returns `USD`                                                                                                                                                   |
+| `{{ email }}`                 | returns a random email address.                                                                                            | `{{ email }}` returns `monika@hyperjump.tech`                                                                                                                                    |
+| `{{ fullName }}`              | returns a random full name.                                                                                                | `{{ fullName }}` returns `John Doe`                                                                                                                                              |
+| `{{ gender <binary> }}`       | returns a random gender. The default value for `binary` is `true`.                                                         | `{{ gender }}` returns `Male`<br/>`{{ gender false }}` returns `Trans*Man`                                                                                                       |
+| `{{ isodate }}`               | returns the date of the request sending in ISO format.                                                                     | `{{ isodate }}` returns `2022-08-24T04:36:46.019Z`                                                                                                                               |
+| `{{ latitude <min> <max> }}`  | returns a random latitude between `min` and `max` value. The default value for `min` and `max` are `-90` and `90`.         | `{{ latitude }}` returns `-30.9501`<br/>`{{ latitude 0 30 }}` returns `3.9521`                                                                                                   |
+| `{{ lines <lineCount> }}`     | return `lineCount` number of lines of "Lorem ipsum" strings.                                                               | `{{ lines }}` returns `Lorem ipsum dolor sit amet`<br/>`{{ lines 2 }}` returns `Commodi non ex vol uptatibus quibusdam nisi aliquam dolor nihil. Eos maiore s enim praesentium.` |
+| `{{ longitude <min> <max> }}` | returns a random longitude between `min` and `max` value. The default value for `min` and `max` are `-180` and `180`.      | `{{ longitude }}` returns `-30.9501`<br/>`{{ longitude 0 30 }}` returns `3.9521`                                                                                                 |
+| `{{ number <min> <max> }}`    | returns a random integer number between `min` and `max`. The default value for `min` and `max` are `0` and `1000`.         | `{{ number }}` returns `720`<br/>`{{ number 0 500 }}` returns `480`                                                                                                              |
+| `{{ objectId }}`              | returns a random MongoDB ObjectID.                                                                                         | `{{ objectId }}` returns `63034695eca3670c4e083657`                                                                                                                              |
+| `{{ statusCode }}`            | returns a random HTTP status code.                                                                                         | `{{ statusCode }}` returns `200`                                                                                                                                                 |
+| `{{ timestamp }}`             | returns current time in a form of a UNIX timestamp.                                                                        | `{{ timestamp }}` returns `1661159139803`                                                                                                                                        |
+| `{{ uuid }}`                  | returns a random UUID.                                                                                                     | `{{ uuid }}` returns `d8ffd51c-88cd-453e-906e-389b145891e7`                                                                                                                      |
+| `{{ word }}`                  | returns a random English word.                                                                                             | `{{ word }}` returns `nicely`                                                                                                                                                    |
+| `{{ words <count> }}`         | returns `count` number of random English words. The default value for `words` is `3`.                                      | `{{ words }}` returns `such fascinating energies`                                                                                                                                |
+
+To use the fake data, all you need to do is to wrap them in the double curly brackets like the example below:
+
+```
+probes:
+  - id: '6'
+    name: '6'
+    interval: 10
+    requests:
+      - url: http://github.com?timestamp={{ timestamp }}
+        # This will be rendered as https://github.com?timestamp=1661159139803
+
+  - id: '15'
+    name: '15'
+    interval: 10
+    requests:
+      - url: http://github.com/user?id={{ uuid }}
+        # This will be rendered as http://github.com/user?id=d8ffd51c-88cd-453e-906e-389b145891e7
+```
+
+If you want to use it as a request body, you can use it like this:
+
+```
+probes:
+  - id: '0'
+    name: '0'
+    interval: 10
+    requests:
+      - url: https://httpbin.org/post
+        method: POST
+        body:
+          timestamp: '{{ timestamp }}'
+          id: '{{ uuid }}'
+          # This will be rendered as { timestamp: 1661159139803, id: d8ffd51c-88cd-453e-906e-389b145891e7 }
+```
+
+The same goes for the request headers, you can use it like this:
+
+```
+probes:
+  - id: '0'
+    name: '0'
+    interval: 10
+    requests:
+      - url: https://httpbin.org/post
+        method: POST
+        body:
+          timestamp: '{{ timestamp }}'
+          id: '{{ uuid }}'
+        headers:
+          'X-USER-ID': '{{ uuid }}'
+          # This will be rendered as { X-USER-ID: d8ffd51c-88cd-453e-906e-389b145891e7 }
+```
+
 ## Postman JSON file support
 
 > NOTE: We only support Postman collection v2.0 and v2.1 files.
