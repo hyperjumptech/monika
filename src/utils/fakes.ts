@@ -24,112 +24,83 @@
 
 import { faker } from '@faker-js/faker'
 
+/**
+ * wrapFunctionWithDefaultAndTransform returns a function to be registered to Handlebars helper
+ * alongside with the default args and transformed args
+ * @param originFn is the original function to be registered as helper
+ * @param defaultArgs is the default args
+ * @param transformArgs is if the parameter will be transformed for the original function
+ * @returns Handlebars-helper-friendly function
+ */
+const wrapFunctionWithDefaultAndTransform = (
+  originFn: any,
+  defaultArgs: any,
+  transformArgs?: (args: any[]) => any
+) => {
+  return (...arg: any) => {
+    let newArgs = [...arg.slice(0, -1), ...defaultArgs.slice(arg.length - 1)]
+
+    // If there is transformArgs method, transform the newArgs
+    if (transformArgs) {
+      newArgs = [transformArgs(newArgs)]
+    }
+
+    // Return the handlebars-helper-friendly function
+    return originFn(...newArgs)
+  }
+}
+
+// Functions from faker
+const helpers = [
+  { fn: faker.random.alpha, expr: 'alpha', default: [8] },
+  { fn: faker.random.alphaNumeric, expr: 'alphaNumeric' },
+  { fn: faker.address.country, expr: 'country' },
+  { fn: faker.address.countryCode, expr: 'countryCode' },
+  { fn: faker.color.human, expr: 'color' },
+  { fn: faker.finance.currencyCode, expr: 'currency' },
+  { fn: faker.internet.email, expr: 'email' },
+  { fn: faker.name.fullName, expr: 'fullName' },
+  { fn: faker.name.gender, expr: 'gender' },
+  { fn: faker.address.latitude, expr: 'latitude', default: [90, -90, 4] },
+  { fn: faker.address.longitude, expr: 'longitude', default: [180, -180, 4] },
+  { fn: faker.lorem.lines, expr: 'lines', default: [1] },
+  {
+    fn: faker.datatype.number,
+    expr: 'number',
+    default: [0, 100],
+    transformArgs: (args: any[]) => ({ min: args[0], max: args[1] }),
+  },
+  { fn: faker.database.mongodbObjectId, expr: 'objectId' },
+  { fn: faker.internet.httpStatusCode, expr: 'statusCode' },
+  { fn: faker.datatype.uuid, expr: 'uuid' },
+  { fn: faker.random.word, expr: 'word' },
+  { fn: faker.random.words, expr: 'words', default: [3] },
+
+  { fn: () => Date.now().toString(), expr: 'timestamp' },
+  { fn: () => new Date().toISOString(), expr: 'isostring' },
+]
+
+/**
+ * registerFakes registers all the fake data to the Handlebars
+ * by the handlebarsInstance passed through params
+ * @param handlebarsInstance is the handlebars instance
+ * @returns void
+ */
 export default function registerFakes(
   handlebarsInstance: typeof Handlebars
 ): void {
   if (handlebarsInstance) {
-    handlebarsInstance.registerHelper('alpha', (count: number) => {
-      return faker.random.alpha({
-        count: typeof count === 'number' ? count : 8,
-      })
-    })
-
-    handlebarsInstance.registerHelper('alphaNumeric', (count: number) => {
-      return faker.random.alphaNumeric(typeof count === 'number' ? count : 8)
-    })
-
-    handlebarsInstance.registerHelper('country', () => {
-      return faker.address.country()
-    })
-
-    handlebarsInstance.registerHelper('countryCode', () => {
-      return faker.address.countryCode()
-    })
-
-    handlebarsInstance.registerHelper('color', () => {
-      return faker.color.human()
-    })
-
-    handlebarsInstance.registerHelper('currency', () => {
-      return faker.finance.currencyCode()
-    })
-
-    handlebarsInstance.registerHelper('email', () => {
-      return faker.internet.email()
-    })
-
-    handlebarsInstance.registerHelper('fullName', () => {
-      return faker.name.fullName()
-    })
-
-    handlebarsInstance.registerHelper('gender', () => {
-      return faker.name.gender(true)
-    })
-
-    handlebarsInstance.registerHelper('isostring', () => {
-      return new Date().toISOString()
-    })
-
-    handlebarsInstance.registerHelper(
-      'latitude',
-      (min: number, max: number) => {
-        return faker.address
-          .latitude(
-            typeof max === 'number' ? max : 90,
-            typeof min === 'number' ? min : -90
-          )
-          .toString()
-      }
-    )
-
-    handlebarsInstance.registerHelper('lines', (lineCount: number) => {
-      return faker.lorem.lines(typeof lineCount === 'number' ? lineCount : 2)
-    })
-
-    handlebarsInstance.registerHelper(
-      'longitude',
-      (min: number, max: number) => {
-        return faker.address
-          .longitude(
-            typeof max === 'number' ? max : 180,
-            typeof min === 'number' ? min : -180
-          )
-          .toString()
-      }
-    )
-
-    handlebarsInstance.registerHelper('number', (min: number, max: number) => {
-      return faker.datatype
-        .number({
-          min: typeof min === 'number' ? min : 1000,
-          max: typeof max === 'number' ? max : 1000,
-        })
-        .toString()
-    })
-
-    handlebarsInstance.registerHelper('objectId', () => {
-      return faker.database.mongodbObjectId()
-    })
-
-    handlebarsInstance.registerHelper('statusCode', () => {
-      return faker.internet.httpStatusCode().toString()
-    })
-
-    handlebarsInstance.registerHelper('timestamp', () => {
-      return Date.now().toString()
-    })
-
-    handlebarsInstance.registerHelper('uuid', () => {
-      return faker.datatype.uuid()
-    })
-
-    handlebarsInstance.registerHelper('word', () => {
-      return faker.random.word()
-    })
-
-    handlebarsInstance.registerHelper('words', (count: number) => {
-      return faker.random.words(typeof count === 'number' ? count : 3)
-    })
+    // Map the functions from helpers
+    for (const helper of helpers) {
+      handlebarsInstance.registerHelper(
+        helper.expr,
+        wrapFunctionWithDefaultAndTransform(
+          helper.fn,
+          helper.default || [],
+          helper.transformArgs
+        )
+      )
+    }
   } else {
     throw new Error('Handlebars is not defined!')
   }
