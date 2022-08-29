@@ -298,7 +298,7 @@ monika --summary
 ```
 
 Please note that you need to run the above command from the same working directory as the running monika you want to see/check.
-The '--summary' flag also does not when no other monika process is running.
+The '--summary' flag also will not work when no other monika process is running.
 
 ## Verbose
 
