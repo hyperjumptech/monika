@@ -33,6 +33,10 @@ import http from 'http'
 import https from 'https'
 import { getContext } from '../../context'
 import { icmpRequest } from '../icmp-request'
+import registerFakes from '../../utils/fakes'
+
+// Register Handlebars helpers
+registerFakes(Handlebars)
 
 // Keep the agents alive to reduce the overhead of DNS queries and creating TCP connection.
 // More information here: https://rakshanshetty.in/nodejs-http-keep-alive/

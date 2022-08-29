@@ -477,7 +477,7 @@ export async function getSummary(): Promise<any> {
   const config = getConfig()
 
   return {
-    numberOfProbes: config.probes.length,
+    numberOfProbes: config?.probes?.length ? config.probes.length : null,
     numberOfIncidents,
     numberOfRecoveries,
     numberOfSentNotifications,
