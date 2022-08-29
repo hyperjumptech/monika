@@ -55,13 +55,8 @@ export async function tcpRequest(
     responseTime: 0,
   }
 
-  try {
-    const tcpResp = await tcpCheck({ host, port, data, timeout })
-
-    baseResponse = processTCPRequestResult(tcpResp)
-  } catch (error: any) {
-    baseResponse.body = error
-  }
+  const tcpResp = await tcpCheck({ host, port, data, timeout })
+  baseResponse = processTCPRequestResult(tcpResp)
 
   return baseResponse
 }
@@ -131,15 +126,10 @@ function processTCPRequestResult({
   message,
   responseData,
 }: TCPResult) {
-  console.log('duration:', duration)
-  console.log('status:', status)
-  console.log('message:', message)
-  console.log('responseData:', responseData)
-
   const baseResp: ProbeRequestResponse = {
     requestType: 'tcp',
     data: '',
-    body: '',
+    body: responseData || message || '-', // map tcp response data or any message into "http body" to be displayed
     status: status === 'DOWN' ? 0 : 200, // set to 0 if down, and 200 if ok
     headers: {},
     responseTime: duration,

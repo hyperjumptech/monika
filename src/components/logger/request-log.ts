@@ -101,16 +101,12 @@ export class RequestLog {
     // generate probe result messages
     let probeMsg = ''
 
-    probeMsg = `${this.iteration} id:${this.probe.id} ${
-      this.response?.status || '-'
-    } ${this.request.method} ${this.request.url} ${
-      this.response?.responseTime || '-'
-    }ms`
-    // generate logs from ping request or probe request
+    // TODO: make this more generic not probe dependent
     probeMsg = this.request?.ping
       ? `${this.iteration} id:${this.probe.id} ${this.response?.body}`
-      : `${this.iteration} id:${this.probe.id} ${this.response?.status || '-'} 
-      ${this.request?.method} ${this.request?.url} ${
+      : `${this.iteration} id:${this.probe.id} status:${
+          this.response?.status || '-'
+        } ${this.request?.method} ${this.request?.url} ${
           this.response?.responseTime || '-'
         }ms`
 

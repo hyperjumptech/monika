@@ -157,7 +157,7 @@ export async function doProbe({
     const probeRes = await tcpRequest({ host, port, data })
 
     const timeNow = new Date().toISOString()
-    const logMessage = `${timeNow} ${checkOrder} id:${id} [TCP] ${url} ${probeRes.responseTime}ms`
+    const logMessage = `${timeNow} ${checkOrder} id:${id} tcp:${url} ${probeRes.responseTime}ms msg:${probeRes.body}`
 
     const isAlertTriggered = probeRes.status !== 200
 
