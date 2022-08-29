@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.12.0] - 2022-08-29
+
+## Added
+
+- Fake Data in URL, body, headers (#862)
+
+## Fixed
+
+- summary bug (#866)
+- Make STUN non blocking (#856)
+- Fix test timeout/repeatability when testing (#860)
+- Docs: fix request chaining example (#850)
+
+## Updated
+
+- Refactor the probes (#863)
+- Removes 'bats-support' from deps and update the Bats tests (#855)
+
 ## [1.11.0] - 2022-08-05
 
 ## Added
