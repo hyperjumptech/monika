@@ -379,6 +379,7 @@ export const validateConfig = (configuration: Config): Validation => {
         const subject = ''
 
         if (alert === 'status-not-2xx') {
+          // This is temporary, TODO: remove support later
           query = 'response.status < 200 or response.status > 299'
           message = 'HTTP Status is {{ response.status }}, expecting 200'
         } else if (alert.startsWith('response-time-greater-than-')) {

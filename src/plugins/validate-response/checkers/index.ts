@@ -43,17 +43,14 @@ export const parseAlertStringTime = (str: string): number => {
   return number
 }
 
+// resonseChecker checks some result and returns ()
 const responseChecker = (
   alert: ProbeAlert,
   res: ProbeRequestResponse
 ): boolean => {
+  // TODO: improve the flag/alert triggers away from axios centric status
   // if status is 599 : timeout or uri is not found (0), worth reporting so return true for alert
   if (res.status === 599 || res.status === 0 || res.status === 1) {
-    return true
-  }
-
-  // if a ping request is not connected, or timed out, return an alert
-  if (res.alive === false || res.status === 4) {
     return true
   }
 
