@@ -344,7 +344,7 @@ class SymonClient {
           'Content-Type': 'application/json',
         },
         transformRequest: (req) => pako.gzip(JSON.stringify(req)).buffer,
-      })
+      }).then(() => setPauseProbeInterval(false))
 
       log.debug(
         `Reported ${requests.length} requests and ${notifications.length} notifications.`

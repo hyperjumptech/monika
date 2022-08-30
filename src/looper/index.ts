@@ -254,4 +254,6 @@ export function clearProbeInterval(): void {
  */
 export function setPauseProbeInterval(pause: boolean): void {
   isPaused = pause
+
+  if (pause) log.info('Probing is paused')
 }
