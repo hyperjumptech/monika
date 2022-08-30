@@ -288,8 +288,6 @@ class SymonClient {
       for (const listener of this.configListeners) {
         listener(newConfig)
       }
-
-      setPauseProbeInterval(false)
     } else {
       log.debug(`Received config does not change.`)
     }
