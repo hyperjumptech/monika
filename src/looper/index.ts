@@ -157,7 +157,6 @@ function loopProbe({ probe, notifications }: loopProbeParams) {
   const flags = getContext().flags
   // flags is the monika parameter flags... these are used:
   // flags.repeats: number,
-  // flags.verboseLogs: boolean,
   // flags.followRedirects: number
 
   const probeInterval = setInterval(() => {
