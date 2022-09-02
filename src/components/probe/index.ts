@@ -54,8 +54,6 @@ interface ProbeSendNotification extends Omit<ProbeStatusProcessed, 'statuses'> {
   probeState?: ServerAlertState
 }
 
-const flags = getContext().flags
-
 const probeSendNotification = async (data: ProbeSendNotification) => {
   const eventEmitter = getEventEmitter()
 
@@ -146,6 +144,10 @@ export async function doProbe({
   probe,
   notifications,
 }: doProbeParams): Promise<void> {
+  const { flags } = getContext()
+  const isSymonMode = Boolean(flags.symonUrl) && Boolean(flags.symonKey)
+  const verboseLogs = isSymonMode || flags['keep-verbose-logs']
+
   const eventEmitter = getEventEmitter()
   const responses = []
 
@@ -261,7 +263,7 @@ export async function doProbe({
       requestLog.addError(error.message)
     })
 
-    if (flags.verboseLogs || requestLog.hasIncidentOrRecovery) {
+    if (verboseLogs || requestLog.hasIncidentOrRecovery) {
       requestLog.saveToDatabase().catch((error) => log.error(error.message))
     }
   }
@@ -364,7 +366,7 @@ export async function doProbe({
       break
     } finally {
       requestLog.print()
-      if (flags.verboseLogs || requestLog.hasIncidentOrRecovery) {
+      if (verboseLogs || requestLog.hasIncidentOrRecovery) {
         requestLog.saveToDatabase().catch((error) => log.error(error.message))
       }
     }
