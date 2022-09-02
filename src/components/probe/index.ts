@@ -40,7 +40,7 @@ import { logResponseTime } from '../logger/response-time-log'
 import { tcpRequest } from '../tcp-request'
 import { getContext } from '../../context'
 
-// TODO: move this to interface file?
+import { redisRequest } from '../redis-request'
 interface ProbeStatusProcessed {
   probe: Probe
   statuses?: ServerAlertState[]
@@ -148,6 +148,61 @@ export async function doProbe({
 }: doProbeParams): Promise<void> {
   const eventEmitter = getEventEmitter()
   const responses = []
+
+  if (probe?.redis) {
+    const { id, redis } = probe
+
+    for (const redisIndex of redis) {
+      const { host, port } = redisIndex
+
+      // eslint-disable-next-line no-await-in-loop
+      const redisRes = await redisRequest({ host: host, port: port })
+
+      const timeNow = new Date().toISOString()
+      const logMessage = `${timeNow} ${checkOrder} id:${id} redis:${host}:${port} ${redisRes.responseTime}ms msg:${redisRes.body}`
+
+      const isAlertTriggered = redisRes.status !== 200
+
+      isAlertTriggered ? log.warn(logMessage) : log.info(logMessage)
+
+      const redisRequestIndex = 0
+      const validatedResponse = validateResponse(
+        probe.socket?.alerts || [
+          {
+            query: 'response.status < 200 or response.status > 299',
+            message: 'REDIS host cannot be accessed',
+          },
+        ],
+        redisRes
+      )
+      const requestLog = new RequestLog(probe, 0, 0)
+
+      requestLog.addAlerts(
+        validatedResponse
+          .filter((item) => item.isAlertTriggered)
+          .map((item) => item.alert)
+      )
+      const statuses = processThresholds({
+        probe,
+        requestIndex: redisRequestIndex,
+        validatedResponse,
+      })
+
+      requestLog.setResponse(redisRes)
+      checkThresholdsAndSendAlert(
+        {
+          probe,
+          statuses,
+          notifications,
+          requestIndex: redisRequestIndex,
+          validatedResponseStatuses: validatedResponse,
+        },
+        requestLog
+      ).catch((error) => {
+        requestLog.addError(error.message)
+      })
+    }
+  }
 
   if (probe?.socket) {
     const { id, socket } = probe

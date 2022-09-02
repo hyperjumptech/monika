@@ -89,6 +89,21 @@ probes:
         ping: true
 ```
 
+### Redis Request
+
+You can query your redis instance. The following probe sends a ping to your redis host every 30 seconds.
+
+```yaml
+probes:
+  - id: 'redis-test'
+    name: redis health
+    description: requesting redis PONG
+    interval: 30 # in seconds
+    redis:
+      - host: 172.15.0.2
+        port: 6379
+```
+
 ### TCP
 
 You can send a TCP request to a specific `host` and `port` with `data` by using the `socket` field.
@@ -176,7 +191,7 @@ You can use fake data to pass through your URLs, request body, and request heade
 
 To use the fake data, all you need to do is to wrap them in the double curly brackets like the example below:
 
-```
+```yaml
 probes:
   - id: '6'
     name: '6'
@@ -195,7 +210,7 @@ probes:
 
 If you want to use it as a request body, you can use it like this:
 
-```
+```yaml
 probes:
   - id: '0'
     name: '0'
@@ -211,7 +226,7 @@ probes:
 
 The same goes for the request headers, you can use it like this:
 
-```
+```yaml
 probes:
   - id: '0'
     name: '0'
