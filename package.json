@@ -87,6 +87,7 @@
     "pino-pretty": "4.7.1",
     "pkg": "^5.6.0",
     "prom-client": "13.1.0",
+    "redis": "^4.3.0",
     "sinon": "^11.1.2",
     "smtp-server": "^3.8.0",
     "sqlite": "^4.0.21",
@@ -187,6 +188,7 @@
     "outputPath": "dist"
   },
   "volta": {
-    "node": "16.16.0"
+    "node": "16.16.0",
+    "npm": "8.19.0"
   }
 }
