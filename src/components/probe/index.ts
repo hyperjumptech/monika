@@ -166,8 +166,9 @@ export async function doProbe({
       isAlertTriggered ? log.warn(logMessage) : log.info(logMessage)
 
       const redisRequestIndex = 0
+      const { alerts } = redisIndex
       const validatedResponse = validateResponse(
-        probe.socket?.alerts || [
+        alerts || [
           {
             query: 'response.status < 200 or response.status > 299',
             message: 'REDIS host cannot be accessed',
@@ -223,8 +224,9 @@ export async function doProbe({
     // TCPrequestIndex++                           // for later supported
     const TCPrequestIndex = 0
 
+    const { alerts } = socket
     const validatedResponse = validateResponse(
-      probe.socket?.alerts || [
+      alerts || [
         {
           query: 'response.status < 200 or response.status > 299',
           message: 'TCP server cannot be accessed',

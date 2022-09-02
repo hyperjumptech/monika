@@ -24,6 +24,7 @@
 
 import { createClient } from 'redis'
 import { ProbeRequestResponse } from '../../interfaces/request'
+import { differenceInMilliseconds } from 'date-fns'
 
 type RedisRequest = {
   host: string
@@ -32,7 +33,6 @@ type RedisRequest = {
 }
 
 type RedisResult = {
-  responseTime: number
   isAlive: boolean
   message?: string
   responseData?: Buffer | null
@@ -53,13 +53,17 @@ export async function redisRequest(
     headers: '',
     responseTime: 0,
   }
-
+  const startTime = new Date()
   const result = await sendRedisRequest(params)
+  const endTime = new Date()
+  const duration = differenceInMilliseconds(endTime, startTime)
 
   if (result.isAlive) {
-    baseResponse.responseTime = result.responseTime
+    baseResponse.responseTime = duration
     baseResponse.body = result.message
     baseResponse.status = 200 // TODO: improve this up/down flag
+  } else {
+    baseResponse.body = result.message
   }
 
   return baseResponse
@@ -74,7 +78,6 @@ async function sendRedisRequest(params: RedisRequest): Promise<RedisResult> {
   const { host, port } = params
 
   const result: RedisResult = {
-    responseTime: 0,
     isAlive: false,
     message: '',
   }
@@ -87,7 +90,6 @@ async function sendRedisRequest(params: RedisRequest): Promise<RedisResult> {
     await client.connect()
 
     client.on('error', (error: any) => {
-      console.error('Redis Client Error', error)
       result.message = error
     })
 
