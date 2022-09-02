@@ -35,9 +35,9 @@ import { log } from '../../utils/pino'
 import { RequestLog } from '../logger'
 import { sendAlerts } from '../notification'
 import { processThresholds } from '../notification/process-server-status'
-import { probing } from './probing'
+import { probingHTTP } from './probing'
 import { logResponseTime } from '../logger/response-time-log'
-import { check } from '../tcp-request'
+import { tcpRequest } from '../tcp-request'
 import { getContext } from '../../context'
 
 // TODO: move this to interface file?
@@ -153,31 +153,63 @@ export async function doProbe({
     const { id, socket } = probe
     const { host, port, data } = socket
     const url = `${host}:${port}`
-    const tcpRequestID = `tcp-${id}`
-    const { duration, status } = await check({ host, port, data })
+
+    const probeRes = await tcpRequest({ host, port, data })
+
     const timeNow = new Date().toISOString()
-    const logMessage = `${timeNow} ${checkOrder} id:${id} [TCP] ${url} ${duration}ms`
-    const isAlertTriggered = status === 'DOWN'
+    const logMessage = `${timeNow} ${checkOrder} id:${id} tcp:${url} ${probeRes.responseTime}ms msg:${probeRes.body}`
+
+    const isAlertTriggered = probeRes.status !== 200
 
     isAlertTriggered ? log.warn(logMessage) : log.info(logMessage)
-    logResponseTime(duration)
 
     // let TCPrequestIndex = 0 // are there multiple tcp requests?
     // TCPrequestIndex < probe?.requests?.length;  // multiple tcp request, for later support
     // TCPrequestIndex++                           // for later supported
     const TCPrequestIndex = 0
 
-    processTCPRequestResult({
-      probe: probe,
-      tcpRequestID,
-      responseTime: duration,
-      isAlertTriggered,
-      notifications: notifications,
+    const validatedResponse = validateResponse(
+      probe.socket?.alerts || [
+        {
+          query: 'response.status < 200 or response.status > 299',
+          message: 'TCP server cannot be accessed',
+        },
+      ],
+      probeRes
+    )
+    const requestLog = new RequestLog(probe, 0, 0)
+
+    requestLog.addAlerts(
+      validatedResponse
+        .filter((item) => item.isAlertTriggered)
+        .map((item) => item.alert)
+    )
+    const statuses = processThresholds({
+      probe,
       requestIndex: TCPrequestIndex,
-      verboseLogs: flags.verboseLogs,
-    }).catch((error) => log.error(error.message))
+      validatedResponse,
+    })
+
+    requestLog.setResponse(probeRes)
+    checkThresholdsAndSendAlert(
+      {
+        probe,
+        statuses,
+        notifications,
+        requestIndex: TCPrequestIndex,
+        validatedResponseStatuses: validatedResponse,
+      },
+      requestLog
+    ).catch((error) => {
+      requestLog.addError(error.message)
+    })
+
+    if (flags.verboseLogs || requestLog.hasIncidentOrRecovery) {
+      requestLog.saveToDatabase().catch((error) => log.error(error.message))
+    }
   }
 
+  // sending multiple http-type requests
   for (
     let requestIndex = 0;
     requestIndex < probe?.requests?.length;
@@ -189,7 +221,7 @@ export async function doProbe({
     try {
       // intentionally wait for a request to finish before processing next request in loop
       // eslint-disable-next-line no-await-in-loop
-      const probeRes: ProbeRequestResponse = await probing({
+      const probeRes: ProbeRequestResponse = await probingHTTP({
         requestConfig: request,
         responses,
       })
@@ -207,14 +239,13 @@ export async function doProbe({
 
       requestLog.setResponse(probeRes)
 
-      // store request error log
+      // TODO: MOVE THIS DECODING TO THE PROBE/DRIVERS
       if ([0, 1, 2, 3, 4, 599].includes(probeRes.status)) {
         const errorMessageMap: Record<number, string> = {
           0: 'URI not found', // axios error
           1: 'Connection reset', // axios error
           2: 'Connection refused', // axios error
           3: 'Unknown error', // axios error
-          4: 'Ping timed out', // ping error
           599: 'Request Timed out', // axios error
         }
 
@@ -223,7 +254,7 @@ export async function doProbe({
 
       // combine global probe alerts with all individual request alerts
       const probeAlerts = probe.alerts ?? []
-      const combinedAlerts = probeAlerts.concat(...(request.alerts || []))
+      const combinedAlerts = [...probeAlerts, ...(request.alerts || [])]
 
       // Responses have been processed and validated
       const validatedResponse = validateResponse(combinedAlerts, probeRes)
@@ -280,72 +311,5 @@ export async function doProbe({
         requestLog.saveToDatabase().catch((error) => log.error(error.message))
       }
     }
-  }
-}
-
-type ProcessTCPRequestResult = {
-  probe: Probe
-  tcpRequestID: string
-  responseTime: number
-  isAlertTriggered: boolean
-  notifications: Array<Notification>
-  requestIndex: number // to support multiple tcp requests/chaining
-  verboseLogs: boolean
-}
-
-async function processTCPRequestResult({
-  probe,
-  responseTime,
-  isAlertTriggered,
-  notifications,
-  requestIndex,
-  verboseLogs,
-}: ProcessTCPRequestResult) {
-  const probeRes: ProbeRequestResponse = {
-    requestType: 'tcp',
-    data: '',
-    body: '',
-    status: isAlertTriggered ? 0 : 200, // set to 0 if down, and 200 if ok
-    headers: {},
-    responseTime,
-  }
-  const validatedResponse = validateResponse(
-    probe.socket?.alerts || [
-      {
-        query: 'response.status < 200 or response.status > 299',
-        message: 'TCP server cannot be accessed',
-      },
-    ],
-    probeRes
-  )
-  const requestLog = new RequestLog(probe, 0, 0)
-
-  requestLog.addAlerts(
-    validatedResponse
-      .filter((item) => item.isAlertTriggered)
-      .map((item) => item.alert)
-  )
-  const statuses = processThresholds({
-    probe,
-    requestIndex,
-    validatedResponse,
-  })
-
-  requestLog.setResponse(probeRes)
-  checkThresholdsAndSendAlert(
-    {
-      probe,
-      statuses,
-      notifications,
-      requestIndex,
-      validatedResponseStatuses: validatedResponse,
-    },
-    requestLog
-  ).catch((error) => {
-    requestLog.addError(error.message)
-  })
-
-  if (verboseLogs || requestLog.hasIncidentOrRecovery) {
-    requestLog.saveToDatabase().catch((error) => log.error(error.message))
   }
 }

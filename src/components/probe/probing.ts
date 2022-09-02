@@ -28,12 +28,17 @@ import FormData from 'form-data'
 import YAML from 'yaml'
 import { ProbeRequestResponse, RequestConfig } from '../../interfaces/request'
 import * as qs from 'querystring'
-import { sendPing, PING_TIMEDOUT } from '../../utils/ping'
+
 import http from 'http'
 import https from 'https'
 import { getContext } from '../../context'
+import { icmpRequest } from '../icmp-request'
+import registerFakes from '../../utils/fakes'
 
-// Keep the agenst alive to reduce the overhead of DNS queries and creating TCP connection.
+// Register Handlebars helpers
+registerFakes(Handlebars)
+
+// Keep the agents alive to reduce the overhead of DNS queries and creating TCP connection.
 // More information here: https://rakshanshetty.in/nodejs-http-keep-alive/
 const httpAgent = new http.Agent({ keepAlive: true })
 const httpsAgent = new https.Agent({ keepAlive: true })
@@ -51,7 +56,7 @@ type probingParams = {
  * @param {obj} parameter as input object
  * @returns ProbeRequestResponse, response to the probe request
  */
-export async function probing({
+export async function probingHTTP({
   requestConfig,
   responses,
 }: probingParams): Promise<ProbeRequestResponse> {
@@ -146,30 +151,7 @@ export async function probing({
   try {
     // is this a request for ping?
     if (newReq.ping === true) {
-      const pingResp = await sendPing(renderedURL)
-
-      const requestType = 'ICMP'
-
-      const responseTime = pingResp.avg // map response time to the average ping time
-      const alive = pingResp.alive
-      const data = pingResp.output
-      const headers = {}
-      const packetLoss = pingResp.packetLoss
-      const numericHost = pingResp.numericHost
-
-      const status = alive ? 200 : PING_TIMEDOUT
-
-      return {
-        requestType,
-        data,
-        body: data,
-        status,
-        headers,
-        responseTime,
-        alive,
-        numericHost,
-        packetLoss,
-      }
+      return icmpRequest({ host: renderedURL })
     }
 
     // Do the request using compiled URL and compiled headers (if exists)

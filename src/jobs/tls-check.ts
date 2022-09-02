@@ -30,7 +30,7 @@ import { Notification } from '../interfaces/notification'
 import type { ValidatedResponse } from '../plugins/validate-response'
 import { log } from '../utils/pino'
 
-export function tlsChecker() {
+export function tlsChecker(): void {
   const config = getConfig()
   const isCertificateConfigEmpty =
     config?.certificate && config?.certificate?.domains.length > 0

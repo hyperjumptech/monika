@@ -288,8 +288,6 @@ class SymonClient {
       for (const listener of this.configListeners) {
         listener(newConfig)
       }
-
-      setPauseProbeInterval(false)
     } else {
       log.debug(`Received config does not change.`)
     }
@@ -344,7 +342,7 @@ class SymonClient {
           'Content-Type': 'application/json',
         },
         transformRequest: (req) => pako.gzip(JSON.stringify(req)).buffer,
-      })
+      }).then(() => setPauseProbeInterval(false))
 
       log.debug(
         `Reported ${requests.length} requests and ${notifications.length} notifications.`

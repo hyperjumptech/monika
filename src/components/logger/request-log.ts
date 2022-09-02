@@ -27,6 +27,7 @@ import { Notification } from '../../interfaces/notification'
 import { ProbeRequestResponse } from '../../interfaces/request'
 import { log } from '../../utils/pino'
 import { saveProbeRequestLog, saveNotificationLog } from './history'
+import { getContext } from '../../context'
 
 export class RequestLog {
   private iteration: number
@@ -93,6 +94,7 @@ export class RequestLog {
       reversedSentNotifications.find((notif) => notif.type === 'NOTIFY-RECOVER')
 
     const time = new Date().toISOString()
+    const { flags } = getContext()
 
     let alertMsg = ''
     let errorMsg = ''
@@ -101,25 +103,25 @@ export class RequestLog {
     // generate probe result messages
     let probeMsg = ''
 
-    probeMsg = `${this.iteration} id:${this.probe.id} ${
-      this.response?.status || '-'
-    } ${this.request.method} ${this.request.url} ${
-      this.response?.responseTime || '-'
-    }ms`
-    // generate logs from ping request or probe request
-    probeMsg = this.request?.ping
-      ? `${this.iteration} id:${this.probe.id} PING:${
-          this.response?.alive ? 'alive' : 'dead'
-        } ${this.request?.url} ${
-          this.response?.alive ? this.response?.responseTime : '-'
-        }ms packetLoss:${
-          this.response?.alive ? this.response?.packetLoss : '-'
-        }%`
-      : `${this.iteration} id:${this.probe.id} ${
-          this.response?.status || '-'
-        } ${this.request?.method} ${this.request?.url} ${
-          this.response?.responseTime || '-'
-        }ms`
+    // TODO: make this more generic not probe dependent
+    if (this.request?.ping) {
+      probeMsg = `${this.iteration} id:${this.probe.id} ${this.response?.body}`
+    } else {
+      probeMsg = flags.verbose
+        ? `${this.iteration} id:${this.probe.id} ${
+            this.response?.status || '-'
+          } ${this.request?.method} ${this.request?.url} ${
+            this.response?.responseTime || '-'
+          }ms 
+    Request Headers: ${JSON.stringify(this.request?.headers) || '-'} 
+    Request Body: ${JSON.stringify(this.request?.body) || '-'} 
+    Response Body: ${JSON.stringify(this.response?.body) || '-'}`
+        : `${this.iteration} id:${this.probe.id} ${
+            this.response?.status || '-'
+          } ${this.request?.method} ${this.request?.url} ${
+            this.response?.responseTime || '-'
+          }ms`
+    }
 
     if (printedNotification) {
       notifMsg = `, NOTIF: ${
