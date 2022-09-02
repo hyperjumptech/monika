@@ -93,7 +93,6 @@ export class RequestLog {
       reversedSentNotifications.find((notif) => notif.type === 'NOTIFY-RECOVER')
 
     const time = new Date().toISOString()
-
     let alertMsg = ''
     let errorMsg = ''
     let notifMsg = ''
