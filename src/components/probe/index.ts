@@ -139,6 +139,7 @@ type doProbeParams = {
  * @param {object} param object parameter
  * @returns {Promise<void>} void
  */
+// eslint-disable-next-line complexity
 export async function doProbe({
   checkOrder,
   probe,
@@ -154,6 +155,7 @@ export async function doProbe({
   if (probe?.redis) {
     const { id, redis } = probe
 
+    let redisRequestIndex = 0
     for (const redisIndex of redis) {
       const { host, port } = redisIndex
 
@@ -164,10 +166,8 @@ export async function doProbe({
       const logMessage = `${timeNow} ${checkOrder} id:${id} redis:${host}:${port} ${redisRes.responseTime}ms msg:${redisRes.body}`
 
       const isAlertTriggered = redisRes.status !== 200
-
       isAlertTriggered ? log.warn(logMessage) : log.info(logMessage)
 
-      const redisRequestIndex = 0
       const { alerts } = redisIndex
       const validatedResponse = validateResponse(
         alerts || [
@@ -204,6 +204,8 @@ export async function doProbe({
       ).catch((error) => {
         requestLog.addError(error.message)
       })
+
+      redisRequestIndex++
     }
   }
 
