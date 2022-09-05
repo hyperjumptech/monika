@@ -35,10 +35,11 @@ import { log } from '../../utils/pino'
 import { RequestLog } from '../logger'
 import { sendAlerts } from '../notification'
 import { processThresholds } from '../notification/process-server-status'
-import { probingHTTP } from './probing'
 import { logResponseTime } from '../logger/response-time-log'
+
 import { tcpRequest } from '../tcp-request'
 import { getContext } from '../../context'
+import { httpRequest } from '../http-request'
 
 import { redisRequest } from '../redis-request'
 interface ProbeStatusProcessed {
@@ -282,7 +283,7 @@ export async function doProbe({
     try {
       // intentionally wait for a request to finish before processing next request in loop
       // eslint-disable-next-line no-await-in-loop
-      const probeRes: ProbeRequestResponse = await probingHTTP({
+      const probeRes: ProbeRequestResponse = await httpRequest({
         requestConfig: request,
         responses,
       })

@@ -29,7 +29,8 @@ import { RequestInterceptor } from 'node-request-interceptor'
 import withDefaultInterceptors from 'node-request-interceptor/lib/presets/default'
 import { setContext } from '../../context'
 import { RequestConfig } from '../../interfaces/request'
-import { probingHTTP } from './probing'
+
+import { httpRequest } from '../http-request'
 
 describe('probingHTTP', () => {
   let interceptor: any
@@ -39,7 +40,7 @@ describe('probingHTTP', () => {
   afterEach(() => {
     interceptor.restore()
   })
-  describe('probingHTTP function', () => {
+  describe('httpRequest function', () => {
     it('should render correct headers', async () => {
       let verifyHeader: any = {}
       let tokens = ['1', '2']
@@ -96,7 +97,7 @@ describe('probingHTTP', () => {
         for (let j = 0; j < requests.length; j++) {
           try {
             // eslint-disable-next-line no-await-in-loop
-            const resp = await probingHTTP({
+            const resp = await httpRequest({
               requestConfig: requests[j],
               responses,
             })
@@ -138,7 +139,7 @@ describe('probingHTTP', () => {
 
       const flag: { followRedirects: number } = { followRedirects: 0 }
       setContext({ flags: flag })
-      const result = await probingHTTP({
+      const result = await httpRequest({
         requestConfig: request,
         responses: [],
       })
@@ -175,7 +176,7 @@ describe('probingHTTP', () => {
       setContext({ flags: flag })
       // act
       server.listen()
-      const res = await probingHTTP({
+      const res = await httpRequest({
         requestConfig: request,
         responses: [],
       })
@@ -216,7 +217,7 @@ describe('probingHTTP', () => {
       server.listen()
       const flag: { followRedirects: number } = { followRedirects: 0 }
       setContext({ flags: flag })
-      const res = await probingHTTP({
+      const res = await httpRequest({
         requestConfig: request,
         responses: [],
       })
@@ -257,7 +258,7 @@ describe('probingHTTP', () => {
       server.listen()
       const flag: { followRedirects: number } = { followRedirects: 0 }
       setContext({ flags: flag })
-      const res = await probingHTTP({
+      const res = await httpRequest({
         requestConfig: request,
         responses: [],
       })
@@ -299,7 +300,7 @@ describe('probingHTTP', () => {
       server.listen()
       const flag: { followRedirects: number } = { followRedirects: 0 }
       setContext({ flags: flag })
-      const res = await probingHTTP({
+      const res = await httpRequest({
         requestConfig: request,
         responses: [],
       })
