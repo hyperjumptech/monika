@@ -45,6 +45,7 @@ const generateProbesFromXml = (config: any) => {
         })
       }
     }
+
     return {
       id: item?.loc,
       name: item?.loc,
@@ -65,7 +66,7 @@ export const parseConfigFromSitemap = (configString: string): Config => {
     const probes = generateProbesFromXml(xmlObj)
 
     return { probes }
-  } catch (error: any) {
+  } catch {
     throw new Error(
       'Your Sitemap file contains an invalid Sitemap XML format !'
     )

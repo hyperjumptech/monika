@@ -30,7 +30,7 @@ import withDefaultInterceptors from 'node-request-interceptor/lib/presets/defaul
 import { setContext } from '../../context'
 import { RequestConfig } from '../../interfaces/request'
 
-import { httpRequest } from '../http-request'
+import { httpRequest } from '.'
 
 describe('probingHTTP', () => {
   let interceptor: any
@@ -94,11 +94,11 @@ describe('probingHTTP', () => {
       setContext({ flags: flag })
       for (let i = 0; i < 2; i++) {
         const responses: any = []
-        for (let j = 0; j < requests.length; j++) {
+        for (const [j, request] of requests.entries()) {
           try {
             // eslint-disable-next-line no-await-in-loop
             const resp = await httpRequest({
-              requestConfig: requests[j],
+              requestConfig: request,
               responses,
             })
             responses.push(resp)
@@ -112,8 +112,8 @@ describe('probingHTTP', () => {
         }
       }
 
-      for (let k = 0; k < results.length; k++) {
-        expect(results[k].sentToken).to.be.equals(results[k].expectedToken)
+      for (const result of results) {
+        expect(result.sentToken).to.be.equals(result.expectedToken)
       }
     })
 
