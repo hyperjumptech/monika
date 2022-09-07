@@ -23,6 +23,49 @@
       "description": "The number of seconds to repeat the probe",
       "default": 10
     },
+    "postgres": {
+      "title": "Postgres",
+      "type": "object",
+      "description": "Monitor postgres readiness",
+      "additionalProperties": false,
+      "required": ["host", "port"],
+      "properties": {
+        "host": {
+          "type": "string",
+          "description": "Postgres host address to connect to"
+        },
+        "port": {
+          "title": "Port",
+          "type": "integer",
+          "description": "Postgres port to connect to"
+        }
+      }
+    },
+    "redis": {
+      "title": "Redis",
+      "type": "array",
+      "description": "Monitor redis health ",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["host", "port"],
+        "properties": {
+          "host": {
+            "title": "Redis host",
+            "description": "The host address of the redis",
+            "type": "string",
+            "default": "172.15.0.1",
+            "examples": ["localhost", "192.168.0.1"]
+          },
+          "port": {
+            "title": "Port number",
+            "description": "Port number used for the redis",
+            "type":"integer",
+            "default": "6379"
+          }
+        }
+      }
+    },
     "requests": {
       "title": "Requests",
       "type": "array",
@@ -217,6 +260,12 @@
           },
           "interval": {
             "$ref": "#/definitions/interval"
+          },
+          "postgres": {
+            "$ref": "#/definitions/postgres"
+          },
+          "redis": {
+            "$ref": "#/definitions/redis"
           },
           "requests": {
             "$ref": "#/definitions/requests"
