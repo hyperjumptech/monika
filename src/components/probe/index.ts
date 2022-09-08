@@ -157,6 +157,7 @@ async function responseProcessing({
   const verboseLogs = isSymonMode || flags['keep-verbose-logs']
 
   isAlertTriggered ? log.warn(logMessage) : log.info(logMessage)
+
   const { alerts } = probe
   const validatedResponse = validateResponse(
     alerts || [
@@ -214,6 +215,10 @@ export async function doProbe({
   probe,
   notifications,
 }: doProbeParams): Promise<void> {
+  const { flags } = getContext()
+  const isSymonMode = Boolean(flags.symonUrl) && Boolean(flags.symonKey)
+  const verboseLogs = isSymonMode || flags['keep-verbose-logs']
+
   const eventEmitter = getEventEmitter()
   const responses = []
 
@@ -229,48 +234,16 @@ export async function doProbe({
 
       const timeNow = new Date().toISOString()
       const logMessage = `${timeNow} ${checkOrder} id:${id} redis:${host}:${port} ${redisRes.responseTime}ms msg:${redisRes.body}`
-
       const isAlertTriggered = redisRes.status !== 200
 
-      isAlertTriggered ? log.warn(logMessage) : log.info(logMessage)
-
-      const { alerts } = redisIndex
-      const validatedResponse = validateResponse(
-        alerts || [
-          {
-            query: 'response.status < 200 or response.status > 299',
-            message: 'REDIS host cannot be accessed',
-          },
-        ],
-        redisRes
-      )
-      const requestLog = new RequestLog(probe, 0, 0)
-
-      requestLog.addAlerts(
-        validatedResponse
-          .filter((item) => item.isAlertTriggered)
-          .map((item) => item.alert)
-      )
-      const statuses = processThresholds({
-        probe,
-        requestIndex: redisRequestIndex,
-        validatedResponse,
+      responseProcessing({
+        probe: probe,
+        probeResult: redisRes,
+        notifications: notifications,
+        logMessage: logMessage,
+        isAlertTriggered: isAlertTriggered,
+        index: redisRequestIndex,
       })
-
-      requestLog.setResponse(redisRes)
-      checkThresholdsAndSendAlert(
-        {
-          probe,
-          statuses,
-          notifications,
-          requestIndex: redisRequestIndex,
-          validatedResponseStatuses: validatedResponse,
-        },
-        requestLog
-      ).catch((error) => {
-        requestLog.addError(error.message)
-      })
-
       redisRequestIndex++
     }
   }
@@ -295,7 +268,7 @@ export async function doProbe({
       logMessage: logMessage,
       isAlertTriggered: isAlertTriggered,
       index: TCPrequestIndex,
-    }) // ==> replace all below with this!!
+    })
   }
 
   // sending multiple http-type requests
