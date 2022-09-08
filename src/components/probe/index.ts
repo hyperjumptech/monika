@@ -163,12 +163,12 @@ async function responseProcessing({
     alerts || [
       {
         query: 'response.status < 200 or response.status > 299',
-        message: 'TCP server cannot be accessed',
+        message: 'probe cannot be accessed',
       },
     ],
     probeResult
   )
-  const requestLog = new RequestLog(probe, 0, 0)
+  const requestLog = new RequestLog(probe, index, 0)
 
   requestLog.addAlerts(
     validatedResponse
@@ -298,10 +298,9 @@ export async function doProbe({
 
       // Add to a response array to be accessed by another request for chaining later
       responses.push(probeRes)
-
       requestLog.setResponse(probeRes)
 
-      // TODO: MOVE THIS DECODING TO THE PROBE/DRIVERS
+      // decode error message based on returned driver status
       if ([0, 1, 2, 3, 4, 599].includes(probeRes.status)) {
         const errorMessageMap: Record<number, string> = {
           0: 'URI not found', // axios error
@@ -348,7 +347,7 @@ export async function doProbe({
         requestLog.addError(error.message)
       })
 
-      // Exit the loop if there is any alert triggered
+      // Exit the chaining loop if there is any alert triggered
       if (validatedResponse.some((item) => item.isAlertTriggered)) {
         const triggeredAlertResponse = validatedResponse.find(
           (item) => item.isAlertTriggered
