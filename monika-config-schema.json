@@ -60,7 +60,7 @@
           "port": {
             "title": "Port number",
             "description": "Port number used for the redis",
-            "type":"integer",
+            "type": "integer",
             "default": "6379"
           }
         }
