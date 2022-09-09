@@ -71,7 +71,7 @@ const probeSendNotification = async (data: ProbeSendNotification) => {
   const validation =
     validatedResponseStatuses.find(
       (validateResponse: ValidatedResponse) =>
-        validateResponse.alert.query === probeState?.alertQuery
+        validateResponse.alert.assertion === probeState?.alertQuery
     ) || validatedResponseStatuses[index]
 
   eventEmitter.emit(events.probe.notification.willSend, {
@@ -173,7 +173,7 @@ export async function doProbe({
     const validatedResponse = validateResponse(
       probe.socket?.alerts || [
         {
-          query: 'response.status < 200 or response.status > 299',
+          assertion: 'response.status < 200 or response.status > 299',
           message: 'TCP server cannot be accessed',
         },
       ],
@@ -298,7 +298,7 @@ export async function doProbe({
           eventEmitter.emit(events.probe.alert.triggered, {
             probe: probe,
             requestIndex,
-            alertQuery: triggeredAlertResponse.alert.query,
+            alertQuery: triggeredAlertResponse.alert.assertion,
           })
         }
 

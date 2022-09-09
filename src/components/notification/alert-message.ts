@@ -77,7 +77,7 @@ export async function getMessageForAlert({
   const meta = {
     type: isRecovery ? ('recovery' as const) : ('incident' as const),
     probeID,
-    alertQuery: alert.query,
+    alertQuery: alert.assertion,
     url,
     time: format(new Date(), 'yyyy-MM-dd HH:mm:ss XXX'),
     hostname: hostname(),
@@ -96,8 +96,8 @@ export async function getMessageForAlert({
 
     if (!alert.message) {
       if (isRecovery)
-        return `The request is back to normal and pass the query: ${alert.query}`
-      return `The request failed because the response does not pass the query: ${alert.query}. The actual response status is ${response.status} and the response time is ${response.responseTime}.`
+        return `The request is back to normal and pass the query: ${alert.assertion}`
+      return `The request failed because the response does not pass the query: ${alert.assertion}. The actual response status is ${response.status} and the response time is ${response.responseTime}.`
     }
 
     if (!isHTTPStatusCode) {
