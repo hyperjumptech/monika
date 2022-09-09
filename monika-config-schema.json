@@ -25,19 +25,24 @@
     },
     "postgres": {
       "title": "Postgres",
-      "type": "object",
+      "type": "array",
       "description": "Monitor postgres readiness",
-      "additionalProperties": false,
-      "required": ["host", "port"],
-      "properties": {
-        "host": {
-          "type": "string",
-          "description": "Postgres host address to connect to"
-        },
-        "port": {
-          "title": "Port",
-          "type": "integer",
-          "description": "Postgres port to connect to"
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["host", "port"],
+        "properties": {
+          "host": {
+            "type": "string",
+            "description": "Postgres host address to connect to",
+            "default": "172.15.0.1"
+          },
+          "port": {
+            "title": "Port",
+            "type": "integer",
+            "description": "Postgres port to connect to",
+            "default": "5432"
+          }
         }
       }
     },
