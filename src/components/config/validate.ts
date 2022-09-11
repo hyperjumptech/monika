@@ -33,6 +33,8 @@ import { parseAlertStringTime } from '../../plugins/validate-response/checkers'
 import { compileExpression } from '../../utils/expression-parser'
 import type { SymonConfig } from '../reporter'
 import { newPagerDuty } from '../notification/channel/pagerduty'
+import { getContext } from '../../context'
+import { validateConfigFile } from '../config/validate-config'
 
 const HTTPMethods = [
   'DELETE',
@@ -291,6 +293,7 @@ const isValidProbeAlert = (alert: ProbeAlert | string): boolean => {
 }
 
 export const validateConfig = (configuration: Config): Validation => {
+  const { flags } = getContext()
   const { notifications = [], probes = [], symon } = configuration
   const symonConfigError = validateSymonConfig(symon)
 
@@ -399,6 +402,10 @@ export const validateConfig = (configuration: Config): Validation => {
   if (symonConfigError) {
     return setInvalidResponse(`Monika configuration: symon ${symonConfigError}`)
   }
+
+  // check config file against monika-config-schema.json
+  const isValidConfig = validateConfigFile(flags.config[0])
+  if (isValidConfig.valid === false) return isValidConfig
 
   return VALID_CONFIG
 }

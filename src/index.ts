@@ -491,6 +491,7 @@ Please refer to the Monika documentations on how to how to configure notificatio
         Request Body: ${JSON.stringify(request.body) || `-`}
 `
         }
+
         startupMessage += `    Alerts: ${
           probe?.alerts === undefined || probe?.alerts.length === 0
             ? `[{ "query": "response.status < 200 or response.status > 299", "message": "HTTP Status is not 200"}, 
