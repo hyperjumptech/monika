@@ -157,9 +157,14 @@ export async function doProbe({
 
     let redisRequestIndex = 0
     for await (const redisIndex of redis) {
-      const { host, port } = redisIndex
+      const { host, port, username, password } = redisIndex
 
-      const redisRes = await redisRequest({ host: host, port: port })
+      const redisRes = await redisRequest({
+        host: host,
+        port: port,
+        username: username,
+        password: password,
+      })
 
       const timeNow = new Date().toISOString()
       const logMessage = `${timeNow} ${checkOrder} id:${id} redis:${host}:${port} ${redisRes.responseTime}ms msg:${redisRes.body}`

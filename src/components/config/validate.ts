@@ -321,7 +321,7 @@ export const validateConfig = (configuration: Config): Validation => {
     const redisConfigError = validateRedisConfig(redis)
     if (redisConfigError) {
       return setInvalidResponse(
-        `Monika configuration: probes.socket ${redisConfigError}`
+        `Monika configuration: probes.redis ${redisConfigError}`
       )
     }
 
@@ -454,6 +454,8 @@ function validateRedisConfig(redisConfig?: Redis[]) {
   const schema = Joi.object({
     host: Joi.string().required(),
     port: Joi.number().required(),
+    password: Joi.string(),
+    username: Joi.string(),
     command: Joi.string(),
   })
 

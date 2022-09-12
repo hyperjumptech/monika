@@ -104,6 +104,23 @@ probes:
         port: 6379
 ```
 
+If your redis configuration include `AUTH` settings, you might get some error like `Error: NOAUTH Authentication required.`
+You can pass a `password` field like below:
+
+```yaml
+probes:
+  - id: 'redis-ping'
+    name: redis check with password
+    description: requesting redis PONG
+    interval: 30 # in seconds
+    redis:
+      - host: 172.15.0.2
+        port: 6379
+        password: mypassword
+```
+
+The example above use only password, but both `username` and `password` are possible and optional.
+
 ### TCP
 
 You can send a TCP request to a specific `host` and `port` with `data` by using the `socket` field.

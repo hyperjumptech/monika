@@ -27,14 +27,16 @@ import { ProbeRequestResponse } from '../../interfaces/request'
 import { differenceInMilliseconds } from 'date-fns'
 
 type RedisRequest = {
-  host: string
-  port: number
+  host: string // Host address of the redis-server
+  port: number // Port number of the redis-server
+  password?: string // Password string if AUTH is used, optional
+  username?: string // Username stgring if used, optional
   command?: string
 }
 
 type RedisResult = {
-  isAlive: boolean
-  message?: string
+  isAlive: boolean // If redis responds to PING/commands
+  message?: string // Any message from redis
   responseData?: Buffer | null
 }
 
@@ -76,16 +78,21 @@ export async function redisRequest(
  * @returns {object} RedisResult type contain client response
  */
 async function sendRedisRequest(params: RedisRequest): Promise<RedisResult> {
-  const { host, port } = params
+  const { host, port, username, password } = params
 
   const result: RedisResult = {
     isAlive: false,
     message: '',
   }
+
   try {
     const client = createClient({
-      // url has this format redis[s]://[[username][:password]@][host][:port][/db-number]:
-      url: `redis://${host}:${port}`,
+      socket: {
+        host: '172.17.0.1',
+        port: 6379,
+      },
+      password: password,
+      username: username,
     })
 
     await client.connect()
