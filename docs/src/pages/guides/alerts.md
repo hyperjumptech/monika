@@ -13,7 +13,7 @@ probes:
       - method: GET
         url: https://github.com
         alerts:
-          - query: response.size >= 10000
+          - assertion: response.size >= 10000
             message: Response size is {{ response.size }}, expecting less than 10000
 ```
 
@@ -31,12 +31,12 @@ probes:
       - method: GET
         url: https://github.com
         alerts:
-          - query: response.status != 200
+          - assertion: response.status != 200
             message: Status not 2xx # (This alert is only triggered for the github.com request)
       - method: GET
         url: https://gitlab.com
         alerts:
-          - query: response.status != 200
+          - assertion: response.status != 200
             message: Status not 2xx # (This alert is only triggered for the gitlab.com request)
 ```
 
@@ -52,15 +52,15 @@ probes:
       - method: GET
         url: https://github.com
         alerts:
-          - query: response.status != 200
+          - assertion: response.status != 200
             message: Status not 2xx # (This alert is only triggered for the github.com request)
       - method: GET
         url: https://gitlab.com
         alerts:
-          - query: response.status != 200
+          - assertion: response.status != 200
             message: Status not 2xx # (This alert is only triggered for the gitlab.com request)
     alerts:
-      - query: response.time > 10000 # in milliseconds
+      - assertion: response.time > 10000 # in milliseconds
         message: Response time is longer than 10 seconds # (This alert is triggered for all request)
 ```
 
@@ -82,10 +82,10 @@ Query contains any arbitrary expression that will trigger alert when it returns 
 
 ```yaml
 alerts:
-  - query: response.status == 500
+  - assertion: response.status == 500
 ```
 
-Inside the query expression you can get the response object.
+Inside the assertion expression you can get the response object.
 
 These are values that are available:
 
@@ -101,21 +101,21 @@ For example, to trigger alert when content-type is not json you may use
 
 ```yaml
 alerts:
-  - query: response.headers['content-type'] != "application/json"
+  - assertion: response.headers['content-type'] != "application/json"
 ```
 
-Or to query value inside the body
+Or to assertion value inside the body
 
 ```yaml
 alerts:
-  - query: response.body.data.todos[0].title != "Drink water"
+  - assertion: response.body.data.todos[0].title != "Drink water"
 ```
 
 Additionally you can have processing done in your queries. For instance, to ensure case insensitivity, you might want to convert to lowercase. It might look something like this:
 
 ```yaml
 alerts:
-  - query: has(lowerCase(response.body.status), "success")
+  - assertion: has(lowerCase(response.body.status), "success")
 ```
 
 These operators are available:
@@ -189,13 +189,13 @@ There are also several helper functions available:
 
 ```yaml
 alerts:
-  - query: response.status != 200
+  - assertion: response.status != 200
     message: HTTP Status code is different, expecting 200
 ```
 
 This is the message that is used in the sent notification.
 
-Inside the message string, you can also get the response object similar to query by surrounding the expression with double curly braces like the example above.
+Inside the message string, you can also get the response object similar to assertion by surrounding the expression with double curly braces like the example above.
 
 ## Further reading
 

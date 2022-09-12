@@ -74,9 +74,12 @@ describe('json schema validation tests', () => {
     expect(isValid).to.be.false
   })
 
-  it('should detect missing probe.alert.query', () => {
+  it('should detect missing probe.alert.assertion', () => {
     const badQuery = yaml.load(
-      fs.readFileSync('./test/json-schema/test-configs/bad-query.yml', 'utf8')
+      fs.readFileSync(
+        './test/json-schema/test-configs/bad-assertion.yml',
+        'utf8'
+      )
     )
     const isValid = validate(badQuery)
     expect(isValid).to.be.false

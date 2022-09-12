@@ -47,12 +47,12 @@ probes:
           username: someusername
           password: somepassword
         alerts:
-          - query: response.status != 200
+          - assertion: response.status != 200
             message: Status not 2xx
     incidentThreshold: 3
     recoveryThreshold: 3
     alerts:
-      - query: response.status != 200
+      - assertion: response.status != 200
         message: HTTP response status is {{ response.status }}, expecting 200
 ```
 

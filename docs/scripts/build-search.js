@@ -30,8 +30,8 @@ const path = require('path')
 
 const options = {
   indexName: 'monika-documentation',
-  appId: process.env.NEXT_PUBLIC_ALGOLIA_APPLICATION_ID,
-  adminAPIKey: process.env.ALGOLIA_ADMIN_API_KEY,
+  appId: process.env.NEXT_PUBLIC_ALGOLIA_APPLICATION_ID || '',
+  adminAPIKey: process.env.ALGOLIA_ADMIN_API_KEY || '',
 }
 
 main()
