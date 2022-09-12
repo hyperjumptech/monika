@@ -38,7 +38,7 @@ describe('monika', () => {
   })
 
   it('shows initializing file when no config', (done) => {
-    const proc = exec('monika', (_, stdout) => {
+    exec('monika', (_, stdout) => {
       expect(stdout).to.contain(
         'No Monika configuration available, initializing...'
       )
@@ -47,31 +47,19 @@ describe('monika', () => {
       )
       done()
     })
-
-    setTimeout(() => {
-      process.kill(proc.pid)
-    }, 3000)
   })
 
   it('shows starting message with valid json config', (done) => {
-    const proc = exec(`monika -c ./monika.example.json`, (_, stdout) => {
+    exec(`monika -c ./monika.example.json`, (_, stdout) => {
       expect(stdout).to.contain('Starting Monika.')
       done()
     })
-
-    setTimeout(() => {
-      process.kill(proc.pid)
-    }, 3000)
   })
 
   it('shows starting message with valid yaml config', (done) => {
-    const proc = exec(`monika -c ./monika.example.yml`, (_, stdout) => {
+    exec(`monika -c ./monika.example.yml`, (_, stdout) => {
       expect(stdout).to.contain('Starting Monika.')
       done()
     })
-
-    setTimeout(() => {
-      process.kill(proc.pid)
-    }, 3000)
   })
 })

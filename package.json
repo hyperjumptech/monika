@@ -140,6 +140,7 @@
     "oclif": "^3.0.1",
     "prettier": "2.5.1",
     "ts-node": "^10.4.0",
+    "tsx": "^3.9.0",
     "typescript": "4.4.4"
   },
   "prettier": {
