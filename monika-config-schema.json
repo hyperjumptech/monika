@@ -67,6 +67,18 @@
             "description": "Port number used for the redis",
             "type": "integer",
             "default": "6379"
+          },
+          "password": {
+            "title": "Password",
+            "description": "Password used for the redis AUTH, if set.",
+            "type": "string",
+            "default": "mypassword"
+          },
+          "username": {
+            "title": "Username",
+            "description": "Username used for the redis AUTH, if set.",
+            "type": "string",
+            "default": "myuser"
           }
         }
       }
