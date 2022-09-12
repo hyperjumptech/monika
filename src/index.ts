@@ -50,7 +50,7 @@ import {
 import { notificationChecker } from './components/notification/checker'
 import events from './events'
 import { Config } from './interfaces/config'
-import { Probe, ProbeAlert } from './interfaces/probe'
+import { Probe } from './interfaces/probe'
 import {
   printSummary,
   getSummaryAndSendNotif,
@@ -493,6 +493,7 @@ Please refer to the Monika documentations on how to how to configure notificatio
         Request Body: ${JSON.stringify(request.body) || `-`}
 `
         }
+
         startupMessage += `    Alerts: ${
           probe?.alerts === undefined || probe?.alerts.length === 0
             ? `[{ "assertion": "response.status < 200 or response.status > 299", "message": "HTTP Status is not 200"},
@@ -560,12 +561,27 @@ Please refer to the Monika documentations on how to how to configure notificatio
     throw error
   }
 
+  // eslint-disable max-depth
   async deprecationHandler(config: Config) {
-    let showMessage = false // if probes.alerts using `query` convert to `assertion`
+    let showMessage = false
     if (config && config.probes) {
-      config.probes.forEach(function (probe: Probe, iprobe: number) {
+      for (const [iprobe, probe] of config.probes.entries()) {
+        for (const [, request] of probe.requests.entries()) {
+          if (request.alerts) {
+            for (const [ialert, alert] of request.alerts.entries()) {
+              if (alert.query !== undefined && alert.assertion === undefined) {
+                request.alerts[ialert] = {
+                  assertion: alert.query,
+                  message: alert.message,
+                }
+                showMessage = true
+              }
+            }
+          }
+        }
+
         if (probe.alerts) {
-          probe.alerts.forEach(function (alert: ProbeAlert, ialert: number) {
+          for (const [ialert, alert] of probe.alerts.entries()) {
             if (alert.query !== undefined && alert.assertion === undefined) {
               config.probes[iprobe].alerts[ialert] = {
                 assertion: alert.query,
@@ -573,15 +589,18 @@ Please refer to the Monika documentations on how to how to configure notificatio
               }
               showMessage = true
             }
-          })
+          }
         }
-      })
+      }
     }
 
     if (showMessage) {
       log.warn('is deprecated. Please use "alerts.assertion"')
     }
+
+    return config
   }
+  // eslint-enable max-depth
 }
 
 /**
