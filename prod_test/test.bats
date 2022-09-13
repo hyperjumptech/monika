@@ -1,5 +1,4 @@
 function setup() {
-    load './node_modules/bats-support/load.bash'
     load './node_modules/bats-assert/load.bash'
 }
 
