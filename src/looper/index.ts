@@ -138,16 +138,16 @@ export function startProbing({
   notifications,
 }: StartProbingArgs): () => void {
   const flags = getContext().flags
-  const repeats = flags.repeats
+  const repeat = flags.repeat
 
   initializeProbeStates(probes)
 
   const probeInterval = setInterval(() => {
-    if (repeats) {
+    if (repeat) {
       const finishedProbe = probes.every((probe) => {
         const context = getProbeContext(probe.id)
 
-        return context.cycle === repeats && getProbeState(probe.id) === 'idle'
+        return context.cycle === repeat && getProbeState(probe.id) === 'idle'
       })
 
       if (finishedProbe) {
@@ -163,7 +163,7 @@ export function startProbing({
         const diff = differenceInSeconds(new Date(), context.lastFinish)
 
         if (probeState === 'idle' && diff >= probe.interval) {
-          if (repeats && context.cycle === repeats) {
+          if (repeat && context.cycle === repeat) {
             continue
           }
 

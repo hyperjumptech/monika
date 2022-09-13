@@ -1,8 +1,8 @@
 {
-  "require": ["tsx"],
+  "require": ["ts-node/register"],
   "watch-extensions": ["ts"],
   "recursive": true,
   "reporter": "spec",
-  "timeout": 20000,
+  "timeout": 5000,
   "bail": true
 }
