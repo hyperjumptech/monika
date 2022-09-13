@@ -403,9 +403,11 @@ export const validateConfig = (configuration: Config): Validation => {
     return setInvalidResponse(`Monika configuration: symon ${symonConfigError}`)
   }
 
-  // check config file against monika-config-schema.json
-  const isValidConfig = validateConfigFile(flags.config[0])
-  if (isValidConfig.valid === false) return isValidConfig
+  // check config file against monika-config-schema.json if a configfile is passed
+  if (flags.config.length > 0) {
+    const isValidConfig = validateConfigFile(flags.config[0])
+    if (isValidConfig.valid === false) return isValidConfig
+  }
 
   return VALID_CONFIG
 }
