@@ -182,7 +182,7 @@ export async function doProbe({
       const validatedResponse = validateResponse(
         alerts || [
           {
-            query: 'response.status < 200 or response.status > 299',
+            assertion: 'response.status < 200 or response.status > 299',
             message: 'REDIS host cannot be accessed',
           },
         ],
