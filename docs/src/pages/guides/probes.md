@@ -89,6 +89,38 @@ probes:
         ping: true
 ```
 
+### Redis Request
+
+You can check if your redis instance is running and accessible by adding a probe with `redis` configuration as follows.
+
+```yaml
+probes:
+  - id: 'redis-test'
+    name: redis health
+    description: requesting redis PONG
+    interval: 30 # in seconds
+    redis:
+      - host: 172.15.0.2
+        port: 6379
+```
+
+If your redis configuration include `AUTH` settings, you might get some error like `Error: NOAUTH Authentication required.`
+You can pass a `password` field like below:
+
+```yaml
+probes:
+  - id: 'redis-ping'
+    name: redis check with password
+    description: requesting redis PONG
+    interval: 30 # in seconds
+    redis:
+      - host: 172.15.0.2
+        port: 6379
+        password: mypassword
+```
+
+You may also add a `username` property as needed.
+
 ### TCP
 
 You can send a TCP request to a specific `host` and `port` with `data` by using the `socket` field.
@@ -176,7 +208,7 @@ You can use fake data to pass through your URLs, request body, and request heade
 
 To use the fake data, all you need to do is to wrap them in the double curly brackets like the example below:
 
-```
+```yaml
 probes:
   - id: '6'
     name: '6'
@@ -195,7 +227,7 @@ probes:
 
 If you want to use it as a request body, you can use it like this:
 
-```
+```yaml
 probes:
   - id: '0'
     name: '0'
@@ -211,7 +243,7 @@ probes:
 
 The same goes for the request headers, you can use it like this:
 
-```
+```yaml
 probes:
   - id: '0'
     name: '0'
