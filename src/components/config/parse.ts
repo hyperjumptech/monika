@@ -61,11 +61,14 @@ export const parseConfig = async (
         if (configString.length > 0) {
           break
         }
+
         tries--
       }
+
       if (configString.length === 0)
         throw new Error(`Failed to read ${source}, got empty config string.`)
     }
+
     const ext = path.extname(source)
 
     if (type === 'har') return parseHarFile(configString)
