@@ -1,7 +1,7 @@
 /**********************************************************************************
  * MIT License                                                                    *
  *                                                                                *
- * Copyright (c) 2022 Hyperjump Technology                                        *
+ * Copyright (c) 2021 Hyperjump Technology                                        *
  *                                                                                *
  * Permission is hereby granted, free of charge, to any person obtaining a copy   *
  * of this software and associated documentation files (the "Software"), to deal  *
@@ -27,14 +27,16 @@ import { ProbeRequestResponse } from '../../interfaces/request'
 import { differenceInMilliseconds } from 'date-fns'
 
 type RedisRequest = {
-  host: string
-  port: number
+  host: string // Host address of the redis-server
+  port: number // Port number of the redis-server
+  password?: string // Password string if AUTH is used, optional
+  username?: string // Username stgring if used, optional
   command?: string
 }
 
 type RedisResult = {
-  isAlive: boolean
-  message?: string
+  isAlive: boolean // If redis responds to PING/commands
+  message?: string // Any message from redis
   responseData?: Buffer | null
 }
 
@@ -47,6 +49,7 @@ export async function redisRequest(
   params: RedisRequest
 ): Promise<ProbeRequestResponse> {
   const baseResponse: ProbeRequestResponse = {
+    requestType: 'redis',
     data: '',
     body: '',
     status: 0,
@@ -75,16 +78,21 @@ export async function redisRequest(
  * @returns {object} RedisResult type contain client response
  */
 async function sendRedisRequest(params: RedisRequest): Promise<RedisResult> {
-  const { host, port } = params
+  const { host, port, username, password } = params
 
   const result: RedisResult = {
     isAlive: false,
     message: '',
   }
+
   try {
     const client = createClient({
-      // redis[s]://[[username][:password]@][host][:port][/db-number]:
-      url: `redis://${host}:${port}`,
+      socket: {
+        host: host,
+        port: port,
+      },
+      password: password,
+      username: username,
     })
 
     await client.connect()

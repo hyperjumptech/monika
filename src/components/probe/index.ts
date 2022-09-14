@@ -106,10 +106,16 @@ async function checkThresholdsAndSendAlert(
     validatedResponseStatuses,
   } = data
 
+  const { flags } = getContext()
+  const isSymonMode = Boolean(flags.symonUrl) && Boolean(flags.symonKey)
+
   statuses
-    ?.filter((probeState) => !probeState.isFirstTime)
     ?.filter((probeState) => probeState.shouldSendNotification)
     ?.forEach((probeState, index) => {
+      if (isSymonMode && probeState.isFirstTime) {
+        return
+      }
+
       probeSendNotification({
         index,
         probe,

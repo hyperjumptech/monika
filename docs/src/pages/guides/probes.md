@@ -91,7 +91,7 @@ probes:
 
 ### Redis Request
 
-You can query your redis instance. The following probe sends a ping to your redis host every 30 seconds.
+You can check if your redis instance is running and accessible by adding a probe with `redis` configuration as follows.
 
 ```yaml
 probes:
@@ -103,6 +103,23 @@ probes:
       - host: 172.15.0.2
         port: 6379
 ```
+
+If your redis configuration include `AUTH` settings, you might get some error like `Error: NOAUTH Authentication required.`
+You can pass a `password` field like below:
+
+```yaml
+probes:
+  - id: 'redis-ping'
+    name: redis check with password
+    description: requesting redis PONG
+    interval: 30 # in seconds
+    redis:
+      - host: 172.15.0.2
+        port: 6379
+        password: mypassword
+```
+
+You may also add a `username` property as needed.
 
 ### TCP
 
