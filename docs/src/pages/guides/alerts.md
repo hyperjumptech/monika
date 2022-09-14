@@ -76,9 +76,9 @@ Alert resolution = interval period (s) x threshold + network_and_channel_latenci
 
 From above, the theoretical maximum resolution is one second.
 
-## Alert Query
+## Alert Assertion
 
-Query contains any arbitrary expression that will trigger alert when it returns a truthy value
+Assertion contains any arbitrary expression that will trigger alert when it returns a truthy value
 
 ```yaml
 alerts:
