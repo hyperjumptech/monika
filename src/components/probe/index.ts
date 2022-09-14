@@ -24,7 +24,7 @@
 
 import events from '../../events'
 import { Notification } from '../../interfaces/notification'
-import { Probe } from '../../interfaces/probe'
+import { Probe, ProbeAlert } from '../../interfaces/probe'
 import type { ServerAlertState } from '../../interfaces/probe-status'
 import { ProbeRequestResponse } from '../../interfaces/request'
 import validateResponse, {
@@ -255,7 +255,7 @@ export async function doProbe({
       }
 
       // combine global probe alerts with all individual request alerts
-      const probeAlerts = probe.alerts ?? []
+      const probeAlerts: ProbeAlert[] = probe.alerts ?? []
       const combinedAlerts = [...probeAlerts, ...(request.alerts || [])]
 
       // Responses have been processed and validated
