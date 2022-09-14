@@ -452,7 +452,9 @@ function validateRedisConfig(redisConfig?: Redis[]) {
   }
 
   const schema = Joi.object({
-    host: Joi.string().required(),
+    host: Joi.alternatives()
+      .try(Joi.string().hostname(), Joi.string().ip())
+      .required(),
     port: Joi.number().min(0).max(65536).required(),
     password: Joi.string(),
     username: Joi.string(),
