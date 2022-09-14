@@ -3,7 +3,6 @@ notifications:
     type: webhook
     data:
       url: http://www.example.com
-      method: GET
 probes:
   - id: '1'
     description: Probe
@@ -16,5 +15,7 @@ probes:
           username: someusername
           password: somepassword
     alerts:
-      - status-not-2xx
-      - response-time-greater-than-200-ms
+      - query: response.status != 200
+        message: Http Response status code is not 200!
+      - query: response.time > 200
+        message: Yo too slow!
