@@ -88,8 +88,8 @@ async function sendRedisRequest(params: RedisRequest): Promise<RedisResult> {
   try {
     const client = createClient({
       socket: {
-        host: '172.17.0.1',
-        port: 6379,
+        host: host,
+        port: port,
       },
       password: password,
       username: username,
