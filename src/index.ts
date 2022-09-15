@@ -156,7 +156,7 @@ class Monika extends Command {
 
     'one-probe': Flags.boolean({
       description: 'One Probe',
-      default: false,
+      dependsOn: ['sitemap'],
     }),
 
     postman: Flags.string({

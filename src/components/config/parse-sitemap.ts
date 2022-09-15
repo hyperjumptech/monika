@@ -97,7 +97,16 @@ const generateProbesFromXmlOneProbe = (config: any) => {
       interval: DEFAULT_CONFIG_INTERVAL,
       incidentThreshold: DEFAULT_THRESHOLD,
       recoveryThreshold: DEFAULT_THRESHOLD,
-      alerts: [],
+      alerts: [
+        {
+          query: 'response.status < 200 or response.status > 299',
+          message: 'HTTP Status is not 200',
+        },
+        {
+          query: 'response.time > 2000',
+          message: 'Response time is more than 2000ms',
+        },
+      ],
     }
   }
 

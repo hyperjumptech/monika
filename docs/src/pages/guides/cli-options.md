@@ -211,7 +211,7 @@ Monika supports reading sitemap.xml as configuration input. Use the `--sitemap` 
 monika --sitemap sitemap.xml
 ```
 
-or you can also add `--one-probe` to merge all requests into single probe
+or you can also add `--one-probe` flag to merge all requests into single probe.
 
 ```bash
 monika --sitemap sitemap.xml --one-probe
@@ -225,7 +225,7 @@ You can use the combination of `--create-config` and `--sitemap` flags to conver
 monika --create-config --sitemap sitemap.xml
 ```
 
-or you can also add `--one-probe` to merge all requests into single probe
+or you can also add `--one-probe` flag to merge all requests into single probe.
 
 ```bash
 monika --create-config --sitemap sitemap.xml --one-probe
