@@ -134,10 +134,8 @@ export const processThresholds = ({
   const results: Array<ServerAlertState> = []
 
   if (!serverAlertStateInterpreters.has(id!)) {
-    const interpreters: Record<
-      string,
-      Interpreter<ServerAlertStateContext>
-    > = {}
+    const interpreters: Record<string, any> = {}
+
     for (const alert of validatedResponse.map((r) => r.alert)) {
       const stateMachine = serverAlertStateMachine.withContext({
         incidentThreshold,
