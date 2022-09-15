@@ -40,7 +40,7 @@ import { logResponseTime } from '../logger/response-time-log'
 import { tcpRequest } from '../tcp-request'
 import { getContext } from '../../context'
 
-// TODO: move this to interface file?
+import { redisRequest } from '../redis-request'
 interface ProbeStatusProcessed {
   probe: Probe
   statuses?: ServerAlertState[]
@@ -105,10 +105,16 @@ async function checkThresholdsAndSendAlert(
     validatedResponseStatuses,
   } = data
 
+  const { flags } = getContext()
+  const isSymonMode = Boolean(flags.symonUrl) && Boolean(flags.symonKey)
+
   statuses
-    ?.filter((probeState) => !probeState.isFirstTime)
     ?.filter((probeState) => probeState.shouldSendNotification)
     ?.forEach((probeState, index) => {
+      if (isSymonMode && probeState.isFirstTime) {
+        return
+      }
+
       probeSendNotification({
         index,
         probe,
@@ -139,6 +145,7 @@ type doProbeParams = {
  * @param {object} param object parameter
  * @returns {Promise<void>} void
  */
+// eslint-disable-next-line complexity
 export async function doProbe({
   checkOrder,
   probe,
@@ -150,6 +157,67 @@ export async function doProbe({
 
   const eventEmitter = getEventEmitter()
   const responses = []
+
+  if (probe?.redis) {
+    const { id, redis } = probe
+
+    let redisRequestIndex = 0
+    for await (const redisIndex of redis) {
+      const { host, port, username, password } = redisIndex
+
+      const redisRes = await redisRequest({
+        host: host,
+        port: port,
+        username: username,
+        password: password,
+      })
+
+      const timeNow = new Date().toISOString()
+      const logMessage = `${timeNow} ${checkOrder} id:${id} redis:${host}:${port} ${redisRes.responseTime}ms msg:${redisRes.body}`
+
+      const isAlertTriggered = redisRes.status !== 200
+      isAlertTriggered ? log.warn(logMessage) : log.info(logMessage)
+
+      const { alerts } = redisIndex
+      const validatedResponse = validateResponse(
+        alerts || [
+          {
+            query: 'response.status < 200 or response.status > 299',
+            message: 'REDIS host cannot be accessed',
+          },
+        ],
+        redisRes
+      )
+      const requestLog = new RequestLog(probe, 0, 0)
+
+      requestLog.addAlerts(
+        validatedResponse
+          .filter((item) => item.isAlertTriggered)
+          .map((item) => item.alert)
+      )
+      const statuses = processThresholds({
+        probe,
+        requestIndex: redisRequestIndex,
+        validatedResponse,
+      })
+
+      requestLog.setResponse(redisRes)
+      checkThresholdsAndSendAlert(
+        {
+          probe,
+          statuses,
+          notifications,
+          requestIndex: redisRequestIndex,
+          validatedResponseStatuses: validatedResponse,
+        },
+        requestLog
+      ).catch((error) => {
+        requestLog.addError(error.message)
+      })
+
+      redisRequestIndex++
+    }
+  }
 
   if (probe?.socket) {
     const { id, socket } = probe
@@ -170,8 +238,9 @@ export async function doProbe({
     // TCPrequestIndex++                           // for later supported
     const TCPrequestIndex = 0
 
+    const { alerts } = socket
     const validatedResponse = validateResponse(
-      probe.socket?.alerts || [
+      alerts || [
         {
           query: 'response.status < 200 or response.status > 299',
           message: 'TCP server cannot be accessed',

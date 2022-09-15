@@ -26,7 +26,7 @@ import { AxiosRequestConfig } from 'axios'
 import { ProbeAlert } from './probe'
 
 // RequestTypes are used to define the type of request that is being made.
-export type RequestTypes = 'http' | 'HTTP' | 'icmp' | 'ICMP' | 'tcp'
+export type RequestTypes = 'http' | 'HTTP' | 'icmp' | 'ICMP' | 'tcp' | 'redis'
 
 // ProbeRequestResponse is used to define the response from a probe requests.
 export interface ProbeRequestResponse<T = any> {

@@ -26,7 +26,7 @@
 import Joi from 'joi'
 import { Notification } from '../../interfaces/notification'
 import { Config } from '../../interfaces/config'
-import { ProbeAlert, Socket } from '../../interfaces/probe'
+import { ProbeAlert, Socket, Redis } from '../../interfaces/probe'
 import { Validation } from '../../interfaces/validation'
 import { isValidURL } from '../../utils/is-valid-url'
 import { parseAlertStringTime } from '../../plugins/validate-response/checkers'
@@ -311,7 +311,7 @@ export const validateConfig = (configuration: Config): Validation => {
 
   // Check probes properties
   for (const probe of probes) {
-    const { name, interval, alerts = [], requests, socket } = probe
+    const { name, interval, alerts = [], requests, socket, redis } = probe
     const socketAlerts = socket?.alerts ?? []
     const tcpConfigError = validateTCPConfig(socket)
 
@@ -321,7 +321,17 @@ export const validateConfig = (configuration: Config): Validation => {
       )
     }
 
-    if ((!socket && (requests?.length ?? 0)) === 0) return PROBE_NO_REQUESTS
+    const redisConfigError = validateRedisConfig(redis)
+    if (redisConfigError) {
+      return setInvalidResponse(
+        `Monika configuration: probes.redis ${redisConfigError}`
+      )
+    }
+
+    // ensure at least one of these probe types is defined/exist in the probe object
+    const totalProbes =
+      (socket ? 1 : 0) + (redis ? 1 : 0) + (requests?.length ?? 0)
+    if (totalProbes === 0) return PROBE_NO_REQUESTS
 
     // Validate Interval
     if (interval <= 0) {
@@ -443,4 +453,25 @@ function validateTCPConfig(tcpConfig?: Socket) {
   const validationError = schema.validate(tcpConfig)
 
   return validationError?.error?.message
+}
+
+function validateRedisConfig(redisConfig?: Redis[]) {
+  if (!redisConfig) {
+    return ''
+  }
+
+  const schema = Joi.object({
+    host: Joi.alternatives()
+      .try(Joi.string().hostname(), Joi.string().ip())
+      .required(),
+    port: Joi.number().min(0).max(65536).required(),
+    password: Joi.string(),
+    username: Joi.string(),
+    command: Joi.string(),
+  })
+
+  for (const redis of redisConfig) {
+    const validationError = schema.validate(redis)
+    if (validationError?.error?.message) return validationError?.error?.message
+  }
 }
