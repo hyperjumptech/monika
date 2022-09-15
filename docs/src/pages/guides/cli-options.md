@@ -211,12 +211,24 @@ Monika supports reading sitemap.xml as configuration input. Use the `--sitemap` 
 monika --sitemap sitemap.xml
 ```
 
+or you can also add `--one-probe` to merge all requests into single probe
+
+```bash
+monika --sitemap sitemap.xml --one-probe
+```
+
 ### Create config from Sitemap file
 
 You can use the combination of `--create-config` and `--sitemap` flags to convert the sitemap xml file to a monika.yml config file.
 
 ```bash
 monika --create-config --sitemap sitemap.xml
+```
+
+or you can also add `--one-probe` to merge all requests into single probe
+
+```bash
+monika --create-config --sitemap sitemap.xml --one-probe
 ```
 
 ## Prometheus
