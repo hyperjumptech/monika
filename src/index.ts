@@ -22,25 +22,30 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import boxen from 'boxen'
+import chalk from 'chalk'
+import fs from 'fs'
+import isUrl from 'is-url'
+import cron, { ScheduledTask } from 'node-cron'
+import path from 'path'
+
 import {
+  CliUx,
   Command,
+  Errors,
   Flags,
   Interfaces,
   loadHelpClass,
   toCached,
-  CliUx,
-  Errors,
 } from '@oclif/core'
-import boxen from 'boxen'
-import chalk from 'chalk'
-import fs from 'fs'
-import cron, { ScheduledTask } from 'node-cron'
+
 import {
   createConfig,
   DEFAULT_CONFIG_INTERVAL,
   getConfigIterator,
   updateConfig,
 } from './components/config'
+import { DEFAULT_CONFIG_FILENAME } from './components/config/create-config'
 import { printAllLogs } from './components/logger'
 import {
   closeLog,
@@ -48,23 +53,21 @@ import {
   openLogfile,
 } from './components/logger/history'
 import { notificationChecker } from './components/notification/checker'
+import { setContext } from './context'
 import events from './events'
 import { Config } from './interfaces/config'
 import { Probe } from './interfaces/probe'
 import {
-  printSummary,
   getSummaryAndSendNotif,
+  printSummary,
   savePidFile,
 } from './jobs/summary-notification'
 import initLoaders from './loaders'
-import { idFeeder, isIDValid, sanitizeProbe } from './looper'
+import { sanitizeProbe, startProbing } from './looper'
+import SymonClient from './symon'
+import { checkProbeId } from './utils/check-probe-id'
 import { getEventEmitter } from './utils/events'
 import { log } from './utils/pino'
-import path from 'path'
-import isUrl from 'is-url'
-import SymonClient from './symon'
-import { DEFAULT_CONFIG_FILENAME } from './components/config/create-config'
-import { setContext } from './context'
 
 const em = getEventEmitter()
 let symonClient: SymonClient
@@ -195,10 +198,11 @@ class Monika extends Command {
       exclusive: ['r'],
     }),
 
-    repeat: Flags.string({
+    repeat: Flags.integer({
       char: 'r', // (r)epeat
       description: 'Repeats the test run n times',
       multiple: false,
+      default: 0,
     }),
 
     stun: Flags.integer({
@@ -374,7 +378,7 @@ class Monika extends Command {
         // default sequence for Each element
         let probesToRun = config.probes
         if (_flags.id) {
-          if (!isIDValid(config, _flags.id)) {
+          if (!checkProbeId(probesToRun, _flags.id)) {
             throw new Error('Input error') // can't continue, exit from app
           }
 
@@ -424,9 +428,8 @@ class Monika extends Command {
           scheduledTasks.push(scheduledStatusUpdateTask)
         }
 
-        // feed the configs and probes to be processed
-        abortCurrentLooper = idFeeder({
-          sanitizedProbes: sanitizedProbe,
+        abortCurrentLooper = startProbing({
+          probes: sanitizedProbe,
           notifications: config.notifications ?? [],
         })
       }
