@@ -22,19 +22,23 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Config } from '../interfaces/config'
-import { Probe } from '../interfaces/probe'
-import { doProbe } from '../components/probe'
-import { log } from '../utils/pino'
-import { Notification } from '../interfaces/notification'
-import { getPublicIp, isConnectedToSTUNServer } from '../utils/public-ip'
-import { getContext } from '../context'
+import { differenceInSeconds } from 'date-fns'
 
-const MILLISECONDS = 1000
+import { doProbe } from '../components/probe'
+import { getContext } from '../context'
+import { Notification } from '../interfaces/notification'
+import { Probe } from '../interfaces/probe'
+import { log } from '../utils/pino'
+import {
+  getProbeContext,
+  getProbeState,
+  initializeProbeStates,
+} from '../utils/probe-state'
+import { getPublicIp, isConnectedToSTUNServer } from '../utils/public-ip'
+
 export const DEFAULT_THRESHOLD = 5
-let checkSTUNinterval: NodeJS.Timeout
 let isPaused = false
-const intervals: Array<NodeJS.Timeout> = []
+let checkSTUNinterval: NodeJS.Timeout
 
 const DISABLE_STUN = -1 // -1 is disable stun checking
 
@@ -96,34 +100,6 @@ export function sanitizeProbe(probe: Probe, id: string): Probe {
   return probe
 }
 
-/**
- * isIDValid checks the user input against existing probe ids in Config
- * @param {object} config is the probe configuration
- * @param {array} ids is array of user input string ids
- * @returns {bool} true if all ids found, false if any id is not found
- */
-export function isIDValid(config: Config, ids: string): boolean {
-  const idSplit = ids.split(',').map((item) => item.trim())
-
-  for (const id of idSplit) {
-    let isFound = false
-
-    for (const probes of config.probes) {
-      if (probes.id === id) {
-        isFound = true
-        break
-      }
-    }
-
-    if (!isFound) {
-      log.error(`id not found: ${id}`)
-      return false // ran through the probes and didn't find id
-    }
-  }
-
-  return true
-}
-
 export async function loopCheckSTUNServer(interval: number): Promise<any> {
   // if stun is disabled, no need to create interval
   if (interval === -1) return
@@ -136,111 +112,9 @@ export async function loopCheckSTUNServer(interval: number): Promise<any> {
 
   checkSTUNinterval = setInterval(async () => {
     await getPublicIp()
-  }, interval * MILLISECONDS)
+  }, interval * 1000)
 
   return checkSTUNinterval
-}
-
-type loopProbeParams = {
-  probe: Probe // probe is the target to request
-  notifications: Notification[] // notifications is the array of channels to notify the user if probes does not work
-}
-
-/**
- * loopProbe fires off the probe requests after every x interval, and handles repeats.
- * This function receives the probe id from idFeeder.
- * @param {object} input params
- * @returns {function} func with isAborted true if interrupted
- */
-function loopProbe({ probe, notifications }: loopProbeParams) {
-  let counter = 0
-  const { flags } = getContext()
-
-  const probeInterval = setInterval(() => {
-    if (counter === flags.repeats) {
-      // for fixed repeat loops: check repeat flag, if equal to counter, the we'll stop the loop
-      clearInterval(probeInterval)
-      clearInterval(checkSTUNinterval)
-      process.kill(process.pid, 'SIGINT')
-      // else, isSTUNServer connected? if not connected, skip doing probes.
-      // or are we disabling STUN connection
-    } else if (
-      (isConnectedToSTUNServer && !isPaused) ||
-      flags.stun === DISABLE_STUN
-    ) {
-      doProbe({
-        checkOrder: ++counter,
-        probe,
-        notifications,
-      })
-    }
-  }, (probe.interval ?? 10) * MILLISECONDS)
-
-  if (process.env.CI || process.env.NODE_ENV === 'test') {
-    clearInterval(probeInterval)
-  }
-
-  return probeInterval
-}
-
-const delayForProbe = (
-  index: number,
-  totalProbes: number,
-  maxStartDelay: number
-) => {
-  const delay =
-    Math.max(Math.ceil(maxStartDelay / totalProbes) * index, 100) +
-    Math.random() * 1000
-
-  return delay
-}
-
-const abort = () => {
-  for (const i of intervals) {
-    clearInterval(i)
-  }
-}
-
-type idFeederParam = {
-  sanitizedProbes: Probe[] // {object} sanitizedProbes probes that has been sanitized
-  notifications: Notification[] // {object} notifications probe notifications
-}
-/**
- * idFeeder feeds Prober with actual ids to process
- * @param {object} input parameters
- * @returns {function} abort function
- */
-export function idFeeder({
-  sanitizedProbes,
-  notifications,
-}: idFeederParam): any {
-  const flags = getContext().flags
-
-  for (const [i, probe] of sanitizedProbes.entries()) {
-    const delay =
-      flags.maxStartDelay === 0
-        ? 0
-        : delayForProbe(i, sanitizedProbes.length, flags.maxStartDelay)
-    setTimeout(() => {
-      const interval = loopProbe({
-        probe,
-        notifications: notifications ?? [],
-      })
-      intervals.push(interval)
-    }, delay)
-  }
-
-  return abort
-}
-
-/**
- * clearProbeInterval clear all probing process
- * @returns void
- */
-export function clearProbeInterval(): void {
-  for (const i of intervals) {
-    clearInterval(i)
-  }
 }
 
 /**
@@ -252,4 +126,56 @@ export function setPauseProbeInterval(pause: boolean): void {
   isPaused = pause
 
   if (pause) log.info('Probing is paused')
+}
+
+type StartProbingArgs = {
+  probes: Probe[]
+  notifications: Notification[]
+}
+
+export function startProbing({
+  probes,
+  notifications,
+}: StartProbingArgs): () => void {
+  const flags = getContext().flags
+  const repeat = flags.repeat
+
+  initializeProbeStates(probes)
+
+  const probeInterval = setInterval(() => {
+    if (repeat) {
+      const finishedProbe = probes.every((probe) => {
+        const context = getProbeContext(probe.id)
+
+        return context.cycle === repeat && getProbeState(probe.id) === 'idle'
+      })
+
+      if (finishedProbe) {
+        // eslint-disable-next-line unicorn/no-process-exit
+        process.exit(0)
+      }
+    }
+
+    if ((isConnectedToSTUNServer && !isPaused) || flags.stun === DISABLE_STUN) {
+      for (const probe of probes) {
+        const probeState = getProbeState(probe.id)
+        const context = getProbeContext(probe.id)
+        const diff = differenceInSeconds(new Date(), context.lastFinish)
+
+        if (probeState === 'idle' && diff >= probe.interval) {
+          if (repeat && context.cycle === repeat) {
+            continue
+          }
+
+          doProbe({
+            checkOrder: context.cycle,
+            probe,
+            notifications,
+          })
+        }
+      }
+    }
+  }, 1000)
+
+  return () => clearInterval(probeInterval)
 }

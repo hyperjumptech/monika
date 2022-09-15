@@ -39,7 +39,7 @@
     "start:prod": "npm run prepack && ./bin/run",
     "test": "npm run clean && cross-env NODE_ENV=test nyc --reporter=lcov --extension .ts mocha --config .mocharc.json --forbid-only \"{src,test}/**/*.test.ts\" --exclude test/cli.test.ts",
     "cli-test": "npx bats test/bats/cli.bats",
-    "prod_test": "cross-env NODE_ENV=test nyc --extension .ts mocha --forbid-only \"prod_test/**/*.test.ts\"",
+    "prod_test": "npx bats prod_test/test.bats",
     "version": "oclif readme && git add README.md",
     "format": "prettier --write .",
     "check-format": "prettier --check .",
