@@ -23,19 +23,19 @@
  **********************************************************************************/
 
 import { expect } from 'chai'
-import { interpret, Interpreter } from 'xstate'
+import { interpret } from 'xstate'
+
 import { Probe } from '../../../interfaces/probe'
 import { ServerAlertState } from '../../../interfaces/probe-status'
 import { ValidatedResponse } from '../../../plugins/validate-response'
 import {
   processThresholds,
-  ServerAlertStateContext,
   serverAlertStateInterpreters,
   serverAlertStateMachine,
 } from '../process-server-status'
 
 describe('serverAlertStateMachine', () => {
-  let interpreter: Interpreter<ServerAlertStateContext>
+  let interpreter: any
 
   beforeEach(() => {
     interpreter = interpret(

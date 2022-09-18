@@ -25,13 +25,13 @@
 import events from '../../events'
 import { Notification } from '../../interfaces/notification'
 import { Probe } from '../../interfaces/probe'
-import type { ServerAlertState } from '../../interfaces/probe-status'
 import { ProbeRequestResponse } from '../../interfaces/request'
 import validateResponse, {
   ValidatedResponse,
 } from '../../plugins/validate-response'
 import { getEventEmitter } from '../../utils/events'
 import { log } from '../../utils/pino'
+import { setProbeFinish, setProbeRunning } from '../../utils/probe-state'
 import { RequestLog } from '../logger'
 import { sendAlerts } from '../notification'
 import { processThresholds } from '../notification/process-server-status'
@@ -42,6 +42,7 @@ import { getContext } from '../../context'
 import { httpRequest } from '../http-request'
 
 import { redisRequest } from '../redis-request'
+import { ServerAlertState } from '../../interfaces/probe-status'
 interface ProbeStatusProcessed {
   probe: Probe
   statuses?: ServerAlertState[]
@@ -225,158 +226,160 @@ export async function doProbe({
   const isSymonMode = Boolean(flags.symonUrl) && Boolean(flags.symonKey)
   const verboseLogs = isSymonMode || flags['keep-verbose-logs']
 
-  const eventEmitter = getEventEmitter()
-  const responses = []
+  setProbeRunning(probe.id)
 
-  if (probe?.redis) {
-    const { id, redis } = probe
+  const randomTimeout = [1000, 2000, 3000].sort(() => {
+    return Math.random() - 0.5
+  })[0]
 
-    let redisRequestIndex = 0
-    for (const redisIndex of redis) {
-      const { host, port } = redisIndex
+  setTimeout(async () => {
+    const eventEmitter = getEventEmitter()
+    const responses = []
 
-      // eslint-disable-next-line no-await-in-loop
-      const redisRes = await redisRequest({ host: host, port: port })
+    if (probe?.redis) {
+      const { id, redis } = probe
+      let redisRequestIndex = 0
+      for (const redisIndex of redis) {
+        const { host, port } = redisIndex
+        // eslint-disable-next-line no-await-in-loop
+        const redisRes = await redisRequest({ host: host, port: port })
+        const timeNow = new Date().toISOString()
+        const logMessage = `${timeNow} ${checkOrder} id:${id} redis:${host}:${port} ${redisRes.responseTime}ms msg:${redisRes.body}`
+        const isAlertTriggered = redisRes.status !== 200
+        responseProcessing({
+          probe: probe,
+          probeResult: redisRes,
+          notifications: notifications,
+          logMessage: logMessage,
+          isAlertTriggered: isAlertTriggered,
+          index: redisRequestIndex,
+        })
+        redisRequestIndex++
+      }
+    }
 
+    if (probe?.socket) {
+      const { id, socket } = probe
+      const { host, port, data } = socket
+      const url = `${host}:${port}`
+      const probeRes = await tcpRequest({ host, port, data })
       const timeNow = new Date().toISOString()
-      const logMessage = `${timeNow} ${checkOrder} id:${id} redis:${host}:${port} ${redisRes.responseTime}ms msg:${redisRes.body}`
-      const isAlertTriggered = redisRes.status !== 200
-
+      const logMessage = `${timeNow} ${checkOrder} id:${id} tcp:${url} ${probeRes.responseTime}ms msg:${probeRes.body}`
+      const isAlertTriggered = probeRes.status !== 200
+      const TCPrequestIndex = 0
       responseProcessing({
         probe: probe,
-        probeResult: redisRes,
+        probeResult: probeRes,
         notifications: notifications,
         logMessage: logMessage,
         isAlertTriggered: isAlertTriggered,
-        index: redisRequestIndex,
+        index: TCPrequestIndex,
       })
-      redisRequestIndex++
     }
-  }
 
-  if (probe?.socket) {
-    const { id, socket } = probe
-    const { host, port, data } = socket
-    const url = `${host}:${port}`
+    // sending multiple http-type requests
+    for (
+      let requestIndex = 0;
+      requestIndex < probe?.requests?.length;
+      requestIndex++
+    ) {
+      const request = probe.requests?.[requestIndex]
+      const requestLog = new RequestLog(probe, requestIndex, checkOrder)
 
-    const probeRes = await tcpRequest({ host, port, data })
+      try {
+        // intentionally wait for a request to finish before processing next request in loop
+        // eslint-disable-next-line no-await-in-loop
+        const probeRes: ProbeRequestResponse = await httpRequest({
+          requestConfig: request,
+          responses,
+        })
 
-    const timeNow = new Date().toISOString()
-    const logMessage = `${timeNow} ${checkOrder} id:${id} tcp:${url} ${probeRes.responseTime}ms msg:${probeRes.body}`
+        logResponseTime(probeRes.responseTime)
 
-    const isAlertTriggered = probeRes.status !== 200
-    const TCPrequestIndex = 0
+        eventEmitter.emit(events.probe.response.received, {
+          probe: probe,
+          requestIndex,
+          response: probeRes,
+        })
 
-    responseProcessing({
-      probe: probe,
-      probeResult: probeRes,
-      notifications: notifications,
-      logMessage: logMessage,
-      isAlertTriggered: isAlertTriggered,
-      index: TCPrequestIndex,
-    })
-  }
+        // Add to a response array to be accessed by another request for chaining later
+        responses.push(probeRes)
+        requestLog.setResponse(probeRes)
 
-  // sending multiple http-type requests
-  for (
-    let requestIndex = 0;
-    requestIndex < probe?.requests?.length;
-    requestIndex++
-  ) {
-    const request = probe.requests?.[requestIndex]
-    const requestLog = new RequestLog(probe, requestIndex, checkOrder)
+        // decode error message based on returned driver status
+        if ([0, 1, 2, 3, 4, 599].includes(probeRes.status)) {
+          const errorMessageMap: Record<number, string> = {
+            0: 'URI not found', // axios error
+            1: 'Connection reset', // axios error
+            2: 'Connection refused', // axios error
+            3: 'Unknown error', // axios error
+            599: 'Request Timed out', // axios error
+          }
 
-    try {
-      // intentionally wait for a request to finish before processing next request in loop
-      // eslint-disable-next-line no-await-in-loop
-      const probeRes: ProbeRequestResponse = await httpRequest({
-        requestConfig: request,
-        responses,
-      })
-
-      logResponseTime(probeRes.responseTime)
-
-      eventEmitter.emit(events.probe.response.received, {
-        probe: probe,
-        requestIndex,
-        response: probeRes,
-      })
-
-      // Add to a response array to be accessed by another request for chaining later
-      responses.push(probeRes)
-      requestLog.setResponse(probeRes)
-
-      // decode error message based on returned driver status
-      if ([0, 1, 2, 3, 4, 599].includes(probeRes.status)) {
-        const errorMessageMap: Record<number, string> = {
-          0: 'URI not found', // axios error
-          1: 'Connection reset', // axios error
-          2: 'Connection refused', // axios error
-          3: 'Unknown error', // axios error
-          599: 'Request Timed out', // axios error
+          requestLog.addError(errorMessageMap[probeRes.status])
         }
 
-        requestLog.addError(errorMessageMap[probeRes.status])
-      }
+        // combine global probe alerts with all individual request alerts
+        const probeAlerts = probe.alerts ?? []
+        const combinedAlerts = [...probeAlerts, ...(request.alerts || [])]
 
-      // combine global probe alerts with all individual request alerts
-      const probeAlerts = probe.alerts ?? []
-      const combinedAlerts = [...probeAlerts, ...(request.alerts || [])]
+        // Responses have been processed and validated
+        const validatedResponse = validateResponse(combinedAlerts, probeRes)
 
-      // Responses have been processed and validated
-      const validatedResponse = validateResponse(combinedAlerts, probeRes)
-
-      requestLog.addAlerts(
-        validatedResponse
-          .filter((item) => item.isAlertTriggered)
-          .map((item) => item.alert)
-      )
-
-      // done probing, got some result, process it, check for thresholds and notifications
-      const statuses = processThresholds({
-        probe: probe,
-        requestIndex,
-        validatedResponse,
-      })
-
-      // Done processing results, check if need to send out alerts
-      checkThresholdsAndSendAlert(
-        {
-          probe: probe,
-          statuses,
-          notifications: notifications,
-          requestIndex,
-          validatedResponseStatuses: validatedResponse,
-        },
-        requestLog
-      ).catch((error) => {
-        requestLog.addError(error.message)
-      })
-
-      // Exit the chaining loop if there is any alert triggered
-      if (validatedResponse.some((item) => item.isAlertTriggered)) {
-        const triggeredAlertResponse = validatedResponse.find(
-          (item) => item.isAlertTriggered
+        requestLog.addAlerts(
+          validatedResponse
+            .filter((item) => item.isAlertTriggered)
+            .map((item) => item.alert)
         )
 
-        if (triggeredAlertResponse) {
-          eventEmitter.emit(events.probe.alert.triggered, {
-            probe: probe,
-            requestIndex,
-            alertQuery: triggeredAlertResponse.alert.query,
-          })
-        }
+        // done probing, got some result, process it, check for thresholds and notifications
+        const statuses = processThresholds({
+          probe: probe,
+          requestIndex,
+          validatedResponse,
+        })
 
+        // Done processing results, check if need to send out alerts
+        checkThresholdsAndSendAlert(
+          {
+            probe: probe,
+            statuses,
+            notifications: notifications,
+            requestIndex,
+            validatedResponseStatuses: validatedResponse,
+          },
+          requestLog
+        ).catch((error) => {
+          requestLog.addError(error.message)
+        })
+
+        // Exit the chaining loop if there is any alert triggered
+        if (validatedResponse.some((item) => item.isAlertTriggered)) {
+          const triggeredAlertResponse = validatedResponse.find(
+            (item) => item.isAlertTriggered
+          )
+
+          if (triggeredAlertResponse) {
+            eventEmitter.emit(events.probe.alert.triggered, {
+              probe: probe,
+              requestIndex,
+              alertQuery: triggeredAlertResponse.alert.query,
+            })
+          }
+
+          break
+        }
+      } catch (error) {
+        requestLog.addError((error as any).message)
         break
-      }
-    } catch (error) {
-      requestLog.addError((error as any).message)
-      break
-    } finally {
-      requestLog.print()
-      if (verboseLogs || requestLog.hasIncidentOrRecovery) {
-        requestLog.saveToDatabase().catch((error) => log.error(error.message))
+      } finally {
+        requestLog.print()
+        if (verboseLogs || requestLog.hasIncidentOrRecovery) {
+          requestLog.saveToDatabase().catch((error) => log.error(error.message))
+        }
       }
     }
-  }
+
+    setProbeFinish(probe.id)
+  }, randomTimeout)
 }

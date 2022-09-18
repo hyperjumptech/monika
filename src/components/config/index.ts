@@ -112,7 +112,7 @@ const watchConfigFile = (
   const watchConfigFile = !(
     process.env.CI ||
     process.env.NODE_ENV === 'test' ||
-    repeat !== undefined
+    repeat !== 0
   )
   if (watchConfigFile) {
     const watcher = chokidar.watch(path)
