@@ -39,9 +39,9 @@ probes:
       - url: https://hyperjumptech.github.io/monika
         timeout: 7000 # in milliseconds
     alerts:
-      - query: response.status < 200 or response.status > 299
+      - assertion: response.status < 200 or response.status > 299
         message: Target is not healthy. It has not been returning status code 2xx.
-      - query: response.time > 2000 # in milliseconds
+      - assertion: response.time > 2000 # in milliseconds
         message:
           Target is not healthy. The response time has been greater than 2000
           ms.
@@ -94,9 +94,9 @@ probes:
     incidentThreshold: 3
     recoveryThreshold: 3
     alerts:
-      - query: response.status > 299
+      - assertion: response.status > 299
         message: Target is not healthy. It has not been returning status code 2xx.
-      - query: response.time > 2000 # in milliseconds
+      - assertion: response.time > 2000 # in milliseconds
         message:
           Target is not healthy. The response time has been greater than 2000
           ms.
@@ -108,7 +108,7 @@ If there is a case where executing a GET request to `https://github.com` trigger
 
 ## Requests Chaining
 
-Monika supports request chaining, which enables you to do multiple requests and the ability to use past responses from earlier requests. For example, after executing a GET request to a certain API, the next request could use the previous request(s) response into their path/query parameters or headers.
+Monika supports request chaining, which enables you to do multiple requests and the ability to use past responses from earlier requests. For example, after executing a GET request to a certain API, the next request could use the previous request(s) response into their path/assertion parameters or headers.
 
 Here is an example on how you could get previous request(s) response data into your next request:
 
@@ -126,7 +126,7 @@ In the sections below, you can find several examples of configuration files whic
 
 ### Pass Response Data as Path/Query Parameters
 
-Here is an example of using previous request's response in the path/query parameters:
+Here is an example of using previous request's response in the path/assertion parameters:
 
 ```yaml
 probes:
@@ -144,9 +144,9 @@ probes:
     incidentThreshold: 3
     recoveryThreshold: 3
     alerts:
-      - query: response.status > 299
+      - assertion: response.status > 299
         message: Target is not healthy. It has not been returning status code 2xx.
-      - query: response.time > 2000 # in milliseconds
+      - assertion: response.time > 2000 # in milliseconds
         message:
           Target is not healthy. The response time has been greater than 2000
           ms.
@@ -205,9 +205,9 @@ probes:
     incidentThreshold: 3
     recoveryThreshold: 3
     alerts:
-      - query: response.status > 299
+      - assertion: response.status > 299
         message: Target is not healthy. It has not been returning status code 2xx.
-      - query: response.time > 2000 # in milliseconds
+      - assertion: response.time > 2000 # in milliseconds
         message:
           Target is not healthy. The response time has been greater than 2000
           ms.
@@ -259,7 +259,7 @@ probes:
           password: password
 
         alerts:
-          - query: response.status != 200
+          - assertion: response.status != 200
             message: Http Response status code is not 200!
 notifications:
   - id: unique-id-desktop

@@ -72,7 +72,7 @@ const probeSendNotification = async (data: ProbeSendNotification) => {
   const validation =
     validatedResponseStatuses.find(
       (validateResponse: ValidatedResponse) =>
-        validateResponse.alert.query === probeState?.alertQuery
+        validateResponse.alert.assertion === probeState?.alertQuery
     ) || validatedResponseStatuses[index]
 
   eventEmitter.emit(events.probe.notification.willSend, {
@@ -190,7 +190,7 @@ export async function doProbe({
         const validatedResponse = validateResponse(
           alerts || [
             {
-              query: 'response.status < 200 or response.status > 299',
+              assertion: 'response.status < 200 or response.status > 299',
               message: 'REDIS host cannot be accessed',
             },
           ],
@@ -250,7 +250,7 @@ export async function doProbe({
       const validatedResponse = validateResponse(
         alerts || [
           {
-            query: 'response.status < 200 or response.status > 299',
+            assertion: 'response.status < 200 or response.status > 299',
             message: 'TCP server cannot be accessed',
           },
         ],

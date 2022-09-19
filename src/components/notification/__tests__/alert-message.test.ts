@@ -43,7 +43,7 @@ describe('Alert message', () => {
       const alertMessage = await getMessageForAlert({
         probeID: 'f76fef86-7331-4bfd-a7e9-f4ba105127ac',
         url: '',
-        alert: { query: '' },
+        alert: { assertion: '' },
         ipAddress: '',
         isRecovery: false,
         response: {
@@ -71,7 +71,7 @@ describe('Alert message', () => {
       const alertMessage = await getMessageForAlert({
         probeID: 'f76fef86-7331-4bfd-a7e9-f4ba105127ac',
         url: '',
-        alert: { query: '' },
+        alert: { assertion: '' },
         ipAddress: '',
         isRecovery: false,
         response: {
@@ -106,7 +106,7 @@ describe('Alert message', () => {
       const alertMessage = await getMessageForAlert({
         probeID: 'f76fef86-7331-4bfd-a7e9-f4ba105127ac',
         url: '',
-        alert: { query: '' },
+        alert: { assertion: '' },
         ipAddress: '',
         isRecovery: true,
         response: {
@@ -156,7 +156,7 @@ describe('Alert message', () => {
       const alertMessage = await getMessageForAlert({
         probeID: 'f76fef86-7331-4bfd-a7e9-f4ba105127aa',
         url: '',
-        alert: { query: '' },
+        alert: { assertion: '' },
         ipAddress: '',
         isRecovery: true,
         response: {

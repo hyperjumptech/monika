@@ -286,7 +286,7 @@ const isValidProbeAlert = (alert: ProbeAlert | string): boolean => {
       )
     }
 
-    return Boolean(compileExpression(alert.query))
+    return Boolean(compileExpression(alert.assertion))
   } catch {
     return false
   }

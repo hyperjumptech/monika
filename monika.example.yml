@@ -37,7 +37,7 @@ probes:
 #     - url: http://google.com
 #       ping: true
 #   alerts:
-#     - query: response.status == 500
+#     - assertion: response.status == 500
 #       message: response status message
 #   incidentThreshold: 3
 #   recoveryThreshold: 3
@@ -79,9 +79,9 @@ probes:
 #             <password>secret</password>
 #           </user>
 #     alerts:
-#       - query: response.status == 500
+#       - assertion: response.status == 500
 #         message: response status message
-#       - query: response.time > 150
+#       - assertion: response.time > 150
 #         message: response time message
 #     incidentThreshold: 3
 #     recoveryThreshold: 3
@@ -101,7 +101,7 @@ probes:
 #         method: POST
 #         timeout: 6000
 #     alerts:
-#       - query: response.status == 500
+#       - assertion: response.status == 500
 #         message: response status message
 #     incidentThreshold: 3
 #     recoveryThreshold: 3

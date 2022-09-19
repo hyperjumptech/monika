@@ -66,7 +66,7 @@ export function tlsChecker(): void {
             // TODO: Remove validation below
             // validation is used because it is needed to send alert
             const validation: ValidatedResponse = {
-              alert: { query: '', message: error.message },
+              alert: { assertion: '', message: error.message },
               isAlertTriggered: true,
               response: {
                 status: 500,
