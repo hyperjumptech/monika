@@ -18,9 +18,9 @@
       "request": "launch",
       "name": "Launch Run Dev",
       "skipFiles": ["<node_internals>/**"],
-      "program": "${workspaceFolder}\\bin\\run_dev",
-      "args": ["-c", "./monika.yml"],
-      "sourceMap": true
+      "program": "${workspaceFolder}/bin/run_dev",
+      "args": ["-c", "./monika.yml", "--verbose"],
+      "sourceMap": false
     },
     {
       "type": "pwa-node",

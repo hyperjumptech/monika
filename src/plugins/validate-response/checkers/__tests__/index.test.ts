@@ -39,7 +39,7 @@ describe('responseChecker', () => {
       const res = generateMockedResponse(100)
       const data = responseChecker(
         {
-          query: 'response.status < 200 or response.status > 299',
+          assertion: 'response.status < 200 or response.status > 299',
           message: '',
         },
         res
@@ -52,7 +52,7 @@ describe('responseChecker', () => {
       const res = generateMockedResponse(200)
       const data = responseChecker(
         {
-          query: 'response.status < 200 or response.status > 299',
+          assertion: 'response.status < 200 or response.status > 299',
           message: '',
         },
         res
@@ -65,7 +65,7 @@ describe('responseChecker', () => {
       const res = generateMockedResponse(201)
       const data = responseChecker(
         {
-          query: 'response.status < 200 or response.status > 299',
+          assertion: 'response.status < 200 or response.status > 299',
           message: '',
         },
         res
@@ -78,7 +78,7 @@ describe('responseChecker', () => {
       const res = generateMockedResponse(300)
       const data = responseChecker(
         {
-          query: 'response.status < 200 or response.status > 299',
+          assertion: 'response.status < 200 or response.status > 299',
           message: '',
         },
         res
@@ -91,7 +91,7 @@ describe('responseChecker', () => {
       const res = generateMockedResponse(400)
       const data = responseChecker(
         {
-          query: 'response.status < 200 or response.status > 299',
+          assertion: 'response.status < 200 or response.status > 299',
           message: '',
         },
         res
@@ -104,7 +104,7 @@ describe('responseChecker', () => {
       const res = generateMockedResponse(500)
       const data = responseChecker(
         {
-          query: 'response.status < 200 or response.status > 299',
+          assertion: 'response.status < 200 or response.status > 299',
           message: '',
         },
         res
@@ -128,7 +128,7 @@ describe('responseChecker', () => {
     it('seconds - should handle when response time is greater than alert defined response time', () => {
       const res = generateMockedResponse(20_000)
       const data = responseChecker(
-        { query: 'response.time > 10000', message: '' },
+        { assertion: 'response.time > 10000', message: '' },
         res
       )
 
@@ -138,7 +138,7 @@ describe('responseChecker', () => {
     it('seconds - should handle when response time is less than alert defined response time', () => {
       const res = generateMockedResponse(10_000)
       const data = responseChecker(
-        { query: 'response.time > 20000', message: '' },
+        { assertion: 'response.time > 20000', message: '' },
         res
       )
 
@@ -148,7 +148,7 @@ describe('responseChecker', () => {
     it('milliseconds - should handle when response time is greater than alert defined response time', () => {
       const res = generateMockedResponse(20)
       const data = responseChecker(
-        { query: 'response.time > 10', message: '' },
+        { assertion: 'response.time > 10', message: '' },
         res
       )
 
@@ -158,7 +158,7 @@ describe('responseChecker', () => {
     it('milliseconds - should handle when response time is less than alert defined response time', () => {
       const res = generateMockedResponse(10)
       const data = responseChecker(
-        { query: 'response.time > 20', message: '' },
+        { assertion: 'response.time > 20', message: '' },
         res
       )
 

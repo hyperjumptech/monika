@@ -73,7 +73,7 @@ const probeSendNotification = async (data: ProbeSendNotification) => {
   const validation =
     validatedResponseStatuses.find(
       (validateResponse: ValidatedResponse) =>
-        validateResponse.alert.query === probeState?.alertQuery
+        validateResponse.alert.assertion === probeState?.alertQuery
     ) || validatedResponseStatuses[index]
 
   eventEmitter.emit(events.probe.notification.willSend, {

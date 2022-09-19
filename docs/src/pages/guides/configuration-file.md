@@ -41,9 +41,9 @@ The example below defines two alerts that will send notification if the HTTP res
 
 ```yaml
 alerts:
-  - query: response.status == 500
+  - assertion: response.status == 500
     message: response status is 500
-  - query: response.time > 150 # in milliseconds
+  - assertion: response.time > 150 # in milliseconds
     message: response time is slow
 ```
 

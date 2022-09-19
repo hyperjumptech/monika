@@ -83,11 +83,11 @@ export function sanitizeProbe(probe: Probe, id: string): Probe {
   if (alerts === undefined || alerts.length === 0) {
     probe.alerts = [
       {
-        query: 'response.status < 200 or response.status > 299',
+        assertion: 'response.status < 200 or response.status > 299',
         message: 'HTTP Status is {{ response.status }}, expecting 200',
       },
       {
-        query: 'response.time > 2000',
+        assertion: 'response.time > 2000',
         message:
           'Response time is {{ response.time }}ms, expecting less than 2000ms',
       },
