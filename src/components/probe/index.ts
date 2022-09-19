@@ -239,9 +239,8 @@ export async function doProbe({
     if (probe?.redis) {
       const { id, redis } = probe
       let redisRequestIndex = 0
-      for (const redisIndex of redis) {
+      for await (const redisIndex of redis) {
         const { host, port } = redisIndex
-        // eslint-disable-next-line no-await-in-loop
         const redisRes = await redisRequest({ host: host, port: port })
         const timeNow = new Date().toISOString()
         const logMessage = `${timeNow} ${checkOrder} id:${id} redis:${host}:${port} ${redisRes.responseTime}ms msg:${redisRes.body}`
