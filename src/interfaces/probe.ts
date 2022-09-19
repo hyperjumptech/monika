@@ -25,7 +25,8 @@
 import { RequestConfig } from './request'
 
 export interface ProbeAlert {
-  query: string
+  query?: string
+  assertion: string
   message?: string
   id?: string
 }
@@ -37,6 +38,16 @@ export type Socket = {
   alerts?: ProbeAlert[]
 }
 
+export type Redis = {
+  host: string
+  port: number
+  username?: string
+  password?: string
+  command?: string
+  data?: string | Uint8Array
+  alerts?: ProbeAlert[]
+}
+
 export interface Probe {
   id: string
   name: string
@@ -44,6 +55,7 @@ export interface Probe {
   interval: number
   requests: RequestConfig[]
   socket?: Socket
+  redis?: Redis[]
   incidentThreshold: number
   recoveryThreshold: number
   alerts: ProbeAlert[]

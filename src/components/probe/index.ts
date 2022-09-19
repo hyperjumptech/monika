@@ -22,25 +22,26 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import { getContext } from '../../context'
 import events from '../../events'
 import { Notification } from '../../interfaces/notification'
 import { Probe } from '../../interfaces/probe'
-import type { ServerAlertState } from '../../interfaces/probe-status'
 import { ProbeRequestResponse } from '../../interfaces/request'
 import validateResponse, {
   ValidatedResponse,
 } from '../../plugins/validate-response'
 import { getEventEmitter } from '../../utils/events'
 import { log } from '../../utils/pino'
+import { setProbeFinish, setProbeRunning } from '../../utils/probe-state'
 import { RequestLog } from '../logger'
+import { logResponseTime } from '../logger/response-time-log'
 import { sendAlerts } from '../notification'
 import { processThresholds } from '../notification/process-server-status'
-import { probingHTTP } from './probing'
-import { logResponseTime } from '../logger/response-time-log'
 import { tcpRequest } from '../tcp-request'
-import { getContext } from '../../context'
+import { probingHTTP } from './probing'
 
-// TODO: move this to interface file?
+import { redisRequest } from '../redis-request'
+import { ServerAlertState } from '../../interfaces/probe-status'
 interface ProbeStatusProcessed {
   probe: Probe
   statuses?: ServerAlertState[]
@@ -71,7 +72,7 @@ const probeSendNotification = async (data: ProbeSendNotification) => {
   const validation =
     validatedResponseStatuses.find(
       (validateResponse: ValidatedResponse) =>
-        validateResponse.alert.query === probeState?.alertQuery
+        validateResponse.alert.assertion === probeState?.alertQuery
     ) || validatedResponseStatuses[index]
 
   eventEmitter.emit(events.probe.notification.willSend, {
@@ -105,10 +106,16 @@ async function checkThresholdsAndSendAlert(
     validatedResponseStatuses,
   } = data
 
+  const { flags } = getContext()
+  const isSymonMode = Boolean(flags.symonUrl) && Boolean(flags.symonKey)
+
   statuses
-    ?.filter((probeState) => !probeState.isFirstTime)
     ?.filter((probeState) => probeState.shouldSendNotification)
     ?.forEach((probeState, index) => {
+      if (isSymonMode && probeState.isFirstTime) {
+        return
+      }
+
       probeSendNotification({
         index,
         probe,
@@ -139,6 +146,7 @@ type doProbeParams = {
  * @param {object} param object parameter
  * @returns {Promise<void>} void
  */
+// eslint-disable-next-line complexity
 export async function doProbe({
   checkOrder,
   probe,
@@ -148,139 +156,126 @@ export async function doProbe({
   const isSymonMode = Boolean(flags.symonUrl) && Boolean(flags.symonKey)
   const verboseLogs = isSymonMode || flags['keep-verbose-logs']
 
-  const eventEmitter = getEventEmitter()
-  const responses = []
+  setProbeRunning(probe.id)
 
-  if (probe?.socket) {
-    const { id, socket } = probe
-    const { host, port, data } = socket
-    const url = `${host}:${port}`
+  const randomTimeout = [1000, 2000, 3000].sort(() => {
+    return Math.random() - 0.5
+  })[0]
 
-    const probeRes = await tcpRequest({ host, port, data })
+  setTimeout(async () => {
+    const eventEmitter = getEventEmitter()
+    const responses = []
 
-    const timeNow = new Date().toISOString()
-    const logMessage = `${timeNow} ${checkOrder} id:${id} tcp:${url} ${probeRes.responseTime}ms msg:${probeRes.body}`
+    if (probe?.redis) {
+      const { id, redis } = probe
 
-    const isAlertTriggered = probeRes.status !== 200
+      let redisRequestIndex = 0
+      for await (const redisIndex of redis) {
+        const { host, port, username, password } = redisIndex
 
-    isAlertTriggered ? log.warn(logMessage) : log.info(logMessage)
+        const redisRes = await redisRequest({
+          host: host,
+          port: port,
+          username: username,
+          password: password,
+        })
 
-    // let TCPrequestIndex = 0 // are there multiple tcp requests?
-    // TCPrequestIndex < probe?.requests?.length;  // multiple tcp request, for later support
-    // TCPrequestIndex++                           // for later supported
-    const TCPrequestIndex = 0
+        const timeNow = new Date().toISOString()
+        const logMessage = `${timeNow} ${checkOrder} id:${id} redis:${host}:${port} ${redisRes.responseTime}ms msg:${redisRes.body}`
 
-    const validatedResponse = validateResponse(
-      probe.socket?.alerts || [
-        {
-          query: 'response.status < 200 or response.status > 299',
-          message: 'TCP server cannot be accessed',
-        },
-      ],
-      probeRes
-    )
-    const requestLog = new RequestLog(probe, 0, 0)
+        const isAlertTriggered = redisRes.status !== 200
+        isAlertTriggered ? log.warn(logMessage) : log.info(logMessage)
 
-    requestLog.addAlerts(
-      validatedResponse
-        .filter((item) => item.isAlertTriggered)
-        .map((item) => item.alert)
-    )
-    const statuses = processThresholds({
-      probe,
-      requestIndex: TCPrequestIndex,
-      validatedResponse,
-    })
+        const { alerts } = redisIndex
+        const validatedResponse = validateResponse(
+          alerts || [
+            {
+              assertion: 'response.status < 200 or response.status > 299',
+              message: 'REDIS host cannot be accessed',
+            },
+          ],
+          redisRes
+        )
+        const requestLog = new RequestLog(probe, 0, 0)
 
-    requestLog.setResponse(probeRes)
-    checkThresholdsAndSendAlert(
-      {
-        probe,
-        statuses,
-        notifications,
-        requestIndex: TCPrequestIndex,
-        validatedResponseStatuses: validatedResponse,
-      },
-      requestLog
-    ).catch((error) => {
-      requestLog.addError(error.message)
-    })
+        requestLog.addAlerts(
+          validatedResponse
+            .filter((item) => item.isAlertTriggered)
+            .map((item) => item.alert)
+        )
+        const statuses = processThresholds({
+          probe,
+          requestIndex: redisRequestIndex,
+          validatedResponse,
+        })
 
-    if (verboseLogs || requestLog.hasIncidentOrRecovery) {
-      requestLog.saveToDatabase().catch((error) => log.error(error.message))
-    }
-  }
+        requestLog.setResponse(redisRes)
+        checkThresholdsAndSendAlert(
+          {
+            probe,
+            statuses,
+            notifications,
+            requestIndex: redisRequestIndex,
+            validatedResponseStatuses: validatedResponse,
+          },
+          requestLog
+        ).catch((error) => {
+          requestLog.addError(error.message)
+        })
 
-  // sending multiple http-type requests
-  for (
-    let requestIndex = 0;
-    requestIndex < probe?.requests?.length;
-    requestIndex++
-  ) {
-    const request = probe.requests?.[requestIndex]
-    const requestLog = new RequestLog(probe, requestIndex, checkOrder)
-
-    try {
-      // intentionally wait for a request to finish before processing next request in loop
-      // eslint-disable-next-line no-await-in-loop
-      const probeRes: ProbeRequestResponse = await probingHTTP({
-        requestConfig: request,
-        responses,
-      })
-
-      logResponseTime(probeRes.responseTime)
-
-      eventEmitter.emit(events.probe.response.received, {
-        probe: probe,
-        requestIndex,
-        response: probeRes,
-      })
-
-      // Add to a response array to be accessed by another request
-      responses.push(probeRes)
-
-      requestLog.setResponse(probeRes)
-
-      // TODO: MOVE THIS DECODING TO THE PROBE/DRIVERS
-      if ([0, 1, 2, 3, 4, 599].includes(probeRes.status)) {
-        const errorMessageMap: Record<number, string> = {
-          0: 'URI not found', // axios error
-          1: 'Connection reset', // axios error
-          2: 'Connection refused', // axios error
-          3: 'Unknown error', // axios error
-          599: 'Request Timed out', // axios error
-        }
-
-        requestLog.addError(errorMessageMap[probeRes.status])
+        redisRequestIndex++
       }
+    }
 
-      // combine global probe alerts with all individual request alerts
-      const probeAlerts = probe.alerts ?? []
-      const combinedAlerts = [...probeAlerts, ...(request.alerts || [])]
+    if (probe?.socket) {
+      const { id, socket } = probe
+      const { host, port, data } = socket
+      const url = `${host}:${port}`
 
-      // Responses have been processed and validated
-      const validatedResponse = validateResponse(combinedAlerts, probeRes)
+      const probeRes = await tcpRequest({ host, port, data })
+
+      const timeNow = new Date().toISOString()
+      const logMessage = `${timeNow} ${checkOrder} id:${id} tcp:${url} ${probeRes.responseTime}ms msg:${probeRes.body}`
+
+      const isAlertTriggered = probeRes.status !== 200
+
+      isAlertTriggered ? log.warn(logMessage) : log.info(logMessage)
+
+      // let TCPrequestIndex = 0 // are there multiple tcp requests?
+      // TCPrequestIndex < probe?.requests?.length;  // multiple tcp request, for later support
+      // TCPrequestIndex++                           // for later supported
+      const TCPrequestIndex = 0
+
+      const { alerts } = socket
+      const validatedResponse = validateResponse(
+        alerts || [
+          {
+            assertion: 'response.status < 200 or response.status > 299',
+            message: 'TCP server cannot be accessed',
+          },
+        ],
+        probeRes
+      )
+      const requestLog = new RequestLog(probe, 0, 0)
 
       requestLog.addAlerts(
         validatedResponse
           .filter((item) => item.isAlertTriggered)
           .map((item) => item.alert)
       )
-
-      // done probing, got some result, process it, check for thresholds and notifications
       const statuses = processThresholds({
-        probe: probe,
-        requestIndex,
+        probe,
+        requestIndex: TCPrequestIndex,
         validatedResponse,
       })
 
-      // Done processing results, check if need to send out alerts
+      requestLog.setResponse(probeRes)
       checkThresholdsAndSendAlert(
         {
-          probe: probe,
+          probe,
           statuses,
-          notifications: notifications,
-          requestIndex,
+          notifications,
+          requestIndex: TCPrequestIndex,
           validatedResponseStatuses: validatedResponse,
         },
         requestLog
@@ -288,30 +283,115 @@ export async function doProbe({
         requestLog.addError(error.message)
       })
 
-      // Exit the loop if there is any alert triggered
-      if (validatedResponse.some((item) => item.isAlertTriggered)) {
-        const triggeredAlertResponse = validatedResponse.find(
-          (item) => item.isAlertTriggered
-        )
-
-        if (triggeredAlertResponse) {
-          eventEmitter.emit(events.probe.alert.triggered, {
-            probe: probe,
-            requestIndex,
-            alertQuery: triggeredAlertResponse.alert.query,
-          })
-        }
-
-        break
-      }
-    } catch (error) {
-      requestLog.addError((error as any).message)
-      break
-    } finally {
-      requestLog.print()
       if (verboseLogs || requestLog.hasIncidentOrRecovery) {
         requestLog.saveToDatabase().catch((error) => log.error(error.message))
       }
     }
-  }
+
+    // sending multiple http-type requests
+    for (
+      let requestIndex = 0;
+      requestIndex < probe?.requests?.length;
+      requestIndex++
+    ) {
+      const request = probe.requests?.[requestIndex]
+      const requestLog = new RequestLog(probe, requestIndex, checkOrder)
+
+      try {
+        // intentionally wait for a request to finish before processing next request in loop
+        // eslint-disable-next-line no-await-in-loop
+        const probeRes: ProbeRequestResponse = await probingHTTP({
+          requestConfig: request,
+          responses,
+        })
+
+        logResponseTime(probeRes.responseTime)
+
+        eventEmitter.emit(events.probe.response.received, {
+          probe: probe,
+          requestIndex,
+          response: probeRes,
+        })
+
+        // Add to a response array to be accessed by another request
+        responses.push(probeRes)
+
+        requestLog.setResponse(probeRes)
+
+        // TODO: MOVE THIS DECODING TO THE PROBE/DRIVERS
+        if ([0, 1, 2, 3, 4, 599].includes(probeRes.status)) {
+          const errorMessageMap: Record<number, string> = {
+            0: 'URI not found', // axios error
+            1: 'Connection reset', // axios error
+            2: 'Connection refused', // axios error
+            3: 'Unknown error', // axios error
+            599: 'Request Timed out', // axios error
+          }
+
+          requestLog.addError(errorMessageMap[probeRes.status])
+        }
+
+        // combine global probe alerts with all individual request alerts
+        const probeAlerts = probe.alerts ?? []
+        const combinedAlerts = [...probeAlerts, ...(request.alerts || [])]
+
+        // Responses have been processed and validated
+        const validatedResponse = validateResponse(combinedAlerts, probeRes)
+
+        requestLog.addAlerts(
+          validatedResponse
+            .filter((item) => item.isAlertTriggered)
+            .map((item) => item.alert)
+        )
+
+        // done probing, got some result, process it, check for thresholds and notifications
+        const statuses = processThresholds({
+          probe: probe,
+          requestIndex,
+          validatedResponse,
+        })
+
+        // Done processing results, check if need to send out alerts
+        checkThresholdsAndSendAlert(
+          {
+            probe: probe,
+            statuses,
+            notifications: notifications,
+            requestIndex,
+            validatedResponseStatuses: validatedResponse,
+          },
+          requestLog
+        ).catch((error) => {
+          requestLog.addError(error.message)
+        })
+
+        // Exit the loop if there is any alert triggered
+        if (validatedResponse.some((item) => item.isAlertTriggered)) {
+          const triggeredAlertResponse = validatedResponse.find(
+            (item) => item.isAlertTriggered
+          )
+
+          if (triggeredAlertResponse) {
+            eventEmitter.emit(events.probe.alert.triggered, {
+              probe: probe,
+              requestIndex,
+              alertQuery: triggeredAlertResponse.alert.query,
+            })
+          }
+
+          break
+        }
+      } catch (error) {
+        requestLog.addError((error as any).message)
+        break
+      } finally {
+        requestLog.print()
+        if (verboseLogs || requestLog.hasIncidentOrRecovery) {
+          requestLog.saveToDatabase().catch((error) => log.error(error.message))
+        }
+      }
+    }
+
+    setProbeFinish(probe.id)
+  }, randomTimeout)
 }

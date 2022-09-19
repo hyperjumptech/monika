@@ -23,6 +23,66 @@
       "description": "The number of seconds to repeat the probe",
       "default": 10
     },
+    "postgres": {
+      "title": "Postgres",
+      "type": "array",
+      "description": "Monitor postgres readiness",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["host", "port"],
+        "properties": {
+          "host": {
+            "type": "string",
+            "description": "Postgres host address to connect to",
+            "default": "172.15.0.1"
+          },
+          "port": {
+            "title": "Port",
+            "type": "integer",
+            "description": "Postgres port to connect to",
+            "default": "5432"
+          }
+        }
+      }
+    },
+    "redis": {
+      "title": "Redis",
+      "type": "array",
+      "description": "Monitor redis health ",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["host", "port"],
+        "properties": {
+          "host": {
+            "title": "Redis host",
+            "description": "The hostname or IP address of the redis server",
+            "type": "string",
+            "default": "172.15.0.1",
+            "examples": ["localhost", "192.168.0.1"]
+          },
+          "port": {
+            "title": "Port number",
+            "description": "Port number used for the redis",
+            "type": "integer",
+            "default": "6379"
+          },
+          "password": {
+            "title": "Password",
+            "description": "Password used for the redis AUTH, if set.",
+            "type": "string",
+            "default": ""
+          },
+          "username": {
+            "title": "Username",
+            "description": "Username used for the redis AUTH, if set.",
+            "type": "string",
+            "default": ""
+          }
+        }
+      }
+    },
     "requests": {
       "title": "Requests",
       "type": "array",
@@ -106,10 +166,10 @@
         "type": "object",
         "additionalProperties": false,
         "properties": {
-          "query": {
-            "title": "Query",
+          "assertion": {
+            "title": "Assertion",
             "type": "string",
-            "description": "An expression that will trigger an alert when its is logically true. See the queries here: https://monika.hyperjump.tech/guides/alerts#alert-query",
+            "description": "An expression that will trigger an alert when its is logically true. See the assertions here: https://monika.hyperjump.tech/guides/alerts#alert-query",
             "default": "response.status != 200"
           },
           "message": {
@@ -119,7 +179,7 @@
             "default": "Http Response status code is not 200!"
           }
         },
-        "required": ["query", "message"]
+        "required": ["assertion", "message"]
       }
     },
     "body": {
@@ -217,6 +277,12 @@
           },
           "interval": {
             "$ref": "#/definitions/interval"
+          },
+          "postgres": {
+            "$ref": "#/definitions/postgres"
+          },
+          "redis": {
+            "$ref": "#/definitions/redis"
           },
           "requests": {
             "$ref": "#/definitions/requests"

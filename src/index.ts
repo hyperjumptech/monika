@@ -22,25 +22,30 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import boxen from 'boxen'
+import chalk from 'chalk'
+import fs from 'fs'
+import isUrl from 'is-url'
+import cron, { ScheduledTask } from 'node-cron'
+import path from 'path'
+
 import {
+  CliUx,
   Command,
+  Errors,
   Flags,
   Interfaces,
   loadHelpClass,
   toCached,
-  CliUx,
-  Errors,
 } from '@oclif/core'
-import boxen from 'boxen'
-import chalk from 'chalk'
-import fs from 'fs'
-import cron, { ScheduledTask } from 'node-cron'
+
 import {
   createConfig,
   DEFAULT_CONFIG_INTERVAL,
   getConfigIterator,
   updateConfig,
 } from './components/config'
+import { DEFAULT_CONFIG_FILENAME } from './components/config/create-config'
 import { printAllLogs } from './components/logger'
 import {
   closeLog,
@@ -48,23 +53,21 @@ import {
   openLogfile,
 } from './components/logger/history'
 import { notificationChecker } from './components/notification/checker'
+import { setContext } from './context'
 import events from './events'
 import { Config } from './interfaces/config'
 import { Probe } from './interfaces/probe'
 import {
-  printSummary,
   getSummaryAndSendNotif,
+  printSummary,
   savePidFile,
 } from './jobs/summary-notification'
 import initLoaders from './loaders'
-import { idFeeder, isIDValid, sanitizeProbe } from './looper'
+import { sanitizeProbe, startProbing } from './looper'
+import SymonClient from './symon'
+import { checkProbeId } from './utils/check-probe-id'
 import { getEventEmitter } from './utils/events'
 import { log } from './utils/pino'
-import path from 'path'
-import isUrl from 'is-url'
-import SymonClient from './symon'
-import { DEFAULT_CONFIG_FILENAME } from './components/config/create-config'
-import { setContext } from './context'
 
 const em = getEventEmitter()
 let symonClient: SymonClient
@@ -154,6 +157,11 @@ class Monika extends Command {
       exclusive: ['har', 'insomnia', 'postman'],
     }),
 
+    'one-probe': Flags.boolean({
+      description: 'One Probe',
+      dependsOn: ['sitemap'],
+    }),
+
     postman: Flags.string({
       char: 'p', // (p)ostman
       description: 'Run Monika using a Postman json file.',
@@ -195,10 +203,11 @@ class Monika extends Command {
       exclusive: ['r'],
     }),
 
-    repeat: Flags.string({
+    repeat: Flags.integer({
       char: 'r', // (r)epeat
       description: 'Repeats the test run n times',
       multiple: false,
+      default: 0,
     }),
 
     stun: Flags.integer({
@@ -347,6 +356,8 @@ class Monika extends Command {
           await notificationChecker(config.notifications ?? [])
         }
 
+        await this.deprecationHandler(config)
+
         const startupMessage = this.buildStartupMessage(
           config,
           !abortCurrentLooper,
@@ -374,7 +385,7 @@ class Monika extends Command {
         // default sequence for Each element
         let probesToRun = config.probes
         if (_flags.id) {
-          if (!isIDValid(config, _flags.id)) {
+          if (!checkProbeId(probesToRun, _flags.id)) {
             throw new Error('Input error') // can't continue, exit from app
           }
 
@@ -424,9 +435,8 @@ class Monika extends Command {
           scheduledTasks.push(scheduledStatusUpdateTask)
         }
 
-        // feed the configs and probes to be processed
-        abortCurrentLooper = idFeeder({
-          sanitizedProbes: sanitizedProbe,
+        abortCurrentLooper = startProbing({
+          probes: sanitizedProbe,
           notifications: config.notifications ?? [],
         })
       }
@@ -491,10 +501,11 @@ Please refer to the Monika documentations on how to how to configure notificatio
         Request Body: ${JSON.stringify(request.body) || `-`}
 `
         }
+
         startupMessage += `    Alerts: ${
           probe?.alerts === undefined || probe?.alerts.length === 0
-            ? `[{ "query": "response.status < 200 or response.status > 299", "message": "HTTP Status is not 200"}, 
-            { "query": "response.time > 2000", "message": "Response time is more than 2000ms" }]`
+            ? `[{ "assertion": "response.status < 200 or response.status > 299", "message": "HTTP Status is not 200"},
+            { "assertion": "response.time > 2000", "message": "Response time is more than 2000ms" }]`
             : JSON.stringify(probe.alerts)
         }\n`
       }
@@ -557,6 +568,47 @@ Please refer to the Monika documentations on how to how to configure notificatio
 
     throw error
   }
+
+  // eslint-disable max-depth
+  async deprecationHandler(config: Config) {
+    let showMessage = false
+    if (config && config.probes) {
+      for (const [iprobe, probe] of config.probes.entries()) {
+        for (const [, request] of probe.requests.entries()) {
+          if (request.alerts) {
+            for (const [ialert, alert] of request.alerts.entries()) {
+              if (alert.query !== undefined && alert.assertion === undefined) {
+                request.alerts[ialert] = {
+                  assertion: alert.query,
+                  message: alert.message,
+                }
+                showMessage = true
+              }
+            }
+          }
+        }
+
+        if (probe.alerts) {
+          for (const [ialert, alert] of probe.alerts.entries()) {
+            if (alert.query !== undefined && alert.assertion === undefined) {
+              config.probes[iprobe].alerts[ialert] = {
+                assertion: alert.query,
+                message: alert.message,
+              }
+              showMessage = true
+            }
+          }
+        }
+      }
+    }
+
+    if (showMessage) {
+      log.warn('"alerts.query" is deprecated. Please use "alerts.assertion"')
+    }
+
+    return config
+  }
+  // eslint-enable max-depth
 }
 
 /**

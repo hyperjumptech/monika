@@ -94,6 +94,27 @@ describe('Sitemap config', () => {
   })
 })
 
+describe('Sitemap config [--one-probe ]', () => {
+  describe('Create config from xml file', () => {
+    it('should create config from xml file', async () => {
+      const flags = {
+        sitemap: './src/components/config/__tests__/sitemap.xml',
+        output: 'monika.sitemap.yml',
+        'one-probe': true,
+      }
+      await createConfig(flags)
+      expect(fs.lstatSync('monika.sitemap.yml').isFile()).to.be.true
+
+      const generated = fs.readFileSync('monika.sitemap.yml', 'utf-8')
+      const expected = fs.readFileSync(
+        './src/components/config/__tests__/expected.sitemap-oneprobe.yml',
+        'utf-8'
+      )
+      expect(_.isEqual(generated, expected)).to.be.true
+    })
+  })
+})
+
 const getPostmanConfig = ({ grouped }: { grouped: boolean }) => {
   if (grouped) {
     const generated = fs.readFileSync('monika.postman-grouped.yml', 'utf-8')

@@ -25,6 +25,8 @@
 import { Config } from '../../interfaces/config'
 import { DEFAULT_THRESHOLD } from '../../looper'
 import { XMLParser } from 'fast-xml-parser'
+import { Probe } from '../../interfaces/probe'
+import { DEFAULT_CONFIG_INTERVAL } from '.'
 
 const generateProbesFromXml = (config: any) => {
   const probes = config?.urlset?.url?.map((item: any) => {
@@ -58,12 +60,70 @@ const generateProbesFromXml = (config: any) => {
   return probes ?? []
 }
 
-export const parseConfigFromSitemap = (configString: string): Config => {
+const generateProbesFromXmlOneProbe = (config: any) => {
+  let probe: Probe | undefined
+  let requests: any = []
+
+  const resources = config?.urlset?.url
+  for (const [, item] of resources.entries()) {
+    // eslint-disable-next-line prefer-const
+    requests = [
+      ...requests,
+      {
+        url: item.loc,
+        method: 'GET',
+        timeout: 10_000,
+      },
+    ]
+    if (item['xhtml:link']) {
+      for (const alt of item['xhtml:link']) {
+        requests = [
+          ...requests,
+          {
+            url: alt['@_href'],
+            method: 'GET',
+            timeout: 10_000,
+          },
+        ]
+      }
+    }
+
+    const url = new URL(item.loc)
+
+    probe = {
+      id: url.host,
+      name: url.host,
+      requests: requests,
+      interval: DEFAULT_CONFIG_INTERVAL,
+      incidentThreshold: DEFAULT_THRESHOLD,
+      recoveryThreshold: DEFAULT_THRESHOLD,
+      alerts: [
+        {
+          assertion: 'response.status < 200 or response.status > 299',
+          message: 'HTTP Status is not 200',
+        },
+        {
+          assertion: 'response.time > 2000',
+          message: 'Response time is more than 2000ms',
+        },
+      ],
+    }
+  }
+
+  return probe ? [probe] : []
+}
+
+export const parseConfigFromSitemap = (
+  configString: string,
+  flags: any
+): Config => {
   try {
     const parser = new XMLParser({ ignoreAttributes: false })
     const xmlObj = parser.parse(configString)
-    const probes = generateProbesFromXml(xmlObj)
-
+    let probes = generateProbesFromXml(xmlObj)
+    if (flags && flags['one-probe']) {
+      probes = generateProbesFromXmlOneProbe(xmlObj)
+    }
     return { probes }
   } catch (error: any) {
     throw new Error(

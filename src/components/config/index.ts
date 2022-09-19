@@ -107,17 +107,18 @@ const watchConfigFile = (
   path: string,
   type: string,
   index?: number,
-  repeat?: number
+  repeat?: number,
+  flags?: any
 ) => {
   const watchConfigFile = !(
     process.env.CI ||
     process.env.NODE_ENV === 'test' ||
-    repeat !== undefined
+    repeat !== 0
   )
   if (watchConfigFile) {
     const watcher = chokidar.watch(path)
     watcher.on('change', async () => {
-      const newConfig = await parseConfig(path, type)
+      const newConfig = await parseConfig(path, type, flags)
       if (index === undefined) {
         nonDefaultConfig = newConfig
       } else {
@@ -133,11 +134,12 @@ const scheduleRemoteConfigFetcher = (
   url: string,
   configType: 'monika' | 'har' | 'insomnia' | 'postman' | 'sitemap',
   interval: number,
-  index?: number
+  index?: number,
+  flags?: any
 ) => {
   setInterval(async () => {
     try {
-      const newConfig = await parseConfig(url, configType)
+      const newConfig = await parseConfig(url, configType, flags)
       if (index === undefined) {
         nonDefaultConfig = newConfig
       } else {
@@ -164,7 +166,7 @@ const parseConfigType = async (
     watchConfigFile(source, configType, index, flags.repeat)
   }
 
-  const parsed = await parseConfig(source, configType)
+  const parsed = await parseConfig(source, configType, flags)
 
   return {
     ...parsed,
@@ -282,7 +284,7 @@ export const createConfig = async (flags: any): Promise<void> => {
       return
     }
 
-    const parse = await parseConfig(path, type)
+    const parse = await parseConfig(path, type, flags)
     const result = await addDefaultNotifications(parse)
     const file = flags.output || 'monika.yml'
 

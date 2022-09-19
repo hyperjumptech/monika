@@ -40,7 +40,7 @@ probes:
         interval: 1
 
     alerts:
-      - query: response.status == 500
+      - assertion: response.status == 500
         subject: response status
         message: response status message
     incidentThreshold: 3
@@ -62,7 +62,7 @@ probes:
         interval: 1
 
     alerts:
-      - query: response.status == 500
+      - assertion: response.status == 500
         subject: response status
         message: response status message
     incidentThreshold: 3
@@ -105,6 +105,7 @@ async function test() {
       changefile()
       console.log('changeing file. iteration:', iteration, 'delay:', ms)
     }
+
     flag = !flag // toggle
   }
 }
