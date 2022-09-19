@@ -40,7 +40,8 @@ function sleep(ms: number): Promise<void> {
 
 export const parseConfig = async (
   source: string,
-  type: string
+  type: string,
+  flag: any
 ): Promise<Partial<Config>> => {
   try {
     let configString = isUrl(source)
@@ -73,7 +74,7 @@ export const parseConfig = async (
 
     if (type === 'har') return parseHarFile(configString)
     if (type === 'postman') return parseConfigFromPostman(configString)
-    if (type === 'sitemap') return parseConfigFromSitemap(configString)
+    if (type === 'sitemap') return parseConfigFromSitemap(configString, flag)
     if (type === 'insomnia')
       return parseInsomnia(configString, ext.replace('.', ''))
 
