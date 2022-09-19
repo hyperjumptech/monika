@@ -1,0 +1,30 @@
+probes:
+  - id: monika.hyperjump.tech
+    name: monika.hyperjump.tech
+    requests:
+      - url: https://monika.hyperjump.tech/articles
+        method: GET
+        timeout: 10000
+      - url: https://de.wiktionary.org/wiki/hyperjump
+        method: GET
+        timeout: 10000
+      - url: https://id.wiktionary.org/wiki/hyperjump
+        method: GET
+        timeout: 10000
+      - url: https://en.wiktionary.org/wiki/hyperjump
+        method: GET
+        timeout: 10000
+      - url: https://monika.hyperjump.tech/index
+        method: GET
+        timeout: 10000
+    interval: 900
+    incidentThreshold: 5
+    recoveryThreshold: 5
+    alerts:
+      - query: response.status < 200 or response.status > 299
+        message: HTTP Status is not 200
+      - query: response.time > 2000
+        message: Response time is more than 2000ms
+notifications:
+  - id: default
+    type: desktop

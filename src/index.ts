@@ -157,6 +157,11 @@ class Monika extends Command {
       exclusive: ['har', 'insomnia', 'postman'],
     }),
 
+    'one-probe': Flags.boolean({
+      description: 'One Probe',
+      dependsOn: ['sitemap'],
+    }),
+
     postman: Flags.string({
       char: 'p', // (p)ostman
       description: 'Run Monika using a Postman json file.',
