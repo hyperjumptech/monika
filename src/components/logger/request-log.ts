@@ -112,9 +112,9 @@ export class RequestLog {
             this.response?.status || '-'
           } ${this.request?.method} ${this.request?.url} ${
             this.response?.responseTime || '-'
-          }ms 
-    Request Headers: ${JSON.stringify(this.request?.headers) || '-'} 
-    Request Body: ${JSON.stringify(this.request?.body) || '-'} 
+          }ms
+    Request Headers: ${JSON.stringify(this.request?.headers) || '-'}
+    Request Body: ${JSON.stringify(this.request?.body) || '-'}
     Response Body: ${JSON.stringify(this.response?.body) || '-'}`
         : `${this.iteration} id:${this.probe.id} ${
             this.response?.status || '-'
@@ -137,7 +137,7 @@ export class RequestLog {
 
     if (this.triggeredAlerts.length > 0) {
       alertMsg = `, ALERT: ${this.triggeredAlerts
-        .map((alert) => alert.query)
+        .map((alert) => alert.assertion)
         .join(', ')}`
     }
 
@@ -156,7 +156,7 @@ export class RequestLog {
         probe: this.probe,
         requestIndex: this.requestIndex,
         probeRes: this.response!,
-        alertQueries: this.triggeredAlerts.map((alert) => alert.query),
+        alertQueries: this.triggeredAlerts.map((alert) => alert.assertion),
         error: this.errors.join(', '),
       }),
       ...this.sentNotifications.map((sent) =>

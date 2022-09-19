@@ -356,6 +356,8 @@ class Monika extends Command {
           await notificationChecker(config.notifications ?? [])
         }
 
+        await this.deprecationHandler(config)
+
         const startupMessage = this.buildStartupMessage(
           config,
           !abortCurrentLooper,
@@ -499,10 +501,11 @@ Please refer to the Monika documentations on how to how to configure notificatio
         Request Body: ${JSON.stringify(request.body) || `-`}
 `
         }
+
         startupMessage += `    Alerts: ${
           probe?.alerts === undefined || probe?.alerts.length === 0
-            ? `[{ "query": "response.status < 200 or response.status > 299", "message": "HTTP Status is not 200"},
-            { "query": "response.time > 2000", "message": "Response time is more than 2000ms" }]`
+            ? `[{ "assertion": "response.status < 200 or response.status > 299", "message": "HTTP Status is not 200"},
+            { "assertion": "response.time > 2000", "message": "Response time is more than 2000ms" }]`
             : JSON.stringify(probe.alerts)
         }\n`
       }
@@ -565,6 +568,47 @@ Please refer to the Monika documentations on how to how to configure notificatio
 
     throw error
   }
+
+  // eslint-disable max-depth
+  async deprecationHandler(config: Config) {
+    let showMessage = false
+    if (config && config.probes) {
+      for (const [iprobe, probe] of config.probes.entries()) {
+        for (const [, request] of probe.requests.entries()) {
+          if (request.alerts) {
+            for (const [ialert, alert] of request.alerts.entries()) {
+              if (alert.query !== undefined && alert.assertion === undefined) {
+                request.alerts[ialert] = {
+                  assertion: alert.query,
+                  message: alert.message,
+                }
+                showMessage = true
+              }
+            }
+          }
+        }
+
+        if (probe.alerts) {
+          for (const [ialert, alert] of probe.alerts.entries()) {
+            if (alert.query !== undefined && alert.assertion === undefined) {
+              config.probes[iprobe].alerts[ialert] = {
+                assertion: alert.query,
+                message: alert.message,
+              }
+              showMessage = true
+            }
+          }
+        }
+      }
+    }
+
+    if (showMessage) {
+      log.warn('"alerts.query" is deprecated. Please use "alerts.assertion"')
+    }
+
+    return config
+  }
+  // eslint-enable max-depth
 }
 
 /**

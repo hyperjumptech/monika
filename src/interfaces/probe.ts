@@ -25,7 +25,8 @@
 import { RequestConfig } from './request'
 
 export interface ProbeAlert {
-  query: string
+  query?: string
+  assertion: string
   message?: string
   id?: string
 }

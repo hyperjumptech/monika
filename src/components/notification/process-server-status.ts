@@ -145,7 +145,7 @@ export const processThresholds = ({
         isFirstTimeSendEvent: true,
       })
 
-      interpreters[alert.query] = interpret(stateMachine).start()
+      interpreters[alert.assertion] = interpret(stateMachine).start()
     }
 
     serverAlertStateInterpreters.set(id!, interpreters)
@@ -155,7 +155,7 @@ export const processThresholds = ({
   // then get latest state for each alert
   for (const validation of validatedResponse) {
     const { alert, isAlertTriggered } = validation
-    const interpreter = serverAlertStateInterpreters.get(id!)![alert.query]
+    const interpreter = serverAlertStateInterpreters.get(id!)![alert.assertion]
 
     const prevStateValue = interpreter.state.value
 
@@ -166,7 +166,7 @@ export const processThresholds = ({
 
     results.push({
       isFirstTime: stateContext.isFirstTimeSendEvent,
-      alertQuery: alert.query,
+      alertQuery: alert.assertion,
       state: stateValue as 'UP' | 'DOWN',
       shouldSendNotification:
         stateContext.isFirstTimeSendEvent ||

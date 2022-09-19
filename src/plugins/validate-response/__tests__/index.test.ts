@@ -29,10 +29,10 @@ import { ProbeRequestResponse } from '../../../interfaces/request'
 describe('validateResponse', () => {
   const mockedAlerts = [
     {
-      query: 'response.status < 200 or response.status > 299',
+      assertion: 'response.status < 200 or response.status > 299',
       message: '',
     },
-    { query: 'response.time > 10', message: '' },
+    { assertion: 'response.time > 10', message: '' },
   ]
 
   const generateMockedResponse = (
@@ -55,7 +55,7 @@ describe('validateResponse', () => {
     expect(data).to.eql([
       {
         alert: {
-          query: 'response.status < 200 or response.status > 299',
+          assertion: 'response.status < 200 or response.status > 299',
           message: '',
         },
         isAlertTriggered: true,
@@ -69,7 +69,7 @@ describe('validateResponse', () => {
       },
       {
         alert: {
-          query: 'response.time > 10',
+          assertion: 'response.time > 10',
           message: '',
         },
         response: {
@@ -91,7 +91,7 @@ describe('validateResponse', () => {
     expect(data).to.eql([
       {
         alert: {
-          query: 'response.status < 200 or response.status > 299',
+          assertion: 'response.status < 200 or response.status > 299',
           message: '',
         },
         response: {
@@ -105,7 +105,7 @@ describe('validateResponse', () => {
       },
       {
         alert: {
-          query: 'response.time > 10',
+          assertion: 'response.time > 10',
           message: '',
         },
         response: {
@@ -127,7 +127,7 @@ describe('validateResponse', () => {
     expect(data).to.eql([
       {
         alert: {
-          query: 'response.status < 200 or response.status > 299',
+          assertion: 'response.status < 200 or response.status > 299',
           message: '',
         },
         response: {
@@ -141,7 +141,7 @@ describe('validateResponse', () => {
       },
       {
         alert: {
-          query: 'response.time > 10',
+          assertion: 'response.time > 10',
           message: '',
         },
         response: {
@@ -163,7 +163,7 @@ describe('validateResponse', () => {
     expect(data).to.eql([
       {
         alert: {
-          query: 'response.status < 200 or response.status > 299',
+          assertion: 'response.status < 200 or response.status > 299',
           message: '',
         },
         response: {
@@ -177,7 +177,7 @@ describe('validateResponse', () => {
       },
       {
         alert: {
-          query: 'response.time > 10',
+          assertion: 'response.time > 10',
           message: '',
         },
         response: {

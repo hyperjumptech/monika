@@ -29,7 +29,7 @@ Monika has grown rapidly since its conception and currently it has variety of th
 - Get notifications when an alert is triggered via a growing number of [notification channels](/guides/notifications).
 - Run Monika or create configuration file from a [HAR file](/guides/probes#har-file-support), a [Postman file](/guides/probes#postman-json-file-support), an [Insomnia file](/guides/probes#insomnia-file-support), and a [sitemap file](/guides/cli-options#sitemap).
 - Check [TLS certificate status](/guides/tls-checkers).
-- Create complex [alert's query](/guides/alerts#alert-query) to trigger an alert based on the response's status code, response's time, size, headers, and the received data.
+- Create complex [alert's assertion](/guides/alerts#alert-assertion) to trigger an alert based on the response's status code, response's time, size, headers, and the received data.
 - [Run Monika from a URL](/quick-start#run-monika).
 - Receive periodical [status notification](/guides/status-notification) about the status of Monika and the probes.
 - Connect to [Prometheus](/guides/cli-options#prometheus).
