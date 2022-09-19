@@ -157,6 +157,11 @@ class Monika extends Command {
       exclusive: ['har', 'insomnia', 'postman'],
     }),
 
+    'one-probe': Flags.boolean({
+      description: 'One Probe',
+      dependsOn: ['sitemap'],
+    }),
+
     postman: Flags.string({
       char: 'p', // (p)ostman
       description: 'Run Monika using a Postman json file.',
@@ -496,7 +501,7 @@ Please refer to the Monika documentations on how to how to configure notificatio
         }
         startupMessage += `    Alerts: ${
           probe?.alerts === undefined || probe?.alerts.length === 0
-            ? `[{ "query": "response.status < 200 or response.status > 299", "message": "HTTP Status is not 200"}, 
+            ? `[{ "query": "response.status < 200 or response.status > 299", "message": "HTTP Status is not 200"},
             { "query": "response.time > 2000", "message": "Response time is more than 2000ms" }]`
             : JSON.stringify(probe.alerts)
         }\n`
