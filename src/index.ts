@@ -598,7 +598,7 @@ Please refer to the Monika documentations on how to how to configure notificatio
     }
 
     if (showMessage) {
-      log.warn('is deprecated. Please use "alerts.assertion"')
+      log.warn('"alerts.query" is deprecated. Please use "alerts.assertion"')
     }
 
     return config
