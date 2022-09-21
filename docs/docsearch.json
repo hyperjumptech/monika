@@ -1,44 +1,33 @@
 {
-    "index_name": "monika-documentation-prod",
-    "start_urls": ["https://monika.hyperjump.tech/"],
-    "sitemap_urls": [
-      "https://monika.hyperjump.tech/sitemap.xml"
-    ],
-    "sitemap_alternate_links": true,
-    "selectors": {
-      "lvl0": {
-        "selector": "//*[contains(@class,'navGroups')]//*[contains(@class,'navListItemActive')]/preceding::h3[1]",
-        "type": "xpath",
-        "global": true,
-        "default_value": "Blog"
-      },
-      "lvl1": ".content h1",
-      "lvl2": ".content h2",
-      "lvl3": ".content h3",
-      "lvl4": ".content h4",
-      "text": ".content article p, .content article li"
+  "index_name": "monika-documentation-prod",
+  "start_urls": ["https://monika.hyperjump.tech/"],
+  "sitemap_urls": ["https://monika.hyperjump.tech/sitemap.xml"],
+  "sitemap_alternate_links": true,
+  "selectors": {
+    "lvl0": {
+      "selector": "//*[contains(@class,'navGroups')]//*[contains(@class,'navListItemActive')]/preceding::h3[1]",
+      "type": "xpath",
+      "global": true,
+      "default_value": "Blog"
     },
-    "selectors_exclude": [
-      ".hash-link"
-    ],
-    "custom_settings": {
-      "attributesForFaceting": [
-        "language",
-        "version",
-        "tags",
-        "type"
-      ],
-      "attributesToRetrieve": [
-        "hierarchy",
-        "content",
-        "anchor",
-        "url",
-        "url_without_anchor",
-        "type"
-      ]
-    },
-    "conversation_id": [
-      "415526327"
-    ],
-    "nb_hits": 12684
-  }
+    "lvl1": ".content h1",
+    "lvl2": ".content h2",
+    "lvl3": ".content h3",
+    "lvl4": ".content h4",
+    "text": ".content article p, .content article li"
+  },
+  "selectors_exclude": [".hash-link"],
+  "custom_settings": {
+    "attributesForFaceting": ["language", "version", "tags", "type"],
+    "attributesToRetrieve": [
+      "hierarchy",
+      "content",
+      "anchor",
+      "url",
+      "url_without_anchor",
+      "type"
+    ]
+  },
+  "conversation_id": ["415526327"],
+  "nb_hits": 12684
+}
