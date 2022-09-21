@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.13.0] - 2022-09-19
+
+## Added
+
+- Redis Monitoring (#872)
+- Generate a single probe from Sitemap (#883)
+
+## Fixed
+
+- Cannot send alert on first threshold (#881)
+
+## Updated
+
+- JSON Schema for Redis/Postgres Requests (#876)
+- Implemented new probe mechanism (#861)
+- Changed alerts.query into alerts.assertion (#880)
+
 ## [1.12.1] - 2022-09-02
 
 ## Fixed
