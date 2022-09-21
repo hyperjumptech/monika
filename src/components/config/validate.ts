@@ -34,7 +34,7 @@ import { compileExpression } from '../../utils/expression-parser'
 import type { SymonConfig } from '../reporter'
 import { newPagerDuty } from '../notification/channel/pagerduty'
 
-const HTTPMethods = [
+const HTTPMethods = new Set([
   'DELETE',
   'GET',
   'HEAD',
@@ -45,7 +45,7 @@ const HTTPMethods = [
   'PURGE',
   'LINK',
   'UNLINK',
-]
+])
 
 const setInvalidResponse = (message: string): Validation => ({
   valid: false,
@@ -284,7 +284,9 @@ const isValidProbeAlert = (alert: ProbeAlert | string): boolean => {
       )
     }
 
-    return Boolean(compileExpression(alert.assertion))
+    return Boolean(
+      compileExpression(alert.assertion || (alert.query as string))
+    )
   } catch {
     return false
   }
@@ -357,7 +359,7 @@ export const validateConfig = (configuration: Config): Validation => {
           return PROBE_REQUEST_INVALID_URL
         }
 
-        if (!HTTPMethods.includes(method?.toUpperCase() ?? 'GET'))
+        if (!HTTPMethods.has(method?.toUpperCase() ?? 'GET'))
           return PROBE_REQUEST_INVALID_METHOD
       }
     }
@@ -446,7 +448,7 @@ function validateRedisConfig(redisConfig?: Redis[]) {
     host: Joi.alternatives()
       .try(Joi.string().hostname(), Joi.string().ip())
       .required(),
-    port: Joi.number().min(0).max(65536).required(),
+    port: Joi.number().min(0).max(65_536).required(),
     password: Joi.string(),
     username: Joi.string(),
     command: Joi.string(),
