@@ -1,7 +1,7 @@
 {
   "name": "@hyperjumptech/monika",
   "description": "Synthetic monitoring made easy",
-  "version": "1.13.0",
+  "version": "0.0.0-nightly-20220922-06e0744",
   "license": "MIT",
   "author": "@hyperjumptech",
   "main": "lib/index.js",
