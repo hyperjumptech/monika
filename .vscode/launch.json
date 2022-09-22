@@ -16,10 +16,10 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Launch Run Dev",
+      "name": "Launch Text File",
       "skipFiles": ["<node_internals>/**"],
       "program": "${workspaceFolder}/bin/run_dev",
-      "args": ["-c", "./monika.yml", "--verbose"],
+      "args": ["--text", "./simple", "--create-config"],
       "sourceMap": false
     },
     {
