@@ -54,7 +54,7 @@ const responseChecker = (
     return true
   }
 
-  return queryExpression(res, alert.assertion)
+  return queryExpression(res, alert.assertion || (alert.query as string))
 }
 
 export default responseChecker
