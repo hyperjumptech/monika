@@ -68,6 +68,9 @@ jobs:
       - name: 📥 Install deps
         run: npm ci
 
+      - name: Install jq
+        run: apt-get install -y jq
+
       - name: 🔎 Send to Algolia
         uses: actions/checkout@v2
 
