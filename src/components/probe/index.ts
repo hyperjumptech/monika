@@ -169,7 +169,7 @@ async function responseProcessing({
   const validatedResponse = validateResponse(
     alerts || [
       {
-        query: 'response.status < 200 or response.status > 299',
+        assertion: 'response.status < 200 or response.status > 299',
         message: 'probe cannot be accessed',
       },
     ],
