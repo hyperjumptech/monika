@@ -53,48 +53,44 @@ import { Probe } from '../../interfaces/probe'
 import { isValidURL } from '../../utils/is-valid-url'
 
 export const parseConfigFromText = (configString: string): Config => {
-  try {
-    let probes: Probe[] = []
-    const urls = configString.split(/\r?\n/)
-    for (const [, url] of urls.entries()) {
-      if (isValidURL(url)) {
-        probes = [
-          ...probes,
-          {
-            id: url,
-            name: url,
-            requests: [
-              {
-                url: url,
-                method: 'GET',
-                timeout: 10_000,
-                body: {} as JSON,
-              },
-            ],
-            incidentThreshold: DEFAULT_THRESHOLD,
-            recoveryThreshold: DEFAULT_THRESHOLD,
-            interval: DEFAULT_CONFIG_INTERVAL,
-            alerts: [
-              {
-                assertion: 'response.status < 200 or response.status > 299',
-                message: 'HTTP Status is not 200',
-              },
-              {
-                assertion: 'response.time > 2000',
-                message: 'Response time is more than 2000ms',
-              },
-            ],
-          },
-        ]
-      }
-      // Ignoring new line from url validating checker
-      else if (url.length > 0) {
-        throw new Error('URL invalid')
-      }
+  let probes: Probe[] = []
+  const urls = configString.split(/\r?\n/)
+  for (const [, url] of urls.entries()) {
+    if (isValidURL(url)) {
+      probes = [
+        ...probes,
+        {
+          id: url,
+          name: url,
+          requests: [
+            {
+              url: url,
+              method: 'GET',
+              timeout: 10_000,
+              body: {} as JSON,
+            },
+          ],
+          incidentThreshold: DEFAULT_THRESHOLD,
+          recoveryThreshold: DEFAULT_THRESHOLD,
+          interval: DEFAULT_CONFIG_INTERVAL,
+          alerts: [
+            {
+              assertion: 'response.status < 200 or response.status > 299',
+              message: 'HTTP Status is not 200',
+            },
+            {
+              assertion: 'response.time > 2000',
+              message: 'Response time is more than 2000ms',
+            },
+          ],
+        },
+      ]
     }
-
-    return { probes }
-  } catch {
-    throw new Error('Your Text file contains an invalid format !')
+    // Ignoring new line from url validating checker
+    else if (url.length > 0) {
+      throw new Error(`The URL ${url} is not a valid URL`)
+    }
   }
+
+  return { probes }
 }
