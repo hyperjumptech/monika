@@ -169,6 +169,11 @@
           "editUrl": "/tutorial/run-using-opsgenie-notification.md"
         },
         {
+          "title": "Run with Ping Method",
+          "path": "/tutorial/run-using-ping-method",
+          "editUrl": "/tutorial/run-using-ping-method.md"
+        },
+        {
           "title": "Run with Pushover Notification",
           "path": "/tutorial/run-using-pushover-notification",
           "editUrl": "/tutorial/run-using-pushover-notification.md"

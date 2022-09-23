@@ -19,12 +19,6 @@ Once that’s done, it’s time to configure Monika to integrate with Opsgenie.
 
 ## Integrate Monika with Opsgenie
 
-**Monika** is an open-source and free synthetic monitoring command-line application. The name Monika stands for “**Moni**toring Ber**ka**la”, which means “periodic monitoring” in the Indonesian language.
-
-With Monika, you can add as many websites as you want to monitor. You can monitor several conditions such as service outages or slow services. Also, you can configure Monika to send notifications of the incidents on your services through your favorite communication tools like [SMTP mail](https://medium.com/hyperjump-tech/get-notified-by-e-mail-when-your-website-is-down-using-monika-a-guide-to-smtp-notification-channel-91dfcbed2bf8), [WhatsApp](https://medium.com/hyperjump-tech/get-monika-notifications-to-your-whatsapp-using-monika-whatsapp-notifier-78a83560c04c) (**it’s free!**), [Microsoft Teams](https://medium.com/hyperjump-tech/integrate-monika-with-microsoft-teams-get-notifications-straight-to-your-channels-using-incoming-3292147d6758), [Slack](https://medium.com/hyperjump-tech/integrate-monika-with-your-slack-channels-to-receive-monika-notifications-using-incoming-webhook-9ed13e5a910e), and many more.
-
-There are many ways to install Monika, from Node Package Manager (NPM), [downloading binaries from the Monika release page](https://medium.com/hyperjump-tech/install-and-run-monika-in-linux-without-package-managers-9b019571bf38), to package managers such as [Homebrew](https://medium.com/hyperjump-tech/install-monika-in-macos-using-homebrew-875265f8ded6) or [Snapcraft](https://medium.com/hyperjump-tech/install-monika-on-linux-using-snapcraft-2ecff9dd98ac).
-
 Now that we have our API Key from Opsgenie, it’s time to create a Monika configuration called `monika.yml`
 
 ```
