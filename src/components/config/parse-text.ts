@@ -1,6 +1,30 @@
 /**********************************************************************************
  * MIT License                                                                    *
  *                                                                                *
+ * Copyright (c) 2021 Hyperjump Technology                                        *
+ *                                                                                *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy   *
+ * of this software and associated documentation files (the "Software"), to deal  *
+ * in the Software without restriction, including without limitation the rights   *
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell      *
+ * copies of the Software, and to permit persons to whom the Software is          *
+ * furnished to do so, subject to the following conditions:                       *
+ *                                                                                *
+ * The above copyright notice and this permission notice shall be included in all *
+ * copies or substantial portions of the Software.                                *
+ *                                                                                *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR     *
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,       *
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE    *
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER         *
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,  *
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  *
+ * SOFTWARE.                                                                      *
+ **********************************************************************************/
+
+/**********************************************************************************
+ * MIT License                                                                    *
+ *                                                                                *
  * Copyright (c) 2022 Hyperjump Technology                                        *
  *                                                                                *
  * Permission is hereby granted, free of charge, to any person obtaining a copy   *
@@ -26,45 +50,47 @@ import { Config } from '../../interfaces/config'
 import { DEFAULT_CONFIG_INTERVAL } from '.'
 import { DEFAULT_THRESHOLD } from '../../looper'
 import { Probe } from '../../interfaces/probe'
-
-const generateProbesFromText = (config: any): Probe[] => {
-  const probes = []
-  const urls = config.split(/\r?\n/)
-  for (const [, url] of urls.entries()) {
-    if (url.length > 0) {
-      probes.push({
-        id: url,
-        name: url,
-        requests: [
-          {
-            url: url,
-            method: 'GET',
-            timeout: 10_000,
-            body: {} as JSON,
-          },
-        ],
-        incidentThreshold: DEFAULT_THRESHOLD,
-        recoveryThreshold: DEFAULT_THRESHOLD,
-        interval: DEFAULT_CONFIG_INTERVAL,
-        alerts: [
-          {
-            assertion: 'response.status < 200 or response.status > 299',
-            message: 'HTTP Status is not 200',
-          },
-          {
-            assertion: 'response.time > 2000',
-            message: 'Response time is more than 2000ms',
-          },
-        ],
-      })
-    }
-  }
-  return probes as Probe[]
-}
+import { isValidURL } from '../../utils/is-valid-url'
 
 export const parseConfigFromText = (configString: string): Config => {
   try {
-    const probes = generateProbesFromText(configString)
+    let probes: Probe[] = []
+    const urls = configString.split(/\r?\n/)
+    for (const [, url] of urls.entries()) {
+      if (url.length > 0 && isValidURL(url)) {
+        probes = [
+          ...probes,
+          {
+            id: url,
+            name: url,
+            requests: [
+              {
+                url: url,
+                method: 'GET',
+                timeout: 10_000,
+                body: {} as JSON,
+              },
+            ],
+            incidentThreshold: DEFAULT_THRESHOLD,
+            recoveryThreshold: DEFAULT_THRESHOLD,
+            interval: DEFAULT_CONFIG_INTERVAL,
+            alerts: [
+              {
+                assertion: 'response.status < 200 or response.status > 299',
+                message: 'HTTP Status is not 200',
+              },
+              {
+                assertion: 'response.time > 2000',
+                message: 'Response time is more than 2000ms',
+              },
+            ],
+          },
+        ]
+      } else {
+        throw new Error('URL invalid')
+      }
+    }
+
     return { probes }
   } catch (error: any) {
     throw new Error('Your Text file contains an invalid format !')
