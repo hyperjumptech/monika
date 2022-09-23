@@ -32,7 +32,7 @@ import cn from 'classnames'
 import { Container } from './Container'
 import { FiChevronRight as ArrowRightSidebar } from 'react-icons/fi'
 import { useRouter } from 'next/router'
-import { SearchBox } from './SearchBox'
+import { Search } from './Search'
 
 export function SidebarMobile({ children }) {
   const [opened, setOpen] = React.useState(false)
@@ -76,7 +76,7 @@ export function SidebarMobile({ children }) {
     <div className="lg:hidden">
       <Container>
         <div className="sidebar-search py-2 z-10">
-          <SearchBox />
+          <Search />
         </div>
         <label
           htmlFor="dropdown-input"
