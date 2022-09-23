@@ -7,7 +7,7 @@ export const siteConfig = {
   algolia: {
     appId: process.env.NEXT_PUBLIC_ALGOLIA_APPLICATION_ID || '',
     apiKey: process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY || '',
-    indexName: 'monika-documentation',
+    indexName: 'monika-documentation-prod',
     // algoliaOptions: {
     //   facetFilters: ['version:VERSION'],
     // },

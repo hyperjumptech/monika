@@ -26,7 +26,7 @@ import Link from 'next/link'
 import { siteConfig } from 'siteConfig'
 import MonikaSvg from '../../public/monika.svg'
 import { useState } from 'react'
-import { SearchBox } from './SearchBox'
+import { Search } from './Search'
 
 export default function NavBar() {
   const [navbarOpen, setNavbarOpen] = useState(false)
@@ -64,7 +64,7 @@ export default function NavBar() {
           </button>
         </div>
         <div className="flex-grow hidden lg:block ml-8">
-          <SearchBox />
+          <Search />
         </div>
         <div
           className={
