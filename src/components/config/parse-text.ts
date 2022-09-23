@@ -57,7 +57,7 @@ export const parseConfigFromText = (configString: string): Config => {
     let probes: Probe[] = []
     const urls = configString.split(/\r?\n/)
     for (const [, url] of urls.entries()) {
-      if (url.length > 0 && isValidURL(url)) {
+      if (isValidURL(url)) {
         probes = [
           ...probes,
           {
@@ -86,7 +86,9 @@ export const parseConfigFromText = (configString: string): Config => {
             ],
           },
         ]
-      } else {
+      }
+      // Ignoring new line from url validating checker
+      else if (url.length > 0) {
         throw new Error('URL invalid')
       }
     }
