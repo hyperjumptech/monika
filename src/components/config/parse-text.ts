@@ -94,7 +94,7 @@ export const parseConfigFromText = (configString: string): Config => {
     }
 
     return { probes }
-  } catch (error: any) {
+  } catch {
     throw new Error('Your Text file contains an invalid format !')
   }
 }
