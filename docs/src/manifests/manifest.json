@@ -197,6 +197,11 @@
           "title": "Visualizing Monika Data with Prometheus and Grafana",
           "path": "/tutorial/visualizing-monika-data-with-prometheus-and-grafana",
           "editUrl": "/tutorial/visualizing-monika-data-with-prometheus-and-grafana.md"
+        },
+        {
+          "title": "Write Config in Visual Studio Code",
+          "path": "/tutorial/write-config-in-visual-studio-code",
+          "editUrl": "/tutorial/write-config-in-visual-studio-code.md"
         }
       ]
     }
