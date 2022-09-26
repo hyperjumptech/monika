@@ -11,7 +11,7 @@ on:
 jobs:
   testing:
     name: Testing Release
-    if: github.repository == 'hyperjumptech/monika'
+    if: github.repository == 'lukman7788/monika'
     runs-on: ubuntu-latest
     outputs:
       NEXT_VERSION: ${{ steps.version.outputs.NEXT_VERSION }}
