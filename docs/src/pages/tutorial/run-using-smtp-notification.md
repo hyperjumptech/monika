@@ -1,38 +1,11 @@
-[![Denny Pradipta](https://miro.medium.com/fit/c/48/48/1*xMyd0j43HlsG8Iots4I1ig.jpeg)
+---
+id: run-using-smtp-notification
+title: Run using SMTP Notification
+---
 
-](https://medium.com/@dennypradipta?source=post_page-----91dfcbed2bf8--------------------------------)[Denny Pradipta](https://medium.com/@dennypradipta?source=post_page-----91dfcbed2bf8--------------------------------)Follow
+This tutorial will show you how to integrate Monika with SMTP so you can receive notifications from Monika straight to your email.
 
-Oct 20, 2021
-
-·4 min read
-
-# Get notified by e-mail when your website is down using Monika: A guide to SMTP notification channel
-
-![](https://miro.medium.com/max/1400/0*ASHbeMX53msf2wdF)Photo by [Stephen Phillips - Hostreviews.co.uk](https://unsplash.com/@hostreviews?utm_source=medium&utm_medium=referral) on [Unsplash](https://unsplash.com?utm_source=medium&utm_medium=referral)
-
-We talked about how Monika can alert you when your API is down or slow using desktop notification many times in our previous articles. Unfortunately, if you use Monika in non-graphical environments such as servers, you can’t use desktop notifications. You should use other channels such as SMTP to send the alerts to your email and your co-workers’ email instead.
-
-If you have read Monika's documentation, you may notice that Monika supports [SMTP notifications too](https://monika.hyperjump.tech/guides/notifications#smtp). If you’re looking for a free SMTP service instead of using a paid service like Sendinblue, Mailchimp, or similar, Google Mail is a great option.
-
-So, without further ado!
-
-# What is Monika?
-
-[
-
-## GitHub - hyperjumptech/monika: Monika is a command line application to monitor every part of your…
-
-### Monika is a command line application to monitor every part of your web app using a simple JSON configuration file. Get…
-
-github.com
-
-](http://github.com/hyperjumptech/monika)
-
-Monika is an open-source and free synthetic monitoring command-line application. The name Monika stands for “**Moni**toring Ber**ka**la”, which means “periodic monitoring” in the Indonesian language.
-
-With Monika, you can add as many websites as you want to monitor. You can monitor several undesirable events such as service outages or slow services. In addition, you can configure Monika to send notifications of the incidents on your services through your favorite communication tools like SMTP mail, Telegram, [**WhatsApp**](https://whatsapp.hyperjump.tech/) (It’s free!), etc.
-
-# Configuring the SMTP notification channel
+## Configuring the SMTP notification channel
 
 In order to start using Google Mail as your Monika notification channel, you need to prepare these:
 
@@ -42,7 +15,7 @@ In order to start using Google Mail as your Monika notification channel, you nee
 
 First, go to the [Less secure app access](https://myaccount.google.com/lesssecureapps) section of your Google Account. You might need to sign in first using your Google account. Then, turn on the “Allow less secure apps” like so:
 
-![](https://miro.medium.com/max/1400/1*9ZHBFLFw61-mXbQcIfjv1w.png)Allow less secure apps
+![](https://miro.medium.com/max/1400/1*9ZHBFLFw61-mXbQcIfjv1w.png)
 
 Now that we enabled the ‘Allow less secure apps’ option, it is time to create a Monika configuration. As an example, let’s use a configuration from our previous article: [Be alerted when your authentication API is slow with Monika: A guide for chaining request](https://dennypradipta.medium.com/be-alerted-when-your-authentication-api-is-slow-with-monika-a-guide-for-chaining-request-a63801df8b39)
 
@@ -69,32 +42,50 @@ The configuration above will hit the /login endpoint with a JSON request body an
 
 Now that we know the structure of the SMTP notification block, it’s time to update our Monika configuration:
 
+```
+notifications:
+  - id: unique-id-smtp
+    type: smtp
+    data:
+      recipients: ["recipient-1@example.com", "recipient-2@example.com"]
+      hostname: smtp.gmail.com
+      port: 587
+      username: denny@example.com
+      password: p455w0rd
+probes:
+  - id: sample_login
+    name: Sample Login
+    requests:
+      - method: POST
+        url: https://reqres.in/api/login
+        body:
+          email: "eve.holt@reqres.in"
+          password: "cityslicka"
+        headers:
+          Content-Type: application/json
+        alerts:
+          - query: response.time > 600
+            message: Login API Response time is {{ response.time }} ms, expecting less than 60>
+          - query: response.status != 200
+            message: Login API Status code is not 200. Please check the service status!
+      - method: GET
+        url: https://reqres.in/api/users/2
+        headers:
+          Authorization: Bearer {{ response.[0].data.token }}
+        alerts:
+          - query: response.time > 500
+            message: Get User API Response time is {{ response.time }} ms, expecting less than>
+          - query: response.status != 200
+            message: Get User API Status code is not 200. Please check the service status!
+    alerts:
+      - query: response.time > 10000
+        message: Please check your internet connection
+    incidentThreshold: 1
+    recoveryThreshold: 1
+```
+
 Save the configuration file as `monika.yml` and run the configuration. When an alert is triggered, it should send a recovery or incident email to the recipients you have configured.
 
-![](https://miro.medium.com/max/1400/1*6PDFNfQV7AYkPMO97hAT2g.png)I received an email when my API is down or slow!
+![](https://miro.medium.com/max/1400/1*6PDFNfQV7AYkPMO97hAT2g.png)
 
 Congratulations! You can now send the alert notification using Google Mail SMTP!
-
-# Closing
-
-If you use Monika in non-graphical environments such as servers, you can’t use desktop notifications. You should use other channels such as SMTP to send the alerts to your email. We could use Google Mail SMTP to send Monika alerts to the configured recipients without worry.
-
-The only thing that you should be worried about is that Google Mail SMTP only allows us to send 2000 emails per day. Sure it may sound big when it comes to small teams, but if your team is big enough or your servers go down frequently to hit that daily quota, you better use paid services like Mailchimp or Sendinblue to adjust the quota according to your needs.
-
-If you’re having a problem with using Monika, don’t hesitate to create an issue on [Monika’s Github Issue Page](https://github.com/hyperjumptech/monika/issues). If you like this article, don’t forget to clap and share this article with your friends!
-
-Also, we are participating in [Hacktoberfest 2021](https://hacktoberfest.digitalocean.com/) as a maintainer! Feel free to contribute to Monika this month by helping us [resolve open issues with the “hacktoberfest” label on it.](https://medium.com/hyperjump-tech/october-means-hacktoberfest-contribute-to-open-source-software-by-contributing-to-monika-877c4a8fba79)
-
-That’s it for today, see you next time!
-
-[Hyperjump](https://hyperjump.tech/) is an open-source-first company providing engineering excellence service. We aim to build and commercialize [open-source tools](https://github.com/hyperjumptech) to help companies streamline, simplify, and secure the most important aspects of its modern DevOps practices.
-
-[
-
-## Hyperjump
-
-### Open-source first. Cloud-native. DevOps excellence. - Hyperjump
-
-github.com
-
-](https://github.com/hyperjumptech)
