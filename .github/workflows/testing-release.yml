@@ -13,7 +13,7 @@ jobs:
     name: Testing Release
     if: github.repository == 'hyperjumptech/monika'
     runs-on: ubuntu-latest
-    # allows this to be used in the `comment` job below
+    outputs:
       NEXT_VERSION: ${{ steps.version.outputs.NEXT_VERSION }}
     steps:
       - name: 🛑 Cancel Previous Runs
