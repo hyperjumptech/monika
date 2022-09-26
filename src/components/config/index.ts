@@ -132,7 +132,7 @@ const watchConfigFile = (
 
 const scheduleRemoteConfigFetcher = (
   url: string,
-  configType: 'monika' | 'har' | 'insomnia' | 'postman' | 'sitemap',
+  configType: 'monika' | 'har' | 'insomnia' | 'postman' | 'sitemap' | 'text',
   interval: number,
   index?: number,
   flags?: any
@@ -155,7 +155,7 @@ const scheduleRemoteConfigFetcher = (
 
 const parseConfigType = async (
   source: string,
-  configType: 'monika' | 'har' | 'insomnia' | 'postman' | 'sitemap',
+  configType: 'monika' | 'har' | 'insomnia' | 'postman' | 'sitemap' | 'text',
   flags: any,
   index?: number
 ): Promise<Partial<Config>> => {
@@ -212,7 +212,8 @@ export const setupConfig = async (flags: any): Promise<void> => {
     flags.har === undefined &&
     flags.postman === undefined &&
     flags.insomnia === undefined &&
-    flags.sitemap === undefined
+    flags.sitemap === undefined &&
+    flags.text === undefined
   ) {
     log.info(`No Monika configuration available, initializing...`)
     const configFilename = await createConfigFile(flags)
@@ -229,6 +230,8 @@ export const setupConfig = async (flags: any): Promise<void> => {
     nonDefaultConfig = await parseConfigType(flags.insomnia, 'insomnia', flags)
   } else if (flags.sitemap) {
     nonDefaultConfig = await parseConfigType(flags.sitemap, 'sitemap', flags)
+  } else if (flags.text) {
+    nonDefaultConfig = await parseConfigType(flags.text, 'text', flags)
   }
 
   if (defaultConfigs.length === 0 && nonDefaultConfig !== undefined) {
@@ -262,6 +265,11 @@ const getPathAndTypeFromFlag = (flags: any) => {
     type = 'sitemap'
   }
 
+  if (flags.text) {
+    path = flags.text
+    type = 'text'
+  }
+
   return {
     path,
     type,
@@ -271,7 +279,13 @@ const getPathAndTypeFromFlag = (flags: any) => {
 // disable warn "any" type parameter
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const createConfig = async (flags: any): Promise<void> => {
-  if (!flags.har && !flags.postman && !flags.insomnia && !flags.sitemap) {
+  if (
+    !flags.har &&
+    !flags.postman &&
+    !flags.insomnia &&
+    !flags.sitemap &&
+    !flags.text
+  ) {
     log.info(
       'Opening Monika Configuration Generator in your default browser...'
     )
