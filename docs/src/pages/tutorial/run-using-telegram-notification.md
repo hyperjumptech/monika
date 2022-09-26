@@ -3,7 +3,7 @@ id: run-using-telegram-notification
 title: Run using Telegram Notification
 ---
 
-This article, we will be sharing how to integrate Monika with Telegram bots so that when there are Monika incidents or recoveries, you will be notified on your Telegram group.
+This tutorial, we will be sharing how to integrate Monika with Telegram bots so that when there are Monika incidents or recoveries, you will be notified on your Telegram group.
 
 ## Set up the Telegram bot
 

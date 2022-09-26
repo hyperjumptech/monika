@@ -3,7 +3,7 @@ id: run-using-slack-notification
 title: Run using Slack Notification
 ---
 
-In this tutorial, I will be sharing how to integrate Monika with Slack. You can integrate Monika with Slack using Incoming Webhook so that when there is a Monika incidents or recoveries alert, your team will be notified via existing Slack channels.
+This tutorial, I will be sharing how to integrate Monika with Slack. You can integrate Monika with Slack using Incoming Webhook so that when there is a Monika incidents or recoveries alert, your team will be notified via existing Slack channels.
 
 ## Setup Webhook with Slack
 
