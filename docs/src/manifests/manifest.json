@@ -114,14 +114,14 @@
           "editUrl": "/articles.js"
         },
         {
-          "title": "Run with GMail Notification",
-          "path": "/tutorial/run-with-gmail-notification",
-          "editUrl": "/tutorial/run-with-gmail-notification.md"
+          "title": "Deploy to Fly.io",
+          "path": "/tutorial/deploy-to-fly-io",
+          "editUrl": "/tutorial/deploy-to-fly-io.md"
         },
         {
-          "title": "Run Monika in Docker",
-          "path": "/tutorial/run-in-docker",
-          "editUrl": "/tutorial/run-in-docker.md"
+          "title": "Run Monika in Raspberry Pi",
+          "path": "/tutorial/run-in-raspberry-pi",
+          "editUrl": "/tutorial/run-in-raspberry-pi.md"
         },
         {
           "title": "Run Monika in Background",
@@ -129,9 +129,79 @@
           "editUrl": "/tutorial/run-in-background.md"
         },
         {
-          "title": "Run Monika in Raspberry Pi",
-          "path": "/tutorial/run-in-raspberry-pi",
-          "editUrl": "/tutorial/run-in-raspberry-pi.md"
+          "title": "Run Monika in Docker",
+          "path": "/tutorial/run-in-docker",
+          "editUrl": "/tutorial/run-in-docker.md"
+        },
+        {
+          "title": "Run with GMail Notification",
+          "path": "/tutorial/run-with-gmail-notification",
+          "editUrl": "/tutorial/run-with-gmail-notification.md"
+        },
+        {
+          "title": "Run with DingTalk Notification",
+          "path": "/tutorial/run-using-dingtalk-notification",
+          "editUrl": "/tutorial/run-using-dingtalk-notification.md"
+        },
+        {
+          "title": "Run with Google Chat Notification",
+          "path": "/tutorial/run-using-google-chat-notification",
+          "editUrl": "/tutorial/run-using-google-chat-notification.md"
+        },
+        {
+          "title": "Run with Mailgun Notification",
+          "path": "/tutorial/run-using-mailgun-notification",
+          "editUrl": "/tutorial/run-using-mailgun-notification.md"
+        },
+        {
+          "title": "Run with Microsoft Teams Notification",
+          "path": "/tutorial/run-using-microsoft-teams-notification",
+          "editUrl": "/tutorial/run-using-microsoft-teams-notification.md"
+        },
+        {
+          "title": "Run with Monika Whatsapp Notifier Notification",
+          "path": "/tutorial/run-using-monika-whatsapp-notifier-notification",
+          "editUrl": "/tutorial/run-using-monika-whatsapp-notifier-notification.md"
+        },
+        {
+          "title": "Run with Opsgenie Notification",
+          "path": "/tutorial/run-using-opsgenie-notification",
+          "editUrl": "/tutorial/run-using-opsgenie-notification.md"
+        },
+        {
+          "title": "Run with Ping Method",
+          "path": "/tutorial/run-using-ping-method",
+          "editUrl": "/tutorial/run-using-ping-method.md"
+        },
+        {
+          "title": "Run with Pushover Notification",
+          "path": "/tutorial/run-using-pushover-notification",
+          "editUrl": "/tutorial/run-using-pushover-notification.md"
+        },
+        {
+          "title": "Run with Slack Notification",
+          "path": "/tutorial/run-using-slack-notification",
+          "editUrl": "/tutorial/run-using-slack-notification.md"
+        },
+        {
+          "title": "Run with SMTP Notification",
+          "path": "/tutorial/run-using-smtp-notification",
+          "editUrl": "/tutorial/run-using-smtp-notification.md"
+        },
+        {
+          "title": "Run with Telegram Notification",
+          "path": "/tutorial/run-using-telegram-notification",
+          "editUrl": "/tutorial/run-using-telegram-notification.md"
+        },
+        {
+          "title": "Visualizing Monika Data with Prometheus and Grafana",
+          "path": "/tutorial/visualizing-monika-data-with-prometheus-and-grafana",
+          "editUrl": "/tutorial/visualizing-monika-data-with-prometheus-and-grafana.md"
+        },
+        {
+          "title": "Write Config in Visual Studio Code",
+          "path": "/tutorial/write-config-in-visual-studio-code",
+          "editUrl": "/tutorial/write-config-in-visual-studio-code.md"
         }
       ]
     }
