@@ -3,17 +3,7 @@ id: run-using-ping-method
 title: Run using Ping Method
 ---
 
-This tutorial will show you how to integrate Monika with Ping Method to get your Monika notifications
-
-## Use PING to check your internet connection for your Monika API monitoring
-
-![](https://miro.medium.com/max/1400/0*HNZxvDYjZGD61paE)
-
-Basically, [Monika](https://monika.hyperjump.tech)’s default behavior is hitting your API periodically and reporting you the performance and the result of your API. Of course, “hitting your API periodically” means it requires a working internet connection.
-
-And let’s face it, even your internet service providers can be slow and experience downtime too. While your internet service provider is having a problem, it could send you a false alarm saying that your API is down. That’s why many people tend to open their Terminal and run the `ping 8.8.8.8` command to ensure that they are still connected to the internet.
-
-In the newest version of Monika, we have included the PING command inside the Monika. So, this article will show you how to use PING in Monika as a secondary check so that you will know the real story behind your API’s failures. So, without further ado:
+This tutorial will show you how to integrate Monika with Ping Method to get your Monika notifications.
 
 ## Installing Monika
 

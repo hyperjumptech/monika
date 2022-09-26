@@ -3,7 +3,7 @@ id: run-using-opsgenie-notification
 title: Run using Opsgenie Notification
 ---
 
-This article will show you how to integrate Monika with Opsgenie to get your Monika notifications through the Opsgenie dashboard. So, without further ado:
+This tutorial will show you how to integrate Monika with Opsgenie to get your Monika notifications through the Opsgenie dashboard.
 
 ## Setup Opsgenie
 

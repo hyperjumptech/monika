@@ -3,7 +3,7 @@ id: run-using-microsoft-teams-notification
 title: Run using Microsoft Teams Notification
 ---
 
-This article will show you how to integrate Monika with Microsoft Teams using Incoming Webhook so that when there is a Monika incidents or recoveries alert, your team will be notified via existing Microsoft Teams channels. So, without further ado:
+This tutorial will show you how to integrate Monika with Microsoft Teams using Incoming Webhook so that when there is a Monika incidents or recoveries alert, your team will be notified via existing Microsoft Teams channels. So, without further ado:
 
 ## Setup Microsoft Teams Incoming Webhook
 
