@@ -42,6 +42,7 @@ import { getContext } from '../../context'
 import { httpRequest } from '../http-request'
 
 import { redisRequest } from '../redis-request'
+import { postgresRequest, PostgresParam } from '../postgres-request'
 import { ServerAlertState } from '../../interfaces/probe-status'
 interface ProbeStatusProcessed {
   probe: Probe
@@ -235,6 +236,37 @@ export async function doProbe({
   setTimeout(async () => {
     const eventEmitter = getEventEmitter()
     const responses = []
+
+    if (probe?.postgres) {
+      const { id, postgres } = probe
+      let pgReqIndex = 0
+
+      for await (const pgIndex of postgres) {
+        const { host, port, database, username, password } = pgIndex
+        const params: PostgresParam = {
+          host: host,
+          port: port,
+          database: database,
+          username: username,
+          password: password,
+        }
+        const pgResult = await postgresRequest(params)
+
+        const timeNow = new Date().toISOString()
+        const logMessage = `${timeNow} ${checkOrder} id:${id} redis:${host}:${port} ${pgResult.responseTime}ms msg:${pgResult.body}`
+        const isAlertTriggered = pgResult.status !== 200
+
+        responseProcessing({
+          probe: probe,
+          probeResult: pgResult,
+          notifications: notifications,
+          logMessage: logMessage,
+          isAlertTriggered: isAlertTriggered,
+          index: pgReqIndex,
+        })
+        pgReqIndex++
+      }
+    }
 
     if (probe?.redis) {
       const { id, redis } = probe

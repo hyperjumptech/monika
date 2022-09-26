@@ -89,6 +89,24 @@ probes:
         ping: true
 ```
 
+### Postgres Request
+
+Monika provides a way to check your postgres database's health with a 'postgres' type probe.
+
+```yaml
+probes:
+  - id: 'postgres-01'
+    name: database health
+    description: ensure db health
+    interval: 30 # in seconds
+    postgres:
+      - host: 172.15.0.1
+        port: 5432
+        database: my-database
+        user: db-user
+        password: db-password
+```
+
 ### Redis Request
 
 You can check if your redis instance is running and accessible by adding a probe with `redis` configuration as follows.
