@@ -19,12 +19,6 @@ Save the Monika WhatsApp Notifier webhook URL to somewhere safe as we will need 
 
 ## Configuring Monika with Webhook
 
-I can assure you that Monika is not [the girl from Doki Doki Literature Club](<https://doki-doki-literature-club.fandom.com/wiki/Monika_(DDLC)>). **Monika** is an open-source and free synthetic monitoring command-line application. The name Monika stands for “**Moni**toring Ber**ka**la”, which means “periodic monitoring” in the Indonesian language.
-
-With Monika, you can add as many websites as you want to monitor. You can monitor several undesirable events such as service outages or slow services. In addition, you can configure Monika to send notifications of the incidents on your services through your favorite communication tools like [SMTP mail](https://medium.com/hyperjump-tech/get-notified-by-e-mail-when-your-website-is-down-using-monika-a-guide-to-smtp-notification-channel-91dfcbed2bf8), Telegram, Slack, etc.
-
-Install Monika via `npm install -g @hyperjumptech/monika` or if you don’t have NPM in your system, you can [download the prebuilt binary from our release page](https://github.com/hyperjumptech/monika/releases).
-
 Now that we have our Webhook URL, it’s time to create a configuration called `monika.yml`:
 
 ```
