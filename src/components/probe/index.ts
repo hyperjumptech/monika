@@ -22,7 +22,6 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { getContext } from '../../context'
 import events from '../../events'
 import { Notification } from '../../interfaces/notification'
 import { Probe } from '../../interfaces/probe'
@@ -34,11 +33,13 @@ import { getEventEmitter } from '../../utils/events'
 import { log } from '../../utils/pino'
 import { setProbeFinish, setProbeRunning } from '../../utils/probe-state'
 import { RequestLog } from '../logger'
-import { logResponseTime } from '../logger/response-time-log'
 import { sendAlerts } from '../notification'
 import { processThresholds } from '../notification/process-server-status'
+import { logResponseTime } from '../logger/response-time-log'
+
 import { tcpRequest } from '../tcp-request'
-import { probingHTTP } from './probing'
+import { getContext } from '../../context'
+import { httpRequest } from '../http-request'
 
 import { redisRequest } from '../redis-request'
 import { ServerAlertState } from '../../interfaces/probe-status'
@@ -136,6 +137,76 @@ async function checkThresholdsAndSendAlert(
     })
 }
 
+type respProsessingParams = {
+  probe: Probe // the actual probe that got this response
+  probeResult: ProbeRequestResponse // actual response from the probe
+  notifications: Notification[] // notifications contains all the notifications
+  logMessage: string // message from the probe to display
+  isAlertTriggered: boolean // flag, should alert be triggered?
+  index: number
+}
+/**
+ * responseProcessing determines if the last probe response warrants an alert
+ * creates the console log
+ * @param {object} param is response Processing type
+ * @returns void
+ */
+async function responseProcessing({
+  probe,
+  probeResult,
+  notifications,
+  logMessage,
+  isAlertTriggered,
+  index,
+}: respProsessingParams): Promise<void> {
+  const { flags } = getContext()
+  const isSymonMode = Boolean(flags.symonUrl) && Boolean(flags.symonKey)
+  const verboseLogs = isSymonMode || flags['keep-verbose-logs']
+
+  isAlertTriggered ? log.warn(logMessage) : log.info(logMessage)
+
+  const { alerts } = probe
+  const validatedResponse = validateResponse(
+    alerts || [
+      {
+        assertion: 'response.status < 200 or response.status > 299',
+        message: 'probe cannot be accessed',
+      },
+    ],
+    probeResult
+  )
+  const requestLog = new RequestLog(probe, index, 0)
+
+  requestLog.addAlerts(
+    validatedResponse
+      .filter((item) => item.isAlertTriggered)
+      .map((item) => item.alert)
+  )
+  const statuses = processThresholds({
+    probe,
+    requestIndex: index,
+    validatedResponse,
+  })
+
+  requestLog.setResponse(probeResult)
+  checkThresholdsAndSendAlert(
+    {
+      probe,
+      statuses,
+      notifications,
+      requestIndex: index,
+      validatedResponseStatuses: validatedResponse,
+    },
+    requestLog
+  ).catch((error) => {
+    requestLog.addError(error.message)
+  })
+
+  if (verboseLogs || requestLog.hasIncidentOrRecovery) {
+    requestLog.saveToDatabase().catch((error) => log.error(error.message))
+  }
+}
+
 type doProbeParams = {
   checkOrder: number // the order of probe being processed
   probe: Probe // probe contains all the probes
@@ -146,7 +217,6 @@ type doProbeParams = {
  * @param {object} param object parameter
  * @returns {Promise<void>} void
  */
-// eslint-disable-next-line complexity
 export async function doProbe({
   checkOrder,
   probe,
@@ -168,61 +238,21 @@ export async function doProbe({
 
     if (probe?.redis) {
       const { id, redis } = probe
-
       let redisRequestIndex = 0
       for await (const redisIndex of redis) {
-        const { host, port, username, password } = redisIndex
-
-        const redisRes = await redisRequest({
-          host: host,
-          port: port,
-          username: username,
-          password: password,
-        })
-
+        const { host, port } = redisIndex
+        const redisRes = await redisRequest({ host: host, port: port })
         const timeNow = new Date().toISOString()
         const logMessage = `${timeNow} ${checkOrder} id:${id} redis:${host}:${port} ${redisRes.responseTime}ms msg:${redisRes.body}`
-
         const isAlertTriggered = redisRes.status !== 200
-        isAlertTriggered ? log.warn(logMessage) : log.info(logMessage)
-
-        const { alerts } = redisIndex
-        const validatedResponse = validateResponse(
-          alerts || [
-            {
-              assertion: 'response.status < 200 or response.status > 299',
-              message: 'REDIS host cannot be accessed',
-            },
-          ],
-          redisRes
-        )
-        const requestLog = new RequestLog(probe, 0, 0)
-
-        requestLog.addAlerts(
-          validatedResponse
-            .filter((item) => item.isAlertTriggered)
-            .map((item) => item.alert)
-        )
-        const statuses = processThresholds({
-          probe,
-          requestIndex: redisRequestIndex,
-          validatedResponse,
+        responseProcessing({
+          probe: probe,
+          probeResult: redisRes,
+          notifications: notifications,
+          logMessage: logMessage,
+          isAlertTriggered: isAlertTriggered,
+          index: redisRequestIndex,
         })
-
-        requestLog.setResponse(redisRes)
-        checkThresholdsAndSendAlert(
-          {
-            probe,
-            statuses,
-            notifications,
-            requestIndex: redisRequestIndex,
-            validatedResponseStatuses: validatedResponse,
-          },
-          requestLog
-        ).catch((error) => {
-          requestLog.addError(error.message)
-        })
-
         redisRequestIndex++
       }
     }
@@ -231,61 +261,19 @@ export async function doProbe({
       const { id, socket } = probe
       const { host, port, data } = socket
       const url = `${host}:${port}`
-
       const probeRes = await tcpRequest({ host, port, data })
-
       const timeNow = new Date().toISOString()
       const logMessage = `${timeNow} ${checkOrder} id:${id} tcp:${url} ${probeRes.responseTime}ms msg:${probeRes.body}`
-
       const isAlertTriggered = probeRes.status !== 200
-
-      isAlertTriggered ? log.warn(logMessage) : log.info(logMessage)
-
-      // let TCPrequestIndex = 0 // are there multiple tcp requests?
-      // TCPrequestIndex < probe?.requests?.length;  // multiple tcp request, for later support
-      // TCPrequestIndex++                           // for later supported
       const TCPrequestIndex = 0
-
-      const { alerts } = socket
-      const validatedResponse = validateResponse(
-        alerts || [
-          {
-            assertion: 'response.status < 200 or response.status > 299',
-            message: 'TCP server cannot be accessed',
-          },
-        ],
-        probeRes
-      )
-      const requestLog = new RequestLog(probe, 0, 0)
-
-      requestLog.addAlerts(
-        validatedResponse
-          .filter((item) => item.isAlertTriggered)
-          .map((item) => item.alert)
-      )
-      const statuses = processThresholds({
-        probe,
-        requestIndex: TCPrequestIndex,
-        validatedResponse,
+      responseProcessing({
+        probe: probe,
+        probeResult: probeRes,
+        notifications: notifications,
+        logMessage: logMessage,
+        isAlertTriggered: isAlertTriggered,
+        index: TCPrequestIndex,
       })
-
-      requestLog.setResponse(probeRes)
-      checkThresholdsAndSendAlert(
-        {
-          probe,
-          statuses,
-          notifications,
-          requestIndex: TCPrequestIndex,
-          validatedResponseStatuses: validatedResponse,
-        },
-        requestLog
-      ).catch((error) => {
-        requestLog.addError(error.message)
-      })
-
-      if (verboseLogs || requestLog.hasIncidentOrRecovery) {
-        requestLog.saveToDatabase().catch((error) => log.error(error.message))
-      }
     }
 
     // sending multiple http-type requests
@@ -300,7 +288,7 @@ export async function doProbe({
       try {
         // intentionally wait for a request to finish before processing next request in loop
         // eslint-disable-next-line no-await-in-loop
-        const probeRes: ProbeRequestResponse = await probingHTTP({
+        const probeRes: ProbeRequestResponse = await httpRequest({
           requestConfig: request,
           responses,
         })
@@ -313,12 +301,11 @@ export async function doProbe({
           response: probeRes,
         })
 
-        // Add to a response array to be accessed by another request
+        // Add to a response array to be accessed by another request for chaining later
         responses.push(probeRes)
-
         requestLog.setResponse(probeRes)
 
-        // TODO: MOVE THIS DECODING TO THE PROBE/DRIVERS
+        // decode error message based on returned driver status
         if ([0, 1, 2, 3, 4, 599].includes(probeRes.status)) {
           const errorMessageMap: Record<number, string> = {
             0: 'URI not found', // axios error
@@ -365,7 +352,7 @@ export async function doProbe({
           requestLog.addError(error.message)
         })
 
-        // Exit the loop if there is any alert triggered
+        // Exit the chaining loop if there is any alert triggered
         if (validatedResponse.some((item) => item.isAlertTriggered)) {
           const triggeredAlertResponse = validatedResponse.find(
             (item) => item.isAlertTriggered

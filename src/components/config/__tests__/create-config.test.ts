@@ -74,6 +74,26 @@ describe('Har config', () => {
   })
 })
 
+describe('Text config', () => {
+  describe('Create config from text file', () => {
+    it('should create config from text file', async () => {
+      const flags = {
+        text: './src/components/config/__tests__/textfile',
+        output: 'monika.textfile.yml',
+      }
+      await createConfig(flags)
+      expect(fs.lstatSync('monika.textfile.yml').isFile()).to.be.true
+
+      const generated = fs.readFileSync('monika.textfile.yml', 'utf-8')
+      const expected = fs.readFileSync(
+        './src/components/config/__tests__/expected.textfile.yml',
+        'utf-8'
+      )
+      expect(_.isEqual(generated, expected)).to.be.true
+    })
+  })
+})
+
 describe('Sitemap config', () => {
   describe('Create config from xml file', () => {
     it('should create config from xml file', async () => {

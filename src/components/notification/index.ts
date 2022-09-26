@@ -194,6 +194,7 @@ export async function sendNotifications(
                 }
                 break
               }
+
               case 'incident':
               case 'recovery': {
                 body = {
@@ -205,6 +206,7 @@ export async function sendNotifications(
                 }
                 break
               }
+
               case 'status-update': {
                 body = {
                   type: message.meta.type,
@@ -222,6 +224,7 @@ export async function sendNotifications(
                 }
                 break
               }
+
               default: {
                 break
               }
@@ -268,6 +271,7 @@ export async function sendNotifications(
             break
           }
         }
+
         return Promise.resolve()
       } catch (error: any) {
         throw NotificationSendingError.create(notification.type, error?.message)
@@ -290,7 +294,7 @@ export async function sendAlerts({
   notifications,
   url,
   probeState,
-}: SendAlertsProps) {
+}: SendAlertsProps): Promise<void> {
   const ipAddress = getIp()
   const isRecovery = probeState === 'UP'
   const message = await getMessageForAlert({

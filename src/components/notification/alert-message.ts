@@ -60,6 +60,48 @@ type MessageAlertProps = {
   response: ProbeRequestResponse
 }
 
+const getExpectedMessage = (
+  alert: ProbeAlert,
+  response: ProbeRequestResponse,
+  isRecovery: boolean
+): string | number => {
+  const { status, data, headers, responseTime } = response
+  const isHTTPStatusCode = status >= 100 && status <= 599
+
+  if (!alert.message) {
+    if (isRecovery)
+      return `The request is back to normal and pass the query: ${alert.query}`
+    return `The request failed because the response does not pass the query: ${alert.query}. The actual response status is ${status} and the response time is ${responseTime}.`
+  }
+
+  if (!isHTTPStatusCode) {
+    switch (status) {
+      case 0:
+        return 'Host cannot be reached'
+      case 1:
+        return 'Connection reset'
+      case 2:
+        return 'Connection refused'
+      // for TCP request
+      case 5:
+        return isRecovery ? 'The request is back to normal' : alert?.message
+
+      default:
+        return status
+    }
+  }
+
+  return Handlebars.compile(alert.message)({
+    response: {
+      size: Number(headers['content-length']),
+      status,
+      time: responseTime,
+      body: data,
+      headers: headers,
+    },
+  })
+}
+
 export async function getMessageForAlert({
   probeID,
   alert,
@@ -85,47 +127,6 @@ export async function getMessageForAlert({
     publicIpAddress,
     monikaInstance,
     version: userAgent,
-  }
-  const getExpectedMessage = (
-    alert: ProbeAlert,
-    response: ProbeRequestResponse,
-    isRecovery: boolean
-  ): string | number => {
-    const { status } = response
-    const isHTTPStatusCode = status >= 100 && status <= 599
-
-    if (!alert.message) {
-      if (isRecovery)
-        return `The request is back to normal and pass the query: ${alert.assertion}`
-      return `The request failed because the response does not pass the query: ${alert.assertion}. The actual response status is ${response.status} and the response time is ${response.responseTime}.`
-    }
-
-    if (!isHTTPStatusCode) {
-      switch (status) {
-        case 0:
-          return 'Host cannot be reached'
-        case 1:
-          return 'Connection reset'
-        case 2:
-          return 'Connection refused'
-        // for TCP request
-        case 5:
-          return isRecovery ? 'The request is back to normal' : alert?.message
-
-        default:
-          return status
-      }
-    }
-
-    return Handlebars.compile(alert.message)({
-      response: {
-        size: Number(response.headers['content-length']),
-        status,
-        time: response?.responseTime,
-        body: response.data,
-        headers: response.headers,
-      },
-    })
   }
 
   const lastIncident = incidents.find(
