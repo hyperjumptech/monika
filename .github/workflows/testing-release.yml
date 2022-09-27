@@ -1,0 +1,65 @@
+name: Testing Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Monika NPM version to create docker image'
+        required: true
+        type: string
+
+jobs:
+  testing:
+    name: Testing Release
+    if: github.repository == 'hyperjump/monika'
+    runs-on: ubuntu-latest
+    outputs:
+      NEXT_VERSION: ${{ steps.version.outputs.NEXT_VERSION }}
+    steps:
+      - name: 🛑 Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.9.1
+
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v3
+
+      - name: 🔧 Setup Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14
+
+      - name: 📥 Install Dependencies
+        run: npm ci
+
+      - name: 🧪 Run Unit Tests
+        run: npm test
+
+      - name: ⤴️ Switch Version based on inputs
+        id: version
+        run: |
+          git config --local user.email "monika@hyperjump.tech"
+          git config --local user.name "Monika Bot"
+          SHA=$(git rev-parse "v${{ inputs.version }}")
+          SHORT_SHA=${SHA::7}
+          DATE=$(date '+%Y%m%d')
+          NEXT_VERSION=0.0.0-testing-${DATE}-${SHORT_SHA}
+          echo ::set-output name=NEXT_VERSION::${NEXT_VERSION}
+          git checkout -b "v${{ inputs.version }}"
+
+      - name: 📦 Pack
+        run: npm pack
+        if: steps.version.outputs.NEXT_VERSION
+
+      - name: 📥 Install Pack
+        run: npm install -g ./hyperjumptech-monika-*.tgz
+        if: steps.version.outputs.NEXT_VERSION
+
+      - name: 🧪 Run Production Test
+        run: npm run prod_test
+        if: steps.version.outputs.NEXT_VERSION
+
+      - name: 💬 Notify Teams
+        if: steps.version.outputs.NEXT_VERSION
+        uses: joelwmale/webhook-action@fd99bb3b8272237103e349e9bb4d9b0ead9a217c
+        with:
+          url: ${{secrets.HYPERJUMP_TEAMS_SYMON_WEBHOOK}}
+          body: '{"title": "Monika NPM Version Release", "Text": "Version: ${{ steps.version.outputs.NEXT_VERSION }}"}'
