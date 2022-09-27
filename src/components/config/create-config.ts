@@ -39,7 +39,7 @@ export const createConfigFile = async (flags: any): Promise<string> => {
     log.info(
       `${filename} file has been created in this directory. You can change the URL to probe and other configurations in that ${filename} file.`
     )
-  } catch (error) {
+  } catch {
     const ymlConfig = `
     probes:
     - id: '1'
