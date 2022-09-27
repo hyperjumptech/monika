@@ -26,7 +26,7 @@ import yaml from 'js-yaml'
 import fs from 'fs'
 import Ajv from 'ajv'
 import { Validation } from '../../interfaces/validation'
-import mySchema from '../../../monika-config-schema.json'
+import mySchema from '../../monika-config-schema.json'
 
 const ajv = new Ajv()
 
