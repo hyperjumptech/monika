@@ -29,9 +29,7 @@ export async function postgresRequest(
     responseTime: 0,
   }
   const startTime = new Date()
-
   const result = await sendPsqlRequest(params)
-
   const endTime = new Date()
   const duration = differenceInMilliseconds(endTime, startTime)
 
@@ -52,23 +50,22 @@ async function sendPsqlRequest(params: PostgresParam): Promise<PostgresResult> {
     message: '',
   }
 
-  const pool = new Pool({
-    host: params.host,
-    port: params.port,
-    database: params.database,
-    user: params.username,
-    password: params.password,
-  })
-  const client = await pool.connect()
-
   try {
-    const res = await client.query('SELECT NOW()')
-    result.message = res
+    const pool = new Pool({
+      host: params.host,
+      port: params.port,
+      database: params.database,
+      user: params.username,
+      password: params.password,
+    })
+
+    const client = await pool.connect()
+    await client.query('SELECT NOW()')
+    result.message = 'postgres ok'
+    result.isAlive = true
+    await client.release()
   } catch (error: any) {
     result.message = error.message
-    console.log(error)
-  } finally {
-    await client.release()
   }
 
   return result

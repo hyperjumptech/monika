@@ -253,7 +253,7 @@ export async function doProbe({
         const pgResult = await postgresRequest(params)
 
         const timeNow = new Date().toISOString()
-        const logMessage = `${timeNow} ${checkOrder} id:${id} redis:${host}:${port} ${pgResult.responseTime}ms msg:${pgResult.body}`
+        const logMessage = `${timeNow} ${checkOrder} id:${id} postgres:${host}:${port} ${pgResult.responseTime}ms msg:${pgResult.body}`
         const isAlertTriggered = pgResult.status !== 200
 
         responseProcessing({
