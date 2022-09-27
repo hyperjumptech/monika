@@ -134,7 +134,7 @@ class Monika extends Command {
 
     'create-config': Flags.boolean({
       description:
-        'Create config from HAR (-H), postman (-p), insomnia (-I), sitemap (--sitemap) export file, or open Monika Configuration Generator using default browser',
+        'Create config from HAR (-H), postman (-p), insomnia (-I), sitemap (--sitemap), textfile (--text) export file, or open Monika Configuration Generator using default browser',
     }),
 
     'config-interval': Flags.integer({
@@ -154,7 +154,7 @@ class Monika extends Command {
     sitemap: Flags.string({
       description: 'Run Monika using a Sitemap xml file.',
       multiple: false,
-      exclusive: ['har', 'insomnia', 'postman'],
+      exclusive: ['har', 'insomnia', 'postman', 'text'],
     }),
 
     'one-probe': Flags.boolean({
@@ -166,21 +166,27 @@ class Monika extends Command {
       char: 'p', // (p)ostman
       description: 'Run Monika using a Postman json file.',
       multiple: false,
-      exclusive: ['har', 'insomnia', 'sitemap'],
+      exclusive: ['har', 'insomnia', 'sitemap', 'text'],
     }),
 
     har: Flags.string({
       char: 'H', // (H)ar file to
       description: 'Run Monika using a HAR file',
       multiple: false,
-      exclusive: ['postman', 'insomnia', 'sitemap'],
+      exclusive: ['postman', 'insomnia', 'sitemap', 'text'],
     }),
 
     insomnia: Flags.string({
       char: 'I', // (I)nsomnia file to
       description: 'Run Monika using an Insomnia json/yaml file',
       multiple: false,
-      exclusive: ['har', 'postman', 'sitemap'],
+      exclusive: ['har', 'postman', 'sitemap', 'text'],
+    }),
+
+    text: Flags.string({
+      description: 'Run Monika using a Simple text file',
+      multiple: false,
+      exclusive: ['postman', 'insomnia', 'sitemap', 'har'],
     }),
 
     logs: Flags.boolean({

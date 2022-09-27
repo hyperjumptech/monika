@@ -26,6 +26,7 @@ import { Config } from '../../interfaces/config'
 import { readFileSync } from 'fs'
 import { parseConfigFromPostman } from './parse-postman'
 import { parseConfigFromSitemap } from './parse-sitemap'
+import { parseConfigFromText } from './parse-text'
 import { parseHarFile } from './parse-har'
 import path from 'path'
 import yml from 'js-yaml'
@@ -73,6 +74,7 @@ export const parseConfig = async (
     const ext = path.extname(source)
 
     if (type === 'har') return parseHarFile(configString)
+    if (type === 'text') return parseConfigFromText(configString)
     if (type === 'postman') return parseConfigFromPostman(configString)
     if (type === 'sitemap') return parseConfigFromSitemap(configString, flag)
     if (type === 'insomnia')
