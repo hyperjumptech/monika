@@ -38,7 +38,8 @@ jobs:
         run: |
           git config --local user.email "monika@hyperjump.tech"
           git config --local user.name "Monika Bot"
-          SHA=$(git rev-parse "v${{ inputs.version }}")
+          git fetch --all --tags
+          SHA=$(git rev-parse v${{ inputs.version }})
           SHORT_SHA=${SHA::7}
           DATE=$(date '+%Y%m%d')
           NEXT_VERSION=0.0.0-testing-${DATE}-${SHORT_SHA}
@@ -56,6 +57,30 @@ jobs:
       - name: 🧪 Run Production Test
         run: npm run prod_test
         if: steps.version.outputs.NEXT_VERSION
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          # list of Docker images to use as base name for tags
+          images: |
+            hyperjump/monika
+          # generate Docker tags based on the following events/attributes
+          tags: |
+            type=semver,pattern=v${{ inputs.version }}
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{secrets.HYPERJUMP_DOCKER_USERNAME}}
+          password: ${{secrets.HYPERJUMP_DOCKER_PASSWORD}}
+
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: ${{ inputs.version }}
 
       - name: 💬 Notify Teams
         if: steps.version.outputs.NEXT_VERSION
