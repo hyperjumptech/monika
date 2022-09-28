@@ -11,7 +11,7 @@ on:
 jobs:
   testing:
     name: Testing Release
-    if: github.repository == 'hyperjump/monika'
+    if: github.repository == 'hyperjump/monika-nightly'
     runs-on: ubuntu-latest
     outputs:
       NEXT_VERSION: ${{ steps.version.outputs.NEXT_VERSION }}
@@ -64,10 +64,16 @@ jobs:
         with:
           # list of Docker images to use as base name for tags
           images: |
-            hyperjump/monika
+            hyperjump/monika-nightly
           # generate Docker tags based on the following events/attributes
           tags: |
             type=semver,pattern=v${{ inputs.version }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
 
       - name: Login to DockerHub
         uses: docker/login-action@v1
@@ -79,6 +85,7 @@ jobs:
         id: docker_build
         uses: docker/build-push-action@v2
         with:
+          context: .
           push: true
           tags: ${{ inputs.version }}
 
