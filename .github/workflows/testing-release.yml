@@ -1,4 +1,4 @@
-name: Testing Release
+name: Docker Release from Tag
 
 on:
   workflow_dispatch:
@@ -39,7 +39,7 @@ jobs:
           git config --local user.email "monika@hyperjump.tech"
           git config --local user.name "Monika Bot"
           git fetch --all --tags
-          git rev-parse ${{ inputs.version }}
+          git checkout -b "${{ inputs.version }}"
           echo ::set-output name=VERSION::${{ inputs.version }}
           if [ -z "$(git status --porcelain)" ]; then
               echo "✨"
