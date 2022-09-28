@@ -30,7 +30,7 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["host", "port"],
+        "required": ["host", "port", "database"],
         "properties": {
           "host": {
             "type": "string",
@@ -42,6 +42,24 @@
             "type": "integer",
             "description": "Postgres port to connect to",
             "default": "5432"
+          },
+          "database": {
+            "title": "Database",
+            "type": "string",
+            "description": "Name of the database",
+            "default": ""
+          },
+          "username": {
+            "title": "Username",
+            "type": "string",
+            "description": "Username with access to the database",
+            "default": ""
+          },
+          "password": {
+            "title": "Password",
+            "type": "string",
+            "description": "User's database password",
+            "default": ""
           }
         }
       }
