@@ -11,10 +11,10 @@ on:
 jobs:
   testing:
     name: Testing Release
-    if: github.repository == 'hyperjump/monika-nightly'
+    if: github.repository == 'hyperjump/monika'
     runs-on: ubuntu-latest
     outputs:
-      NEXT_VERSION: ${{ steps.version.outputs.NEXT_VERSION }}
+      VERSION: ${{ inputs.version }}
     steps:
       - name: 🛑 Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.9.1
@@ -39,24 +39,24 @@ jobs:
           git config --local user.email "monika@hyperjump.tech"
           git config --local user.name "Monika Bot"
           git fetch --all --tags
-          SHA=$(git rev-parse v${{ inputs.version }})
-          SHORT_SHA=${SHA::7}
-          DATE=$(date '+%Y%m%d')
-          NEXT_VERSION=0.0.0-testing-${DATE}-${SHORT_SHA}
-          echo ::set-output name=NEXT_VERSION::${NEXT_VERSION}
-          git checkout -b "v${{ inputs.version }}"
+          git rev-parse ${{ inputs.version }}
+          echo ::set-output name=VERSION::${{ inputs.version }}
+          if [ -z "$(git status --porcelain)" ]; then
+              echo "✨"
+          fi
+          npm version ${VERSION}
 
       - name: 📦 Pack
         run: npm pack
-        if: steps.version.outputs.NEXT_VERSION
+        if: steps.version.outputs.VERSION
 
       - name: 📥 Install Pack
         run: npm install -g ./hyperjumptech-monika-*.tgz
-        if: steps.version.outputs.NEXT_VERSION
+        if: steps.version.outputs.VERSION
 
       - name: 🧪 Run Production Test
         run: npm run prod_test
-        if: steps.version.outputs.NEXT_VERSION
+        if: steps.version.outputs.VERSION
 
       - name: Docker meta
         id: meta
@@ -67,7 +67,7 @@ jobs:
             hyperjump/monika-nightly
           # generate Docker tags based on the following events/attributes
           tags: |
-            type=semver,pattern=v${{ inputs.version }}
+            type=semver,pattern=${{ inputs.version }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -78,19 +78,18 @@ jobs:
       - name: Login to DockerHub
         uses: docker/login-action@v1
         with:
-          username: ${{secrets.HYPERJUMP_DOCKER_USERNAME}}
-          password: ${{secrets.HYPERJUMP_DOCKER_PASSWORD}}
+          username: ${{ secrets.HYPERJUMP_DOCKER_USERNAME }}
+          password: ${{ secrets.HYPERJUMP_DOCKER_PASSWORD }}
 
       - name: Build and push
         id: docker_build
         uses: docker/build-push-action@v2
         with:
-          context: .
           push: true
           tags: ${{ inputs.version }}
 
       - name: 💬 Notify Teams
-        if: steps.version.outputs.NEXT_VERSION
+        if: steps.version.outputs.VERSION
         uses: joelwmale/webhook-action@fd99bb3b8272237103e349e9bb4d9b0ead9a217c
         with:
           url: ${{secrets.HYPERJUMP_TEAMS_SYMON_WEBHOOK}}
