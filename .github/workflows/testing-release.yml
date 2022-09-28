@@ -1,4 +1,4 @@
-name: Testing Release
+name: Docker Release from Tag
 
 on:
   workflow_dispatch:
