@@ -1,0 +1,92 @@
+name: Docker Release from Tag
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Monika NPM version to create docker image'
+        required: true
+        type: string
+
+jobs:
+  testing:
+    name: Testing Release
+    if: github.repository == 'hyperjumptech/monika'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🛑 Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.9.1
+
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v3
+
+      - name: 🔧 Setup Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14
+
+      - name: 📥 Install Dependencies
+        run: npm ci
+
+      - name: 🧪 Run Unit Tests
+        run: npm test
+
+      - name: ⤴️ Switch Version based on inputs
+        id: version
+        run: |
+          git config --local user.email "monika@hyperjump.tech"
+          git config --local user.name "Monika Bot"
+          git fetch --all --tags
+          git checkout -b "${{ inputs.version }}"
+          echo ::set-output name=VERSION::${{ inputs.version }}
+          if [ -z "$(git status --porcelain)" ]; then
+              echo "✨"
+          fi
+          npm version --no-git-tag-version
+
+      - name: 📦 Pack
+        run: npm pack
+        if: inputs.version
+
+      - name: 📥 Install Pack
+        run: npm install -g ./hyperjumptech-monika-*.tgz
+        if: inputs.version
+
+      - name: 🧪 Run Production Test
+        run: npm run prod_test
+        if: inputs.version
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          # list of Docker images to use as base name for tags
+          images: |
+            hyperjump/monika-nightly
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.HYPERJUMP_DOCKER_USERNAME }}
+          password: ${{ secrets.HYPERJUMP_DOCKER_PASSWORD }}
+
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: true
+          tags: hyperjump/monika-nightly:${{ inputs.version }}
+
+      - name: 💬 Notify Teams
+        if: steps.version.outputs.VERSION
+        uses: joelwmale/webhook-action@fd99bb3b8272237103e349e9bb4d9b0ead9a217c
+        with:
+          url: ${{secrets.HYPERJUMP_TEAMS_SYMON_WEBHOOK}}
+          body: '{"title": "Docker Release from Tag", "Text": "Version: ${{ inputs.version }}"}'
