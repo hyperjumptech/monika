@@ -42,12 +42,6 @@
             "type": "integer",
             "description": "Postgres port to connect to",
             "default": "5432"
-          },
-          "database": {
-            "title": "Database",
-            "type": "string",
-            "description": "Name of the datatabase",
-            "default": "dbname"
           }
         }
       }
