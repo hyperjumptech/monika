@@ -30,7 +30,7 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["host", "port", "database"],
+        "required": ["host", "port"],
         "properties": {
           "host": {
             "type": "string",

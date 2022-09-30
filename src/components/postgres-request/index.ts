@@ -74,22 +74,24 @@ async function sendPsqlRequest(params: PostgresParam): Promise<PostgresResult> {
     message: '',
   }
 
+  let client: any
   try {
     const pool = new Pool({
       host: params.host,
       port: params.port,
       database: params.database,
-      user: params.username,
-      password: params.password,
+      user: params.username || '',
+      password: params.password || '',
     })
 
-    const client = await pool.connect()
+    client = await pool.connect()
     await client.query('SELECT NOW()')
     result.message = 'postgres ok'
     result.isAlive = true
-    await client.release()
   } catch (error: any) {
     result.message = error.message
+  } finally {
+    await client.release()
   }
 
   return result

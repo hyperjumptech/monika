@@ -91,7 +91,7 @@ probes:
 
 ### Postgres Request
 
-Monika provides a way to check your postgres database's health with a 'postgres' type probe.
+Monika provides a way to check your postgres database's health with a 'postgres' type probe. You can define the `host`, `port` and `user` and `password` like this:
 
 ```yaml
 probes:
@@ -102,9 +102,9 @@ probes:
     postgres:
       - host: 172.15.0.1
         port: 5432
-        database: my-database
         user: db-user
         password: db-password
+        database: my-db
 ```
 
 ### Redis Request
