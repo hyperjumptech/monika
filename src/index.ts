@@ -575,46 +575,43 @@ Please refer to the Monika documentations on how to how to configure notificatio
     throw error
   }
 
-  // eslint-disable max-depth
-  async deprecationHandler(config: Config) {
+  async deprecationHandler(config: Config): Promise<Config> {
     let showMessage = false
-    if (config && config.probes) {
-      for (const [iprobe, probe] of config.probes.entries()) {
-        for (const [, request] of probe.requests.entries()) {
-          if (request.alerts) {
-            for (const [ialert, alert] of request.alerts.entries()) {
-              if (alert.query !== undefined && alert.assertion === undefined) {
-                request.alerts[ialert] = {
-                  assertion: alert.query,
-                  message: alert.message,
-                }
-                showMessage = true
-              }
-            }
-          }
-        }
 
-        if (probe.alerts) {
-          for (const [ialert, alert] of probe.alerts.entries()) {
-            if (alert.query !== undefined && alert.assertion === undefined) {
-              config.probes[iprobe].alerts[ialert] = {
-                assertion: alert.query,
-                message: alert.message,
-              }
-              showMessage = true
+    const checkedConfig = {
+      ...config,
+      probes: config.probes?.map((probe) => ({
+        ...probe,
+        requests: probe.requests?.map((request) => ({
+          ...request,
+          alert: request.alerts?.map((alert) => {
+            showMessage = true
+
+            if (alert.query) {
+              return { ...alert, assertion: alert.query }
             }
+
+            return alert
+          }),
+        })),
+        alerts: probe.alerts?.map((alert) => {
+          showMessage = true
+
+          if (alert.query) {
+            return { ...alert, assertion: alert.query }
           }
-        }
-      }
+
+          return alert
+        }),
+      })),
     }
 
     if (showMessage) {
       log.warn('"alerts.query" is deprecated. Please use "alerts.assertion"')
     }
 
-    return config
+    return checkedConfig
   }
-  // eslint-enable max-depth
 }
 
 /**
