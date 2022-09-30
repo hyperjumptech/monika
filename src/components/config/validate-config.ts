@@ -24,60 +24,33 @@
 
 import yaml from 'js-yaml'
 import fs from 'fs'
-import path from 'path'
-import { expect } from 'chai'
 import Ajv from 'ajv'
+import { Validation } from '../../interfaces/validation'
+import mySchema from '../../monika-config-schema.json'
 
 const ajv = new Ajv()
 
-import mySchema from '../../src/monika-config-schema.json'
+// validate the config file used by monika
+export function validateConfigFile(filename: string): Validation {
+  const validResult: Validation = {
+    valid: false,
+    message: `Errors detected in config file: ${filename}, please recheck`,
+  }
+  const validate = ajv.compile(mySchema)
 
-const validate = ajv.compile(mySchema)
+  try {
+    const configFile = yaml.load(fs.readFileSync(filename, 'utf8'))
 
-const getAllFiles = function (dirPath: string, arrayOfFiles: string[]) {
-  const files = fs.readdirSync(dirPath)
-
-  arrayOfFiles = arrayOfFiles || []
-
-  // files.forEach(function(file) {
-  for (const file of files) {
-    if (fs.statSync(dirPath + '/' + file).isDirectory()) {
-      arrayOfFiles = getAllFiles(dirPath + '/' + file, arrayOfFiles)
-    } else {
-      arrayOfFiles.push(path.join(dirPath, '/', file))
+    const isValid = validate(configFile)
+    if (isValid) {
+      validResult.valid = true
+      validResult.message = `config: ${filename} is ok`
+      return validResult
     }
+  } catch (error: any) {
+    console.error('error:', error)
+    validResult.message = error
   }
 
-  return arrayOfFiles
+  return validResult
 }
-
-describe('validate example configs', () => {
-  it('should detect examples that does not conform to the schema', () => {
-    const files = getAllFiles('./config_sample', [])
-
-    let sampleFile: any
-
-    for (const file of files) {
-      switch (path.extname(file)) {
-        case '.yml':
-        case '.yaml':
-          sampleFile = yaml.load(fs.readFileSync(file, 'utf8'))
-          break
-        case '.json':
-          sampleFile = JSON.parse(fs.readFileSync(file, 'utf8'))
-          break
-        default:
-          sampleFile = null
-          continue // skip for other file.extension
-      }
-
-      const isValid = validate(sampleFile)
-      if (isValid === false) {
-        console.error('file:', file, 'validity:', isValid)
-        console.error('error:', validate.errors)
-      }
-
-      expect(isValid).to.be.true
-    }
-  })
-})

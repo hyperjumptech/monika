@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - "monika-config-schema.json" # only run the workflow if the schema file is changed
+      - "src/monika-config-schema.json" # only run the workflow if the schema file is changed
     branches:
       - main
 
