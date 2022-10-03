@@ -33,7 +33,7 @@ jobs:
         run: |
           cd src/schemas/json
           rm monika-config-schema.json
-          wget https://raw.githubusercontent.com/hyperjumptech/monika/main/monika-config-schema.json
+          wget https://raw.githubusercontent.com/hyperjumptech/monika/main/src/monika-config-schema.json
 
       - name: Create Pull Request
         id: cpr
