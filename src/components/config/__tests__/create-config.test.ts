@@ -80,6 +80,7 @@ describe('Text config', () => {
       const flags = {
         text: './src/components/config/__tests__/textfile',
         output: 'monika.textfile.yml',
+        force: true,
       }
       await createConfig(flags)
       expect(fs.lstatSync('monika.textfile.yml').isFile()).to.be.true
