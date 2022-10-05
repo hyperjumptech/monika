@@ -5,18 +5,21 @@
   "sitemap_alternate_links": true,
   "selectors": {
     "lvl0": {
-      "selector": "//*[contains(@class,'navGroups')]//*[contains(@class,'navListItemActive')]/preceding::h3[1]",
+      "selector": "(//ul[contains(@class,'menu__list')]//a[contains(@class, 'menu__link menu__link--sublist menu__link--active')]/text() | //nav[contains(@class, 'navbar')]//a[contains(@class, 'navbar__link--active')]/text())[last()]",
       "type": "xpath",
       "global": true,
-      "default_value": "Blog"
+      "default_value": "Documentation"
     },
     "lvl1": ".content h1",
     "lvl2": ".content h2",
     "lvl3": ".content h3",
     "lvl4": ".content h4",
-    "text": ".content article p, .content article li"
+    "lvl5": ".content h5, .content td:first-child",
+    "lvl6": ".content h6",
+    "text": "p, li, td:last-child"
   },
   "selectors_exclude": [".hash-link"],
+  "strip_chars": " .,;:#",
   "custom_settings": {
     "attributesForFaceting": ["language", "version", "tags", "type"],
     "attributesToRetrieve": [
