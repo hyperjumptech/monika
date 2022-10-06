@@ -78,6 +78,11 @@ probes:
 #             <name>John</name>
 #             <password>secret</password>
 #           </user>
+#       - url: https://expired.badssl.com
+#         method: GET
+#         timeout: 7000
+#         allowUnauthorized: true
+#         # allowUnauthorized will make the https agent to not check certificate validity
 #     alerts:
 #       - assertion: response.status == 500
 #         message: response status message

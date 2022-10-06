@@ -48,4 +48,5 @@ export interface RequestConfig extends Omit<AxiosRequestConfig, 'data'> {
   timeout: number // request timeout
   alerts?: ProbeAlert[]
   ping?: boolean // is this request for a ping?
+  allowUnauthorized?: boolean // ignore ssl cert?
 }
