@@ -74,7 +74,7 @@ async function sendPsqlRequest(params: PostgresParam): Promise<PostgresResult> {
     message: '',
   }
 
-  let client: any
+  let client: any = false
   try {
     const pool = new Pool({
       host: params.host,
@@ -91,7 +91,10 @@ async function sendPsqlRequest(params: PostgresParam): Promise<PostgresResult> {
   } catch (error: any) {
     result.message = error.message
   } finally {
-    await client.release()
+    if (client !== false) {
+      // release if connect was successful
+      await client.release()
+    }
   }
 
   return result
