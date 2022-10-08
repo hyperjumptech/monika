@@ -92,8 +92,8 @@ async function sendPsqlRequest(params: PostgresParam): Promise<PostgresResult> {
     result.message = error.message
   } finally {
     if (client !== false) {
-      // release if connect was successful
-      await client.release()
+      // release if connect was previously successful.
+      await client.release(true)
     }
   }
 
