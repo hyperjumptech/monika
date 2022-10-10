@@ -863,6 +863,38 @@
             }
           },
           {
+            "title": "Gotify",
+            "type": "object",
+            "required": ["id", "type", "data"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Unique Gotify notification id",
+                "default": "Gotify-01"
+              },
+              "type": {
+                "const": "gotify"
+              },
+              "data": {
+                "type": "object",
+                "description": "Data for your payload",
+                "additionalProperties": false,
+                "required": ["token", "url"],
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "description": "Gotify application token"
+                  },
+                  "url": {
+                    "type": "string",
+                    "description": "Gotify base url"
+                  }
+                }
+              }
+            }
+          },
+          {
             "title": "Opsgenie",
             "type": "object",
             "required": ["id", "type", "data"],
