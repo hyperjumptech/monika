@@ -69,7 +69,7 @@ jobs:
         run: npm ci
 
       - name: Install jq
-        run: apt-get install -y jq
+        run: sudo apt-get install -y jq
 
       - name: 🔎 Send to Algolia
         uses: actions/checkout@v2
@@ -82,5 +82,5 @@ jobs:
         uses: signcl/docsearch-scraper-action@master
         env:
           APPLICATION_ID: ${{ secrets.ALGOLIA_APPLICATION_ID }}
-          API_KEY: ${{ secrets.ALGOLIA_API_KEY }}
+          API_KEY: ${{ secrets.ALGOLIA_ADMIN_API_KEY }}
           CONFIG: ${{ steps.algolia_config.outputs.config }}

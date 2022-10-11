@@ -13,5 +13,7 @@ probes:
     incidentThreshold: 2
     recoveryThreshold: 2
     alerts:
-      - status-not-2xx
-      - response-time-greater-than-200-ms
+      - assertion: response.status != 200
+        message: Http Response status code is not 200!
+      - assertion: response.time > 200
+        message: Yo too slow!
