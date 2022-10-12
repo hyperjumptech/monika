@@ -62,9 +62,9 @@
             "default": ""
           },
           "uri": {
-            "title": "Password",
+            "title": "URI connection",
             "type": "string",
-            "description": "User's database password",
+            "description": "Postgres uri connection configuration",
             "examples": ["postgres://user:password@172.1.0.1:5432/mydb"]
           }
         }
