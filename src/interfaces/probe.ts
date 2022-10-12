@@ -49,6 +49,7 @@ export type Redis = {
 }
 
 export type Postgres = {
+  uri: string
   host: string
   port: number
   database: string

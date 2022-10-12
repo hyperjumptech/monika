@@ -30,7 +30,7 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["host", "port"],
+        "required": [],
         "properties": {
           "host": {
             "type": "string",
@@ -60,6 +60,12 @@
             "type": "string",
             "description": "User's database password",
             "default": ""
+          },
+          "uri": {
+            "title": "Password",
+            "type": "string",
+            "description": "User's database password",
+            "examples": ["postgres://user:password@172.1.0.1:5432/mydb"]
           }
         }
       }

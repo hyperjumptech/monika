@@ -242,8 +242,9 @@ export async function doProbe({
       let pgReqIndex = 0
 
       for await (const pgIndex of postgres) {
-        const { host, port, database, username, password } = pgIndex
+        const { host, port, database, username, password, uri } = pgIndex
         const params: PostgresParam = {
+          uri: uri,
           host: host,
           port: port,
           database: database,
