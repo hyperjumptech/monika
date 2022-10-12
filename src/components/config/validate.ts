@@ -26,7 +26,7 @@
 import Joi from 'joi'
 import { Notification } from '../../interfaces/notification'
 import { Config } from '../../interfaces/config'
-import { ProbeAlert, Socket, Redis } from '../../interfaces/probe'
+import { ProbeAlert, Socket, Redis, Mongo } from '../../interfaces/probe'
 import { Validation } from '../../interfaces/validation'
 import { isValidURL } from '../../utils/is-valid-url'
 import { parseAlertStringTime } from '../../plugins/validate-response/checkers'
@@ -313,7 +313,15 @@ export const validateConfig = (configuration: Config): Validation => {
 
   // Check probes properties
   for (const probe of probes) {
-    const { name, interval, alerts = [], requests, socket, redis } = probe
+    const {
+      name,
+      interval,
+      alerts = [],
+      requests,
+      socket,
+      redis,
+      mongo,
+    } = probe
     const socketAlerts = socket?.alerts ?? []
     const tcpConfigError = validateTCPConfig(socket)
 
@@ -330,9 +338,19 @@ export const validateConfig = (configuration: Config): Validation => {
       )
     }
 
+    const mongoConfigError = validateMongoConfig(mongo)
+    if (mongoConfigError) {
+      return setInvalidResponse(
+        `Monika configuration: probes.mongo ${mongoConfigError}`
+      )
+    }
+
     // ensure at least one of these probe types is defined/exist in the probe object
     const totalProbes =
-      (socket ? 1 : 0) + (redis ? 1 : 0) + (requests?.length ?? 0)
+      (socket ? 1 : 0) +
+      (redis ? 1 : 0) +
+      (mongo ? 1 : 0) +
+      (requests?.length ?? 0)
     if (totalProbes === 0) return PROBE_NO_REQUESTS
 
     // Validate Interval
@@ -465,6 +483,29 @@ function validateRedisConfig(redisConfig?: Redis[]) {
 
   for (const redis of redisConfig) {
     const validationError = schema.validate(redis)
+    if (validationError?.error?.message) return validationError?.error?.message
+  }
+}
+
+function validateMongoConfig(mongoConfig?: Mongo[]) {
+  if (!mongoConfig) {
+    return ''
+  }
+
+  const schema = Joi.alternatives([
+    Joi.object({
+      uri: Joi.string(),
+    }),
+    Joi.object({
+      host: Joi.alternatives().try(Joi.string().hostname(), Joi.string().ip()),
+      port: Joi.number().min(0).max(65_536).required(),
+      password: Joi.string(),
+      username: Joi.string(),
+    }),
+  ])
+
+  for (const mongo of mongoConfig) {
+    const validationError = schema.validate(mongo)
     if (validationError?.error?.message) return validationError?.error?.message
   }
 }

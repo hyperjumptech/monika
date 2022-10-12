@@ -48,6 +48,15 @@ export type Redis = {
   alerts?: ProbeAlert[]
 }
 
+export type Mongo = {
+  uri?: string
+  host?: string
+  port?: number
+  username?: string
+  password?: string
+  alerts?: ProbeAlert[]
+}
+
 export interface Probe {
   id: string
   name: string
@@ -56,6 +65,7 @@ export interface Probe {
   requests: RequestConfig[]
   socket?: Socket
   redis?: Redis[]
+  mongo?: Mongo[]
   incidentThreshold: number
   recoveryThreshold: number
   alerts: ProbeAlert[]
