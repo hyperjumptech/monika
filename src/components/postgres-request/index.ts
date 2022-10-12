@@ -70,6 +70,9 @@ export async function postgresRequest(
   return baseResponse
 }
 
+const IDLETIMEOUTMS = 10_000 // Default idle timeout
+const CONNECTIONTIMEOUTMS = 10_000 // Default connection timout
+
 async function sendPsqlRequest(params: PostgresParam): Promise<PostgresResult> {
   const result: PostgresResult = {
     isAlive: false,
@@ -95,6 +98,8 @@ async function sendPsqlRequest(params: PostgresParam): Promise<PostgresResult> {
       database: params.database,
       user: params.username || '',
       password: params.password || '',
+      idleTimeoutMillis: IDLETIMEOUTMS,
+      connectionTimeoutMillis: CONNECTIONTIMEOUTMS,
     })
 
     client = await pool.connect()
