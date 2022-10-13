@@ -104,11 +104,14 @@ async function sendMongoRequest(params: MongoRequest): Promise<MongoResult> {
     message: '',
   }
 
-  try {
-    const connectionURI =
-      uri || `mongodb://${username}:${password}@${host}:${port}`
-    const client = new MongoClient(connectionURI)
+  const connectionURI =
+    uri || `mongodb://${username}:${password}@${host}:${port}`
+  const client = new MongoClient(connectionURI, {
+    connectTimeoutMS: 5000,
+    serverSelectionTimeoutMS: 5000,
+  })
 
+  try {
     await client.connect()
 
     client.on('error', (error: any) => {
@@ -122,6 +125,8 @@ async function sendMongoRequest(params: MongoRequest): Promise<MongoResult> {
     }
   } catch (error: any) {
     result.message = error
+  } finally {
+    await client.close()
   }
 
   return result
