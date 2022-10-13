@@ -85,6 +85,7 @@ async function sendMongoRequest(params: MongoRequest): Promise<MongoResult> {
   let port: number | undefined
   let username: string | undefined
   let password: string | undefined
+  let connectionURI: string
 
   if (uri) {
     const parsed = mongodbURI.parse(uri)
@@ -92,11 +93,23 @@ async function sendMongoRequest(params: MongoRequest): Promise<MongoResult> {
     port = parsed.hosts[0].port
     username = parsed.username
     password = parsed.password
+    connectionURI = uri
   } else {
     host = params.host
     port = params.port
     username = params.username
     password = params.password
+    connectionURI = mongodbURI.format({
+      scheme: 'mongodb',
+      hosts: [
+        {
+          host: host as string,
+          port,
+        },
+      ],
+      username,
+      password,
+    })
   }
 
   const result: MongoResult = {
@@ -104,11 +117,10 @@ async function sendMongoRequest(params: MongoRequest): Promise<MongoResult> {
     message: '',
   }
 
-  const connectionURI =
-    uri || `mongodb://${username}:${password}@${host}:${port}`
   const client = new MongoClient(connectionURI, {
-    connectTimeoutMS: 5000,
-    serverSelectionTimeoutMS: 5000,
+    connectTimeoutMS: 3000,
+    maxIdleTimeMS: 3000,
+    serverSelectionTimeoutMS: 3000,
   })
 
   try {
@@ -126,7 +138,9 @@ async function sendMongoRequest(params: MongoRequest): Promise<MongoResult> {
   } catch (error: any) {
     result.message = error
   } finally {
-    await client.close()
+    if (client) {
+      await client.close()
+    }
   }
 
   return result
