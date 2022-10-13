@@ -25,10 +25,8 @@
 import { Pool } from 'pg'
 import { ProbeRequestResponse } from '../../interfaces/request'
 import { differenceInMilliseconds } from 'date-fns'
-import { parse } from 'pg-connection-string'
 
 export type PostgresParam = {
-  uri: string // Postgres uri string
   host: string // Host address of the psql db
   port: number // Port number of the psql db
   database: string // Database name
@@ -81,17 +79,6 @@ async function sendPsqlRequest(params: PostgresParam): Promise<PostgresResult> {
 
   let client: any = false
   try {
-    if (params.uri !== undefined) {
-      const config = parse(params.uri)
-
-      // If got uri format, parse and use that instead
-      params.host = config.host ?? ''
-      params.port = Number(config.port) ?? 5432
-      params.database = config.database ?? ''
-      params.username = config.user ?? ''
-      params.password = config.password ?? ''
-    }
-
     const pool = new Pool({
       host: params.host,
       port: params.port,
