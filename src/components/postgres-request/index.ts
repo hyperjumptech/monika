@@ -81,7 +81,7 @@ async function sendPsqlRequest(params: PostgresParam): Promise<PostgresResult> {
 
   let client: any = false
   try {
-    if (params.uri.length > 0) {
+    if (params.uri !== undefined) {
       const config = parse(params.uri)
 
       // If got uri format, parse and use that instead
