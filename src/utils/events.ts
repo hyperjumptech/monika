@@ -24,8 +24,12 @@
 
 import { EventEmitter } from 'events'
 
-const em = new EventEmitter()
+let em: NodeJS.EventEmitter
 
 export const getEventEmitter = (): EventEmitter => {
+  if (!em) {
+    em = new EventEmitter()
+  }
+
   return em
 }
