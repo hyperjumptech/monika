@@ -30,7 +30,14 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": [],
+        "oneOf": [
+          {
+            "required": ["host", "port", "database"]
+          },
+          {
+            "required": ["uri"]
+          }
+        ],
         "properties": {
           "host": {
             "type": "string",
