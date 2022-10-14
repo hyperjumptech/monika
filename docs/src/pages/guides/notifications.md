@@ -321,6 +321,26 @@ To use Gmail SMTP with Monika,
 5. Use your Gmail password for `password`.
    1. If you have activated 2-Factor-Authentication (2FA), you need to [create an App Password from your Account Settings](https://support.google.com/accounts/answer/185833). Then use the app password for `password`.
 
+## Statuspage
+
+[Statuspage](https://www.atlassian.com/software/statuspage) is a status and incident communication tool. You need a page ID and an API key to use Statuspage. You can obtain it by following the steps in [the documentation](https://developer.statuspage.io/#section/Authentication).
+
+```yaml
+notifications:
+  - id: unique-id-statuspage
+    type: statuspage
+    data:
+      apiKey: YOUR_STATUSPAGE_API_KEY
+      pageID: YOUR_STATUSPAGE_PAGE_ID
+```
+
+| Key         | Description                  | Example                                |
+| ----------- | ---------------------------- | -------------------------------------- |
+| id          | Notification identity number | `statuspage-1`                         |
+| type        | Notification types           | `statuspage`                           |
+| data.apiKey | Statuspage API key           | `c374d669-8ac0-480d-9ec7-732d71b43e38` |
+| data.pageID | Statuspage page ID           | `q3sl2xb8h0`                           |
+
 ## Telegram
 
 Monika supports Telegram. To enable notification via Telegram, you must have a Telegram bot. Please consult [Bots: An introduction for developers](https://core.telegram.org/bots).

@@ -2,7 +2,7 @@
 # For complete documentation on configuration check https://monika.hyperjump.tech/guides/probes
 # Monika can run by its minimal configuration such as :
 probes:
-  - id: '1'
+  - id: "1"
     name: GitHub
     description: Multiple
     requests:
@@ -140,6 +140,11 @@ probes:
 #       port: 587
 #       username: SMTP_USERNAME
 #       password: SMTP_PASSWORD
+#   - id: random-string-statuspage
+#     type: statuspage
+#     data:
+#       apiKey: YOUR_STATUSPAGE_API_KEY
+#       pageID: YOUR_STATUSPAGE_PAGE_ID
 #   - id: random-string-webhook
 #     type: webhook
 #     data:
@@ -192,5 +197,5 @@ probes:
 db_limit:
   max_db_size: 1000000000
   deleted_data: 1
-  cron_schedule: '*/1 * * * *'
+  cron_schedule: "*/1 * * * *"
 # status-notification: 0 6 * * *

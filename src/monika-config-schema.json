@@ -699,6 +699,38 @@
             }
           },
           {
+            "title": "Statuspage",
+            "type": "object",
+            "required": ["id", "type", "data"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Notification identity number",
+                "default": "statuspage"
+              },
+              "type": {
+                "const": "statuspage"
+              },
+              "data": {
+                "type": "object",
+                "description": "Data for your payload",
+                "additionalProperties": false,
+                "required": ["pageID", "apiKey"],
+                "properties": {
+                  "apiKey": {
+                    "type": "string",
+                    "description": "Statuspage API key"
+                  },
+                  "pageID": {
+                    "type": "string",
+                    "description": "Statuspage page ID "
+                  }
+                }
+              }
+            }
+          },
+          {
             "title": "Telegram",
             "type": "object",
             "required": ["id", "type", "data"],
