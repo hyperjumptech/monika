@@ -35,10 +35,12 @@ import {
 } from '../plugins/metrics/prometheus'
 import { getEventEmitter } from '../utils/events'
 import { getPublicNetworkInfo } from '../utils/public-ip'
-// import to activate all the application event emitter subscribers
-import '../events/subscribers/application'
 import { jobsLoader } from './jobs'
 import { enableAutoUpdate } from '../plugins/updater'
+
+// import the subscriber file to activate the event emitter subscribers
+import '../events/subscribers/application'
+import '../events/subscribers/probe'
 
 export default async function init(
   // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
