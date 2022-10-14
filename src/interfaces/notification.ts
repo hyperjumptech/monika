@@ -23,6 +23,7 @@
  **********************************************************************************/
 
 import { PagerDutyNotification } from '../components/notification/channel/pagerduty'
+import type { StatuspageNotification } from '../plugins/visualization/atlassian-status-page'
 import {
   MailgunData,
   MonikaNotifData,
@@ -60,6 +61,7 @@ export type Notification =
   | PagerDutyNotification
   | PushoverNotification
   | OpsgenieNotification
+  | StatuspageNotification
 interface BaseNotification {
   id: string
 }

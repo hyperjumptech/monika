@@ -25,6 +25,7 @@
 import { hostname } from 'os'
 import { NotificationSendingError, sendNotifications } from '.'
 import { Notification } from '../../interfaces/notification'
+import { validator as dataStatuspageSchemaValidator } from '../../plugins/visualization/atlassian-status-page'
 import getIp from '../../utils/ip'
 import { getMessageForStart } from './alert-message'
 import { newPagerDuty } from './channel/pagerduty'
@@ -63,6 +64,7 @@ export const notificationChecker = async (
     sendgrid: dataSendgridSchemaValidator,
     slack: dataSlackSchemaValidator,
     smtp: dataSMTPSchemaValidator,
+    statuspage: dataStatuspageSchemaValidator,
     teams: dataTeamsSchemaValidator,
     telegram: dataTelegramSchemaValidator,
     webhook: dataWebhookSchemaValidator,
