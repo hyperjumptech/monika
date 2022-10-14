@@ -22,15 +22,16 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios from 'axios'
+import { AxiosResponse } from 'axios'
 
 import { TelegramData } from '../../../interfaces/data'
 import { NotificationMessage } from '../../../interfaces/notification'
+import { sendHttpRequest } from '../../../utils/http'
 
 export const sendTelegram = async (
   data: TelegramData,
   message: NotificationMessage
-) => {
+): Promise<AxiosResponse> => {
   try {
     const notificationType =
       message.meta.type[0].toUpperCase() + message.meta.type.substring(1)
@@ -47,7 +48,7 @@ export const sendTelegram = async (
         break
     }
 
-    const res = await axios({
+    const res = await sendHttpRequest({
       url: `https://api.telegram.org/bot${data.bot_token}/sendMessage?chat_id=${data.group_id}&text=${content}`,
     })
 

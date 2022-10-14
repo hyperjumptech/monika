@@ -24,10 +24,10 @@
 
 import { log } from './pino'
 import stun from 'stun'
-import axios from 'axios'
 import { hostname } from 'os'
 import getIp from './ip'
 import { sendPing } from './ping'
+import { sendHttpRequest } from './http'
 
 export let publicIpAddress = ''
 export let isConnectedToSTUNServer = true
@@ -58,7 +58,9 @@ async function pokeStun(): Promise<string> {
 export async function getPublicNetworkInfo(): Promise<any> {
   try {
     const ip = await pokeStun()
-    const response = await axios.get(`http://ip-api.com/json/${ip}`)
+    const response = await sendHttpRequest({
+      url: `http://ip-api.com/json/${ip}`,
+    })
     const { country, city, isp } = response.data
     publicNetworkInfo = { country, city, isp }
     log.info(

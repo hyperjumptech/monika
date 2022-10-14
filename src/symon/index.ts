@@ -48,6 +48,7 @@ import {
   publicNetworkInfo,
 } from '../utils/public-ip'
 import { setPauseProbeInterval } from '../looper'
+import { DEFAULT_TIMEOUT } from '../utils/http'
 
 type SymonHandshakeData = {
   macAddress: string
@@ -151,6 +152,7 @@ class SymonClient {
       headers: {
         'x-api-key': apiKey,
       },
+      timeout: DEFAULT_TIMEOUT,
     })
 
     this.locationId = locationId || ''

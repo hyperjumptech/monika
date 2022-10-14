@@ -22,20 +22,16 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios from 'axios'
-
 import { WorkplaceData } from '../../../interfaces/data'
+import { sendHttpRequest } from '../../../utils/http'
 
 export const sendWorkplace = async (data: WorkplaceData): Promise<any> => {
   try {
-    const httpClient = axios.create({
+    const res = await sendHttpRequest({
       baseURL: 'https://graph.workplace.com',
       headers: {
         Authorization: `Bearer ${data.access_token}`,
       },
-    })
-
-    const res = await httpClient({
       method: 'POST',
       url: '/me/messages',
       data: {

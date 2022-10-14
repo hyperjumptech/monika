@@ -22,7 +22,6 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios from 'axios'
 import * as Handlebars from 'handlebars'
 import FormData from 'form-data'
 import YAML from 'yaml'
@@ -34,6 +33,7 @@ import https from 'https'
 import { getContext } from '../../context'
 import { icmpRequest } from '../icmp-request'
 import registerFakes from '../../utils/fakes'
+import { sendHttpRequest } from '../../utils/http'
 
 // Register Handlebars helpers
 registerFakes(Handlebars)
@@ -42,9 +42,6 @@ registerFakes(Handlebars)
 // More information here: https://rakshanshetty.in/nodejs-http-keep-alive/
 const httpAgent = new http.Agent({ keepAlive: true })
 const httpsAgent = new https.Agent({ keepAlive: true })
-
-// Create an instance of axios here so it will be reused instead of creating a new one all the time.
-const axiosInstance = axios.create()
 
 type probingParams = {
   requestConfig: Omit<RequestConfig, 'saveBody' | 'alert'> // is a config object
@@ -155,7 +152,7 @@ export async function httpRequest({
     }
 
     // Do the request using compiled URL and compiled headers (if exists)
-    const resp = await axiosInstance.request({
+    const resp = await sendHttpRequest({
       ...newReq,
       url: renderedURL,
       data: newReq.body,

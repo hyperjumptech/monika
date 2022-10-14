@@ -21,11 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  *
  * SOFTWARE.                                                                      *
  **********************************************************************************/
-import axios from 'axios'
 
 import { NotificationMessage } from '../../../interfaces/notification'
 import { GoogleChatData } from '../../../interfaces/data'
 import { log } from '../../../utils/pino'
+import { sendHttpRequest } from '../../../utils/http'
 
 export const sendGoogleChat = async (
   data: GoogleChatData,
@@ -213,7 +213,7 @@ export const sendGoogleChat = async (
   }
 
   try {
-    const res = await axios({
+    const res = await sendHttpRequest({
       method: 'POST',
       url: data.url,
       headers: {
