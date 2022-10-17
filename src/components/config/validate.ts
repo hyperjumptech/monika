@@ -327,7 +327,15 @@ export const validateConfig = (configuration: Config): Validation => {
 
   // Check probes properties
   for (const probe of probes) {
-    const { name, interval, alerts = [], requests, socket, redis } = probe
+    const {
+      name,
+      interval,
+      alerts = [],
+      requests,
+      socket,
+      redis,
+      postgres,
+    } = probe
     const socketAlerts = socket?.alerts ?? []
     const tcpConfigError = validateTCPConfig(socket)
 
@@ -346,7 +354,10 @@ export const validateConfig = (configuration: Config): Validation => {
 
     // ensure at least one of these probe types is defined/exist in the probe object
     const totalProbes =
-      (socket ? 1 : 0) + (redis ? 1 : 0) + (requests?.length ?? 0)
+      (socket ? 1 : 0) +
+      (redis ? 1 : 0) +
+      (postgres ? 1 : 0) +
+      (requests?.length ?? 0)
     if (totalProbes === 0) return PROBE_NO_REQUESTS
 
     // Validate Interval
