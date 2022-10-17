@@ -115,6 +115,11 @@ export interface PushoverData {
   message: string
 }
 
+export interface GotifyData {
+  url: string
+  token: string
+}
+
 export interface WebhookDataBody {
   url: string
   time: string
