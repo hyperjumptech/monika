@@ -30,7 +30,14 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["host", "port"],
+        "oneOf": [
+          {
+            "required": ["host", "port", "database"]
+          },
+          {
+            "required": ["uri"]
+          }
+        ],
         "properties": {
           "host": {
             "type": "string",
@@ -42,6 +49,30 @@
             "type": "integer",
             "description": "Postgres port to connect to",
             "default": "5432"
+          },
+          "database": {
+            "title": "Database",
+            "type": "string",
+            "description": "Name of the database",
+            "default": ""
+          },
+          "username": {
+            "title": "Username",
+            "type": "string",
+            "description": "Username with access to the database",
+            "default": ""
+          },
+          "password": {
+            "title": "Password",
+            "type": "string",
+            "description": "User's database password",
+            "default": ""
+          },
+          "uri": {
+            "title": "URI connection",
+            "type": "string",
+            "description": "Postgres uri connection configuration",
+            "examples": ["postgres://user:password@172.1.0.1:5432/mydb"]
           }
         }
       }
@@ -857,6 +888,38 @@
                   "user": {
                     "type": "string",
                     "description": "Pushover user key"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "title": "Gotify",
+            "type": "object",
+            "required": ["id", "type", "data"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Unique Gotify notification id",
+                "default": "Gotify-01"
+              },
+              "type": {
+                "const": "gotify"
+              },
+              "data": {
+                "type": "object",
+                "description": "Data for your payload",
+                "additionalProperties": false,
+                "required": ["token", "url"],
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "description": "Gotify application token"
+                  },
+                  "url": {
+                    "type": "string",
+                    "description": "Gotify base url"
                   }
                 }
               }
