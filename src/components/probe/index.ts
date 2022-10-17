@@ -42,7 +42,9 @@ import { getContext } from '../../context'
 import { httpRequest } from '../http-request'
 
 import { redisRequest } from '../redis-request'
+import { postgresRequest, PostgresParam } from '../postgres-request'
 import { ServerAlertState } from '../../interfaces/probe-status'
+import { parse } from 'pg-connection-string'
 interface ProbeStatusProcessed {
   probe: Probe
   statuses?: ServerAlertState[]
@@ -232,9 +234,59 @@ export async function doProbe({
     return Math.random() - 0.5
   })[0]
 
+  // eslint-disable-next-line complexity
   setTimeout(async () => {
     const eventEmitter = getEventEmitter()
     const responses = []
+
+    if (probe?.postgres) {
+      const { id, postgres } = probe
+      let pgReqIndex = 0
+      const postgresParams: PostgresParam = {
+        host: '',
+        port: 0,
+        database: '',
+        username: '',
+        password: '',
+      }
+
+      for await (const pgIndex of postgres) {
+        const { host, port, database, username, password, uri } = pgIndex
+
+        if (uri !== undefined) {
+          const config = parse(uri)
+
+          // If got uri format, parse and use that instead
+          postgresParams.host = config.host ?? '0.0.0.0'
+          postgresParams.port = Number(config.port) ?? 5432
+          postgresParams.database = config.database ?? ''
+          postgresParams.username = config.user ?? ''
+          postgresParams.password = config.password ?? ''
+        } else if (uri === undefined) {
+          postgresParams.host = host
+          postgresParams.port = port
+          postgresParams.database = database
+          postgresParams.username = username
+          postgresParams.password = password
+        }
+
+        const pgResult = await postgresRequest(postgresParams)
+
+        const timeNow = new Date().toISOString()
+        const logMessage = `${timeNow} ${checkOrder} id:${id} postgres:${postgresParams.host}:${postgresParams.port} ${pgResult.responseTime}ms msg:${pgResult.body}`
+        const isAlertTriggered = pgResult.status !== 200
+
+        responseProcessing({
+          probe: probe,
+          probeResult: pgResult,
+          notifications: notifications,
+          logMessage: logMessage,
+          isAlertTriggered: isAlertTriggered,
+          index: pgReqIndex,
+        })
+        pgReqIndex++
+      }
+    }
 
     if (probe?.redis) {
       const { id, redis } = probe

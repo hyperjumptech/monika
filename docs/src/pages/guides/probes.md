@@ -91,6 +91,39 @@ probes:
         ping: true
 ```
 
+### Postgres Request
+
+Monika provides a way to check your postgres database's health with a 'postgres' type probe. You can define the `host`, `port` and `user` and `password` like this:
+
+```yaml
+probes:
+  - id: 'postgres-01'
+    name: database health
+    description: ensure db health
+    interval: 30 # in seconds
+    postgres:
+      - host: 172.15.0.1
+        port: 5432
+        user: user
+        password: password
+        database: mydb
+```
+
+Or alternatively you may provide a postgresql connection URI like below:
+
+```yaml
+probes:
+  - id: 'postgres-01'
+    name: database health
+    description: ensure db health
+    interval: 30 # in seconds
+    postgres:
+      - uri: postgresql://user:password@172.15.0.1:5432/mydb
+```
+
+If uri is provided along with host, port, user and password fields, connection will be derived from the uri string and the other fields will be ignored.  
+Please see the [postgres connection specification](https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING) for details on uri formatting.
+
 ### Redis Request
 
 You can check if your redis instance is running and accessible by adding a probe with `redis` configuration as follows.
