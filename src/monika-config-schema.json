@@ -142,7 +142,7 @@
             "description": "Port number used for the MongoDB",
             "type": "integer",
             "examples": ["27017"],
-            "default": ""
+            "default": "27017"
           },
           "password": {
             "title": "Password",
