@@ -157,6 +157,11 @@
             "type": "boolean",
             "description": "If defined and to true, the request is an ICMP ping"
           },
+          "allowUnauthorized": {
+            "title": "AllowUnauthorized",
+            "type": "boolean",
+            "description": "If defined and to true, the request will ignore SSL certificate validity"
+          },
           "body": {
             "$ref": "#/definitions/body"
           },
