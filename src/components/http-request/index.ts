@@ -61,7 +61,8 @@ export async function httpRequest({
   responses,
 }: probingParams): Promise<ProbeRequestResponse> {
   // Compile URL using handlebars to render URLs that uses previous responses data
-  const { method, url, headers, timeout, body, ping } = requestConfig
+  const { method, url, headers, timeout, body, ping, allowUnauthorized } =
+    requestConfig
   const newReq = { method, headers, timeout, body, ping }
   const renderURL = Handlebars.compile(url)
   const renderedURL = renderURL({ responses })
@@ -146,6 +147,13 @@ export async function httpRequest({
     }
   }
 
+  // check if this request must ignore ssl cert
+  // if it is, then create new https agent solely for this request
+  let optHttpsAgent = httpsAgent
+  if (allowUnauthorized) {
+    optHttpsAgent = new https.Agent({ rejectUnauthorized: !allowUnauthorized })
+  }
+
   const requestStartedAt = Date.now()
 
   try {
@@ -161,7 +169,7 @@ export async function httpRequest({
       data: newReq.body,
       maxRedirects: flags.followRedirects,
       httpAgent,
-      httpsAgent,
+      httpsAgent: optHttpsAgent,
     })
 
     const responseTime = Date.now() - requestStartedAt

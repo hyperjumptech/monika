@@ -49,6 +49,7 @@ probes:
         alerts:
           - assertion: response.status != 200
             message: Status not 2xx
+        allowUnauthorized: true
     incidentThreshold: 3
     recoveryThreshold: 3
     alerts:
@@ -72,6 +73,7 @@ Details of the field are given in the table below.
 | saveBody (optional)          | When set to true, the response body of the request is stored in the internal database. The default is off when not defined. This is to keep the log file size small as some responses can be sizable. The setting is for each probe request.                                                                                                              |
 | alerts (optional)            | See [alerts](./alerts) section for detailed information.                                                                                                                                                                                                                                                                                                  |
 | ping (optional)              | (boolean), If set true then send a PING to the specified url instead.                                                                                                                                                                                                                                                                                     |
+| allowUnauthorized (optional) | (boolean), If set to true, will make https agent to not check for ssl certificate validity                                                                                                                                                                                                                                                                |
 
 ### PING Request
 
@@ -88,6 +90,39 @@ probes:
       - url: http://google.com
         ping: true
 ```
+
+### Postgres Request
+
+Monika provides a way to check your postgres database's health with a 'postgres' type probe. You can define the `host`, `port` and `user` and `password` like this:
+
+```yaml
+probes:
+  - id: 'postgres-01'
+    name: database health
+    description: ensure db health
+    interval: 30 # in seconds
+    postgres:
+      - host: 172.15.0.1
+        port: 5432
+        user: user
+        password: password
+        database: mydb
+```
+
+Or alternatively you may provide a postgresql connection URI like below:
+
+```yaml
+probes:
+  - id: 'postgres-01'
+    name: database health
+    description: ensure db health
+    interval: 30 # in seconds
+    postgres:
+      - uri: postgresql://user:password@172.15.0.1:5432/mydb
+```
+
+If uri is provided along with host, port, user and password fields, connection will be derived from the uri string and the other fields will be ignored.  
+Please see the [postgres connection specification](https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING) for details on uri formatting.
 
 ### Redis Request
 
