@@ -321,6 +321,7 @@ export const validateConfig = (configuration: Config): Validation => {
       socket,
       redis,
       mongo,
+      postgres,
     } = probe
     const socketAlerts = socket?.alerts ?? []
     const tcpConfigError = validateTCPConfig(socket)
@@ -350,6 +351,7 @@ export const validateConfig = (configuration: Config): Validation => {
       (socket ? 1 : 0) +
       (redis ? 1 : 0) +
       (mongo ? 1 : 0) +
+      (postgres ? 1 : 0) +
       (requests?.length ?? 0)
     if (totalProbes === 0) return PROBE_NO_REQUESTS
 
