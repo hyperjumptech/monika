@@ -33,6 +33,7 @@ export type RequestTypes =
   | 'ICMP'
   | 'tcp'
   | 'redis'
+  | 'mongo'
   | 'postgres'
 
 // ProbeRequestResponse is used to define the response from a probe requests.
@@ -55,4 +56,5 @@ export interface RequestConfig extends Omit<AxiosRequestConfig, 'data'> {
   timeout: number // request timeout
   alerts?: ProbeAlert[]
   ping?: boolean // is this request for a ping?
+  allowUnauthorized?: boolean // ignore ssl cert?
 }

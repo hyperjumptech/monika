@@ -49,6 +49,7 @@ probes:
         alerts:
           - assertion: response.status != 200
             message: Status not 2xx
+        allowUnauthorized: true
     incidentThreshold: 3
     recoveryThreshold: 3
     alerts:
@@ -72,6 +73,45 @@ Details of the field are given in the table below.
 | saveBody (optional)          | When set to true, the response body of the request is stored in the internal database. The default is off when not defined. This is to keep the log file size small as some responses can be sizable. The setting is for each probe request.                                                                                                              |
 | alerts (optional)            | See [alerts](./alerts) section for detailed information.                                                                                                                                                                                                                                                                                                  |
 | ping (optional)              | (boolean), If set true then send a PING to the specified url instead.                                                                                                                                                                                                                                                                                     |
+| allowUnauthorized (optional) | (boolean), If set to true, will make https agent to not check for ssl certificate validity                                                                                                                                                                                                                                                                |
+
+### MongoDB Request
+
+You can check if your MongoDB instance is running and accessible by adding a probe with `mongo` configuration as follows.
+
+```yaml
+probes:
+  - id: 'mongo-test'
+    name: MongoDB health check
+    interval: 30 # in seconds
+    mongo:
+      - host: localhost
+        port: 27017
+```
+
+If your MongoDB configuration uses authentication settings, you can pass the `username` and `password` field like below:
+
+```yaml
+probes:
+  - id: 'mongo-test'
+    name: MongoDB health check
+    interval: 30 # in seconds
+    mongo:
+      - host: localhost
+        port: 28017
+        username: mongoadmin
+        password: secret
+```
+
+If you have a connection URI, you can pass it to the `uri` field like below:
+
+```yaml
+- id: 'mongo-test'
+  name: MongoDB health check
+  interval: 30 # in seconds
+  mongo:
+    - uri: mongodb://mongoadmin:secret@localhost:28017
+```
 
 ### PING Request
 

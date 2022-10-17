@@ -48,6 +48,14 @@ export type Redis = {
   alerts?: ProbeAlert[]
 }
 
+export type Mongo = {
+  uri?: string
+  host?: string
+  port?: number
+  username?: string
+  password?: string
+}
+
 export type Postgres = {
   uri: string
   host: string
@@ -68,6 +76,7 @@ export interface Probe {
   requests: RequestConfig[]
   socket?: Socket
   redis?: Redis[]
+  mongo?: Mongo[]
   postgres?: Postgres[]
   incidentThreshold: number
   recoveryThreshold: number

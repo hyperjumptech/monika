@@ -309,5 +309,47 @@ describe('probingHTTP', () => {
       // assert
       expect(res.status).to.eq(200)
     })
+
+    it('should send request with text-plain content-type even with allowUnauthorized option', async () => {
+      // arrange
+      const server = setupServer(
+        rest.post('https://example.com', (req, res, ctx) => {
+          const { headers, body } = req
+
+          if (
+            headers.get('content-type') !== 'text/plain' ||
+            body !== 'multiline string\nexample'
+          ) {
+            console.error(headers.get('content-type'))
+            console.error(body)
+
+            return res(ctx.status(400))
+          }
+
+          return res(ctx.status(200))
+        })
+      )
+      const request: RequestConfig = {
+        url: 'https://example.com',
+        method: 'POST',
+        headers: { 'content-type': 'text/plain' },
+        body: 'multiline string\nexample' as any,
+        timeout: 10,
+        allowUnauthorized: true,
+      }
+
+      // act
+      server.listen()
+      const flag: { followRedirects: number } = { followRedirects: 0 }
+      setContext({ flags: flag })
+      const res = await httpRequest({
+        requestConfig: request,
+        responses: [],
+      })
+      server.close()
+
+      // assert
+      expect(res.status).to.eq(200)
+    })
   })
 })

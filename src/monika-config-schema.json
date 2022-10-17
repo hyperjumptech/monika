@@ -114,6 +114,51 @@
         }
       }
     },
+    "mongo": {
+      "title": "MongoDB",
+      "type": "array",
+      "description": "Monitor MongoDB health ",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [],
+        "properties": {
+          "uri": {
+            "title": "MongoDB URI",
+            "description": "The hostname or IP address of the MongoDB server",
+            "type": "string",
+            "examples": ["mongodb://127.0.0.1:27017"],
+            "default": ""
+          },
+          "host": {
+            "title": "MongoDB host",
+            "description": "The hostname or IP address of the MongoDB server",
+            "type": "string",
+            "examples": ["localhost", "127.0.0.1"],
+            "default": ""
+          },
+          "port": {
+            "title": "Port number",
+            "description": "Port number used for the MongoDB",
+            "type": "integer",
+            "examples": ["27017"],
+            "default": "27017"
+          },
+          "password": {
+            "title": "Password",
+            "description": "Password used for the MongoDB AUTH, if set.",
+            "type": "string",
+            "default": ""
+          },
+          "username": {
+            "title": "Username",
+            "description": "Username used for the MongoDB AUTH, if set.",
+            "type": "string",
+            "default": ""
+          }
+        }
+      }
+    },
     "requests": {
       "title": "Requests",
       "type": "array",
@@ -156,6 +201,11 @@
             "title": "Ping",
             "type": "boolean",
             "description": "If defined and to true, the request is an ICMP ping"
+          },
+          "allowUnauthorized": {
+            "title": "AllowUnauthorized",
+            "type": "boolean",
+            "description": "If defined and to true, the request will ignore SSL certificate validity"
           },
           "body": {
             "$ref": "#/definitions/body"
@@ -314,6 +364,9 @@
           },
           "redis": {
             "$ref": "#/definitions/redis"
+          },
+          "mongo": {
+            "$ref": "#/definitions/mongo"
           },
           "requests": {
             "$ref": "#/definitions/requests"
