@@ -22,39 +22,4 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { AxiosRequestConfig } from 'axios'
-import { ProbeAlert } from './probe'
-
-// RequestTypes are used to define the type of request that is being made.
-export type RequestTypes =
-  | 'http'
-  | 'HTTP'
-  | 'icmp'
-  | 'ICMP'
-  | 'tcp'
-  | 'redis'
-  | 'mongo'
-  | 'postgres'
-
-// ProbeRequestResponse is used to define the response from a probe requests.
-export interface ProbeRequestResponse<T = any> {
-  requestType?: RequestTypes // is this for http (default) or icmp  or others
-  data: T
-  body: T
-  status: number // TODO: Improve status management. Status as number is pretty limiting here if we want to support other protocols other than http
-  // statusMsg: string // string messge of the satus code
-  headers: any
-  responseTime: number
-}
-
-// ProbeRequest is used to define the requests that is being made.
-export interface RequestConfig extends Omit<AxiosRequestConfig, 'data'> {
-  id?: string
-  saveBody?: boolean // save response body to db?
-  url: string
-  body: JSON
-  timeout: number // request timeout
-  alerts?: ProbeAlert[]
-  ping?: boolean // is this request for a ping?
-  allowUnauthorized?: boolean // ignore ssl cert?
-}
+declare module 'pg'

@@ -49,6 +49,7 @@ import { sendLark } from './channel/lark'
 import { sendGoogleChat } from './channel/googlechat'
 import { newPagerDuty } from './channel/pagerduty'
 import { sendPushover } from './channel/pushover'
+import { sendGotify } from './channel/gotify'
 
 export class NotificationSendingError extends Error {
   notificationType: string
@@ -157,6 +158,11 @@ export async function sendNotifications(
 
           case 'pushover': {
             await sendPushover(notification.data, message)
+            break
+          }
+
+          case 'gotify': {
+            await sendGotify(notification.data, message)
             break
           }
 

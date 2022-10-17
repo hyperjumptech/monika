@@ -141,3 +141,10 @@ export const dataPushoverSchemaValidator = dataBaseEmailSchemaValidator(
   token: Joi.string().required().label('Pushover token'),
   user: Joi.string().required().label('Pushover user'),
 })
+
+export const dataGotifySchemaValidator = dataBaseEmailSchemaValidator(
+  'gotify'
+).keys({
+  token: Joi.string().required().label('Gotify token'),
+  url: Joi.string().required().label('Gotify url'),
+})
