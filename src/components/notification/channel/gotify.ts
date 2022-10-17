@@ -22,39 +22,54 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { AxiosRequestConfig } from 'axios'
-import { ProbeAlert } from './probe'
+import axios from 'axios'
 
-// RequestTypes are used to define the type of request that is being made.
-export type RequestTypes =
-  | 'http'
-  | 'HTTP'
-  | 'icmp'
-  | 'ICMP'
-  | 'tcp'
-  | 'redis'
-  | 'mongo'
-  | 'postgres'
+import { GotifyData } from '../../../interfaces/data'
+import { NotificationMessage } from '../../../interfaces/notification'
 
-// ProbeRequestResponse is used to define the response from a probe requests.
-export interface ProbeRequestResponse<T = any> {
-  requestType?: RequestTypes // is this for http (default) or icmp  or others
-  data: T
-  body: T
-  status: number // TODO: Improve status management. Status as number is pretty limiting here if we want to support other protocols other than http
-  // statusMsg: string // string messge of the satus code
-  headers: any
-  responseTime: number
-}
+export const sendGotify = async (
+  data: GotifyData,
+  message: NotificationMessage
+) => {
+  try {
+    const notificationType =
+      message.meta.type[0].toUpperCase() + message.meta.type.substring(1)
 
-// ProbeRequest is used to define the requests that is being made.
-export interface RequestConfig extends Omit<AxiosRequestConfig, 'data'> {
-  id?: string
-  saveBody?: boolean // save response body to db?
-  url: string
-  body: JSON
-  timeout: number // request timeout
-  alerts?: ProbeAlert[]
-  ping?: boolean // is this request for a ping?
-  allowUnauthorized?: boolean // ignore ssl cert?
+    let title
+    let content
+    switch (message.meta.type) {
+      case 'incident':
+      case 'recovery': {
+        title = message.meta.type.toUpperCase() + ': '
+        content = `New ${notificationType} event from Monika\n\n${message.body}`
+        break
+      }
+      default:
+        title = ''
+        content = message.body
+        break
+    }
+
+    if (message.meta.url) {
+      title += `[${message.meta.url}] `
+    }
+
+    title += `${message.summary}`
+
+    const res = await axios.request({
+      method: 'POST',
+      url: `${data.url}/message?token=${data.token}`,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      data: {
+        title,
+        message: content,
+      },
+    })
+
+    return res
+  } catch (error) {
+    throw error
+  }
 }
