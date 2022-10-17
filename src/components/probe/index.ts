@@ -22,6 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import * as mongodbURI from 'mongodb-uri'
 import events from '../../events'
 import { Notification } from '../../interfaces/notification'
 import { Probe } from '../../interfaces/probe'
@@ -42,9 +43,11 @@ import { getContext } from '../../context'
 import { httpRequest } from '../http-request'
 
 import { redisRequest } from '../redis-request'
+import { mongoRequest } from '../mongodb-request'
 import { postgresRequest, PostgresParam } from '../postgres-request'
 import { ServerAlertState } from '../../interfaces/probe-status'
 import { parse } from 'pg-connection-string'
+
 interface ProbeStatusProcessed {
   probe: Probe
   statuses?: ServerAlertState[]
@@ -239,6 +242,51 @@ export async function doProbe({
   setTimeout(async () => {
     const eventEmitter = getEventEmitter()
     const responses = []
+
+    if (probe?.mongo) {
+      const { id, mongo } = probe
+      let mongoRequestIndex = 0
+      for await (const mongoDB of mongo) {
+        const { uri } = mongoDB
+        let host: string | undefined
+        let port: number | undefined
+        let username: string | undefined
+        let password: string | undefined
+
+        if (uri) {
+          const parsed = mongodbURI.parse(uri)
+          host = parsed.hosts[0].host
+          port = parsed.hosts[0].port
+          username = parsed.username
+          password = parsed.password
+        } else {
+          host = mongoDB.host
+          port = mongoDB.port
+          username = mongoDB.username
+          password = mongoDB.password
+        }
+
+        const mongoResult = await mongoRequest({
+          uri,
+          host,
+          port,
+          username,
+          password,
+        })
+        const timeNow = new Date().toISOString()
+        const logMessage = `${timeNow} ${checkOrder} id:${id} mongo:${host}:${port} ${mongoResult.responseTime}ms msg:${mongoResult.body}`
+        const isAlertTriggered = mongoResult.status !== 200
+        responseProcessing({
+          probe: probe,
+          probeResult: mongoResult,
+          notifications: notifications,
+          logMessage: logMessage,
+          isAlertTriggered: isAlertTriggered,
+          index: mongoRequestIndex,
+        })
+        mongoRequestIndex++
+      }
+    }
 
     if (probe?.postgres) {
       const { id, postgres } = probe
