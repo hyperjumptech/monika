@@ -409,6 +409,24 @@ notifications:
 | ------------ | ---------------------------------- | -------------- |
 | Access Token | The token of your Dingtalk account | `Dingtalk1234` |
 
+## Gotify
+
+Monika supports Gotify. To enable notification via Gotify, you must have a Gotify Server's URL and application token. Gotify is an open source notification server with several different clients. More info at [Gotify documentation](https://gotify.net).
+
+```yml
+notifications:
+  - id: unique-id-gotify
+    type: gotify
+    data:
+      url: GOTIFY_URL
+      token: GOTIFY_TOKEN
+```
+
+| Key   | Description              | Example                      |
+| ----- | ------------------------ | ---------------------------- |
+| url   | Gotify server URL        | `https://gotify.example.com` |
+| token | Gotify application token | `Ohyegh1eePahraz`            |
+
 ## Pushover
 
 Monika supports Pushover. To enable notification via Pushover, you must create a pushover application first. More info at [Pushover documentation](https://pushover.net/api).

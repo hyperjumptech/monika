@@ -110,6 +110,10 @@ const WEBHOOK_NO_URL = setInvalidResponse('URL not found')
 const PUSHOVER_NO_TOKEN = setInvalidResponse('TOKEN not found')
 const PUSHOVER_NO_USER = setInvalidResponse('USER not found')
 
+// Gotify
+const GOTIFY_NO_TOKEN = setInvalidResponse('TOKEN not found')
+const GOTIFY_NO_URL = setInvalidResponse('URL not found')
+
 // Discord
 const DISCORD_NO_URL = setInvalidResponse('Discord URL not found')
 
@@ -263,6 +267,12 @@ function validateNotification(notifications: Notification[]): Validation {
       case 'pushover': {
         if (!notification.data.token) return PUSHOVER_NO_TOKEN
         if (!notification.data.user) return PUSHOVER_NO_USER
+        break
+      }
+
+      case 'gotify': {
+        if (!notification.data.token) return GOTIFY_NO_TOKEN
+        if (!notification.data.url) return GOTIFY_NO_URL
         break
       }
 
