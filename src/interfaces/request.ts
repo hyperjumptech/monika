@@ -33,6 +33,7 @@ export type RequestTypes =
   | 'ICMP'
   | 'tcp'
   | 'redis'
+  | 'mongo'
   | 'postgres'
 
 // ProbeRequestResponse is used to define the response from a probe requests.
