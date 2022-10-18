@@ -35,6 +35,10 @@ import type { SymonConfig } from '../reporter'
 import { newPagerDuty } from '../notification/channel/pagerduty'
 import { getContext } from '../../context'
 import { validateConfigFile } from '../config/validate-config'
+import {
+  slug as atlassianStatuspageSlug,
+  validateConfig as atlassianStatuspageValidateConfig,
+} from '../../plugins/visualization/atlassian-status-page'
 
 const HTTPMethods = new Set([
   'DELETE',
@@ -194,6 +198,16 @@ function validateNotification(notifications: Notification[]): Validation {
 
       case 'slack': {
         if (!notification.data.url) return WEBHOOK_NO_URL
+
+        break
+      }
+
+      case atlassianStatuspageSlug: {
+        const error = atlassianStatuspageValidateConfig(notification.data)
+
+        if (error) {
+          return setInvalidResponse(error)
+        }
 
         break
       }
