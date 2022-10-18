@@ -83,6 +83,7 @@ const probeSendNotification = async (data: ProbeSendNotification) => {
 
   eventEmitter.emit(events.probe.notification.willSend, {
     probeID: probe.id,
+    notifications: notifications ?? [],
     url: url,
     probeState: statusString,
     validation,

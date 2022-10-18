@@ -145,6 +145,11 @@ probes:
 #       port: 587
 #       username: SMTP_USERNAME
 #       password: SMTP_PASSWORD
+#   - id: random-string-statuspage
+#     type: statuspage
+#     data:
+#       apiKey: YOUR_STATUSPAGE_API_KEY
+#       pageID: YOUR_STATUSPAGE_PAGE_ID
 #   - id: random-string-webhook
 #     type: webhook
 #     data:
