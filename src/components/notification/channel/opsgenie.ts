@@ -22,15 +22,15 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios from 'axios'
-
+import { AxiosResponse } from 'axios'
 import { OpsgenieData } from '../../../interfaces/data'
 import { NotificationMessage } from '../../../interfaces/notification'
+import { sendHttpRequest } from '../../../utils/http'
 
 export const sendOpsgenie = async (
   data: OpsgenieData,
   message: NotificationMessage
-) => {
+): Promise<AxiosResponse> => {
   try {
     const notificationType =
       message.meta.type[0].toUpperCase() + message.meta.type.substring(1)
@@ -55,7 +55,7 @@ export const sendOpsgenie = async (
         break
     }
 
-    const res = await axios.request({
+    const res = await sendHttpRequest({
       method: 'POST',
       url: `https://api.opsgenie.com/v2/alerts`,
       headers: {

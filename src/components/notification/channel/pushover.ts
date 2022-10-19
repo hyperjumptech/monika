@@ -22,18 +22,18 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios from 'axios'
-
+import { AxiosResponse } from 'axios'
 import { PushoverData } from '../../../interfaces/data'
 import { NotificationMessage } from '../../../interfaces/notification'
+import { sendHttpRequest } from '../../../utils/http'
 
 export const sendPushover = async (
   data: PushoverData,
   message: NotificationMessage
-) => {
+): Promise<AxiosResponse> => {
   try {
     const notificationType =
-      message.meta.type[0].toUpperCase() + message.meta.type.substring(1)
+      message.meta.type[0].toUpperCase() + message.meta.type.slice(1)
 
     let content
     switch (message.meta.type) {
@@ -42,12 +42,13 @@ export const sendPushover = async (
         content = `New ${notificationType} event from Monika\n\n${message.body}`
         break
       }
+
       default:
         content = message.body
         break
     }
 
-    const res = await axios.request({
+    const res = await sendHttpRequest({
       method: 'POST',
       url: `https://api.pushover.net/1/messages.json`,
       headers: {

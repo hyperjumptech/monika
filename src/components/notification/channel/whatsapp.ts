@@ -22,11 +22,11 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios from 'axios'
 import { LoginUserSuccessResponse } from '../../../interfaces/whatsapp'
 import { authorize } from '../../../utils/authorization'
 import { log } from 'console'
 import { WhatsappData } from '../../../interfaces/data'
+import { sendHttpRequest } from '../../../utils/http'
 
 export const loginUser = async (data: WhatsappData): Promise<any> => {
   try {
@@ -36,7 +36,7 @@ export const loginUser = async (data: WhatsappData): Promise<any> => {
     })
 
     const url = `${data.url}/v1/users/login`
-    const resp = await axios.request({
+    const resp = await sendHttpRequest({
       method: 'POST',
       url: url,
       headers: {
@@ -48,7 +48,10 @@ export const loginUser = async (data: WhatsappData): Promise<any> => {
 
     if (loginResp.users?.length > 0) return loginResp.users[0].token
   } catch (error) {
-    log('Something wrong with your whatsapp config please check again.')
+    log(
+      'Something wrong with your whatsapp config please check again. error:',
+      error
+    )
   }
 }
 
@@ -67,7 +70,7 @@ export const sendTextMessage = async ({
     const auth = authorize('bearer', token)
     const url = `${baseUrl}/v1/messages`
 
-    return axios.request({
+    return sendHttpRequest({
       method: 'POST',
       url: url,
       headers: {

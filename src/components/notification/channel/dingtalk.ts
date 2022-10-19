@@ -22,16 +22,16 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios from 'axios'
-
+import { AxiosResponse } from 'axios'
 import format from 'date-fns/format'
 import { DingtalkData } from '../../../interfaces/data'
 import { NotificationMessage } from '../../../interfaces/notification'
+import { sendHttpRequest } from '../../../utils/http'
 
 export const sendDingtalk = async (
   data: DingtalkData,
   message: NotificationMessage
-) => {
+): Promise<AxiosResponse> => {
   try {
     const notificationType =
       message.meta.type[0].toUpperCase() + message.meta.type.substring(1)
@@ -97,7 +97,7 @@ Notifications: ${message.meta.numberOfSentNotifications}\n
         break
     }
 
-    const res = await axios.request({
+    const res = await sendHttpRequest({
       method: 'POST',
       url: `https://oapi.dingtalk.com/robot/send?access_token=${data.access_token}`,
       headers: {

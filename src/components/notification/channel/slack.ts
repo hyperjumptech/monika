@@ -22,10 +22,9 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios from 'axios'
-
 import { SlackData } from '../../../interfaces/data'
 import { NotificationMessage } from '../../../interfaces/notification'
+import { sendHttpRequest } from '../../../utils/http'
 
 export const sendSlack = async (
   data: SlackData,
@@ -191,7 +190,7 @@ export const sendSlack = async (
   }
 
   if (content) {
-    await axios({
+    await sendHttpRequest({
       method: 'POST',
       url: data.url,
       data: content,
