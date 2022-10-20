@@ -21,11 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  *
  * SOFTWARE.                                                                      *
  **********************************************************************************/
-import axios from 'axios'
 
 import { NotificationMessage } from '../../../interfaces/notification'
 import { LarkData } from '../../../interfaces/data'
 import { log } from '../../../utils/pino'
+import { sendHttpRequest } from '../../../utils/http'
 
 export const sendLark = async (
   data: LarkData,
@@ -153,9 +153,10 @@ export const sendLark = async (
     default:
       break
   }
+
   /* eslint-enable */
   try {
-    const res = await axios({
+    const res = await sendHttpRequest({
       method: 'POST',
       url: data.url,
       headers: {

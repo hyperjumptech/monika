@@ -22,47 +22,28 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { WebhookData } from '../../../interfaces/data'
-import { NotificationMessage } from '../../../interfaces/notification'
-import { sendHttpRequest } from '../../../utils/http'
-import { log } from '../../../utils/pino'
+import axios, { AxiosRequestConfig, AxiosResponse } from 'axios'
+import http from 'http'
+import https from 'https'
 
-export const sendDiscord = async (
-  data: WebhookData,
-  message: NotificationMessage
-): Promise<any> => {
-  try {
-    const notificationType =
-      message.meta.type[0].toUpperCase() + message.meta.type.substring(1)
-    let content
-    switch (message.meta.type) {
-      case 'incident':
-      case 'recovery': {
-        content = `New *\`${notificationType}\`* event from Monika\n${message.body}`
-        content = content.replaceAll('\n\n', '\n')
-        break
-      }
+// Keep the agents alive to reduce the overhead of DNS queries and creating TCP connection.
+// More information here: https://rakshanshetty.in/nodejs-http-keep-alive/
+const httpAgent = new http.Agent({ keepAlive: true })
+const httpsAgent = new https.Agent({ keepAlive: true })
+export const DEFAULT_TIMEOUT = 10_000
 
-      default:
-        content = message.body
-        break
-    }
+// Create an instance of axios here so it will be reused instead of creating a new one all the time.
+const axiosInstance = axios.create()
 
-    const res = await sendHttpRequest({
-      method: 'POST',
-      url: data.url,
-      headers: {
-        Accept: 'application/json',
-        'Content-type': 'application/json',
-      },
-      data: {
-        content: content,
-      },
-    })
-    return res
-  } catch (error: any) {
-    log.error(
-      "Couldn't send notification to Discord. Got this error: " + error.message
-    )
-  }
+export async function sendHttpRequest(
+  config: AxiosRequestConfig
+): Promise<AxiosResponse> {
+  const resp = await axiosInstance.request({
+    ...config,
+    timeout: config.timeout ?? DEFAULT_TIMEOUT, // Ensure default timeout if not filled.
+    httpAgent: config.httpAgent ?? httpAgent,
+    httpsAgent: config.httpsAgent ?? httpsAgent,
+  })
+
+  return resp
 }

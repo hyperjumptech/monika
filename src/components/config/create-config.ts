@@ -23,8 +23,8 @@
  **********************************************************************************/
 
 import fs from 'fs'
-import axios from 'axios'
 import { log } from '../../utils/pino'
+import { sendHttpRequest } from '../../utils/http'
 
 export const DEFAULT_CONFIG_FILENAME = 'monika.yml'
 
@@ -33,7 +33,7 @@ export const createConfigFile = async (flags: any): Promise<string> => {
   try {
     const url =
       'https://raw.githubusercontent.com/hyperjumptech/monika/main/monika.example.yml'
-    await axios.get(url).then((resp) => {
+    await sendHttpRequest({ url: url }).then((resp) => {
       fs.writeFileSync(filename, resp.data, 'utf-8')
     })
     log.info(

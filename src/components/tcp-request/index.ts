@@ -86,6 +86,8 @@ async function tcpCheck(tcpRequest: TCPRequest): Promise<TCPResult> {
   }
 }
 
+const SOCKETTIMEOUTMS = 10_000
+
 async function sendTCP(tcpRequest: TCPRequest): Promise<any> {
   const { host, port, data, timeout } = tcpRequest
 
@@ -94,7 +96,7 @@ async function sendTCP(tcpRequest: TCPRequest): Promise<any> {
       data ? client.write(data) : client.end()
     })
 
-    client.setTimeout(timeout || 10_000)
+    client.setTimeout(timeout || SOCKETTIMEOUTMS)
 
     client.on('data', (data) => {
       resolve(data.toString())
