@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          repository: hyperjumptech/schemastore
+          repository: SchemaStore/schemastore
           token: ${{ secrets.AUTO_PR_TOKEN }}
           ref: master
 
@@ -34,6 +34,10 @@ jobs:
           cd src/schemas/json
           rm monika-config-schema.json
           wget https://raw.githubusercontent.com/hyperjumptech/monika/main/src/monika-config-schema.json
+      
+      - name: Run some tests on it
+        run : |
+          make
 
       - name: Create Pull Request
         id: cpr
@@ -50,7 +54,7 @@ jobs:
           body: |
             In this PR:
             - Update config json schema to improve suggestions
-            - Update keys, default values and fix typos
+            - Update keys, default values and properties.
 
           draft: false
           delete-branch: true
