@@ -23,19 +23,13 @@ jobs:
           token: ${{ secrets.AUTO_PR_TOKEN }}
           ref: master
 
-      - name: Sync local fork
-        run: |
-          git remote add upstream https://github.com/SchemaStore/schemastore.git
-          git pull upstream master --ff-only
-          git push origin master
-
       - name: Update schema file
         run: |
           cd src/schemas/json
           rm monika-config-schema.json
           wget https://raw.githubusercontent.com/hyperjumptech/monika/main/src/monika-config-schema.json
       
-      - name: Run some tests on it
+      - name: Run Test on Schema
         run : |
           make
 
