@@ -30,7 +30,7 @@
       "items": {
         "type": "object",
         "anyOf": [
-          { 
+          {
             "required": ["uri"],
             "additionalProperties": false,
             "properties": {
