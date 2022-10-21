@@ -44,6 +44,7 @@ import { httpRequest } from '../http-request'
 
 import { redisRequest } from '../redis-request'
 import { mongoRequest } from '../mongodb-request'
+import { mariaRequest } from '../mariadb-request'
 import { postgresRequest, PostgresParam } from '../postgres-request'
 import { ServerAlertState } from '../../interfaces/probe-status'
 import { parse } from 'pg-connection-string'
@@ -285,6 +286,36 @@ export async function doProbe({
           index: mongoRequestIndex,
         })
         mongoRequestIndex++
+      }
+    }
+
+    if (probe?.maria) {
+      const { id, maria } = probe
+      let mariaReqIndex = 0
+
+      for await (const mariaIndex of maria) {
+        const { host, port, database, username, password } = mariaIndex
+
+        const mariaResult = await mariaRequest({
+          host,
+          port,
+          database,
+          username,
+          password,
+        })
+        const timeNow = new Date().toISOString()
+        const logMessage = `${timeNow} ${checkOrder} id:${id} mariadb:${host}:${port} ${mariaResult.responseTime}ms msg:${mariaResult.body}`
+        const isAlertTriggered = mariaResult.status !== 200
+
+        responseProcessing({
+          probe: probe,
+          probeResult: mariaResult,
+          notifications: notifications,
+          logMessage: logMessage,
+          isAlertTriggered: isAlertTriggered,
+          index: mariaReqIndex,
+        })
+        mariaReqIndex++
       }
     }
 
