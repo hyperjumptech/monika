@@ -28,9 +28,12 @@ import { setupServer } from 'msw/node'
 import { RequestInterceptor } from 'node-request-interceptor'
 import withDefaultInterceptors from 'node-request-interceptor/lib/presets/default'
 import { setContext } from '../../context'
-import { RequestConfig } from '../../interfaces/request'
+import type {
+  ProbeRequestResponse,
+  RequestConfig,
+} from '../../interfaces/request'
 
-import { httpRequest } from '.'
+import { generateRequestChainingBody, httpRequest } from '.'
 
 describe('probingHTTP', () => {
   let interceptor: any
@@ -350,6 +353,93 @@ describe('probingHTTP', () => {
 
       // assert
       expect(res.status).to.eq(200)
+    })
+  })
+
+  describe('Unit test', () => {
+    describe('generateRequestChainingBody', () => {
+      it('should generate request chaining body', () => {
+        // arrange
+        type TestTable = {
+          body: Record<string, any>
+          responses: ProbeRequestResponse[]
+          expected: Record<string, any>
+        }
+        const testTables: TestTable[] = [
+          {
+            body: {
+              message: 'Your email is {{ responses.[0].body.email }}',
+            },
+            responses: [
+              {
+                body: { email: 'name@example.com' },
+              },
+            ] as unknown as ProbeRequestResponse[],
+            expected: {
+              message: 'Your email is name@example.com',
+            },
+          },
+          {
+            body: {
+              auth: 'Authorization: Bearer {{ responses.[1].body.token }}',
+            },
+            responses: [
+              {},
+              { body: { token: 'random-token' } },
+            ] as ProbeRequestResponse[],
+            expected: {
+              auth: 'Authorization: Bearer random-token',
+            },
+          },
+          {
+            body: {
+              password: '{{ responses.[0].body.otp }}',
+              otp: 789012,
+              siblings: [
+                '{{ responses.[0].body.password }}',
+                '{{ responses.[0].body.name.last }}',
+              ],
+              name: {
+                first: '{{ responses.[0].body.siblings.[0] }}',
+                last: '{{ responses.[0].body.siblings.[1]  }}',
+              },
+            },
+            responses: [
+              {
+                body: {
+                  password: 'notsogoodpassword',
+                  otp: 123456,
+                  name: {
+                    first: 'John',
+                    last: 'Doe',
+                  },
+                  siblings: ['Jane', 'Jade'],
+                },
+              },
+            ] as ProbeRequestResponse[],
+            expected: {
+              password: '123456',
+              otp: 789012,
+              siblings: ['notsogoodpassword', 'Doe'],
+              name: {
+                first: 'Jane',
+                last: 'Jade',
+              },
+            },
+          },
+        ]
+
+        for (const test of testTables) {
+          // act
+          const requestBody = generateRequestChainingBody(
+            test.body as JSON,
+            test.responses
+          )
+
+          // assert
+          expect(requestBody).deep.eq(test.expected)
+        }
+      })
     })
   })
 })
