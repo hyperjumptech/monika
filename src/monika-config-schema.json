@@ -162,7 +162,7 @@
         }
       }
     },
-    "maria": {
+    "mariadb": {
       "title": "MariaDB",
       "type": "array",
       "description": "Monitor MariaDB health ",
@@ -412,8 +412,8 @@
           "mongo": {
             "$ref": "#/definitions/mongo"
           },
-          "maria": {
-            "$ref": "#/definitions/maria"
+          "mariadb": {
+            "$ref": "#/definitions/mariadb"
           },
           "requests": {
             "$ref": "#/definitions/requests"

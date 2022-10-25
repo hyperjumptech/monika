@@ -346,7 +346,7 @@ export const validateConfig = (configuration: Config): Validation => {
       redis,
       mongo,
       postgres,
-      maria,
+      mariadb,
     } = probe
     const socketAlerts = socket?.alerts ?? []
     const tcpConfigError = validateTCPConfig(socket)
@@ -377,7 +377,7 @@ export const validateConfig = (configuration: Config): Validation => {
       (redis ? 1 : 0) +
       (mongo ? 1 : 0) +
       (postgres ? 1 : 0) +
-      (maria ? 1 : 0) +
+      (mariadb ? 1 : 0) +
       (requests?.length ?? 0)
     if (totalProbes === 0) return PROBE_NO_REQUESTS
 

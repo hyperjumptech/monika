@@ -84,7 +84,7 @@ probes:
   - id: 'id-mariadb'
     name: maria_probe
     description: testing maria db
-    maria:
+    mariadb:
       - host: 172.11.0.1
         port: 3306
         database: mydatabase

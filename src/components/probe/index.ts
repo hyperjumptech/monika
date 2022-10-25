@@ -289,11 +289,11 @@ export async function doProbe({
       }
     }
 
-    if (probe?.maria) {
-      const { id, maria } = probe
+    if (probe?.mariadb) {
+      const { id, mariadb } = probe
       let mariaReqIndex = 0
 
-      for await (const mariaIndex of maria) {
+      for await (const mariaIndex of mariadb) {
         const { host, port, database, username, password } = mariaIndex
 
         const mariaResult = await mariaRequest({
