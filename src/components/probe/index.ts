@@ -101,7 +101,7 @@ const probeSendNotification = async (data: ProbeSendNotification) => {
 }
 
 // Probes Thresholds processed, Send out notifications/alerts.
-async function checkThresholdsAndSendAlert(
+function checkThresholdsAndSendAlert(
   data: ProbeStatusProcessed,
   requestLog: RequestLog
 ) {
@@ -115,32 +115,46 @@ async function checkThresholdsAndSendAlert(
 
   const { flags } = getContext()
   const isSymonMode = Boolean(flags.symonUrl) && Boolean(flags.symonKey)
+  const probeStatesWithValidAlert = getProbeStatesWithValidAlert(
+    statuses || [],
+    isSymonMode
+  )
 
-  statuses
-    ?.filter((probeState) => probeState.shouldSendNotification)
-    ?.forEach((probeState, index) => {
-      if (isSymonMode && probeState.isFirstTime) {
-        return
-      }
+  probeStatesWithValidAlert.forEach((probeState, index) => {
+    const { alertQuery, state } = probeState
 
-      probeSendNotification({
-        index,
-        probe,
-        probeState,
-        notifications,
-        requestIndex,
-        validatedResponseStatuses,
-      }).catch((error: Error) => log.error(error.message))
+    probeSendNotification({
+      index,
+      probe,
+      probeState,
+      notifications,
+      requestIndex,
+      validatedResponseStatuses,
+    }).catch((error: Error) => log.error(error.message))
 
-      requestLog.addNotifications(
-        (notifications ?? []).map((notification) => ({
-          notification,
-          type:
-            probeState?.state === 'DOWN' ? 'NOTIFY-INCIDENT' : 'NOTIFY-RECOVER',
-          alertQuery: probeState?.alertQuery || '',
-        }))
-      )
-    })
+    requestLog.addNotifications(
+      (notifications ?? []).map((notification) => ({
+        notification,
+        type: state === 'DOWN' ? 'NOTIFY-INCIDENT' : 'NOTIFY-RECOVER',
+        alertQuery: alertQuery || '',
+      }))
+    )
+  })
+}
+
+export function getProbeStatesWithValidAlert(
+  probeStates: ServerAlertState[],
+  isSymonMode: boolean
+): ServerAlertState[] {
+  return probeStates.filter(
+    ({ isFirstTime, shouldSendNotification, state }) => {
+      // ignore first up event for non Symon mode
+      const isFirstUpEvent = isFirstTime && state === 'UP'
+      const isFirstUpEventForNonSymonMode = isFirstUpEvent && !isSymonMode
+
+      return shouldSendNotification && !isFirstUpEventForNonSymonMode
+    }
+  )
 }
 
 type respProsessingParams = {
@@ -204,9 +218,7 @@ async function responseProcessing({
       validatedResponseStatuses: validatedResponse,
     },
     requestLog
-  ).catch((error) => {
-    requestLog.addError(error.message)
-  })
+  )
 
   if (verboseLogs || requestLog.hasIncidentOrRecovery) {
     requestLog.saveToDatabase().catch((error) => log.error(error.message))
@@ -449,9 +461,7 @@ export async function doProbe({
             validatedResponseStatuses: validatedResponse,
           },
           requestLog
-        ).catch((error) => {
-          requestLog.addError(error.message)
-        })
+        )
 
         // Exit the chaining loop if there is any alert triggered
         if (validatedResponse.some((item) => item.isAlertTriggered)) {
