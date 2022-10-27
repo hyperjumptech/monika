@@ -77,7 +77,7 @@ Details of the field are given in the table below.
 
 ### Mariadb Request
 
-To monitor connectivity and health of your MariaDB database, monika provides a MariaDB database probe, set it up like below:
+To monitor the connectivity and the health of your MariaDB database, you can use the following monika configuration:
 
 ```yaml
 probes:
@@ -85,6 +85,21 @@ probes:
     name: maria_probe
     description: testing maria db
     mariadb:
+      - host: 172.11.0.1
+        port: 3306
+        database: mydatabase
+        username: myuser
+        password: password
+```
+
+You can also use the `mysql` keyword for your Mysql database like this:
+
+```yaml
+probes:
+  - id: 'id-mariadb'
+    name: maria_probe
+    description: testing maria db
+    mysql:
       - host: 172.11.0.1
         port: 3306
         database: mydatabase

@@ -415,6 +415,9 @@
           "mariadb": {
             "$ref": "#/definitions/mariadb"
           },
+          "mysql": {
+            "$ref": "#/definitions/mariadb"
+          },
           "requests": {
             "$ref": "#/definitions/requests"
           },
