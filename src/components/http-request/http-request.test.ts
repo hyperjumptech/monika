@@ -361,11 +361,24 @@ describe('probingHTTP', () => {
       it('should generate request chaining body', () => {
         // arrange
         type TestTable = {
-          body: Record<string, any>
+          body: Record<string, any> | string
           responses: ProbeRequestResponse[]
-          expected: Record<string, any>
+          expected: Record<string, any> | string
         }
         const testTables: TestTable[] = [
+          {
+            body: {
+              message: 'Your email is name@example.com',
+            },
+            responses: [
+              {
+                body: { email: 'email@example.com' },
+              },
+            ] as unknown as ProbeRequestResponse[],
+            expected: {
+              message: 'Your email is name@example.com',
+            },
+          },
           {
             body: {
               message: 'Your email is {{ responses.[0].body.email }}',
@@ -427,12 +440,30 @@ describe('probingHTTP', () => {
               },
             },
           },
+          {
+            body: 'Your email is name@example.com',
+            responses: [
+              {
+                body: { email: 'email@example.com' },
+              },
+            ] as unknown as ProbeRequestResponse[],
+            expected: 'Your email is name@example.com',
+          },
+          {
+            body: 'Your email is {{ responses.[0].body.email }}',
+            responses: [
+              {
+                body: { email: 'name@example.com' },
+              },
+            ] as unknown as ProbeRequestResponse[],
+            expected: 'Your email is name@example.com',
+          },
         ]
 
         for (const test of testTables) {
           // act
           const requestBody = generateRequestChainingBody(
-            test.body as JSON,
+            test.body as JSON | string,
             test.responses
           )
 
