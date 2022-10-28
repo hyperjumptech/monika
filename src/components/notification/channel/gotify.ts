@@ -31,45 +31,41 @@ export const sendGotify = async (
   data: GotifyData,
   message: NotificationMessage
 ) => {
-  try {
-    const notificationType =
-      message.meta.type[0].toUpperCase() + message.meta.type.substring(1)
+  const notificationType =
+    message.meta.type[0].toUpperCase() + message.meta.type.substring(1)
 
-    let title
-    let content
-    switch (message.meta.type) {
-      case 'incident':
-      case 'recovery': {
-        title = message.meta.type.toUpperCase() + ': '
-        content = `New ${notificationType} event from Monika\n\n${message.body}`
-        break
-      }
-      default:
-        title = ''
-        content = message.body
-        break
+  let title
+  let content
+  switch (message.meta.type) {
+    case 'incident':
+    case 'recovery': {
+      title = message.meta.type.toUpperCase() + ': '
+      content = `New ${notificationType} event from Monika\n\n${message.body}`
+      break
     }
-
-    if (message.meta.url) {
-      title += `[${message.meta.url}] `
-    }
-
-    title += `${message.summary}`
-
-    const res = await axios.request({
-      method: 'POST',
-      url: `${data.url}/message?token=${data.token}`,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      data: {
-        title,
-        message: content,
-      },
-    })
-
-    return res
-  } catch (error) {
-    throw error
+    default:
+      title = ''
+      content = message.body
+      break
   }
+
+  if (message.meta.url) {
+    title += `[${message.meta.url}] `
+  }
+
+  title += `${message.summary}`
+
+  const res = await axios.request({
+    method: 'POST',
+    url: `${data.url}/message?token=${data.token}`,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: {
+      title,
+      message: content,
+    },
+  })
+
+  return res
 }

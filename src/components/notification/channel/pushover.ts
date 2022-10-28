@@ -31,39 +31,35 @@ export const sendPushover = async (
   data: PushoverData,
   message: NotificationMessage
 ): Promise<AxiosResponse> => {
-  try {
-    const notificationType =
-      message.meta.type[0].toUpperCase() + message.meta.type.slice(1)
+  const notificationType =
+    message.meta.type[0].toUpperCase() + message.meta.type.slice(1)
 
-    let content
-    switch (message.meta.type) {
-      case 'incident':
-      case 'recovery': {
-        content = `New ${notificationType} event from Monika\n\n${message.body}`
-        break
-      }
-
-      default:
-        content = message.body
-        break
+  let content
+  switch (message.meta.type) {
+    case 'incident':
+    case 'recovery': {
+      content = `New ${notificationType} event from Monika\n\n${message.body}`
+      break
     }
 
-    const res = await sendHttpRequest({
-      method: 'POST',
-      url: `https://api.pushover.net/1/messages.json`,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      data: {
-        user: data.user,
-        token: data.token,
-        message: content,
-        html: 1,
-      },
-    })
-
-    return res
-  } catch (error) {
-    throw error
+    default:
+      content = message.body
+      break
   }
+
+  const res = await sendHttpRequest({
+    method: 'POST',
+    url: `https://api.pushover.net/1/messages.json`,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: {
+      user: data.user,
+      token: data.token,
+      message: content,
+      html: 1,
+    },
+  })
+
+  return res
 }

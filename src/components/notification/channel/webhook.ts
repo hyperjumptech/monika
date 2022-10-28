@@ -29,15 +29,11 @@ import { sendHttpRequest } from '../../../utils/http'
 export const sendWebhook = async (
   data: WebhookData
 ): Promise<AxiosResponse> => {
-  try {
-    const res = await sendHttpRequest({
-      method: 'POST',
-      url: data.url,
-      data: data.body,
-    })
+  const res = await sendHttpRequest({
+    method: 'POST',
+    url: data.url,
+    data: data.body,
+  })
 
-    return res
-  } catch (error) {
-    throw error
-  }
+  return res
 }

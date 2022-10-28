@@ -31,45 +31,41 @@ export const sendOpsgenie = async (
   data: OpsgenieData,
   message: NotificationMessage
 ): Promise<AxiosResponse> => {
-  try {
-    const notificationType =
-      message.meta.type[0].toUpperCase() + message.meta.type.substring(1)
+  const notificationType =
+    message.meta.type[0].toUpperCase() + message.meta.type.substring(1)
 
-    let content
-    let title
-    switch (message.meta.type) {
-      case 'incident':
-      case 'recovery': {
-        title = `New ${notificationType} event from Monika`
-        content = `New ${notificationType} event from Monika\n\n${message.body}`
-        break
-      }
-      case 'status-update': {
-        title = `Monika status update`
-        content = `New ${notificationType} event from Monika\n\n${message.body}`
-        break
-      }
-      default:
-        title = `Monika ${message.meta.type}`
-        content = message.body
-        break
+  let content
+  let title
+  switch (message.meta.type) {
+    case 'incident':
+    case 'recovery': {
+      title = `New ${notificationType} event from Monika`
+      content = `New ${notificationType} event from Monika\n\n${message.body}`
+      break
     }
-
-    const res = await sendHttpRequest({
-      method: 'POST',
-      url: `https://api.opsgenie.com/v2/alerts`,
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `GenieKey ${data.geniekey}`,
-      },
-      data: {
-        message: title,
-        description: content,
-      },
-    })
-
-    return res
-  } catch (error) {
-    throw error
+    case 'status-update': {
+      title = `Monika status update`
+      content = `New ${notificationType} event from Monika\n\n${message.body}`
+      break
+    }
+    default:
+      title = `Monika ${message.meta.type}`
+      content = message.body
+      break
   }
+
+  const res = await sendHttpRequest({
+    method: 'POST',
+    url: `https://api.opsgenie.com/v2/alerts`,
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `GenieKey ${data.geniekey}`,
+    },
+    data: {
+      message: title,
+      description: content,
+    },
+  })
+
+  return res
 }
