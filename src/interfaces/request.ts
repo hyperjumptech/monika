@@ -52,7 +52,7 @@ export interface RequestConfig extends Omit<AxiosRequestConfig, 'data'> {
   id?: string
   saveBody?: boolean // save response body to db?
   url: string
-  body: JSON
+  body: JSON | string
   timeout: number // request timeout
   alerts?: ProbeAlert[]
   ping?: boolean // is this request for a ping?
