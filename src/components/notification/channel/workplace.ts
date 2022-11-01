@@ -26,27 +26,23 @@ import { WorkplaceData } from '../../../interfaces/data'
 import { sendHttpRequest } from '../../../utils/http'
 
 export const sendWorkplace = async (data: WorkplaceData): Promise<any> => {
-  try {
-    const res = await sendHttpRequest({
-      baseURL: 'https://graph.workplace.com',
-      headers: {
-        Authorization: `Bearer ${data.access_token}`,
+  const res = await sendHttpRequest({
+    baseURL: 'https://graph.workplace.com',
+    headers: {
+      Authorization: `Bearer ${data.access_token}`,
+    },
+    method: 'POST',
+    url: '/me/messages',
+    data: {
+      recipient: {
+        // eslint-disable-next-line camelcase
+        thread_key: data.thread_id,
       },
-      method: 'POST',
-      url: '/me/messages',
-      data: {
-        recipient: {
-          // eslint-disable-next-line camelcase
-          thread_key: data.thread_id,
-        },
-        message: {
-          text: data.body,
-        },
+      message: {
+        text: data.body,
       },
-    })
+    },
+  })
 
-    return res
-  } catch (error) {
-    throw error
-  }
+  return res
 }

@@ -103,24 +103,7 @@ export async function httpRequest({
   }
 
   if (body) {
-    if (typeof body === 'string') {
-      const renderBody = Handlebars.compile(body)
-      const renderedBody = renderBody({ responses })
-
-      newReq.body = renderedBody as any
-    } else {
-      for (const bk of Object.keys(body)) {
-        let rawBody = (body as any)[bk]
-        if (typeof rawBody !== 'string') {
-          rawBody = JSON.stringify(rawBody)
-        }
-
-        const renderBody = Handlebars.compile(rawBody)
-        const renderedBody = renderBody({ responses })
-
-        newReq.body = { ...newReq.body, [bk]: renderedBody }
-      }
-    }
+    newReq.body = generateRequestChainingBody(body, responses)
 
     if (newReq.headers) {
       const contentTypeKey = Object.keys(headers).find((hk) => {
@@ -219,6 +202,17 @@ export async function httpRequest({
       responseTime,
     }
   }
+}
+
+export function generateRequestChainingBody(
+  body: JSON | string,
+  responses: ProbeRequestResponse[]
+): JSON | string {
+  const isString = typeof body === 'string'
+  const template = Handlebars.compile(isString ? body : JSON.stringify(body))
+  const renderedBody = template({ responses })
+
+  return isString ? renderedBody : JSON.parse(renderedBody)
 }
 
 function transformContentByType(content: any, contentType: string) {
