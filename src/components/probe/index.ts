@@ -319,6 +319,36 @@ export async function doProbe({
       }
     }
 
+    if (probe?.mysql) {
+      const { id, mysql } = probe
+      let mysqlReqIndex = 0
+
+      for await (const mysqlIndex of mysql) {
+        const { host, port, database, username, password } = mysqlIndex
+
+        const mysqlResult = await mariaRequest({
+          host,
+          port,
+          database,
+          username,
+          password,
+        })
+        const timeNow = new Date().toISOString()
+        const logMessage = `${timeNow} ${checkOrder} id:${id} mysql:${host}:${port} ${mysqlResult.responseTime}ms msg:${mysqlResult.body}`
+        const isAlertTriggered = mysqlResult.status !== 200
+
+        responseProcessing({
+          probe: probe,
+          probeResult: mysqlResult,
+          notifications: notifications,
+          logMessage: logMessage,
+          isAlertTriggered: isAlertTriggered,
+          index: mysqlReqIndex,
+        })
+        mysqlReqIndex++
+      }
+    }
+
     if (probe?.postgres) {
       const { id, postgres } = probe
       let pgReqIndex = 0

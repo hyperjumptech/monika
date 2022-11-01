@@ -33,6 +33,7 @@ export type RequestTypes =
   | 'ICMP'
   | 'tcp'
   | 'redis'
+  | 'mariadb'
   | 'mongo'
   | 'postgres'
 

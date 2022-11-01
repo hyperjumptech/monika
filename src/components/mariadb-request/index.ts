@@ -1,6 +1,6 @@
 import { ProbeRequestResponse } from '../../interfaces/request'
 import { differenceInMilliseconds } from 'date-fns'
-import { checkMariaDBConnection } from '@hyperjumptech/db-connection-checker'
+import { createConnection } from 'mariadb'
 
 export type MariaParam = {
   host: string // Host address of the psql db
@@ -15,7 +15,7 @@ export async function mariaRequest(
   params: MariaParam
 ): Promise<ProbeRequestResponse> {
   const baseResponse: ProbeRequestResponse = {
-    requestType: 'postgres',
+    requestType: 'mariadb',
     data: '',
     body: '',
     status: 0,
@@ -26,10 +26,10 @@ export async function mariaRequest(
   const startTime = new Date()
   let isConnected = false
   try {
-    isConnected = await checkMariaDBConnection({
+    isConnected = await checkConnection({
       host: params.host,
       port: params.port,
-      user: params.username,
+      username: params.username,
       password: params.password,
       database: params.database,
     })
@@ -43,9 +43,24 @@ export async function mariaRequest(
 
   if (isConnected) {
     baseResponse.responseTime = duration
-    baseResponse.body = 'mariadb ok'
+    baseResponse.body = 'database ok'
     baseResponse.status = 200
   }
 
   return baseResponse
+}
+
+async function checkConnection(params?: MariaParam) {
+  const client = await createConnection({
+    host: params?.host,
+    port: params?.port,
+    user: params?.username,
+    password: params?.password,
+    database: params?.database,
+
+    allowPublicKeyRetrieval: true,
+  })
+
+  await client.end()
+  return true
 }
