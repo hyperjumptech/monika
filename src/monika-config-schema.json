@@ -163,16 +163,16 @@
       }
     },
     "mariadb": {
-      "title": "MariaDB",
+      "title": "MariaDB/Mysql",
       "type": "array",
-      "description": "Monitor MariaDB health ",
+      "description": "Monitor MariaDB/Mysql health ",
       "items": {
         "type": "object",
         "additionalProperties": false,
         "required": ["host", "port", "username", "password", "database"],
         "properties": {
           "host": {
-            "title": "MariaDB database host",
+            "title": "Database host",
             "description": "The hostname or IP address of the database server",
             "type": "string",
             "examples": ["localhost", "127.0.0.1", "172.11.0.1"],
