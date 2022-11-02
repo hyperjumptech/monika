@@ -92,7 +92,7 @@ probes:
         password: password
 ```
 
-You can also use the `mysql` keyword for your Mysql database like this:
+You can also use the `mysql` keyword for your Mysql database like below. The `mariadb` and `mysql` probe types are interchagnable.
 
 ```yaml
 probes:
