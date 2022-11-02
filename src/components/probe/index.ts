@@ -301,63 +301,45 @@ export async function doProbe({
       }
     }
 
-    if (probe?.mariadb) {
-      const { id, mariadb } = probe
+    if (probe?.mariadb || probe?.mysql) {
+      const { id, mariadb, mysql } = probe
       let mariaReqIndex = 0
+      let logMessage = ''
 
-      for await (const mariaIndex of mariadb) {
-        const { host, port, database, username, password } = mariaIndex
+      const mydb = mariadb ?? mysql
 
-        const mariaResult = await mariaRequest({
-          host,
-          port,
-          database,
-          username,
-          password,
-        })
-        const timeNow = new Date().toISOString()
-        const logMessage = `${timeNow} ${checkOrder} id:${id} mariadb:${host}:${port} ${mariaResult.responseTime}ms msg:${mariaResult.body}`
-        const isAlertTriggered = mariaResult.status !== 200
+      if (mydb !== undefined) {
+        for await (const mariaIndex of mydb) {
+          const { host, port, database, username, password } = mariaIndex
 
-        responseProcessing({
-          probe: probe,
-          probeResult: mariaResult,
-          notifications: notifications,
-          logMessage: logMessage,
-          isAlertTriggered: isAlertTriggered,
-          index: mariaReqIndex,
-        })
-        mariaReqIndex++
-      }
-    }
+          const mariaResult = await mariaRequest({
+            host,
+            port,
+            database,
+            username,
+            password,
+          })
+          const timeNow = new Date().toISOString()
 
-    if (probe?.mysql) {
-      const { id, mysql } = probe
-      let mysqlReqIndex = 0
+          // eslint-disable-next-line unicorn/prefer-ternary
+          if (mariadb) {
+            logMessage = `${timeNow} ${checkOrder} id:${id} mariadb:${host}:${port} ${mariaResult.responseTime}ms msg:${mariaResult.body}`
+          } else {
+            logMessage = `${timeNow} ${checkOrder} id:${id} mysql:${host}:${port} ${mariaResult.responseTime}ms msg:${mariaResult.body}`
+          }
 
-      for await (const mysqlIndex of mysql) {
-        const { host, port, database, username, password } = mysqlIndex
+          const isAlertTriggered = mariaResult.status !== 200
 
-        const mysqlResult = await mariaRequest({
-          host,
-          port,
-          database,
-          username,
-          password,
-        })
-        const timeNow = new Date().toISOString()
-        const logMessage = `${timeNow} ${checkOrder} id:${id} mysql:${host}:${port} ${mysqlResult.responseTime}ms msg:${mysqlResult.body}`
-        const isAlertTriggered = mysqlResult.status !== 200
-
-        responseProcessing({
-          probe: probe,
-          probeResult: mysqlResult,
-          notifications: notifications,
-          logMessage: logMessage,
-          isAlertTriggered: isAlertTriggered,
-          index: mysqlReqIndex,
-        })
-        mysqlReqIndex++
+          responseProcessing({
+            probe: probe,
+            probeResult: mariaResult,
+            notifications: notifications,
+            logMessage: logMessage,
+            isAlertTriggered: isAlertTriggered,
+            index: mariaReqIndex,
+          })
+          mariaReqIndex++
+        }
       }
     }
 
