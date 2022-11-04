@@ -34,7 +34,7 @@ const ajv = new Ajv()
 export function validateConfigFile(filename: string): Validation {
   const validResult: Validation = {
     valid: false,
-    message: `Errors detected in config file ${filename}: `,
+    message: `Errors detected in config file ${filename}`,
   }
   const validate = ajv.compile(mySchema)
 
@@ -54,7 +54,7 @@ export function validateConfigFile(filename: string): Validation {
 
   if (validate.errors) {
     for (const err of validate.errors) {
-      validResult.message += err.message + ', '
+      validResult.message += ', ' + err.message
     }
 
     validResult.message += '.'
