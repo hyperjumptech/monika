@@ -34,14 +34,14 @@ const ajv = new Ajv()
 export function validateConfigFile(filename: string): Validation {
   const validResult: Validation = {
     valid: false,
-    message: `Errors detected in config file: ${filename}, please recheck`,
+    message: `Errors detected in config file ${filename}: `,
   }
   const validate = ajv.compile(mySchema)
 
   try {
     const configFile = yaml.load(fs.readFileSync(filename, 'utf8'))
-
     const isValid = validate(configFile)
+
     if (isValid) {
       validResult.valid = true
       validResult.message = `config: ${filename} is ok`
@@ -50,6 +50,14 @@ export function validateConfigFile(filename: string): Validation {
   } catch (error: any) {
     console.error('error:', error)
     validResult.message = error
+  }
+
+  if (validate.errors) {
+    for (const err of validate.errors) {
+      validResult.message += err.message + ', '
+    }
+
+    validResult.message += '.'
   }
 
   return validResult
