@@ -38,6 +38,7 @@ import { parseConfig } from './parse'
 import { validateConfig } from './validate'
 import { createConfigFile } from './create-config'
 import yml from 'js-yaml'
+import { exit } from 'process'
 
 export const DEFAULT_CONFIG_INTERVAL = 900
 
@@ -72,7 +73,12 @@ export const updateConfig = (config: Config, validate = true): void => {
     const validated = validateConfig(config)
 
     if (!validated.valid) {
-      throw new Error(validated.message)
+      if (process.env.NODE_ENV === 'test') {
+        throw new Error(validated.message) // return error during tests
+      }
+
+      log.error(validated.message)
+      exit(1)
     }
   }
 
