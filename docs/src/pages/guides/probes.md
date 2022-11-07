@@ -75,6 +75,38 @@ Details of the field are given in the table below.
 | ping (optional)              | (boolean), If set true then send a PING to the specified url instead.                                                                                                                                                                                                                                                                                     |
 | allowUnauthorized (optional) | (boolean), If set to true, will make https agent to not check for ssl certificate validity                                                                                                                                                                                                                                                                |
 
+### Mariadb or MySQL Probes
+
+To monitor the connectivity and the health of your MariaDB database, you can use the following monika configuration:
+
+```yaml
+probes:
+  - id: 'id-mariadb'
+    name: maria_probe
+    description: testing maria db
+    mariadb:
+      - host: 172.11.0.1
+        port: 3306
+        database: mydatabase
+        username: myuser
+        password: password
+```
+
+You can also use the `mysql` keyword for your Mysql database like below. The `mariadb` and `mysql` probe types are interchagnable.
+
+```yaml
+probes:
+  - id: 'id-mariadb'
+    name: maria_probe
+    description: testing maria db
+    mysql:
+      - host: 172.11.0.1
+        port: 3306
+        database: mydatabase
+        username: myuser
+        password: password
+```
+
 ### MongoDB Request
 
 You can check if your MongoDB instance is running and accessible by adding a probe with `mongo` configuration as follows.
