@@ -48,6 +48,17 @@ export type Redis = {
   alerts?: ProbeAlert[]
 }
 
+export type MariaDB = {
+  host: string
+  port: number
+  database: string
+  username: string
+  password: string
+  command?: string
+  data?: string | Uint8Array
+  alerts?: ProbeAlert[]
+}
+
 export type Mongo = {
   uri?: string
   host?: string
@@ -77,6 +88,8 @@ export interface Probe {
   socket?: Socket
   redis?: Redis[]
   mongo?: Mongo[]
+  mariadb?: MariaDB[]
+  mysql?: MariaDB[]
   postgres?: Postgres[]
   incidentThreshold: number
   recoveryThreshold: number

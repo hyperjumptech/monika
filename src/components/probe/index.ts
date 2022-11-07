@@ -44,6 +44,7 @@ import { httpRequest } from '../http-request'
 
 import { redisRequest } from '../redis-request'
 import { mongoRequest } from '../mongodb-request'
+import { mariaRequest } from '../mariadb-request'
 import { postgresRequest, PostgresParam } from '../postgres-request'
 import { ServerAlertState } from '../../interfaces/probe-status'
 import { parse } from 'pg-connection-string'
@@ -297,6 +298,48 @@ export async function doProbe({
           index: mongoRequestIndex,
         })
         mongoRequestIndex++
+      }
+    }
+
+    if (probe?.mariadb || probe?.mysql) {
+      const { id, mariadb, mysql } = probe
+      let mariaReqIndex = 0
+      let logMessage = ''
+
+      const mydb = mariadb ?? mysql
+
+      if (mydb !== undefined) {
+        for await (const mariaIndex of mydb) {
+          const { host, port, database, username, password } = mariaIndex
+
+          const mariaResult = await mariaRequest({
+            host,
+            port,
+            database,
+            username,
+            password,
+          })
+          const timeNow = new Date().toISOString()
+
+          // eslint-disable-next-line unicorn/prefer-ternary
+          if (mariadb) {
+            logMessage = `${timeNow} ${checkOrder} id:${id} mariadb:${host}:${port} ${mariaResult.responseTime}ms msg:${mariaResult.body}`
+          } else {
+            logMessage = `${timeNow} ${checkOrder} id:${id} mysql:${host}:${port} ${mariaResult.responseTime}ms msg:${mariaResult.body}`
+          }
+
+          const isAlertTriggered = mariaResult.status !== 200
+
+          responseProcessing({
+            probe: probe,
+            probeResult: mariaResult,
+            notifications: notifications,
+            logMessage: logMessage,
+            isAlertTriggered: isAlertTriggered,
+            index: mariaReqIndex,
+          })
+          mariaReqIndex++
+        }
       }
     }
 
