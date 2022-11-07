@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.14.0] - 2022-11-07
+
+## Added
+
+- Add Mariaor MySQL DB probe (#928)
+- Add Atlassian Statuspage integration (#919)
+
+## Updated
+
+- Make timeout explicit for all probe and http requests (#917)
+- Enable no-useless-catch rule (#935)
+
+## Fixed
+
+- Sending notifications when Monika is started (#934)
+- Parses integer to string (#929)
+- Auto PR JSON schema workflow (#926)
+
 ## [1.13.3] - 2022-10-17
 
 ## Added
