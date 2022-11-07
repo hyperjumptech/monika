@@ -75,7 +75,7 @@ Details of the field are given in the table below.
 | ping (optional)              | (boolean), If set true then send a PING to the specified url instead.                                                                                                                                                                                                                                                                                     |
 | allowUnauthorized (optional) | (boolean), If set to true, will make https agent to not check for ssl certificate validity                                                                                                                                                                                                                                                                |
 
-### Mariadb Request
+### Mariadb or MySQL Probes
 
 To monitor the connectivity and the health of your MariaDB database, you can use the following monika configuration:
 
