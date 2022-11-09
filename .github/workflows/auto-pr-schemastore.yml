@@ -28,6 +28,7 @@ jobs:
           cd src/schemas/json
           rm monika-config-schema.json
           wget https://raw.githubusercontent.com/hyperjumptech/monika/main/src/monika-config-schema.json
+          git commit -m "update json schema"
       
       - name: Run Test on Schema
         run : |
