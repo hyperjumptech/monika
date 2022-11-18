@@ -118,6 +118,11 @@ const PUSHOVER_NO_USER = setInvalidResponse('USER not found')
 const GOTIFY_NO_TOKEN = setInvalidResponse('TOKEN not found')
 const GOTIFY_NO_URL = setInvalidResponse('URL not found')
 
+// Pushbullet
+const PUSHBULLET_NO_TOKEN = setInvalidResponse(
+  'Token not found! You can create your Access Token at https://www.pushbullet.com/#settings'
+)
+
 // Discord
 const DISCORD_NO_URL = setInvalidResponse('Discord URL not found')
 
@@ -287,6 +292,11 @@ function validateNotification(notifications: Notification[]): Validation {
       case 'gotify': {
         if (!notification.data.token) return GOTIFY_NO_TOKEN
         if (!notification.data.url) return GOTIFY_NO_URL
+        break
+      }
+
+      case 'pushbullet': {
+        if (!notification.data.token) return PUSHBULLET_NO_TOKEN
         break
       }
 
