@@ -22,10 +22,9 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios from 'axios'
-
 import { WebhookData } from '../../../interfaces/data'
 import { NotificationMessage } from '../../../interfaces/notification'
+import { sendHttpRequest } from '../../../utils/http'
 import { log } from '../../../utils/pino'
 
 export const sendDiscord = async (
@@ -43,12 +42,13 @@ export const sendDiscord = async (
         content = content.replaceAll('\n\n', '\n')
         break
       }
+
       default:
         content = message.body
         break
     }
 
-    const res = await axios({
+    const res = await sendHttpRequest({
       method: 'POST',
       url: data.url,
       headers: {

@@ -22,50 +22,59 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { AxiosResponse } from 'axios'
-import { OpsgenieData } from '../../../interfaces/data'
-import { NotificationMessage } from '../../../interfaces/notification'
-import { sendHttpRequest } from '../../../utils/http'
+import events from '../../events'
+import type { Notification } from '../../interfaces/notification'
+import type { StatuspageNotification } from '../../plugins/visualization/atlassian-status-page'
+import { AtlassianStatusPageAPI } from '../../plugins/visualization/atlassian-status-page'
+import { getEventEmitter } from '../../utils/events'
+import { log } from '../../utils/pino'
 
-export const sendOpsgenie = async (
-  data: OpsgenieData,
-  message: NotificationMessage
-): Promise<AxiosResponse> => {
-  const notificationType =
-    message.meta.type[0].toUpperCase() + message.meta.type.substring(1)
+const eventEmitter = getEventEmitter()
 
-  let content
-  let title
-  switch (message.meta.type) {
-    case 'incident':
-    case 'recovery': {
-      title = `New ${notificationType} event from Monika`
-      content = `New ${notificationType} event from Monika\n\n${message.body}`
-      break
+eventEmitter.on(
+  events.probe.notification.willSend,
+  async ({ notifications, probeID, probeState, url }) => {
+    const isNotificationEmpty = (notifications?.length ?? 0) === 0
+    const isAtlassianStatuspageEnable: StatuspageNotification | undefined =
+      notifications.find(
+        (notification: Notification) => notification.type === 'statuspage'
+      )
+
+    if (!isNotificationEmpty && isAtlassianStatuspageEnable) {
+      const { apiKey, pageID } = isAtlassianStatuspageEnable.data
+      const atlassianStatusPageAPI = new AtlassianStatusPageAPI(apiKey, pageID)
+      const type = getNotificationType(probeState)
+
+      try {
+        if (!type) {
+          throw new Error(`probeState ${probeState} is unknown`)
+        }
+
+        const incidentID = await atlassianStatusPageAPI.notify({
+          probeID,
+          type,
+          url,
+        })
+        log.info(
+          `Atlassian status page (${type}). id: ${incidentID}, probeID: ${probeID}, url: ${url}`
+        )
+      } catch (error: any) {
+        log.error(
+          `Atlassian status page (Error). probeID: ${probeID}, url: ${url}, probeState: ${probeState} error: ${error}`
+        )
+      }
     }
-    case 'status-update': {
-      title = `Monika status update`
-      content = `New ${notificationType} event from Monika\n\n${message.body}`
-      break
-    }
-    default:
-      title = `Monika ${message.meta.type}`
-      content = message.body
-      break
   }
+)
 
-  const res = await sendHttpRequest({
-    method: 'POST',
-    url: `https://api.opsgenie.com/v2/alerts`,
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `GenieKey ${data.geniekey}`,
-    },
-    data: {
-      message: title,
-      description: content,
-    },
-  })
+function getNotificationType(probeState: string): 'incident' | 'recovery' | '' {
+  switch (probeState) {
+    case 'UP':
+      return 'recovery'
+    case 'DOWN':
+      return 'incident'
 
-  return res
+    default:
+      return ''
+  }
 }

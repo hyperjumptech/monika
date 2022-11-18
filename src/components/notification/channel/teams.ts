@@ -22,8 +22,8 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios from 'axios'
 import { NotificationMessage } from '../../../interfaces/notification'
+import { sendHttpRequest } from '../../../utils/http'
 import { TeamsData } from './../../../interfaces/data'
 
 export const sendTeams = async (
@@ -33,7 +33,7 @@ export const sendTeams = async (
   switch (message.meta.type) {
     case 'start':
     case 'termination': {
-      await axios({
+      await sendHttpRequest({
         method: 'POST',
         url: data.url,
         data: {
@@ -63,7 +63,7 @@ export const sendTeams = async (
         message.meta.type[0].toUpperCase() + message.meta.type.substring(1)
       const notifColor = message.meta.type === 'incident' ? 'DF202E' : '8CC152'
 
-      await axios({
+      await sendHttpRequest({
         method: 'POST',
         url: data.url,
         data: {
@@ -101,7 +101,7 @@ export const sendTeams = async (
     }
 
     case 'status-update': {
-      await axios({
+      await sendHttpRequest({
         method: 'POST',
         url: data.url,
         data: {

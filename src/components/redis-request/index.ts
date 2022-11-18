@@ -72,6 +72,8 @@ export async function redisRequest(
   return baseResponse
 }
 
+const CONNECTTIMEOUTMS = 10_000
+
 /**
  * sendRedisRequest actually sends the command/request to redis
  * @param {object} params is a RedisRequest type
@@ -90,6 +92,7 @@ async function sendRedisRequest(params: RedisRequest): Promise<RedisResult> {
       socket: {
         host: host,
         port: port,
+        connectTimeout: CONNECTTIMEOUTMS,
       },
       password: password,
       username: username,

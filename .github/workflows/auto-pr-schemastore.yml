@@ -12,28 +12,33 @@ on:
       - "src/monika-config-schema.json" # only run the workflow if the schema file is changed
     branches:
       - main
-
+env:
+  USERNAME: ${{ github.actor }}
+  EMAIL: ${{ github.actor}}@users.noreply.github.com
+  
 jobs:
   create-auto-PR:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         with:
-          repository: hyperjumptech/schemastore
+          repository: SchemaStore/schemastore
           token: ${{ secrets.AUTO_PR_TOKEN }}
           ref: master
-
-      - name: Sync local fork
-        run: |
-          git remote add upstream https://github.com/SchemaStore/schemastore.git
-          git pull upstream master --ff-only
-          git push origin master
 
       - name: Update schema file
         run: |
           cd src/schemas/json
           rm monika-config-schema.json
           wget https://raw.githubusercontent.com/hyperjumptech/monika/main/src/monika-config-schema.json
+          git config --global user.name "$USERNAME"
+          git config --global user.email "$EMAIL"
+          git add .
+          git commit -m "update json schema"
+      
+      - name: Run Test on Schema
+        run : |
+          make
 
       - name: Create Pull Request
         id: cpr
@@ -50,7 +55,7 @@ jobs:
           body: |
             In this PR:
             - Update config json schema to improve suggestions
-            - Update keys, default values and fix typos
+            - Update keys, default values and properties.
 
           draft: false
           delete-branch: true

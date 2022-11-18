@@ -22,20 +22,18 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios from 'axios'
-
+import { AxiosResponse } from 'axios'
 import { WebhookData } from '../../../interfaces/data'
+import { sendHttpRequest } from '../../../utils/http'
 
-export const sendWebhook = async (data: WebhookData): Promise<any> => {
-  try {
-    const res = await axios({
-      method: 'POST',
-      url: data.url,
-      data: data.body,
-    })
+export const sendWebhook = async (
+  data: WebhookData
+): Promise<AxiosResponse> => {
+  const res = await sendHttpRequest({
+    method: 'POST',
+    url: data.url,
+    data: data.body,
+  })
 
-    return res
-  } catch (error) {
-    throw error
-  }
+  return res
 }

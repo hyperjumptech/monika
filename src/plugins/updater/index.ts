@@ -34,7 +34,6 @@ import {
   move,
 } from 'fs-extra'
 import { Stream } from 'stream'
-import axios from 'axios'
 import * as os from 'os'
 import { setInterval } from 'timers'
 import { log } from '../../utils/pino'
@@ -42,6 +41,7 @@ import { format } from 'date-fns'
 import { spawn } from 'child_process'
 import * as unzipper from 'unzipper'
 import hasha from 'hasha'
+import { sendHttpRequest } from '../../utils/http'
 
 const DEFAULT_UPDATE_CHECK = 86_400 // 24 hours
 type UpdateMode = 'major' | 'minor' | 'patch'
@@ -88,9 +88,9 @@ export async function enableAutoUpdate(
 async function runUpdater(config: IConfig, updateMode: UpdateMode) {
   log.info('Updater: starting')
   const currentVersion = config.version
-  const { data } = await axios.get(
-    'https://registry.npmjs.org/@hyperjumptech/monika'
-  )
+  const { data } = await sendHttpRequest({
+    url: 'https://registry.npmjs.org/@hyperjumptech/monika',
+  })
 
   const latestVersion = data['dist-tags'].latest
   if (latestVersion === currentVersion || config.debug) {
@@ -263,13 +263,14 @@ async function downloadMonika(
   const filename = `monika-v${remoteVersion}-${platformName}-x64`
   const downloadUri = `https://github.com/hyperjumptech/monika/releases/download/v${remoteVersion}/${filename}.zip`
   log.info(`Updater: download from ${downloadUri}`)
-  const { data: downloadStream } = await axios.get(downloadUri, {
+  const { data: downloadStream } = await sendHttpRequest({
+    url: downloadUri,
     responseType: 'stream',
   })
 
-  const { data: checksum }: { data: string } = await axios.get(
-    `https://github.com/hyperjumptech/monika/releases/download/v${remoteVersion}/${filename}-CHECKSUM.txt`
-  )
+  const { data: checksum }: { data: string } = await sendHttpRequest({
+    url: `https://github.com/hyperjumptech/monika/releases/download/v${remoteVersion}/${filename}-CHECKSUM.txt`,
+  })
 
   return new Promise((resolve, reject) => {
     const targetPath = `${os.tmpdir()}/${filename}`

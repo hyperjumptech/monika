@@ -22,92 +22,88 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios from 'axios'
-
+import { AxiosResponse } from 'axios'
 import format from 'date-fns/format'
 import { DingtalkData } from '../../../interfaces/data'
 import { NotificationMessage } from '../../../interfaces/notification'
+import { sendHttpRequest } from '../../../utils/http'
 
 export const sendDingtalk = async (
   data: DingtalkData,
   message: NotificationMessage
-) => {
-  try {
-    const notificationType =
-      message.meta.type[0].toUpperCase() + message.meta.type.substring(1)
+): Promise<AxiosResponse> => {
+  const notificationType =
+    message.meta.type[0].toUpperCase() + message.meta.type.substring(1)
 
-    let content
-    let bodyJson
-    switch (message.meta.type) {
-      case 'incident':
-      case 'recovery': {
-        content = `New ${notificationType} event from Monika\n\n${message.body}`
-        bodyJson = {
-          msgtype: 'text',
-          text: {
-            content: content,
-          },
-        }
-        break
+  let content
+  let bodyJson
+  switch (message.meta.type) {
+    case 'incident':
+    case 'recovery': {
+      content = `New ${notificationType} event from Monika\n\n${message.body}`
+      bodyJson = {
+        msgtype: 'text',
+        text: {
+          content: content,
+        },
       }
-      case 'status-update': {
-        content = `Status Update ${format(
-          new Date(),
-          'yyyy-MM-dd HH:mm:ss XXX'
-        )}\n
+      break
+    }
+    case 'status-update': {
+      content = `Status Update ${format(
+        new Date(),
+        'yyyy-MM-dd HH:mm:ss XXX'
+      )}\n
 Host: ${message.meta.monikaInstance}\n
 Number of Probes: ${message.meta.numberOfProbes}\n
 Maximum Response Time: ${message.meta.maxResponseTime} ms in the last ${
-          message.meta.responseTimelogLifeTimeInHour
-        } hours\n
+        message.meta.responseTimelogLifeTimeInHour
+      } hours\n
 Minimum Response Time: ${message.meta.minResponseTime} ms in the last ${
-          message.meta.responseTimelogLifeTimeInHour
-        } hours\n
+        message.meta.responseTimelogLifeTimeInHour
+      } hours\n
 Average Response Time: ${message.meta.averageResponseTime} ms in the last ${
-          message.meta.responseTimelogLifeTimeInHour
-        } hours\n
+        message.meta.responseTimelogLifeTimeInHour
+      } hours\n
 Incidents: ${message.meta.numberOfIncidents} in the last 24 hours\n
 Recoveries: ${message.meta.numberOfRecoveries} in the last 24 hours\n
 Notifications: ${message.meta.numberOfSentNotifications}\n
  \n
 `
-        const indexTweet = message.body.indexOf('<a href')
-        let tweet = message.body.substring(indexTweet)
-        tweet = tweet.replace('<a href=', '[Tweet this status!](')
-        tweet = tweet.replace('Tweet this status!</a>', ')')
+      const indexTweet = message.body.indexOf('<a href')
+      let tweet = message.body.substring(indexTweet)
+      tweet = tweet.replace('<a href=', '[Tweet this status!](')
+      tweet = tweet.replace('Tweet this status!</a>', ')')
 
-        bodyJson = {
-          msgtype: 'markdown',
-          markdown: {
-            title: message.meta.type,
-            text: content + tweet,
-          },
-        }
-        break
+      bodyJson = {
+        msgtype: 'markdown',
+        markdown: {
+          title: message.meta.type,
+          text: content + tweet,
+        },
       }
-
-      default:
-        content = message.body
-        bodyJson = {
-          msgtype: 'text',
-          text: {
-            content: content,
-          },
-        }
-        break
+      break
     }
 
-    const res = await axios.request({
-      method: 'POST',
-      url: `https://oapi.dingtalk.com/robot/send?access_token=${data.access_token}`,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      data: bodyJson,
-    })
-
-    return res
-  } catch (error) {
-    throw error
+    default:
+      content = message.body
+      bodyJson = {
+        msgtype: 'text',
+        text: {
+          content: content,
+        },
+      }
+      break
   }
+
+  const res = await sendHttpRequest({
+    method: 'POST',
+    url: `https://oapi.dingtalk.com/robot/send?access_token=${data.access_token}`,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    data: bodyJson,
+  })
+
+  return res
 }

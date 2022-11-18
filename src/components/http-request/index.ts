@@ -22,7 +22,6 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios from 'axios'
 import * as Handlebars from 'handlebars'
 import FormData from 'form-data'
 import YAML from 'yaml'
@@ -34,6 +33,7 @@ import https from 'https'
 import { getContext } from '../../context'
 import { icmpRequest } from '../icmp-request'
 import registerFakes from '../../utils/fakes'
+import { sendHttpRequest } from '../../utils/http'
 
 // Register Handlebars helpers
 registerFakes(Handlebars)
@@ -42,9 +42,6 @@ registerFakes(Handlebars)
 // More information here: https://rakshanshetty.in/nodejs-http-keep-alive/
 const httpAgent = new http.Agent({ keepAlive: true })
 const httpsAgent = new https.Agent({ keepAlive: true })
-
-// Create an instance of axios here so it will be reused instead of creating a new one all the time.
-const axiosInstance = axios.create()
 
 type probingParams = {
   requestConfig: Omit<RequestConfig, 'saveBody' | 'alert'> // is a config object
@@ -106,24 +103,7 @@ export async function httpRequest({
   }
 
   if (body) {
-    if (typeof body === 'string') {
-      const renderBody = Handlebars.compile(body)
-      const renderedBody = renderBody({ responses })
-
-      newReq.body = renderedBody as any
-    } else {
-      for (const bk of Object.keys(body)) {
-        let rawBody = (body as any)[bk]
-        if (typeof rawBody !== 'string') {
-          rawBody = JSON.stringify(rawBody)
-        }
-
-        const renderBody = Handlebars.compile(rawBody)
-        const renderedBody = renderBody({ responses })
-
-        newReq.body = { ...newReq.body, [bk]: renderedBody }
-      }
-    }
+    newReq.body = generateRequestChainingBody(body, responses)
 
     if (newReq.headers) {
       const contentTypeKey = Object.keys(headers).find((hk) => {
@@ -163,7 +143,7 @@ export async function httpRequest({
     }
 
     // Do the request using compiled URL and compiled headers (if exists)
-    const resp = await axiosInstance.request({
+    const resp = await sendHttpRequest({
       ...newReq,
       url: renderedURL,
       data: newReq.body,
@@ -222,6 +202,17 @@ export async function httpRequest({
       responseTime,
     }
   }
+}
+
+export function generateRequestChainingBody(
+  body: JSON | string,
+  responses: ProbeRequestResponse[]
+): JSON | string {
+  const isString = typeof body === 'string'
+  const template = Handlebars.compile(isString ? body : JSON.stringify(body))
+  const renderedBody = template({ responses })
+
+  return isString ? renderedBody : JSON.parse(renderedBody)
 }
 
 function transformContentByType(content: any, contentType: string) {

@@ -24,7 +24,7 @@
 
 import ping from 'ping'
 
-const PING_TIMEOUT_S = 10 // 10 seconds timeout
+export const PING_TIMEOUT_S = 10 // 10 seconds timeout
 /**
  * sendPing() sends a ping to an address/host
  * @param host is a string
@@ -34,6 +34,3 @@ export async function sendPing(host: string): Promise<any> {
   const cleanUrl: any = host.replace(/^https?:\/\//, '') // sanitize url
   return ping.promise.probe(cleanUrl, { timeout: PING_TIMEOUT_S })
 }
-
-// some signal constants
-export const PING_TIMEDOUT = 4

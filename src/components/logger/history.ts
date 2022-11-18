@@ -89,7 +89,7 @@ export type DeleteProbeRes = {
   probeRequestIds: ProbeReqIdDate[]
 }
 
-let db: Database<SQLite3.Database, SQLite3.Statement>
+export let db: Database<SQLite3.Database, SQLite3.Statement>
 
 async function migrate() {
   await db.migrate({
@@ -304,12 +304,15 @@ export async function deleteNotificationLogs(
  * @returns Promise<void>
  */
 export async function flushAllLogs(): Promise<void> {
+  const dropAtlassianStatusPageTableSQL =
+    'DROP TABLE IF EXISTS atlassian_status_page_incidents;'
   const dropProbeRequestsTableSQL = 'DROP TABLE IF EXISTS probe_requests;'
   const dropAlertsTableSQL = 'DROP TABLE IF EXISTS alerts;'
   const dropNotificationsTableSQL = 'DROP TABLE IF EXISTS notifications;'
   const dropMigrationsTableSQL = 'DROP TABLE IF EXISTS migrations;'
 
   await Promise.all([
+    db.run(dropAtlassianStatusPageTableSQL),
     db.run(dropProbeRequestsTableSQL),
     db.run(dropAlertsTableSQL),
     db.run(dropNotificationsTableSQL),

@@ -22,14 +22,13 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios from 'axios'
-
 import { MonikaNotifData } from '../../../interfaces/data'
+import { sendHttpRequest } from '../../../utils/http'
 import { log } from '../../../utils/pino'
 
 export const sendMonikaNotif = async (data: MonikaNotifData): Promise<any> => {
   try {
-    const res = await axios({
+    const res = await sendHttpRequest({
       method: 'POST',
       url: data.url,
       data: data.body,

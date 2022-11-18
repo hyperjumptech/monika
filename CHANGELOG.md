@@ -5,6 +5,52 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.14.0] - 2022-11-07
+
+## Added
+
+- Add Mariaor MySQL DB probe (#928)
+- Add Atlassian Statuspage integration (#919)
+
+## Updated
+
+- Make timeout explicit for all probe and http requests (#917)
+- Enable no-useless-catch rule (#935)
+
+## Fixed
+
+- Sending notifications when Monika is started (#934)
+- Parses integer to string (#929)
+- Auto PR JSON schema workflow (#926)
+
+## [1.13.3] - 2022-10-17
+
+## Added
+
+- Add PostgreSQL probe type (#892)
+- Add MongoDB Probe Request (#918)
+- Add new Notification Gotify (#916)
+- Add option to allow probing invalid ssl endpoint (#910)
+- Verify config file with json schema (#882)
+- Sonar-cloud workflow (#905)
+
+## Fixed
+
+- Repeating test failure (#909)
+- Update source path for sonar cloud (#911)
+- Test paths in SonarCloud workflow (#912)
+
+## Updated:
+
+- Update fake date test (#908)
+- Update sonar cloud project name (#915)
+- Update wget path (#920)
+
+## Docs
+
+- Update docs workflow (#904)
+- Update Algolia JSON (#906)
+
 ## [1.13.2] - 2022-09-29
 
 ## Added

@@ -29,52 +29,55 @@
       "description": "Monitor postgres readiness",
       "items": {
         "type": "object",
-        "additionalProperties": false,
-        "oneOf": [
+        "anyOf": [
           {
-            "required": ["host", "port", "database"]
+            "required": ["uri"],
+            "additionalProperties": false,
+            "properties": {
+              "uri": {
+                "title": "URI connection",
+                "type": "string",
+                "description": "Postgres uri connection configuration",
+                "examples": ["postgres://user:password@172.1.0.1:5432/mydb"]
+              }
+            }
           },
           {
-            "required": ["uri"]
+            "required": ["host", "port", "database"],
+            "additionalProperties": true,
+            "properties": {
+              "host": {
+                "type": "string",
+                "description": "Postgres host address to connect to",
+                "default": "172.15.0.1"
+              },
+              "port": {
+                "title": "Port",
+                "type": "integer",
+                "description": "Postgres port to connect to",
+                "default": "5432"
+              },
+              "database": {
+                "title": "Database",
+                "type": "string",
+                "description": "Name of the database",
+                "default": ""
+              },
+              "username": {
+                "title": "Username",
+                "type": "string",
+                "description": "Username with access to the database",
+                "default": ""
+              },
+              "password": {
+                "title": "Password",
+                "type": "string",
+                "description": "User's database password",
+                "default": ""
+              }
+            }
           }
-        ],
-        "properties": {
-          "host": {
-            "type": "string",
-            "description": "Postgres host address to connect to",
-            "default": "172.15.0.1"
-          },
-          "port": {
-            "title": "Port",
-            "type": "integer",
-            "description": "Postgres port to connect to",
-            "default": "5432"
-          },
-          "database": {
-            "title": "Database",
-            "type": "string",
-            "description": "Name of the database",
-            "default": ""
-          },
-          "username": {
-            "title": "Username",
-            "type": "string",
-            "description": "Username with access to the database",
-            "default": ""
-          },
-          "password": {
-            "title": "Password",
-            "type": "string",
-            "description": "User's database password",
-            "default": ""
-          },
-          "uri": {
-            "title": "URI connection",
-            "type": "string",
-            "description": "Postgres uri connection configuration",
-            "examples": ["postgres://user:password@172.1.0.1:5432/mydb"]
-          }
-        }
+        ]
       }
     },
     "redis": {
@@ -127,15 +130,15 @@
             "title": "MongoDB URI",
             "description": "The hostname or IP address of the MongoDB server",
             "type": "string",
-            "examples": ["mongodb://127.0.0.1:27017"],
-            "default": ""
+            "examples": ["mongodb://user:password@127.0.0.1:27017/database"],
+            "default": "mongodb://127.0.0.1:27017"
           },
           "host": {
             "title": "MongoDB host",
             "description": "The hostname or IP address of the MongoDB server",
             "type": "string",
             "examples": ["localhost", "127.0.0.1"],
-            "default": ""
+            "default": "0.0.0.0.0"
           },
           "port": {
             "title": "Port number",
@@ -155,6 +158,47 @@
             "description": "Username used for the MongoDB AUTH, if set.",
             "type": "string",
             "default": ""
+          }
+        }
+      }
+    },
+    "mariadb": {
+      "title": "MariaDB/Mysql",
+      "type": "array",
+      "description": "Monitor MariaDB/Mysql health ",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["host", "port", "username", "password", "database"],
+        "properties": {
+          "host": {
+            "title": "Database host",
+            "description": "The hostname or IP address of the database server",
+            "type": "string",
+            "examples": ["localhost", "127.0.0.1", "172.11.0.1"],
+            "default": "0.0.0.0"
+          },
+          "port": {
+            "title": "Port number",
+            "description": "Port number used by your database server",
+            "type": "integer",
+            "default": "3306"
+          },
+          "username": {
+            "title": "Username",
+            "description": "User with access to the database",
+            "type": "string",
+            "default": ""
+          },
+          "password": {
+            "title": "Password",
+            "description": "User password for authentication",
+            "type": "string",
+            "default": ""
+          },
+          "database": {
+            "title": "Database",
+            "default": "Name of the database"
           }
         }
       }
@@ -367,6 +411,12 @@
           },
           "mongo": {
             "$ref": "#/definitions/mongo"
+          },
+          "mariadb": {
+            "$ref": "#/definitions/mariadb"
+          },
+          "mysql": {
+            "$ref": "#/definitions/mariadb"
           },
           "requests": {
             "$ref": "#/definitions/requests"
@@ -777,6 +827,38 @@
                   "password": {
                     "type": "string",
                     "description": "The password set for your username"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "title": "Statuspage",
+            "type": "object",
+            "required": ["id", "type", "data"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Notification identity number",
+                "default": "statuspage"
+              },
+              "type": {
+                "const": "statuspage"
+              },
+              "data": {
+                "type": "object",
+                "description": "Data for your payload",
+                "additionalProperties": false,
+                "required": ["pageID", "apiKey"],
+                "properties": {
+                  "apiKey": {
+                    "type": "string",
+                    "description": "Statuspage API key"
+                  },
+                  "pageID": {
+                    "type": "string",
+                    "description": "Statuspage page ID "
                   }
                 }
               }

@@ -35,6 +35,10 @@ import type { SymonConfig } from '../reporter'
 import { newPagerDuty } from '../notification/channel/pagerduty'
 import { getContext } from '../../context'
 import { validateConfigFile } from '../config/validate-config'
+import {
+  slug as atlassianStatuspageSlug,
+  validateConfig as atlassianStatuspageValidateConfig,
+} from '../../plugins/visualization/atlassian-status-page'
 
 const HTTPMethods = new Set([
   'DELETE',
@@ -198,6 +202,16 @@ function validateNotification(notifications: Notification[]): Validation {
         break
       }
 
+      case atlassianStatuspageSlug: {
+        const error = atlassianStatuspageValidateConfig(notification.data)
+
+        if (error) {
+          return setInvalidResponse(error)
+        }
+
+        break
+      }
+
       case 'telegram': {
         break
       }
@@ -332,6 +346,8 @@ export const validateConfig = (configuration: Config): Validation => {
       redis,
       mongo,
       postgres,
+      mariadb,
+      mysql,
     } = probe
     const socketAlerts = socket?.alerts ?? []
     const tcpConfigError = validateTCPConfig(socket)
@@ -362,6 +378,8 @@ export const validateConfig = (configuration: Config): Validation => {
       (redis ? 1 : 0) +
       (mongo ? 1 : 0) +
       (postgres ? 1 : 0) +
+      (mariadb ? 1 : 0) +
+      (mysql ? 1 : 0) +
       (requests?.length ?? 0)
     if (totalProbes === 0) return PROBE_NO_REQUESTS
 

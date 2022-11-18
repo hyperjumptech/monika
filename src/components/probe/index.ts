@@ -44,6 +44,7 @@ import { httpRequest } from '../http-request'
 
 import { redisRequest } from '../redis-request'
 import { mongoRequest } from '../mongodb-request'
+import { mariaRequest } from '../mariadb-request'
 import { postgresRequest, PostgresParam } from '../postgres-request'
 import { ServerAlertState } from '../../interfaces/probe-status'
 import { parse } from 'pg-connection-string'
@@ -83,6 +84,7 @@ const probeSendNotification = async (data: ProbeSendNotification) => {
 
   eventEmitter.emit(events.probe.notification.willSend, {
     probeID: probe.id,
+    notifications: notifications ?? [],
     url: url,
     probeState: statusString,
     validation,
@@ -100,7 +102,7 @@ const probeSendNotification = async (data: ProbeSendNotification) => {
 }
 
 // Probes Thresholds processed, Send out notifications/alerts.
-async function checkThresholdsAndSendAlert(
+function checkThresholdsAndSendAlert(
   data: ProbeStatusProcessed,
   requestLog: RequestLog
 ) {
@@ -114,32 +116,46 @@ async function checkThresholdsAndSendAlert(
 
   const { flags } = getContext()
   const isSymonMode = Boolean(flags.symonUrl) && Boolean(flags.symonKey)
+  const probeStatesWithValidAlert = getProbeStatesWithValidAlert(
+    statuses || [],
+    isSymonMode
+  )
 
-  statuses
-    ?.filter((probeState) => probeState.shouldSendNotification)
-    ?.forEach((probeState, index) => {
-      if (isSymonMode && probeState.isFirstTime) {
-        return
-      }
+  probeStatesWithValidAlert.forEach((probeState, index) => {
+    const { alertQuery, state } = probeState
 
-      probeSendNotification({
-        index,
-        probe,
-        probeState,
-        notifications,
-        requestIndex,
-        validatedResponseStatuses,
-      }).catch((error: Error) => log.error(error.message))
+    probeSendNotification({
+      index,
+      probe,
+      probeState,
+      notifications,
+      requestIndex,
+      validatedResponseStatuses,
+    }).catch((error: Error) => log.error(error.message))
 
-      requestLog.addNotifications(
-        (notifications ?? []).map((notification) => ({
-          notification,
-          type:
-            probeState?.state === 'DOWN' ? 'NOTIFY-INCIDENT' : 'NOTIFY-RECOVER',
-          alertQuery: probeState?.alertQuery || '',
-        }))
-      )
-    })
+    requestLog.addNotifications(
+      (notifications ?? []).map((notification) => ({
+        notification,
+        type: state === 'DOWN' ? 'NOTIFY-INCIDENT' : 'NOTIFY-RECOVER',
+        alertQuery: alertQuery || '',
+      }))
+    )
+  })
+}
+
+export function getProbeStatesWithValidAlert(
+  probeStates: ServerAlertState[],
+  isSymonMode: boolean
+): ServerAlertState[] {
+  return probeStates.filter(
+    ({ isFirstTime, shouldSendNotification, state }) => {
+      // ignore first up event for non Symon mode
+      const isFirstUpEvent = isFirstTime && state === 'UP'
+      const isFirstUpEventForNonSymonMode = isFirstUpEvent && !isSymonMode
+
+      return shouldSendNotification && !isFirstUpEventForNonSymonMode
+    }
+  )
 }
 
 type respProsessingParams = {
@@ -203,9 +219,7 @@ async function responseProcessing({
       validatedResponseStatuses: validatedResponse,
     },
     requestLog
-  ).catch((error) => {
-    requestLog.addError(error.message)
-  })
+  )
 
   if (verboseLogs || requestLog.hasIncidentOrRecovery) {
     requestLog.saveToDatabase().catch((error) => log.error(error.message))
@@ -284,6 +298,48 @@ export async function doProbe({
           index: mongoRequestIndex,
         })
         mongoRequestIndex++
+      }
+    }
+
+    if (probe?.mariadb || probe?.mysql) {
+      const { id, mariadb, mysql } = probe
+      let mariaReqIndex = 0
+      let logMessage = ''
+
+      const mydb = mariadb ?? mysql
+
+      if (mydb !== undefined) {
+        for await (const mariaIndex of mydb) {
+          const { host, port, database, username, password } = mariaIndex
+
+          const mariaResult = await mariaRequest({
+            host,
+            port,
+            database,
+            username,
+            password,
+          })
+          const timeNow = new Date().toISOString()
+
+          // eslint-disable-next-line unicorn/prefer-ternary
+          if (mariadb) {
+            logMessage = `${timeNow} ${checkOrder} id:${id} mariadb:${host}:${port} ${mariaResult.responseTime}ms msg:${mariaResult.body}`
+          } else {
+            logMessage = `${timeNow} ${checkOrder} id:${id} mysql:${host}:${port} ${mariaResult.responseTime}ms msg:${mariaResult.body}`
+          }
+
+          const isAlertTriggered = mariaResult.status !== 200
+
+          responseProcessing({
+            probe: probe,
+            probeResult: mariaResult,
+            notifications: notifications,
+            logMessage: logMessage,
+            isAlertTriggered: isAlertTriggered,
+            index: mariaReqIndex,
+          })
+          mariaReqIndex++
+        }
       }
     }
 
@@ -448,9 +504,7 @@ export async function doProbe({
             validatedResponseStatuses: validatedResponse,
           },
           requestLog
-        ).catch((error) => {
-          requestLog.addError(error.message)
-        })
+        )
 
         // Exit the chaining loop if there is any alert triggered
         if (validatedResponse.some((item) => item.isAlertTriggered)) {
