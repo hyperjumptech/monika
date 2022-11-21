@@ -120,7 +120,7 @@ const GOTIFY_NO_URL = setInvalidResponse('URL not found')
 
 // Pushbullet
 const PUSHBULLET_NO_TOKEN = setInvalidResponse(
-  'Token not found! You can create your Access Token at https://www.pushbullet.com/#settings'
+  'Pushbullet Access Token not found! You can create your Access Token at https://www.pushbullet.com/#settings'
 )
 
 // Discord
