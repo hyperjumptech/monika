@@ -120,6 +120,11 @@ export interface GotifyData {
   token: string
 }
 
+export interface PushbulletData {
+  token: string
+  deviceID?: string
+}
+
 export interface WebhookDataBody {
   url: string
   time: string

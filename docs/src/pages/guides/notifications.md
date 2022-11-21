@@ -27,6 +27,7 @@ At this moment, Monika support these channel of notifications (You can use just 
 16. [Dingtalk](https://hyperjumptech.github.io/monika/guides/notifications#dingtalk)
 17. [Pushover](https://hyperjumptech.github.io/monika/guides/notifications#pushover)
 18. [Opsgenie](https://hyperjumptech.github.io/monika/guides/notifications#opsgenie)
+19. [Pushbullet](https://hyperjumptech.github.io/monika/guides/notifications#pushbullet)
 
 ## Configurations
 
@@ -480,3 +481,32 @@ notifications:
 | Key      | Description                | Example                    |
 | -------- | -------------------------- | -------------------------- |
 | Geniekey | Opsgenie application token | `opsgenieApplicationToken` |
+
+## Pushbullet
+
+Monika supports Pushbullet. To enable notification via Pushbullet, you must create an account and create your access token. You can create an access token at [Pushbullet Settings Page](https://www.pushbullet.com/#settings).
+
+Optionally, you can push notifications to specific devices by running the command below:
+
+```
+curl --header 'Access-Token: <your_access_token_here>' \
+     https://api.pushbullet.com/v2/devices
+```
+
+Then, you can put the `iden` value from the API response to the `deviceID` at the Monika configuration properties.
+
+More info at [Pushbullet Documentation](https://docs.pushbullet.com/).
+
+```yml
+notifications:
+  - id: unique-id-pushbullet
+    type: pushbullet
+    data:
+      token: PUSBULLET_ACCESS_TOKEN
+      deviceID: PUSHBULLET_DEVICE_ID
+```
+
+| Key      | Description                  | Example                |
+| -------- | ---------------------------- | ---------------------- |
+| token    | Pushbullet Access Token      | `a6FJVAA0LVJKrT8k`     |
+| deviceID | Pushbullet Device Identifier | `ujpah72o0sjAoRtnM0jc` |
