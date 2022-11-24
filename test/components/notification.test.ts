@@ -65,6 +65,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          isSuccess: true,
         },
       },
       notifications: [
@@ -97,6 +98,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          isSuccess: true,
         },
       },
       notifications: [
@@ -129,6 +131,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          isSuccess: true,
         },
       },
       notifications: [
@@ -162,6 +165,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          isSuccess: true,
         },
       },
       notifications: [
@@ -196,6 +200,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          isSuccess: true,
         },
       },
       notifications: [
@@ -235,6 +240,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          isSuccess: true,
         },
       },
       notifications: [
@@ -270,6 +276,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          isSuccess: true,
         },
       },
       notifications: [
@@ -323,6 +330,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          isSuccess: true,
         },
       },
       notifications: [
@@ -359,6 +367,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          isSuccess: true,
         },
       },
       notifications: [
@@ -391,6 +400,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          isSuccess: true,
         },
       },
       notifications: [
@@ -423,6 +433,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          isSuccess: true,
         },
       },
       notifications: [
@@ -455,6 +466,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          isSuccess: true,
         },
       },
       notifications: [

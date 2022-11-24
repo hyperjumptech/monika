@@ -32,6 +32,7 @@ describe('responseChecker', () => {
       return {
         status,
         headers: {},
+        isSuccess: true,
       } as ProbeRequestResponse
     }
 
@@ -122,6 +123,7 @@ describe('responseChecker', () => {
         status: 200,
         responseTime, // milliseconds
         headers: {},
+        isSuccess: true,
       }
     }
 
