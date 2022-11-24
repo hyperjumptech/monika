@@ -46,17 +46,20 @@ export async function tcpRequest(
 ): Promise<ProbeRequestResponse<any>> {
   const { host, port, data, timeout } = param
 
-  let baseResponse: ProbeRequestResponse = {
+  const tcpResp = await tcpCheck({ host, port, data, timeout })
+
+  // map tcpResp to standard monika baseResponse
+  const baseResponse: ProbeRequestResponse = {
     requestType: 'tcp',
     data: '',
-    body: '',
-    status: 0,
-    headers: '',
-    responseTime: 0,
-  }
+    body: tcpResp.responseData || tcpResp.message || '-', // map tcp response data or any message into "http body" to be displayed
+    status: tcpResp.status === 'DOWN' ? 0 : 200, // set to 0 if down, and 200 if ok
+    headers: {},
+    responseTime: tcpResp.duration,
 
-  const tcpResp = await tcpCheck({ host, port, data, timeout })
-  baseResponse = processTCPRequestResult(tcpResp)
+    isSuccess: tcpResp.status === 'UP', // map success flag
+    errMessage: tcpResp.message, // map message if any
+  }
 
   return baseResponse
 }
@@ -119,23 +122,4 @@ async function sendTCP(tcpRequest: TCPRequest): Promise<any> {
       client.end()
     })
   })
-}
-
-// map tcp request result to monika base response
-function processTCPRequestResult({
-  duration,
-  status,
-  message,
-  responseData,
-}: TCPResult) {
-  const baseResp: ProbeRequestResponse = {
-    requestType: 'tcp',
-    data: '',
-    body: responseData || message || '-', // map tcp response data or any message into "http body" to be displayed
-    status: status === 'DOWN' ? 0 : 200, // set to 0 if down, and 200 if ok
-    headers: {},
-    responseTime: duration,
-  }
-
-  return baseResp
 }

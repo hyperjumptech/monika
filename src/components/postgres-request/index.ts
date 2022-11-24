@@ -51,6 +51,7 @@ export async function postgresRequest(
     status: 0,
     headers: '',
     responseTime: 0,
+    isSuccess: false,
   }
   const startTime = new Date()
   const result = await sendPsqlRequest(params)
@@ -61,8 +62,10 @@ export async function postgresRequest(
     baseResponse.responseTime = duration
     baseResponse.body = result.message
     baseResponse.status = 200
+    baseResponse.isSuccess = result.isAlive
   } else {
     baseResponse.body = result.message
+    baseResponse.errMessage = result.message
   }
 
   return baseResponse

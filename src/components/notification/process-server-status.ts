@@ -125,6 +125,7 @@ export const processThresholds = ({
 }) => {
   const { requests, incidentThreshold, recoveryThreshold, socket, name } = probe
   const request = requests?.[requestIndex]
+
   const id = `${probe?.id}:${name}:${requestIndex}:${
     request?.id || ''
   }-${incidentThreshold}:${recoveryThreshold} ${

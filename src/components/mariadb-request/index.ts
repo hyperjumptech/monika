@@ -21,6 +21,7 @@ export async function mariaRequest(
     status: 0,
     headers: '',
     responseTime: 0,
+    isSuccess: false,
   }
 
   const startTime = new Date()
@@ -35,6 +36,7 @@ export async function mariaRequest(
     })
   } catch (error: any) {
     baseResponse.body = error.message
+    baseResponse.errMessage = error.message
     isConnected = false
   }
 
@@ -44,7 +46,8 @@ export async function mariaRequest(
   if (isConnected) {
     baseResponse.responseTime = duration
     baseResponse.body = 'database ok'
-    baseResponse.status = 200
+    baseResponse.status = 200 // TODO: Remove http mapping
+    baseResponse.isSuccess = true
   }
 
   return baseResponse

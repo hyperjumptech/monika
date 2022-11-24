@@ -56,6 +56,7 @@ export async function icmpRequest(
     status: 0,
     headers: '',
     responseTime: 0,
+    isSuccess: false,
   }
 
   try {
@@ -72,6 +73,7 @@ export async function icmpRequest(
   } catch (error: any) {
     console.error('icmp got errror:', error)
     baseResponse.data = error // map error to data
+    baseResponse.errMessage = error
   }
 
   return baseResponse
@@ -93,5 +95,7 @@ export function processICMPRequstResult(
     body: msg,
     headers: {},
     responseTime: params.average || 0,
+
+    isSuccess: true,
   }
 }

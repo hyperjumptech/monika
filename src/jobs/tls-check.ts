@@ -74,6 +74,7 @@ export function tlsChecker(): void {
                 data: {},
                 body: {},
                 headers: {},
+                isSuccess: false,
               },
             }
 
@@ -82,7 +83,7 @@ export function tlsChecker(): void {
               notification,
               'NOTIFY-TLS',
               error.message
-            ).catch((err) => log.error(err.message))
+            ).catch((error) => log.error(error.message))
 
             // TODO: invoke sendNotifications function instead
             // looks like the sendAlerts function does not handle this
@@ -92,7 +93,7 @@ export function tlsChecker(): void {
               probeState: 'invalid',
               notifications: notifications ?? [],
               validation,
-            }).catch((err) => log.error(err.message))
+            }).catch((error) => log.error(error.message))
           })
         }
       })

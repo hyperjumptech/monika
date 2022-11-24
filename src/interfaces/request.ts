@@ -43,9 +43,12 @@ export interface ProbeRequestResponse<T = any> {
   data: T
   body: T
   status: number // TODO: Improve status management. Status as number is pretty limiting here if we want to support other protocols other than http
-  // statusMsg: string // string messge of the satus code
+
   headers: any
   responseTime: number
+
+  isSuccess: boolean // did the command/request succeed or not?
+  errMessage?: string // any error message from drivers
 }
 
 // ProbeRequest is used to define the requests that is being made.

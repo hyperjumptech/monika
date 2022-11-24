@@ -233,7 +233,7 @@ type doProbeParams = {
 }
 /**
  * doProbe sends out the http request
- * @param {object} param object parameter
+ * @param {object} doProbeParams doProbe parameter
  * @returns {Promise<void>} void
  */
 export async function doProbe({
@@ -461,17 +461,8 @@ export async function doProbe({
         responses.push(probeRes)
         requestLog.setResponse(probeRes)
 
-        // decode error message based on returned driver status
-        if ([0, 1, 2, 3, 4, 599].includes(probeRes.status)) {
-          const errorMessageMap: Record<number, string> = {
-            0: 'URI not found', // axios error
-            1: 'Connection reset', // axios error
-            2: 'Connection refused', // axios error
-            3: 'Unknown error', // axios error
-            599: 'Request Timed out', // axios error
-          }
-
-          requestLog.addError(errorMessageMap[probeRes.status])
+        if (!probeRes.isSuccess) {
+          requestLog.addError(probeRes.errMessage || '')
         }
 
         // combine global probe alerts with all individual request alerts

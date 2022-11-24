@@ -56,6 +56,7 @@ export async function mongoRequest(
     status: 0,
     headers: '',
     responseTime: 0,
+    isSuccess: false,
   }
   const startTime = new Date()
   const result = await sendMongoRequest(params)
@@ -66,8 +67,10 @@ export async function mongoRequest(
     baseResponse.responseTime = duration
     baseResponse.body = result.message
     baseResponse.status = 200 // TODO: improve this up/down flag
+    baseResponse.isSuccess = true
   } else {
     baseResponse.body = result.message
+    baseResponse.errMessage = result.message
   }
 
   return baseResponse
