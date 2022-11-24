@@ -50,6 +50,7 @@ import { sendGoogleChat } from './channel/googlechat'
 import { newPagerDuty } from './channel/pagerduty'
 import { sendPushover } from './channel/pushover'
 import { sendGotify } from './channel/gotify'
+import { sendPushbullet } from './channel/pushbullet'
 
 export class NotificationSendingError extends Error {
   notificationType: string
@@ -163,6 +164,11 @@ export async function sendNotifications(
 
           case 'gotify': {
             await sendGotify(notification.data, message)
+            break
+          }
+
+          case 'pushbullet': {
+            await sendPushbullet(notification.data, message)
             break
           }
 
