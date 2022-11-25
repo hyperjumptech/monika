@@ -41,6 +41,7 @@ import {
   PushoverData,
   GotifyData,
   OpsgenieData,
+  PushbulletData,
 } from './data'
 
 export type Notification =
@@ -64,6 +65,7 @@ export type Notification =
   | GotifyNotification
   | OpsgenieNotification
   | StatuspageNotification
+  | PushbulletNotification
 interface BaseNotification {
   id: string
 }
@@ -158,6 +160,11 @@ interface PushoverNotification extends BaseNotification {
 interface GotifyNotification extends BaseNotification {
   type: 'gotify'
   data: GotifyData
+}
+
+interface PushbulletNotification extends BaseNotification {
+  type: 'pushbullet'
+  data: PushbulletData
 }
 
 export interface NotificationMessage {

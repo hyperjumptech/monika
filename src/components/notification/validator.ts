@@ -148,3 +148,12 @@ export const dataGotifySchemaValidator = dataBaseEmailSchemaValidator(
   token: Joi.string().required().label('Gotify token'),
   url: Joi.string().required().label('Gotify url'),
 })
+
+export const dataPushbulletSchemaValidator = dataBaseEmailSchemaValidator(
+  'pushbullet'
+).keys({
+  token: Joi.string().required().label('Pushbullet token'),
+  deviceID: Joi.string()
+    .optional()
+    .label('Pushbullet device identifier (optional)'),
+})
