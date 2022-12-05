@@ -62,6 +62,9 @@ interface ProbeSendNotification extends Omit<ProbeStatusProcessed, 'statuses'> {
   probeState?: ServerAlertState
 }
 
+const connectionRecoveryMsg = `Probe is accessible again`
+const connectionIncidentMsg = `Probe not accessible`
+
 const probeSendNotification = async (data: ProbeSendNotification) => {
   const eventEmitter = getEventEmitter()
 
@@ -226,7 +229,7 @@ async function responseProcessing({
   }
 }
 
-const isConnectionUp = new Map<string, boolean>()
+const isConnectionDown = new Map<string, boolean>()
 
 type doProbeParams = {
   checkOrder: number // the order of probe being processed
@@ -466,110 +469,77 @@ export async function doProbe({
         responses.push(probeRes)
         requestLog.setResponse(probeRes)
 
-        if (probeRes.isSuccess) {
-          // combine global probe alerts with all individual request alerts
-          const probeAlerts = probe.alerts ?? []
-          const combinedAlerts = [...probeAlerts, ...(request.alerts || [])]
+        // combine global probe alerts with all individual request alerts
+        const probeAlerts = probe.alerts ?? []
+        const combinedAlerts = [...probeAlerts, ...(request.alerts || [])]
 
-          // Responses have been processed and validated
-          const validatedResponse = validateResponse(combinedAlerts, probeRes)
+        // Responses have been processed and validated
+        const validatedResponse = validateResponse(combinedAlerts, probeRes)
 
-          requestLog.addAlerts(
-            validatedResponse
-              .filter((item) => item.isAlertTriggered)
-              .map((item) => item.alert)
-          )
+        requestLog.addAlerts(
+          validatedResponse
+            .filter((item) => item.isAlertTriggered)
+            .map((item) => item.alert)
+        )
 
-          // done probing, got some result, process it, check for thresholds and notifications
-          const statuses = processThresholds({
-            probe: probe,
-            requestIndex,
-            validatedResponse,
-          })
+        // done probing, got some result, process it, check for thresholds and notifications
+        const statuses = processThresholds({
+          probe: probe,
+          requestIndex,
+          validatedResponse,
+        })
 
-          // so got connection success  that need to be reported
-          // 1. check first was this ever down?
-          // 2. record that this connection is down
+        // so we've got a status that need to be reported/alerted
+        // 1. check first, this connection is up, but was it ever down? if yes then use a specific connection recovery msg
+        // 2. if this connection is down, save to map and send specific connection incident msg
+        // 3. if event is not for connection failure, send user specified notification msg
+        if (statuses[0].shouldSendNotification) {
           if (
-            statuses[0].shouldSendNotification &&
-            isConnectionUp.get(id) === false
+            probeRes.isSuccess && // if connection is succEssful but
+            isConnectionDown.has(id) // if connection was down then send custom alert. Else use user's alert.
           ) {
             validatedResponse[0].alert = {
               assertion: '',
-              message: 'Probe is accessible again',
+              message: `${connectionRecoveryMsg}`,
             }
-            isConnectionUp.set(id, true)
-          }
-
-          // Done processing results, check if need to send out alerts
-          checkThresholdsAndSendAlert(
-            {
-              probe: probe,
-              statuses,
-              notifications: notifications,
-              requestIndex,
-              validatedResponseStatuses: validatedResponse,
-            },
-            requestLog
-          )
-
-          // Exit the chaining loop if there is any alert triggered
-          if (validatedResponse.some((item) => item.isAlertTriggered)) {
-            const triggeredAlertResponse = validatedResponse.find(
-              (item) => item.isAlertTriggered
-            )
-
-            if (triggeredAlertResponse) {
-              eventEmitter.emit(events.probe.alert.triggered, {
-                probe: probe,
-                requestIndex,
-                alertQuery: triggeredAlertResponse.alert.query,
-              })
-            }
-
-            break
-          }
-        } else {
-          requestLog.addError(probeRes.errMessage || '')
-          // If its a built-in error do
-          // 1. process threshold + alert argument custom
-          // 2. must have ProbeAlert[] for custom alert ==> unique ID
-
-          // const combinedAlerts: ProbeAlert[] = [{assertion: '', message: 'Connection failed'}]
-          const probeAlerts = probe.alerts ?? []
-          const combinedAlerts = [...probeAlerts, ...(request.alerts || [])]
-
-          const validatedResponse = validateResponse(combinedAlerts, probeRes)
-
-          // done probing, got some result, process it, check for thresholds and notifications
-          const statuses = processThresholds({
-            probe: probe,
-            requestIndex,
-            validatedResponse,
-          })
-
-          // so got connection failure that need to be reported
-          // 1. so, patch in a custom message
-          // 2. record that this connection is down
-          if (statuses[0].shouldSendNotification) {
+            isConnectionDown.delete(id) // connection is up, so remove from entry
+          } else if (!probeRes.isSuccess) {
+            // if connection has failed, then lest send out specific notification
             validatedResponse[0].alert = {
               assertion: '',
-              message: 'Probe is unreachable',
+              message: `${connectionIncidentMsg}`,
             }
-            isConnectionUp.set(id, false)
+            isConnectionDown.set(id, true) // connection is down, so add to map
+          }
+        }
+
+        // Done processing results, check if need to send out alerts
+        checkThresholdsAndSendAlert(
+          {
+            probe: probe,
+            statuses,
+            notifications: notifications,
+            requestIndex,
+            validatedResponseStatuses: validatedResponse,
+          },
+          requestLog
+        )
+
+        // Exit the chaining loop if there is any alert triggered
+        if (validatedResponse.some((item) => item.isAlertTriggered)) {
+          const triggeredAlertResponse = validatedResponse.find(
+            (item) => item.isAlertTriggered
+          )
+
+          if (triggeredAlertResponse) {
+            eventEmitter.emit(events.probe.alert.triggered, {
+              probe: probe,
+              requestIndex,
+              alertQuery: triggeredAlertResponse.alert.query,
+            })
           }
 
-          // Done processing results, check if need to send out alerts
-          checkThresholdsAndSendAlert(
-            {
-              probe: probe,
-              statuses,
-              notifications: notifications,
-              requestIndex,
-              validatedResponseStatuses: validatedResponse,
-            },
-            requestLog
-          )
+          break
         }
       } catch (error) {
         requestLog.addError((error as any).message)
