@@ -142,7 +142,6 @@ export function getProbeStatesWithValidAlert(
 ): ServerAlertState[] {
   return probeStates.filter(
     ({ isFirstTime, shouldSendNotification, state }) => {
-      // ignore first up event for non Symon mode
       const isFirstUpEvent = isFirstTime && state === 'UP'
       const isFirstUpEventForNonSymonMode = isFirstUpEvent
 
