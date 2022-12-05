@@ -226,6 +226,8 @@ async function responseProcessing({
   }
 }
 
+const isConnectionUp = new Map<string, boolean>()
+
 type doProbeParams = {
   checkOrder: number // the order of probe being processed
   probe: Probe // probe contains all the probes
@@ -441,6 +443,9 @@ export async function doProbe({
       const request = probe.requests?.[requestIndex]
       const requestLog = new RequestLog(probe, requestIndex, checkOrder)
 
+      // create id-request
+      const id = `${probe?.id}:${request.url}:${requestIndex}:${request?.id} `
+
       try {
         // intentionally wait for a request to finish before processing next request in loop
         // eslint-disable-next-line no-await-in-loop
@@ -461,57 +466,110 @@ export async function doProbe({
         responses.push(probeRes)
         requestLog.setResponse(probeRes)
 
-        if (!probeRes.isSuccess) {
-          requestLog.addError(probeRes.errMessage || '')
-        }
+        if (probeRes.isSuccess) {
+          // combine global probe alerts with all individual request alerts
+          const probeAlerts = probe.alerts ?? []
+          const combinedAlerts = [...probeAlerts, ...(request.alerts || [])]
 
-        // combine global probe alerts with all individual request alerts
-        const probeAlerts = probe.alerts ?? []
-        const combinedAlerts = [...probeAlerts, ...(request.alerts || [])]
+          // Responses have been processed and validated
+          const validatedResponse = validateResponse(combinedAlerts, probeRes)
 
-        // Responses have been processed and validated
-        const validatedResponse = validateResponse(combinedAlerts, probeRes)
-
-        requestLog.addAlerts(
-          validatedResponse
-            .filter((item) => item.isAlertTriggered)
-            .map((item) => item.alert)
-        )
-
-        // done probing, got some result, process it, check for thresholds and notifications
-        const statuses = processThresholds({
-          probe: probe,
-          requestIndex,
-          validatedResponse,
-        })
-
-        // Done processing results, check if need to send out alerts
-        checkThresholdsAndSendAlert(
-          {
-            probe: probe,
-            statuses,
-            notifications: notifications,
-            requestIndex,
-            validatedResponseStatuses: validatedResponse,
-          },
-          requestLog
-        )
-
-        // Exit the chaining loop if there is any alert triggered
-        if (validatedResponse.some((item) => item.isAlertTriggered)) {
-          const triggeredAlertResponse = validatedResponse.find(
-            (item) => item.isAlertTriggered
+          requestLog.addAlerts(
+            validatedResponse
+              .filter((item) => item.isAlertTriggered)
+              .map((item) => item.alert)
           )
 
-          if (triggeredAlertResponse) {
-            eventEmitter.emit(events.probe.alert.triggered, {
-              probe: probe,
-              requestIndex,
-              alertQuery: triggeredAlertResponse.alert.query,
-            })
+          // done probing, got some result, process it, check for thresholds and notifications
+          const statuses = processThresholds({
+            probe: probe,
+            requestIndex,
+            validatedResponse,
+          })
+
+          // so got connection success  that need to be reported
+          // 1. check first was this ever down?
+          // 2. record that this connection is down
+          if (
+            statuses[0].shouldSendNotification &&
+            isConnectionUp.get(id) === false
+          ) {
+            validatedResponse[0].alert = {
+              assertion: '',
+              message: 'Probe is accessible again',
+            }
+            isConnectionUp.set(id, true)
           }
 
-          break
+          // Done processing results, check if need to send out alerts
+          checkThresholdsAndSendAlert(
+            {
+              probe: probe,
+              statuses,
+              notifications: notifications,
+              requestIndex,
+              validatedResponseStatuses: validatedResponse,
+            },
+            requestLog
+          )
+
+          // Exit the chaining loop if there is any alert triggered
+          if (validatedResponse.some((item) => item.isAlertTriggered)) {
+            const triggeredAlertResponse = validatedResponse.find(
+              (item) => item.isAlertTriggered
+            )
+
+            if (triggeredAlertResponse) {
+              eventEmitter.emit(events.probe.alert.triggered, {
+                probe: probe,
+                requestIndex,
+                alertQuery: triggeredAlertResponse.alert.query,
+              })
+            }
+
+            break
+          }
+        } else {
+          requestLog.addError(probeRes.errMessage || '')
+          // If its a built-in error do
+          // 1. process threshold + alert argument custom
+          // 2. must have ProbeAlert[] for custom alert ==> unique ID
+
+          // const combinedAlerts: ProbeAlert[] = [{assertion: '', message: 'Connection failed'}]
+          const probeAlerts = probe.alerts ?? []
+          const combinedAlerts = [...probeAlerts, ...(request.alerts || [])]
+
+          const validatedResponse = validateResponse(combinedAlerts, probeRes)
+
+          // done probing, got some result, process it, check for thresholds and notifications
+          const statuses = processThresholds({
+            probe: probe,
+            requestIndex,
+            validatedResponse,
+          })
+
+          // so got connection failure that need to be reported
+          // 1. so, patch in a custom message
+          // 2. record that this connection is down
+          if (statuses[0].shouldSendNotification) {
+            validatedResponse[0].alert = {
+              assertion: '',
+              message: 'Probe is unreachable',
+            }
+            isConnectionUp.set(id, false)
+          }
+
+          // Done processing results, check if need to send out alerts
+          checkThresholdsAndSendAlert(
+            {
+              probe: probe,
+              statuses,
+              notifications: notifications,
+              requestIndex,
+              validatedResponseStatuses: validatedResponse,
+            },
+            requestLog
+          )
         }
       } catch (error) {
         requestLog.addError((error as any).message)
