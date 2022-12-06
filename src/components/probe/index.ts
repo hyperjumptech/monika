@@ -23,9 +23,13 @@
  **********************************************************************************/
 
 import * as mongodbURI from 'mongodb-uri'
+import { parse } from 'pg-connection-string'
+
+import { getContext } from '../../context'
 import events from '../../events'
 import { Notification } from '../../interfaces/notification'
 import { Probe } from '../../interfaces/probe'
+import { ServerAlertState } from '../../interfaces/probe-status'
 import { ProbeRequestResponse } from '../../interfaces/request'
 import validateResponse, {
   ValidatedResponse,
@@ -33,21 +37,16 @@ import validateResponse, {
 import { getEventEmitter } from '../../utils/events'
 import { log } from '../../utils/pino'
 import { setProbeFinish, setProbeRunning } from '../../utils/probe-state'
+import { httpRequest } from '../http-request'
 import { RequestLog } from '../logger'
+import { logResponseTime } from '../logger/response-time-log'
+import { mariaRequest } from '../mariadb-request'
+import { mongoRequest } from '../mongodb-request'
 import { sendAlerts } from '../notification'
 import { processThresholds } from '../notification/process-server-status'
-import { logResponseTime } from '../logger/response-time-log'
-
-import { tcpRequest } from '../tcp-request'
-import { getContext } from '../../context'
-import { httpRequest } from '../http-request'
-
+import { PostgresParam, postgresRequest } from '../postgres-request'
 import { redisRequest } from '../redis-request'
-import { mongoRequest } from '../mongodb-request'
-import { mariaRequest } from '../mariadb-request'
-import { postgresRequest, PostgresParam } from '../postgres-request'
-import { ServerAlertState } from '../../interfaces/probe-status'
-import { parse } from 'pg-connection-string'
+import { tcpRequest } from '../tcp-request'
 
 interface ProbeStatusProcessed {
   probe: Probe
@@ -114,12 +113,7 @@ function checkThresholdsAndSendAlert(
     validatedResponseStatuses,
   } = data
 
-  const { flags } = getContext()
-  const isSymonMode = Boolean(flags.symonUrl) && Boolean(flags.symonKey)
-  const probeStatesWithValidAlert = getProbeStatesWithValidAlert(
-    statuses || [],
-    isSymonMode
-  )
+  const probeStatesWithValidAlert = getProbeStatesWithValidAlert(statuses || [])
 
   probeStatesWithValidAlert.forEach((probeState, index) => {
     const { alertQuery, state } = probeState
@@ -144,14 +138,12 @@ function checkThresholdsAndSendAlert(
 }
 
 export function getProbeStatesWithValidAlert(
-  probeStates: ServerAlertState[],
-  isSymonMode: boolean
+  probeStates: ServerAlertState[]
 ): ServerAlertState[] {
   return probeStates.filter(
     ({ isFirstTime, shouldSendNotification, state }) => {
-      // ignore first up event for non Symon mode
       const isFirstUpEvent = isFirstTime && state === 'UP'
-      const isFirstUpEventForNonSymonMode = isFirstUpEvent && !isSymonMode
+      const isFirstUpEventForNonSymonMode = isFirstUpEvent
 
       return shouldSendNotification && !isFirstUpEventForNonSymonMode
     }

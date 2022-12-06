@@ -94,4 +94,8 @@ export interface Probe {
   incidentThreshold: number
   recoveryThreshold: number
   alerts: ProbeAlert[]
+  lastEvent?: {
+    createdAt?: Date
+    recoveredAt?: Date
+  }
 }
