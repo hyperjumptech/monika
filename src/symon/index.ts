@@ -27,6 +27,7 @@ import { EventEmitter } from 'events'
 import mac from 'macaddress'
 import { hostname } from 'os'
 import pako from 'pako'
+
 import {
   deleteNotificationLogs,
   deleteRequestLogs,
@@ -37,8 +38,10 @@ import { getContext } from '../context'
 import events from '../events'
 import { Config } from '../interfaces/config'
 import { Probe } from '../interfaces/probe'
+import { setPauseProbeInterval } from '../looper'
 import { ValidatedResponse } from '../plugins/validate-response'
 import { getEventEmitter } from '../utils/events'
+import { DEFAULT_TIMEOUT } from '../utils/http'
 import getIp from '../utils/ip'
 import { log } from '../utils/pino'
 import {
@@ -47,8 +50,6 @@ import {
   publicIpAddress,
   publicNetworkInfo,
 } from '../utils/public-ip'
-import { setPauseProbeInterval } from '../looper'
-import { DEFAULT_TIMEOUT } from '../utils/http'
 
 type SymonHandshakeData = {
   macAddress: string

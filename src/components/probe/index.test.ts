@@ -67,43 +67,8 @@ describe('Probe processing', () => {
       },
     ]
 
-    it('should return probe states with valid alert for Symon mode', () => {
+    it('should return probe states with valid alert', () => {
       // arrange
-      const isSymonMode = true
-      const expected: ServerAlertState[] = [
-        {
-          isFirstTime: true,
-          alertQuery: '',
-          state: 'UP',
-          shouldSendNotification: true,
-        },
-        {
-          isFirstTime: true,
-          alertQuery: '',
-          state: 'DOWN',
-          shouldSendNotification: true,
-        },
-        {
-          isFirstTime: false,
-          alertQuery: '',
-          state: 'DOWN',
-          shouldSendNotification: true,
-        },
-      ]
-
-      // act
-      const probeStatesWithValidAlert = getProbeStatesWithValidAlert(
-        probeStates,
-        isSymonMode
-      )
-
-      // assert
-      expect(probeStatesWithValidAlert).deep.eq(expected)
-    })
-
-    it('should return probe states with valid alert for non Symon mode', () => {
-      // arrange
-      const isSymonMode = false
       const expected: ServerAlertState[] = [
         {
           isFirstTime: true,
@@ -120,10 +85,8 @@ describe('Probe processing', () => {
       ]
 
       // act
-      const probeStatesWithValidAlert = getProbeStatesWithValidAlert(
-        probeStates,
-        isSymonMode
-      )
+      const probeStatesWithValidAlert =
+        getProbeStatesWithValidAlert(probeStates)
 
       // assert
       expect(probeStatesWithValidAlert).deep.eq(expected)

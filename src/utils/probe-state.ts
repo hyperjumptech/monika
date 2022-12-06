@@ -1,4 +1,3 @@
-import { subDays } from 'date-fns'
 import { assign, createMachine, EventObject, interpret } from 'xstate'
 
 import { Probe } from '../interfaces/probe'
@@ -53,11 +52,19 @@ export function initializeProbeStates(probes: Probe[]): void {
   probeInterpreters.clear()
 
   for (const probe of probes) {
+    const createdAt = probe.lastEvent?.createdAt
+      ? new Date(probe.lastEvent.createdAt)
+      : new Date()
+
+    const recoveredAt = probe.lastEvent?.recoveredAt
+      ? new Date(probe.lastEvent.recoveredAt)
+      : new Date()
+
     const interpreter = interpret(
       probeStateMachine.withContext({
         cycle: 0,
-        lastStart: subDays(new Date(), 30),
-        lastFinish: subDays(new Date(), 30),
+        lastStart: createdAt,
+        lastFinish: probe.lastEvent?.recoveredAt ? recoveredAt : createdAt,
       })
     ).start()
 
