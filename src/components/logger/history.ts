@@ -89,6 +89,13 @@ export type DeleteProbeRes = {
   probeRequestIds: ProbeReqIdDate[]
 }
 
+type Summary = {
+  numberOfProbes: number
+  numberOfIncidents: number
+  numberOfRecoveries: number
+  numberOfSentNotifications: number
+}
+
 export let db: Database<SQLite3.Database, SQLite3.Statement>
 
 async function migrate() {
@@ -168,12 +175,6 @@ const snakeToCamel = (s: string) => {
   })
 }
 
-// const camelToSnake = (s:string) => {
-//   return s.replace(/[A-Z]/g, (g: string) => {
-//     return `_${g.toLowerCase()}`
-//   })
-// }
-
 const mapObjectDbToModel = <T extends Record<string, unknown>>(
   obj: T
 ): { [K in keyof T]: T[K] extends null ? undefined : T[K] } => {
@@ -184,15 +185,6 @@ const mapObjectDbToModel = <T extends Record<string, unknown>>(
       return acc
     }, {} as any)
 }
-
-// const objectNullValueToUndefined = <T extends Record<string, unknown>>(obj: T): { [K in keyof T]: T[K] extends null ? undefined : T[K] } => {
-//   return Object.entries(obj)
-//     .map(([k, v]) => [k, v === null ? undefined : v] as [string, unknown])
-//     .reduce((acc, [k, v]) => {
-//       acc[k] = v
-//       return acc
-//     }, {} as any)
-// }
 
 /**
  * getAllLogs gets all the history table from sqlite db
@@ -459,7 +451,7 @@ export async function saveNotificationLog(
   }
 }
 
-export async function getSummary(): Promise<any> {
+export async function getSummary(): Promise<Summary> {
   const getNotificationsSummaryByTypeSQL = `SELECT type, COUNT(*) as count FROM notifications WHERE created_at > strftime('%s', datetime('now', '-24 hours')) GROUP BY type;`
 
   const notificationsSummaryByType = await db.all(
@@ -480,7 +472,7 @@ export async function getSummary(): Promise<any> {
   const config = getConfig()
 
   return {
-    numberOfProbes: config?.probes?.length ? config.probes.length : null,
+    numberOfProbes: config?.probes?.length ? config.probes.length : 0,
     numberOfIncidents,
     numberOfRecoveries,
     numberOfSentNotifications,
