@@ -42,6 +42,7 @@ export const sendTelegram = async (
       content = `New ${notificationType} event from Monika\n\n${message.body}`
       break
     }
+
     default:
       content = message.body
       break

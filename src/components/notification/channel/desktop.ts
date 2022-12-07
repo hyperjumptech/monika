@@ -37,8 +37,7 @@ interface NotifyData {
  */
 export const psEscape = (str: string): string => {
   let result = ''
-  for (let i = 0; i < str.length; i++) {
-    const ch = str[i]
+  for (const ch of str) {
     if (ch.charCodeAt(0) === 39) {
       // single quote, escape it with another single quote
       result += ch

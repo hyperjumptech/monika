@@ -22,7 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios from 'axios'
+import axios, { AxiosResponse } from 'axios'
 
 import { GotifyData } from '../../../interfaces/data'
 import { NotificationMessage } from '../../../interfaces/notification'
@@ -30,9 +30,9 @@ import { NotificationMessage } from '../../../interfaces/notification'
 export const sendGotify = async (
   data: GotifyData,
   message: NotificationMessage
-) => {
+): Promise<AxiosResponse<any>> => {
   const notificationType =
-    message.meta.type[0].toUpperCase() + message.meta.type.substring(1)
+    message.meta.type[0].toUpperCase() + message.meta.type.slice(1)
 
   let title
   let content
@@ -43,6 +43,7 @@ export const sendGotify = async (
       content = `New ${notificationType} event from Monika\n\n${message.body}`
       break
     }
+
     default:
       title = ''
       content = message.body

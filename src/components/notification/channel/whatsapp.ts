@@ -22,11 +22,18 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import type { AxiosResponse } from 'axios'
 import { LoginUserSuccessResponse } from '../../../interfaces/whatsapp'
 import { authorize } from '../../../utils/authorization'
-import { log } from 'console'
 import { WhatsappData } from '../../../interfaces/data'
 import { sendHttpRequest } from '../../../utils/http'
+
+type SendTextMessageParams = {
+  recipient: string
+  message: string
+  token: string
+  baseUrl: string
+}
 
 export const loginUser = async (data: WhatsappData): Promise<any> => {
   try {
@@ -48,7 +55,7 @@ export const loginUser = async (data: WhatsappData): Promise<any> => {
 
     if (loginResp.users?.length > 0) return loginResp.users[0].token
   } catch (error) {
-    log(
+    console.error(
       'Something wrong with your whatsapp config please check again. error:',
       error
     )
@@ -60,12 +67,7 @@ export const sendTextMessage = async ({
   message,
   token,
   baseUrl,
-}: {
-  recipient: string
-  message: string
-  token: string
-  baseUrl: string
-}) => {
+}: SendTextMessageParams): Promise<AxiosResponse<any> | void> => {
   try {
     const auth = authorize('bearer', token)
     const url = `${baseUrl}/v1/messages`
@@ -80,6 +82,7 @@ export const sendTextMessage = async ({
       data: {
         to: recipient,
         type: 'text',
+        // eslint-disable-next-line camelcase
         recipient_type: 'individual',
         text: {
           body: message,
@@ -87,9 +90,10 @@ export const sendTextMessage = async ({
       },
     })
   } catch (error) {
-    log(
-      'Something wrong with your recipient no, Please check your country code: ',
-      recipient
+    console.error(
+      'Something wrong with your recipient no, Please check your country code:',
+      recipient,
+      error
     )
   }
 }
