@@ -407,7 +407,7 @@ describe('probingHTTP', () => {
           {
             body: {
               password: '{{ responses.[0].body.otp }}',
-              otp: 789012,
+              otp: 789_012,
               siblings: [
                 '{{ responses.[0].body.password }}',
                 '{{ responses.[0].body.name.last }}',
@@ -421,7 +421,7 @@ describe('probingHTTP', () => {
               {
                 body: {
                   password: 'notsogoodpassword',
-                  otp: 123456,
+                  otp: 123_456,
                   name: {
                     first: 'John',
                     last: 'Doe',
@@ -432,7 +432,7 @@ describe('probingHTTP', () => {
             ] as ProbeRequestResponse[],
             expected: {
               password: '123456',
-              otp: 789012,
+              otp: 789_012,
               siblings: ['notsogoodpassword', 'Doe'],
               name: {
                 first: 'Jane',

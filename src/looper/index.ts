@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/consistent-destructuring */
 /**********************************************************************************
  * MIT License                                                                    *
  *                                                                                *
@@ -52,7 +51,7 @@ const DISABLE_STUN = -1 // -1 is disable stun checking
 export function sanitizeProbe(probe: Probe, id: string): Probe {
   const { name, requests, incidentThreshold, recoveryThreshold, alerts } = probe
   probe.id = `${id}`
-  probe.alerts = probe.alerts?.map((alert) => {
+  probe.alerts = alerts?.map((alert) => {
     if (alert.query) {
       return { ...alert, assertion: alert.query }
     }
@@ -169,7 +168,7 @@ export function startProbing({
       })
 
       if (finishedProbe) {
-        // eslint-disable-next-line unicorn/no-process-exit
+        // eslint-disable-next-line unicorn/no-process-exit, no-process-exit
         process.exit(0)
       }
     }

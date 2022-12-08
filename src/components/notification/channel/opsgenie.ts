@@ -32,7 +32,7 @@ export const sendOpsgenie = async (
   message: NotificationMessage
 ): Promise<AxiosResponse> => {
   const notificationType =
-    message.meta.type[0].toUpperCase() + message.meta.type.substring(1)
+    message.meta.type[0].toUpperCase() + message.meta.type.slice(1)
 
   let content
   let title
@@ -43,11 +43,13 @@ export const sendOpsgenie = async (
       content = `New ${notificationType} event from Monika\n\n${message.body}`
       break
     }
+
     case 'status-update': {
       title = `Monika status update`
       content = `New ${notificationType} event from Monika\n\n${message.body}`
       break
     }
+
     default:
       title = `Monika ${message.meta.type}`
       content = message.body

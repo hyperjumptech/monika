@@ -33,7 +33,7 @@ export const sendDingtalk = async (
   message: NotificationMessage
 ): Promise<AxiosResponse> => {
   const notificationType =
-    message.meta.type[0].toUpperCase() + message.meta.type.substring(1)
+    message.meta.type[0].toUpperCase() + message.meta.type.slice(1)
 
   let content
   let bodyJson
@@ -49,6 +49,7 @@ export const sendDingtalk = async (
       }
       break
     }
+
     case 'status-update': {
       content = `Status Update ${format(
         new Date(),
@@ -71,7 +72,7 @@ Notifications: ${message.meta.numberOfSentNotifications}\n
  \n
 `
       const indexTweet = message.body.indexOf('<a href')
-      let tweet = message.body.substring(indexTweet)
+      let tweet = message.body.slice(indexTweet)
       tweet = tweet.replace('<a href=', '[Tweet this status!](')
       tweet = tweet.replace('Tweet this status!</a>', ')')
 

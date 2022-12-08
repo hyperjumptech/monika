@@ -23,8 +23,10 @@
  **********************************************************************************/
 
 import { expect, test } from '@oclif/test'
-import { resolve } from 'path'
+import path from 'path'
 import cmd from '../../../src'
+
+const { resolve } = path
 
 describe('Prometheus plugin', () => {
   describe('success', () => {
@@ -46,7 +48,7 @@ describe('Prometheus plugin', () => {
         expect(ctx.stdout).to.contain('Starting Monika.')
         expect(res.status).to.equal(200)
 
-        // eslint-disable-next-line unicorn/no-process-exit
+        // eslint-disable-next-line unicorn/no-process-exit, no-process-exit
         process.exit(0)
       })
   })
@@ -77,7 +79,7 @@ describe('Prometheus plugin', () => {
           expect(error.response.status).to.equal(405)
         }
 
-        // eslint-disable-next-line unicorn/no-process-exit
+        // eslint-disable-next-line unicorn/no-process-exit, no-process-exit
         process.exit(0)
       })
   })
