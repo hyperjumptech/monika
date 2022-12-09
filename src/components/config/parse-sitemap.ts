@@ -30,8 +30,7 @@ import { DEFAULT_CONFIG_INTERVAL } from '.'
 
 const generateProbesFromXml = (config: any) => {
   const probes = config?.urlset?.url?.map((item: any) => {
-    // eslint-disable-next-line prefer-const
-    let requests = [
+    const requests = [
       {
         url: item?.loc,
         method: 'GET',
@@ -67,7 +66,6 @@ const generateProbesFromXmlOneProbe = (config: any) => {
 
   const resources = config?.urlset?.url
   for (const [, item] of resources.entries()) {
-    // eslint-disable-next-line prefer-const
     requests = [
       ...requests,
       {
@@ -125,6 +123,7 @@ export const parseConfigFromSitemap = (
     if (flags && flags['one-probe']) {
       probes = generateProbesFromXmlOneProbe(xmlObj)
     }
+
     return { probes }
   } catch {
     throw new Error(

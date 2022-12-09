@@ -18,19 +18,27 @@ describe('notificationChecker - pushbulletNotification', () => {
     id: 'pushbullet',
     type: 'pushbullet' as const,
   }
+  const fn = () =>
+    notificationChecker([
+      {
+        ...notificationConfig,
+        data: {
+          token: 'qwertyuiop',
+          deviceID: 'asdfghjkl',
+        } as PushbulletData,
+      },
+    ])
+  const notificationCheckerWithoutDeviceID = () =>
+    notificationChecker([
+      {
+        ...notificationConfig,
+        data: {
+          token: 'qwertyuiop',
+        } as PushbulletData,
+      },
+    ])
 
   it('should handle correct config', async () => {
-    const fn = () =>
-      notificationChecker([
-        {
-          ...notificationConfig,
-          data: {
-            token: 'qwertyuiop',
-            deviceID: 'asdfghjkl',
-          } as PushbulletData,
-        },
-      ])
-
     expect(fn).not.to.throws()
   })
 
@@ -57,16 +65,6 @@ describe('notificationChecker - pushbulletNotification', () => {
   })
 
   it('should proceed as usual without deviceID', async () => {
-    const fn = () =>
-      notificationChecker([
-        {
-          ...notificationConfig,
-          data: {
-            token: 'qwertyuiop',
-          } as PushbulletData,
-        },
-      ])
-
-    expect(fn).not.to.throws()
+    expect(notificationCheckerWithoutDeviceID).not.to.throws()
   })
 })

@@ -632,6 +632,7 @@ process.on('SIGINT', async () => {
 
   em.emit(events.application.terminated)
 
+  // eslint-disable-next-line no-process-exit
   process.exit(process.exitCode)
 })
 

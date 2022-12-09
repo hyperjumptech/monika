@@ -23,12 +23,14 @@
  **********************************************************************************/
 
 import { expect, test } from '@oclif/test'
-import { resolve } from 'path'
+import path from 'path'
 import chai from 'chai'
 import spies from 'chai-spies'
 import cmd from '../src'
 import sinon from 'sinon'
 import * as IpUtil from '../src/utils/public-ip'
+
+const { resolve } = path
 
 chai.use(spies)
 

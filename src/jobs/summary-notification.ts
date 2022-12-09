@@ -52,6 +52,13 @@ import { Notification } from '../interfaces/notification'
 import { Probe } from '../interfaces/probe'
 const eventEmitter = getEventEmitter()
 
+type TweetMessage = {
+  averageResponseTime: number
+  numberOfIncidents: number
+  numberOfProbes: number
+  numberOfRecoveries: number
+}
+
 export async function getSummaryAndSendNotif(): Promise<void> {
   const config = getConfig()
   const { notifications } = config
@@ -66,32 +73,37 @@ export async function getSummaryAndSendNotif(): Promise<void> {
       getOSName(),
       getMonikaInstance(privateIpAddress),
     ])
+    const {
+      numberOfIncidents,
+      numberOfProbes,
+      numberOfRecoveries,
+      numberOfSentNotifications,
+    } = summary
     const responseTimelogLifeTimeInHour = getLogLifeTimeInHour()
-    /* eslint-disable camelcase */
     const tweetMessage = createTweetMessage({
-      average_response_time: averageResponseTime,
-      number_of_incidents: summary.numberOfIncidents,
-      number_of_probes: summary.numberOfProbes,
-      number_of_recoveries: summary.numberOfRecoveries,
+      averageResponseTime,
+      numberOfIncidents,
+      numberOfProbes,
+      numberOfRecoveries,
     })
-    /* eslint-enable */
+
     sendNotifications(notifications, {
       subject: `Monika Status`,
       body: `Status Update ${format(new Date(), 'yyyy-MM-dd HH:mm:ss XXX')}
 Host: ${monikaInstance})
-Number of probes: ${summary.numberOfProbes}
+Number of probes: ${numberOfProbes}
 Maximum response time: ${maxResponseTime} ms in the last ${responseTimelogLifeTimeInHour} hours
 Minimum response time: ${minResponseTime} ms in the last ${responseTimelogLifeTimeInHour} hours
 Average response time: ${averageResponseTime} ms in the last ${responseTimelogLifeTimeInHour} hours
-Incidents: ${summary.numberOfIncidents} in the last 24 hours
-Recoveries: ${summary.numberOfRecoveries} in the last 24 hours
-Notifications: ${summary.numberOfSentNotifications}
+Incidents: ${numberOfIncidents} in the last 24 hours
+Recoveries: ${numberOfRecoveries} in the last 24 hours
+Notifications: ${numberOfSentNotifications}
 OS: ${osName}
 Version: ${userAgent}
 
 ${tweetMessage}
 `,
-      summary: `There are ${summary.numberOfIncidents} incidents and ${summary.numberOfRecoveries} recoveries in the last 24 hours. - ${userAgent} - ${osName}`,
+      summary: `There are ${numberOfIncidents} incidents and ${numberOfRecoveries} recoveries in the last 24 hours. - ${userAgent} - ${osName}`,
       meta: {
         type: 'status-update' as const,
         time: format(new Date(), 'yyyy-MM-dd HH:mm:ss XXX'),
@@ -189,14 +201,12 @@ eventEmitter.on(events.application.terminated, async () => {
  * @returns {string} text of the date to print
  */
 function getDaysHours(startTime: Date): string {
-  let duration = Math.abs(
-    (new Date().getTime() - new Date(startTime).getTime()) / 1_000
-  )
+  let duration = Math.abs((Date.now() - new Date(startTime).getTime()) / 1000)
   const numDays = Math.floor(duration / 86_400)
   duration -= numDays * 86_400 // get the remaining hours
 
-  const numHours = Math.floor(duration / 3_600) % 24
-  duration -= numHours * 3_600 // get the remaining minutes
+  const numHours = Math.floor(duration / 3600) % 24
+  duration -= numHours * 3600 // get the remaining minutes
 
   const numMinutes = Math.floor(duration / 60) % 60
 
@@ -239,23 +249,18 @@ export async function printSummary(cliConfig: IConfig): Promise<void> {
     log.error(`Summary notification: ${error.message}`)
   }
 }
-/* eslint-disable camelcase */
-function createTweetMessage({
-  number_of_probes,
-  average_response_time,
-  number_of_incidents,
-  number_of_recoveries,
-}: {
-  number_of_probes: number
-  average_response_time: number
-  number_of_incidents: number
-  number_of_recoveries: number
-}): string {
-  const message = `I am using Monika by @hyperjump_tech to monitor ${number_of_probes} probes! In the last 24 hours,
 
-⏱ the average response time is ${average_response_time} ms
-⚠️ there were ${number_of_incidents} incidents
-✅ and ${number_of_recoveries} recoveries!
+function createTweetMessage({
+  averageResponseTime,
+  numberOfIncidents,
+  numberOfProbes,
+  numberOfRecoveries,
+}: TweetMessage): string {
+  const message = `I am using Monika by @hyperjump_tech to monitor ${numberOfProbes} probes! In the last 24 hours,
+
+⏱ the average response time is ${averageResponseTime} ms
+⚠️ there were ${numberOfIncidents} incidents
+✅ and ${numberOfRecoveries} recoveries!
 
 Give it a try!
 
@@ -265,4 +270,3 @@ https://monika.hyperjump.tech`
     message
   )}&hashtags=opensource,monika>Tweet this status!</a>`
 }
-/* eslint-enable */

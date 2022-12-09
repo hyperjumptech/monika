@@ -21,19 +21,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  *
  * SOFTWARE.                                                                      *
  **********************************************************************************/
-/* eslint-disable camelcase */
 import cron from 'node-cron'
 import { tlsChecker } from '../jobs/tls-check'
-import { check_db_size } from '../jobs/check-database'
+import { checkDBSize } from '../jobs/check-database'
 import { getConfig } from '../components/config'
 
 export function jobsLoader(): any {
-  const { db_limit } = getConfig()
+  const { db_limit: DBLimit } = getConfig()
   // schedule TLS checker every day at 00:00
   cron.schedule('0 0 * * *', tlsChecker)
   // schedule database size check
-  if (db_limit && db_limit.cron_schedule) {
-    cron.schedule(db_limit.cron_schedule, check_db_size)
+  if (DBLimit && DBLimit.cron_schedule) {
+    cron.schedule(DBLimit.cron_schedule, checkDBSize)
   }
 }
-/* eslint-enable */

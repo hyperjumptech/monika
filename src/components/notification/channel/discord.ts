@@ -33,7 +33,7 @@ export const sendDiscord = async (
 ): Promise<any> => {
   try {
     const notificationType =
-      message.meta.type[0].toUpperCase() + message.meta.type.substring(1)
+      message.meta.type[0].toUpperCase() + message.meta.type.slice(1)
     let content
     switch (message.meta.type) {
       case 'incident':
