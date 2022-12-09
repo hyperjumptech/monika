@@ -26,7 +26,6 @@ import { getConfig } from '../components/config'
 import { saveNotificationLog } from '../components/logger/history'
 import { sendAlerts } from '../components/notification'
 import { checkTLS, TLSHostArg } from '../components/tls-checker'
-import { Notification } from '../interfaces/notification'
 import type { ValidatedResponse } from '../plugins/validate-response'
 import { log } from '../utils/pino'
 
@@ -62,7 +61,7 @@ export function tlsChecker(): void {
             alerts: [],
           }
 
-          notifications.forEach((notification: Notification) => {
+          for (const notification of notifications) {
             // TODO: Remove validation below
             // validation is used because it is needed to send alert
             const validation: ValidatedResponse = {
@@ -93,7 +92,7 @@ export function tlsChecker(): void {
               notifications: notifications ?? [],
               validation,
             }).catch((error) => log.error(error.message))
-          })
+          }
         }
       })
     })

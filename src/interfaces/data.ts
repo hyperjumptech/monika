@@ -58,6 +58,7 @@ export interface WebhookData {
 }
 
 export interface DingtalkData {
+  // eslint-disable-next-line camelcase
   access_token: string
   body: string
 }
@@ -66,16 +67,6 @@ export interface OpsgenieData {
   geniekey: string
   body: string
 }
-
-export interface MonikaNotifData {
-  url: string
-  body: MonikaNotifDataBody
-}
-
-export type MonikaNotifDataBody =
-  | MonikaAlertNotifDataBody
-  | MonikaStartAndTerminationNotifDataBody
-  | MonikaStatusUpdateNotifDataBody
 
 interface MonikaAlertNotifDataBody {
   type: 'incident' | 'recovery'
@@ -87,6 +78,7 @@ interface MonikaAlertNotifDataBody {
 
 interface MonikaStartAndTerminationNotifDataBody {
   type: 'start' | 'termination'
+  // eslint-disable-next-line camelcase
   ip_address: string
 }
 
@@ -103,9 +95,21 @@ interface MonikaStatusUpdateNotifDataBody {
   numberOfSentNotifications: string
 }
 
+export type MonikaNotifDataBody =
+  | MonikaAlertNotifDataBody
+  | MonikaStartAndTerminationNotifDataBody
+  | MonikaStatusUpdateNotifDataBody
+
+export interface MonikaNotifData {
+  url: string
+  body: MonikaNotifDataBody
+}
+
 export interface TelegramData {
+  /* eslint-disable camelcase */
   group_id: string
   bot_token: string
+  /* eslint-enable camelcase */
   body: string
 }
 
@@ -138,8 +142,10 @@ export interface WhatsappData extends MailData {
 }
 
 export interface WorkplaceData {
+  /* eslint-disable camelcase */
   thread_id: string
   access_token: string
+  /* eslint-enable camelcase */
   body: string
 }
 
@@ -148,9 +154,11 @@ export interface LarkData {
 }
 
 export interface DBLimit {
+  /* eslint-disable camelcase */
   max_db_size: number
   deleted_data: number
   cron_schedule: string
+  /* eslint-enable camelcase */
 }
 
 export interface GoogleChatData {

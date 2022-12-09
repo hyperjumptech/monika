@@ -39,11 +39,13 @@ export interface SendMessageBody {
 
 export interface User {
   token: string
+  // eslint-disable-next-line camelcase
   expires_after: string
 }
 
 export interface Meta {
   version: string
+  // eslint-disable-next-line camelcase
   api_status: string
 }
 
