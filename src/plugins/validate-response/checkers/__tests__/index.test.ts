@@ -28,16 +28,8 @@ import { ProbeRequestResponse } from '../../../../interfaces/request'
 
 describe('responseChecker', () => {
   describe('status-not-2xx', () => {
-    const generateMockedResponse = (status: number) => {
-      return {
-        status,
-        headers: {},
-        isSuccess: true,
-      } as ProbeRequestResponse
-    }
-
     it('should handle when response status is 100', () => {
-      const res = generateMockedResponse(100)
+      const res = generateMockedResponse({ status: 100 })
       const data = responseChecker(
         {
           assertion: 'response.status < 200 or response.status > 299',
@@ -50,7 +42,7 @@ describe('responseChecker', () => {
     })
 
     it('should handle when response status is 200', () => {
-      const res = generateMockedResponse(200)
+      const res = generateMockedResponse({ status: 200 })
       const data = responseChecker(
         {
           assertion: 'response.status < 200 or response.status > 299',
@@ -63,7 +55,7 @@ describe('responseChecker', () => {
     })
 
     it('should handle when response status is 201', () => {
-      const res = generateMockedResponse(201)
+      const res = generateMockedResponse({ status: 201 })
       const data = responseChecker(
         {
           assertion: 'response.status < 200 or response.status > 299',
@@ -76,7 +68,7 @@ describe('responseChecker', () => {
     })
 
     it('should handle when response status is 300', () => {
-      const res = generateMockedResponse(300)
+      const res = generateMockedResponse({ status: 300 })
       const data = responseChecker(
         {
           assertion: 'response.status < 200 or response.status > 299',
@@ -89,7 +81,7 @@ describe('responseChecker', () => {
     })
 
     it('should handle when response status is 400', () => {
-      const res = generateMockedResponse(400)
+      const res = generateMockedResponse({ status: 400 })
       const data = responseChecker(
         {
           assertion: 'response.status < 200 or response.status > 299',
@@ -102,7 +94,7 @@ describe('responseChecker', () => {
     })
 
     it('should handle when response status is 500', () => {
-      const res = generateMockedResponse(500)
+      const res = generateMockedResponse({ status: 500 })
       const data = responseChecker(
         {
           assertion: 'response.status < 200 or response.status > 299',
@@ -116,19 +108,8 @@ describe('responseChecker', () => {
   })
 
   describe('res-time-greater-than-x', () => {
-    const generateMockedResponse = (responseTime: number) => {
-      return {
-        data: '',
-        body: '',
-        status: 200,
-        responseTime, // milliseconds
-        headers: {},
-        isSuccess: true,
-      }
-    }
-
     it('seconds - should handle when response time is greater than alert defined response time', () => {
-      const res = generateMockedResponse(20_000)
+      const res = generateMockedResponse({ responseTime: 20_000 })
       const data = responseChecker(
         { assertion: 'response.time > 10000', message: '' },
         res
@@ -138,7 +119,7 @@ describe('responseChecker', () => {
     })
 
     it('seconds - should handle when response time is less than alert defined response time', () => {
-      const res = generateMockedResponse(10_000)
+      const res = generateMockedResponse({ responseTime: 10_000 })
       const data = responseChecker(
         { assertion: 'response.time > 20000', message: '' },
         res
@@ -148,7 +129,7 @@ describe('responseChecker', () => {
     })
 
     it('milliseconds - should handle when response time is greater than alert defined response time', () => {
-      const res = generateMockedResponse(20)
+      const res = generateMockedResponse({ responseTime: 20 })
       const data = responseChecker(
         { assertion: 'response.time > 10', message: '' },
         res
@@ -158,7 +139,7 @@ describe('responseChecker', () => {
     })
 
     it('milliseconds - should handle when response time is less than alert defined response time', () => {
-      const res = generateMockedResponse(10)
+      const res = generateMockedResponse({ responseTime: 10 })
       const data = responseChecker(
         { assertion: 'response.time > 20', message: '' },
         res
@@ -168,3 +149,12 @@ describe('responseChecker', () => {
     })
   })
 })
+
+function generateMockedResponse(
+  probeRequestResponse: Partial<ProbeRequestResponse>
+) {
+  return {
+    headers: {},
+    ...probeRequestResponse,
+  } as ProbeRequestResponse
+}

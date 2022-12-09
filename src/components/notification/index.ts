@@ -68,7 +68,7 @@ export class NotificationSendingError extends Error {
     // for the sake of passing test
     const notificationTypeformatted = notificationType
       .split('-')
-      .map((s) => s[0].toUpperCase() + s.substring(1))
+      .map((s) => s[0].toUpperCase() + s.slice(1))
       .join('-')
       .replace(/^smtp$/i, 'SMTP')
 
@@ -202,6 +202,7 @@ export async function sendNotifications(
               case 'termination': {
                 body = {
                   type: message.meta.type,
+                  // eslint-disable-next-line camelcase
                   ip_address: message.body,
                 }
                 break

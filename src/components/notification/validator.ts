@@ -24,7 +24,9 @@
 
 import Joi from 'joi'
 
-export const dataBaseEmailSchemaValidator = (type: string) => {
+export const dataBaseEmailSchemaValidator = (
+  type: string
+): Joi.ObjectSchema<any> => {
   return Joi.object().keys({
     recipients: Joi.array()
       .items(Joi.string().email().label(`${type} Recipients`))
@@ -71,8 +73,10 @@ export const dataSlackSchemaValidator = dataBaseEmailSchemaValidator(
 export const dataTelegramSchemaValidator = dataBaseEmailSchemaValidator(
   'Telegram'
 ).keys({
+  /* eslint-disable camelcase */
   group_id: Joi.string().required().label('Telegram Group ID'),
   bot_token: Joi.string().required().label('Telegram Bot Token'),
+  /* eslint-enable camelcase */
 })
 
 export const dataWhatsappSchemaValidator = dataBaseEmailSchemaValidator(
@@ -101,6 +105,7 @@ export const dataDiscordSchemaValidator = dataBaseEmailSchemaValidator(
 export const dataDingtalkSchemaValidator = dataBaseEmailSchemaValidator(
   'Discord'
 ).keys({
+  // eslint-disable-next-line camelcase
   access_token: Joi.string().required().label('Dingtalk access token'),
 })
 
@@ -119,8 +124,10 @@ export const dataMonikaNotifSchemaValidator = dataBaseEmailSchemaValidator(
 export const dataWorkplaceSchemaValidator = dataBaseEmailSchemaValidator(
   'Workplace'
 ).keys({
+  /* eslint-disable camelcase */
   thread_id: Joi.string().required().label('Workplace Thread ID'),
   access_token: Joi.string().required().label('Workplace Access Token'),
+  /* eslint-enable camelcase */
 })
 
 export const dataLarkSchemaValidator = dataBaseEmailSchemaValidator(

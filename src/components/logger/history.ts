@@ -263,7 +263,10 @@ export async function getUnreportedLogs(ids: string[]): Promise<UnreportedLog> {
     db
       .all(readUnreportedNotificationsSQL)
       .then(
-        (data) => data.map(mapObjectDbToModel) as UnreportedNotificationsLog[]
+        (data) =>
+          data.map((datum) =>
+            mapObjectDbToModel(datum)
+          ) as UnreportedNotificationsLog[]
       ),
   ])
 

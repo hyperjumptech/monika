@@ -35,20 +35,6 @@ describe('validateResponse', () => {
     { assertion: 'response.time > 10', message: '' },
   ]
 
-  const generateMockedResponse = (
-    status: number,
-    responseTime: number
-  ): ProbeRequestResponse => {
-    return {
-      data: '',
-      body: '',
-      status,
-      responseTime,
-      headers: {},
-      isSuccess: true,
-    }
-  }
-
   it('status-not-2xx = true && response-time-greater-than-10-ms = true', () => {
     const res = generateMockedResponse(300, 20)
     const data = validateResponse(mockedAlerts, res)
@@ -201,3 +187,17 @@ describe('validateResponse', () => {
     ])
   })
 })
+
+function generateMockedResponse(
+  status: number,
+  responseTime: number
+): ProbeRequestResponse {
+  return {
+    data: '',
+    body: '',
+    status,
+    responseTime,
+    headers: {},
+    isSuccess: true,
+  }
+}

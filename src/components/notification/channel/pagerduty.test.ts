@@ -152,9 +152,11 @@ describe('PagerDuty notification', () => {
 
       // assert
       expect(body).to.deep.eq({
+        /* eslint-disable camelcase */
         routing_key: routingKey,
         dedup_key: dedupKey,
         event_action: 'trigger',
+        /* eslint-enable camelcase */
         payload: {
           summary: summary,
           source: publicIpAddress,
@@ -208,9 +210,11 @@ describe('PagerDuty notification', () => {
 
       // assert
       expect(body).to.deep.eq({
+        /* eslint-disable camelcase */
         routing_key: routingKey,
         dedup_key: dedupKey,
         event_action: 'resolve',
+        /* eslint-enable camelcase */
       })
     })
   })

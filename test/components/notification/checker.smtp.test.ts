@@ -19,24 +19,23 @@ describe('notificationChecker - smtpNotification', () => {
     id: 'smtp',
     type: 'smtp' as const,
   }
+  const fn = () =>
+    notificationChecker([
+      {
+        ...smtpNotificationConfig,
+        data: {
+          hostname: 'hostname',
+          port: 1000,
+          username: 'username',
+          password: 'password',
+        } as SMTPData,
+      },
+    ])
 
   it('should handle success', async () => {
     chai.spy.on(smtp, 'createSmtpTransport', () => ({
       sendMail: () => true,
     }))
-
-    const fn = () =>
-      notificationChecker([
-        {
-          ...smtpNotificationConfig,
-          data: {
-            hostname: 'hostname',
-            port: 1000,
-            username: 'username',
-            password: 'password',
-          } as SMTPData,
-        },
-      ])
 
     expect(fn).not.to.throws()
   })
