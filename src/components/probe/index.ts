@@ -115,7 +115,7 @@ function checkThresholdsAndSendAlert(
 
   const probeStatesWithValidAlert = getProbeStatesWithValidAlert(statuses || [])
 
-  probeStatesWithValidAlert.forEach((probeState, index) => {
+  for (const [index, probeState] of probeStatesWithValidAlert.entries()) {
     const { alertQuery, state } = probeState
 
     probeSendNotification({
@@ -134,7 +134,7 @@ function checkThresholdsAndSendAlert(
         alertQuery: alertQuery || '',
       }))
     )
-  })
+  }
 }
 
 export function getProbeStatesWithValidAlert(
