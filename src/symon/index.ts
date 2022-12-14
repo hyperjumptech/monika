@@ -142,12 +142,19 @@ class SymonClient {
 
   private configListeners: ConfigListener[] = []
 
-  constructor(
-    url: string,
-    apiKey: string,
-    locationId?: string | undefined,
+  constructor({
+    url,
+    apiKey,
+    locationId,
+    monikaId,
+    reportInterval,
+  }: {
+    url: string
+    apiKey: string
+    locationId?: string | undefined
     monikaId?: string | undefined
-  ) {
+    reportInterval?: string | undefined
+  }) {
     this.httpClient = axios.create({
       baseURL: `${url}/api/v1/monika`,
       headers: {
@@ -165,10 +172,7 @@ class SymonClient {
       10
     )
 
-    this.reportProbesInterval = Number.parseInt(
-      process.env.REPORT_PROBES_INTERVAL ?? '10000',
-      10
-    )
+    this.reportProbesInterval = Number.parseInt(reportInterval ?? '10000', 10)
   }
 
   async initiate(): Promise<void> {
