@@ -191,6 +191,8 @@ class SymonClient {
             headers: args.validation.response.headers ?? {},
             body: args.validation.response.data,
           },
+        }).catch((error: any) => {
+          log.error(error)
         })
       }
     )
