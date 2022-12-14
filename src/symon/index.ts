@@ -156,8 +156,8 @@ class SymonClient {
     apiKey: string
     locationId?: string | undefined
     monikaId?: string | undefined
-    reportInterval?: string | undefined
-    reportLimit?: string | undefined
+    reportInterval?: number | undefined
+    reportLimit?: number | undefined
   }) {
     this.httpClient = axios.create({
       baseURL: `${url}/api/v1/monika`,
@@ -176,9 +176,9 @@ class SymonClient {
       10
     )
 
-    this.reportProbesInterval = Number.parseInt(reportInterval ?? '10000', 10)
+    this.reportProbesInterval = reportInterval ?? 1000
 
-    this.reportProbesLimit = Number.parseInt(reportLimit ?? '100', 10)
+    this.reportProbesLimit = reportLimit ?? 100
   }
 
   async initiate(): Promise<void> {

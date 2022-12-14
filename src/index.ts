@@ -123,13 +123,13 @@ class Monika extends Command {
       required: false,
     }),
 
-    symonReportInterval: Flags.string({
+    symonReportInterval: Flags.integer({
       description: 'Interval for reporting to Symon in milliseconds (optional)',
       dependsOn: ['symonKey', 'symonUrl'],
       required: false,
     }),
 
-    symonReportLimit: Flags.string({
+    symonReportLimit: Flags.integer({
       description: 'Data limit to be reported to Symon (optional)',
       dependsOn: ['symonKey', 'symonUrl'],
       required: false,
@@ -349,8 +349,8 @@ class Monika extends Command {
           apiKey: _flags.symonKey as string,
           locationId: _flags.symonLocationId as string,
           monikaId: _flags.symonMonikaId as string,
-          reportInterval: _flags.symonReportInterval as string,
-          reportLimit: _flags.symonReportLimit as string,
+          reportInterval: _flags.symonReportInterval,
+          reportLimit: _flags.symonReportLimit,
         })
         await symonClient.initiate()
         symonClient.onConfig((config) => updateConfig(config, false))
