@@ -132,6 +132,8 @@ class SymonClient {
 
   private reportProbesInterval: number // (ms)
 
+  private reportProbesLimit: number
+
   private probes: Probe[] = []
 
   eventEmitter: EventEmitter | null = null
@@ -142,12 +144,21 @@ class SymonClient {
 
   private configListeners: ConfigListener[] = []
 
-  constructor(
-    url: string,
-    apiKey: string,
-    locationId?: string | undefined,
+  constructor({
+    url,
+    apiKey,
+    locationId,
+    monikaId,
+    reportInterval,
+    reportLimit,
+  }: {
+    url: string
+    apiKey: string
+    locationId?: string | undefined
     monikaId?: string | undefined
-  ) {
+    reportInterval?: number | undefined
+    reportLimit?: number | undefined
+  }) {
     this.httpClient = axios.create({
       baseURL: `${url}/api/v1/monika`,
       headers: {
@@ -165,10 +176,9 @@ class SymonClient {
       10
     )
 
-    this.reportProbesInterval = Number.parseInt(
-      process.env.REPORT_PROBES_INTERVAL ?? '10000',
-      10
-    )
+    this.reportProbesInterval = reportInterval ?? 1000
+
+    this.reportProbesLimit = reportLimit ?? 100
   }
 
   async initiate(): Promise<void> {
@@ -321,7 +331,7 @@ class SymonClient {
     log.debug('Reporting to symon')
     try {
       const probeIds = this.probes.map((probe) => probe.id)
-      const logs = await getUnreportedLogs(probeIds)
+      const logs = await getUnreportedLogs(probeIds, this.reportProbesLimit)
 
       const requests = logs.requests
 

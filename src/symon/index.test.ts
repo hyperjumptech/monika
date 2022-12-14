@@ -1,5 +1,3 @@
-/* eslint-disable no-console */
-
 /**********************************************************************************
  * MIT License                                                                    *
  *                                                                                *
@@ -102,7 +100,10 @@ describe('Symon initiate', () => {
       }
     })
 
-    const symon = new SymonClient('http://localhost:4000', 'abcd')
+    const symon = new SymonClient({
+      url: 'http://localhost:4000',
+      apiKey: 'abcd',
+    })
     await symon.initiate()
     expect(symon.monikaId).equals('1234')
 
@@ -166,7 +167,10 @@ describe('Symon initiate', () => {
       }
     })
 
-    const symon = new SymonClient('http://localhost:4000', 'abcd')
+    const symon = new SymonClient({
+      url: 'http://localhost:4000',
+      apiKey: 'abcd',
+    })
 
     expect(symon.config).to.be.null
 
@@ -213,7 +217,10 @@ describe('Symon initiate', () => {
       }
     })
 
-    const symon = new SymonClient('http://localhost:4000', 'abcd')
+    const symon = new SymonClient({
+      url: 'http://localhost:4000',
+      apiKey: 'abcd',
+    })
     const reportSpy = sinon.spy(symon, 'report')
 
     await symon.initiate()
@@ -241,7 +248,10 @@ describe('Send incident or recovery event', () => {
       }
     })
 
-    const symon = new SymonClient('http://localhost:4000', 'abcd')
+    const symon = new SymonClient({
+      url: 'http://localhost:4000',
+      apiKey: 'abcd',
+    })
     symon.monikaId = '1234'
 
     await symon.notifyEvent({
