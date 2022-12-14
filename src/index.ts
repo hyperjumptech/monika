@@ -124,7 +124,7 @@ class Monika extends Command {
     }),
 
     symonReportInterval: Flags.string({
-      description: 'Interval for reporting to Symon (optional)',
+      description: 'Interval for reporting to Symon in milliseconds (optional)',
       dependsOn: ['symonKey', 'symonUrl'],
       required: false,
     }),
