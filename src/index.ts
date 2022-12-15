@@ -123,6 +123,18 @@ class Monika extends Command {
       required: false,
     }),
 
+    symonReportInterval: Flags.integer({
+      description: 'Interval for reporting to Symon in milliseconds (optional)',
+      dependsOn: ['symonKey', 'symonUrl'],
+      required: false,
+    }),
+
+    symonReportLimit: Flags.integer({
+      description: 'Data limit to be reported to Symon (optional)',
+      dependsOn: ['symonKey', 'symonUrl'],
+      required: false,
+    }),
+
     config: Flags.string({
       char: 'c',
       description:
@@ -332,12 +344,14 @@ class Monika extends Command {
 
       const isSymonMode = Boolean(_flags.symonUrl) && Boolean(_flags.symonKey)
       if (isSymonMode) {
-        symonClient = new SymonClient(
-          _flags.symonUrl as string,
-          _flags.symonKey as string,
-          _flags.symonLocationId as string,
-          _flags.symonMonikaId as string
-        )
+        symonClient = new SymonClient({
+          url: _flags.symonUrl as string,
+          apiKey: _flags.symonKey as string,
+          locationId: _flags.symonLocationId as string,
+          monikaId: _flags.symonMonikaId as string,
+          reportInterval: _flags.symonReportInterval,
+          reportLimit: _flags.symonReportLimit,
+        })
         await symonClient.initiate()
         symonClient.onConfig((config) => updateConfig(config, false))
       }
