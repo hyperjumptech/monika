@@ -28,6 +28,7 @@ import { setupServer } from 'msw/node'
 import { RequestInterceptor } from 'node-request-interceptor'
 import withDefaultInterceptors from 'node-request-interceptor/lib/presets/default'
 import { setContext } from '../../context'
+import type { MonikaFlags } from '../../context/monika-flags'
 import type {
   ProbeRequestResponse,
   RequestConfig,
@@ -93,7 +94,7 @@ describe('probingHTTP', () => {
       ]
 
       const results: any = []
-      const flag: { followRedirects: number } = { followRedirects: 0 }
+      const flag = { followRedirects: 0 } as unknown as MonikaFlags
       setContext({ flags: flag })
       for (let i = 0; i < 2; i++) {
         const responses: any = []
@@ -140,7 +141,7 @@ describe('probingHTTP', () => {
         timeout: 10,
       }
 
-      const flag: { followRedirects: number } = { followRedirects: 0 }
+      const flag = { followRedirects: 0 } as unknown as MonikaFlags
       setContext({ flags: flag })
       const result = await httpRequest({
         requestConfig: request,
@@ -175,8 +176,8 @@ describe('probingHTTP', () => {
         timeout: 10,
       }
 
-      const flag: { followRedirects: number } = { followRedirects: 0 }
-      setContext({ flags: flag })
+      const flags = { followRedirects: 0 } as unknown as MonikaFlags
+      setContext({ flags })
       // act
       server.listen()
       const res = await httpRequest({
@@ -218,7 +219,7 @@ describe('probingHTTP', () => {
 
       // act
       server.listen()
-      const flag: { followRedirects: number } = { followRedirects: 0 }
+      const flag = { followRedirects: 0 } as unknown as MonikaFlags
       setContext({ flags: flag })
       const res = await httpRequest({
         requestConfig: request,
@@ -259,7 +260,7 @@ describe('probingHTTP', () => {
 
       // act
       server.listen()
-      const flag: { followRedirects: number } = { followRedirects: 0 }
+      const flag = { followRedirects: 0 } as unknown as MonikaFlags
       setContext({ flags: flag })
       const res = await httpRequest({
         requestConfig: request,
@@ -301,7 +302,7 @@ describe('probingHTTP', () => {
 
       // act
       server.listen()
-      const flag: { followRedirects: number } = { followRedirects: 0 }
+      const flag = { followRedirects: 0 } as unknown as MonikaFlags
       setContext({ flags: flag })
       const res = await httpRequest({
         requestConfig: request,
@@ -343,7 +344,7 @@ describe('probingHTTP', () => {
 
       // act
       server.listen()
-      const flag: { followRedirects: number } = { followRedirects: 0 }
+      const flag = { followRedirects: 0 } as unknown as MonikaFlags
       setContext({ flags: flag })
       const res = await httpRequest({
         requestConfig: request,

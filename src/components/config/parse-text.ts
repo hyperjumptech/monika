@@ -47,7 +47,7 @@
  **********************************************************************************/
 
 import { Config } from '../../interfaces/config'
-import { DEFAULT_CONFIG_INTERVAL } from '.'
+import { monikaFlagsDefaultValue } from '../../context/monika-flags'
 import { DEFAULT_THRESHOLD } from '../../looper'
 import { Probe } from '../../interfaces/probe'
 import { isValidURL } from '../../utils/is-valid-url'
@@ -72,7 +72,7 @@ export const parseConfigFromText = (configString: string): Config => {
           ],
           incidentThreshold: DEFAULT_THRESHOLD,
           recoveryThreshold: DEFAULT_THRESHOLD,
-          interval: DEFAULT_CONFIG_INTERVAL,
+          interval: monikaFlagsDefaultValue['config-interval'],
           alerts: [
             {
               assertion: 'response.status < 200 or response.status > 299',

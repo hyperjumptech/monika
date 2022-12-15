@@ -23,13 +23,13 @@
  **********************************************************************************/
 
 import fs from 'fs'
+import type { MonikaFlags } from '../../context/monika-flags'
 import { log } from '../../utils/pino'
 import { sendHttpRequest } from '../../utils/http'
 
-export const DEFAULT_CONFIG_FILENAME = 'monika.yml'
+export const createConfigFile = async (flags: MonikaFlags): Promise<string> => {
+  const filename = flags['config-filename']
 
-export const createConfigFile = async (flags: any): Promise<string> => {
-  const filename: string = flags['config-filename'] || DEFAULT_CONFIG_FILENAME
   try {
     const url =
       'https://raw.githubusercontent.com/hyperjumptech/monika/main/monika.example.yml'
