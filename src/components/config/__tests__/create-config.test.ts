@@ -26,6 +26,7 @@ import { expect } from 'chai'
 import fs from 'fs'
 import _ from 'lodash'
 
+import type { MonikaFlags } from '../../../context/monika-flags'
 import { createConfig } from '../'
 
 beforeEach(() => {
@@ -60,7 +61,7 @@ describe('Har config', () => {
       const flags = {
         har: './src/components/config/__tests__/form_encoded.har',
         output: 'monika.har.yml',
-      }
+      } as MonikaFlags
       await createConfig(flags)
       expect(fs.lstatSync('monika.har.yml').isFile()).to.be.true
 
@@ -81,7 +82,7 @@ describe('Text config', () => {
         text: './src/components/config/__tests__/textfile',
         output: 'monika.textfile.yml',
         force: true,
-      }
+      } as MonikaFlags
       await createConfig(flags)
       expect(fs.lstatSync('monika.textfile.yml').isFile()).to.be.true
 
@@ -101,7 +102,7 @@ describe('Sitemap config', () => {
       const flags = {
         sitemap: './src/components/config/__tests__/sitemap.xml',
         output: 'monika.sitemap.yml',
-      }
+      } as MonikaFlags
       await createConfig(flags)
       expect(fs.lstatSync('monika.sitemap.yml').isFile()).to.be.true
 
@@ -122,7 +123,7 @@ describe('Sitemap config [--one-probe ]', () => {
         sitemap: './src/components/config/__tests__/sitemap.xml',
         output: 'monika.sitemap.yml',
         'one-probe': true,
-      }
+      } as MonikaFlags
       await createConfig(flags)
       expect(fs.lstatSync('monika.sitemap.yml').isFile()).to.be.true
 
@@ -165,7 +166,7 @@ describe('Postman config', () => {
         postman:
           './src/components/config/__tests__/mock_files/basic-postman_collection-v2.0.json',
         output: 'monika.postman-basic.yml',
-      }
+      } as MonikaFlags
 
       await createConfig(flags)
       expect(fs.lstatSync('monika.postman-basic.yml').isFile()).to.be.true
@@ -179,7 +180,7 @@ describe('Postman config', () => {
         postman:
           './src/components/config/__tests__/mock_files/basic-postman_collection-v2.1.json',
         output: 'monika.postman-basic.yml',
-      }
+      } as MonikaFlags
 
       await createConfig(flags)
       expect(fs.lstatSync('monika.postman-basic.yml').isFile()).to.be.true
@@ -193,7 +194,7 @@ describe('Postman config', () => {
         postman:
           './src/components/config/__tests__/mock_files/grouped-postman_collection-v2.0.json',
         output: 'monika.postman-grouped.yml',
-      }
+      } as MonikaFlags
 
       await createConfig(flags)
       expect(fs.lstatSync('monika.postman-grouped.yml').isFile()).to.be.true
@@ -207,7 +208,7 @@ describe('Postman config', () => {
         postman:
           './src/components/config/__tests__/mock_files/grouped-postman_collection-v2.1.json',
         output: 'monika.postman-grouped.yml',
-      }
+      } as MonikaFlags
 
       await createConfig(flags)
       expect(fs.lstatSync('monika.postman-grouped.yml').isFile()).to.be.true
@@ -224,7 +225,7 @@ describe('Insomnia config', () => {
       const flags = {
         insomnia: './src/components/config/__tests__/petstore.insomnia.yaml',
         output: 'monika.insomnia.yml',
-      }
+      } as MonikaFlags
       await createConfig(flags)
       expect(fs.lstatSync('monika.insomnia.yml').isFile()).to.be.true
 
