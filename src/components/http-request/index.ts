@@ -147,7 +147,7 @@ export async function httpRequest({
       ...newReq,
       url: renderedURL,
       data: newReq.body,
-      maxRedirects: flags.followRedirects,
+      maxRedirects: flags['follow-redirects'],
       httpAgent,
       httpsAgent: optHttpsAgent,
     })
