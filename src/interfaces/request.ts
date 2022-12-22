@@ -47,7 +47,7 @@ export interface ProbeRequestResponse<T = any> {
   headers: any
   responseTime: number
 
-  isSuccess: boolean // did the command/request succeed or not?
+  isProbeResponsive: boolean // did the command/request response to requests/queries?
   errMessage?: string // any error message from drivers
 }
 

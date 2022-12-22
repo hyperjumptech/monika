@@ -487,7 +487,7 @@ export async function doProbe({
         // 3. if event is not for connection failure, send user specified notification msg
         if (statuses[0].shouldSendNotification) {
           if (
-            probeRes.isSuccess && // if connection is succEssful but
+            probeRes.isProbeResponsive && // if connection is succEssful but
             isConnectionDown.has(id) // if connection was down then send custom alert. Else use user's alert.
           ) {
             validatedResponse[0].alert = {
@@ -495,7 +495,7 @@ export async function doProbe({
               message: `${connectionRecoveryMsg}`,
             }
             isConnectionDown.delete(id) // connection is up, so remove from entry
-          } else if (!probeRes.isSuccess) {
+          } else if (!probeRes.isProbeResponsive) {
             // if connection has failed, then lest send out specific notification
             validatedResponse[0].alert = {
               assertion: '',

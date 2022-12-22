@@ -55,7 +55,7 @@ export async function redisRequest(
     status: 0,
     headers: '',
     responseTime: 0,
-    isSuccess: false,
+    isProbeResponsive: false,
   }
   const startTime = new Date()
   const result = await sendRedisRequest(params)
@@ -66,7 +66,7 @@ export async function redisRequest(
     baseResponse.responseTime = duration
     baseResponse.body = result.message
     baseResponse.status = 200 // TODO: improve this up/down flag
-    baseResponse.isSuccess = true
+    baseResponse.isProbeResponsive = true
   } else {
     baseResponse.body = result.message
     baseResponse.errMessage = result.message

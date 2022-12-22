@@ -52,7 +52,7 @@ describe('validateResponse', () => {
           responseTime: 20,
           headers: {},
           status: 300,
-          isSuccess: true,
+          isProbeResponsive: true,
         },
       },
       {
@@ -66,7 +66,7 @@ describe('validateResponse', () => {
           responseTime: 20,
           headers: {},
           status: 300,
-          isSuccess: true,
+          isProbeResponsive: true,
         },
         isAlertTriggered: true,
       },
@@ -89,7 +89,7 @@ describe('validateResponse', () => {
           responseTime: 20,
           headers: {},
           status: 200,
-          isSuccess: true,
+          isProbeResponsive: true,
         },
         isAlertTriggered: false,
       },
@@ -104,7 +104,7 @@ describe('validateResponse', () => {
           responseTime: 20,
           headers: {},
           status: 200,
-          isSuccess: true,
+          isProbeResponsive: true,
         },
         isAlertTriggered: true,
       },
@@ -127,7 +127,7 @@ describe('validateResponse', () => {
           responseTime: 10,
           headers: {},
           status: 300,
-          isSuccess: true,
+          isProbeResponsive: true,
         },
         isAlertTriggered: true,
       },
@@ -142,7 +142,7 @@ describe('validateResponse', () => {
           responseTime: 10,
           headers: {},
           status: 300,
-          isSuccess: true,
+          isProbeResponsive: true,
         },
         isAlertTriggered: false,
       },
@@ -165,7 +165,7 @@ describe('validateResponse', () => {
           responseTime: 10,
           headers: {},
           status: 200,
-          isSuccess: true,
+          isProbeResponsive: true,
         },
         isAlertTriggered: false,
       },
@@ -180,7 +180,7 @@ describe('validateResponse', () => {
           responseTime: 10,
           headers: {},
           status: 200,
-          isSuccess: true,
+          isProbeResponsive: true,
         },
         isAlertTriggered: false,
       },
@@ -191,7 +191,7 @@ describe('validateResponse', () => {
 function generateMockedResponse(
   status: number,
   responseTime: number,
-  isSuccess: boolean
+  isProbeResponsive: boolean
 ): ProbeRequestResponse {
   return {
     data: '',
@@ -199,6 +199,6 @@ function generateMockedResponse(
     status,
     responseTime,
     headers: {},
-    isSuccess,
+    isProbeResponsive,
   }
 }

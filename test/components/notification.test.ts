@@ -65,7 +65,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
-          isSuccess: true,
+          isProbeResponsive: true,
         },
       },
       notifications: [
@@ -98,7 +98,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
-          isSuccess: true,
+          isProbeResponsive: true,
         },
       },
       notifications: [
@@ -131,7 +131,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
-          isSuccess: true,
+          isProbeResponsive: true,
         },
       },
       notifications: [
@@ -165,7 +165,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
-          isSuccess: true,
+          isProbeResponsive: true,
         },
       },
       notifications: [
@@ -200,7 +200,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
-          isSuccess: true,
+          isProbeResponsive: true,
         },
       },
       notifications: [
@@ -240,7 +240,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
-          isSuccess: true,
+          isProbeResponsive: true,
         },
       },
       notifications: [
@@ -276,7 +276,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
-          isSuccess: true,
+          isProbeResponsive: true,
         },
       },
       notifications: [
@@ -330,7 +330,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
-          isSuccess: true,
+          isProbeResponsive: true,
         },
       },
       notifications: [
@@ -367,7 +367,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
-          isSuccess: true,
+          isProbeResponsive: true,
         },
       },
       notifications: [
@@ -400,7 +400,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
-          isSuccess: true,
+          isProbeResponsive: true,
         },
       },
       notifications: [
@@ -433,7 +433,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
-          isSuccess: true,
+          isProbeResponsive: true,
         },
       },
       notifications: [
@@ -466,7 +466,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
-          isSuccess: true,
+          isProbeResponsive: true,
         },
       },
       notifications: [

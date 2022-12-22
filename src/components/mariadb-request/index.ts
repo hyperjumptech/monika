@@ -45,7 +45,7 @@ export async function mariaRequest(
     status: 0,
     headers: '',
     responseTime: 0,
-    isSuccess: false,
+    isProbeResponsive: false,
   }
 
   const startTime = new Date()
@@ -71,7 +71,7 @@ export async function mariaRequest(
     baseResponse.responseTime = duration
     baseResponse.body = 'database ok'
     baseResponse.status = 200 // TODO: Remove http mapping
-    baseResponse.isSuccess = true
+    baseResponse.isProbeResponsive = true
   }
 
   return baseResponse

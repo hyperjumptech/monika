@@ -33,7 +33,7 @@ describe('queryExpression', () => {
       status: 200,
       headers: {},
       responseTime: 150,
-      isSuccess: true,
+      isProbeResponsive: true,
     }
 
     const result = queryExpression(res, 'response.time > 1000')
@@ -48,7 +48,7 @@ describe('queryExpression', () => {
       status: 200,
       headers: {},
       responseTime: 200,
-      isSuccess: true,
+      isProbeResponsive: true,
     }
 
     const result = queryExpression(res, 'response.status != 200')
@@ -63,7 +63,7 @@ describe('queryExpression', () => {
       status: 200,
       headers: { 'content-length': 2000 },
       responseTime: 200,
-      isSuccess: true,
+      isProbeResponsive: true,
     }
 
     const result = queryExpression(res, 'response.size < 1000')
@@ -78,7 +78,7 @@ describe('queryExpression', () => {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
       responseTime: 200,
-      isSuccess: true,
+      isProbeResponsive: true,
     }
 
     const result = queryExpression(
@@ -100,7 +100,7 @@ describe('queryExpression', () => {
       body: {
         message: 'Hello',
       },
-      isSuccess: true,
+      isProbeResponsive: true,
     }
 
     const result = queryExpression(

@@ -73,7 +73,7 @@ export function tlsChecker(): void {
                 data: {},
                 body: {},
                 headers: {},
-                isSuccess: false,
+                isProbeResponsive: false,
               },
             }
 
