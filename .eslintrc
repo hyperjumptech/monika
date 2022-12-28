@@ -12,6 +12,5 @@
                 "unicorn/filename-case": "off"
             }
         }
-    ],
-    "env": {"node": true}
+    ]
 }
