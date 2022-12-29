@@ -3,8 +3,7 @@
     "rules": {
         "no-use-before-define": ["warn", "nofunc"],
         "unicorn/prefer-node-protocol": "off",
-        "unicorn/no-array-reduce": "warn",
-        "unicorn/no-array-for-each": "warn"
+        "unicorn/no-array-reduce": "warn"
     },
     "overrides": [
         {
@@ -13,5 +12,6 @@
                 "unicorn/filename-case": "off"
             }
         }
-    ]
+    ],
+    "env": {"node": true}
 }
