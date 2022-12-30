@@ -11,28 +11,12 @@ on:
         branches: [main]
 
 jobs:
-    build-on-node-14:
-        runs-on: ubuntu-latest
-
-        steps:
-            - uses: actions/checkout@v3
-            - name: Use Node.js 14.x
-              uses: actions/setup-node@v3
-              with:
-                  node-version: 14.x
-            - run: npm ci
-            - run: npm run build --if-present
-            - run: npm test && npx codecov
-            - run: npm pack
-            - run: npm install -g ./hyperjumptech-monika-*.tgz
-            - run: npm run prod_test
-
     build:
         runs-on: ubuntu-latest
 
         strategy:
             matrix:
-                node-version: [16.14, 18.x]
+                node-version: [14.x, 16.14]
                 # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
         steps:
@@ -41,6 +25,22 @@ jobs:
               uses: actions/setup-node@v3
               with:
                   node-version: ${{ matrix.node-version }}
+            - run: npm ci
+            - run: npm run build --if-present
+            - run: npm test && npx codecov
+            - run: npm pack
+            - run: npm install -g ./hyperjumptech-monika-*.tgz
+            - run: npm run prod_test
+
+    build-on-node-js-18:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v3
+            - name: Use Node.js 18.x
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 18.x
             - run: npm ci
             - run: npm run build --if-present
             - run: NODE_OPTIONS='--no-experimental-fetch' npm test && npx codecov
