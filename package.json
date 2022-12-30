@@ -37,7 +37,7 @@
     "start": "npm run prepack && ./bin/dev",
     "start:windows": "npm run prepack && /bin/dev",
     "start:prod": "npm run prepack && ./bin/run",
-    "test": "npm run clean && cross-env NODE_ENV=test nyc --reporter=lcov --extension .ts mocha --config .mocharc.json --forbid-only \"{src,test}/**/*.test.ts\" --exclude test/cli.test.ts",
+    "test": "npm run clean && cross-env NODE_ENV=test NODE_OPTIONS='--no-experimental-fetch' nyc --reporter=lcov --extension .ts mocha --config .mocharc.json --forbid-only \"{src,test}/**/*.test.ts\" --exclude test/cli.test.ts",
     "cli-test": "npx bats test/bats/cli.bats",
     "prod_test": "npx bats prod_test/test.bats",
     "version": "oclif readme && git add README.md",
@@ -195,7 +195,6 @@
     "outputPath": "dist"
   },
   "volta": {
-    "node": "16.16.0",
-    "npm": "8.19.0"
+    "node": "18.12.1"
   }
 }
