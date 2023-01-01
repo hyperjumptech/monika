@@ -26,19 +26,21 @@ import axios, { AxiosInstance } from 'axios'
 import { EventEmitter } from 'events'
 import mac from 'macaddress'
 import { hostname } from 'os'
-import pako from 'pako'
+// import pako from 'pako'
+import Bree from 'bree'
+import path from 'path'
 
-import {
-  deleteNotificationLogs,
-  deleteRequestLogs,
-  getUnreportedLogs,
-} from '../components/logger/history'
+// import {
+//   deleteNotificationLogs,
+//   deleteRequestLogs,
+//   getUnreportedLogs,
+// } from '../components/logger/history'
 import { getOSName } from '../components/notification/alert-message'
 import { getContext } from '../context'
 import events from '../events'
 import { Config } from '../interfaces/config'
 import { Probe } from '../interfaces/probe'
-import { setPauseProbeInterval } from '../looper'
+// import { setPauseProbeInterval } from '../looper'
 import { ValidatedResponse } from '../plugins/validate-response'
 import { getEventEmitter } from '../utils/events'
 import { DEFAULT_TIMEOUT } from '../utils/http'
@@ -50,6 +52,9 @@ import {
   publicIpAddress,
   publicNetworkInfo,
 } from '../utils/public-ip'
+
+// eslint-disable-next-line unicorn/prefer-module
+Bree.extend(require('@breejs/ts-worker'))
 
 type SymonHandshakeData = {
   macAddress: string
@@ -130,7 +135,7 @@ class SymonClient {
 
   private fetchProbesInterval: number // (ms)
 
-  private reportProbesInterval: number // (ms)
+  private reportProbesInterval = 10_000 // (ms)
 
   private reportProbesLimit: number
 
@@ -143,6 +148,23 @@ class SymonClient {
   private locationId: string
 
   private configListeners: ConfigListener[] = []
+
+  private bree = new Bree({
+    root: false,
+    jobs: [],
+    interval: this.reportProbesInterval,
+    logger: log,
+    doRootCheck: false,
+    errorHandler: (error, workerMetadata) => {
+      log.error(error)
+      log.debug(workerMetadata)
+    },
+    outputWorkerMetadata: true,
+    workerMessageHandler: (message) => {
+      const status = this.bree.getWorkerMetadata('test', message)
+      console.log(status)
+    },
+  })
 
   constructor({
     url,
@@ -176,7 +198,7 @@ class SymonClient {
       10
     )
 
-    this.reportProbesInterval = reportInterval ?? 1000
+    this.reportProbesInterval = reportInterval ?? 10_000
 
     this.reportProbesLimit = reportLimit ?? 100
   }
@@ -313,9 +335,50 @@ class SymonClient {
       const { probes, hash } = await this.fetchProbes()
       const newConfig: Config = { probes, version: hash }
       this.updateConfig(newConfig)
+
+      const testJobIndex = this.bree.config.jobs.findIndex(
+        ({ name }) => name === 'test'
+      )
+
       if (!hasConnectionToSymon) {
         hasConnectionToSymon = true
         await this.setReportInterval()
+      }
+
+      const jobData = {
+        hasConnectionToSymon,
+        probes: probes,
+        reportProbesLimit: this.reportProbesLimit,
+        httpClient: this.httpClient,
+        monikaId: this.monikaId,
+      }
+
+      if (testJobIndex >= 0) {
+        await this.bree.remove('test')
+        this.bree.config.jobs[testJobIndex] = {
+          ...this.bree.config.jobs[testJobIndex],
+          worker: {
+            ...this.bree.config.jobs[testJobIndex].worker,
+            workerData: {
+              data: JSON.stringify(jobData),
+            },
+          },
+        }
+        await this.bree.start()
+      } else {
+        await this.bree.add({
+          name: 'test',
+          interval: 'every 5 seconds',
+          outputWorkerMetadata: true,
+          // eslint-disable-next-line unicorn/prefer-module
+          path: path.resolve(__dirname, 'bree/report.js'),
+          worker: {
+            workerData: {
+              data: JSON.stringify(jobData),
+            },
+          },
+        })
+        await this.bree.start()
       }
     } catch (error) {
       log.warn((error as any).message)
@@ -323,67 +386,68 @@ class SymonClient {
   }
 
   async report(): Promise<any> {
-    if (!hasConnectionToSymon) {
-      log.warn('Has no connection to symon')
-      return
-    }
+    log.debug('Moved the report function to worker')
+    // if (!hasConnectionToSymon) {
+    //   log.warn('Has no connection to symon')
+    //   return
+    // }
 
-    log.debug('Reporting to symon')
-    try {
-      const probeIds = this.probes.map((probe) => probe.id)
-      const logs = await getUnreportedLogs(probeIds, this.reportProbesLimit)
+    // log.debug('Reporting to symon')
+    // try {
+    //   const probeIds = this.probes.map((probe) => probe.id)
+    //   const logs = await getUnreportedLogs(probeIds, this.reportProbesLimit)
 
-      const requests = logs.requests
+    //   const requests = logs.requests
 
-      const notifications = logs.notifications.map(({ id: _, ...n }) => n)
+    //   const notifications = logs.notifications.map(({ id: _, ...n }) => n)
 
-      if (requests.length === 0 && notifications.length === 0) {
-        log.debug('Nothing to report')
-        return
-      }
+    //   if (requests.length === 0 && notifications.length === 0) {
+    //     log.debug('Nothing to report')
+    //     return
+    //   }
 
-      await this.httpClient({
-        url: '/report',
-        method: 'POST',
-        data: {
-          monikaId: this.monikaId,
-          data: {
-            requests,
-            notifications,
-          },
-        },
-        headers: {
-          'Content-Encoding': 'gzip',
-          'Content-Type': 'application/json',
-        },
-        transformRequest: (req) => pako.gzip(JSON.stringify(req)).buffer,
-      }).then(() => setPauseProbeInterval(false))
+    //   await this.httpClient({
+    //     url: '/report',
+    //     method: 'POST',
+    //     data: {
+    //       monikaId: this.monikaId,
+    //       data: {
+    //         requests,
+    //         notifications,
+    //       },
+    //     },
+    //     headers: {
+    //       'Content-Encoding': 'gzip',
+    //       'Content-Type': 'application/json',
+    //     },
+    //     transformRequest: (req) => pako.gzip(JSON.stringify(req)).buffer,
+    //   }).then(() => setPauseProbeInterval(false))
 
-      log.debug(
-        `Reported ${requests.length} requests and ${notifications.length} notifications.`
-      )
+    //   log.debug(
+    //     `Reported ${requests.length} requests and ${notifications.length} notifications.`
+    //   )
 
-      await Promise.all([
-        deleteRequestLogs(logs.requests.map((log) => log.probeId)),
-        deleteNotificationLogs(logs.notifications.map((log) => log.probeId)),
-      ])
+    //   await Promise.all([
+    //     deleteRequestLogs(logs.requests.map((log) => log.probeId)),
+    //     deleteNotificationLogs(logs.notifications.map((log) => log.probeId)),
+    //   ])
 
-      log.debug(
-        `Deleted reported requests and notifications from local database.`
-      )
-    } catch (error) {
-      hasConnectionToSymon = false
-      if (reportIntervalId) {
-        setPauseProbeInterval(true)
+    //   log.debug(
+    //     `Deleted reported requests and notifications from local database.`
+    //   )
+    // } catch (error) {
+    //   hasConnectionToSymon = false
+    //   if (reportIntervalId) {
+    //     setPauseProbeInterval(true)
 
-        reportIntervalId = clearInterval(reportIntervalId)
-        this.configHash = ''
-      }
+    //     reportIntervalId = clearInterval(reportIntervalId)
+    //     this.configHash = ''
+    //   }
 
-      log.error(
-        "Warning: Can't report history to Symon. " + (error as any).message
-      )
-    }
+    //   log.error(
+    //     "Warning: Can't report history to Symon. " + (error as any).message
+    //   )
+    // }
   }
 
   async setReportInterval(): Promise<void> {
