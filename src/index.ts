@@ -24,7 +24,6 @@
 
 import boxen from 'boxen'
 import chalk from 'chalk'
-import fs from 'fs'
 import isUrl from 'is-url'
 import cron, { ScheduledTask } from 'node-cron'
 import path from 'path'
@@ -41,11 +40,9 @@ import {
 
 import {
   createConfig,
-  DEFAULT_CONFIG_INTERVAL,
   getConfigIterator,
   updateConfig,
 } from './components/config'
-import { DEFAULT_CONFIG_FILENAME } from './components/config/create-config'
 import { printAllLogs } from './components/logger'
 import {
   closeLog,
@@ -64,6 +61,8 @@ import {
 } from './jobs/summary-notification'
 import initLoaders from './loaders'
 import { sanitizeProbe, startProbing } from './looper'
+import { monikaFlagsDefaultValue } from './context/monika-flags'
+import type { MonikaFlags } from './context/monika-flags'
 import SymonClient from './symon'
 import { checkProbeId } from './utils/check-probe-id'
 import { getEventEmitter } from './utils/events'
@@ -71,17 +70,6 @@ import { log } from './utils/pino'
 
 const em = getEventEmitter()
 let symonClient: SymonClient
-
-function getDefaultConfig(): Array<string> {
-  const filesArray = fs.readdirSync(path.dirname('../'))
-  const monikaDotJsonFile = filesArray.find((x) => x === 'monika.json')
-  const monikaDotYamlFile = filesArray.find(
-    (x) => x === 'monika.yml' || x === 'monika.yaml'
-  )
-  const defaultConfig = monikaDotYamlFile || monikaDotJsonFile
-
-  return defaultConfig ? [defaultConfig] : []
-}
 
 class Monika extends Command {
   static id = 'monika'
@@ -123,11 +111,23 @@ class Monika extends Command {
       required: false,
     }),
 
+    symonReportInterval: Flags.integer({
+      description: 'Interval for reporting to Symon in milliseconds (optional)',
+      dependsOn: ['symonKey', 'symonUrl'],
+      required: false,
+    }),
+
+    symonReportLimit: Flags.integer({
+      description: 'Data limit to be reported to Symon (optional)',
+      dependsOn: ['symonKey', 'symonUrl'],
+      required: false,
+    }),
+
     config: Flags.string({
       char: 'c',
       description:
         'JSON configuration filename or URL. If none is supplied, will look for monika.yml in the current directory',
-      default: () => Promise.resolve(getDefaultConfig()),
+      default: monikaFlagsDefaultValue.config,
       env: 'MONIKA_JSON_CONFIG',
       multiple: true,
     }),
@@ -140,14 +140,14 @@ class Monika extends Command {
     'config-interval': Flags.integer({
       description:
         'The interval (in seconds) for periodic config checking if url is used as config source',
-      default: DEFAULT_CONFIG_INTERVAL,
+      default: monikaFlagsDefaultValue['config-interval'],
       dependsOn: ['config'],
     }),
 
     'config-filename': Flags.string({
       description:
         'The configuration filename for config file created if there is no config file found ',
-      default: DEFAULT_CONFIG_FILENAME,
+      default: monikaFlagsDefaultValue['config-filename'],
       dependsOn: ['config'],
     }),
 
@@ -220,7 +220,7 @@ class Monika extends Command {
       char: 's', // (s)stun
       description: 'Interval in seconds to check STUN server',
       multiple: false,
-      default: 20, // default is 20s interval lookup
+      default: monikaFlagsDefaultValue.stun,
     }),
 
     id: Flags.string({
@@ -260,13 +260,13 @@ class Monika extends Command {
     }),
 
     'max-start-delay': Flags.integer({
-      default: 1 * 60 * 1000, // 1 minutes in milliseconds
+      default: monikaFlagsDefaultValue['max-start-delay'],
       description:
         'The maximum delay (in milliseconds) to start probing when there are many probes. When this is set to value greater than zero, all of the probes will start at slightly different time but within the value set here.',
     }),
 
     'follow-redirects': Flags.integer({
-      default: 1,
+      default: monikaFlagsDefaultValue['follow-redirects'],
       description:
         'Monika will follow redirects as many times as the specified value here. By default, Monika will follow redirects once. To disable redirects following, set the value to zero.',
     }),
@@ -275,7 +275,7 @@ class Monika extends Command {
   /* eslint-disable complexity */
   async run(): Promise<void> {
     const monika = await this.parse(Monika)
-    const _flags = monika.flags
+    const _flags: MonikaFlags = monika.flags
     setContext({ flags: _flags })
 
     try {
@@ -332,12 +332,14 @@ class Monika extends Command {
 
       const isSymonMode = Boolean(_flags.symonUrl) && Boolean(_flags.symonKey)
       if (isSymonMode) {
-        symonClient = new SymonClient(
-          _flags.symonUrl as string,
-          _flags.symonKey as string,
-          _flags.symonLocationId as string,
-          _flags.symonMonikaId as string
-        )
+        symonClient = new SymonClient({
+          url: _flags.symonUrl as string,
+          apiKey: _flags.symonKey as string,
+          locationId: _flags.symonLocationId as string,
+          monikaId: _flags.symonMonikaId as string,
+          reportInterval: _flags.symonReportInterval,
+          reportLimit: _flags.symonReportLimit,
+        })
         await symonClient.initiate()
         symonClient.onConfig((config) => updateConfig(config, false))
       }

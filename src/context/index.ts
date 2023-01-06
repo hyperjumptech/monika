@@ -22,18 +22,8 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-type Context = {
-  // userAgent example: @hyperjumptech/monika/1.2.3 linux-x64 node-14.17.0
-  userAgent: string
-  incidents: Incident[]
-  flags: any // monika parameter flags
-}
-
-type NewContext = {
-  userAgent?: string
-  incidents?: Incident[]
-  flags?: any
-}
+import { monikaFlagsDefaultValue } from './monika-flags'
+import type { MonikaFlags } from './monika-flags'
 
 type Incident = {
   probeID: string
@@ -41,10 +31,37 @@ type Incident = {
   createdAt: Date
 }
 
+type Context = {
+  // userAgent example: @hyperjumptech/monika/1.2.3 linux-x64 node-14.17.0
+  userAgent: string
+  incidents: Incident[]
+  flags: MonikaFlags
+}
+
+type NewContext = Partial<Context>
+
 const initialContext: Context = {
   userAgent: '',
   incidents: [],
-  flags: {},
+  flags: {
+    config: monikaFlagsDefaultValue.config,
+    'config-filename': monikaFlagsDefaultValue['config-filename'],
+    'config-interval': monikaFlagsDefaultValue['config-interval'],
+    'create-config': false,
+    flush: false,
+    'follow-redirects': monikaFlagsDefaultValue['follow-redirects'],
+    force: false,
+    help: false,
+    'keep-verbose-logs': false,
+    logs: false,
+    'max-start-delay': monikaFlagsDefaultValue['max-start-delay'],
+    'one-probe': false,
+    repeat: 0,
+    stun: monikaFlagsDefaultValue.stun,
+    summary: false,
+    verbose: false,
+    version: undefined,
+  },
 }
 
 let context: Context = initialContext

@@ -25,8 +25,9 @@
 import { Config } from '../../interfaces/config'
 import { DEFAULT_THRESHOLD } from '../../looper'
 import { XMLParser } from 'fast-xml-parser'
+import { monikaFlagsDefaultValue } from '../../context/monika-flags'
+import type { MonikaFlags } from '../../context/monika-flags'
 import { Probe } from '../../interfaces/probe'
-import { DEFAULT_CONFIG_INTERVAL } from '.'
 
 const generateProbesFromXml = (config: any) => {
   const probes = config?.urlset?.url?.map((item: any) => {
@@ -93,7 +94,7 @@ const generateProbesFromXmlOneProbe = (config: any) => {
       id: url.host,
       name: url.host,
       requests: requests,
-      interval: DEFAULT_CONFIG_INTERVAL,
+      interval: monikaFlagsDefaultValue['config-interval'],
       incidentThreshold: DEFAULT_THRESHOLD,
       recoveryThreshold: DEFAULT_THRESHOLD,
       alerts: [
@@ -114,7 +115,7 @@ const generateProbesFromXmlOneProbe = (config: any) => {
 
 export const parseConfigFromSitemap = (
   configString: string,
-  flags: any
+  flags?: MonikaFlags
 ): Config => {
   try {
     const parser = new XMLParser({ ignoreAttributes: false })

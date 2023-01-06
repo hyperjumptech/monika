@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.14.1] - 2022-12-12
+
+## Added
+
+- Add Pushbullet notification channel (#946)
+
+## Fixed
+
+- Re-add query support (#956)
+- Enable some eslint rules (#955) (#953)
+- Fix Monika always send recovery at first time run in Symon mode (#952)
+- Fix Config schema PR (#945) (#944)
+- Improve config validation error message (#939)
+
 ## [1.14.0] - 2022-11-07
 
 ## Added

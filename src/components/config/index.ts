@@ -30,6 +30,8 @@ import pEvent from 'p-event'
 
 import events from '../../events'
 import { Config } from '../../interfaces/config'
+import { monikaFlagsDefaultValue } from '../../context/monika-flags'
+import type { MonikaFlags } from '../../context/monika-flags'
 import { getEventEmitter } from '../../utils/events'
 import { md5Hash } from '../../utils/hash'
 import { open } from '../../utils/open-website'
@@ -39,8 +41,6 @@ import { validateConfig } from './validate'
 import { createConfigFile } from './create-config'
 import yml from 'js-yaml'
 import { exit } from 'process'
-
-export const DEFAULT_CONFIG_INTERVAL = 900
 
 const emitter = getEventEmitter()
 
@@ -114,7 +114,7 @@ const watchConfigFile = (
   type: string,
   index?: number,
   repeat?: number,
-  flags?: any
+  flags?: MonikaFlags
 ) => {
   const watchConfigFile = !(
     process.env.CI ||
@@ -141,7 +141,7 @@ const scheduleRemoteConfigFetcher = (
   configType: 'monika' | 'har' | 'insomnia' | 'postman' | 'sitemap' | 'text',
   interval: number,
   index?: number,
-  flags?: any
+  flags?: MonikaFlags
 ) => {
   setInterval(async () => {
     try {
@@ -162,11 +162,12 @@ const scheduleRemoteConfigFetcher = (
 const parseConfigType = async (
   source: string,
   configType: 'monika' | 'har' | 'insomnia' | 'postman' | 'sitemap' | 'text',
-  flags: any,
+  flags: MonikaFlags,
   index?: number
 ): Promise<Partial<Config>> => {
   if (isUrl(source)) {
-    const interval: number = flags['config-interval'] || DEFAULT_CONFIG_INTERVAL
+    const interval: number =
+      flags['config-interval'] || monikaFlagsDefaultValue['config-interval']
     scheduleRemoteConfigFetcher(source, configType, interval, index)
   } else {
     watchConfigFile(source, configType, index, flags.repeat)
@@ -193,7 +194,9 @@ const parseConfigType = async (
   }
 }
 
-const parseDefaultConfig = async (flags: any): Promise<Partial<Config>[]> => {
+const parseDefaultConfig = async (
+  flags: MonikaFlags
+): Promise<Partial<Config>[]> => {
   return Promise.all(
     (flags.config as Array<string>).map((source, index) =>
       parseConfigType(source, 'monika', flags, index)
@@ -209,9 +212,7 @@ const addDefaultNotifications = (config: Partial<Config>): Partial<Config> => {
   }
 }
 
-// disable warn "any" type parameter
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export const setupConfig = async (flags: any): Promise<void> => {
+export const setupConfig = async (flags: MonikaFlags): Promise<void> => {
   // check for default config path when -c/--config not provided
   if (
     flags.config.length === 0 &&
@@ -247,8 +248,9 @@ export const setupConfig = async (flags: any): Promise<void> => {
   updateConfig(mergeConfigs())
 }
 
-const getPathAndTypeFromFlag = (flags: any) => {
-  let path = flags.config
+const getPathAndTypeFromFlag = (flags: MonikaFlags) => {
+  // TODO: Asuming the first index of config is the primary config
+  let path = flags.config?.[0]
   let type = 'monika'
 
   if (flags.postman) {
@@ -282,9 +284,7 @@ const getPathAndTypeFromFlag = (flags: any) => {
   }
 }
 
-// disable warn "any" type parameter
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export const createConfig = async (flags: any): Promise<void> => {
+export const createConfig = async (flags: MonikaFlags): Promise<void> => {
   if (
     !flags.har &&
     !flags.postman &&

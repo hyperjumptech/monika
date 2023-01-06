@@ -31,3 +31,19 @@ jobs:
             - run: npm pack
             - run: npm install -g ./hyperjumptech-monika-*.tgz
             - run: npm run prod_test
+
+    build-on-node-js-18:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v3
+            - name: Use Node.js 18.x
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 18.x
+            - run: npm ci
+            - run: npm run build --if-present
+            - run: NODE_OPTIONS='--no-experimental-fetch' npm test && npx codecov
+            - run: npm pack
+            - run: npm install -g ./hyperjumptech-monika-*.tgz
+            - run: npm run prod_test

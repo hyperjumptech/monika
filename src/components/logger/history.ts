@@ -96,6 +96,50 @@ type Summary = {
   numberOfSentNotifications: number
 }
 
+type ProbeRequestDB = {
+  id: number
+  /* eslint-disable camelcase */
+  probe_id: string
+  response_status: number
+  request_url: string
+  response_time: number
+  /* eslint-enable camelcase */
+}
+
+type UnreportedProbeRequestDB = {
+  alerts: string
+  id: number
+  /* eslint-disable camelcase */
+  probe_id: string
+  probe_name?: string
+  request_method: string
+  request_body?: string
+  request_header?: string
+  request_type: string
+  request_url: string
+  response_header?: string
+  response_size?: number
+  response_status: number
+  response_time: number
+  socket_host: string
+  socket_port: string
+  timestamp: number
+  /* eslint-enable camelcase */
+}
+
+type UnreportedNotificationDB = {
+  id: number
+  timestamp: number
+  /* eslint-disable camelcase */
+  probe_id: string
+  probe_name: string
+  alert_type: string
+  type: string
+  notification_id: string
+  channel: string
+  /* eslint-enable camelcase */
+}
+
 export let db: Database<SQLite3.Database, SQLite3.Statement>
 
 async function migrate() {
@@ -169,23 +213,6 @@ export async function deleteFromNotifications(
   }
 }
 
-const snakeToCamel = (s: string) => {
-  return s.replace(/([_-][a-z])/gi, (g: string) => {
-    return g.toUpperCase().replace('-', '').replace('_', '')
-  })
-}
-
-const mapObjectDbToModel = <T extends Record<string, unknown>>(
-  obj: T
-): { [K in keyof T]: T[K] extends null ? undefined : T[K] } => {
-  return Object.entries(obj)
-    .map(([k, v]) => [k, v === null ? undefined : v] as [string, unknown])
-    .reduce((acc, [k, v]) => {
-      acc[snakeToCamel(k)] = v
-      return acc
-    }, {} as any)
-}
-
 /**
  * getAllLogs gets all the history table from sqlite db
  * @returns {obj} result of logs table
@@ -193,11 +220,20 @@ const mapObjectDbToModel = <T extends Record<string, unknown>>(
 export async function getAllLogs(): Promise<RequestsLog[]> {
   const readRowsSQL =
     'SELECT id, probe_id, response_status, request_url, response_time FROM probe_requests'
+  const probeRequests = await db.all(readRowsSQL)
+  const dbVal = probeRequests.map((probeRequest: ProbeRequestDB) => {
+    /* eslint-disable camelcase */
+    const { id, probe_id, request_url, response_status, response_time } =
+      probeRequest
 
-  const dbVal = await db.all(readRowsSQL).then((data: any) => {
-    return data.map((d: any) => ({
-      ...mapObjectDbToModel(d),
-    }))
+    return {
+      id,
+      probeId: probe_id,
+      responseStatus: response_status,
+      requestUrl: request_url,
+      responseTime: response_time,
+    }
+    /* eslint-enable camelcase */
   })
 
   return dbVal
@@ -214,7 +250,10 @@ export async function getUnreportedLogsCount(): Promise<number> {
   return row?.count || 0
 }
 
-export async function getUnreportedLogs(ids: string[]): Promise<UnreportedLog> {
+export async function getUnreportedLogs(
+  ids: string[],
+  limit: number
+): Promise<UnreportedLog> {
   const readUnreportedRequestsSQL = `
     SELECT PR.id,
       PR.created_at as timestamp,
@@ -238,7 +277,9 @@ export async function getUnreportedLogs(ids: string[]): Promise<UnreportedLog> {
     FROM probe_requests PR
       LEFT JOIN alerts A ON PR.id = A.probe_request_id
     WHERE PR.reported = 0 AND PR.probe_id IN ('${ids.join("','")}')
-    GROUP BY PR.id;`
+    GROUP BY PR.id
+    ORDER BY PR.created_at ASC
+    LIMIT ${limit};`
 
   const readUnreportedNotificationsSQL = `
     SELECT id,
@@ -250,23 +291,86 @@ export async function getUnreportedLogs(ids: string[]): Promise<UnreportedLog> {
       notification_id,
       channel
     FROM notifications
-    WHERE reported = 0 AND probe_id IN ('${ids.join("','")}');`
+    WHERE reported = 0 AND probe_id IN ('${ids.join("','")}')
+    ORDER BY timestamp ASC
+    LIMIT ${limit};`
 
   const [unreportedRequests, unreportedNotifications] = await Promise.all([
     db.all(readUnreportedRequestsSQL).then(
-      (data) =>
-        data.map((d) => ({
-          ...mapObjectDbToModel(d),
-          alerts: JSON.parse(d.alerts),
-        })) as UnreportedRequestsLog[]
+      (unreportedProbeRequests: UnreportedProbeRequestDB[]) =>
+        /* eslint-disable camelcase */
+        unreportedProbeRequests.map(
+          (unreportedProbeRequest: UnreportedProbeRequestDB) => {
+            const {
+              alerts,
+              id,
+              probe_id,
+              probe_name,
+              request_body,
+              request_header,
+              request_method,
+              request_type,
+              request_url,
+              response_header,
+              response_size,
+              response_status,
+              response_time,
+              socket_host,
+              socket_port,
+              timestamp,
+            } = unreportedProbeRequest
+
+            return {
+              alerts: JSON.parse(alerts),
+              id,
+              probeId: probe_id,
+              probeName: probe_name || '',
+              requestBody: request_body || '',
+              requestHeader: request_header || '',
+              requestMethod: request_method,
+              requestType: request_type,
+              requestUrl: request_url,
+              responseHeader: response_header,
+              responseSize: response_size || 0,
+              responseStatus: response_status,
+              responseTime: response_time,
+              socketHost: socket_host,
+              socketPort: socket_port,
+              timestamp,
+            }
+          }
+        )
+
+      /* eslint-enable camelcase */
     ),
     db
       .all(readUnreportedNotificationsSQL)
-      .then(
-        (data) =>
-          data.map((datum) =>
-            mapObjectDbToModel(datum)
-          ) as UnreportedNotificationsLog[]
+      .then((unreportedNotifications: UnreportedNotificationDB[]) =>
+        unreportedNotifications.map((unreportedNotification) => {
+          /* eslint-disable camelcase */
+          const {
+            alert_type,
+            channel,
+            id,
+            notification_id,
+            probe_id,
+            probe_name,
+            timestamp,
+            type,
+          } = unreportedNotification
+
+          return {
+            alertType: alert_type,
+            channel,
+            id,
+            notificationId: notification_id,
+            probeId: probe_id,
+            probeName: probe_name,
+            timestamp,
+            type,
+          }
+          /* eslint-enable camelcase */
+        })
       ),
   ])
 
