@@ -30,6 +30,8 @@ import pEvent from 'p-event'
 
 import events from '../../events'
 import { Config } from '../../interfaces/config'
+import { monikaFlagsDefaultValue } from '../../context/monika-flags'
+import type { MonikaFlags } from '../../context/monika-flags'
 import { getEventEmitter } from '../../utils/events'
 import { md5Hash } from '../../utils/hash'
 import { open } from '../../utils/open-website'
@@ -40,7 +42,19 @@ import { createConfigFile } from './create-config'
 import yml from 'js-yaml'
 import { exit } from 'process'
 
-export const DEFAULT_CONFIG_INTERVAL = 900
+type ScheduleRemoteConfigFetcherParams = {
+  configType: 'monika' | 'har' | 'insomnia' | 'postman' | 'sitemap' | 'text'
+  interval: number
+  url: string
+  index?: number
+}
+
+type WatchConfigFileParams = {
+  path: string
+  type: string
+  index?: number
+  repeat?: number
+}
 
 const emitter = getEventEmitter()
 
@@ -109,22 +123,16 @@ const mergeConfigs = (): Config => {
   return mergedConfig as Config
 }
 
-const watchConfigFile = (
-  path: string,
-  type: string,
-  index?: number,
-  repeat?: number,
-  flags?: any
-) => {
-  const watchConfigFile = !(
+function watchConfigFile({ path, type, index, repeat }: WatchConfigFileParams) {
+  const isWatchConfigFile = !(
     process.env.CI ||
     process.env.NODE_ENV === 'test' ||
     repeat !== 0
   )
-  if (watchConfigFile) {
+  if (isWatchConfigFile) {
     const watcher = chokidar.watch(path)
     watcher.on('change', async () => {
-      const newConfig = await parseConfig(path, type, flags)
+      const newConfig = await parseConfig(path, type)
       if (index === undefined) {
         nonDefaultConfig = newConfig
       } else {
@@ -136,16 +144,15 @@ const watchConfigFile = (
   }
 }
 
-const scheduleRemoteConfigFetcher = (
-  url: string,
-  configType: 'monika' | 'har' | 'insomnia' | 'postman' | 'sitemap' | 'text',
-  interval: number,
-  index?: number,
-  flags?: any
-) => {
+function scheduleRemoteConfigFetcher({
+  configType,
+  interval,
+  url,
+  index,
+}: ScheduleRemoteConfigFetcherParams) {
   setInterval(async () => {
     try {
-      const newConfig = await parseConfig(url, configType, flags)
+      const newConfig = await parseConfig(url, configType)
       if (index === undefined) {
         nonDefaultConfig = newConfig
       } else {
@@ -162,14 +169,20 @@ const scheduleRemoteConfigFetcher = (
 const parseConfigType = async (
   source: string,
   configType: 'monika' | 'har' | 'insomnia' | 'postman' | 'sitemap' | 'text',
-  flags: any,
+  flags: MonikaFlags,
   index?: number
 ): Promise<Partial<Config>> => {
   if (isUrl(source)) {
-    const interval: number = flags['config-interval'] || DEFAULT_CONFIG_INTERVAL
-    scheduleRemoteConfigFetcher(source, configType, interval, index)
+    const interval: number =
+      flags['config-interval'] || monikaFlagsDefaultValue['config-interval']
+    scheduleRemoteConfigFetcher({ configType, interval, url: source, index })
   } else {
-    watchConfigFile(source, configType, index, flags.repeat)
+    watchConfigFile({
+      path: source,
+      type: configType,
+      index,
+      repeat: flags.repeat,
+    })
   }
 
   const parsed = await parseConfig(source, configType, flags)
@@ -193,7 +206,9 @@ const parseConfigType = async (
   }
 }
 
-const parseDefaultConfig = async (flags: any): Promise<Partial<Config>[]> => {
+const parseDefaultConfig = async (
+  flags: MonikaFlags
+): Promise<Partial<Config>[]> => {
   return Promise.all(
     (flags.config as Array<string>).map((source, index) =>
       parseConfigType(source, 'monika', flags, index)
@@ -209,9 +224,7 @@ const addDefaultNotifications = (config: Partial<Config>): Partial<Config> => {
   }
 }
 
-// disable warn "any" type parameter
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export const setupConfig = async (flags: any): Promise<void> => {
+export const setupConfig = async (flags: MonikaFlags): Promise<void> => {
   // check for default config path when -c/--config not provided
   if (
     flags.config.length === 0 &&
@@ -247,8 +260,9 @@ export const setupConfig = async (flags: any): Promise<void> => {
   updateConfig(mergeConfigs())
 }
 
-const getPathAndTypeFromFlag = (flags: any) => {
-  let path = flags.config
+const getPathAndTypeFromFlag = (flags: MonikaFlags) => {
+  // TODO: Asuming the first index of config is the primary config
+  let path = flags.config?.[0]
   let type = 'monika'
 
   if (flags.postman) {
@@ -282,9 +296,7 @@ const getPathAndTypeFromFlag = (flags: any) => {
   }
 }
 
-// disable warn "any" type parameter
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export const createConfig = async (flags: any): Promise<void> => {
+export const createConfig = async (flags: MonikaFlags): Promise<void> => {
   if (
     !flags.har &&
     !flags.postman &&

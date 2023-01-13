@@ -23,11 +23,11 @@ jobs:
       - name: 🔧 Setup Node
         uses: actions/setup-node@v1
         with:
-          node-version: 14
+          node-version: 16
 
       - name: 📥 Install Dependencies
         run: npm ci
-      
+
       - name: 🧪 Run Unit Tests
         run: npm test
 
@@ -86,7 +86,7 @@ jobs:
       - name: 🚀 Publish
         if: steps.version.outputs.NEXT_VERSION
         run: npm publish --access public --tag nightly
-        
+
       - name: 💬 Notify Teams
         if: steps.version.outputs.NEXT_VERSION
         uses: joelwmale/webhook-action@fd99bb3b8272237103e349e9bb4d9b0ead9a217c

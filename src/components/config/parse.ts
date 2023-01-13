@@ -24,6 +24,7 @@
 
 import { Config } from '../../interfaces/config'
 import { readFileSync } from 'fs'
+import type { MonikaFlags } from '../../context/monika-flags'
 import { parseConfigFromPostman } from './parse-postman'
 import { parseConfigFromSitemap } from './parse-sitemap'
 import { parseConfigFromText } from './parse-text'
@@ -42,7 +43,7 @@ function sleep(ms: number): Promise<void> {
 export const parseConfig = async (
   source: string,
   type: string,
-  flag: any
+  flag?: MonikaFlags
 ): Promise<Partial<Config>> => {
   try {
     let configString = isUrl(source)

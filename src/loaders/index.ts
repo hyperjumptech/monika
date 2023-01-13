@@ -26,6 +26,7 @@ import type { Config as IConfig } from '@oclif/core'
 import { setupConfig } from '../components/config'
 import { setContext } from '../context'
 import events from '../events'
+import type { MonikaFlags } from '../context/monika-flags'
 import { tlsChecker } from '../jobs/tls-check'
 import type { Probe } from '../interfaces/probe'
 import { loopCheckSTUNServer } from '../looper'
@@ -43,8 +44,7 @@ import '../events/subscribers/application'
 import '../events/subscribers/probe'
 
 export default async function init(
-  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-  flags: any,
+  flags: MonikaFlags,
   cliConfig: IConfig
 ): Promise<void> {
   const eventEmitter = getEventEmitter()

@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Monika NPM version to create docker image'
+        description: "Monika NPM version to create docker image"
         required: true
         type: string
 
@@ -23,7 +23,7 @@ jobs:
       - name: 🔧 Setup Node
         uses: actions/setup-node@v1
         with:
-          node-version: 14
+          node-version: 16
 
       - name: 📥 Install Dependencies
         run: npm ci
