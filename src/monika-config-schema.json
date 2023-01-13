@@ -1141,6 +1141,38 @@
                 }
               }
             }
+          },
+          {
+            "title": "Instatus",
+            "type": "object",
+            "required": ["id", "type", "data"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Notification identity number",
+                "default": "instatus"
+              },
+              "type": {
+                "const": "instatus"
+              },
+              "data": {
+                "type": "object",
+                "description": "Data for your payload",
+                "additionalProperties": false,
+                "required": ["apiKey", "pageID"],
+                "properties": {
+                  "apiKey": {
+                    "type": "string",
+                    "description": "Instatus API key"
+                  },
+                  "pageID": {
+                    "type": "string",
+                    "description": "Statuspage page ID "
+                  }
+                }
+              }
+            }
           }
         ]
       }

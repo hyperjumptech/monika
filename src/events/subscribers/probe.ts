@@ -26,6 +26,8 @@ import events from '../../events'
 import type { Notification } from '../../interfaces/notification'
 import type { StatuspageNotification } from '../../plugins/visualization/atlassian-status-page'
 import { AtlassianStatusPageAPI } from '../../plugins/visualization/atlassian-status-page'
+import type { InstatusPageNotification } from '../../plugins/visualization/instatus'
+import { InstaStatusPageAPI } from '../../plugins/visualization/instatus'
 import { getEventEmitter } from '../../utils/events'
 import { log } from '../../utils/pino'
 
@@ -34,6 +36,13 @@ const eventEmitter = getEventEmitter()
 eventEmitter.on(
   events.probe.notification.willSend,
   async ({ notifications, probeID, probeState, url }) => {
+    console.log(
+      notifications,
+      'notifications===========',
+      probeID,
+      probeState,
+      url
+    )
     const isNotificationEmpty = (notifications?.length ?? 0) === 0
     const isAtlassianStatuspageEnable: StatuspageNotification | undefined =
       notifications.find(
@@ -61,6 +70,44 @@ eventEmitter.on(
       } catch (error: any) {
         log.error(
           `Atlassian status page (Error). probeID: ${probeID}, url: ${url}, probeState: ${probeState} error: ${error}`
+        )
+      }
+    }
+
+    const isInstatuspageEnable: InstatusPageNotification | undefined =
+      notifications.find(
+        (notification: Notification) => notification.type === 'instatus'
+      )
+
+    if (!isNotificationEmpty && isInstatuspageEnable) {
+      const { apiKey, pageID } = isInstatuspageEnable.data
+      console.log(
+        apiKey,
+        'apiKey',
+        isInstatuspageEnable,
+        'isInstatuspageEnable'
+      )
+      const instatusPageAPI = new InstaStatusPageAPI(apiKey, pageID)
+      console.log(instatusPageAPI, 'instatusPageAPI')
+      const type = getNotificationType(probeState)
+      console.log(type, 'tepe====', probeState, 'probeState====')
+
+      try {
+        if (!type) {
+          throw new Error(`probeState ${probeState} is unknown`)
+        }
+
+        const incidentID = await instatusPageAPI.notify({
+          probeID,
+          type,
+          url,
+        })
+        log.info(
+          `Instatus page (${type}). id: ${incidentID}, probeID: ${probeID}, url: ${url}`
+        )
+      } catch (error: any) {
+        log.error(
+          `Instatus page (Error). probeID: ${probeID}, url: ${url}, probeState: ${probeState} error: ${error}`
         )
       }
     }

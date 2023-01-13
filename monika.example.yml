@@ -197,6 +197,11 @@ probes:
 #     type: opsgenie
 #     data:
 #       geniekey: "genie-key"
+#   - id: random-string-instatus
+#     type: instatus
+#     data:
+#       apiKey: YOUR_INSTATUS_API_KEY
+#       pageID: YOUR_INSTATUS_PAGE_ID
 
 # limit log database size in bytes
 db_limit:
