@@ -60,6 +60,13 @@ const eventEmitter = getEventEmitter()
 eventEmitter.on(
   events.probe.notification.willSend,
   async ({ notifications, probeID, probeState, url }) => {
+    console.log(
+      notifications,
+      'notifications===========',
+      probeID,
+      probeState,
+      url
+    )
     const isNotificationEmpty = (notifications?.length ?? 0) === 0
     const isAtlassianStatuspageEnable: StatuspageNotification | undefined =
       notifications.find(
