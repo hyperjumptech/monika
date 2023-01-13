@@ -24,72 +24,60 @@
 
 import { parentPort, workerData } from 'worker_threads'
 import { log } from '../../utils/pino'
-import { AxiosRequestConfig } from 'axios'
+import axios, { AxiosRequestConfig } from 'axios'
 import Pako from 'pako'
-import {
-  deleteNotificationLogs,
-  deleteRequestLogs,
-  getUnreportedLogs,
-} from '../../components/logger/history'
-import { Probe } from '../../interfaces/probe'
-
 const main = async (data: Record<string, any>) => {
   try {
-    const {
-      hasConnectionToSymon,
-      probes,
-      reportProbesLimit,
-      httpClient,
-      monikaId,
-    } = data
+    const { url, apiKey, requests, notifications, monikaId } = data
 
-    if (!hasConnectionToSymon) {
-      log.warn('Has no connection to symon')
-      return
-    }
-
-    log.debug('Reporting to symon')
-
-    const probeIds = probes.map((probe: Probe) => probe.id)
-    const logs = await getUnreportedLogs(probeIds, reportProbesLimit)
-    const requests = logs.requests
-    const notifications = logs.notifications.map(({ id: _, ...n }) => n)
     if (requests.length === 0 && notifications.length === 0) {
+      // No requests or notifications to report
       log.debug('Nothing to report')
-      return
-    }
 
-    await httpClient({
-      url: '/report',
-      method: 'POST',
-      data: {
-        monikaId: monikaId,
+      parentPort?.postMessage({
+        success: true,
         data: {
           requests,
           notifications,
         },
-      },
-      headers: {
-        'Content-Encoding': 'gzip',
-        'Content-Type': 'application/json',
-      },
-      transformRequest: (req: AxiosRequestConfig) =>
-        Pako.gzip(JSON.stringify(req)).buffer,
-    })
+      })
+    } else {
+      // Hit the Symon API for receiving Monika report
+      // With the compressed requests and notifications data
+      await axios({
+        url: `${url}/api/v1/monika/report`,
+        method: 'POST',
+        data: {
+          monikaId: monikaId,
+          data: {
+            requests,
+            notifications,
+          },
+        },
+        headers: {
+          'Content-Encoding': 'gzip',
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+        },
+        transformRequest: (req: AxiosRequestConfig) =>
+          Pako.gzip(JSON.stringify(req)).buffer,
+      })
 
-    log.debug(
-      `Reported ${requests.length} requests and ${notifications.length} notifications.`
-    )
+      log.debug(
+        `Reported ${requests.length} requests and ${notifications.length} notifications.`
+      )
+      log.debug(`Last reported ID: ${JSON.stringify(requests.at(-1).id)}`)
 
-    await Promise.all([
-      deleteRequestLogs(logs.requests.map((log) => log.probeId)),
-      deleteNotificationLogs(logs.notifications.map((log) => log.probeId)),
-    ])
-    log.debug(
-      `Deleted reported requests and notifications from local database.`
-    )
-
-    parentPort?.postMessage({ success: true })
+      // Send message to parentPort so that
+      // the reported logs and notifications can be deleted
+      parentPort?.postMessage({
+        success: true,
+        data: {
+          requests,
+          notifications,
+        },
+      })
+    }
   } catch (error) {
     log.error(
       "Warning: Can't report history to Symon. " + (error as any).message
