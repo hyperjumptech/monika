@@ -15,7 +15,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
-          node-version: 14
+          node-version: 16
       - run: npm ci
         name: Install dependencies
       - run: npm test
@@ -51,8 +51,8 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
-          node-version: 14
-      
+          node-version: 16
+
       - run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
         name: Get version
         id: get_version
@@ -61,22 +61,22 @@ jobs:
       - run: npm ci
         name: Install dependencies
 
-      - run: npm run pkg -- -t node14-${{ matrix.platform }}
+      - run: npm run pkg -- -t node16-${{ matrix.platform }}
         name: Pack the binary using vercel/pkg
 
       - run: file ./dist/*
         name: List all the files to be compressed
         shell: bash
-      
+
       - name: Compress all binaries to one zip
         uses: vimtor/action-zip@v1
         with:
           files: dist/${{ matrix.file_name }}
           dest: monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}.zip
-      
+
       - name: Generate SHA256 Checksum
         run: shasum -a 256 monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}.zip > monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}-CHECKSUM.txt
-      
+
       - name: Upload binary to release
         id: upload_binary_to_release
         uses: svenstaro/upload-release-action@v2
@@ -93,7 +93,7 @@ jobs:
           file: monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}-CHECKSUM.txt
           asset_name: monika-${{ steps.get_version.outputs.VERSION }}-${{ matrix.platform }}-CHECKSUM.txt
           tag: ${{ github.ref }}
-      
+
       - name: Read checksum file
         if: runner.os == 'Windows'
         id: checksum_file
@@ -109,24 +109,24 @@ jobs:
         if: runner.os == 'Windows'
         uses: actions/github-script@v6
         with:
-            script: |
-              const fs = require('fs');
-              const oldString = fs.readFileSync('./chocolatey/example/chocolateyinstall.example.ps1','utf8').toString();
-              const releaseUrlString = "${{ steps.upload_binary_to_release.outputs.browser_download_url }}"
-              const checkSumString = "${{ steps.checksum_file.outputs.content }}".split("*")[0].trim()
-              const newString = oldString.replace("_RELEASE_URL_", releaseUrlString).replace("_CHECKSUM_CONTENT_", checkSumString);
-              fs.writeFile("./chocolatey/tools/chocolateyinstall.ps1", newString, {
-                encoding: "utf8"
-              },
-              (err) => {
-                if (err)
-                  console.log(err);
-                else {
-                  console.log("File written successfully\n");
-                }
-              });
-              return newString;
-            result-encoding: string
+          script: |
+            const fs = require('fs');
+            const oldString = fs.readFileSync('./chocolatey/example/chocolateyinstall.example.ps1','utf8').toString();
+            const releaseUrlString = "${{ steps.upload_binary_to_release.outputs.browser_download_url }}"
+            const checkSumString = "${{ steps.checksum_file.outputs.content }}".split("*")[0].trim()
+            const newString = oldString.replace("_RELEASE_URL_", releaseUrlString).replace("_CHECKSUM_CONTENT_", checkSumString);
+            fs.writeFile("./chocolatey/tools/chocolateyinstall.ps1", newString, {
+              encoding: "utf8"
+            },
+            (err) => {
+              if (err)
+                console.log(err);
+              else {
+                console.log("File written successfully\n");
+              }
+            });
+            return newString;
+          result-encoding: string
 
       - name: See chocolateyinstall.ps1 file content
         if: runner.os == 'Windows'
@@ -147,29 +147,29 @@ jobs:
         with:
           path: version_number.txt
           trim: true
-      
+
       - name: Change version in nuspec file
         if: runner.os == 'Windows'
         uses: actions/github-script@v6
         with:
-            script: |
-              const fs = require('fs');
-              const oldString = fs.readFileSync('./chocolatey/example/monika.example.nuspec','utf8').toString();
-              const versionString = "${{ steps.read_version.outputs.content }}"
-              const newString = oldString.replace("_VERSION_", versionString);
-              fs.writeFile("./chocolatey/monika.nuspec", newString, {
-                encoding: "utf8"
-              },
-              (err) => {
-                if (err)
-                  console.log(err);
-                else {
-                  console.log("File written successfully\n");
-                }
-              });
-              return newString;
-            result-encoding: string
-        
+          script: |
+            const fs = require('fs');
+            const oldString = fs.readFileSync('./chocolatey/example/monika.example.nuspec','utf8').toString();
+            const versionString = "${{ steps.read_version.outputs.content }}"
+            const newString = oldString.replace("_VERSION_", versionString);
+            fs.writeFile("./chocolatey/monika.nuspec", newString, {
+              encoding: "utf8"
+            },
+            (err) => {
+              if (err)
+                console.log(err);
+              else {
+                console.log("File written successfully\n");
+              }
+            });
+            return newString;
+          result-encoding: string
+
       - name: see nuspec file content
         if: runner.os == 'Windows'
         run: cat ./chocolatey/monika.nuspec
