@@ -22,6 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+/* eslint-disable unicorn/prefer-module */
 import axios, { AxiosInstance } from 'axios'
 import { EventEmitter } from 'events'
 import mac from 'macaddress'
@@ -53,7 +54,6 @@ import {
   UnreportedRequestsLog,
 } from '../components/logger/history'
 
-// eslint-disable-next-line unicorn/prefer-module
 Bree.extend(require('@breejs/ts-worker'))
 
 type ReportWorkerMessage = {
@@ -167,6 +167,7 @@ class SymonClient {
 
   private bree = new Bree({
     root: false,
+    defaultExtension: process.env.NODE_ENV === 'test' ? 'ts' : 'js',
     jobs: [],
     interval: this.reportProbesInterval,
     logger: log,
@@ -401,12 +402,6 @@ class SymonClient {
   }
 
   async report(): Promise<any> {
-    if (!hasConnectionToSymon) {
-      log.warn('Has no connection to symon')
-      await this.report()
-      return
-    }
-
     try {
       log.debug('Reporting to Symon')
 
@@ -445,8 +440,10 @@ class SymonClient {
           name: 'report',
           interval: `every ${jobInterval} seconds`,
           outputWorkerMetadata: true,
-          // eslint-disable-next-line unicorn/prefer-module
-          path: path.resolve(__dirname, 'bree/report.js'),
+          path: path.resolve(
+            __dirname,
+            `bree/report.${this.bree.config.defaultExtension}`
+          ),
           worker: {
             workerData: {
               data: JSON.stringify(jobData),
@@ -460,8 +457,10 @@ class SymonClient {
           name: 'report',
           interval: `every ${jobInterval} seconds`,
           outputWorkerMetadata: true,
-          // eslint-disable-next-line unicorn/prefer-module
-          path: path.resolve(__dirname, 'bree/report.js'),
+          path: path.resolve(
+            __dirname,
+            `bree/report.${this.bree.config.defaultExtension}`
+          ),
           worker: {
             workerData: {
               data: JSON.stringify(jobData),
@@ -472,6 +471,7 @@ class SymonClient {
       }
     } catch (error) {
       hasConnectionToSymon = false
+      this.configHash = ''
       log.error(
         "Warning: Can't report history to Symon. " + (error as any).message
       )
@@ -482,7 +482,7 @@ class SymonClient {
 
   async sendStatus({ isOnline }: { isOnline: boolean }): Promise<void> {
     try {
-      await this.httpClient({
+      const response = await this.httpClient({
         url: '/status',
         method: 'POST',
         data: {
@@ -490,6 +490,10 @@ class SymonClient {
           status: isOnline,
         },
       })
+
+      if (response.status === 200) {
+        hasConnectionToSymon = true
+      }
 
       log.debug('Status successfully sent to Symon.')
     } catch (error: any) {
