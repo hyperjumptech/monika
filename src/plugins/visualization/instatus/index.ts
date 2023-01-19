@@ -17,7 +17,6 @@ type Incident = Omit<NotifyIncident, 'type'>
 
 type InstatusConfig = {
   apiKey: string
-  pageID: string
 }
 
 export type InstatusPageNotification = {
@@ -29,7 +28,6 @@ export type InstatusPageNotification = {
 export const slug = 'instatus'
 export const validator = Joi.object({
   apiKey: Joi.string().required().label('API Key'),
-  pageID: Joi.string().required().label('Page ID'),
 }).required()
 
 export const validateConfig = (instatusPageConfig: InstatusConfig): string => {
@@ -42,10 +40,8 @@ export const validateConfig = (instatusPageConfig: InstatusConfig): string => {
 export class InstaStatusPageAPI {
   private instatusPageBaseURL = 'https://api.instatus.com/'
   private axiosConfig = {}
-  private pageID = ''
 
-  constructor(apiKey: string, pageID: string) {
-    this.pageID = pageID
+  constructor(apiKey: string) {
     this.axiosConfig = {
       // 10 sec timeout
       timeout: 10_000,
@@ -61,8 +57,25 @@ export class InstaStatusPageAPI {
     }
   }
 
+  private async getPageID() {
+    try {
+      const resp = await axios.post(
+        `${this.instatusPageBaseURL}/v2/pages`,
+        this.axiosConfig
+      )
+
+      const pageID = resp?.data?.id
+      return pageID
+    } catch (error: any) {
+      throw new Error(
+        `${error?.message}${
+          error?.data ? `. ${error?.response?.data?.message}` : ''
+        }`
+      )
+    }
+  }
+
   async notify({ probeID, url, type }: NotifyIncident): Promise<string> {
-    console.log(probeID, url, type, 'probeID, url, type=========')
     switch (type) {
       case 'incident': {
         const incidentID = await this.createIncident({ probeID, url })
@@ -103,7 +116,7 @@ export class InstaStatusPageAPI {
 
     try {
       const resp = await axios.post(
-        `${this.instatusPageBaseURL}/v1/${this.pageID}/incidents`,
+        `${this.instatusPageBaseURL}/v1/incidents`,
         data,
         this.axiosConfig
       )
@@ -144,7 +157,7 @@ export class InstaStatusPageAPI {
 
     try {
       await axios.patch(
-        `${this.instatusPageBaseURL}/v1/${this.pageID}/incidents/${incidentID}`,
+        `${this.instatusPageBaseURL}/v1/incidents/${incidentID}`,
         data,
         this.axiosConfig
       )

@@ -1160,15 +1160,11 @@
                 "type": "object",
                 "description": "Data for your payload",
                 "additionalProperties": false,
-                "required": ["apiKey", "pageID"],
+                "required": ["apiKey"],
                 "properties": {
                   "apiKey": {
                     "type": "string",
                     "description": "Instatus API key"
-                  },
-                  "pageID": {
-                    "type": "string",
-                    "description": "Statuspage page ID "
                   }
                 }
               }
