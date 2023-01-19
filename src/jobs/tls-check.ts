@@ -60,8 +60,7 @@ export function tlsChecker(): void {
       const hasNotification = (notifications?.length || 0) > 0
 
       if (!hasNotification) {
-        s
-        returns
+        return
       }
 
       sendTLSErrorNotification({
@@ -102,6 +101,7 @@ function sendTLSErrorNotification({
         data: {},
         body: {},
         headers: {},
+        isProbeResponsive: true,
       },
     }
 
