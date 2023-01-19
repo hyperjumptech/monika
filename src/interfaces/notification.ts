@@ -44,28 +44,6 @@ import {
   PushbulletData,
 } from './data'
 
-export type Notification =
-  | SMTPNotification
-  | MailgunNotification
-  | SendgridNotification
-  | WebhookNotification
-  | SlackNotification
-  | WhatsappBusinessNotification
-  | MonikaWhatsappNotification
-  | TeamsNotification
-  | TelegramNotification
-  | DiscordNotification
-  | WorkplaceNotification
-  | DesktopNotification
-  | LarkNotification
-  | DingtalkNotification
-  | GoogleChatNotification
-  | PagerDutyNotification
-  | PushoverNotification
-  | GotifyNotification
-  | OpsgenieNotification
-  | StatuspageNotification
-  | PushbulletNotification
 interface BaseNotification {
   id: string
 }
@@ -167,15 +145,28 @@ interface PushbulletNotification extends BaseNotification {
   data: PushbulletData
 }
 
-export interface NotificationMessage {
-  subject: string
-  body: string
-  summary: string
-  meta:
-    | NotificationIncidentRecoveryMessageMeta
-    | NotificationStartTerminationMessageMeta
-    | NotificationStatusUpdateMessageMeta
-}
+export type Notification =
+  | SMTPNotification
+  | MailgunNotification
+  | SendgridNotification
+  | WebhookNotification
+  | SlackNotification
+  | WhatsappBusinessNotification
+  | MonikaWhatsappNotification
+  | TeamsNotification
+  | TelegramNotification
+  | DiscordNotification
+  | WorkplaceNotification
+  | DesktopNotification
+  | LarkNotification
+  | DingtalkNotification
+  | GoogleChatNotification
+  | PagerDutyNotification
+  | PushoverNotification
+  | GotifyNotification
+  | OpsgenieNotification
+  | StatuspageNotification
+  | PushbulletNotification
 
 interface BaseNotificationMessageMeta {
   type: string
@@ -206,4 +197,14 @@ interface NotificationStatusUpdateMessageMeta
   numberOfIncidents: number
   numberOfRecoveries: number
   numberOfSentNotifications: number
+}
+
+export interface NotificationMessage {
+  subject: string
+  body: string
+  summary: string
+  meta:
+    | NotificationIncidentRecoveryMessageMeta
+    | NotificationStartTerminationMessageMeta
+    | NotificationStatusUpdateMessageMeta
 }

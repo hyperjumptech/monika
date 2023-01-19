@@ -23,14 +23,13 @@
  **********************************************************************************/
 
 import { expect } from '@oclif/test'
+import mailMock from 'nodemailer-mock'
 import {
   createSmtpTransport,
   sendSmtpMail,
 } from '../../src/components/notification/channel/smtp'
 import Mail from 'nodemailer/lib/mailer'
 import { SMTPData } from '../../src/interfaces/data'
-
-const mailMock = require('nodemailer-mock')
 
 const transport: Mail = mailMock.createTransport({
   host: '127.0.0.1',

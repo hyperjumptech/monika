@@ -42,6 +42,20 @@ import { createConfigFile } from './create-config'
 import yml from 'js-yaml'
 import { exit } from 'process'
 
+type ScheduleRemoteConfigFetcherParams = {
+  configType: 'monika' | 'har' | 'insomnia' | 'postman' | 'sitemap' | 'text'
+  interval: number
+  url: string
+  index?: number
+}
+
+type WatchConfigFileParams = {
+  path: string
+  type: string
+  index?: number
+  repeat?: number
+}
+
 const emitter = getEventEmitter()
 
 let cfg: Config
@@ -109,22 +123,16 @@ const mergeConfigs = (): Config => {
   return mergedConfig as Config
 }
 
-const watchConfigFile = (
-  path: string,
-  type: string,
-  index?: number,
-  repeat?: number,
-  flags?: MonikaFlags
-) => {
-  const watchConfigFile = !(
+function watchConfigFile({ path, type, index, repeat }: WatchConfigFileParams) {
+  const isWatchConfigFile = !(
     process.env.CI ||
     process.env.NODE_ENV === 'test' ||
     repeat !== 0
   )
-  if (watchConfigFile) {
+  if (isWatchConfigFile) {
     const watcher = chokidar.watch(path)
     watcher.on('change', async () => {
-      const newConfig = await parseConfig(path, type, flags)
+      const newConfig = await parseConfig(path, type)
       if (index === undefined) {
         nonDefaultConfig = newConfig
       } else {
@@ -136,16 +144,15 @@ const watchConfigFile = (
   }
 }
 
-const scheduleRemoteConfigFetcher = (
-  url: string,
-  configType: 'monika' | 'har' | 'insomnia' | 'postman' | 'sitemap' | 'text',
-  interval: number,
-  index?: number,
-  flags?: MonikaFlags
-) => {
+function scheduleRemoteConfigFetcher({
+  configType,
+  interval,
+  url,
+  index,
+}: ScheduleRemoteConfigFetcherParams) {
   setInterval(async () => {
     try {
-      const newConfig = await parseConfig(url, configType, flags)
+      const newConfig = await parseConfig(url, configType)
       if (index === undefined) {
         nonDefaultConfig = newConfig
       } else {
@@ -168,9 +175,14 @@ const parseConfigType = async (
   if (isUrl(source)) {
     const interval: number =
       flags['config-interval'] || monikaFlagsDefaultValue['config-interval']
-    scheduleRemoteConfigFetcher(source, configType, interval, index)
+    scheduleRemoteConfigFetcher({ configType, interval, url: source, index })
   } else {
-    watchConfigFile(source, configType, index, flags.repeat)
+    watchConfigFile({
+      path: source,
+      type: configType,
+      index,
+      repeat: flags.repeat,
+    })
   }
 
   const parsed = await parseConfig(source, configType, flags)

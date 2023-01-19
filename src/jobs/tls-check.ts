@@ -25,77 +25,98 @@
 import { getConfig } from '../components/config'
 import { saveNotificationLog } from '../components/logger/history'
 import { sendAlerts } from '../components/notification'
-import { checkTLS, TLSHostArg } from '../components/tls-checker'
+import { checkTLS, getHostname } from '../components/tls-checker'
+import type { Notification } from '../interfaces/notification'
 import type { ValidatedResponse } from '../plugins/validate-response'
 import { log } from '../utils/pino'
 
+type SendTLSErrorNotificationProps = {
+  hostname: string
+  notifications: Notification[]
+  errorMessage: string
+}
+
 export function tlsChecker(): void {
   const config = getConfig()
-  const isCertificateConfigEmpty =
-    config?.certificate && config?.certificate?.domains.length > 0
+  const hasDomain = (config?.certificate?.domains?.length || 0) > 0
 
-  if (isCertificateConfigEmpty) {
-    const { certificate } = config
-    const defaultExpiryReminder = 30
+  if (!hasDomain) {
+    return
+  }
 
-    certificate?.domains.forEach((domain: string | TLSHostArg) => {
-      const host = (domain as TLSHostArg)?.domain ?? (domain as string)
-      const reminder = certificate?.reminder ?? defaultExpiryReminder
-      const notifications = config?.notifications
+  const { certificate } = config
+  const defaultExpiryReminder = 30
 
-      log.info(`Running TLS check for ${host} every day at 00:00`)
+  for (const domain of certificate?.domains || []) {
+    const hostname = getHostname(domain)
+    const reminder = certificate?.reminder ?? defaultExpiryReminder
 
-      checkTLS(domain, reminder).catch((error) => {
-        log.error(error.message)
+    log.info(`Running TLS check for ${hostname} every day at 00:00`)
 
-        if (notifications && notifications?.length > 0) {
-          // TODO: Remove probe below
-          // probe is used because probe detail is needed to save the notification log
-          const probe = {
-            id: '',
-            name: '',
-            requests: [],
-            interval: 10,
-            incidentThreshold: 0,
-            recoveryThreshold: 0,
-            alerts: [],
-          }
+    checkTLS(domain, reminder).catch((error) => {
+      log.error(error.message)
 
-          for (const notification of notifications) {
-            // TODO: Remove validation below
-            // validation is used because it is needed to send alert
-            const validation: ValidatedResponse = {
-              alert: { assertion: '', message: error.message },
-              isAlertTriggered: true,
-              response: {
-                status: 500,
-                responseTime: 0,
-                data: {},
-                body: {},
-                headers: {},
-                isProbeResponsive: false,
-              },
-            }
+      const { notifications } = config
+      const hasNotification = (notifications?.length || 0) > 0
 
-            saveNotificationLog(
-              probe,
-              notification,
-              'NOTIFY-TLS',
-              error.message
-            ).catch((error) => log.error(error.message))
+      if (!hasNotification) {
+        s
+        returns
+      }
 
-            // TODO: invoke sendNotifications function instead
-            // looks like the sendAlerts function does not handle this
-            sendAlerts({
-              probeID: '',
-              url: host,
-              probeState: 'invalid',
-              notifications: notifications ?? [],
-              validation,
-            }).catch((error) => log.error(error.message))
-          }
-        }
+      sendTLSErrorNotification({
+        hostname,
+        notifications: notifications || [],
+        errorMessage: error.message,
       })
     })
+  }
+}
+
+function sendTLSErrorNotification({
+  hostname,
+  notifications,
+  errorMessage,
+}: SendTLSErrorNotificationProps) {
+  // TODO: Remove probe below
+  // probe is used because probe detail is needed to save the notification log
+  const probe = {
+    id: '',
+    name: '',
+    requests: [],
+    interval: 10,
+    incidentThreshold: 0,
+    recoveryThreshold: 0,
+    alerts: [],
+  }
+
+  for (const notification of notifications) {
+    // TODO: Remove validation below
+    // validation is used because it is needed to send alert
+    const validation: ValidatedResponse = {
+      alert: { assertion: '', message: errorMessage },
+      isAlertTriggered: true,
+      response: {
+        status: 500,
+        responseTime: 0,
+        data: {},
+        body: {},
+        headers: {},
+      },
+    }
+
+    saveNotificationLog(probe, notification, 'NOTIFY-TLS', errorMessage).catch(
+      (error) => log.error(error.message)
+    )
+
+    // TODO: invoke sendNotifications function instead
+    // looks like the sendAlerts function does not handle this
+    sendAlerts({
+      probeID: '',
+      url: hostname,
+      probeState: 'invalid',
+      notifications: notifications ?? [],
+      validation,
+    }).catch((error) => log.error(error.message))
   }
 }

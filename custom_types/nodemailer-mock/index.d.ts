@@ -22,17 +22,4 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import type { RequestOptions } from 'https'
-
-type DomainWithOptions = {
-  domain: string
-  options?: RequestOptions
-}
-
-export type Domain = string | DomainWithOptions
-
-export interface Certificate {
-  domains: Domain[]
-  // The reminder is the number of days to send notification to user before the domain expires.
-  reminder?: number
-}
+declare module 'nodemailer-mock'
