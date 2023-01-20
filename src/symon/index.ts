@@ -28,6 +28,7 @@ import mac from 'macaddress'
 import { hostname } from 'os'
 import pako from 'pako'
 
+import PouchDB from 'pouchdb'
 import {
   deleteNotificationLogs,
   deleteRequestLogs,
@@ -144,6 +145,14 @@ class SymonClient {
 
   private configListeners: ConfigListener[] = []
 
+  private isSymonExperimental: boolean
+
+  private symonCouchDB: string
+
+  private pouch: PouchDB.Database<Record<string, unknown>>
+
+  private remotePouchDB: PouchDB.Database<Record<string, unknown>>
+
   constructor({
     url,
     apiKey,
@@ -179,6 +188,15 @@ class SymonClient {
     this.reportProbesInterval = reportInterval ?? 1000
 
     this.reportProbesLimit = reportLimit ?? 100
+
+    const { flags } = getContext()
+
+    this.isSymonExperimental = flags.symonExperimental
+    this.symonCouchDB =
+      flags.symonCouchDbURL || 'http://symon:symon@localhost:5984/symon'
+
+    this.pouch = new PouchDB('symon')
+    this.remotePouchDB = new PouchDB(this.symonCouchDB)
   }
 
   async initiate(): Promise<void> {
@@ -342,16 +360,52 @@ class SymonClient {
         return
       }
 
+      const reportData = {
+        monikaId: this.monikaId,
+        data: {
+          requests,
+          notifications,
+        },
+      }
+
+      const id = new Date().toISOString()
+      if (this.isSymonExperimental) {
+        try {
+          log.debug('Saving to couchDB')
+          const pouchData = await this.pouch.put({ _id: id, ...reportData })
+
+          const replicator = this.pouch.replicate.to(this.remotePouchDB, {
+            live: true,
+            retry: true,
+          })
+
+          // delete data on complete replication
+          replicator.on('complete', async () => {
+            console.log('complete replicating to remote DB')
+            await Promise.all([
+              deleteRequestLogs(logs.requests.map((log) => log.probeId)),
+              deleteNotificationLogs(
+                logs.notifications.map((log) => log.probeId)
+              ),
+            ])
+            this.pouch.remove({ _id: pouchData.id, _rev: pouchData.rev })
+            console.log('complete replicating to remote DB')
+          })
+
+          // log replication error
+          replicator.on('error', function (err) {
+            console.log('failed replicating to remote DB')
+            console.log(err)
+          })
+        } catch (error) {
+          console.error(`error occured : ${error}`)
+        }
+      }
+
       await this.httpClient({
         url: '/report',
         method: 'POST',
-        data: {
-          monikaId: this.monikaId,
-          data: {
-            requests,
-            notifications,
-          },
-        },
+        data: reportData,
         headers: {
           'Content-Encoding': 'gzip',
           'Content-Type': 'application/json',
@@ -396,6 +450,20 @@ class SymonClient {
       }
     } catch (error: any) {
       log.warn(`Warning: Can't set report interval. ${error?.message}`)
+    }
+  }
+
+  async setPouchDBSettings(): Promise<void> {
+    try {
+      const { flags } = getContext()
+
+      this.isSymonExperimental = flags.symonExperimental
+      this.symonCouchDB =
+        flags.symonCouchDbURL || 'http://symon:symon@localhost:5984/symon'
+      this.pouch = new PouchDB('symon')
+      this.remotePouchDB = new PouchDB(this.symonCouchDB)
+    } catch (error: any) {
+      log.warn(`Warning: Can't set pouch db settings. ${error?.message}`)
     }
   }
 

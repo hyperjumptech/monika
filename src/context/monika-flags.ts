@@ -36,6 +36,8 @@ export type MonikaFlags = {
   text?: string
   verbose: boolean
   version: void
+  symonExperimental: boolean
+  symonCouchDbURL?: string
 }
 
 const seconds = 1000
