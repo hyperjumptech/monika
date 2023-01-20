@@ -267,24 +267,24 @@ class SymonClient {
   private async fetchProbes() {
     log.debug('Getting probes from symon')
     return this.httpClient
-      .get<{ data: Probe[] }>(`/${this.monikaId}/probes`, {
-        headers: {
-          ...(this.configHash ? { 'If-None-Match': this.configHash } : {}),
-        },
-        validateStatus(status) {
-          return [200, 304].includes(status)
-        },
-      })
+      .get<{ data: { probes: Probe[]; checksum: string } }>(
+        `/${this.monikaId}/probes`,
+        {
+          validateStatus(status) {
+            return [200, 304].includes(status)
+          },
+        }
+      )
       .then((res) => {
         if (res.data.data) {
-          this.probes = res.data.data
+          this.probes = res.data.data.probes
 
-          log.debug(`Received ${res.data.data.length} probes`)
+          log.debug(`Received ${res.data.data.probes.length} probes`)
         } else {
           log.debug(`No new config from Symon`)
         }
 
-        return { probes: res.data.data, hash: res.headers.etag }
+        return { probes: res.data.data.probes, hash: res.data.data.checksum }
       })
       .catch((error) => {
         if (error.isAxiosError) {
