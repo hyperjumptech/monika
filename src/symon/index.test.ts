@@ -75,6 +75,21 @@ afterEach(() => {
 
 describe('Symon initiate', () => {
   it('should send handshake data on initiate', async () => {
+    const config: Config = {
+      version: 'asdfg123',
+      probes: [
+        {
+          id: '1',
+          name: 'test',
+          interval: 10,
+          requests: [],
+          incidentThreshold: 5,
+          recoveryThreshold: 5,
+          alerts: [],
+        },
+      ],
+    }
+
     setContext({
       userAgent: 'v1.5.0',
     })
@@ -82,20 +97,33 @@ describe('Symon initiate', () => {
     // mock the outgoing requests
     interceptor.use((req) => {
       // mock the handshake to symon
-      if (['http://localhost:4000'].includes(req.url.origin)) {
+      if (req.url.origin === 'http://localhost:4000') {
         if (req.url.pathname.endsWith('client-handshake')) {
           sentBody = req.body!
+          return {
+            status: 200,
+            body: JSON.stringify({
+              statusCode: 'ok',
+              message: 'Successfully handshaked with Symon',
+              data: {
+                monikaId: '1234',
+              },
+            }),
+          }
         }
 
-        return {
-          status: 200,
-          body: JSON.stringify({
-            statusCode: 'ok',
-            message: 'Successfully handshaked with Symon',
-            data: {
-              monikaId: '1234',
+        if (req.url.pathname.endsWith('probes')) {
+          return {
+            status: 200,
+            headers: {
+              etag: config.version as string,
             },
-          }),
+            body: JSON.stringify({
+              statusCode: 'ok',
+              message: 'Successfully get probes configuration',
+              data: config.probes,
+            }),
+          }
         }
       }
     })
@@ -104,6 +132,8 @@ describe('Symon initiate', () => {
       url: 'http://localhost:4000',
       apiKey: 'abcd',
     })
+    sinon.spy(symon, 'report')
+
     await symon.initiate()
     expect(symon.monikaId).equals('1234')
 
@@ -164,6 +194,16 @@ describe('Symon initiate', () => {
             }),
           }
         }
+
+        if (req.url.pathname.endsWith('report')) {
+          return {
+            status: 200,
+            body: JSON.stringify({
+              statusCode: 'ok',
+              message: 'Successfully report to Symon',
+            }),
+          }
+        }
       }
     })
 
@@ -171,6 +211,7 @@ describe('Symon initiate', () => {
       url: 'http://localhost:4000',
       apiKey: 'abcd',
     })
+    sinon.spy(symon, 'report')
 
     expect(symon.config).to.be.null
 
@@ -252,6 +293,7 @@ describe('Send incident or recovery event', () => {
       url: 'http://localhost:4000',
       apiKey: 'abcd',
     })
+    sinon.spy(symon, 'report')
     symon.monikaId = '1234'
 
     await symon.notifyEvent({

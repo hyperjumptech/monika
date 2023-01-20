@@ -80,7 +80,7 @@ describe('probingHTTP', () => {
         {
           url: 'http://localhost:4000/get_key',
           body: JSON.parse('{}'),
-          timeout: 10,
+          timeout: 10_000,
         },
         {
           url: 'http://localhost:4000/verify',
@@ -89,7 +89,7 @@ describe('probingHTTP', () => {
             Authorization: '{{ responses.[0].data.token }}',
           },
           body: JSON.parse('{}'),
-          timeout: 10,
+          timeout: 10_000,
         },
       ]
 
@@ -138,7 +138,7 @@ describe('probingHTTP', () => {
         body: JSON.parse(
           '{"username": "example@example.com", "password": "example"}'
         ),
-        timeout: 10,
+        timeout: 10_000,
       }
 
       const flag = { followRedirects: 0 } as unknown as MonikaFlags
@@ -173,7 +173,7 @@ describe('probingHTTP', () => {
         method: 'POST',
         headers: { 'content-type': 'multipart/form-data' },
         body: { username: 'john@example.com', password: 'drowssap' } as any,
-        timeout: 10,
+        timeout: 10_000,
       }
 
       const flags = { followRedirects: 0 } as unknown as MonikaFlags
@@ -214,7 +214,7 @@ describe('probingHTTP', () => {
         method: 'POST',
         headers: { 'content-type': 'text/plain' },
         body: 'multiline string\nexample' as any,
-        timeout: 10,
+        timeout: 10_000,
       }
 
       // act
@@ -255,7 +255,7 @@ describe('probingHTTP', () => {
         method: 'POST',
         headers: { 'content-type': 'text/yaml' },
         body: { username: 'john@example.com', password: 'secret' } as any,
-        timeout: 10,
+        timeout: 10_000,
       }
 
       // act
@@ -297,7 +297,7 @@ describe('probingHTTP', () => {
         method: 'POST',
         headers: { 'content-type': 'application/xml' },
         body: { username: 'john@example.com', password: 'secret' } as any,
-        timeout: 10,
+        timeout: 10_000,
       }
 
       // act
@@ -338,7 +338,7 @@ describe('probingHTTP', () => {
         method: 'POST',
         headers: { 'content-type': 'text/plain' },
         body: 'multiline string\nexample' as any,
-        timeout: 10,
+        timeout: 10_000,
         allowUnauthorized: true,
       }
 
