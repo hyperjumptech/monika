@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.15.0] - 2023-01-20
+
+## Added
+
+- Report Limit and Report Interval Flags in Symon Mode (#961)
+
+## Changed
+
+- Use Node.js v16 for all release version of Monika (#968)
+- SymonClient: Use Bree for Reporting to Symon (#972)
+
+## Updated
+
+- Improve History Log Type (#965)
+- Improve Monika config type (#964)
+- Add Monika flags type (#963)
+
+## Fixed
+
+- Fix GitHub checks warnings (#966)
+- Make MSW Run on Node.js v18 (#967)
+- Monika crashes when send incident/recovery event (#960)
+
 ## [1.14.1] - 2022-12-12
 
 ## Added
