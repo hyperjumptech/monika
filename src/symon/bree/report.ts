@@ -22,58 +22,75 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { expect } from '@oclif/test'
-import mailMock from 'nodemailer-mock'
-import {
-  createSmtpTransport,
-  sendSmtpMail,
-} from '../../src/components/notification/channel/smtp'
-import Mail from 'nodemailer/lib/mailer'
-import { SMTPData } from '../../src/interfaces/data'
+import { parentPort, workerData } from 'worker_threads'
+import { log } from '../../utils/pino'
+import axios, { AxiosRequestConfig } from 'axios'
+import Pako from 'pako'
+const main = async (data: Record<string, any>) => {
+  try {
+    const { url, apiKey, requests, notifications, monikaId } = data
 
-const transport: Mail = mailMock.createTransport({
-  host: '127.0.0.1',
-  port: 2323,
-})
-const opt: Mail.Options = {
-  from: 'me@example.com',
-  to: 'symontest@example.com',
-  subject: 'unit test',
-  html: '<p>A unit test</p>',
+    if (requests.length === 0 && notifications.length === 0) {
+      // No requests or notifications to report
+      log.debug('Nothing to report')
+
+      parentPort?.postMessage({
+        success: true,
+        data: {
+          requests,
+          notifications,
+        },
+      })
+    } else {
+      // Hit the Symon API for receiving Monika report
+      // With the compressed requests and notifications data
+      await axios({
+        url: `${url}/api/v1/monika/report`,
+        method: 'POST',
+        data: {
+          monikaId: monikaId,
+          data: {
+            requests,
+            notifications,
+          },
+        },
+        headers: {
+          'Content-Encoding': 'gzip',
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+        },
+        transformRequest: (req: AxiosRequestConfig) =>
+          Pako.gzip(JSON.stringify(req)).buffer,
+      })
+
+      log.debug(
+        `Reported ${requests.length} requests and ${notifications.length} notifications.`
+      )
+      log.debug(`Last reported ID: ${JSON.stringify(requests.at(-1).id)}`)
+
+      // Send message to parentPort so that
+      // the reported logs and notifications can be deleted
+      parentPort?.postMessage({
+        success: true,
+        data: {
+          requests,
+          notifications,
+        },
+      })
+    }
+  } catch (error) {
+    log.error(
+      "Warning: Can't report history to Symon. " + (error as any).message
+    )
+    parentPort?.postMessage({ success: false, error: error })
+  }
 }
 
-describe('Smtp test', () => {
-  describe('createSmtpTransport test', () => {
-    it('should return transporter', async function () {
-      const mockCfg: SMTPData = {
-        hostname: 'smtp.symon.org',
-        port: 587,
-        username: 'me@symon.org',
-        password: 'symonPass',
-        recipients: ['symon@example.com'],
-      }
-
-      const res = createSmtpTransport(mockCfg)
-      expect(res).instanceOf(Mail)
-    })
-  })
-
-  describe('sendSmtp test', () => {
-    it('should return success info', async function () {
-      transport.sendMail(opt, function () {
-        return {
-          accepted: ['successEmail'],
-        }
-      })
-
-      const res = await sendSmtpMail(transport, {
-        from: 'me@example.com',
-        to: 'symontest@example.com',
-        subject: 'unit test',
-        html: '<p>A unit test</p>',
-      })
-
-      expect(res.accepted).length(1)
-    })
-  })
-})
+;(async () => {
+  try {
+    const data = JSON.parse(workerData.data)
+    await main(data)
+  } catch (error) {
+    console.error(error)
+  }
+})()

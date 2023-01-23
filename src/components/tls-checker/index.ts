@@ -22,31 +22,50 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import type { RequestOptions } from 'https'
 import sslChecker from 'ssl-checker'
+import type { Domain } from '../../interfaces/certificate'
 
-export type TLSHostArg = {
-  domain: string
-  options?: Record<string, any>
-}
 export async function checkTLS(
-  host: string | TLSHostArg,
+  domain: Domain,
+  // default expiry threshold is 30 days
   expiryThreshold = 30
 ): Promise<null> {
-  const hostOptions = (host as TLSHostArg)?.options ?? {}
-  const domain = (host as TLSHostArg)?.domain ?? (host as string)
+  const hostname = getHostname(domain)
+  const requestOptions = getRequestOptions(domain)
 
   const { valid, validTo, daysRemaining } = await sslChecker(
-    domain,
-    hostOptions
+    hostname,
+    requestOptions
   )
 
   if (!valid) {
-    throw new Error(`${domain} security certificate has expired at ${validTo}!`)
+    throw new Error(
+      `${hostname} security certificate has expired at ${validTo}!`
+    )
   }
 
   if (daysRemaining <= expiryThreshold) {
-    throw new Error(`${domain} security certificate will expire at ${validTo}!`)
+    throw new Error(
+      `${hostname} security certificate will expire at ${validTo}!`
+    )
   }
 
   return null
+}
+
+export function getHostname(domain: Domain): string {
+  if (typeof domain === 'string') {
+    return domain
+  }
+
+  return domain.domain
+}
+
+function getRequestOptions(domain: Domain): RequestOptions | undefined {
+  if (typeof domain === 'string') {
+    return undefined
+  }
+
+  return domain?.options
 }
