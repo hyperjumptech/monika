@@ -37,9 +37,11 @@ export const validateConfig = (instatusPageConfig: InstatusConfig): string => {
   return error ? `Instatus notification: ${error?.message}` : ''
 }
 
-export class InstaStatusPageAPI {
-  private instatusPageBaseURL = 'https://api.instatus.com/'
+export class InstatusPageAPI {
+  private instatusPageBaseURL = 'https://api.instatus.com'
   private axiosConfig = {}
+  private pageID = {}
+  private components = {}
 
   constructor(apiKey: string) {
     this.axiosConfig = {
@@ -51,28 +53,23 @@ export class InstaStatusPageAPI {
       // follow up to 10 HTTP 3xx redirects
       maxRedirects: 10,
       headers: {
-        Authorization: `OAuth ${apiKey}`,
-        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+        // 'Content-Type': 'application/json',
       },
     }
-  }
 
-  private async getPageID() {
-    try {
-      const resp = await axios.post(
-        `${this.instatusPageBaseURL}/v2/pages`,
-        this.axiosConfig
-      )
-
-      const pageID = resp?.data?.id
-      return pageID
-    } catch (error: any) {
-      throw new Error(
-        `${error?.message}${
-          error?.data ? `. ${error?.response?.data?.message}` : ''
-        }`
-      )
-    }
+    this.pageID = axios
+      .get(`${this.instatusPageBaseURL}/v2/pages`, this.axiosConfig)
+      .then((res) => {
+        return res.data[0]?.id.toString()
+      })
+      .catch((error) => {
+        throw new Error(
+          `${error?.message}${
+            error?.data ? `. ${error?.response?.data?.message}` : ''
+          }`
+        )
+      })
   }
 
   async notify({ probeID, url, type }: NotifyIncident): Promise<string> {
@@ -107,25 +104,54 @@ export class InstaStatusPageAPI {
     }
 
     const status = 'investigating'
+    this.pageID = await this.pageID
+
+    this.components = axios
+      .get(
+        `${this.instatusPageBaseURL}/v1/${this.pageID}/components`,
+        this.axiosConfig
+      )
+      .then((res) => {
+        return res.data[0]?.id
+      })
+      .catch((error) => {
+        throw new Error(
+          `${error?.message}${
+            error?.data ? `. ${error?.response?.data?.message}` : ''
+          }`
+        )
+      })
+
+    this.components = await this.components
+
     const data = {
-      incident: {
-        name: 'Service is down',
-        status,
-      },
+      name: 'Service is down',
+      message: "We're currently investigating an issue with the Website",
+      components: this.components,
+      started: '2020-09-12 05:38:47.998',
+      status: status,
+      notify: true,
+      statuses: [
+        {
+          id: this.components,
+          status: 'OPERATIONAL',
+        },
+      ],
     }
 
     try {
-      const resp = await axios.post(
-        `${this.instatusPageBaseURL}/v1/incidents`,
+      const res = await axios.post(
+        `${this.instatusPageBaseURL}/v1/${this.pageID}/incidents`,
         data,
         this.axiosConfig
       )
 
-      const incidentID = resp?.data?.id
+      const incidentID = res?.data?.id
       await insertIncidentToDatabase({ incidentID, probeID, status, url })
 
       return incidentID
     } catch (error: any) {
+      console.log(error, 'error')
       throw new Error(
         `${error?.message}${
           error?.data ? `. ${error?.response?.data?.message}` : ''
@@ -157,7 +183,7 @@ export class InstaStatusPageAPI {
 
     try {
       await axios.patch(
-        `${this.instatusPageBaseURL}/v1/incidents/${incidentID}`,
+        `${this.instatusPageBaseURL}/v1/${this.pageID}/incidents/${incidentID}`,
         data,
         this.axiosConfig
       )

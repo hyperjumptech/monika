@@ -51,7 +51,7 @@ import type { Notification } from '../../interfaces/notification'
 import type { StatuspageNotification } from '../../plugins/visualization/atlassian-status-page'
 import { AtlassianStatusPageAPI } from '../../plugins/visualization/atlassian-status-page'
 import type { InstatusPageNotification } from '../../plugins/visualization/instatus'
-import { InstaStatusPageAPI } from '../../plugins/visualization/instatus'
+import { InstatusPageAPI } from '../../plugins/visualization/instatus'
 import { getEventEmitter } from '../../utils/events'
 import { log } from '../../utils/pino'
 
@@ -98,7 +98,7 @@ eventEmitter.on(
 
     if (!isNotificationEmpty && isInstatuspageEnable) {
       const { apiKey } = isInstatuspageEnable.data
-      const instatusPageAPI = new InstaStatusPageAPI(apiKey)
+      const instatusPageAPI = new InstatusPageAPI(apiKey)
       const type = getNotificationType(probeState)
 
       try {
