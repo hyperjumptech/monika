@@ -74,6 +74,8 @@ export const validateConfig = (instatusPageConfig: InstatusConfig): string => {
 export class InstatusPageAPI {
   private instatusPageBaseURL = 'https://api.instatus.com'
   private axiosConfig = {}
+  private pageID = {}
+  private components = {}
 
   constructor(apiKey: string, pageID: string) {
     this.axiosConfig = {
@@ -86,29 +88,22 @@ export class InstatusPageAPI {
       maxRedirects: 10,
       headers: {
         Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
+        // 'Content-Type': 'application/json',
       },
     }
 
-    this.pageID = pageID
-  }
-
-  private async getPageID() {
-    try {
-      const resp = await axios.post(
-        `${this.instatusPageBaseURL}/v2/pages`,
-        this.axiosConfig
-      )
-
-      const pageID = resp?.data?.id
-      return pageID
-    } catch (error: any) {
-      throw new Error(
-        `${error?.message}${
-          error?.data ? `. ${error?.response?.data?.message}` : ''
-        }`
-      )
-    }
+    this.pageID = axios
+      .get(`${this.instatusPageBaseURL}/v2/pages`, this.axiosConfig)
+      .then((res) => {
+        return res.data[0]?.id.toString()
+      })
+      .catch((error) => {
+        throw new Error(
+          `${error?.message}${
+            error?.data ? `. ${error?.response?.data?.message}` : ''
+          }`
+        )
+      })
   }
 
   async notify({ probeID, url, type }: NotifyIncident): Promise<string> {
@@ -176,6 +171,7 @@ export class InstatusPageAPI {
 
       return incidentID
     } catch (error: any) {
+      console.log(error, 'error')
       throw new Error(
         `${error?.message}${
           error?.data ? `. ${error?.response?.data?.message}` : ''
@@ -215,7 +211,7 @@ export class InstatusPageAPI {
 
     try {
       await axios.patch(
-        `${this.instatusPageBaseURL}/v1/incidents/${incidentID}`,
+        `${this.instatusPageBaseURL}/v1/${this.pageID}/incidents/${incidentID}`,
         data,
         this.axiosConfig
       )
