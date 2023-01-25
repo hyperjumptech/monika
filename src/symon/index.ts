@@ -28,8 +28,8 @@ import Bree from 'bree'
 import { EventEmitter } from 'events'
 import mac from 'macaddress'
 import { hostname } from 'os'
+import pako from 'pako'
 import path from 'path'
-
 import PouchDB from 'pouchdb'
 import {
   deleteNotificationLogs,
@@ -43,6 +43,7 @@ import { getContext } from '../context'
 import events from '../events'
 import { Config } from '../interfaces/config'
 import { Probe } from '../interfaces/probe'
+import { setPauseProbeInterval } from '../looper'
 import { ValidatedResponse } from '../plugins/validate-response'
 import { getEventEmitter } from '../utils/events'
 import { DEFAULT_TIMEOUT } from '../utils/http'
@@ -180,12 +181,12 @@ class SymonClient {
     interval: this.reportProbesInterval,
     logger: log,
     doRootCheck: false,
-    errorHandler: (error, workerMetadata) => {
+    errorHandler: (error: any, workerMetadata: any) => {
       log.error(error)
       log.debug(workerMetadata)
     },
     outputWorkerMetadata: true,
-    workerMessageHandler: async (msg) => {
+    workerMessageHandler: async (msg: any) => {
       try {
         // Get worker metadata
         const workerMetaData = this.bree.getWorkerMetadata('report', msg)
