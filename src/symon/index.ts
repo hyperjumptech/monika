@@ -24,12 +24,20 @@
 
 /* eslint-disable unicorn/prefer-module */
 import axios, { AxiosInstance } from 'axios'
+import Bree from 'bree'
 import { EventEmitter } from 'events'
 import mac from 'macaddress'
 import { hostname } from 'os'
-import Bree from 'bree'
 import path from 'path'
 
+import PouchDB from 'pouchdb'
+import {
+  deleteNotificationLogs,
+  deleteRequestLogs,
+  getUnreportedLogs,
+  UnreportedNotificationsLog,
+  UnreportedRequestsLog,
+} from '../components/logger/history'
 import { getOSName } from '../components/notification/alert-message'
 import { getContext } from '../context'
 import events from '../events'
@@ -46,13 +54,6 @@ import {
   publicIpAddress,
   publicNetworkInfo,
 } from '../utils/public-ip'
-import {
-  deleteNotificationLogs,
-  deleteRequestLogs,
-  getUnreportedLogs,
-  UnreportedNotificationsLog,
-  UnreportedRequestsLog,
-} from '../components/logger/history'
 
 Bree.extend(require('@breejs/ts-worker'))
 
@@ -165,6 +166,14 @@ class SymonClient {
 
   private unreportedNotificationsLog: Partial<UnreportedNotificationsLog>[] = []
 
+  private isSymonExperimental: boolean
+
+  private symonCouchDB: string
+
+  private pouch: PouchDB.Database<Record<string, unknown>>
+
+  private remotePouchDB: PouchDB.Database<Record<string, unknown>>
+
   private bree = new Bree({
     root: false,
     defaultExtension: process.env.NODE_ENV === 'test' ? 'ts' : 'js',
@@ -256,6 +265,17 @@ class SymonClient {
     this.reportProbesInterval = reportInterval ?? 10_000
 
     this.reportProbesLimit = reportLimit ?? 100
+
+    const { flags } = getContext()
+
+    this.isSymonExperimental = flags.symonExperimental
+
+    this.symonCouchDB =
+      flags.symonCouchDbURL || 'http://symon:symon@localhost:5984/symon'
+
+    this.pouch = new PouchDB('symon')
+
+    this.remotePouchDB = new PouchDB(this.symonCouchDB)
   }
 
   async initiate(): Promise<void> {
@@ -425,6 +445,47 @@ class SymonClient {
         monikaId: this.monikaId,
         url: this.url,
         apiKey: this.apiKey,
+      }
+
+      const reportData = {
+        monikaId: this.monikaId,
+        data: {
+          requests,
+          notifications,
+        },
+      }
+
+      const id = new Date().toISOString()
+      if (this.isSymonExperimental) {
+        try {
+          const pouchData = await this.pouch.put({ _id: id, ...reportData })
+
+          const replicator = this.pouch.replicate.to(this.remotePouchDB, {
+            live: true,
+            retry: true,
+          })
+
+          // delete data on complete replication
+          replicator.on('complete', async () => {
+            console.log('complete replicating to remote DB')
+            await Promise.all([
+              deleteRequestLogs(logs.requests.map((log) => log.probeId)),
+              deleteNotificationLogs(
+                logs.notifications.map((log) => log.probeId)
+              ),
+            ])
+            this.pouch.remove({ _id: pouchData.id, _rev: pouchData.rev })
+            console.log('complete replicating to remote DB')
+          })
+
+          // log replication error
+          replicator.on('error', function (err) {
+            console.log('failed replicating to remote DB')
+            console.log(err)
+          })
+        } catch (error) {
+          console.error(`error occured : ${error}`)
+        }
       }
 
       // Find existing report job

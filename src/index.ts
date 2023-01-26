@@ -51,6 +51,8 @@ import {
 } from './components/logger/history'
 import { notificationChecker } from './components/notification/checker'
 import { setContext } from './context'
+import type { MonikaFlags } from './context/monika-flags'
+import { monikaFlagsDefaultValue } from './context/monika-flags'
 import events from './events'
 import { Config } from './interfaces/config'
 import { Probe } from './interfaces/probe'
@@ -61,8 +63,6 @@ import {
 } from './jobs/summary-notification'
 import initLoaders from './loaders'
 import { sanitizeProbe, startProbing } from './looper'
-import { monikaFlagsDefaultValue } from './context/monika-flags'
-import type { MonikaFlags } from './context/monika-flags'
 import SymonClient from './symon'
 import { checkProbeId } from './utils/check-probe-id'
 import { getEventEmitter } from './utils/events'
@@ -269,6 +269,17 @@ class Monika extends Command {
       default: monikaFlagsDefaultValue['follow-redirects'],
       description:
         'Monika will follow redirects as many times as the specified value here. By default, Monika will follow redirects once. To disable redirects following, set the value to zero.',
+    }),
+
+    symonExperimental: Flags.boolean({
+      description: 'to run an experimental feature of monika related to symon',
+      default: false,
+    }),
+
+    symonCouchDbURL: Flags.string({
+      hidden: false,
+      description: 'URL of remote couchDB',
+      dependsOn: ['symonExperimental'],
     }),
   }
 

@@ -22,8 +22,8 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { monikaFlagsDefaultValue } from './monika-flags'
 import type { MonikaFlags } from './monika-flags'
+import { monikaFlagsDefaultValue } from './monika-flags'
 
 type Incident = {
   probeID: string
@@ -61,6 +61,7 @@ const initialContext: Context = {
     summary: false,
     verbose: false,
     version: undefined,
+    symonExperimental: false,
   },
 }
 
