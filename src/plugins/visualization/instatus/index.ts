@@ -74,8 +74,8 @@ export const validateConfig = (instatusPageConfig: InstatusConfig): string => {
 export class InstatusPageAPI {
   private instatusPageBaseURL = 'https://api.instatus.com'
   private axiosConfig = {}
-  private pageID = {}
-  private components = {}
+  pageID = {}
+  components = {}
 
   constructor(apiKey: string, pageID: string) {
     this.axiosConfig = {
@@ -88,7 +88,7 @@ export class InstatusPageAPI {
       maxRedirects: 10,
       headers: {
         Authorization: `Bearer ${apiKey}`,
-        // 'Content-Type': 'application/json',
+        'Content-Type': 'application/json',
       },
     }
 
@@ -171,7 +171,6 @@ export class InstatusPageAPI {
 
       return incidentID
     } catch (error: any) {
-      console.log(error, 'error')
       throw new Error(
         `${error?.message}${
           error?.data ? `. ${error?.response?.data?.message}` : ''
