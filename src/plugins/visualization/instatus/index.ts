@@ -40,8 +40,8 @@ export const validateConfig = (instatusPageConfig: InstatusConfig): string => {
 export class InstatusPageAPI {
   private instatusPageBaseURL = 'https://api.instatus.com'
   private axiosConfig = {}
-  private pageID = {}
-  private components = {}
+  pageID = {}
+  components = {}
 
   constructor(apiKey: string) {
     this.axiosConfig = {
@@ -54,7 +54,7 @@ export class InstatusPageAPI {
       maxRedirects: 10,
       headers: {
         Authorization: `Bearer ${apiKey}`,
-        // 'Content-Type': 'application/json',
+        'Content-Type': 'application/json',
       },
     }
 
@@ -94,7 +94,7 @@ export class InstatusPageAPI {
   private async createIncident({ probeID, url }: Incident): Promise<string> {
     const incident = await findIncident({
       probeID,
-      status: 'investigating',
+      status: 'INVESTIGATING',
       url,
     })
 
@@ -103,7 +103,7 @@ export class InstatusPageAPI {
       return incident.incident_id
     }
 
-    const status = 'investigating'
+    const status = 'INVESTIGATING'
     this.pageID = await this.pageID
 
     this.components = axios
@@ -127,31 +127,39 @@ export class InstatusPageAPI {
     const data = {
       name: 'Service is down',
       message: "We're currently investigating an issue with the Website",
-      components: this.components,
-      started: '2020-09-12 05:38:47.998',
+      components: [this.components.toString()],
+      started: `${Date.now()}`,
       status: status,
       notify: true,
       statuses: [
         {
-          id: this.components,
+          id: this.components.toString(),
           status: 'OPERATIONAL',
         },
       ],
     }
 
     try {
-      const res = await axios.post(
-        `${this.instatusPageBaseURL}/v1/${this.pageID}/incidents`,
-        data,
-        this.axiosConfig
-      )
-
-      const incidentID = res?.data?.id
-      await insertIncidentToDatabase({ incidentID, probeID, status, url })
+      const incidentID = await axios
+        .post(
+          `${this.instatusPageBaseURL}/v1/${this.pageID}/incidents/`,
+          data,
+          this.axiosConfig
+        )
+        .then((res) => {
+          return res?.data?.id
+        })
+        .catch((error) => {
+          throw new Error(
+            `${error?.message}${
+              error?.data ? `. ${error?.response?.data?.message}` : ''
+            }`
+          )
+        })
+      insertIncidentToDatabase({ incidentID, probeID, status, url })
 
       return incidentID
     } catch (error: any) {
-      console.log(error, 'error')
       throw new Error(
         `${error?.message}${
           error?.data ? `. ${error?.response?.data?.message}` : ''
