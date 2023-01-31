@@ -86,6 +86,7 @@ export const sendDesktop = (data: NotifyData): any => {
       execSync(powershellScript, { shell: 'powershell.exe' })
       break
     default:
+      // eslint-disable-next-line no-warning-comments
       // TODO: New operating system?
       break
   }

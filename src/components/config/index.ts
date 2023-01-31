@@ -261,6 +261,7 @@ export const setupConfig = async (flags: MonikaFlags): Promise<void> => {
 }
 
 const getPathAndTypeFromFlag = (flags: MonikaFlags) => {
+  // eslint-disable-next-line no-warning-comments
   // TODO: Asuming the first index of config is the primary config
   let path = flags.config?.[0]
   let type = 'monika'
