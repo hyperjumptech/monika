@@ -574,6 +574,13 @@ Please refer to the Monika documentations on how to how to configure notificatio
       return Errors.handle(error)
     }
 
+    if (error.message.includes('EEXIT: 0')) {
+      // this is normal exit, for example after running with --version,
+      // not an error so just quit immediately
+      // eslint-disable-next-line no-process-exit, unicorn/no-process-exit
+      process.exit(0)
+    }
+
     throw error
   }
 
