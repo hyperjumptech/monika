@@ -33,11 +33,10 @@ describe('CLI Testing', () => {
     const { spawn, cleanup } = await prepareEnvironment()
 
     // act
-    const { getStdout, wait } = await spawn('node', `${monika} -v`)
-    await wait(5000)
+    const { getStdout, waitForText } = await spawn('node', `${monika} -v`)
+    await waitForText('@hyperjumptech/monika')
 
     const stdout = getStdout().join('\r\n')
-    console.log(getStdout())
 
     // assert
     expect(stdout).to.contain('@hyperjumptech/monika')
@@ -46,22 +45,24 @@ describe('CLI Testing', () => {
   })
   it('shows initializing file when no config', async () => {
     // arrange
-    const { spawn, cleanup } = await prepareEnvironment()
+    const { spawn, cleanup, exists, removeFile } = await prepareEnvironment()
+    const assertText1 = 'No Monika configuration available, initializing...'
+    const assertText2 =
+      'monika.yml file has been created in this directory. You can change the URL to probe and other configurations in that monika.yml file.'
 
     // act
-    const { getStdout, wait } = await spawn('node', `${monika} -r 1`)
-    await wait(5000)
+    const prevConfig = await exists('./monika.yml')
+    if (prevConfig) {
+      await removeFile('./monika.yml')
+    }
 
+    const { getStdout, waitForText } = await spawn('node', `${monika} -r 1`)
+    await waitForText(assertText2)
     const stdout = getStdout().join('\r\n')
-    console.log(getStdout())
 
     // assert
-    expect(stdout).to.contain(
-      'No Monika configuration available, initializing...'
-    )
-    expect(stdout).to.contain(
-      'monika.yml file has been created in this directory. You can change the URL to probe and other configurations in that monika.yml file.'
-    )
+    expect(stdout).to.contain(assertText1)
+    expect(stdout).to.contain(assertText2)
 
     await cleanup()
   })
@@ -70,14 +71,12 @@ describe('CLI Testing', () => {
     const { spawn, cleanup } = await prepareEnvironment()
 
     // act
-    const { getStdout, wait } = await spawn(
+    const { getStdout, waitForText } = await spawn(
       'node',
       `${monika} -r 1 -c ./monika.example.json`
     )
-    await wait(8000)
-
+    await waitForText('Starting Monika.')
     const stdout = getStdout().join('\r\n')
-    console.log(getStdout())
 
     // assert
     expect(stdout).to.contain('Starting Monika.')
@@ -89,14 +88,12 @@ describe('CLI Testing', () => {
     const { spawn, cleanup } = await prepareEnvironment()
 
     // act
-    const { getStdout, wait } = await spawn(
+    const { getStdout, waitForText } = await spawn(
       'node',
       `${monika} -r 1 -c ./monika.example.yml`
     )
-    await wait(8000)
-
+    await waitForText('Starting Monika.')
     const stdout = getStdout().join('\r\n')
-    console.log(getStdout())
 
     // assert
     expect(stdout).to.contain('Starting Monika.')
@@ -140,32 +137,27 @@ describe('CLI Testing', () => {
   - id: unique-id-monika-notif,
     type: desktop
   `
+    const updatedString = 'WARN: config file update detected'
 
     // act
     // write initial yml
     await writeFile('./cli-test.yml', initFile)
 
     // run monika
-    const { getStdout, wait, kill } = await spawn(
+    const { getStdout, waitForText, kill } = await spawn(
       'node',
       `${monika} -c cli-test.yml`
     )
-    await wait(15_000)
+    await waitForText('GET https://google.com')
 
     // write new yml containing github url
     await writeFile('./cli-test.yml', changeFile)
-    await wait(5000)
-
-    const stdout = getStdout().join('\r\n')
-    const updatedString = 'WARN: config file update detected'
-    const stdoutBeforeConfigChange = stdout.split(updatedString)[0]
-    const stdoutAfterConfigChange = stdout.split(updatedString)[1]
-
-    console.log('stdout:\r\n', getStdout())
-    console.log('stdoutBeforeConfigChange:\r\n', stdoutBeforeConfigChange)
-    console.log('stdoutAfterConfigChange:', stdoutAfterConfigChange)
+    await waitForText('GET https://github.com')
 
     // assert
+    const stdout = getStdout().join('\r\n')
+    const stdoutBeforeConfigChange = stdout.split(updatedString)[0]
+    const stdoutAfterConfigChange = stdout.split(updatedString)[1]
     // expect starting monika
     expect(stdoutBeforeConfigChange).to.contain('Using config file')
     expect(stdoutBeforeConfigChange).to.contain('cli-test.yml')
