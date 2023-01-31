@@ -28,7 +28,7 @@ import { expect } from 'chai'
 const monika = './bin/run'
 
 describe('CLI Testing', () => {
-  xit('shows version', async () => {
+  it('shows version', async () => {
     // arrange
     const { spawn, cleanup } = await prepareEnvironment()
 
@@ -44,7 +44,7 @@ describe('CLI Testing', () => {
 
     await cleanup()
   })
-  xit('shows initializing file when no config', async () => {
+  it('shows initializing file when no config', async () => {
     // arrange
     const { spawn, cleanup } = await prepareEnvironment()
 
@@ -65,7 +65,45 @@ describe('CLI Testing', () => {
 
     await cleanup()
   })
-  xit('Detect config file changes successfully', async () => {
+  it('shows starting message with valid json config', async () => {
+    // arrange
+    const { spawn, cleanup } = await prepareEnvironment()
+
+    // act
+    const { getStdout, wait } = await spawn(
+      'node',
+      `${monika} -r 1 -c ./monika.example.json`
+    )
+    await wait(8000)
+
+    const stdout = getStdout().join('\r\n')
+    console.log(getStdout())
+
+    // assert
+    expect(stdout).to.contain('Starting Monika.')
+
+    await cleanup()
+  })
+  it('shows starting message with valid yml config', async () => {
+    // arrange
+    const { spawn, cleanup } = await prepareEnvironment()
+
+    // act
+    const { getStdout, wait } = await spawn(
+      'node',
+      `${monika} -r 1 -c ./monika.example.yml`
+    )
+    await wait(8000)
+
+    const stdout = getStdout().join('\r\n')
+    console.log(getStdout())
+
+    // assert
+    expect(stdout).to.contain('Starting Monika.')
+
+    await cleanup()
+  })
+  it('Detect config file changes successfully', async () => {
     // arrange
     const { spawn, cleanup, writeFile } = await prepareEnvironment()
 
@@ -150,17 +188,3 @@ describe('CLI Testing', () => {
     await cleanup()
   })
 })
-
-// @test "shows starting message with valid json config" {
-//     run monika -r 1 -c ./monika.example.json
-
-//     assert_success
-//     assert_output --partial 'Starting Monika.'
-// }
-
-// @test "shows starting message with valid yaml config" {
-//     run monika -r 1 -c ./monika.example.yml
-
-//     assert_success
-//     assert_output --partial 'Starting Monika.'
-// }
