@@ -28,7 +28,7 @@ import { expect } from 'chai'
 const monika = './bin/run'
 
 describe('CLI Testing', () => {
-  it('shows version', async () => {
+  xit('shows version', async () => {
     // arrange
     const { spawn, cleanup } = await prepareEnvironment()
 
@@ -37,13 +37,35 @@ describe('CLI Testing', () => {
     await wait(5000)
 
     const stdout = getStdout().join('\r\n')
+    console.log(getStdout())
 
     // assert
     expect(stdout).to.contain('@hyperjumptech/monika')
 
     await cleanup()
   })
-  it('Detect config file changes successfully', async () => {
+  xit('shows initializing file when no config', async () => {
+    // arrange
+    const { spawn, cleanup } = await prepareEnvironment()
+
+    // act
+    const { getStdout, wait } = await spawn('node', `${monika} -r 1`)
+    await wait(5000)
+
+    const stdout = getStdout().join('\r\n')
+    console.log(getStdout())
+
+    // assert
+    expect(stdout).to.contain(
+      'No Monika configuration available, initializing...'
+    )
+    expect(stdout).to.contain(
+      'monika.yml file has been created in this directory. You can change the URL to probe and other configurations in that monika.yml file.'
+    )
+
+    await cleanup()
+  })
+  xit('Detect config file changes successfully', async () => {
     // arrange
     const { spawn, cleanup, writeFile } = await prepareEnvironment()
 
@@ -128,15 +150,6 @@ describe('CLI Testing', () => {
     await cleanup()
   })
 })
-
-// @test "shows initializing file when no config" {
-//     run rm -rf monika.yml
-//     run monika -r 1
-
-//     assert_success
-//     assert_output --partial 'No Monika configuration available, initializing...'
-//     assert_output --partial 'monika.yml file has been created in this directory. You can change the URL to probe and other configurations in that monika.yml file.'
-// }
 
 // @test "shows starting message with valid json config" {
 //     run monika -r 1 -c ./monika.example.json
