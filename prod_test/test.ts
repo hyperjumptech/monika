@@ -25,53 +25,72 @@
 import { prepareEnvironment } from '@gmrchk/cli-testing-library'
 import { expect } from 'chai'
 
+const monika = './bin/run'
+
 describe('CLI Testing', () => {
+  it('shows version', async () => {
+    // arrange
+    const { spawn, cleanup } = await prepareEnvironment()
+
+    // act
+    const { getStdout, wait } = await spawn('node', `${monika} -v`)
+    await wait(5000)
+
+    const stdout = getStdout().join('\r\n')
+
+    // assert
+    expect(stdout).to.contain('@hyperjumptech/monika')
+
+    await cleanup()
+  })
   it('Detect config file changes successfully', async () => {
+    // arrange
     const { spawn, cleanup, writeFile } = await prepareEnvironment()
 
     const initFile = `
-probes:
-  - id: '1'
-    name: Google
-    interval: 1
-    incidentThreshold: 6
-    recoveryThreshold: 6
-    requests:
-      - url: https://google.com
-notifications:
+  probes:
+    - id: '1'
+      name: Google
+      interval: 1
+      incidentThreshold: 6
+      recoveryThreshold: 6
+      requests:
+        - url: https://google.com
+  notifications:
+    - id: unique-id-monika-notif,
+      type: desktop
+  `
+    const changeFile = `
+  probes:
+    - id: '1'
+      name: Google
+      interval: 1
+      incidentThreshold: 6
+      recoveryThreshold: 6
+      requests:
+        - url: https://google.com
+    - id: '2'
+      name: Github
+      interval: 1
+      incidentThreshold: 6
+      recoveryThreshold: 6
+      requests:
+        - url: https://github.com
+  notifications:
   - id: unique-id-monika-notif,
     type: desktop
-`
-    const changeFile = `
-probes:
-  - id: '1'
-    name: Google
-    interval: 1
-    incidentThreshold: 6
-    recoveryThreshold: 6
-    requests:
-      - url: https://google.com
-  - id: '2'
-    name: Github
-    interval: 1
-    incidentThreshold: 6
-    recoveryThreshold: 6
-    requests:
-      - url: https://github.com
-notifications:
-- id: unique-id-monika-notif,
-  type: desktop
-`
+  `
 
+    // act
     // write initial yml
     await writeFile('./cli-test.yml', initFile)
 
     // run monika
     const { getStdout, wait, kill } = await spawn(
       'node',
-      './bin/run -c cli-test.yml'
+      `${monika} -c cli-test.yml`
     )
-    await wait(13_000)
+    await wait(15_000)
 
     // write new yml containing github url
     await writeFile('./cli-test.yml', changeFile)
@@ -86,6 +105,7 @@ notifications:
     console.log('stdoutBeforeConfigChange:\r\n', stdoutBeforeConfigChange)
     console.log('stdoutAfterConfigChange:', stdoutAfterConfigChange)
 
+    // assert
     // expect starting monika
     expect(stdoutBeforeConfigChange).to.contain('Using config file')
     expect(stdoutBeforeConfigChange).to.contain('cli-test.yml')
@@ -108,3 +128,26 @@ notifications:
     await cleanup()
   })
 })
+
+// @test "shows initializing file when no config" {
+//     run rm -rf monika.yml
+//     run monika -r 1
+
+//     assert_success
+//     assert_output --partial 'No Monika configuration available, initializing...'
+//     assert_output --partial 'monika.yml file has been created in this directory. You can change the URL to probe and other configurations in that monika.yml file.'
+// }
+
+// @test "shows starting message with valid json config" {
+//     run monika -r 1 -c ./monika.example.json
+
+//     assert_success
+//     assert_output --partial 'Starting Monika.'
+// }
+
+// @test "shows starting message with valid yaml config" {
+//     run monika -r 1 -c ./monika.example.yml
+
+//     assert_success
+//     assert_output --partial 'Starting Monika.'
+// }
