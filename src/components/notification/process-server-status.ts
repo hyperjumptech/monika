@@ -45,6 +45,7 @@ export const serverAlertStateInterpreters = new Map<
 export const serverAlertStateMachine = createMachine<ServerAlertStateContext>(
   {
     id: 'server-alerts-state',
+    predictableActionArguments: true,
     initial: 'UP',
     states: {
       UP: {

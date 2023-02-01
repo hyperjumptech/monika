@@ -13,6 +13,7 @@ type ProbeStateContext = {
 const probeStateMachine = createMachine<ProbeStateValue, ProbeStateContext>(
   {
     id: 'probe-state',
+    predictableActionArguments: true,
     initial: 'idle',
     states: {
       idle: {
