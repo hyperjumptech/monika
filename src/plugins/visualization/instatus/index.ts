@@ -41,6 +41,7 @@ type Incident = Omit<NotifyIncident, 'type'>
 
 type InstatusConfig = {
   apiKey: string
+  pageID: string
 }
 
 export type InstatusPageNotification = {
@@ -63,6 +64,7 @@ type Component = {
 export const slug = 'instatus'
 export const validator = Joi.object({
   apiKey: Joi.string().required().label('API Key'),
+  pageID: Joi.string().required().label('Page ID'),
 }).required()
 
 export const validateConfig = (instatusPageConfig: InstatusConfig): string => {
@@ -74,8 +76,7 @@ export const validateConfig = (instatusPageConfig: InstatusConfig): string => {
 export class InstatusPageAPI {
   private instatusPageBaseURL = 'https://api.instatus.com'
   private axiosConfig = {}
-  pageID = {}
-  components = {}
+  private pageID = ''
 
   constructor(apiKey: string, pageID: string) {
     this.axiosConfig = {
@@ -92,18 +93,7 @@ export class InstatusPageAPI {
       },
     }
 
-    this.pageID = axios
-      .get(`${this.instatusPageBaseURL}/v2/pages`, this.axiosConfig)
-      .then((res) => {
-        return res.data[0]?.id.toString()
-      })
-      .catch((error) => {
-        throw new Error(
-          `${error?.message}${
-            error?.data ? `. ${error?.response?.data?.message}` : ''
-          }`
-        )
-      })
+    this.pageID = pageID
   }
 
   async notify({ probeID, url, type }: NotifyIncident): Promise<string> {
