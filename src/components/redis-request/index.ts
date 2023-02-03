@@ -64,7 +64,6 @@ export async function redisRequest(
   if (result.isAlive) {
     baseResponse.responseTime = duration
     baseResponse.body = result.message
-    // eslint-disable-next-line no-warning-comments
     baseResponse.status = 200 // TODO: improve this up/down flag
   } else {
     baseResponse.body = result.message

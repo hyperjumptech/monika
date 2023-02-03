@@ -103,7 +103,6 @@ export class RequestLog {
     // generate probe result messages
     let probeMsg = ''
 
-    // eslint-disable-next-line no-warning-comments
     // TODO: make this more generic not probe dependent
     if (this.request?.ping) {
       probeMsg = `${this.iteration} id:${this.probe.id} ${this.response?.body}`

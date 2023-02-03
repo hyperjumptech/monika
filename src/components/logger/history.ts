@@ -144,7 +144,6 @@ export let db: Database<SQLite3.Database, SQLite3.Statement>
 
 async function migrate() {
   await db.migrate({
-    // eslint-disable-next-line unicorn/prefer-module
     migrationsPath: path.join(__dirname, '../../../db/migrations'),
   })
 }
@@ -484,7 +483,6 @@ export async function saveProbeRequestLog({
   const now = Math.round(Date.now() / 1000)
   const requestConfig = probe.requests?.[requestIndex]
 
-  // eslint-disable-next-line no-warning-comments
   // TODO: limit data stored.
   const responseBody = requestConfig?.saveBody
     ? typeof probeRes.data === 'string'

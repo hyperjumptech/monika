@@ -97,7 +97,6 @@ export async function sendNotifications(
                 subject: message.subject,
                 body: message.body,
                 sender: {
-                  // eslint-disable-next-line no-warning-comments
                   // TODO: Read from ENV Variables
                   name: 'Monika',
                   email: 'Monika@hyperjump.tech',
@@ -176,7 +175,6 @@ export async function sendNotifications(
           case 'smtp': {
             const transporter = createSmtpTransport(notification.data)
             await sendSmtpMail(transporter, {
-              // eslint-disable-next-line no-warning-comments
               // TODO: Read from ENV Variables
               from: 'Monika@hyperjump.tech',
               to: notification?.data?.recipients?.join(','),
