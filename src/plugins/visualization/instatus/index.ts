@@ -17,6 +17,7 @@ type Incident = Omit<NotifyIncident, 'type'>
 
 type InstatusConfig = {
   apiKey: string
+  pageID: string
 }
 
 export type InstatusPageNotification = {
@@ -25,14 +26,25 @@ export type InstatusPageNotification = {
   data: InstatusConfig
 }
 
+type Component = {
+  id: string
+  name: string
+  description: string
+  status: string
+  uniqueEmail: string
+  showUptime: boolean
+  order: number
+  group: 'string' | null
+}
+
 export const slug = 'instatus'
 export const validator = Joi.object({
   apiKey: Joi.string().required().label('API Key'),
+  pageID: Joi.string().required().label('Page ID'),
 }).required()
 
 export const validateConfig = (instatusPageConfig: InstatusConfig): string => {
   const { error } = validator.validate(instatusPageConfig)
-  console.log(error, 'instatus err valid')
 
   return error ? `Instatus notification: ${error?.message}` : ''
 }
@@ -40,10 +52,9 @@ export const validateConfig = (instatusPageConfig: InstatusConfig): string => {
 export class InstatusPageAPI {
   private instatusPageBaseURL = 'https://api.instatus.com'
   private axiosConfig = {}
-  pageID = {}
-  components = {}
+  private pageID = ''
 
-  constructor(apiKey: string) {
+  constructor(apiKey: string, pageID: string) {
     this.axiosConfig = {
       // 10 sec timeout
       timeout: 10_000,
@@ -58,18 +69,7 @@ export class InstatusPageAPI {
       },
     }
 
-    this.pageID = axios
-      .get(`${this.instatusPageBaseURL}/v2/pages`, this.axiosConfig)
-      .then((res) => {
-        return res.data[0]?.id.toString()
-      })
-      .catch((error) => {
-        throw new Error(
-          `${error?.message}${
-            error?.data ? `. ${error?.response?.data?.message}` : ''
-          }`
-        )
-      })
+    this.pageID = pageID
   }
 
   async notify({ probeID, url, type }: NotifyIncident): Promise<string> {
@@ -92,9 +92,10 @@ export class InstatusPageAPI {
   }
 
   private async createIncident({ probeID, url }: Incident): Promise<string> {
+    const status = 'INVESTIGATING'
     const incident = await findIncident({
       probeID,
-      status: 'INVESTIGATING',
+      status,
       url,
     })
 
@@ -103,43 +104,25 @@ export class InstatusPageAPI {
       return incident.incident_id
     }
 
-    const status = 'INVESTIGATING'
-    this.pageID = await this.pageID
-
-    this.components = axios
-      .get(
-        `${this.instatusPageBaseURL}/v1/${this.pageID}/components`,
-        this.axiosConfig
-      )
-      .then((res) => {
-        return res.data[0]?.id
-      })
-      .catch((error) => {
-        throw new Error(
-          `${error?.message}${
-            error?.data ? `. ${error?.response?.data?.message}` : ''
-          }`
-        )
-      })
-
-    this.components = await this.components
-
-    const data = {
-      name: 'Service is down',
-      message: "We're currently investigating an issue with the Website",
-      components: [this.components.toString()],
-      started: `${Date.now()}`,
-      status: status,
-      notify: true,
-      statuses: [
-        {
-          id: this.components.toString(),
-          status: 'OPERATIONAL',
-        },
-      ],
-    }
-
     try {
+      const components = await this.getComponents()
+      const componentIDs: string[] = components.map(({ id }) => id)
+      const componentID: string = componentIDs[0]
+      const started = new Date()
+      const statuses = componentIDs.map((id) => ({
+        id,
+        status: 'OPERATIONAL',
+      }))
+      const data = {
+        name: 'Service is down',
+        message: "We're currently experiencing an issue with the website",
+        components: [componentID],
+        started,
+        status,
+        notify: true,
+        statuses,
+      }
+
       const incidentID = await axios
         .post(
           `${this.instatusPageBaseURL}/v1/${this.pageID}/incidents/`,
@@ -149,13 +132,7 @@ export class InstatusPageAPI {
         .then((res) => {
           return res?.data?.id
         })
-        .catch((error) => {
-          throw new Error(
-            `${error?.message}${
-              error?.data ? `. ${error?.response?.data?.message}` : ''
-            }`
-          )
-        })
+
       insertIncidentToDatabase({ incidentID, probeID, status, url })
 
       return incidentID
@@ -169,17 +146,9 @@ export class InstatusPageAPI {
   }
 
   private async updateIncident({ probeID, url }: Incident): Promise<string> {
-    const status = 'resolved'
-    const data = {
-      incident: {
-        name: 'Service is up',
-        status,
-      },
-    }
-
     const incident = await findIncident({
       probeID,
-      status: 'investigating',
+      status: 'INVESTIGATING',
       url,
     })
 
@@ -187,6 +156,22 @@ export class InstatusPageAPI {
       throw new Error('Instatus notification: Incident is not found.')
     }
 
+    const status = 'RESOLVED'
+    const components = await this.getComponents()
+    const componentIDs: string[] = components.map(({ id }) => id)
+    const componentID: string = componentIDs[0]
+    const started = new Date()
+    const statuses = componentIDs.map((id) => ({
+      id,
+      status: 'OPERATIONAL',
+    }))
+    const data = {
+      name: 'Service is up',
+      components: [componentID],
+      started,
+      status,
+      statuses,
+    }
     const { incident_id: incidentID } = incident
 
     try {
@@ -206,5 +191,14 @@ export class InstatusPageAPI {
     await updateIncidentToDatabase({ incidentID, status })
 
     return incidentID
+  }
+
+  private async getComponents(): Promise<Component[]> {
+    const componentsResponse = await axios.get(
+      `${this.instatusPageBaseURL}/v1/${this.pageID}/components`,
+      this.axiosConfig
+    )
+
+    return componentsResponse.data
   }
 }

@@ -1165,6 +1165,10 @@
                   "apiKey": {
                     "type": "string",
                     "description": "Instatus API key"
+                  },
+                  "pageID": {
+                    "type": "string",
+                    "description": "Instatus Page ID"
                   }
                 }
               }
