@@ -525,27 +525,9 @@ notifications:
       pageID: YOUR_INSTATUS_PAGE_ID //You can get it with client.pages.get()
 ```
 
-or, you can map each probe to each component. The configuration could be something like in the following:
-
-```yaml
-data:
-  apiKey: YOUR_INSTATUS_API_KEY
-  data:
-    - probeID: YOUR_INSTATUS_PROBE_ID
-      pageID: YOUR_INSTATUS_PAGE_ID
-      componentIDs:
-        - YOUR_INSTATUS_COMPONENT_ID
-        - YOUR_INSTATUS_COMPONENT_ID
-      impact: 'DEGRADEDPERFORMANCE'
-```
-
-The impact options can be DEGRADEDPERFORMANCE or PARTIALOUTAGE or MAJOROUTAGE.
-
-| Key                    | Description                  | Example                            |
-| ---------------------- | ---------------------------- | ---------------------------------- |
-| id                     | Notification identity number | `instatus-id`                      |
-| type                   | Notification types           | `instatus`                         |
-| data.apiKey            | Instatus API key             | `43d43d2c06ae223a88a9c35523acd00a` |
-| data.data.pageID       | Instatus page ID             | `2hu1aj8r6td7mog6uz1sh`            |
-| data.data.componentIDs | Instatus component ID        | `0vf1ab8r6td3mxg3uz1bs`            |
-| data.data.impact       | Instatus impact              | `DEGRADEDPERFORMANCE`              |
+| Key              | Description                  | Example                            |
+| ---------------- | ---------------------------- | ---------------------------------- |
+| id               | Notification identity number | `instatus-id`                      |
+| type             | Notification types           | `instatus`                         |
+| data.apiKey      | Instatus API key             | `43d43d2c06ae223a88a9c35523acd00a` |
+| data.data.pageID | Instatus page ID             | `2hu1aj8r6td7mog6uz1sh`            |

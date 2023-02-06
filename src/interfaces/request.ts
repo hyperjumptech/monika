@@ -42,7 +42,6 @@ export interface ProbeRequestResponse<T = any> {
   requestType?: RequestTypes // is this for http (default) or icmp  or others
   data: T
   body: T
-  // eslint-disable-next-line no-warning-comments
   status: number // TODO: Improve status management. Status as number is pretty limiting here if we want to support other protocols other than http
   // statusMsg: string // string messge of the satus code
   headers: any
