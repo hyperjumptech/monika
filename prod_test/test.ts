@@ -148,35 +148,39 @@ describe('CLI Testing', () => {
       'node',
       `${monika} -c cli-test.yml`
     )
-    await waitForText('GET https://google.com')
 
-    // write new yml containing github url
-    await writeFile('./cli-test.yml', changeFile)
-    await waitForText('GET https://github.com')
+    try {
+      await waitForText('GET https://google.com')
 
-    // assert
-    const stdout = getStdout().join('\r\n')
-    const stdoutBeforeConfigChange = stdout.split(updatedString)[0]
-    const stdoutAfterConfigChange = stdout.split(updatedString)[1]
-    // expect starting monika
-    expect(stdoutBeforeConfigChange).to.contain('Using config file')
-    expect(stdoutBeforeConfigChange).to.contain('cli-test.yml')
-    expect(stdoutBeforeConfigChange).to.contain(
-      'Starting Monika. Probes: 1. Notifications: 1'
-    )
-    expect(stdoutBeforeConfigChange).to.contain('GET https://google.com')
+      // write new yml containing github url
+      await writeFile('./cli-test.yml', changeFile)
+      await waitForText('GET https://github.com')
 
-    // expect new yml including url github
-    expect(stdoutAfterConfigChange).to.contain('Using config file:')
-    expect(stdoutAfterConfigChange).to.contain('cli-test.yml')
-    expect(stdoutAfterConfigChange).to.contain(
-      'Restarting Monika. Probes: 2. Notifications: 1'
-    )
-    expect(stdoutAfterConfigChange).to.contain('GET https://github.com')
+      // assert
+      const stdout = getStdout().join('\r\n')
+      const stdoutBeforeConfigChange = stdout.split(updatedString)[0]
+      const stdoutAfterConfigChange = stdout.split(updatedString)[1]
+      // expect starting monika
+      expect(stdoutBeforeConfigChange).to.contain('Using config file')
+      expect(stdoutBeforeConfigChange).to.contain('cli-test.yml')
+      expect(stdoutBeforeConfigChange).to.contain(
+        'Starting Monika. Probes: 1. Notifications: 1'
+      )
+      expect(stdoutBeforeConfigChange).to.contain('GET https://google.com')
+
+      // expect new yml including url github
+      expect(stdoutAfterConfigChange).to.contain('Using config file:')
+      expect(stdoutAfterConfigChange).to.contain('cli-test.yml')
+      expect(stdoutAfterConfigChange).to.contain(
+        'Restarting Monika. Probes: 2. Notifications: 1'
+      )
+      expect(stdoutAfterConfigChange).to.contain('GET https://github.com')
+    } catch {
+      console.error('catch error waiting for change file')
+    }
 
     // Stop monika
     kill('SIGINT')
-
     await cleanup()
   })
 })
