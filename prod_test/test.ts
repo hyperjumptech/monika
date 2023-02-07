@@ -144,7 +144,7 @@ describe('CLI Testing', () => {
     await writeFile('./cli-test.yml', initFile)
 
     // run monika
-    const { getStdout, waitForText, kill } = await spawn(
+    const { getStdout, waitForText, kill, wait } = await spawn(
       'node',
       `${monika} -c cli-test.yml`
     )
@@ -154,7 +154,7 @@ describe('CLI Testing', () => {
 
       // write new yml containing github url
       await writeFile('./cli-test.yml', changeFile)
-      await waitForText('GET https://github.com')
+      await wait(5000)
 
       // assert
       const stdout = getStdout().join('\r\n')
