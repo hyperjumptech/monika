@@ -22,41 +22,66 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios'
-import http from 'http'
-import https from 'https'
+import { Probe, ProbeAlert } from '../../../interfaces/probe'
+import { parseAlertStringTime } from '../../../plugins/validate-response/checkers'
+import { compileExpression } from '../../../utils/expression-parser'
 
-export const HTTPMethods = new Set([
-  'DELETE',
-  'GET',
-  'HEAD',
-  'OPTIONS',
-  'PATCH',
-  'POST',
-  'PUT',
-  'PURGE',
-  'LINK',
-  'UNLINK',
-])
+const alertStatusMessage = 'status-not-2xx'
+const responseTimePrefix = 'response-time-greater-than-'
 
-// Keep the agents alive to reduce the overhead of DNS queries and creating TCP connection.
-// More information here: https://rakshanshetty.in/nodejs-http-keep-alive/
-const httpAgent = new http.Agent({ keepAlive: true })
-const httpsAgent = new https.Agent({ keepAlive: true })
-export const DEFAULT_TIMEOUT = 10_000
+const isValidProbeAlert = (alert: ProbeAlert | string): boolean => {
+  try {
+    if (typeof alert === 'string') {
+      return (
+        alert === alertStatusMessage ||
+        (alert.startsWith(responseTimePrefix) &&
+          Boolean(parseAlertStringTime(alert)))
+      )
+    }
 
-// Create an instance of axios here so it will be reused instead of creating a new one all the time.
-const axiosInstance = axios.create()
+    return Boolean(
+      compileExpression(alert.assertion || (alert.query as string))
+    )
+  } catch {
+    return false
+  }
+}
 
-export async function sendHttpRequest(
-  config: AxiosRequestConfig
-): Promise<AxiosResponse> {
-  const resp = await axiosInstance.request({
-    ...config,
-    timeout: config.timeout ?? DEFAULT_TIMEOUT, // Ensure default timeout if not filled.
-    httpAgent: config.httpAgent ?? httpAgent,
-    httpsAgent: config.httpsAgent ?? httpsAgent,
+const convertOldAlertToNewFormat = (probe: Probe, allAlerts: ProbeAlert[]) => {
+  probe.alerts = allAlerts.map((alert: any) => {
+    if (typeof alert === 'string') {
+      let query = ''
+      let message = ''
+      const subject = ''
+
+      if (alert === alertStatusMessage) {
+        query = 'response.status < 200 or response.status > 299'
+        message = 'HTTP Status is {{ response.status }}, expecting 200'
+      } else if (alert.startsWith(responseTimePrefix)) {
+        const expectedTime = parseAlertStringTime(alert)
+        query = `response.time > ${expectedTime}`
+        message = `Response time is {{ response.time }}ms, expecting less than ${expectedTime}ms`
+      }
+
+      return { query, subject, message }
+    }
+
+    return alert
   })
+}
 
-  return resp
+export const validateAlerts = (probe: Probe) => {
+  const { alerts = [], socket } = probe
+  const socketAlerts = socket?.alerts ?? []
+  const allAlerts = [...alerts, ...socketAlerts]
+
+  // Check probe alert properties
+  for (const alert of allAlerts) {
+    const check = isValidProbeAlert(alert)
+    if (!check) {
+      return `Probe alert format is invalid! (${alert})`
+    }
+  }
+
+  convertOldAlertToNewFormat(probe, allAlerts)
 }

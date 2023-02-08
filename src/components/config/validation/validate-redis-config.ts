@@ -22,43 +22,26 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import yaml from 'js-yaml'
-import fs from 'fs'
-import Ajv from 'ajv'
-import { Validation } from '../../interfaces/validation'
-import mySchema from '../../monika-config-schema.json'
+import Joi from 'joi'
+import { Redis } from '../../../interfaces/probe'
 
-const ajv = new Ajv()
-
-// validate the config file used by monika
-export function validateConfigFile(filename: string): Validation {
-  const validResult: Validation = {
-    valid: false,
-    message: `Errors detected in config file ${filename}`,
-  }
-  const validate = ajv.compile(mySchema)
-
-  try {
-    const configFile = yaml.load(fs.readFileSync(filename, 'utf8'))
-    const isValid = validate(configFile)
-
-    if (isValid) {
-      validResult.valid = true
-      validResult.message = `config: ${filename} is ok`
-      return validResult
-    }
-  } catch (error: any) {
-    console.error('error:', error)
-    validResult.message = error
+export const validateRedisConfig = (redisConfig?: Redis[]) => {
+  if (!redisConfig) {
+    return ''
   }
 
-  if (validate.errors) {
-    for (const err of validate.errors) {
-      validResult.message += ', ' + err.message
-    }
+  const schema = Joi.object({
+    host: Joi.alternatives()
+      .try(Joi.string().hostname(), Joi.string().ip())
+      .required(),
+    port: Joi.number().min(0).max(65_536).required(),
+    password: Joi.string(),
+    username: Joi.string(),
+    command: Joi.string(),
+  })
 
-    validResult.message += '.'
+  for (const redis of redisConfig) {
+    const validationError = schema.validate(redis)
+    if (validationError?.error?.message) return validationError?.error?.message
   }
-
-  return validResult
 }

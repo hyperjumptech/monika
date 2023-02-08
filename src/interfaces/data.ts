@@ -164,3 +164,25 @@ export interface DBLimit {
 export interface GoogleChatData {
   url: string
 }
+
+export type Data =
+  | MailData
+  | MailgunData
+  | SendgridData
+  | SMTPData
+  | TeamsData
+  | SlackData
+  | WebhookData
+  | DingtalkData
+  | OpsgenieData
+  | MonikaNotifData
+  | TelegramData
+  | PushoverData
+  | GotifyData
+  | PushbulletData
+  | WebhookDataBody
+  | WhatsappData
+  | WorkplaceData
+  | LarkData
+  | DBLimit
+  | GoogleChatData

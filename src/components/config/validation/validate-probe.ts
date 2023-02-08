@@ -22,41 +22,57 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios'
-import http from 'http'
-import https from 'https'
+import { Probe } from '../../../interfaces/probe'
+import { validateAlerts } from './validate-alert'
+import { validateRequests } from './validate-request'
+import { validateSchemaConfig } from './validate-schema-config'
 
-export const HTTPMethods = new Set([
-  'DELETE',
-  'GET',
-  'HEAD',
-  'OPTIONS',
-  'PATCH',
-  'POST',
-  'PUT',
-  'PURGE',
-  'LINK',
-  'UNLINK',
-])
+const NO_PROBES = 'Probes object does not exists or has length lower than 1!'
+const PROBE_NO_REQUESTS =
+  'Probe requests does not exists or has length lower than 1!'
 
-// Keep the agents alive to reduce the overhead of DNS queries and creating TCP connection.
-// More information here: https://rakshanshetty.in/nodejs-http-keep-alive/
-const httpAgent = new http.Agent({ keepAlive: true })
-const httpsAgent = new https.Agent({ keepAlive: true })
-export const DEFAULT_TIMEOUT = 10_000
+const checkTotalProbes = (probe: Probe) => {
+  const { requests, socket, redis, mongo, postgres, mariadb, mysql } = probe
 
-// Create an instance of axios here so it will be reused instead of creating a new one all the time.
-const axiosInstance = axios.create()
+  const totalProbes =
+    (socket ? 1 : 0) +
+    (redis ? 1 : 0) +
+    (mongo ? 1 : 0) +
+    (postgres ? 1 : 0) +
+    (mariadb ? 1 : 0) +
+    (mysql ? 1 : 0) +
+    (requests?.length ?? 0)
+  if (totalProbes === 0) return PROBE_NO_REQUESTS
+}
 
-export async function sendHttpRequest(
-  config: AxiosRequestConfig
-): Promise<AxiosResponse> {
-  const resp = await axiosInstance.request({
-    ...config,
-    timeout: config.timeout ?? DEFAULT_TIMEOUT, // Ensure default timeout if not filled.
-    httpAgent: config.httpAgent ?? httpAgent,
-    httpsAgent: config.httpsAgent ?? httpsAgent,
-  })
+export const validateProbes = (probes: Probe[]) => {
+  if (probes.length === 0) return NO_PROBES
 
-  return resp
+  for (const probe of probes) {
+    const { name, interval, requests } = probe
+
+    const totalProbesError = checkTotalProbes(probe)
+    if (totalProbesError) {
+      return totalProbesError
+    }
+
+    if (interval <= 0) {
+      return `The interval in the probe with name "${name}" should be greater than 0.`
+    }
+
+    const schemaConfigError = validateSchemaConfig(probe)
+    if (schemaConfigError) {
+      return schemaConfigError
+    }
+
+    const validateRequestsError = validateRequests(requests)
+    if (validateRequestsError) {
+      return validateRequestsError
+    }
+
+    const validateAlertError = validateAlerts(probe)
+    if (validateAlertError) {
+      return validateAlertError
+    }
+  }
 }

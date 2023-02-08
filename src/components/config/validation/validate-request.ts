@@ -22,41 +22,45 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios'
-import http from 'http'
-import https from 'https'
+import { RequestConfig } from '../../../interfaces/request'
+import { HTTPMethods } from '../../../utils/http'
+import { isValidURL } from '../../../utils/is-valid-url'
 
-export const HTTPMethods = new Set([
-  'DELETE',
-  'GET',
-  'HEAD',
-  'OPTIONS',
-  'PATCH',
-  'POST',
-  'PUT',
-  'PURGE',
-  'LINK',
-  'UNLINK',
-])
+const PROBE_REQUEST_INVALID_URL =
+  'Probe request URL should start with http:// or https://'
+const PROBE_REQUEST_INVALID_METHOD =
+  'Probe request method is invalid! Valid methods are GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS, PURGE, LINK, and UNLINK'
+const PROBE_REQUEST_NO_URL = 'Probe request URL does not exists'
 
-// Keep the agents alive to reduce the overhead of DNS queries and creating TCP connection.
-// More information here: https://rakshanshetty.in/nodejs-http-keep-alive/
-const httpAgent = new http.Agent({ keepAlive: true })
-const httpsAgent = new https.Agent({ keepAlive: true })
-export const DEFAULT_TIMEOUT = 10_000
+const checkProbeRequestProperties = (requests: RequestConfig[]) => {
+  if (requests?.length > 0) {
+    for (const request of requests) {
+      const { method, ping, url } = request
 
-// Create an instance of axios here so it will be reused instead of creating a new one all the time.
-const axiosInstance = axios.create()
+      if (!url) {
+        return PROBE_REQUEST_NO_URL
+      }
 
-export async function sendHttpRequest(
-  config: AxiosRequestConfig
-): Promise<AxiosResponse> {
-  const resp = await axiosInstance.request({
-    ...config,
-    timeout: config.timeout ?? DEFAULT_TIMEOUT, // Ensure default timeout if not filled.
-    httpAgent: config.httpAgent ?? httpAgent,
-    httpsAgent: config.httpsAgent ?? httpsAgent,
-  })
+      // if not a ping request and url not valid, return INVLID_URL error
+      if (ping !== true && !isValidURL(url)) {
+        return PROBE_REQUEST_INVALID_URL
+      }
 
-  return resp
+      if (!HTTPMethods.has(method?.toUpperCase() ?? 'GET'))
+        return PROBE_REQUEST_INVALID_METHOD
+    }
+  }
+}
+
+export const validateRequests = (requests: RequestConfig[]) => {
+  for (const req of requests) {
+    if (req.timeout <= 0) {
+      return `The timeout in the request with id "${req.id}" should be greater than 0.`
+    }
+  }
+
+  const probeRequestPropertyMessage = checkProbeRequestProperties(requests)
+  if (probeRequestPropertyMessage) {
+    return probeRequestPropertyMessage
+  }
 }
