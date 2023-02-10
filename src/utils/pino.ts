@@ -24,29 +24,22 @@
 
 import fs from 'fs'
 import path from 'path'
-import pino, { LoggerOptions } from 'pino'
+import pino from 'pino'
 
 const project = path.join(__dirname, '../../tsconfig.json')
 const dev = fs.existsSync(project)
 
-const prettyPrint = {
+const prettyOptions = {
   translateTime: true,
   ignore: 'hostname,pid,time',
   hideObject: true,
-  sync: false, // async mode for better performance
+}
+const pinoOptions = {
+  transport: {
+    target: 'pino-pretty',
+    options: dev ? { ...prettyOptions, colorize: true } : prettyOptions,
+  },
+  level: dev ? 'debug' : 'info',
 }
 
-const transport: LoggerOptions = dev
-  ? {
-      prettyPrint: {
-        ...prettyPrint,
-        colorize: true,
-      },
-      level: 'debug',
-    }
-  : {
-      prettyPrint,
-      level: 'info',
-    }
-
-export const log = pino(transport)
+export const log = pino(pinoOptions)
