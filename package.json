@@ -1,7 +1,7 @@
 {
   "name": "@hyperjumptech/monika",
   "description": "Synthetic monitoring made easy",
-  "version": "1.14.1",
+  "version": "1.15.0",
   "license": "MIT",
   "author": "@hyperjumptech",
   "main": "lib/index.js",
@@ -105,7 +105,7 @@
     "tslib": "^1.14.1",
     "unzip-stream": "^0.3.1",
     "unzipper": "^0.10.11",
-    "xstate": "^4.24.0",
+    "xstate": "^4.35.0",
     "yaml": "1.10.2"
   },
   "devDependencies": {
