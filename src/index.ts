@@ -468,7 +468,7 @@ class Monika extends Command {
 
     let startupMessage = ''
 
-    // warn if config is empty
+    // warn if notifications settings is empty
     if ((notifications?.length ?? 0) === 0) {
       const NO_NOTIFICATIONS_MESSAGE = `Notifications has not been set. We will not be able to notify you when an INCIDENT occurs!
 Please refer to the Monika documentations on how to how to configure notifications (e.g., Telegram, Slack, Desktop notification, etc.) at https://monika.hyperjump.tech/guides/notifications.`

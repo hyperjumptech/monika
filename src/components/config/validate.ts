@@ -466,7 +466,7 @@ export const validateConfig = (configuration: Config): Validation => {
 
   // check config file against monika-config-schema.json only if a configfile is passed
   if (flags.config.length > 0) {
-    const isValidConfig = validateConfigFile(flags.config[0])
+    const isValidConfig = validateConfigFile(configuration)
     if (isValidConfig.valid === false) return isValidConfig
   }
 

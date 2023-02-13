@@ -22,29 +22,27 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import yaml from 'js-yaml'
-import fs from 'fs'
 import Ajv from 'ajv'
 import { Validation } from '../../interfaces/validation'
 import mySchema from '../../monika-config-schema.json'
+import { Config } from '../../interfaces/config'
 
 const ajv = new Ajv()
 
-// validate the config file used by monika
-export function validateConfigFile(filename: string): Validation {
+// validate the config file  loaded by monika against a JSON Schema
+export function validateConfigFile(config: Config): Validation {
   const validResult: Validation = {
     valid: false,
-    message: `Errors detected in config file ${filename}`,
+    message: `Errors detected in config file ${config}`,
   }
   const validate = ajv.compile(mySchema)
 
   try {
-    const configFile = yaml.load(fs.readFileSync(filename, 'utf8'))
-    const isValid = validate(configFile)
+    const isValid = validate(config)
 
     if (isValid) {
       validResult.valid = true
-      validResult.message = `config: ${filename} is ok`
+      validResult.message = `config: ${config} is ok`
       return validResult
     }
   } catch (error: any) {
