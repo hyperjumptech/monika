@@ -51,6 +51,16 @@ describe('monika', () => {
 
   test
     .stderr()
+    .do(() => cmd.run(['--config', 'https://fake.url.com']))
+    .catch((error) => {
+      expect(error.message).to.contain(
+        'The configuration file in https://fake.url.com is unreachable.'
+      )
+    })
+    .it('detects invalid remote config')
+
+  test
+    .stderr()
     .do(() =>
       cmd.run([
         '--config',
