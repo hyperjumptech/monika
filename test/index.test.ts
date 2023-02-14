@@ -60,6 +60,20 @@ describe('monika', () => {
     .it('detects invalid remote config')
 
   test
+    .stdout()
+    .do(() =>
+      cmd.run([
+        '--config',
+        'https://raw.githubusercontent.com/hyperjumptech/monika/main/monika.example.yml',
+      ])
+    )
+    .it('detects valid remote config', (ctx) => {
+      expect(ctx.stdout).to.contain(
+        'Starting Monika. Probes: 1. Notifications: 0'
+      )
+    })
+
+  test
     .stderr()
     .do(() =>
       cmd.run([
