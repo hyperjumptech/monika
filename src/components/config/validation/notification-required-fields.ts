@@ -22,41 +22,69 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios'
-import http from 'http'
-import https from 'https'
-
-// Keep the agents alive to reduce the overhead of DNS queries and creating TCP connection.
-// More information here: https://rakshanshetty.in/nodejs-http-keep-alive/
-const httpAgent = new http.Agent({ keepAlive: true })
-const httpsAgent = new https.Agent({ keepAlive: true })
-export const DEFAULT_TIMEOUT = 10_000
-
-export const HTTPMethods = new Set([
-  'DELETE',
-  'GET',
-  'HEAD',
-  'OPTIONS',
-  'PATCH',
-  'POST',
-  'PUT',
-  'PURGE',
-  'LINK',
-  'UNLINK',
-])
-
-// Create an instance of axios here so it will be reused instead of creating a new one all the time.
-const axiosInstance = axios.create()
-
-export async function sendHttpRequest(
-  config: AxiosRequestConfig
-): Promise<AxiosResponse> {
-  const resp = await axiosInstance.request({
-    ...config,
-    timeout: config.timeout ?? DEFAULT_TIMEOUT, // Ensure default timeout if not filled.
-    httpAgent: config.httpAgent ?? httpAgent,
-    httpsAgent: config.httpsAgent ?? httpsAgent,
-  })
-
-  return resp
+/* eslint-disable camelcase */
+export const requiredFieldMessages: Record<string, any> = {
+  smtp: {
+    hostname: 'Hostname not found',
+    port: 'Port not found',
+    username: 'Username not found',
+    password: 'Password not found',
+  },
+  mailgun: {
+    apiKey: 'Api key not found',
+    domain: 'Domain not found',
+  },
+  sendgrid: {
+    apiKey: 'apiKey not found',
+  },
+  webhook: {
+    url: 'URL not found',
+  },
+  discord: {
+    url: 'URL not found',
+  },
+  slack: {
+    url: 'URL not found',
+  },
+  telegram: {},
+  whatsapp: {
+    url: 'URL not found',
+    username: 'username not found',
+    password: 'password not found',
+  },
+  teams: {
+    url: 'Teams Webhook URL not found',
+  },
+  'monika-notif': {
+    url: 'Monika Notification Webhook URL not found',
+  },
+  workplace: {
+    access_token: 'Workplace Access Token not found',
+    thread_id: 'Workplace Thread ID not found',
+  },
+  desktop: {},
+  lark: {
+    url: 'URL not found',
+  },
+  'google-chat': {
+    url: 'URL not found',
+  },
+  dingtalk: {
+    access_token: 'Dingtalk Access Token not found',
+  },
+  opsgenie: {
+    geniekey: 'Opsgenie Geniekey not found',
+  },
+  pushover: {
+    token: 'TOKEN not found',
+    user: 'USER not found',
+  },
+  gotify: {
+    token: 'TOKEN not found',
+    url: 'URL not found',
+  },
+  pushbullet: {
+    token:
+      'Pushbullet Access Token not found! You can create your Access Token at https://www.pushbullet.com/#settings',
+  },
 }

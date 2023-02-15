@@ -22,41 +22,25 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios'
-import http from 'http'
-import https from 'https'
+import Joi from 'joi'
+import type { SymonConfig } from '../../reporter'
 
-// Keep the agents alive to reduce the overhead of DNS queries and creating TCP connection.
-// More information here: https://rakshanshetty.in/nodejs-http-keep-alive/
-const httpAgent = new http.Agent({ keepAlive: true })
-const httpsAgent = new https.Agent({ keepAlive: true })
-export const DEFAULT_TIMEOUT = 10_000
+export const validateSymonConfig = (
+  symonConfig?: SymonConfig
+): string | undefined => {
+  if (!symonConfig) {
+    return ''
+  }
 
-export const HTTPMethods = new Set([
-  'DELETE',
-  'GET',
-  'HEAD',
-  'OPTIONS',
-  'PATCH',
-  'POST',
-  'PUT',
-  'PURGE',
-  'LINK',
-  'UNLINK',
-])
-
-// Create an instance of axios here so it will be reused instead of creating a new one all the time.
-const axiosInstance = axios.create()
-
-export async function sendHttpRequest(
-  config: AxiosRequestConfig
-): Promise<AxiosResponse> {
-  const resp = await axiosInstance.request({
-    ...config,
-    timeout: config.timeout ?? DEFAULT_TIMEOUT, // Ensure default timeout if not filled.
-    httpAgent: config.httpAgent ?? httpAgent,
-    httpsAgent: config.httpsAgent ?? httpsAgent,
+  const schema = Joi.object({
+    id: Joi.string().required(),
+    url: Joi.string().uri().required(),
+    key: Joi.string().required(),
+    projectID: Joi.string().required(),
+    organizationID: Joi.string().required(),
+    interval: Joi.number(),
   })
+  const validationError = schema.validate(symonConfig)
 
-  return resp
+  return validationError?.error?.message
 }
