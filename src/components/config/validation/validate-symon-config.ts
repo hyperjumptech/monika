@@ -25,7 +25,9 @@
 import Joi from 'joi'
 import type { SymonConfig } from '../../reporter'
 
-export const validateSymonConfig = (symonConfig?: SymonConfig) => {
+export const validateSymonConfig = (
+  symonConfig?: SymonConfig
+): string | undefined => {
   if (!symonConfig) {
     return ''
   }

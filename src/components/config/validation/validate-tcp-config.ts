@@ -25,7 +25,7 @@
 import Joi from 'joi'
 import { Socket } from '../../../interfaces/probe'
 
-export const validateTCPConfig = (tcpConfig?: Socket) => {
+export const validateTCPConfig = (tcpConfig?: Socket): string | undefined => {
   if (!tcpConfig) {
     return ''
   }

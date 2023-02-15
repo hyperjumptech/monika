@@ -25,7 +25,9 @@
 import Joi from 'joi'
 import { Mongo } from '../../../interfaces/probe'
 
-export const validateMongoConfig = (mongoConfig?: Mongo[]) => {
+export const validateMongoConfig = (
+  mongoConfig?: Mongo[]
+): string | undefined => {
   if (!mongoConfig) {
     return ''
   }

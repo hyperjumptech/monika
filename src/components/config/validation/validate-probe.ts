@@ -31,7 +31,7 @@ const NO_PROBES = 'Probes object does not exists or has length lower than 1!'
 const PROBE_NO_REQUESTS =
   'Probe requests does not exists or has length lower than 1!'
 
-const checkTotalProbes = (probe: Probe) => {
+const checkTotalProbes = (probe: Probe): string | undefined => {
   const { requests, socket, redis, mongo, postgres, mariadb, mysql } = probe
 
   const totalProbes =
@@ -45,7 +45,7 @@ const checkTotalProbes = (probe: Probe) => {
   if (totalProbes === 0) return PROBE_NO_REQUESTS
 }
 
-export const validateProbes = (probes: Probe[]) => {
+export const validateProbes = (probes: Probe[]): string | undefined => {
   if (probes.length === 0) return NO_PROBES
 
   for (const probe of probes) {

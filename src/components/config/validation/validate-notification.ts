@@ -30,7 +30,7 @@ import {
 import { newPagerDuty } from '../../notification/channel/pagerduty'
 import { requiredFieldMessages } from './notification-required-fields'
 
-const checkRecipients = (notification: Notification) => {
+const checkRecipients = (notification: Notification): string | undefined => {
   // check one-by-one instead of using indexOf or includes so the type is correct without type assertion
   const notifData: any = notification.data
   if (
@@ -44,12 +44,13 @@ const checkRecipients = (notification: Notification) => {
   }
 }
 
-const validateRequiredFields = (notification: Notification) => {
+const validateRequiredFields = (
+  notification: Notification
+): string | undefined => {
   const { data }: any = notification
   const reqFields = requiredFieldMessages[notification.type]
-  if (!reqFields) {
+  if (!reqFields)
     return `Notifications type is not allowed (${(notification as any)?.type})`
-  }
 
   const keys = Object.keys(reqFields)
   for (const field of keys) {
@@ -59,9 +60,10 @@ const validateRequiredFields = (notification: Notification) => {
   }
 }
 
-const checkSlugValidationError = (notification: Notification) => {
+const checkByNotificationType = (
+  notification: Notification
+): string | undefined => {
   const pagerduty = newPagerDuty()
-
   if (
     notification.type === atlassianStatuspageSlug &&
     atlassianStatuspageValidateConfig(notification.data)
@@ -75,10 +77,17 @@ const checkSlugValidationError = (notification: Notification) => {
   ) {
     return pagerduty.validateConfig(notification.data)
   }
+
+  const missingField = validateRequiredFields(notification)
+  if (missingField) {
+    return missingField
+  }
 }
 
-export const validateNotification = (notifications: Notification[]) => {
-  if (notifications.length > 0) return
+export const validateNotification = (
+  notifications: Notification[]
+): string | undefined => {
+  if (notifications.length === 0) return
 
   for (const notification of notifications) {
     const missingRecipient = checkRecipients(notification)
@@ -86,14 +95,9 @@ export const validateNotification = (notifications: Notification[]) => {
       return missingRecipient
     }
 
-    const missingSlug = checkSlugValidationError(notification)
+    const missingSlug = checkByNotificationType(notification)
     if (missingSlug) {
       return missingSlug
-    }
-
-    const missingField = validateRequiredFields(notification)
-    if (missingField) {
-      return missingField
     }
   }
 }

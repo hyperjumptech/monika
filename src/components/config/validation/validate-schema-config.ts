@@ -27,7 +27,7 @@ import { validateMongoConfig } from './validate-mongo-config'
 import { validateRedisConfig } from './validate-redis-config'
 import { validateTCPConfig } from './validate-tcp-config'
 
-export const validateSchemaConfig = (probe: Probe) => {
+export const validateSchemaConfig = (probe: Probe): string | undefined => {
   const { socket, redis, mongo } = probe
   const tcpConfigError = validateTCPConfig(socket)
   if (tcpConfigError) {

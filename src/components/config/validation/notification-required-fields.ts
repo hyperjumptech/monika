@@ -53,7 +53,7 @@ export const requiredFieldMessages: Record<string, any> = {
     password: 'password not found',
   },
   teams: {
-    url: 'URL not found',
+    url: 'Teams Webhook URL not found',
   },
   'monika-notif': {
     url: 'Monika Notification Webhook URL not found',

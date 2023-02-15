@@ -32,7 +32,9 @@ const PROBE_REQUEST_INVALID_METHOD =
   'Probe request method is invalid! Valid methods are GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS, PURGE, LINK, and UNLINK'
 const PROBE_REQUEST_NO_URL = 'Probe request URL does not exists'
 
-const checkProbeRequestProperties = (requests: RequestConfig[]) => {
+const checkProbeRequestProperties = (
+  requests: RequestConfig[]
+): string | undefined => {
   if (requests?.length > 0) {
     for (const request of requests) {
       const { method, ping, url } = request
@@ -52,7 +54,9 @@ const checkProbeRequestProperties = (requests: RequestConfig[]) => {
   }
 }
 
-export const validateRequests = (requests: RequestConfig[]) => {
+export const validateRequests = (
+  requests: RequestConfig[]
+): string | undefined => {
   for (const req of requests) {
     if (req.timeout <= 0) {
       return `The timeout in the request with id "${req.id}" should be greater than 0.`

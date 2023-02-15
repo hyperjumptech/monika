@@ -25,7 +25,9 @@
 import Joi from 'joi'
 import { Redis } from '../../../interfaces/probe'
 
-export const validateRedisConfig = (redisConfig?: Redis[]) => {
+export const validateRedisConfig = (
+  redisConfig?: Redis[]
+): string | undefined => {
   if (!redisConfig) {
     return ''
   }

@@ -47,7 +47,10 @@ const isValidProbeAlert = (alert: ProbeAlert | string): boolean => {
   }
 }
 
-const convertOldAlertToNewFormat = (probe: Probe, allAlerts: ProbeAlert[]) => {
+const convertOldAlertToNewFormat = (
+  probe: Probe,
+  allAlerts: ProbeAlert[]
+): void => {
   probe.alerts = allAlerts.map((alert: any) => {
     if (typeof alert === 'string') {
       let query = ''
@@ -70,7 +73,7 @@ const convertOldAlertToNewFormat = (probe: Probe, allAlerts: ProbeAlert[]) => {
   })
 }
 
-export const validateAlerts = (probe: Probe) => {
+export const validateAlerts = (probe: Probe): string | undefined => {
   const { alerts = [], socket } = probe
   const socketAlerts = socket?.alerts ?? []
   const allAlerts = [...alerts, ...socketAlerts]
