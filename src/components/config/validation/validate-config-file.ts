@@ -32,33 +32,30 @@ const ajv = new Ajv()
 
 // validate the config file used by monika
 export function validateConfigFile(filename: string): Validation {
-  const validResult: Validation = {
+  const result: Validation = {
     valid: false,
     message: `Errors detected in config file ${filename}`,
   }
-  const validate = ajv.compile(mySchema)
 
   try {
+    const validate = ajv.compile(mySchema)
+
     const configFile = yaml.load(fs.readFileSync(filename, 'utf8'))
     const isValid = validate(configFile)
 
     if (isValid) {
-      validResult.valid = true
-      validResult.message = `config: ${filename} is ok`
-      return validResult
+      result.valid = true
+      result.message = `config: ${filename} is ok`
+      return result
+    }
+
+    if (validate.errors) {
+      result.message += validate.errors.join(',')
     }
   } catch (error: any) {
     console.error('error:', error)
-    validResult.message = error
+    result.message = error
   }
 
-  if (validate.errors) {
-    for (const err of validate.errors) {
-      validResult.message += ', ' + err.message
-    }
-
-    validResult.message += '.'
-  }
-
-  return validResult
+  return result
 }

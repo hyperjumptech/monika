@@ -30,6 +30,20 @@ import {
 import { newPagerDuty } from '../../notification/channel/pagerduty'
 import { requiredFieldMessages } from './notification-required-fields'
 
+const checkRecipients = (notification: Notification) => {
+  // check one-by-one instead of using indexOf or includes so the type is correct without type assertion
+  const notifData: any = notification.data
+  if (
+    (notifData?.recipients?.length ?? 0) === 0 &&
+    (notification.type === 'mailgun' ||
+      notification.type === 'smtp' ||
+      notification.type === 'sendgrid' ||
+      notification.type === 'whatsapp')
+  ) {
+    return 'Recipients does not exists or has length lower than 1!'
+  }
+}
+
 const validateRequiredFields = (notification: Notification) => {
   const { data }: any = notification
   const reqFields = requiredFieldMessages[notification.type]
@@ -42,20 +56,6 @@ const validateRequiredFields = (notification: Notification) => {
     if (!data[field]) {
       return reqFields[field]
     }
-  }
-}
-
-const checkRecipients = (notification: Notification) => {
-  // check one-by-one instead of using indexOf or includes so the type is correct without type assertion
-  const notifData: any = notification.data
-  if (
-    (notifData?.recipients?.length ?? 0) === 0 &&
-    (notification.type === 'mailgun' ||
-      notification.type === 'smtp' ||
-      notification.type === 'sendgrid' ||
-      notification.type === 'whatsapp')
-  ) {
-    return 'Recipients does not exists or has length lower than 1!'
   }
 }
 
@@ -78,6 +78,8 @@ const checkSlugValidationError = (notification: Notification) => {
 }
 
 export const validateNotification = (notifications: Notification[]) => {
+  if (notifications.length > 0) return
+
   for (const notification of notifications) {
     const missingRecipient = checkRecipients(notification)
     if (missingRecipient) {

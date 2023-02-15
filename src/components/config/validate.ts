@@ -33,12 +33,10 @@ export const validateConfig = (configuration: Config): Validation => {
   const { notifications = [], probes = [], symon } = configuration
   const symonConfigError = validator.validateSymonConfig(symon)
 
-  if (notifications.length > 0) {
-    const validateNotificationError =
-      validator.validateNotification(notifications)
-    if (validateNotificationError) {
-      return setInvalidResponse(validateNotificationError)
-    }
+  const validateNotificationError =
+    validator.validateNotification(notifications)
+  if (validateNotificationError) {
+    return setInvalidResponse(validateNotificationError)
   }
 
   const validateProbesError = validator.validateProbes(probes)
