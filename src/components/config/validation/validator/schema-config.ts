@@ -22,41 +22,25 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios'
-import http from 'http'
-import https from 'https'
+import { Probe } from '../../../../interfaces/probe'
+import { validateMongoConfig } from './mongo-config'
+import { validateRedisConfig } from './redis-config'
+import { validateTCPConfig } from './tcp-config'
 
-// Keep the agents alive to reduce the overhead of DNS queries and creating TCP connection.
-// More information here: https://rakshanshetty.in/nodejs-http-keep-alive/
-const httpAgent = new http.Agent({ keepAlive: true })
-const httpsAgent = new https.Agent({ keepAlive: true })
-export const DEFAULT_TIMEOUT = 10_000
+export const validateSchemaConfig = (probe: Probe): string | undefined => {
+  const { socket, redis, mongo } = probe
+  const tcpConfigError = validateTCPConfig(socket)
+  if (tcpConfigError) {
+    return `Monika configuration: probes.socket ${tcpConfigError}`
+  }
 
-export const HTTPMethods = new Set([
-  'DELETE',
-  'GET',
-  'HEAD',
-  'OPTIONS',
-  'PATCH',
-  'POST',
-  'PUT',
-  'PURGE',
-  'LINK',
-  'UNLINK',
-])
+  const redisConfigError = validateRedisConfig(redis)
+  if (redisConfigError) {
+    return `Monika configuration: probes.redis ${redisConfigError}`
+  }
 
-// Create an instance of axios here so it will be reused instead of creating a new one all the time.
-const axiosInstance = axios.create()
-
-export async function sendHttpRequest(
-  config: AxiosRequestConfig
-): Promise<AxiosResponse> {
-  const resp = await axiosInstance.request({
-    ...config,
-    timeout: config.timeout ?? DEFAULT_TIMEOUT, // Ensure default timeout if not filled.
-    httpAgent: config.httpAgent ?? httpAgent,
-    httpsAgent: config.httpsAgent ?? httpsAgent,
-  })
-
-  return resp
+  const mongoConfigError = validateMongoConfig(mongo)
+  if (mongoConfigError) {
+    return `Monika configuration: probes.mongo ${mongoConfigError}`
+  }
 }
