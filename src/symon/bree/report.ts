@@ -23,12 +23,37 @@
  **********************************************************************************/
 
 import { parentPort, workerData } from 'worker_threads'
-import { log } from '../../utils/pino'
+import path from 'path'
+import { open } from 'sqlite'
 import axios, { AxiosRequestConfig } from 'axios'
 import Pako from 'pako'
+import SQLite3 from 'sqlite3'
+import {
+  deleteNotificationLogs,
+  deleteRequestLogs,
+  getUnreportedLogs,
+  UnreportedNotificationsLog,
+  UnreportedRequestsLog,
+} from '../../components/logger/history'
+import { log } from '../../utils/pino'
+const dbPath = path.resolve(process.cwd(), 'monika-logs.db')
+
 const main = async (data: Record<string, any>) => {
   try {
-    const { url, apiKey, requests, notifications, monikaId } = data
+    const { url, apiKey, probeIds, reportProbesLimit, monikaId } = data
+
+    // Open database
+    const sqlite3 = SQLite3.verbose()
+    const db = await open({
+      filename: dbPath,
+      mode: sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE,
+      driver: sqlite3.Database,
+    })
+
+    // Updating requests and notifications to report
+    const logs = await getUnreportedLogs(probeIds, reportProbesLimit, db)
+    const requests = logs.requests
+    const notifications = logs.notifications
 
     if (requests.length === 0 && notifications.length === 0) {
       // No requests or notifications to report
@@ -63,10 +88,23 @@ const main = async (data: Record<string, any>) => {
           Pako.gzip(JSON.stringify(req)).buffer,
       })
 
-      log.debug(
+      log.info(
         `Reported ${requests.length} requests and ${notifications.length} notifications.`
       )
-      log.debug(`Last reported ID: ${JSON.stringify(requests.at(-1).id)}`)
+
+      // Delete the reported requests
+      await deleteRequestLogs(
+        requests.map((log: UnreportedRequestsLog) => log.probeId),
+        db
+      )
+      log.debug(`Deleted ${requests.length} reported request`)
+
+      // Delete the reported notifications
+      await deleteNotificationLogs(
+        notifications.map((log: UnreportedNotificationsLog) => log.probeId),
+        db
+      )
+      log.debug(`Deleted ${notifications.length} reported request`)
 
       // Send message to parentPort so that
       // the reported logs and notifications can be deleted
@@ -79,6 +117,7 @@ const main = async (data: Record<string, any>) => {
       })
     }
   } catch (error) {
+    console.error(error)
     log.error(
       "Warning: Can't report history to Symon. " + (error as any).message
     )
