@@ -276,7 +276,7 @@ class Monika extends Command {
       default: false,
     }),
 
-    symonCouchDbURL: Flags.string({
+    symonCouchDb: Flags.string({
       hidden: false,
       description: 'URL of remote couchDB',
       dependsOn: ['symonExperimental'],

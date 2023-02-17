@@ -168,11 +168,9 @@ class SymonClient {
 
   private isSymonExperimental: boolean
 
-  private symonCouchDB: string
-
   private pouch: PouchDB.Database<Record<string, unknown>>
 
-  private remotePouchDB: PouchDB.Database<Record<string, unknown>>
+  private symonCouchDB: PouchDB.Database<Record<string, unknown>>
 
   private bree = new Bree({
     root: false,
@@ -270,12 +268,11 @@ class SymonClient {
 
     this.isSymonExperimental = flags.symonExperimental
 
-    this.symonCouchDB =
-      flags.symonCouchDbURL || 'http://symon:symon@localhost:5984/symon'
-
     this.pouch = new PouchDB('symon')
 
-    this.remotePouchDB = new PouchDB(this.symonCouchDB)
+    this.symonCouchDB = new PouchDB(
+      flags.symonCouchDb || 'http://symon:symon@localhost:5984/symon'
+    )
   }
 
   async initiate(): Promise<void> {
@@ -460,7 +457,7 @@ class SymonClient {
         try {
           const pouchData = await this.pouch.put({ _id: id, ...reportData })
 
-          const replicator = this.pouch.replicate.to(this.remotePouchDB, {
+          const replicator = this.pouch.replicate.to(this.symonCouchDB, {
             live: true,
             retry: true,
           })
