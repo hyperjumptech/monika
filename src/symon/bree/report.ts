@@ -22,13 +22,87 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { parentPort, workerData } from 'worker_threads'
-import { log } from '../../utils/pino'
 import axios, { AxiosRequestConfig } from 'axios'
 import Pako from 'pako'
+import path from 'path'
+import PouchDB from 'pouchdb'
+import { open } from 'sqlite'
+import SQLite3 from 'sqlite3'
+import { parentPort, workerData } from 'worker_threads'
+import {
+  deleteNotificationLogs,
+  deleteRequestLogs,
+  getUnreportedLogs,
+  UnreportedNotificationsLog,
+  UnreportedRequestsLog,
+} from '../../components/logger/history'
+import { getContext } from '../../context'
+import { log } from '../../utils/pino'
+const dbPath = path.resolve(process.cwd(), 'monika-logs.db')
+const { flags } = getContext()
+const isSymonExperimental = flags.symonExperimental
+
+const pouchDBReporting = async (
+  monikaId: any,
+  requests: UnreportedRequestsLog[],
+  notifications: UnreportedNotificationsLog[]
+) => {
+  const pouch = new PouchDB('symon')
+  const symonCouchDB = new PouchDB(
+    flags.symonCouchDb || 'http://symon:symon@localhost:5984/symon'
+  )
+
+  try {
+    const reportData = {
+      monikaId: monikaId,
+      data: {
+        requests,
+        notifications,
+      },
+    }
+
+    const id = new Date().toISOString()
+    const pouchData = await pouch.put({ _id: id, ...reportData })
+
+    pouch.replicate
+      .to(symonCouchDB, {
+        live: true,
+        retry: true,
+      })
+      .then(async () => {
+        console.log('complete replicating to remote DB')
+        await Promise.all([
+          deleteRequestLogs(requests.map((log) => log.probeId)),
+          deleteNotificationLogs(notifications.map((log) => log.probeId)),
+        ])
+        pouch.remove({ _id: pouchData.id, _rev: pouchData.rev })
+        console.log('complete replicating to remote DB')
+      })
+      .catch((error: any) => {
+        console.log('failed replicating to remote DB')
+        console.log(error)
+      })
+  } catch (error) {
+    console.error(`error occured : ${error}`)
+  }
+}
+
 const main = async (data: Record<string, any>) => {
   try {
-    const { url, apiKey, requests, notifications, monikaId } = data
+    const { url, apiKey, probeIds, reportProbesLimit, monikaId } = data
+
+    // Open database
+    const sqlite3 = SQLite3.verbose()
+    const db = await open({
+      filename: dbPath,
+      mode: sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE,
+      driver: sqlite3.Database,
+    })
+
+    // Updating requests and notifications to report
+    const logs = await getUnreportedLogs(probeIds, reportProbesLimit, db)
+    const requests = logs.requests
+    const notifications = logs.notifications
 
     if (requests.length === 0 && notifications.length === 0) {
       // No requests or notifications to report
@@ -41,44 +115,64 @@ const main = async (data: Record<string, any>) => {
           notifications,
         },
       })
-    } else {
-      // Hit the Symon API for receiving Monika report
-      // With the compressed requests and notifications data
-      await axios({
-        url: `${url}/api/v1/monika/report`,
-        method: 'POST',
-        data: {
-          monikaId: monikaId,
-          data: {
-            requests,
-            notifications,
-          },
-        },
-        headers: {
-          'Content-Encoding': 'gzip',
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey,
-        },
-        transformRequest: (req: AxiosRequestConfig) =>
-          Pako.gzip(JSON.stringify(req)).buffer,
-      })
+      return
+    }
 
-      log.debug(
-        `Reported ${requests.length} requests and ${notifications.length} notifications.`
-      )
-      log.debug(`Last reported ID: ${JSON.stringify(requests.at(-1).id)}`)
+    if (isSymonExperimental) {
+      await pouchDBReporting(monikaId, requests, notifications)
+      return
+    }
 
-      // Send message to parentPort so that
-      // the reported logs and notifications can be deleted
-      parentPort?.postMessage({
-        success: true,
+    // Hit the Symon API for receiving Monika report
+    // With the compressed requests and notifications data
+    await axios({
+      url: `${url}/api/v1/monika/report`,
+      method: 'POST',
+      data: {
+        monikaId: monikaId,
         data: {
           requests,
           notifications,
         },
-      })
-    }
+      },
+      headers: {
+        'Content-Encoding': 'gzip',
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+      },
+      transformRequest: (req: AxiosRequestConfig) =>
+        Pako.gzip(JSON.stringify(req)).buffer,
+    })
+
+    log.info(
+      `Reported ${requests.length} requests and ${notifications.length} notifications.`
+    )
+
+    // Delete the reported requests
+    await deleteRequestLogs(
+      requests.map((log: UnreportedRequestsLog) => log.probeId),
+      db
+    )
+    log.debug(`Deleted ${requests.length} reported request`)
+
+    // Delete the reported notifications
+    await deleteNotificationLogs(
+      notifications.map((log: UnreportedNotificationsLog) => log.probeId),
+      db
+    )
+    log.debug(`Deleted ${notifications.length} reported request`)
+
+    // Send message to parentPort so that
+    // the reported logs and notifications can be deleted
+    parentPort?.postMessage({
+      success: true,
+      data: {
+        requests,
+        notifications,
+      },
+    })
   } catch (error) {
+    console.error(error)
     log.error(
       "Warning: Can't report history to Symon. " + (error as any).message
     )

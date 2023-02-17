@@ -30,14 +30,6 @@ import mac from 'macaddress'
 import { hostname } from 'os'
 import path from 'path'
 
-import PouchDB from 'pouchdb'
-import {
-  deleteNotificationLogs,
-  deleteRequestLogs,
-  getUnreportedLogs,
-  UnreportedNotificationsLog,
-  UnreportedRequestsLog,
-} from '../components/logger/history'
 import { getOSName } from '../components/notification/alert-message'
 import { getContext } from '../context'
 import events from '../events'
@@ -56,15 +48,6 @@ import {
 } from '../utils/public-ip'
 
 Bree.extend(require('@breejs/ts-worker'))
-
-type ReportWorkerMessage = {
-  success: boolean
-  data?: {
-    requests: UnreportedRequestsLog[]
-    notifications: UnreportedNotificationsLog[]
-  }
-  error?: any
-}
 
 type SymonHandshakeData = {
   macAddress: string
@@ -162,16 +145,6 @@ class SymonClient {
 
   private configListeners: ConfigListener[] = []
 
-  private unreportedRequestsLog: UnreportedRequestsLog[] = []
-
-  private unreportedNotificationsLog: Partial<UnreportedNotificationsLog>[] = []
-
-  private isSymonExperimental: boolean
-
-  private pouch: PouchDB.Database<Record<string, unknown>>
-
-  private symonCouchDB: PouchDB.Database<Record<string, unknown>>
-
   private bree = new Bree({
     root: false,
     defaultExtension: process.env.NODE_ENV === 'test' ? 'ts' : 'js',
@@ -184,44 +157,6 @@ class SymonClient {
       log.debug(workerMetadata)
     },
     outputWorkerMetadata: true,
-    workerMessageHandler: async (msg) => {
-      try {
-        // Get worker metadata
-        const workerMetaData = this.bree.getWorkerMetadata('report', msg)
-        const { success, data, error } =
-          workerMetaData.message as ReportWorkerMessage
-
-        // If the message says that the worker successfully processed the data
-        // And there is a data contains the reported logs and notifications
-        if (success && data) {
-          // Delete the reported requests
-          if (data.requests.length > 0) {
-            await deleteRequestLogs(data.requests.map((log) => log.probeId))
-            log.debug(`Deleted ${data.requests.length} reported request`)
-          }
-
-          // Delete the reported notifications
-          if (data.notifications.length > 0) {
-            await deleteNotificationLogs(
-              data.notifications.map((log) => log.probeId)
-            )
-            log.debug(`Deleted ${data.notifications.length} reported request`)
-          }
-
-          // Reset the currently stored logs
-          this.unreportedRequestsLog = []
-          this.unreportedNotificationsLog = []
-        } else {
-          // Else, throw error from the worker
-          throw error
-        }
-      } catch (error) {
-        log.error(`Failed to process the worker metadata, got: ${error}`)
-      } finally {
-        // Run the report again
-        await this.report()
-      }
-    },
   })
 
   constructor({
@@ -263,16 +198,6 @@ class SymonClient {
     this.reportProbesInterval = reportInterval ?? 10_000
 
     this.reportProbesLimit = reportLimit ?? 100
-
-    const { flags } = getContext()
-
-    this.isSymonExperimental = flags.symonExperimental
-
-    this.pouch = new PouchDB('symon')
-
-    this.symonCouchDB = new PouchDB(
-      flags.symonCouchDb || 'http://symon:symon@localhost:5984/symon'
-    )
   }
 
   async initiate(): Promise<void> {
@@ -424,65 +349,17 @@ class SymonClient {
 
       // Updating requests and notifications to report
       const probeIds = this.probes.map((probe: Probe) => probe.id)
-      const logs = await getUnreportedLogs(probeIds, this.reportProbesLimit)
-      const requests = logs.requests
-      const notifications = logs.notifications.map(({ id: _, ...n }) => n)
-
-      // Set the stored logs
-      this.unreportedRequestsLog = requests
-      this.unreportedNotificationsLog = notifications
 
       // Creating/updating report job
       const jobInterval = this.reportProbesInterval / 1000 // Convert probes interval to second
       const jobData = {
         hasConnectionToSymon,
-        requests: this.unreportedRequestsLog,
-        notifications: this.unreportedNotificationsLog,
+        probeIds,
+        reportProbesLimit: this.reportProbesLimit,
         httpClient: this.httpClient,
         monikaId: this.monikaId,
         url: this.url,
         apiKey: this.apiKey,
-      }
-
-      const reportData = {
-        monikaId: this.monikaId,
-        data: {
-          requests,
-          notifications,
-        },
-      }
-
-      const id = new Date().toISOString()
-      if (this.isSymonExperimental) {
-        try {
-          const pouchData = await this.pouch.put({ _id: id, ...reportData })
-
-          const replicator = this.pouch.replicate.to(this.symonCouchDB, {
-            live: true,
-            retry: true,
-          })
-
-          // delete data on complete replication
-          replicator.on('complete', async () => {
-            console.log('complete replicating to remote DB')
-            await Promise.all([
-              deleteRequestLogs(logs.requests.map((log) => log.probeId)),
-              deleteNotificationLogs(
-                logs.notifications.map((log) => log.probeId)
-              ),
-            ])
-            this.pouch.remove({ _id: pouchData.id, _rev: pouchData.rev })
-            console.log('complete replicating to remote DB')
-          })
-
-          // log replication error
-          replicator.on('error', function (err) {
-            console.log('failed replicating to remote DB')
-            console.log(err)
-          })
-        } catch (error) {
-          console.error(`error occured : ${error}`)
-        }
       }
 
       // Find existing report job

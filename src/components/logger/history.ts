@@ -252,7 +252,8 @@ export async function getUnreportedLogsCount(): Promise<number> {
 
 export async function getUnreportedLogs(
   ids: string[],
-  limit: number
+  limit: number,
+  database: Database<SQLite3.Database, SQLite3.Statement> = db
 ): Promise<UnreportedLog> {
   const readUnreportedRequestsSQL = `
     SELECT PR.id,
@@ -296,7 +297,7 @@ export async function getUnreportedLogs(
     LIMIT ${limit};`
 
   const [unreportedRequests, unreportedNotifications] = await Promise.all([
-    db.all(readUnreportedRequestsSQL).then(
+    database.all(readUnreportedRequestsSQL).then(
       (unreportedProbeRequests: UnreportedProbeRequestDB[]) =>
         /* eslint-disable camelcase */
         unreportedProbeRequests.map(
@@ -343,7 +344,7 @@ export async function getUnreportedLogs(
 
       /* eslint-enable camelcase */
     ),
-    db
+    database
       .all(readUnreportedNotificationsSQL)
       .then((unreportedNotifications: UnreportedNotificationDB[]) =>
         unreportedNotifications.map((unreportedNotification) => {
@@ -381,21 +382,23 @@ export async function getUnreportedLogs(
 }
 
 export async function deleteRequestLogs(
-  ids: string[]
+  ids: string[],
+  database: Database<SQLite3.Database, SQLite3.Statement> = db
 ): Promise<ISqlite.RunResult> {
   const idsString = ids.join("','")
   const sql = `DELETE FROM probe_requests WHERE probe_id IN ('${idsString}');`
 
-  return db.run(sql)
+  return database.run(sql)
 }
 
 export async function deleteNotificationLogs(
-  ids: string[]
+  ids: string[],
+  database: Database<SQLite3.Database, SQLite3.Statement> = db
 ): Promise<ISqlite.RunResult> {
   const idsString = ids.join("','")
   const sql = `DELETE FROM notifications WHERE probe_id IN ('${idsString}');`
 
-  return db.run(sql)
+  return database.run(sql)
 }
 
 /**

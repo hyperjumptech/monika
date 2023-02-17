@@ -22,37 +22,69 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { getContext } from '../../context'
-import { Config } from '../../interfaces/config'
-import { Validation } from '../../interfaces/validation'
-import { setInvalidResponse, VALID_CONFIG } from '../../utils/validate-response'
-import validator from './validation'
+import { Probe, ProbeAlert } from '../../../../interfaces/probe'
+import { parseAlertStringTime } from '../../../../plugins/validate-response/checkers'
+import { compileExpression } from '../../../../utils/expression-parser'
 
-export const validateConfig = (configuration: Config): Validation => {
-  const { flags } = getContext()
-  const { notifications = [], probes = [], symon } = configuration
-  const symonConfigError = validator.validateSymonConfig(symon)
+const alertStatusMessage = 'status-not-2xx'
+const responseTimePrefix = 'response-time-greater-than-'
 
-  const validateNotificationError =
-    validator.validateNotification(notifications)
-  if (validateNotificationError) {
-    return setInvalidResponse(validateNotificationError)
+const isValidProbeAlert = (alert: ProbeAlert | string): boolean => {
+  try {
+    if (typeof alert === 'string') {
+      return (
+        alert === alertStatusMessage ||
+        (alert.startsWith(responseTimePrefix) &&
+          Boolean(parseAlertStringTime(alert)))
+      )
+    }
+
+    return Boolean(
+      compileExpression(alert.assertion || (alert.query as string))
+    )
+  } catch {
+    return false
+  }
+}
+
+const convertOldAlertToNewFormat = (
+  probe: Probe,
+  allAlerts: ProbeAlert[]
+): void => {
+  probe.alerts = allAlerts.map((alert: any) => {
+    if (typeof alert === 'string') {
+      let query = ''
+      let message = ''
+      const subject = ''
+
+      if (alert === alertStatusMessage) {
+        query = 'response.status < 200 or response.status > 299'
+        message = 'HTTP Status is {{ response.status }}, expecting 200'
+      } else if (alert.startsWith(responseTimePrefix)) {
+        const expectedTime = parseAlertStringTime(alert)
+        query = `response.time > ${expectedTime}`
+        message = `Response time is {{ response.time }}ms, expecting less than ${expectedTime}ms`
+      }
+
+      return { query, subject, message }
+    }
+
+    return alert
+  })
+}
+
+export const validateAlerts = (probe: Probe): string | undefined => {
+  const { alerts = [], socket } = probe
+  const socketAlerts = socket?.alerts ?? []
+  const allAlerts = [...alerts, ...socketAlerts]
+
+  // Check probe alert properties
+  for (const alert of allAlerts) {
+    const check = isValidProbeAlert(alert)
+    if (!check) {
+      return `Probe alert format is invalid! (${alert})`
+    }
   }
 
-  const validateProbesError = validator.validateProbes(probes)
-  if (validateProbesError) {
-    return setInvalidResponse(validateProbesError)
-  }
-
-  if (symonConfigError) {
-    return setInvalidResponse(`Monika configuration: symon ${symonConfigError}`)
-  }
-
-  // check config file against monika-config-schema.json only if a configfile is passed
-  if (flags.config.length > 0) {
-    const isValidConfig = validator.validateConfigFile(flags.config[0])
-    if (isValidConfig.valid === false) return isValidConfig
-  }
-
-  return VALID_CONFIG
+  convertOldAlertToNewFormat(probe, allAlerts)
 }
