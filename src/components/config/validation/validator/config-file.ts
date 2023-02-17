@@ -22,41 +22,40 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios'
-import http from 'http'
-import https from 'https'
+import Ajv from 'ajv'
+import fs from 'fs'
+import yaml from 'js-yaml'
+import { Validation } from '../../../../interfaces/validation'
+import mySchema from '../../../../monika-config-schema.json'
 
-// Keep the agents alive to reduce the overhead of DNS queries and creating TCP connection.
-// More information here: https://rakshanshetty.in/nodejs-http-keep-alive/
-const httpAgent = new http.Agent({ keepAlive: true })
-const httpsAgent = new https.Agent({ keepAlive: true })
-export const DEFAULT_TIMEOUT = 10_000
+const ajv = new Ajv()
 
-export const HTTPMethods = new Set([
-  'DELETE',
-  'GET',
-  'HEAD',
-  'OPTIONS',
-  'PATCH',
-  'POST',
-  'PUT',
-  'PURGE',
-  'LINK',
-  'UNLINK',
-])
+// validate the config file used by monika
+export function validateConfigFile(filename: string): Validation {
+  const result: Validation = {
+    valid: false,
+    message: `Errors detected in config file ${filename}`,
+  }
 
-// Create an instance of axios here so it will be reused instead of creating a new one all the time.
-const axiosInstance = axios.create()
+  try {
+    const validate = ajv.compile(mySchema)
 
-export async function sendHttpRequest(
-  config: AxiosRequestConfig
-): Promise<AxiosResponse> {
-  const resp = await axiosInstance.request({
-    ...config,
-    timeout: config.timeout ?? DEFAULT_TIMEOUT, // Ensure default timeout if not filled.
-    httpAgent: config.httpAgent ?? httpAgent,
-    httpsAgent: config.httpsAgent ?? httpsAgent,
-  })
+    const configFile = yaml.load(fs.readFileSync(filename, 'utf8'))
+    const isValid = validate(configFile)
 
-  return resp
+    if (isValid) {
+      result.valid = true
+      result.message = `config: ${filename} is ok`
+      return result
+    }
+
+    if (validate.errors) {
+      result.message += validate.errors.join(',')
+    }
+  } catch (error: any) {
+    console.error('error:', error)
+    result.message = error
+  }
+
+  return result
 }
