@@ -23,29 +23,27 @@
  **********************************************************************************/
 
 import Joi from 'joi'
-import { Mongo } from '../../../interfaces/probe'
+import { Redis } from '../../../../interfaces/probe'
 
-export const validateMongoConfig = (
-  mongoConfig?: Mongo[]
+export const validateRedisConfig = (
+  redisConfig?: Redis[]
 ): string | undefined => {
-  if (!mongoConfig) {
+  if (!redisConfig) {
     return ''
   }
 
-  const schema = Joi.alternatives([
-    Joi.object({
-      uri: Joi.string(),
-    }),
-    Joi.object({
-      host: Joi.alternatives().try(Joi.string().hostname(), Joi.string().ip()),
-      port: Joi.number().min(0).max(65_536).required(),
-      password: Joi.string(),
-      username: Joi.string(),
-    }),
-  ])
+  const schema = Joi.object({
+    host: Joi.alternatives()
+      .try(Joi.string().hostname(), Joi.string().ip())
+      .required(),
+    port: Joi.number().min(0).max(65_536).required(),
+    password: Joi.string(),
+    username: Joi.string(),
+    command: Joi.string(),
+  })
 
-  for (const mongo of mongoConfig) {
-    const validationError = schema.validate(mongo)
+  for (const redis of redisConfig) {
+    const validationError = schema.validate(redis)
     if (validationError?.error?.message) return validationError?.error?.message
   }
 }

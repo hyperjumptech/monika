@@ -22,43 +22,25 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import yaml from 'js-yaml'
-import fs from 'fs'
-import Ajv from 'ajv'
-import { Validation } from '../../interfaces/validation'
-import mySchema from '../../monika-config-schema.json'
+import { Probe } from '../../../../interfaces/probe'
+import { validateMongoConfig } from './mongo-config'
+import { validateRedisConfig } from './redis-config'
+import { validateTCPConfig } from './tcp-config'
 
-const ajv = new Ajv()
-
-// validate the config file used by monika
-export function validateConfigFile(filename: string): Validation {
-  const validResult: Validation = {
-    valid: false,
-    message: `Errors detected in config file ${filename}`,
-  }
-  const validate = ajv.compile(mySchema)
-
-  try {
-    const configFile = yaml.load(fs.readFileSync(filename, 'utf8'))
-    const isValid = validate(configFile)
-
-    if (isValid) {
-      validResult.valid = true
-      validResult.message = `config: ${filename} is ok`
-      return validResult
-    }
-  } catch (error: any) {
-    console.error('error:', error)
-    validResult.message = error
+export const validateSchemaConfig = (probe: Probe): string | undefined => {
+  const { socket, redis, mongo } = probe
+  const tcpConfigError = validateTCPConfig(socket)
+  if (tcpConfigError) {
+    return `Monika configuration: probes.socket ${tcpConfigError}`
   }
 
-  if (validate.errors) {
-    for (const err of validate.errors) {
-      validResult.message += ', ' + err.message
-    }
-
-    validResult.message += '.'
+  const redisConfigError = validateRedisConfig(redis)
+  if (redisConfigError) {
+    return `Monika configuration: probes.redis ${redisConfigError}`
   }
 
-  return validResult
+  const mongoConfigError = validateMongoConfig(mongo)
+  if (mongoConfigError) {
+    return `Monika configuration: probes.mongo ${mongoConfigError}`
+  }
 }

@@ -22,49 +22,25 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { RequestConfig } from '../../../interfaces/request'
-import { HTTPMethods } from '../../../utils/http'
-import { isValidURL } from '../../../utils/is-valid-url'
+import Joi from 'joi'
+import type { SymonConfig } from '../../../reporter'
 
-const PROBE_REQUEST_INVALID_URL =
-  'Probe request URL should start with http:// or https://'
-const PROBE_REQUEST_INVALID_METHOD =
-  'Probe request method is invalid! Valid methods are GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS, PURGE, LINK, and UNLINK'
-const PROBE_REQUEST_NO_URL = 'Probe request URL does not exists'
-
-const checkProbeRequestProperties = (
-  requests: RequestConfig[]
+export const validateSymonConfig = (
+  symonConfig?: SymonConfig
 ): string | undefined => {
-  if (requests?.length > 0) {
-    for (const request of requests) {
-      const { method, ping, url } = request
-
-      if (!url) {
-        return PROBE_REQUEST_NO_URL
-      }
-
-      // if not a ping request and url not valid, return INVLID_URL error
-      if (ping !== true && !isValidURL(url)) {
-        return PROBE_REQUEST_INVALID_URL
-      }
-
-      if (!HTTPMethods.has(method?.toUpperCase() ?? 'GET'))
-        return PROBE_REQUEST_INVALID_METHOD
-    }
-  }
-}
-
-export const validateRequests = (
-  requests: RequestConfig[]
-): string | undefined => {
-  for (const req of requests) {
-    if (req.timeout <= 0) {
-      return `The timeout in the request with id "${req.id}" should be greater than 0.`
-    }
+  if (!symonConfig) {
+    return ''
   }
 
-  const probeRequestPropertyMessage = checkProbeRequestProperties(requests)
-  if (probeRequestPropertyMessage) {
-    return probeRequestPropertyMessage
-  }
+  const schema = Joi.object({
+    id: Joi.string().required(),
+    url: Joi.string().uri().required(),
+    key: Joi.string().required(),
+    projectID: Joi.string().required(),
+    organizationID: Joi.string().required(),
+    interval: Joi.number(),
+  })
+  const validationError = schema.validate(symonConfig)
+
+  return validationError?.error?.message
 }

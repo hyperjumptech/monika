@@ -22,28 +22,69 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import Joi from 'joi'
-import { Redis } from '../../../interfaces/probe'
+import { Probe, ProbeAlert } from '../../../../interfaces/probe'
+import { parseAlertStringTime } from '../../../../plugins/validate-response/checkers'
+import { compileExpression } from '../../../../utils/expression-parser'
 
-export const validateRedisConfig = (
-  redisConfig?: Redis[]
-): string | undefined => {
-  if (!redisConfig) {
-    return ''
+const alertStatusMessage = 'status-not-2xx'
+const responseTimePrefix = 'response-time-greater-than-'
+
+const isValidProbeAlert = (alert: ProbeAlert | string): boolean => {
+  try {
+    if (typeof alert === 'string') {
+      return (
+        alert === alertStatusMessage ||
+        (alert.startsWith(responseTimePrefix) &&
+          Boolean(parseAlertStringTime(alert)))
+      )
+    }
+
+    return Boolean(
+      compileExpression(alert.assertion || (alert.query as string))
+    )
+  } catch {
+    return false
   }
+}
 
-  const schema = Joi.object({
-    host: Joi.alternatives()
-      .try(Joi.string().hostname(), Joi.string().ip())
-      .required(),
-    port: Joi.number().min(0).max(65_536).required(),
-    password: Joi.string(),
-    username: Joi.string(),
-    command: Joi.string(),
+const convertOldAlertToNewFormat = (
+  probe: Probe,
+  allAlerts: ProbeAlert[]
+): void => {
+  probe.alerts = allAlerts.map((alert: any) => {
+    if (typeof alert === 'string') {
+      let query = ''
+      let message = ''
+      const subject = ''
+
+      if (alert === alertStatusMessage) {
+        query = 'response.status < 200 or response.status > 299'
+        message = 'HTTP Status is {{ response.status }}, expecting 200'
+      } else if (alert.startsWith(responseTimePrefix)) {
+        const expectedTime = parseAlertStringTime(alert)
+        query = `response.time > ${expectedTime}`
+        message = `Response time is {{ response.time }}ms, expecting less than ${expectedTime}ms`
+      }
+
+      return { query, subject, message }
+    }
+
+    return alert
   })
+}
 
-  for (const redis of redisConfig) {
-    const validationError = schema.validate(redis)
-    if (validationError?.error?.message) return validationError?.error?.message
+export const validateAlerts = (probe: Probe): string | undefined => {
+  const { alerts = [], socket } = probe
+  const socketAlerts = socket?.alerts ?? []
+  const allAlerts = [...alerts, ...socketAlerts]
+
+  // Check probe alert properties
+  for (const alert of allAlerts) {
+    const check = isValidProbeAlert(alert)
+    if (!check) {
+      return `Probe alert format is invalid! (${alert})`
+    }
   }
+
+  convertOldAlertToNewFormat(probe, allAlerts)
 }

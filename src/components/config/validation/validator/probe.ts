@@ -22,20 +22,57 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import Joi from 'joi'
-import { Socket } from '../../../interfaces/probe'
+import { Probe } from '../../../../interfaces/probe'
+import { validateAlerts } from './alert'
+import { validateRequests } from './request'
+import { validateSchemaConfig } from './schema-config'
 
-export const validateTCPConfig = (tcpConfig?: Socket): string | undefined => {
-  if (!tcpConfig) {
-    return ''
+const NO_PROBES = 'Probes object does not exists or has length lower than 1!'
+const PROBE_NO_REQUESTS =
+  'Probe requests does not exists or has length lower than 1!'
+
+const checkTotalProbes = (probe: Probe): string | undefined => {
+  const { requests, socket, redis, mongo, postgres, mariadb, mysql } = probe
+
+  const totalProbes =
+    (socket ? 1 : 0) +
+    (redis ? 1 : 0) +
+    (mongo ? 1 : 0) +
+    (postgres ? 1 : 0) +
+    (mariadb ? 1 : 0) +
+    (mysql ? 1 : 0) +
+    (requests?.length ?? 0)
+  if (totalProbes === 0) return PROBE_NO_REQUESTS
+}
+
+export const validateProbes = (probes: Probe[]): string | undefined => {
+  if (probes.length === 0) return NO_PROBES
+
+  for (const probe of probes) {
+    const { name, interval, requests } = probe
+
+    if (interval <= 0) {
+      return `The interval in the probe with name "${name}" should be greater than 0.`
+    }
+
+    const totalProbesError = checkTotalProbes(probe)
+    if (totalProbesError) {
+      return totalProbesError
+    }
+
+    const schemaConfigError = validateSchemaConfig(probe)
+    if (schemaConfigError) {
+      return schemaConfigError
+    }
+
+    const validateRequestsError = validateRequests(requests)
+    if (validateRequestsError) {
+      return validateRequestsError
+    }
+
+    const validateAlertError = validateAlerts(probe)
+    if (validateAlertError) {
+      return validateAlertError
+    }
   }
-
-  const schema = Joi.object({
-    host: Joi.string().required(),
-    port: Joi.number().required(),
-    data: Joi.string(),
-  })
-  const validationError = schema.validate(tcpConfig)
-
-  return validationError?.error?.message
 }

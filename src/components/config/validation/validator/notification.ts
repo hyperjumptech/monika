@@ -22,13 +22,13 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Notification } from '../../../interfaces/notification'
+import { Notification } from '../../../../interfaces/notification'
 import {
   slug as atlassianStatuspageSlug,
   validateConfig as atlassianStatuspageValidateConfig,
-} from '../../../plugins/visualization/atlassian-status-page'
-import { newPagerDuty } from '../../notification/channel/pagerduty'
-import { requiredFieldMessages } from './notification-required-fields'
+} from '../../../../plugins/visualization/atlassian-status-page'
+import { newPagerDuty } from '../../../notification/channel/pagerduty'
+import { requiredFieldMessages } from '../notification-required-fields'
 
 const checkRecipients = (notification: Notification): string | undefined => {
   // check one-by-one instead of using indexOf or includes so the type is correct without type assertion
