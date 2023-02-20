@@ -22,41 +22,34 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios'
-import http from 'http'
-import https from 'https'
+import Ajv from 'ajv'
+import { Validation } from '../../../../interfaces/validation'
+import mySchema from '../../../../monika-config-schema.json'
+import { Config } from '../../../../interfaces/config'
 
-// Keep the agents alive to reduce the overhead of DNS queries and creating TCP connection.
-// More information here: https://rakshanshetty.in/nodejs-http-keep-alive/
-const httpAgent = new http.Agent({ keepAlive: true })
-const httpsAgent = new https.Agent({ keepAlive: true })
-export const DEFAULT_TIMEOUT = 10_000
+const ajv = new Ajv()
 
-export const HTTPMethods = new Set([
-  'DELETE',
-  'GET',
-  'HEAD',
-  'OPTIONS',
-  'PATCH',
-  'POST',
-  'PUT',
-  'PURGE',
-  'LINK',
-  'UNLINK',
-])
+// validate the config file  loaded by monika against a JSON Schema
+export function validateConfigWithSchema(config: Config): Validation {
+  const result: Validation = {
+    valid: false,
+    message: `Errors detected in config file ${config}`,
+  }
 
-// Create an instance of axios here so it will be reused instead of creating a new one all the time.
-const axiosInstance = axios.create()
+  const validate = ajv.compile(mySchema)
 
-export async function sendHttpRequest(
-  config: AxiosRequestConfig
-): Promise<AxiosResponse> {
-  const resp = await axiosInstance.request({
-    ...config,
-    timeout: config.timeout ?? DEFAULT_TIMEOUT, // Ensure default timeout if not filled.
-    httpAgent: config.httpAgent ?? httpAgent,
-    httpsAgent: config.httpsAgent ?? httpsAgent,
-  })
+  try {
+    const isValid = validate(config)
 
-  return resp
+    if (isValid) {
+      result.valid = true
+      result.message = `config: ${config} is ok`
+      return result
+    }
+  } catch (error: any) {
+    console.error('error:', error)
+    result.message = error
+  }
+
+  return result
 }
