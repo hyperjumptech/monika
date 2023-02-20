@@ -34,7 +34,8 @@
     "Slow site notifications",
     "Resource monitoring",
     "Availability monitoring",
-    "Web health tracking"
+    "Web health tracking",
+    "Synthetic monitoring"
   ],
   "scripts": {
     "clean": "rm -rf coverage lib tsconfig.tsbuildinfo oclif.manifest.json",
