@@ -1150,7 +1150,7 @@
             "properties": {
               "id": {
                 "type": "string",
-                "description": "Notification identity number",
+                "description": "The type of notification",
                 "default": "instatus"
               },
               "type": {
