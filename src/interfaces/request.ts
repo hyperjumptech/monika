@@ -42,10 +42,13 @@ export interface ProbeRequestResponse<T = any> {
   requestType?: RequestTypes // is this for http (default) or icmp  or others
   data: T
   body: T
-  status: number // TODO: Improve status management. Status as number is pretty limiting here if we want to support other protocols other than http
-  // statusMsg: string // string messge of the satus code
+  status: number
+
   headers: any
   responseTime: number
+
+  isProbeResponsive: boolean // did the command/request response to requests/queries?
+  errMessage?: string // any error message from drivers
 }
 
 // ProbeRequest is used to define the requests that is being made.

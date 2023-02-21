@@ -154,15 +154,16 @@ export async function httpRequest({
 
     const responseTime = Date.now() - requestStartedAt
     const { data, headers, status } = resp
-    const requestType = 'HTTP'
 
     return {
-      requestType,
+      requestType: 'HTTP',
       data,
       body: data,
       status,
       headers,
       responseTime,
+
+      isProbeResponsive: true,
     }
   } catch (error: any) {
     const responseTime = Date.now() - requestStartedAt
@@ -176,13 +177,15 @@ export async function httpRequest({
         status: error?.response?.status,
         headers: error?.response?.headers,
         responseTime,
+
+        isProbeResponsive: true, // http status received, so connection ok
       }
     }
 
     // The request was made but no response was received
     // timeout is here, ECONNABORTED, ENOTFOUND, ECONNRESET, ECONNREFUSED
     if (error?.request) {
-      const status = errorRequestCodeToNumber(error?.code)
+      const status = errorRequestCodeToNumber(error?.code) // TODO: remove axios driver error mapping here
 
       return {
         data: '',
@@ -190,6 +193,9 @@ export async function httpRequest({
         status,
         headers: '',
         responseTime,
+
+        isProbeResponsive: false,
+        errMessage: error?.code,
       }
     }
 
@@ -200,6 +206,9 @@ export async function httpRequest({
       status: error.code || 'Unknown error',
       headers: '',
       responseTime,
+
+      isProbeResponsive: false,
+      errMessage: error.code || 'Unknown error',
     }
   }
 }
