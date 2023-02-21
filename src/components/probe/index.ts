@@ -61,6 +61,9 @@ interface ProbeSendNotification extends Omit<ProbeStatusProcessed, 'statuses'> {
   probeState?: ServerAlertState
 }
 
+const connectionRecoveryMsg = `Probe is accessible again`
+const connectionIncidentMsg = `Probe not accessible`
+
 const probeSendNotification = async (data: ProbeSendNotification) => {
   const eventEmitter = getEventEmitter()
 
@@ -218,6 +221,8 @@ async function responseProcessing({
   }
 }
 
+const isConnectionDown = new Map<string, boolean>()
+
 type doProbeParams = {
   checkOrder: number // the order of probe being processed
   probe: Probe // probe contains all the probes
@@ -225,7 +230,7 @@ type doProbeParams = {
 }
 /**
  * doProbe sends out the http request
- * @param {object} param object parameter
+ * @param {object} doProbeParams doProbe parameter
  * @returns {Promise<void>} void
  */
 export async function doProbe({
@@ -433,6 +438,9 @@ export async function doProbe({
       const request = probe.requests?.[requestIndex]
       const requestLog = new RequestLog(probe, requestIndex, checkOrder)
 
+      // create id-request
+      const id = `${probe?.id}:${request.url}:${requestIndex}:${request?.id} `
+
       try {
         // intentionally wait for a request to finish before processing next request in loop
         // eslint-disable-next-line no-await-in-loop
@@ -453,19 +461,6 @@ export async function doProbe({
         responses.push(probeRes)
         requestLog.setResponse(probeRes)
 
-        // decode error message based on returned driver status
-        if ([0, 1, 2, 3, 4, 599].includes(probeRes.status)) {
-          const errorMessageMap: Record<number, string> = {
-            0: 'URI not found', // axios error
-            1: 'Connection reset', // axios error
-            2: 'Connection refused', // axios error
-            3: 'Unknown error', // axios error
-            599: 'Request Timed out', // axios error
-          }
-
-          requestLog.addError(errorMessageMap[probeRes.status])
-        }
-
         // combine global probe alerts with all individual request alerts
         const probeAlerts = probe.alerts ?? []
         const combinedAlerts = [...probeAlerts, ...(request.alerts || [])]
@@ -485,6 +480,30 @@ export async function doProbe({
           requestIndex,
           validatedResponse,
         })
+
+        // so we've got a status that need to be reported/alerted
+        // 1. check first, this connection is up, but was it ever down? if yes then use a specific connection recovery msg
+        // 2. if this connection is down, save to map and send specific connection incident msg
+        // 3. if event is not for connection failure, send user specified notification msg
+        if (statuses[0].shouldSendNotification) {
+          if (
+            probeRes.isProbeResponsive && // if connection is successful but
+            isConnectionDown.has(id) // if connection was down then send custom alert. Else use user's alert.
+          ) {
+            validatedResponse[0].alert = {
+              assertion: '',
+              message: `${connectionRecoveryMsg}`,
+            }
+            isConnectionDown.delete(id) // connection is up, so remove from entry
+          } else if (!probeRes.isProbeResponsive) {
+            // if connection has failed, then lets send out specific notification
+            validatedResponse[0].alert = {
+              assertion: '',
+              message: `${connectionIncidentMsg}`,
+            }
+            isConnectionDown.set(id, true) // connection is down, so add to map
+          }
+        }
 
         // Done processing results, check if need to send out alerts
         checkThresholdsAndSendAlert(

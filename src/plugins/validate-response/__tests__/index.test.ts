@@ -36,7 +36,7 @@ describe('validateResponse', () => {
   ]
 
   it('status-not-2xx = true && response-time-greater-than-10-ms = true', () => {
-    const res = generateMockedResponse(300, 20)
+    const res = generateMockedResponse(300, 20, true)
     const data = validateResponse(mockedAlerts, res)
 
     expect(data).to.eql([
@@ -52,6 +52,7 @@ describe('validateResponse', () => {
           responseTime: 20,
           headers: {},
           status: 300,
+          isProbeResponsive: true,
         },
       },
       {
@@ -65,6 +66,7 @@ describe('validateResponse', () => {
           responseTime: 20,
           headers: {},
           status: 300,
+          isProbeResponsive: true,
         },
         isAlertTriggered: true,
       },
@@ -72,7 +74,7 @@ describe('validateResponse', () => {
   })
 
   it('status-not-2xx = false && response-time-greater-than-10-ms = true', () => {
-    const res = generateMockedResponse(200, 20)
+    const res = generateMockedResponse(200, 20, true)
     const data = validateResponse(mockedAlerts, res)
 
     expect(data).to.eql([
@@ -87,6 +89,7 @@ describe('validateResponse', () => {
           responseTime: 20,
           headers: {},
           status: 200,
+          isProbeResponsive: true,
         },
         isAlertTriggered: false,
       },
@@ -101,6 +104,7 @@ describe('validateResponse', () => {
           responseTime: 20,
           headers: {},
           status: 200,
+          isProbeResponsive: true,
         },
         isAlertTriggered: true,
       },
@@ -108,7 +112,7 @@ describe('validateResponse', () => {
   })
 
   it('status-not-2xx = true && response-time-greater-than-10-ms = false', () => {
-    const res = generateMockedResponse(300, 10)
+    const res = generateMockedResponse(300, 10, true)
     const data = validateResponse(mockedAlerts, res)
 
     expect(data).to.eql([
@@ -123,6 +127,7 @@ describe('validateResponse', () => {
           responseTime: 10,
           headers: {},
           status: 300,
+          isProbeResponsive: true,
         },
         isAlertTriggered: true,
       },
@@ -137,6 +142,7 @@ describe('validateResponse', () => {
           responseTime: 10,
           headers: {},
           status: 300,
+          isProbeResponsive: true,
         },
         isAlertTriggered: false,
       },
@@ -144,7 +150,7 @@ describe('validateResponse', () => {
   })
 
   it('status-not-2xx = false && response-time-greater-than-10-ms = false', () => {
-    const res = generateMockedResponse(200, 10)
+    const res = generateMockedResponse(200, 10, true)
     const data = validateResponse(mockedAlerts, res)
 
     expect(data).to.eql([
@@ -159,6 +165,7 @@ describe('validateResponse', () => {
           responseTime: 10,
           headers: {},
           status: 200,
+          isProbeResponsive: true,
         },
         isAlertTriggered: false,
       },
@@ -173,6 +180,7 @@ describe('validateResponse', () => {
           responseTime: 10,
           headers: {},
           status: 200,
+          isProbeResponsive: true,
         },
         isAlertTriggered: false,
       },
@@ -182,7 +190,8 @@ describe('validateResponse', () => {
 
 function generateMockedResponse(
   status: number,
-  responseTime: number
+  responseTime: number,
+  isProbeResponsive: boolean
 ): ProbeRequestResponse {
   return {
     data: '',
@@ -190,5 +199,6 @@ function generateMockedResponse(
     status,
     responseTime,
     headers: {},
+    isProbeResponsive,
   }
 }
