@@ -51,10 +51,10 @@ describe('monika', () => {
 
   test
     .stderr()
-    .do(() => cmd.run(['--config', 'https://fake.url.com']))
+    .do(() => cmd.run(['--config', 'https://example.com/monika.yaml']))
     .catch((error) => {
       expect(error.message).to.contain(
-        'The configuration file in https://fake.url.com is unreachable.'
+        'The configuration file in https://example.com/monika.yaml is unreachable.'
       )
     })
     .it('detects invalid remote config')
@@ -421,8 +421,8 @@ describe('monika', () => {
       ])
     )
     .it('runs multiple config override', (ctx) => {
-      expect(ctx.stdout).to.contain('Probes: 1.') // TODO: should be probes: 2
-      expect(ctx.stdout).to.contain('Notifications: 2') // TODO: should be Notifications: 3
+      expect(ctx.stdout).to.contain('Probes: 1.') // TODO: should be probes: 2, issue #983
+      expect(ctx.stdout).to.contain('Notifications: 2') // TODO: should be Notifications: 3 issue #983
     })
 
   test
