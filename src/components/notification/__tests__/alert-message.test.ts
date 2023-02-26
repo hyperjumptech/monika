@@ -52,6 +52,7 @@ describe('Alert message', () => {
           status: 404,
           headers: '',
           responseTime: 1000,
+          isProbeResponsive: true,
         },
       })
 
@@ -80,6 +81,7 @@ describe('Alert message', () => {
           status: 404,
           headers: '',
           responseTime: 1000,
+          isProbeResponsive: true,
         },
       })
 
@@ -115,6 +117,7 @@ describe('Alert message', () => {
           status: 404,
           headers: '',
           responseTime: 1000,
+          isProbeResponsive: true,
         },
       })
 
@@ -165,6 +168,7 @@ describe('Alert message', () => {
           status: 404,
           headers: '',
           responseTime: 1000,
+          isProbeResponsive: true,
         },
       })
 

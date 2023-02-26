@@ -22,8 +22,6 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import boxen from 'boxen'
-import chalk from 'chalk'
 import isUrl from 'is-url'
 import cron, { ScheduledTask } from 'node-cron'
 import path from 'path'
@@ -49,6 +47,7 @@ import {
   flushAllLogs,
   openLogfile,
 } from './components/logger/history'
+import { generateStartupMessage } from './components/logger/startup-message'
 import { notificationChecker } from './components/notification/checker'
 import { setContext } from './context'
 import events from './events'
@@ -366,12 +365,12 @@ class Monika extends Command {
 
         await this.deprecationHandler(config)
 
-        const startupMessage = this.buildStartupMessage(
+        const startupMessage = generateStartupMessage({
           config,
-          !abortCurrentLooper,
-          _flags.verbose,
-          isSymonMode
-        )
+          isFirstRun: !abortCurrentLooper,
+          isSymonMode,
+          isVerbose: _flags.verbose,
+        })
 
         // Display config files being used
         if (isSymonMode) {
@@ -453,115 +452,7 @@ class Monika extends Command {
       this.error((error as any)?.message, { exit: 1 })
     }
   }
-
-  buildStartupMessage(
-    config: Config,
-    firstRun: boolean,
-    verbose = false,
-    isSymonMode = false
-  ): string {
-    if (isSymonMode) {
-      return 'Running in Symon mode'
-    }
-
-    const { probes, notifications } = config
-
-    let startupMessage = ''
-
-    // warn if notifications settings is empty
-    if ((notifications?.length ?? 0) === 0) {
-      const NO_NOTIFICATIONS_MESSAGE = `Notifications has not been set. We will not be able to notify you when an INCIDENT occurs!
-Please refer to the Monika documentations on how to how to configure notifications (e.g., Telegram, Slack, Desktop notification, etc.) at https://monika.hyperjump.tech/guides/notifications.`
-
-      startupMessage += boxen(chalk.yellow(NO_NOTIFICATIONS_MESSAGE), {
-        padding: 1,
-        margin: {
-          top: 2,
-          right: 1,
-          bottom: 2,
-          left: 1,
-        },
-        borderStyle: 'bold',
-        borderColor: 'yellow',
-      })
-    }
-
-    startupMessage += `${
-      firstRun ? 'Starting' : 'Restarting'
-    } Monika. Probes: ${probes.length}. Notifications: ${
-      notifications?.length ?? 0
-    }\n\n`
-
-    if (verbose) {
-      startupMessage += 'Probes:\n'
-
-      for (const probe of probes) {
-        startupMessage += `- Probe ID: ${probe.id}
-    Name: ${probe.name}
-    Description: ${probe.description}
-    Interval: ${probe.interval}
-`
-        startupMessage += `    Requests:\n`
-        for (const request of probe.requests) {
-          startupMessage += `      - Request Method: ${request.method || `GET`}
-        Request URL: ${request.url}
-        Request Headers: ${JSON.stringify(request.headers) || `-`}
-        Request Body: ${JSON.stringify(request.body) || `-`}
-`
-        }
-
-        startupMessage += `    Alerts: ${
-          probe?.alerts === undefined || probe?.alerts.length === 0
-            ? `[{ "assertion": "response.status < 200 or response.status > 299", "message": "HTTP Status is not 200"},
-            { "assertion": "response.time > 2000", "message": "Response time is more than 2000ms" }]`
-            : JSON.stringify(probe.alerts)
-        }\n`
-      }
-
-      if (notifications && notifications.length > 0) {
-        startupMessage += `\nNotifications:\n`
-
-        for (const item of notifications) {
-          startupMessage += `- Notification ID: ${item.id}
-    Type: ${item.type}
-`
-          // Only show recipients if type is mailgun, smtp, or sendgrid
-          // check one-by-one instead of using indexOf to avoid using type assertion
-          if (
-            item.type === 'mailgun' ||
-            item.type === 'smtp' ||
-            item.type === 'sendgrid'
-          ) {
-            startupMessage += `    Recipients: ${item.data.recipients.join(
-              ', '
-            )}\n`
-          }
-
-          switch (item.type) {
-            case 'smtp':
-              startupMessage += `    Hostname: ${item.data.hostname}
-    Port: ${item.data.port}
-    Username: ${item.data.username}
-`
-              break
-            case 'mailgun':
-              startupMessage += `    Domain: ${item.data.domain}\n`
-              break
-            case 'sendgrid':
-              break
-            case 'webhook':
-            case 'slack':
-            case 'lark':
-            case 'google-chat':
-              startupMessage += `    URL: ${item.data.url}\n`
-              break
-          }
-        }
-      }
-    }
-
-    return startupMessage
-  }
+  /* eslint-enable complexity */
 
   async catch(error: Error): Promise<any> {
     super.catch(error)

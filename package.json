@@ -26,8 +26,16 @@
   },
   "keywords": [
     "monika",
-    "cli",
-    "monitoring"
+    "Website monitoring",
+    "Uptime monitoring",
+    "Performance tracking",
+    "Command-line interface",
+    "Alert notifications",
+    "Slow site notifications",
+    "Resource monitoring",
+    "Availability monitoring",
+    "Web health tracking",
+    "Synthetic monitoring"
   ],
   "scripts": {
     "clean": "rm -rf coverage lib tsconfig.tsbuildinfo oclif.manifest.json",
@@ -150,7 +158,7 @@
     "oclif": "^3.0.1",
     "prettier": "2.5.1",
     "ts-node": "^10.4.0",
-    "typescript": "4.4.4"
+    "typescript": "4.9.5"
   },
   "prettier": {
     "semi": false,
