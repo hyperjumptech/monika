@@ -59,7 +59,7 @@ export const validateRequests = (
 ): string | undefined => {
   for (const req of requests) {
     if (req.timeout <= 0) {
-      return `The timeout in the request with id "${req.id}" should be greater than 0.`
+      return `The timeout in the request with target "${req.url}" should be greater than 0.`
     }
   }
 

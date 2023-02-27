@@ -53,7 +53,6 @@ export interface ProbeRequestResponse<T = any> {
 
 // ProbeRequest is used to define the requests that is being made.
 export interface RequestConfig extends Omit<AxiosRequestConfig, 'data'> {
-  id?: string
   saveBody?: boolean // save response body to db?
   url: string
   body: JSON | string

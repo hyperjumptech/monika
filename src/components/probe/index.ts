@@ -439,7 +439,7 @@ export async function doProbe({
       const requestLog = new RequestLog(probe, requestIndex, checkOrder)
 
       // create id-request
-      const id = `${probe?.id}:${request.url}:${requestIndex}:${request?.id} `
+      const id = `${probe?.id}:${request.url}:${requestIndex}`
 
       try {
         // intentionally wait for a request to finish before processing next request in loop
