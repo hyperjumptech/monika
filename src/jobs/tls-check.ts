@@ -101,6 +101,7 @@ function sendTLSErrorNotification({
         data: {},
         body: {},
         headers: {},
+        isProbeResponsive: true,
       },
     }
 

@@ -56,6 +56,7 @@ export async function icmpRequest(
     status: 0,
     headers: '',
     responseTime: 0,
+    isProbeResponsive: false,
   }
 
   try {
@@ -68,17 +69,18 @@ export async function icmpRequest(
     icmpResp.numericHost = resp.numeric_host
     icmpResp.output = resp.output
 
-    return processICMPRequstResult(icmpResp)
+    return processICMPRequestResult(icmpResp)
   } catch (error: any) {
-    console.error('icmp got errror:', error)
+    console.error('icmp got error:', error)
     baseResponse.data = error // map error to data
+    baseResponse.errMessage = error
   }
 
   return baseResponse
 }
 
 // translates icmp specific response to base monika response
-export function processICMPRequstResult(
+export function processICMPRequestResult(
   params: icmpResponse
 ): ProbeRequestResponse {
   // build log message
@@ -93,5 +95,7 @@ export function processICMPRequstResult(
     body: msg,
     headers: {},
     responseTime: params.average || 0,
+
+    isProbeResponsive: true,
   }
 }
