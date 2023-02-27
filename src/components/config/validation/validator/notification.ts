@@ -27,6 +27,10 @@ import {
   slug as atlassianStatuspageSlug,
   validateConfig as atlassianStatuspageValidateConfig,
 } from '../../../../plugins/visualization/atlassian-status-page'
+import {
+  slug as instatusPageSlug,
+  validateConfig as instatusPageValidateConfig,
+} from '../../../../plugins/visualization/instatus'
 import { newPagerDuty } from '../../../notification/channel/pagerduty'
 import { requiredFieldMessages } from '../notification-required-fields'
 
@@ -76,6 +80,13 @@ const checkByNotificationType = (
     pagerduty.validateConfig(notification.data)
   ) {
     return pagerduty.validateConfig(notification.data)
+  }
+
+  if (
+    notification.type === instatusPageSlug &&
+    instatusPageValidateConfig(notification.data)
+  ) {
+    return instatusPageValidateConfig(notification.data)
   }
 
   const missingField = validateRequiredFields(notification)
