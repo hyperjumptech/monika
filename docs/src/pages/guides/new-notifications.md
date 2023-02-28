@@ -162,6 +162,48 @@ Finally, head over to `src/components/config/validate.ts` and look for the `vali
 
 In the example above, we made sure that the user provided the `url` when using the notification type `google-chat`. Otherwise a standardized "no-url-found" message is displayed.
 
+In addition the the in-code-validations above, Monika users have the option to use JSON schema validation from their favorite editors. This is super convenient and it is highly recommended to add new schemas to reflect your changes.
+
+Update the json schema in `src/monika-config-schema.json` to be able to validate your new notification.
+
+In the example above, the google chat schema validation may look something like:
+
+```yaml
+{
+            "title": "Google Chat",
+            "type": "object",
+            "required": ["id", "type", "data"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Unique notification id",
+                "default": "google-chat-01"
+              },
+              "type": {
+                "const": "google-chat"
+              },
+              "data": {
+                "type": "object",
+                "description": "Data for your payload",
+                "additionalProperties": false,
+                "required": ["url"],
+                "properties": {
+                  "url": {
+                    "$ref": "#/definitions/urlFormat",
+                    "description": "The webhook URL for your google chat",
+                    "examples": [
+                      "https://chat.googleapis.com/v1/spaces/XXXXX/messages?key=1122334455"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+```
+
+For further documentation on json schemas, you can visit the [json schema website here.](https://json-schema.org/)
+
 ## Testing
 
 To make sure your integration won't break in the future, add your unit test(s) into the folder `test/components/notification.test.ts`. This will also ensure that all your code behaves as designed. We use [`Mocha.js`](https://mochajs.org/) testing framework and [`Chai.js`'](https://www.chaijs.com/) expect for assertion and checking.
