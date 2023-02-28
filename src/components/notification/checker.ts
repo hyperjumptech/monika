@@ -26,6 +26,7 @@ import { hostname } from 'os'
 import { NotificationSendingError, sendNotifications } from '.'
 import { Notification } from '../../interfaces/notification'
 import { validator as dataStatuspageSchemaValidator } from '../../plugins/visualization/atlassian-status-page'
+import { validator as dataInstatusSchemaValidator } from '../../plugins/visualization/instatus'
 import getIp from '../../utils/ip'
 import { getMessageForStart } from './alert-message'
 import { newPagerDuty } from './channel/pagerduty'
@@ -78,6 +79,7 @@ export const notificationChecker = async (
     pushover: dataPushoverSchemaValidator,
     gotify: dataGotifySchemaValidator,
     pushbullet: dataPushbulletSchemaValidator,
+    instatus: dataInstatusSchemaValidator,
   }
 
   await Promise.all(
