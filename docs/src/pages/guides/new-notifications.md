@@ -170,36 +170,36 @@ In the example above, the google chat schema validation may look something like:
 
 ```yaml
 {
-            "title": "Google Chat",
-            "type": "object",
-            "required": ["id", "type", "data"],
-            "additionalProperties": false,
-            "properties": {
-              "id": {
-                "type": "string",
-                "description": "Unique notification id",
-                "default": "google-chat-01"
-              },
-              "type": {
-                "const": "google-chat"
-              },
-              "data": {
-                "type": "object",
-                "description": "Data for your payload",
-                "additionalProperties": false,
-                "required": ["url"],
-                "properties": {
-                  "url": {
-                    "$ref": "#/definitions/urlFormat",
-                    "description": "The webhook URL for your google chat",
-                    "examples": [
-                      "https://chat.googleapis.com/v1/spaces/XXXXX/messages?key=1122334455"
-                    ]
-                  }
-                }
-              }
-            }
-          },
+  "title": "Google Chat",
+  "type": "object",
+  "required": ["id", "type", "data"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique notification id",
+      "default": "google-chat-01"
+    },
+    "type": {
+      "const": "google-chat"
+    },
+    "data": {
+      "type": "object",
+      "description": "Data for your payload",
+      "additionalProperties": false,
+      "required": ["url"],
+      "properties": {
+        "url": {
+          "$ref": "#/definitions/urlFormat",
+          "description": "The webhook URL for your google chat",
+          "examples": [
+            "https://chat.googleapis.com/v1/spaces/XXXXX/messages?key=1122334455"
+          ]
+        }
+      }
+    }
+  }
+},
 ```
 
 For further documentation on json schemas, you can visit the [json schema website here.](https://json-schema.org/)
