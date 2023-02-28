@@ -91,4 +91,8 @@ export const requiredFieldMessages: Record<string, any> = {
     apiKey: 'apiKey not found',
     pageID: 'pageID not found',
   },
+  statuspage: {
+    apiKey: 'apiKey not found',
+    pageID: 'pageID not found',
+  },
 }
