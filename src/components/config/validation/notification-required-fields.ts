@@ -87,4 +87,8 @@ export const requiredFieldMessages: Record<string, any> = {
     token:
       'Pushbullet Access Token not found! You can create your Access Token at https://www.pushbullet.com/#settings',
   },
+  instatus: {
+    apiKey: 'apiKey not found',
+    pageID: 'pageID not found',
+  },
 }
