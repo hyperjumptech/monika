@@ -162,7 +162,7 @@ Finally, head over to `src/components/config/validate.ts` and look for the `vali
 
 In the example above, we made sure that the user provided the `url` when using the notification type `google-chat`. Otherwise a standardized "no-url-found" message is displayed.
 
-In addition the the in-code-validations above, Monika users have the option to use JSON schema validation from their favorite editors. This is super convenient and provide useful real time feedback. Therefore it is mandatory to add a new schema to reflect your changes, otherwise your new notification type will not be recognized and flagged as an unknown type.
+In addition the the in-code-validations above, Monika users have the option to use JSON schema validation from their favorite editors. This is super convenient and provide useful real time feedback. Therefore it is mandatory to add a new schema to reflect your changes, otherwise, your new notification type will not be recognized and flagged as an unknown type.
 
 Update the json schema in `src/monika-config-schema.json` to be able to validate your new notification.
 
