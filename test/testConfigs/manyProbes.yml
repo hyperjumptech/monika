@@ -1,7 +1,7 @@
 probes:
   - id: '1'
     requests:
-      url: https://github.com
+      - url: https://github.com
   - id: '2'
     requests:
-      url: https://example.com
+      - url: https://example.com

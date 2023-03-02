@@ -133,12 +133,10 @@ describe('processThresholds', () => {
   const probe = {
     requests: [
       {
-        id: '1',
         method: 'GET',
         url: 'https://httpbin.org/status/200',
       },
       {
-        id: '2',
         method: 'POST',
         url: 'https://httpbin.org/status/201',
       },
