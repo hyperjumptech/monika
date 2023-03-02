@@ -30,6 +30,7 @@ import { hostname } from 'os'
 import Bree from 'bree'
 import path from 'path'
 
+import { updateConfig } from '../components/config'
 import { getOSName } from '../components/notification/alert-message'
 import { getContext } from '../context'
 import events from '../events'
@@ -235,6 +236,7 @@ class SymonClient {
     }
 
     await this.report()
+    this.onConfig((config) => updateConfig(config, false))
   }
 
   async notifyEvent(event: SymonClientEvent): Promise<void> {

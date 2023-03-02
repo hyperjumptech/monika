@@ -44,13 +44,13 @@ const DISABLE_STUN = -1 // -1 is disable stun checking
 
 /**
  * sanitizeProbe sanitize currently mapped probe name, alerts, and threshold
+ * @param {boolean} isSymonMode is running in Symon mode
  * @param {object} probe is the probe configuration
- * @param {array} id is the probe ID
  * @returns {object} as probe
  */
-export function sanitizeProbe(probe: Probe, id: string): Probe {
-  const { name, requests, incidentThreshold, recoveryThreshold, alerts } = probe
-  probe.id = `${id}`
+export function sanitizeProbe(isSymonMode: boolean, probe: Probe): Probe {
+  const { id, name, requests, incidentThreshold, recoveryThreshold, alerts } =
+    probe
   probe.alerts = alerts?.map((alert) => {
     if (alert.query) {
       return { ...alert, assertion: alert.query }
@@ -77,23 +77,23 @@ export function sanitizeProbe(probe: Probe, id: string): Probe {
   })
 
   if (!name) {
-    probe.name = `monika_${probe.id}`
+    probe.name = `monika_${id}`
     log.warn(
-      `Warning: Probe ${probe.id} has no name defined. Using the default name started by monika`
+      `Warning: Probe ${id} has no name defined. Using the default name started by monika`
     )
   }
 
   if (!incidentThreshold) {
     probe.incidentThreshold = DEFAULT_THRESHOLD
     log.warn(
-      `Warning: Probe ${probe.id} has no incidentThreshold configuration defined. Using the default threshold: 5`
+      `Warning: Probe ${id} has no incidentThreshold configuration defined. Using the default threshold: 5`
     )
   }
 
   if (!recoveryThreshold) {
     probe.recoveryThreshold = DEFAULT_THRESHOLD
     log.warn(
-      `Warning: Probe ${probe.id} has no recoveryThreshold configuration defined. Using the default threshold: 5`
+      `Warning: Probe ${id} has no recoveryThreshold configuration defined. Using the default threshold: 5`
     )
   }
 
@@ -110,8 +110,12 @@ export function sanitizeProbe(probe: Probe, id: string): Probe {
       },
     ]
     log.warn(
-      `Warning: Probe ${probe.id} has no Alerts configuration defined. Using the default status-not-2xx and response-time-greater-than-2-s`
+      `Warning: Probe ${id} has no Alerts configuration defined. Using the default status-not-2xx and response-time-greater-than-2-s`
     )
+  }
+
+  if (isSymonMode) {
+    probe.alerts = []
   }
 
   return probe
