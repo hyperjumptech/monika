@@ -33,24 +33,21 @@ import {
   deleteNotificationLogs,
   deleteRequestLogs,
   getUnreportedLogs,
+  UnreportedLog,
   UnreportedNotificationsLog,
   UnreportedRequestsLog,
 } from '../../components/logger/history'
-import { getContext } from '../../context'
 import { log } from '../../utils/pino'
 const dbPath = path.resolve(process.cwd(), 'monika-logs.db')
-const { flags } = getContext()
-const isSymonExperimental = flags.symonExperimental
 
 const pouchDBReporting = async (
   monikaId: any,
-  requests: UnreportedRequestsLog[],
-  notifications: UnreportedNotificationsLog[]
+  logs: UnreportedLog,
+  symonCouchDB: string
 ) => {
+  const requests = logs.requests
+  const notifications = logs.notifications
   const pouch = new PouchDB('symon')
-  const symonCouchDB = new PouchDB(
-    flags.symonCouchDb || 'http://symon:symon@localhost:5984/symon'
-  )
 
   try {
     const reportData = {
@@ -89,7 +86,15 @@ const pouchDBReporting = async (
 
 const main = async (data: Record<string, any>) => {
   try {
-    const { url, apiKey, probeIds, reportProbesLimit, monikaId } = data
+    const {
+      url,
+      apiKey,
+      probeIds,
+      reportProbesLimit,
+      monikaId,
+      isSymonExperimental,
+      symonCouchDB,
+    } = data
 
     // Open database
     const sqlite3 = SQLite3.verbose()
@@ -119,7 +124,7 @@ const main = async (data: Record<string, any>) => {
     }
 
     if (isSymonExperimental) {
-      await pouchDBReporting(monikaId, requests, notifications)
+      await pouchDBReporting(monikaId, logs, symonCouchDB)
       return
     }
 

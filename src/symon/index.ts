@@ -350,6 +350,8 @@ class SymonClient {
       // Updating requests and notifications to report
       const probeIds = this.probes.map((probe: Probe) => probe.id)
 
+      const { flags } = getContext()
+
       // Creating/updating report job
       const jobInterval = this.reportProbesInterval / 1000 // Convert probes interval to second
       const jobData = {
@@ -360,6 +362,9 @@ class SymonClient {
         monikaId: this.monikaId,
         url: this.url,
         apiKey: this.apiKey,
+        isSymonExperimental: flags.symonExperimental,
+        symonCouchDB:
+          flags.symonCouchDb || 'http://symon:symon@localhost:5984/symon',
       }
 
       // Find existing report job
