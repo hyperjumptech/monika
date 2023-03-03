@@ -28,6 +28,7 @@ At this moment, Monika support these channel of notifications (You can use just 
 17. [Pushover](https://hyperjumptech.github.io/monika/guides/notifications#pushover)
 18. [Opsgenie](https://hyperjumptech.github.io/monika/guides/notifications#opsgenie)
 19. [Pushbullet](https://hyperjumptech.github.io/monika/guides/notifications#pushbullet)
+20. [Instatus](https://hyperjumptech.github.io/monika/guides/notifications#instatus)
 
 ## Configurations
 
@@ -510,3 +511,23 @@ notifications:
 | -------- | ---------------------------- | ---------------------- |
 | token    | Pushbullet Access Token      | `a6FJVAA0LVJKrT8k`     |
 | deviceID | Pushbullet Device Identifier | `ujpah72o0sjAoRtnM0jc` |
+
+## Instatus
+
+[Instatus](https://instatus.com/) is a status and incident communication tool. You need a page ID and an API key to use Instatus. You can obtain it by following the steps in [the documentation](https://dashboard.instatus.com/developer).
+
+```yaml
+notifications:
+  - id: unique-id-instatus
+    type: instatus
+    data:
+      apiKey: YOUR_INSTATUS_API_KEY
+      pageID: YOUR_INSTATUS_PAGE_ID //You can get it with client.pages.get()
+```
+
+| Key              | Description                  | Example                            |
+| ---------------- | ---------------------------- | ---------------------------------- |
+| id               | Notification identity number | `instatus-id`                      |
+| type             | Notification types           | `instatus`                         |
+| data.apiKey      | Instatus API key             | `43d43d2c06ae223a88a9c35523acd00a` |
+| data.data.pageID | Instatus page ID             | `2hu1aj8r6td7mog6uz1sh`            |

@@ -68,7 +68,7 @@ type SymonClientEvent = {
   event: 'incident' | 'recovery'
   alertId: string
   response: {
-    status: number
+    status: number // httpStatus Code
     time?: number
     size?: number
     headers?: Record<string, unknown>
@@ -214,7 +214,7 @@ class SymonClient {
           event: args.probeState === 'DOWN' ? 'incident' : 'recovery',
           alertId: args.validation.alert.id ?? '',
           response: {
-            status: args.validation.response.status,
+            status: args.validation.response.status, // status is http status code
             time: args.validation.response.responseTime,
             size: args.validation.response.headers['content-length'],
             headers: args.validation.response.headers ?? {},

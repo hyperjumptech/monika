@@ -24,6 +24,7 @@
 
 import { PagerDutyNotification } from '../components/notification/channel/pagerduty'
 import type { StatuspageNotification } from '../plugins/visualization/atlassian-status-page'
+import type { InstatusPageNotification } from '../plugins/visualization/instatus'
 import {
   MailgunData,
   MonikaNotifData,
@@ -167,6 +168,7 @@ export type Notification =
   | OpsgenieNotification
   | StatuspageNotification
   | PushbulletNotification
+  | InstatusPageNotification
 
 interface BaseNotificationMessageMeta {
   type: string
