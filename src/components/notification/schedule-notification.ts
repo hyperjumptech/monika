@@ -31,8 +31,11 @@ export function scheduleSummaryNotification({
   // defaults to 6 AM
   // default value is not defined in flag configuration,
   // because the value can also come from config file
+  const DEFAULT_SCHEDULE_CRON_EXPRESSION = '0 6 * * *'
   const schedule =
-    statusNotificationFlag || statusNotificationConfig || '0 6 * * *'
+    statusNotificationFlag ||
+    statusNotificationConfig ||
+    DEFAULT_SCHEDULE_CRON_EXPRESSION
 
   const scheduledStatusUpdateTask = cron.schedule(
     schedule,

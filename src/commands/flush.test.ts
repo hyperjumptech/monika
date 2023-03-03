@@ -29,14 +29,14 @@ import * as history from '../components/logger/history'
 import cmd from '../../src'
 import { flush } from './flush'
 
-let stubFlushAllLogs: sinon.SinonStub
+let flushAllLogsStub: sinon.SinonStub
 
 beforeEach(() => {
-  stubFlushAllLogs = sinon.stub(history, 'flushAllLogs').resolves()
+  flushAllLogsStub = sinon.stub(history, 'flushAllLogs').resolves()
 })
 
 afterEach(() => {
-  stubFlushAllLogs.restore()
+  flushAllLogsStub.restore()
 })
 
 describe('Flush command', () => {
@@ -46,7 +46,7 @@ describe('Flush command', () => {
       await flush(true)
 
       // assert
-      sinon.assert.calledOnce(stubFlushAllLogs)
+      sinon.assert.calledOnce(flushAllLogsStub)
     })
   })
 
@@ -60,7 +60,7 @@ describe('Flush command', () => {
       .do(() => cmd.run(['--flush']))
       .it('should cancel flush', () => {
         // assert
-        sinon.assert.notCalled(stubFlushAllLogs)
+        sinon.assert.notCalled(flushAllLogsStub)
       })
 
     test
@@ -72,7 +72,7 @@ describe('Flush command', () => {
       .do(() => cmd.run(['--flush']))
       .it('should flush', () => {
         // assert
-        sinon.assert.calledOnce(stubFlushAllLogs)
+        sinon.assert.calledOnce(flushAllLogsStub)
       })
   })
 })
