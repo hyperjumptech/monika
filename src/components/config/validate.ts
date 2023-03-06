@@ -48,9 +48,9 @@ export const validateConfig = (configuration: Config): Validation => {
     return setInvalidResponse(`Monika configuration: symon ${symonConfigError}`)
   }
 
-  // check config file against monika-config-schema.json only if a configfile is passed
+  // check config file against monika-config-schema.json only if a config file is passed
   if (flags.config.length > 0) {
-    const isValidConfig = validator.validateConfigFile(flags.config[0])
+    const isValidConfig = validator.validateConfigWithSchema(configuration)
     if (isValidConfig.valid === false) return isValidConfig
   }
 
