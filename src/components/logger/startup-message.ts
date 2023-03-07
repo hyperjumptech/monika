@@ -1,9 +1,50 @@
+import path from 'path'
+import isUrl from 'is-url'
 import boxen from 'boxen'
 import chalk from 'chalk'
 import type { Config } from '../../interfaces/config'
 import type { Notification } from '../../interfaces/notification'
 import type { Probe, ProbeAlert } from '../../interfaces/probe'
 import type { RequestConfig } from '../../interfaces/request'
+import { log } from '../../utils/pino'
+
+type LogStartupMessage = {
+  config: Config
+  configFlag: string[]
+  isFirstRun: boolean
+  isSymonMode: boolean
+  isVerbose: boolean
+}
+
+export function logStartupMessage({
+  config,
+  configFlag,
+  isFirstRun,
+  isSymonMode,
+  isVerbose,
+}: LogStartupMessage): void {
+  const startupMessage = generateStartupMessage({
+    config,
+    isFirstRun,
+    isSymonMode,
+    isVerbose,
+  })
+
+  if (isSymonMode) {
+    log.info(startupMessage)
+    return
+  }
+
+  for (const x in configFlag) {
+    if (isUrl(configFlag[x])) {
+      log.info('Using remote config:', configFlag[x])
+    } else if (configFlag[x].length > 0) {
+      log.info('Using config file:', path.resolve(configFlag[x]))
+    }
+  }
+
+  console.log(startupMessage)
+}
 
 type GenerateStartupMessageParams = {
   config: Config
@@ -12,7 +53,7 @@ type GenerateStartupMessageParams = {
   isSymonMode: boolean
 }
 
-export function generateStartupMessage({
+function generateStartupMessage({
   config,
   isFirstRun,
   isVerbose,
