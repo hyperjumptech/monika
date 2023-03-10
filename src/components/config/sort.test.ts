@@ -22,37 +22,76 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { getContext } from '../../context'
-import { Config } from '../../interfaces/config'
-import { Validation } from '../../interfaces/validation'
-import { setInvalidResponse, VALID_CONFIG } from '../../utils/validate-response'
-import validator from './validation'
+import { expect } from '@oclif/test'
+import { assert } from 'chai'
+import type { Probe } from '../../interfaces/probe'
+import { sortProbes } from './sort'
 
-export const validateConfig = (configuration: Config): Validation => {
-  const { flags } = getContext()
-  const { notifications = [], probes = [], symon } = configuration
-  const symonConfigError = validator.validateSymonConfig(symon)
+// arrange
+const probes: Probe[] = [
+  {
+    id: '9t65v',
+    name: 'Example',
+    interval: 3000,
+    requests: [],
+    incidentThreshold: 0,
+    recoveryThreshold: 0,
+    alerts: [],
+  },
+  {
+    id: '5zm60',
+    name: 'Example 2',
+    interval: 3000,
+    requests: [],
+    incidentThreshold: 0,
+    recoveryThreshold: 0,
+    alerts: [],
+  },
+]
 
-  const validateNotificationError =
-    validator.validateNotification(notifications)
-  if (validateNotificationError) {
-    return setInvalidResponse(validateNotificationError)
-  }
+describe('Sort probes', () => {
+  describe('Without id flag', () => {
+    it('should not change probe order', () => {
+      // act
+      const sortedProbes = sortProbes(probes)
 
-  const validateProbesError = validator.validateProbes(probes)
-  if (validateProbesError) {
-    return setInvalidResponse(validateProbesError)
-  }
+      // assert
+      expect(sortedProbes).deep.eq(probes)
+    })
+  })
 
-  if (symonConfigError) {
-    return setInvalidResponse(`Monika configuration: symon ${symonConfigError}`)
-  }
+  describe('With id flag', () => {
+    it('should throw due to invalid id', () => {
+      // assert
+      assert.throws(() => sortProbes(probes, 'm91us'))
+    })
 
-  // check config file against monika-config-schema.json only if a config file is passed
-  if (flags.config.length > 0) {
-    const isValidConfig = validator.validateConfigWithSchema(configuration)
-    if (isValidConfig.valid === false) return isValidConfig
-  }
+    it('should order probes by id flag', () => {
+      // act
+      const sortedProbes = sortProbes(probes, '5zm60,9t65v')
 
-  return VALID_CONFIG
-}
+      // assert
+      expect(sortedProbes[0]).deep.eq(probes[1])
+      expect(sortedProbes[1]).deep.eq(probes[0])
+    })
+
+    it('should order probes by id flag (duplicate id)', () => {
+      // act
+      const sortedProbes = sortProbes(probes, '5zm60,9t65v,5zm60')
+
+      // assert
+      expect(sortedProbes[0]).deep.eq(probes[1])
+      expect(sortedProbes[1]).deep.eq(probes[0])
+      expect(sortedProbes[2]).deep.eq(probes[1])
+    })
+
+    it('should order probes by spaced id flag', () => {
+      // act
+      const sortedProbes = sortProbes(probes, '5zm60, 9t65v')
+
+      // assert
+      expect(sortedProbes[0]).deep.eq(probes[1])
+      expect(sortedProbes[1]).deep.eq(probes[0])
+    })
+  })
+})

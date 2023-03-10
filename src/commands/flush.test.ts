@@ -22,37 +22,57 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { getContext } from '../../context'
-import { Config } from '../../interfaces/config'
-import { Validation } from '../../interfaces/validation'
-import { setInvalidResponse, VALID_CONFIG } from '../../utils/validate-response'
-import validator from './validation'
+import sinon from 'sinon'
+import { CliUx } from '@oclif/core'
+import { test } from '@oclif/test'
+import * as history from '../components/logger/history'
+import cmd from '../../src'
+import { flush } from './flush'
 
-export const validateConfig = (configuration: Config): Validation => {
-  const { flags } = getContext()
-  const { notifications = [], probes = [], symon } = configuration
-  const symonConfigError = validator.validateSymonConfig(symon)
+let flushAllLogsStub: sinon.SinonStub
 
-  const validateNotificationError =
-    validator.validateNotification(notifications)
-  if (validateNotificationError) {
-    return setInvalidResponse(validateNotificationError)
-  }
+beforeEach(() => {
+  flushAllLogsStub = sinon.stub(history, 'flushAllLogs').resolves()
+})
 
-  const validateProbesError = validator.validateProbes(probes)
-  if (validateProbesError) {
-    return setInvalidResponse(validateProbesError)
-  }
+afterEach(() => {
+  flushAllLogsStub.restore()
+})
 
-  if (symonConfigError) {
-    return setInvalidResponse(`Monika configuration: symon ${symonConfigError}`)
-  }
+describe('Flush command', () => {
+  describe('Force', () => {
+    it('should flush records without asking for confirmation', async () => {
+      // act
+      await flush(true)
 
-  // check config file against monika-config-schema.json only if a config file is passed
-  if (flags.config.length > 0) {
-    const isValidConfig = validator.validateConfigWithSchema(configuration)
-    if (isValidConfig.valid === false) return isValidConfig
-  }
+      // assert
+      sinon.assert.calledOnce(flushAllLogsStub)
+    })
+  })
 
-  return VALID_CONFIG
-}
+  describe('Not force', () => {
+    test
+      // arrange
+      // eslint-disable-next-line unicorn/consistent-function-scoping
+      .stub(CliUx.ux, 'prompt', () => async () => 'n')
+      .stdout()
+      // act
+      .do(() => cmd.run(['--flush']))
+      .it('should cancel flush', () => {
+        // assert
+        sinon.assert.notCalled(flushAllLogsStub)
+      })
+
+    test
+      // arrange
+      // eslint-disable-next-line unicorn/consistent-function-scoping
+      .stub(CliUx.ux, 'prompt', () => async () => 'Y')
+      .stdout()
+      // act
+      .do(() => cmd.run(['--flush']))
+      .it('should flush', () => {
+        // assert
+        sinon.assert.calledOnce(flushAllLogsStub)
+      })
+  })
+})

@@ -22,50 +22,31 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import isUrl from 'is-url'
-import cron, { ScheduledTask } from 'node-cron'
-import path from 'path'
+import { Command, Errors, Flags, Interfaces } from '@oclif/core'
 
-import {
-  CliUx,
-  Command,
-  Errors,
-  Flags,
-  Interfaces,
-  loadHelpClass,
-  toCached,
-} from '@oclif/core'
-
-import {
-  createConfig,
-  getConfigIterator,
-  updateConfig,
-} from './components/config'
+import { flush, help } from './commands'
+import { createConfig, getConfigIterator } from './components/config'
 import { printAllLogs } from './components/logger'
-import {
-  closeLog,
-  flushAllLogs,
-  openLogfile,
-} from './components/logger/history'
-import { generateStartupMessage } from './components/logger/startup-message'
+import { closeLog, openLogfile } from './components/logger/history'
+import { logStartupMessage } from './components/logger/startup-message'
 import { notificationChecker } from './components/notification/checker'
+import {
+  resetScheduledTasks,
+  scheduleSummaryNotification,
+} from './components/notification/schedule-notification'
 import { setContext } from './context'
 import type { MonikaFlags } from './context/monika-flags'
 import { monikaFlagsDefaultValue } from './context/monika-flags'
 import events from './events'
 import { Config } from './interfaces/config'
 import { Probe } from './interfaces/probe'
-import {
-  getSummaryAndSendNotif,
-  printSummary,
-  savePidFile,
-} from './jobs/summary-notification'
+import { printSummary, savePidFile } from './jobs/summary-notification'
 import initLoaders from './loaders'
 import { sanitizeProbe, startProbing } from './looper'
 import SymonClient from './symon'
-import { checkProbeId } from './utils/check-probe-id'
 import { getEventEmitter } from './utils/events'
 import { log } from './utils/pino'
+import { sortProbes } from './components/config/sort'
 
 const em = getEventEmitter()
 let symonClient: SymonClient
@@ -282,7 +263,6 @@ class Monika extends Command {
     }),
   }
 
-  /* eslint-disable complexity */
   async run(): Promise<void> {
     const monika = await this.parse(Monika)
     const _flags: MonikaFlags = monika.flags
@@ -290,12 +270,10 @@ class Monika extends Command {
 
     try {
       if (_flags.help) {
-        const Help = await loadHelpClass(this.config)
-        const help = new Help(this.config)
-        const cmd = await toCached(
+        await help(
+          this.config,
           this.ctor as unknown as Interfaces.Command.Class
         )
-        await help.showCommandHelp(cmd, [])
         return
       }
 
@@ -313,28 +291,14 @@ class Monika extends Command {
       }
 
       if (_flags.flush) {
-        let ans
-
-        if (!_flags.force) {
-          ans = await CliUx.ux.prompt(
-            'Are you sure you want to flush all logs in monika-logs.db (Y/n)?'
-          )
-        }
-
-        if (ans === 'Y' || _flags.force) {
-          await flushAllLogs()
-          log.warn('Records flushed, thank you.')
-        } else {
-          log.info('Cancelled. Thank you.')
-        }
-
+        await flush(_flags.force)
         await closeLog()
-
         return
       }
 
       if (_flags.summary) {
         printSummary(this.config)
+        await closeLog()
         return
       }
 
@@ -351,111 +315,56 @@ class Monika extends Command {
           reportLimit: _flags.symonReportLimit,
         })
         await symonClient.initiate()
-        symonClient.onConfig((config) => updateConfig(config, false))
       }
 
-      let scheduledTasks: ScheduledTask[] = []
       let abortCurrentLooper: (() => void) | undefined
+      const isTestEnvironment = process.env.NODE_ENV === 'test'
 
       for await (const config of getConfigIterator(isSymonMode)) {
         if (!config) continue
+
+        const { notifications, probes } = config
+        const sortedProbes = sortProbes(probes, _flags.id)
+        const sanitizedProbe = sortedProbes.map((probe: Probe) =>
+          sanitizeProbe(isSymonMode, probe)
+        )
+
+        // emit the sanitized probe
+        em.emit(events.config.sanitized, sanitizedProbe)
+
         if (abortCurrentLooper) {
           abortCurrentLooper()
         }
 
-        // Stop, destroy, and clear all previous cron tasks
-        for (const task of scheduledTasks) {
-          task.stop()
-        }
+        resetScheduledTasks()
 
-        scheduledTasks = []
-
-        if (process.env.NODE_ENV !== 'test') {
-          await notificationChecker(config.notifications ?? [])
+        if (!isTestEnvironment) {
+          await notificationChecker(notifications ?? [])
         }
 
         await this.deprecationHandler(config)
 
-        const startupMessage = generateStartupMessage({
+        logStartupMessage({
           config,
+          configFlag: _flags.config,
           isFirstRun: !abortCurrentLooper,
           isSymonMode,
           isVerbose: _flags.verbose,
         })
 
-        // Display config files being used
-        if (isSymonMode) {
-          log.info(startupMessage)
-        } else {
-          for (const x in _flags.config) {
-            // eslint-disable-next-line max-depth
-            if (isUrl(_flags.config[x])) {
-              this.log('Using remote config:', _flags.config[x])
-            } else if (_flags.config[x].length > 0) {
-              this.log('Using config file:', path.resolve(_flags.config[x]))
-            }
-          }
-
-          this.log(startupMessage)
-        }
-
-        // config probes to be run by the looper
-        // default sequence for Each element
-        let probesToRun = config.probes
-        if (_flags.id) {
-          if (!checkProbeId(probesToRun, _flags.id)) {
-            throw new Error('Input error') // can't continue, exit from app
-          }
-
-          // doing custom sequences if list of ids is declared
-          const idSplit = new Set(
-            _flags.id.split(',').map((item: string) => item.trim())
-          )
-          probesToRun = config.probes.filter((probe) => idSplit.has(probe.id))
-        }
-
-        const sanitizedProbe = probesToRun.map((probe: Probe) => {
-          const sanitized = sanitizeProbe(probe, probe.id)
-          if (isSymonMode) {
-            sanitized.alerts = []
-          }
-
-          return sanitized
-        })
-
         // save some data into files for later
         savePidFile(_flags.config, config)
 
-        // emit the sanitized probe
-        if (sanitizedProbe.length > 0) {
-          em.emit(events.config.sanitized, sanitizedProbe)
-        }
-
         // schedule status update notification
-        if (
-          process.env.NODE_ENV !== 'test' &&
-          _flags['status-notification'] !== 'false' &&
-          !isSymonMode
-        ) {
-          // defaults to 6 AM
-          // default value is not defined in flag configuration,
-          // because the value can also come from config file
-          const schedule =
-            _flags['status-notification'] ||
-            config['status-notification'] ||
-            '0 6 * * *'
-
-          const scheduledStatusUpdateTask = cron.schedule(
-            schedule,
-            getSummaryAndSendNotif
-          )
-
-          scheduledTasks.push(scheduledStatusUpdateTask)
-        }
+        scheduleSummaryNotification({
+          isSymonMode,
+          statusNotificationConfig: config['status-notification'],
+          statusNotificationFlag: _flags['status-notification'],
+        })
 
         abortCurrentLooper = startProbing({
           probes: sanitizedProbe,
-          notifications: config.notifications ?? [],
+          notifications: notifications ?? [],
         })
       }
     } catch (error) {
@@ -463,7 +372,6 @@ class Monika extends Command {
       this.error((error as any)?.message, { exit: 1 })
     }
   }
-  /* eslint-enable complexity */
 
   async catch(error: Error): Promise<any> {
     super.catch(error)

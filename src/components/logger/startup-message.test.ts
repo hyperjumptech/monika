@@ -22,10 +22,14 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { expect } from 'chai'
+import chai, { expect } from 'chai'
+import spies from 'chai-spies'
 import type { Config } from '../../interfaces/config'
 import type { MailgunData, SMTPData, WebhookData } from '../../interfaces/data'
-import { generateStartupMessage } from './startup-message'
+import { log } from '../../utils/pino'
+import { logStartupMessage } from './startup-message'
+
+chai.use(spies)
 
 const defaultConfig: Config = {
   probes: [
@@ -45,18 +49,38 @@ const defaultConfig: Config = {
 }
 
 describe('Startup message', () => {
+  // arrange
+  let logMessage = ''
+  let consoleLogMessage = ''
+
+  beforeEach(() => {
+    chai.spy.on(log, 'info', (message: string) => {
+      logMessage = message
+    })
+    chai.spy.on(console, 'log', (message: string) => {
+      consoleLogMessage = message
+    })
+  })
+
+  afterEach(() => {
+    chai.spy.restore()
+    logMessage = ''
+    consoleLogMessage = ''
+  })
+
   describe('Symon mode', () => {
     it('should show running in Symon mode', () => {
       // act
-      const message = generateStartupMessage({
+      logStartupMessage({
         config: { probes: [] },
+        configFlag: [],
         isFirstRun: false,
         isSymonMode: true,
         isVerbose: false,
       })
 
       // assert
-      expect(message).eq('Running in Symon mode')
+      expect(logMessage).eq('Running in Symon mode')
     })
   })
 
@@ -64,73 +88,78 @@ describe('Startup message', () => {
     describe('Notification message', () => {
       it('should show has no notification warning', () => {
         // arrange
-        const message = generateStartupMessage({
+        logStartupMessage({
           config: { probes: [] },
+          configFlag: [],
           isFirstRun: false,
           isSymonMode: false,
           isVerbose: false,
         })
 
         // assert
-        expect(message).include('Notifications has not been set')
+        expect(consoleLogMessage).include('Notifications has not been set')
       })
     })
 
     describe('Starting or Restarting', () => {
       it('should show starting', () => {
         // arrange
-        const message = generateStartupMessage({
+        logStartupMessage({
           config: defaultConfig,
+          configFlag: [],
           isFirstRun: true,
           isSymonMode: false,
           isVerbose: false,
         })
 
         // assert
-        expect(message).include('Starting')
+        expect(consoleLogMessage).include('Starting')
       })
 
       it('should show restarting', () => {
         // arrange
-        const message = generateStartupMessage({
+        logStartupMessage({
           config: defaultConfig,
+          configFlag: [],
           isFirstRun: false,
           isSymonMode: false,
           isVerbose: false,
         })
 
         // assert
-        expect(message).include('Restarting')
+        expect(consoleLogMessage).include('Restarting')
       })
 
       it('should show probe and notification total', () => {
         // arrange
-        const message = generateStartupMessage({
+        logStartupMessage({
           config: defaultConfig,
+          configFlag: [],
           isFirstRun: true,
           isSymonMode: false,
           isVerbose: false,
         })
 
         // assert
-        expect(message).include('Probes: 1')
-        expect(message).include('Notifications: 1')
+        expect(consoleLogMessage).include('Probes: 1')
+        expect(consoleLogMessage).include('Notifications: 1')
       })
 
       it('should show empty notification total', () => {
         // arrange
-        const message = generateStartupMessage({
+        logStartupMessage({
           config: {
             ...defaultConfig,
             notifications: [],
           },
+          configFlag: [],
           isFirstRun: true,
           isSymonMode: false,
           isVerbose: false,
         })
 
         // assert
-        expect(message).include('Notifications: 0')
+        expect(consoleLogMessage).include('Notifications: 0')
       })
     })
   })
@@ -139,7 +168,7 @@ describe('Startup message', () => {
     describe('Probe detail', () => {
       it('should show probe detail', () => {
         // arrange
-        const message = generateStartupMessage({
+        logStartupMessage({
           config: {
             ...defaultConfig,
             probes: [
@@ -149,22 +178,22 @@ describe('Startup message', () => {
               },
             ],
           },
+          configFlag: [],
           isFirstRun: true,
           isSymonMode: false,
           isVerbose: true,
         })
-
         // assert
-        expect(message).include('uYJaw')
-        expect(message).include('Acme')
-        expect(message).include("Acme's company profile")
-        expect(message).include('-')
-        expect(message).include('3000')
+        expect(consoleLogMessage).include('uYJaw')
+        expect(consoleLogMessage).include('Acme')
+        expect(consoleLogMessage).include("Acme's company profile")
+        expect(consoleLogMessage).include('-')
+        expect(consoleLogMessage).include('3000')
       })
 
       it('should show probe detail without description', () => {
         // arrange
-        const message = generateStartupMessage({
+        logStartupMessage({
           config: {
             probes: [
               {
@@ -178,37 +207,37 @@ describe('Startup message', () => {
               },
             ],
           },
+          configFlag: [],
           isFirstRun: true,
           isSymonMode: false,
           isVerbose: true,
         })
-
         // assert
-        expect(message).include('uYJaw')
-        expect(message).include('Acme Inc.')
-        expect(message).include('-')
-        expect(message).include('3000')
+        expect(consoleLogMessage).include('uYJaw')
+        expect(consoleLogMessage).include('Acme Inc.')
+        expect(consoleLogMessage).include('-')
+        expect(consoleLogMessage).include('3000')
       })
     })
 
     describe('Probe request detail', () => {
       it('should show probe request detail with default method', () => {
         // arrange
-        const message = generateStartupMessage({
+        logStartupMessage({
           config: defaultConfig,
+          configFlag: [],
           isFirstRun: true,
           isSymonMode: false,
           isVerbose: true,
         })
-
         // assert
-        expect(message).include('GET')
-        expect(message).include('https://example.com')
+        expect(consoleLogMessage).include('GET')
+        expect(consoleLogMessage).include('https://example.com')
       })
 
       it('should show probe detail', () => {
         // arrange
-        const message = generateStartupMessage({
+        logStartupMessage({
           config: {
             ...defaultConfig,
             probes: [
@@ -232,42 +261,41 @@ describe('Startup message', () => {
               },
             ],
           },
+          configFlag: [],
           isFirstRun: true,
           isSymonMode: false,
           isVerbose: true,
         })
-
         // assert
-        expect(message).include('POST')
-        expect(message).include('https://example.com')
+        expect(consoleLogMessage).include('POST')
+        expect(consoleLogMessage).include('https://example.com')
       })
     })
 
     describe('Alert detail', () => {
       it('should show default alert', () => {
         // arrange
-        const message = generateStartupMessage({
+        logStartupMessage({
           config: defaultConfig,
+          configFlag: [],
           isFirstRun: true,
           isSymonMode: false,
           isVerbose: true,
         })
-
         // assert
-        expect(message).include(
+        expect(consoleLogMessage).include(
           'response.status < 200 or response.status > 299'
         )
       })
 
       it('should show alert detail', () => {
         // arrange
-        const message = generateStartupMessage({
+        logStartupMessage({
           config: {
             ...defaultConfig,
             probes: [
               {
                 ...defaultConfig.probes[0],
-
                 alerts: [
                   {
                     assertion: 'response.status = 500',
@@ -277,13 +305,13 @@ describe('Startup message', () => {
               },
             ],
           },
+          configFlag: [],
           isFirstRun: true,
           isSymonMode: false,
           isVerbose: true,
         })
-
         // assert
-        expect(message).include(
+        expect(consoleLogMessage).include(
           '[{"assertion":"response.status = 500","message":"HTTP status is 500"}]'
         )
       })
@@ -292,25 +320,25 @@ describe('Startup message', () => {
     describe('Notification detail', () => {
       it('should show notification id and type', () => {
         // arrange
-        const message = generateStartupMessage({
+        logStartupMessage({
           config: {
             ...defaultConfig,
             notifications: [{ id: 'UVIsL', type: 'desktop', data: undefined }],
           },
+          configFlag: [],
           isFirstRun: true,
           isSymonMode: false,
           isVerbose: true,
         })
-
         // assert
-        expect(message).include('Notifications')
-        expect(message).include('UVIsL')
-        expect(message).include('desktop')
+        expect(consoleLogMessage).include('Notifications')
+        expect(consoleLogMessage).include('UVIsL')
+        expect(consoleLogMessage).include('desktop')
       })
 
       it('should show notification detail for SMTP', () => {
         // arrange
-        const message = generateStartupMessage({
+        logStartupMessage({
           config: {
             ...defaultConfig,
             notifications: [
@@ -326,21 +354,21 @@ describe('Startup message', () => {
               },
             ],
           },
+          configFlag: [],
           isFirstRun: true,
           isSymonMode: false,
           isVerbose: true,
         })
-
         // assert
-        expect(message).include('john@example.com, jane@example.com')
-        expect(message).include('example.com')
-        expect(message).include('25')
-        expect(message).include('name@example.com')
+        expect(consoleLogMessage).include('john@example.com, jane@example.com')
+        expect(consoleLogMessage).include('example.com')
+        expect(consoleLogMessage).include('25')
+        expect(consoleLogMessage).include('name@example.com')
       })
 
       it('should show notification detail with domain', () => {
         // arrange
-        const message = generateStartupMessage({
+        logStartupMessage({
           config: {
             ...defaultConfig,
             notifications: [
@@ -354,18 +382,18 @@ describe('Startup message', () => {
               },
             ],
           },
+          configFlag: [],
           isFirstRun: true,
           isSymonMode: false,
           isVerbose: true,
         })
-
         // assert
-        expect(message).include('https://example.com')
+        expect(consoleLogMessage).include('https://example.com')
       })
 
       it('should show notification detail with url', () => {
         // arrange
-        const message = generateStartupMessage({
+        logStartupMessage({
           config: {
             ...defaultConfig,
             notifications: [
@@ -378,14 +406,44 @@ describe('Startup message', () => {
               },
             ],
           },
+          configFlag: [],
           isFirstRun: true,
           isSymonMode: false,
           isVerbose: true,
         })
-
         // assert
-        expect(message).include('https://example.com')
+        expect(consoleLogMessage).include('https://example.com')
       })
+    })
+  })
+
+  describe('Config file', () => {
+    it('should show remote config message', () => {
+      // act
+      logStartupMessage({
+        config: defaultConfig,
+        configFlag: ['https://example.com/monika.yaml'],
+        isFirstRun: false,
+        isSymonMode: false,
+        isVerbose: false,
+      })
+
+      // assert
+      expect(logMessage).include('remote config')
+    })
+
+    it('should show file config message', () => {
+      // act
+      logStartupMessage({
+        config: defaultConfig,
+        configFlag: ['./monika.yaml'],
+        isFirstRun: false,
+        isSymonMode: false,
+        isVerbose: false,
+      })
+
+      // assert
+      expect(logMessage).include('config file')
     })
   })
 })
