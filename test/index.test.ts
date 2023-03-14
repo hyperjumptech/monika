@@ -540,7 +540,7 @@ describe('monika', () => {
     .do(() =>
       cmd.run([
         '-c',
-        resolve('./test/testConfigs/manyNotifications.yml'),
+        resolve('./test/testConfigs/manyNotif.yml'),
         resolve('./test/testConfigs/noProbes.yml'),
       ])
     )
