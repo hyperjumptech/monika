@@ -534,4 +534,22 @@ describe('monika', () => {
           .and.contain('Probes: 2')
       }
     )
+
+  test
+    .stdout()
+    .do(() =>
+      cmd.run([
+        '-c',
+        resolve('./test/testConfigs/manyNotifications.yml'),
+        resolve('./test/testConfigs/noProbes.yml'),
+      ])
+    )
+    .it(
+      'run wth multiple config with the no probes on the second config',
+      (ctx) => {
+        expect(ctx.stdout)
+          .to.contain('Notifications: 1')
+          .and.contain('Probes: 1')
+      }
+    )
 })
