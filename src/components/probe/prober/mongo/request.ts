@@ -24,7 +24,7 @@
 
 import { MongoClient } from 'mongodb'
 import * as mongodbURI from 'mongodb-uri'
-import { ProbeRequestResponse } from '../../interfaces/request'
+import type { ProbeRequestResponse } from '../../../../interfaces/request'
 import { differenceInMilliseconds } from 'date-fns'
 
 type MongoRequest = {
@@ -66,7 +66,7 @@ export async function mongoRequest(
   if (result.isAlive) {
     baseResponse.responseTime = duration
     baseResponse.body = result.message
-    baseResponse.status = 200 // TODO: improve this up/down flag
+    baseResponse.status = 200
     baseResponse.isProbeResponsive = true
   } else {
     baseResponse.body = result.message
