@@ -24,7 +24,7 @@
 
 import net from 'net'
 import { differenceInMilliseconds } from 'date-fns'
-import { ProbeRequestResponse } from '../../interfaces/request'
+import type { ProbeRequestResponse } from '../../../../interfaces/request'
 
 type TCPRequest = {
   host: string
