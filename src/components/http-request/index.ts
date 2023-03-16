@@ -106,14 +106,14 @@ export async function httpRequest({
     newReq.body = generateRequestChainingBody(body, responses)
 
     if (newReq.headers) {
-      const contentTypeKey = Object.keys(headers).find((hk) => {
+      const contentTypeKey = Object.keys(headers || {}).find((hk) => {
         return hk.toLocaleLowerCase() === 'content-type'
       })
 
       if (contentTypeKey) {
         const { content, contentType } = transformContentByType(
           newReq.body,
-          headers[contentTypeKey]
+          (headers || {})[contentTypeKey]
         )
 
         delete newReq.headers[contentTypeKey]
@@ -224,7 +224,7 @@ export function generateRequestChainingBody(
   return isString ? renderedBody : JSON.parse(renderedBody)
 }
 
-function transformContentByType(content: any, contentType: string) {
+function transformContentByType(content: any, contentType?: string) {
   switch (contentType) {
     case 'application/x-www-form-urlencoded':
       return {
