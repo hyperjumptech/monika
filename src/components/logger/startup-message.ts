@@ -63,7 +63,6 @@ export function logStartupMessage({
     if (isUrl(configFlag[x])) {
       log.info('Using remote config:', configFlag[x])
     } else if (configFlag[x].length > 0) {
-      log.info(path.resolve(configFlag[x]))
       log.info(`Using config file: ${path.resolve(configFlag[x])}`)
     }
   }
