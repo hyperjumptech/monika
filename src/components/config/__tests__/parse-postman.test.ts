@@ -82,22 +82,28 @@ describe('parseConfigFromPostman', () => {
           }
 
           if (mode === 'formdata') {
-            expect(req.headers['Content-Type']).to.equals('multipart/form-data')
+            expect((req.headers || {})['Content-Type']).to.equals(
+              'multipart/form-data'
+            )
           }
 
           if (mode === 'urlencoded') {
-            expect(req.headers['Content-Type']).to.equals(
+            expect((req.headers || {})['Content-Type']).to.equals(
               'application/x-www-form-urlencoded'
             )
           }
 
           if (mode === 'raw') {
             if (language === 'json') {
-              expect(req.headers['Content-Type']).to.equals('application/json')
+              expect((req.headers || {})['Content-Type']).to.equals(
+                'application/json'
+              )
             }
 
             if (language === 'text') {
-              expect(req.headers['Content-Type']).to.equals('text/plain')
+              expect((req.headers || {})['Content-Type']).to.equals(
+                'text/plain'
+              )
             }
           }
         }
@@ -129,22 +135,28 @@ describe('parseConfigFromPostman', () => {
           }
 
           if (mode === 'formdata') {
-            expect(req.headers['Content-Type']).to.equals('multipart/form-data')
+            expect((req.headers || {})['Content-Type']).to.equals(
+              'multipart/form-data'
+            )
           }
 
           if (mode === 'urlencoded') {
-            expect(req.headers['Content-Type']).to.equals(
+            expect((req.headers || {})['Content-Type']).to.equals(
               'application/x-www-form-urlencoded'
             )
           }
 
           if (mode === 'raw') {
             if (language === 'json') {
-              expect(req.headers['Content-Type']).to.equals('application/json')
+              expect((req.headers || {})['Content-Type']).to.equals(
+                'application/json'
+              )
             }
 
             if (language === 'text') {
-              expect(req.headers['Content-Type']).to.equals('text/plain')
+              expect((req.headers || {})['Content-Type']).to.equals(
+                'text/plain'
+              )
             }
           }
         }
@@ -179,22 +191,28 @@ describe('parseConfigFromPostman', () => {
           }
 
           if (mode === 'formdata') {
-            expect(req.headers['Content-Type']).to.equals('multipart/form-data')
+            expect((req.headers || {})['Content-Type']).to.equals(
+              'multipart/form-data'
+            )
           }
 
           if (mode === 'urlencoded') {
-            expect(req.headers['Content-Type']).to.equals(
+            expect((req.headers || {})['Content-Type']).to.equals(
               'application/x-www-form-urlencoded'
             )
           }
 
           if (mode === 'raw') {
             if (language === 'json') {
-              expect(req.headers['Content-Type']).to.equals('application/json')
+              expect((req.headers || {})['Content-Type']).to.equals(
+                'application/json'
+              )
             }
 
             if (language === 'text') {
-              expect(req.headers['Content-Type']).to.equals('text/plain')
+              expect((req.headers || {})['Content-Type']).to.equals(
+                'text/plain'
+              )
             }
           }
         }
@@ -229,22 +247,28 @@ describe('parseConfigFromPostman', () => {
           }
 
           if (mode === 'formdata') {
-            expect(req.headers['Content-Type']).to.equals('multipart/form-data')
+            expect((req.headers || {})['Content-Type']).to.equals(
+              'multipart/form-data'
+            )
           }
 
           if (mode === 'urlencoded') {
-            expect(req.headers['Content-Type']).to.equals(
+            expect((req.headers || {})['Content-Type']).to.equals(
               'application/x-www-form-urlencoded'
             )
           }
 
           if (mode === 'raw') {
             if (language === 'json') {
-              expect(req.headers['Content-Type']).to.equals('application/json')
+              expect((req.headers || {})['Content-Type']).to.equals(
+                'application/json'
+              )
             }
 
             if (language === 'text') {
-              expect(req.headers['Content-Type']).to.equals('text/plain')
+              expect((req.headers || {})['Content-Type']).to.equals(
+                'text/plain'
+              )
             }
           }
         }
