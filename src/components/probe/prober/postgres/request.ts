@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import { Pool } from 'pg'
-import { ProbeRequestResponse } from '../../interfaces/request'
+import type { ProbeRequestResponse } from '../../../../interfaces/request'
 import { differenceInMilliseconds } from 'date-fns'
 
 export type PostgresParam = {

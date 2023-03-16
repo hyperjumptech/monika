@@ -25,15 +25,18 @@
 import * as Handlebars from 'handlebars'
 import FormData from 'form-data'
 import YAML from 'yaml'
-import { ProbeRequestResponse, RequestConfig } from '../../interfaces/request'
+import {
+  ProbeRequestResponse,
+  RequestConfig,
+} from '../../../../interfaces/request'
 import * as qs from 'querystring'
 
 import http from 'http'
 import https from 'https'
-import { getContext } from '../../context'
-import { icmpRequest } from '../icmp-request'
-import registerFakes from '../../utils/fakes'
-import { sendHttpRequest } from '../../utils/http'
+import { getContext } from '../../../../context'
+import { icmpRequest } from '../icmp/request'
+import registerFakes from '../../../../utils/fakes'
+import { sendHttpRequest } from '../../../../utils/http'
 
 // Register Handlebars helpers
 registerFakes(Handlebars)
@@ -185,7 +188,7 @@ export async function httpRequest({
     // The request was made but no response was received
     // timeout is here, ECONNABORTED, ENOTFOUND, ECONNRESET, ECONNREFUSED
     if (error?.request) {
-      const status = errorRequestCodeToNumber(error?.code) // TODO: remove axios driver error mapping here
+      const status = errorRequestCodeToNumber(error?.code)
 
       return {
         data: '',

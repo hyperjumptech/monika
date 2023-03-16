@@ -1,7 +1,7 @@
 /**********************************************************************************
  * MIT License                                                                    *
  *                                                                                *
- * Copyright (c) 2022 Hyperjump Technology                                        *
+ * Copyright (c) 2021 Hyperjump Technology                                        *
  *                                                                                *
  * Permission is hereby granted, free of charge, to any person obtaining a copy   *
  * of this software and associated documentation files (the "Software"), to deal  *
@@ -22,35 +22,24 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { sendPing } from '../../utils/ping'
-import { ProbeRequestResponse } from '../../interfaces/request'
+import type { ProbeRequestResponse } from '../../../../interfaces/request'
+import { differenceInMilliseconds } from 'date-fns'
+import { createConnection } from 'mariadb'
 
-type icmpParams = {
-  host: string // target to ping
+export type MariaParam = {
+  host: string // Host address of the psql db
+  port: number // Port number of the psql db
+  database: string // Database name
+  username: string // Username string of the database user
+  password: string // Password string of the database user
+  command?: string
 }
 
-// icmp specific responses from the library
-type icmpResponse = {
-  host?: string // host name
-  numericHost?: string // resolved host ip
-  isAlive?: boolean // is the host alive?
-  min?: string // minimum round trip time ms
-  max?: string // max round trip time in ms
-  average?: number // average time in ms
-  packetLoss?: number // packet loss%
-  output?: string // driver output
-}
-
-export async function icmpRequest(
-  params: icmpParams
+export async function mariaRequest(
+  params: MariaParam
 ): Promise<ProbeRequestResponse> {
-  const icmpResp: icmpResponse = {
-    isAlive: false, // initialize to off and packet loss
-    packetLoss: 100,
-    average: 0,
-  }
-
   const baseResponse: ProbeRequestResponse = {
+    requestType: 'mariadb',
     data: '',
     body: '',
     status: 0,
@@ -59,43 +48,46 @@ export async function icmpRequest(
     isProbeResponsive: false,
   }
 
+  const startTime = new Date()
+  let isConnected = false
   try {
-    const resp = await sendPing(params.host)
-
-    icmpResp.host = resp.inputHost
-    icmpResp.average = resp.avg === 'unknown' ? 0 : resp.avg // map response time to the average ping time
-    icmpResp.isAlive = resp.alive
-    icmpResp.packetLoss = resp.packetLoss
-    icmpResp.numericHost = resp.numeric_host
-    icmpResp.output = resp.output
-
-    return processICMPRequestResult(icmpResp)
+    isConnected = await checkConnection({
+      host: params.host,
+      port: params.port,
+      username: params.username,
+      password: params.password,
+      database: params.database,
+    })
   } catch (error: any) {
-    console.error('icmp got error:', error)
-    baseResponse.data = error // map error to data
+    baseResponse.body = error.message
     baseResponse.errMessage = error
+    isConnected = false
+  }
+
+  const endTime = new Date()
+  const duration = differenceInMilliseconds(endTime, startTime)
+
+  if (isConnected) {
+    baseResponse.responseTime = duration
+    baseResponse.body = 'database ok'
+    baseResponse.status = 200
+    baseResponse.isProbeResponsive = true
   }
 
   return baseResponse
 }
 
-// translates icmp specific response to base monika response
-export function processICMPRequestResult(
-  params: icmpResponse
-): ProbeRequestResponse {
-  // build log message
-  const aliveMsg = params.isAlive ? 'alive' : 'dead'
-  const packetLossMsg = params.isAlive ? params.packetLoss : '100%'
-  const msg = `PING:${aliveMsg} host:${params.host} avg:${params.average}ms packetLoss:${packetLossMsg}`
+async function checkConnection(params?: MariaParam) {
+  const client = await createConnection({
+    host: params?.host,
+    port: params?.port,
+    user: params?.username,
+    password: params?.password,
+    database: params?.database,
 
-  return {
-    requestType: 'ICMP',
-    data: params.output, // map output to response data
-    status: params.isAlive ? 200 : 0, // TO IMPROVE: this is a monkey patch to map ping return status to http status. Should not need it!
-    body: msg,
-    headers: {},
-    responseTime: params.average || 0,
+    allowPublicKeyRetrieval: true,
+  })
 
-    isProbeResponsive: true,
-  }
+  await client.end()
+  return true
 }

@@ -22,24 +22,34 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { ProbeRequestResponse } from '../../interfaces/request'
+import { createClient } from 'redis'
+import type { ProbeRequestResponse } from '../../../../interfaces/request'
 import { differenceInMilliseconds } from 'date-fns'
-import { createConnection } from 'mariadb'
 
-export type MariaParam = {
-  host: string // Host address of the psql db
-  port: number // Port number of the psql db
-  database: string // Database name
-  username: string // Username string of the database user
-  password: string // Password string of the database user
+type RedisRequest = {
+  host: string // Host address of the redis-server
+  port: number // Port number of the redis-server
+  password?: string // Password string if AUTH is used, optional
+  username?: string // Username stgring if used, optional
   command?: string
 }
 
-export async function mariaRequest(
-  params: MariaParam
+type RedisResult = {
+  isAlive: boolean // If redis responds to PING/commands
+  message?: string // Any message from redis
+  responseData?: Buffer | null
+}
+
+/**
+ * redisRequest is the interface to call redis and manage the request-response
+ * @param {object} params is a RedisRequest type
+ * @returns {object} ProbeRequestResponse type mapped from RedisResult
+ **/
+export async function redisRequest(
+  params: RedisRequest
 ): Promise<ProbeRequestResponse> {
   const baseResponse: ProbeRequestResponse = {
-    requestType: 'mariadb',
+    requestType: 'redis',
     data: '',
     body: '',
     status: 0,
@@ -47,47 +57,64 @@ export async function mariaRequest(
     responseTime: 0,
     isProbeResponsive: false,
   }
-
   const startTime = new Date()
-  let isConnected = false
-  try {
-    isConnected = await checkConnection({
-      host: params.host,
-      port: params.port,
-      username: params.username,
-      password: params.password,
-      database: params.database,
-    })
-  } catch (error: any) {
-    baseResponse.body = error.message
-    baseResponse.errMessage = error
-    isConnected = false
-  }
-
+  const result = await sendRedisRequest(params)
   const endTime = new Date()
   const duration = differenceInMilliseconds(endTime, startTime)
 
-  if (isConnected) {
+  if (result.isAlive) {
     baseResponse.responseTime = duration
-    baseResponse.body = 'database ok'
-    baseResponse.status = 200 // TODO: Remove http mapping
+    baseResponse.body = result.message
+    baseResponse.status = 200
     baseResponse.isProbeResponsive = true
+  } else {
+    baseResponse.body = result.message
+    baseResponse.errMessage = result.message
   }
 
   return baseResponse
 }
 
-async function checkConnection(params?: MariaParam) {
-  const client = await createConnection({
-    host: params?.host,
-    port: params?.port,
-    user: params?.username,
-    password: params?.password,
-    database: params?.database,
+const CONNECTTIMEOUTMS = 10_000
 
-    allowPublicKeyRetrieval: true,
-  })
+/**
+ * sendRedisRequest actually sends the command/request to redis
+ * @param {object} params is a RedisRequest type
+ * @returns {object} RedisResult type contain client response
+ */
+async function sendRedisRequest(params: RedisRequest): Promise<RedisResult> {
+  const { host, port, username, password } = params
 
-  await client.end()
-  return true
+  const result: RedisResult = {
+    isAlive: false,
+    message: '',
+  }
+
+  try {
+    const client = createClient({
+      socket: {
+        host: host,
+        port: port,
+        connectTimeout: CONNECTTIMEOUTMS,
+      },
+      password: password,
+      username: username,
+    })
+
+    await client.connect()
+
+    client.on('error', (error: any) => {
+      result.message = error
+    })
+
+    const ping = await client.ping()
+    if (ping === 'PONG') {
+      result.isAlive = true
+      result.message = `${host}:${port} PONGED`
+    }
+  } catch (error: any) {
+    result.message = error
+  }
+
+  return result
 }
