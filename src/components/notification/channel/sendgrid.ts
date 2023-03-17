@@ -23,7 +23,8 @@
  **********************************************************************************/
 
 import sgMail from '@sendgrid/mail'
-import type { NotificationMessage } from '.'
+import Joi from 'joi'
+import { dataBaseEmailSchemaValidator, type NotificationMessage } from '.'
 import { convertTextToHTML } from '../../../utils/text'
 
 type SendgridData = {
@@ -37,6 +38,11 @@ export type SendgridNotification = {
   type: 'sendgrid'
   data: SendgridData
 }
+
+export const validator = dataBaseEmailSchemaValidator('Sendgrid').keys({
+  apiKey: Joi.string().required().label('Sendgrid API Key'),
+  sender: Joi.string().required().label('Sendgrid sender email'),
+})
 
 export const send = async (
   { apiKey, recipients, sender }: SendgridData,

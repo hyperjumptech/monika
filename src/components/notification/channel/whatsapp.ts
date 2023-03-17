@@ -22,7 +22,8 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import type { NotificationMessage } from '.'
+import Joi from 'joi'
+import { dataBaseEmailSchemaValidator, type NotificationMessage } from '.'
 import { authorize } from '../../../utils/authorization'
 import { sendHttpRequest } from '../../../utils/http'
 
@@ -131,6 +132,15 @@ const sendTextMessage = async ({
     )
   }
 }
+
+export const validator = dataBaseEmailSchemaValidator('WhatsApp').keys({
+  url: Joi.string().uri().required().label('WhatsApp URL'),
+  username: Joi.string().required().label('WhatsApp Username'),
+  password: Joi.string().required().label('WhatsApp Password'),
+  recipients: Joi.array()
+    .items(Joi.string().label(`WhatsApp Recipients`))
+    .label(`WhatsApp Recipients`),
+})
 
 export const send = async (
   data: WhatsappData,

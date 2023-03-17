@@ -34,6 +34,8 @@ export type DesktopNotification = {
   data: undefined
 }
 
+export const validator = null
+
 export const send = async (
   // actually do not need data property
   // it is here just to make type consistent and does not throw type error in other parts of app
@@ -66,19 +68,19 @@ export const send = async (
     case 'Linux': {
       spawnSync('notify-send', ['-a', 'Monika', subject, content])
 
-      return Promise.resolve()
+      return
     }
 
     case 'Darwin': {
       spawnSync('osascript', ['-e', osascript])
 
-      return Promise.resolve()
+      return
     }
 
     case 'Windows_NT': {
       execSync(powershellScript, { shell: 'powershell.exe' })
 
-      return Promise.resolve()
+      return
     }
 
     default:
@@ -91,7 +93,7 @@ export const send = async (
  * @param {string} str input string
  * @return {string} escape single quote with another
  */
-const psEscape = (str: string): string => {
+function psEscape(str: string): string {
   let result = ''
   for (const ch of str) {
     if (ch.charCodeAt(0) === 39) {

@@ -24,9 +24,10 @@
 
 import * as nodemailer from 'nodemailer'
 import Mailgen from 'mailgen'
+import Joi from 'joi'
 
 import { convertTextToHTML } from '../../../utils/text'
-import type { NotificationMessage } from '.'
+import { dataBaseEmailSchemaValidator, type NotificationMessage } from '.'
 
 type SMTPData = {
   hostname: string
@@ -54,6 +55,13 @@ const createSmtpTransport = ({
     auth: { user: username, pass: password },
   })
 }
+
+export const validator = dataBaseEmailSchemaValidator('SMTP').keys({
+  hostname: Joi.string().required().label('SMTP Hostname'),
+  port: Joi.number().port().required().label('SMTP Port'),
+  username: Joi.string().required().label('SMTP Username'),
+  password: Joi.string().required().label('SMTP Password'),
+})
 
 export const send = async (
   data: SMTPData,

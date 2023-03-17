@@ -24,13 +24,14 @@
 
 import { hostname } from 'os'
 import { NotificationSendingError, sendNotifications } from '.'
-import type { Notification } from './channel'
 import { validator as dataStatuspageSchemaValidator } from '../../plugins/visualization/atlassian-status-page'
 import { validator as dataInstatusSchemaValidator } from '../../plugins/visualization/instatus'
 import getIp from '../../utils/ip'
 import { getMessageForStart } from './alert-message'
-import { newPagerDuty } from './channel'
+import type { Notification } from './channel'
 import {
+  newPagerDuty,
+  validator,
   dataDiscordSchemaValidator,
   dataDingtalkSchemaValidator,
   dataOpsgenieSchemaValidator,
@@ -48,7 +49,7 @@ import {
   dataPushoverSchemaValidator,
   dataGotifySchemaValidator,
   dataPushbulletSchemaValidator,
-} from './validator'
+} from './channel'
 
 // reexported with alias because this `errorMessage` function is used in test file
 export const errorMessage = NotificationSendingError.create
@@ -58,7 +59,7 @@ export const notificationChecker = async (
 ): Promise<any> => {
   const pagerduty = newPagerDuty()
   const validators = {
-    desktop: null,
+    desktop: validator,
     discord: dataDiscordSchemaValidator,
     dingtalk: dataDingtalkSchemaValidator,
     opsgenie: dataOpsgenieSchemaValidator,
@@ -85,7 +86,7 @@ export const notificationChecker = async (
   await Promise.all(
     notifications.map(async (notification) => {
       const validator = validators[notification.type]
-      if (!validator) return Promise.resolve()
+      if (!validator) return
       try {
         const validated = await validator.validateAsync(notification.data)
         return validated

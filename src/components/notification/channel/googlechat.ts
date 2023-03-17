@@ -22,7 +22,8 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import type { NotificationMessage } from './'
+import Joi from 'joi'
+import { dataBaseEmailSchemaValidator, type NotificationMessage } from './'
 import { sendHttpRequest } from '../../../utils/http'
 
 type GoogleChatData = {
@@ -57,6 +58,10 @@ type Content = {
     sections: Section[]
   }[]
 }
+
+export const validator = dataBaseEmailSchemaValidator('google-chat').keys({
+  url: Joi.string().uri().required().label('Google URL'),
+})
 
 export const send = async (
   { url }: GoogleChatData,

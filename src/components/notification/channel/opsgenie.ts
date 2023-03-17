@@ -22,7 +22,8 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import type { NotificationMessage } from './'
+import Joi from 'joi'
+import { dataBaseEmailSchemaValidator, type NotificationMessage } from './'
 import { sendHttpRequest } from '../../../utils/http'
 
 type OpsgenieData = {
@@ -39,6 +40,10 @@ type Content = {
   message: string
   description: string
 }
+
+export const validator = dataBaseEmailSchemaValidator('Opsgenie').keys({
+  geniekey: Joi.string().required().label('Opsgenie geniekey'),
+})
 
 export const send = async (
   { geniekey }: OpsgenieData,

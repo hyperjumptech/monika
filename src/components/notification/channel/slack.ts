@@ -22,7 +22,8 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import type { NotificationMessage } from './'
+import Joi from 'joi'
+import { dataBaseEmailSchemaValidator, type NotificationMessage } from './'
 import { sendHttpRequest } from '../../../utils/http'
 
 type SlackData = {
@@ -44,6 +45,10 @@ type Content = {
   text: string
   blocks: ContentBlock[]
 }
+
+export const validator = dataBaseEmailSchemaValidator('Slack').keys({
+  url: Joi.string().uri().required().label('Slack URL'),
+})
 
 export const send = async (
   { url }: SlackData,

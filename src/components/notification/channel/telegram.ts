@@ -23,7 +23,8 @@
  **********************************************************************************/
 
 /* eslint-disable camelcase */
-import type { NotificationMessage } from './'
+import Joi from 'joi'
+import { dataBaseEmailSchemaValidator, type NotificationMessage } from './'
 import { sendHttpRequest } from '../../../utils/http'
 
 type TelegramData = {
@@ -36,6 +37,11 @@ export type TelegramNotification = {
   type: 'telegram'
   data: TelegramData
 }
+
+export const validator = dataBaseEmailSchemaValidator('Telegram').keys({
+  group_id: Joi.string().required().label('Telegram Group ID'),
+  bot_token: Joi.string().required().label('Telegram Bot Token'),
+})
 
 export const send = async (
   { bot_token, group_id }: TelegramData,

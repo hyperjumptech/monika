@@ -22,7 +22,8 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import type { NotificationMessage } from './'
+import Joi from 'joi'
+import { dataBaseEmailSchemaValidator, type NotificationMessage } from './'
 import { sendHttpRequest } from '../../../utils/http'
 
 type DiscordData = {
@@ -35,6 +36,10 @@ export type DiscordNotification = {
   type: 'discord'
   data: DiscordData
 }
+
+export const validator = dataBaseEmailSchemaValidator('Discord').keys({
+  url: Joi.string().uri().required().label('Discord URL'),
+})
 
 export const send = async (
   { url }: DiscordData,

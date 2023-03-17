@@ -22,7 +22,8 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import type { NotificationMessage } from '.'
+import Joi from 'joi'
+import { dataBaseEmailSchemaValidator, type NotificationMessage } from '.'
 import { sendHttpRequest } from '../../../utils/http'
 
 type MonikaAlertNotifDataBody = {
@@ -66,6 +67,10 @@ export type MonikaWhatsappNotification = {
   type: 'monika-notif'
   data: MonikaNotifData
 }
+
+export const validator = dataBaseEmailSchemaValidator('MonikaNotif').keys({
+  url: Joi.string().uri().required().label('Monika Notification URL'),
+})
 
 export const send = async (
   { url }: MonikaNotifData,

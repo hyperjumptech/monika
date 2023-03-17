@@ -24,8 +24,9 @@
 
 import Mailgun from 'mailgun.js'
 import formData from 'form-data'
+import Joi from 'joi'
 import { convertTextToHTML } from '../../../utils/text'
-import { NotificationMessage } from '.'
+import { dataBaseEmailSchemaValidator, type NotificationMessage } from '.'
 
 type MailgunData = {
   apiKey: string
@@ -39,6 +40,12 @@ export type MailgunNotification = {
   type: 'mailgun'
   data: MailgunData
 }
+
+export const validator = dataBaseEmailSchemaValidator('Mailgun').keys({
+  apiKey: Joi.string().required().label('Mailgun API Key'),
+  domain: Joi.string().required().label('Mailgun Domain'),
+  username: Joi.string().label('Mailgun Username'),
+})
 
 export const send = async (
   { apiKey: key, domain, recipients, username = 'api' }: MailgunData,

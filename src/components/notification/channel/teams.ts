@@ -22,8 +22,9 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import Joi from 'joi'
 import { sendHttpRequest } from '../../../utils/http'
-import type { NotificationMessage } from './'
+import { dataBaseEmailSchemaValidator, type NotificationMessage } from './'
 
 type TeamsData = {
   url: string
@@ -49,6 +50,10 @@ type Content = {
   }[]
   themeColor?: string
 }
+
+export const validator = dataBaseEmailSchemaValidator('Teams').keys({
+  url: Joi.string().uri().required().label('Teams URL'),
+})
 
 export const send = async (
   { url }: TeamsData,

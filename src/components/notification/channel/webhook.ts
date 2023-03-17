@@ -22,7 +22,8 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import type { NotificationMessage } from '.'
+import Joi from 'joi'
+import { dataBaseEmailSchemaValidator, type NotificationMessage } from '.'
 import { sendHttpRequest } from '../../../utils/http'
 
 type WebhookData = {
@@ -34,6 +35,10 @@ export type WebhookNotification = {
   type: 'webhook'
   data: WebhookData
 }
+
+export const validator = dataBaseEmailSchemaValidator('Webhook').keys({
+  url: Joi.string().uri().required().label('Webhook URL'),
+})
 
 export const send = async (
   { url }: WebhookData,

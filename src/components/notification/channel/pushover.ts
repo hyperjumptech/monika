@@ -22,7 +22,8 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import type { NotificationMessage } from './'
+import Joi from 'joi'
+import { dataBaseEmailSchemaValidator, type NotificationMessage } from './'
 import { sendHttpRequest } from '../../../utils/http'
 
 type PushoverData = {
@@ -36,6 +37,11 @@ export type PushoverNotification = {
   type: 'pushover'
   data: PushoverData
 }
+
+export const validator = dataBaseEmailSchemaValidator('pushover').keys({
+  token: Joi.string().required().label('Pushover token'),
+  user: Joi.string().required().label('Pushover user'),
+})
 
 export const send = async (
   { token, user }: PushoverData,

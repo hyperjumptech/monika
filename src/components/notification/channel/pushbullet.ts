@@ -22,8 +22,9 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import Joi from 'joi'
 import { sendHttpRequest } from '../../../utils/http'
-import type { NotificationMessage } from './'
+import { dataBaseEmailSchemaValidator, type NotificationMessage } from './'
 
 type PushbulletData = {
   token: string
@@ -41,6 +42,13 @@ type Content = {
   body: string
   type: 'note'
 }
+
+export const validator = dataBaseEmailSchemaValidator('pushbullet').keys({
+  token: Joi.string().required().label('Pushbullet token'),
+  deviceID: Joi.string()
+    .optional()
+    .label('Pushbullet device identifier (optional)'),
+})
 
 export const send = async (
   { deviceID, token }: PushbulletData,

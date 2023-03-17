@@ -22,8 +22,9 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import Joi from 'joi'
 import { sendHttpRequest } from '../../../utils/http'
-import type { NotificationMessage } from './'
+import { dataBaseEmailSchemaValidator, type NotificationMessage } from './'
 
 type GotifyData = {
   token: string
@@ -37,6 +38,11 @@ export type GotifyNotification = {
 }
 
 type Content = { title: string; message: string }
+
+export const validator = dataBaseEmailSchemaValidator('gotify').keys({
+  token: Joi.string().required().label('Gotify token'),
+  url: Joi.string().required().label('Gotify url'),
+})
 
 export const send = async (
   { token, url }: GotifyData,
