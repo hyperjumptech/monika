@@ -1,0 +1,3 @@
+notifications:
+  - id: desktop
+    type: desktop

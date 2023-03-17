@@ -421,9 +421,27 @@ describe('monika', () => {
       ])
     )
     .it('runs multiple config override', (ctx) => {
-      expect(ctx.stdout).to.contain('Probes: 1.') // TODO: should be probes: 2, issue #983
-      expect(ctx.stdout).to.contain('Notifications: 2') // TODO: should be Notifications: 3 issue #983
+      expect(ctx.stdout).to.contain('Probes: 1.')
+      expect(ctx.stdout).to.contain('Notifications: 2')
     })
+
+  test
+    .stdout()
+    .do(() =>
+      cmd.run([
+        '-c',
+        resolve('./test/testConfigs/manyNotif.yml'),
+        resolve('./test/testConfigs/noProbes.yml'),
+      ])
+    )
+    .it(
+      'run wth multiple config override: no probes on the second config',
+      (ctx) => {
+        expect(ctx.stdout)
+          .to.contain('Notifications: 1')
+          .and.contain('Probes: 1')
+      }
+    )
 
   test
     .stdout()
