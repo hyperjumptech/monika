@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import Joi from 'joi'
-import { NotificationMessage } from '../../../interfaces/notification'
+import type { NotificationMessage } from './'
 
 type PagerDutyConfig = {
   key: string

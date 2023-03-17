@@ -24,12 +24,12 @@
 
 import { hostname } from 'os'
 import { NotificationSendingError, sendNotifications } from '.'
-import { Notification } from '../../interfaces/notification'
+import type { Notification } from './channel'
 import { validator as dataStatuspageSchemaValidator } from '../../plugins/visualization/atlassian-status-page'
 import { validator as dataInstatusSchemaValidator } from '../../plugins/visualization/instatus'
 import getIp from '../../utils/ip'
 import { getMessageForStart } from './alert-message'
-import { newPagerDuty } from './channel/pagerduty'
+import { newPagerDuty } from './channel'
 import {
   dataDiscordSchemaValidator,
   dataDingtalkSchemaValidator,

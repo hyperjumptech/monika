@@ -23,34 +23,32 @@
  **********************************************************************************/
 
 import { getContext, setContext } from '../../context'
-import { MonikaNotifDataBody } from '../../interfaces/data'
-import {
-  Notification,
-  NotificationMessage,
-} from '../../interfaces/notification'
+import type { Notification, NotificationMessage } from './channel'
 import { ValidatedResponse } from '../../plugins/validate-response'
 import getIp from '../../utils/ip'
 import { getMessageForAlert } from './alert-message'
-import { sendDesktop } from './channel/desktop'
-import { sendDiscord } from './channel/discord'
-import { sendDingtalk } from './channel/dingtalk'
-import { sendOpsgenie } from './channel/opsgenie'
-import { sendMailgun } from './channel/mailgun'
-import { sendMonikaNotif } from './channel/monika-notif'
-import { sendSendgrid } from './channel/sendgrid'
-import { sendSlack } from './channel/slack'
-import { createSmtpTransport, sendSmtpMail } from './channel/smtp'
-import { sendTeams } from './channel/teams'
-import { sendTelegram } from './channel/telegram'
-import { sendWebhook } from './channel/webhook'
-import { sendWhatsapp } from './channel/whatsapp'
-import { sendWorkplace } from './channel/workplace'
-import { sendLark } from './channel/lark'
-import { sendGoogleChat } from './channel/googlechat'
-import { newPagerDuty } from './channel/pagerduty'
-import { sendPushover } from './channel/pushover'
-import { sendGotify } from './channel/gotify'
-import { sendPushbullet } from './channel/pushbullet'
+import {
+  sendDesktop,
+  newPagerDuty,
+  sendDingtalk,
+  sendDiscord,
+  sendGoogleChat,
+  sendGotify,
+  sendLark,
+  sendMailgun,
+  sendMonikaNotif,
+  sendOpsgenie,
+  sendPushbullet,
+  sendPushover,
+  sendSendgrid,
+  sendSlack,
+  sendSmtpMail,
+  sendTeams,
+  sendTelegram,
+  sendWebhook,
+  sendWhatsapp,
+  sendWorkplace,
+} from './channel'
 
 export class NotificationSendingError extends Error {
   notificationType: string
@@ -87,197 +85,107 @@ export async function sendNotifications(
 
   await Promise.all(
     // eslint-disable-next-line complexity
-    notifications.map(async (notification) => {
+    notifications.map(async ({ data, type }) => {
       // catch and rethrow error to add information about which notification channel errors.
       try {
-        switch (notification.type) {
+        switch (type) {
           case 'mailgun': {
-            await sendMailgun(
-              {
-                subject: message.subject,
-                body: message.body,
-                sender: {
-                  // TODO: Read from ENV Variables
-                  name: 'Monika',
-                  email: 'Monika@hyperjump.tech',
-                },
-                recipients: notification?.data?.recipients?.join(','),
-              },
-              notification.data
-            )
+            await sendMailgun(data, message)
             break
           }
 
           case 'sendgrid': {
-            await sendSendgrid(
-              {
-                recipients: notification?.data?.recipients?.join(','),
-                subject: message.subject,
-                body: message.body,
-                sender: {
-                  name: 'Monika',
-                  email: notification?.data?.sender,
-                },
-              },
-              notification.data
-            )
+            await sendSendgrid(data, message)
             break
           }
 
           case 'webhook': {
-            await sendWebhook({
-              ...notification.data,
-              body: message.body,
-            })
+            await sendWebhook(data, message)
             break
           }
 
           case 'discord': {
-            await sendDiscord(notification.data, message)
+            await sendDiscord(data, message)
             break
           }
 
           case 'dingtalk': {
-            await sendDingtalk(notification.data, message)
+            await sendDingtalk(data, message)
             break
           }
 
           case 'opsgenie': {
-            await sendOpsgenie(notification.data, message)
+            await sendOpsgenie(data, message)
             break
           }
 
           case 'slack': {
-            await sendSlack(notification.data, message)
+            await sendSlack(data, message)
             break
           }
 
           case 'telegram': {
-            await sendTelegram(notification.data, message)
+            await sendTelegram(data, message)
             break
           }
 
           case 'pushover': {
-            await sendPushover(notification.data, message)
+            await sendPushover(data, message)
             break
           }
 
           case 'gotify': {
-            await sendGotify(notification.data, message)
+            await sendGotify(data, message)
             break
           }
 
           case 'pushbullet': {
-            await sendPushbullet(notification.data, message)
+            await sendPushbullet(data, message)
             break
           }
 
           case 'smtp': {
-            const transporter = createSmtpTransport(notification.data)
-            await sendSmtpMail(transporter, {
-              // TODO: Read from ENV Variables
-              from: 'Monika@hyperjump.tech',
-              to: notification?.data?.recipients?.join(','),
-              subject: message.subject,
-              text: message.body,
-            })
+            await sendSmtpMail(data, message)
             break
           }
 
           case 'whatsapp': {
-            await sendWhatsapp(notification.data, message.body)
+            await sendWhatsapp(data, message)
             break
           }
 
           case 'teams': {
-            await sendTeams(notification.data, message)
+            await sendTeams(data, message)
             break
           }
 
           case 'monika-notif': {
-            let body: MonikaNotifDataBody
-
-            switch (message.meta.type) {
-              case 'start':
-              case 'termination': {
-                body = {
-                  type: message.meta.type,
-                  // eslint-disable-next-line camelcase
-                  ip_address: message.body,
-                }
-                break
-              }
-
-              case 'incident':
-              case 'recovery': {
-                body = {
-                  type: message.meta.type,
-                  alert: message.summary,
-                  url: message.meta.url,
-                  time: message.meta.time,
-                  monika: message.meta.monikaInstance,
-                }
-                break
-              }
-
-              case 'status-update': {
-                body = {
-                  type: message.meta.type,
-                  time: message.meta.time,
-                  monika: message.meta.monikaInstance,
-                  numberOfProbes: String(message.meta.numberOfProbes),
-                  maxResponseTime: String(message.meta.maxResponseTime),
-                  minResponseTime: String(message.meta.minResponseTime),
-                  averageResponseTime: String(message.meta.averageResponseTime),
-                  numberOfIncidents: String(message.meta.numberOfIncidents),
-                  numberOfRecoveries: String(message.meta.numberOfRecoveries),
-                  numberOfSentNotifications: String(
-                    message.meta.numberOfSentNotifications
-                  ),
-                }
-                break
-              }
-
-              default: {
-                break
-              }
-            }
-
-            await sendMonikaNotif({
-              ...notification.data,
-              body: body!,
-            })
+            await sendMonikaNotif(data, message)
             break
           }
 
           case 'workplace': {
-            await sendWorkplace({
-              ...notification.data,
-              body: message.body,
-            })
+            await sendWorkplace(data, message)
             break
           }
 
           case 'desktop': {
-            await sendDesktop({
-              title: message.subject,
-              message: message.summary || message.body,
-            })
+            sendDesktop(data, message)
             break
           }
 
           case 'lark': {
-            await sendLark(notification.data, message)
+            await sendLark(data, message)
             break
           }
 
           case 'google-chat': {
-            await sendGoogleChat(notification.data, message)
+            await sendGoogleChat(data, message)
             break
           }
 
           case pagerduty.slug:
-            await pagerduty.send(notification.data, message)
+            await pagerduty.send(data, message)
             break
 
           default: {
@@ -287,7 +195,7 @@ export async function sendNotifications(
 
         return Promise.resolve()
       } catch (error: any) {
-        throw NotificationSendingError.create(notification.type, error?.message)
+        throw NotificationSendingError.create(type, error?.message)
       }
     })
   )

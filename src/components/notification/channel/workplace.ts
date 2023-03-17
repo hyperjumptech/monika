@@ -22,27 +22,39 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { WorkplaceData } from '../../../interfaces/data'
+/* eslint-disable camelcase */
+import type { NotificationMessage } from '.'
 import { sendHttpRequest } from '../../../utils/http'
 
-export const sendWorkplace = async (data: WorkplaceData): Promise<any> => {
-  const res = await sendHttpRequest({
+type WorkplaceData = {
+  thread_id: string
+  access_token: string
+}
+
+export type WorkplaceNotification = {
+  id: string
+  type: 'workplace'
+  data: WorkplaceData
+}
+
+export const send = async (
+  { access_token, thread_id }: WorkplaceData,
+  { body }: NotificationMessage
+): Promise<void> => {
+  await sendHttpRequest({
     baseURL: 'https://graph.workplace.com',
     headers: {
-      Authorization: `Bearer ${data.access_token}`,
+      Authorization: `Bearer ${access_token}`,
     },
     method: 'POST',
     url: '/me/messages',
     data: {
       recipient: {
-        // eslint-disable-next-line camelcase
-        thread_key: data.thread_id,
+        thread_key: thread_id,
       },
       message: {
-        text: data.body,
+        text: body,
       },
     },
   })
-
-  return res
 }

@@ -23,24 +23,34 @@
  **********************************************************************************/
 
 import sgMail from '@sendgrid/mail'
-import { SendgridData } from '../../../interfaces/data'
-import { SendInput } from '../../../interfaces/mailgun'
+import type { NotificationMessage } from '.'
 import { convertTextToHTML } from '../../../utils/text'
 
-export const sendSendgrid = async (
-  inputData: SendInput,
-  sendgridConfigData: SendgridData
-): Promise<any> => {
-  const { subject, body, sender, recipients } = inputData
-  const API_KEY = sendgridConfigData.apiKey
+type SendgridData = {
+  apiKey: string
+  sender: string
+  recipients: string[]
+}
 
-  sgMail.setApiKey(API_KEY)
+export type SendgridNotification = {
+  id: string
+  type: 'sendgrid'
+  data: SendgridData
+}
+
+export const send = async (
+  { apiKey, recipients, sender }: SendgridData,
+  { body, subject }: NotificationMessage
+): Promise<void> => {
+  const to = recipients?.join(',')
+  const html = convertTextToHTML(body)
   const msg = {
-    to: recipients,
-    from: sender.email,
+    to,
+    from: sender,
     subject,
-    html: convertTextToHTML(body),
+    html,
   }
 
-  return sgMail.send(msg)
+  sgMail.setApiKey(apiKey)
+  await sgMail.send(msg)
 }

@@ -22,69 +22,97 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios, { AxiosResponse } from 'axios'
+import { sendHttpRequest } from '../../../utils/http'
+import type { NotificationMessage } from './'
 
-import { PushbulletData } from '../../../interfaces/data'
-import { NotificationMessage } from '../../../interfaces/notification'
+type PushbulletData = {
+  token: string
+  deviceID?: string
+}
 
-export const sendPushbullet = async (
-  data: PushbulletData,
+export type PushbulletNotification = {
+  id: string
+  type: 'pushbullet'
+  data: PushbulletData
+}
+
+type Content = {
+  title: string
+  body: string
+  type: 'note'
+}
+
+export const send = async (
+  { deviceID, token }: PushbulletData,
   message: NotificationMessage
-): Promise<AxiosResponse<any>> => {
+): Promise<void> => {
   const notificationType =
     message.meta.type[0].toUpperCase() + message.meta.type.slice(1)
-  const { deviceID, token } = data
-
-  let title: string
-  const body: string = message.body
-  switch (message.meta.type) {
-    case 'start':
-      title = ' Monika is starting'
-      break
-    case 'termination':
-      title = 'Monika is terminating'
-      break
-    case 'status-update':
-      title = 'New Monika Status Update'
-      break
-
-    case 'incident':
-    case 'recovery': {
-      title = `New ${notificationType} from Monika`
-      break
-    }
-
-    default:
-      title = ''
-      break
-  }
-
-  if (message.meta.url) {
-    title += `[${message.meta.url}] `
-  }
-
+  const content = getContent(message, notificationType)
   const url = deviceID
     ? `https://api.pushbullet.com/v2/pushes?device_iden=${deviceID}`
     : 'https://api.pushbullet.com/v2/pushes'
 
-  return axios
-    .request({
-      method: 'POST',
-      url,
-      headers: {
-        'Access-Token': token,
-        'Content-Type': 'application/json',
-      },
-      data: {
-        title,
+  await sendHttpRequest({
+    method: 'POST',
+    url,
+    headers: {
+      'Access-Token': token,
+      'Content-Type': 'application/json',
+    },
+    data: content,
+  })
+}
+
+function getContent(
+  { body, meta }: NotificationMessage,
+  notificationType: string
+): Content {
+  const { type, url } = meta
+  switch (type) {
+    case 'start': {
+      return {
         body,
+        title: url ? `Monika is starting [${url}]` : 'Monika is starting',
         type: 'note',
-      },
-    })
-    .then((result) => {
-      return result
-    })
-    .catch((error) => {
-      return error.response
-    })
+      }
+    }
+
+    case 'termination': {
+      return {
+        body,
+        title: url ? `Monika is terminating [${url}]` : 'Monika is terminating',
+        type: 'note',
+      }
+    }
+
+    case 'status-update': {
+      return {
+        body,
+        title: url
+          ? `New Monika Status Update [${url}]`
+          : 'New Monika Status Update',
+        type: 'note',
+      }
+    }
+
+    case 'incident':
+    case 'recovery': {
+      return {
+        body,
+        title: url
+          ? `New ${notificationType} from Monika [${url}]`
+          : `New ${notificationType} from Monika`,
+        type: 'note',
+      }
+    }
+
+    default: {
+      return {
+        body,
+        title: url ? `[${url}]` : '',
+        type: 'note',
+      }
+    }
+  }
 }

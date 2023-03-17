@@ -22,10 +22,8 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import type { AxiosResponse } from 'axios'
-import { LoginUserSuccessResponse } from '../../../interfaces/whatsapp'
+import type { NotificationMessage } from '.'
 import { authorize } from '../../../utils/authorization'
-import { WhatsappData } from '../../../interfaces/data'
 import { sendHttpRequest } from '../../../utils/http'
 
 type SendTextMessageParams = {
@@ -35,44 +33,82 @@ type SendTextMessageParams = {
   baseUrl: string
 }
 
-export const loginUser = async (data: WhatsappData): Promise<any> => {
+type WhatsappData = {
+  url: string
+  username: string
+  password: string
+  recipients: string[]
+}
+
+export type WhatsappBusinessNotification = {
+  id: string
+  type: 'whatsapp'
+  data: WhatsappData
+}
+
+type User = {
+  token: string
+  // eslint-disable-next-line camelcase
+  expires_after: string
+}
+
+type Meta = {
+  version: string
+  // eslint-disable-next-line camelcase
+  api_status: string
+}
+
+type LoginUserSuccessResponse = {
+  users: User[]
+  meta: Meta
+}
+
+const loginUser = async ({
+  password,
+  url: baseURL,
+  username,
+}: WhatsappData): Promise<string> => {
   try {
     const auth = authorize('basic', {
-      username: data.username,
-      password: data.password,
+      username,
+      password,
     })
 
-    const url = `${data.url}/v1/users/login`
+    const url = `${baseURL}/v1/users/login`
     const resp = await sendHttpRequest({
       method: 'POST',
-      url: url,
+      url,
       headers: {
         'Content-Type': 'application/json',
         Authorization: auth,
       },
     })
     const loginResp: LoginUserSuccessResponse = resp?.data
+    const hasUser = loginResp.users?.length > 0
 
-    if (loginResp.users?.length > 0) return loginResp.users[0].token
+    if (!hasUser) {
+      throw new Error('User not found')
+    }
+
+    return loginResp.users[0].token
   } catch (error) {
-    console.error(
-      'Something wrong with your whatsapp config please check again. error:',
-      error
+    throw new Error(
+      `Something wrong with your whatsapp config please check again. error: ${error}`
     )
   }
 }
 
-export const sendTextMessage = async ({
+const sendTextMessage = async ({
   recipient,
   message,
   token,
   baseUrl,
-}: SendTextMessageParams): Promise<AxiosResponse<any> | void> => {
+}: SendTextMessageParams): Promise<void> => {
   try {
     const auth = authorize('bearer', token)
     const url = `${baseUrl}/v1/messages`
 
-    return sendHttpRequest({
+    await sendHttpRequest({
       method: 'POST',
       url: url,
       headers: {
@@ -90,29 +126,26 @@ export const sendTextMessage = async ({
       },
     })
   } catch (error) {
-    console.error(
-      'Something wrong with your recipient no, Please check your country code:',
-      recipient,
-      error
+    throw new Error(
+      `Something wrong with your recipient number, Please check your country code: ${recipient} ${error}`
     )
   }
 }
 
-export const sendWhatsapp = async (
+export const send = async (
   data: WhatsappData,
-  message: string
+  { body }: NotificationMessage
 ): Promise<void> => {
   const token = await loginUser(data)
-  if (token) {
-    await Promise.all(
-      data.recipients.map((recipient) => {
-        return sendTextMessage({
-          recipient,
-          token,
-          baseUrl: data.url,
-          message,
-        })
+
+  await Promise.all(
+    data.recipients.map(async (recipient) => {
+      await sendTextMessage({
+        recipient,
+        token,
+        baseUrl: data.url,
+        message: body,
       })
-    )
-  }
+    })
+  )
 }

@@ -24,24 +24,39 @@
 
 import Mailgun from 'mailgun.js'
 import formData from 'form-data'
-import { MailgunData } from '../../../interfaces/data'
-import { SendInput } from '../../../interfaces/mailgun'
 import { convertTextToHTML } from '../../../utils/text'
+import { NotificationMessage } from '.'
 
-export const sendMailgun = async (
-  inputData: SendInput,
-  mailgunConfigData: MailgunData
-): Promise<any> => {
-  const { subject, body, sender, recipients } = inputData
-  const { username = 'api', domain, apiKey: key } = mailgunConfigData
+type MailgunData = {
+  apiKey: string
+  domain: string
+  recipients: string[]
+  username?: string
+}
 
+export type MailgunNotification = {
+  id: string
+  type: 'mailgun'
+  data: MailgunData
+}
+
+export const send = async (
+  { apiKey: key, domain, recipients, username = 'api' }: MailgunData,
+  { body, subject }: NotificationMessage
+): Promise<void> => {
+  // TODO: Read from ENV Variables
+  const DEFAULT_EMAIL = 'monika@hyperjump.tech'
+  const DEFAULT_SENDER_NAME = 'Monika'
+  const to = recipients?.join(',')
+  const html = convertTextToHTML(body)
   const mailgun = new Mailgun(formData)
   const mg = mailgun.client({ username, key })
   const data = {
-    from: `${sender.name} <${sender.email}>`,
-    to: recipients,
-    subject: subject,
-    html: convertTextToHTML(body),
+    from: `${DEFAULT_SENDER_NAME} <${DEFAULT_EMAIL}>`,
+    to,
+    subject,
+    html,
   }
-  return mg.messages.create(domain, data)
+
+  await mg.messages.create(domain, data)
 }

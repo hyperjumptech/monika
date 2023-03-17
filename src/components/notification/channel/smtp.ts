@@ -23,24 +23,51 @@
  **********************************************************************************/
 
 import * as nodemailer from 'nodemailer'
-import Mail from 'nodemailer/lib/mailer'
 import Mailgen from 'mailgen'
 
-import { SMTPData } from '../../../interfaces/data'
 import { convertTextToHTML } from '../../../utils/text'
+import type { NotificationMessage } from '.'
 
-export const createSmtpTransport = (cfg: SMTPData): any => {
+type SMTPData = {
+  hostname: string
+  port: number
+  username: string
+  password: string
+  recipients: string[]
+}
+
+export type SMTPNotification = {
+  id: string
+  type: 'smtp'
+  data: SMTPData
+}
+
+const createSmtpTransport = ({
+  hostname,
+  password,
+  port,
+  username,
+}: Omit<SMTPData, 'recipients'>): any => {
   return nodemailer.createTransport({
-    host: cfg.hostname,
-    port: cfg.port,
-    auth: { user: cfg.username, pass: cfg.password },
+    host: hostname,
+    port: port,
+    auth: { user: username, pass: password },
   })
 }
 
-export const sendSmtpMail = async (
-  transporter: Mail,
-  opt: Mail.Options
-): Promise<any> => {
+export const send = async (
+  data: SMTPData,
+  { body, subject }: NotificationMessage
+): Promise<void> => {
+  // TODO: Read from ENV Variables
+  const DEFAULT_EMAIL = 'monika@hyperjump.tech'
+  const transporter = createSmtpTransport(data)
+  const opt = {
+    from: DEFAULT_EMAIL,
+    to: data?.recipients?.join(','),
+    subject,
+    text: body,
+  }
   const mailGenerator = new Mailgen({
     theme: 'default',
     product: {
@@ -61,7 +88,7 @@ export const sendSmtpMail = async (
   const emailTemplate = mailGenerator.generate(email)
   const to = (opt.to as string).split(',')
 
-  return transporter.sendMail({
+  await transporter.sendMail({
     from: opt.from,
     to: to,
     subject: opt.subject,

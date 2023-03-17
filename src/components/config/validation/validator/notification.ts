@@ -22,7 +22,6 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Notification } from '../../../../interfaces/notification'
 import {
   slug as atlassianStatuspageSlug,
   validateConfig as atlassianStatuspageValidateConfig,
@@ -31,7 +30,7 @@ import {
   slug as instatusPageSlug,
   validateConfig as instatusPageValidateConfig,
 } from '../../../../plugins/visualization/instatus'
-import { newPagerDuty } from '../../../notification/channel/pagerduty'
+import { newPagerDuty, type Notification } from '../../../notification/channel'
 import { requiredFieldMessages } from '../notification-required-fields'
 
 const checkRecipients = (notification: Notification): string | undefined => {
