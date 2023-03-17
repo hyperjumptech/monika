@@ -81,17 +81,16 @@ export async function* getConfigIterator(
   }
 }
 
-export const updateConfig = (config: Config, validate = true): void => {
+export const updateConfig = async (
+  config: Config,
+  validate = true
+): Promise<void> => {
   log.info('Updating config')
   if (validate) {
-    const validated = validateConfig(config)
-
-    if (!validated.valid) {
-      if (process.env.NODE_ENV === 'test') {
-        throw new Error(validated.message) // return error during tests
-      }
-
-      log.error(validated.message)
+    try {
+      await validateConfig(config)
+    } catch (error: any) {
+      log.error(error?.message)
       exit(1)
     }
   }
@@ -139,7 +138,7 @@ function watchConfigFile({ path, type, index, repeat }: WatchConfigFileParams) {
         defaultConfigs[index] = newConfig
       }
 
-      updateConfig(mergeConfigs())
+      await updateConfig(mergeConfigs())
     })
   }
 }

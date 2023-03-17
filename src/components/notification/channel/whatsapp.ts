@@ -138,8 +138,9 @@ export const validator = dataBaseEmailSchemaValidator('WhatsApp').keys({
   username: Joi.string().required().label('WhatsApp Username'),
   password: Joi.string().required().label('WhatsApp Password'),
   recipients: Joi.array()
-    .items(Joi.string().label(`WhatsApp Recipients`))
-    .label(`WhatsApp Recipients`),
+    .required()
+    .items(Joi.string().label('WhatsApp Recipients'))
+    .label('WhatsApp Recipients'),
 })
 
 export const send = async (

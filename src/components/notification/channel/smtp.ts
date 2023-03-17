@@ -61,6 +61,10 @@ export const validator = dataBaseEmailSchemaValidator('SMTP').keys({
   port: Joi.number().port().required().label('SMTP Port'),
   username: Joi.string().required().label('SMTP Username'),
   password: Joi.string().required().label('SMTP Password'),
+  recipients: Joi.array()
+    .required()
+    .items(Joi.string().label('Email recipients'))
+    .label('Email recipients'),
 })
 
 export const send = async (

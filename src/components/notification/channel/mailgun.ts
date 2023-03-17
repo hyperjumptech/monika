@@ -45,6 +45,10 @@ export const validator = dataBaseEmailSchemaValidator('Mailgun').keys({
   apiKey: Joi.string().required().label('Mailgun API Key'),
   domain: Joi.string().required().label('Mailgun Domain'),
   username: Joi.string().label('Mailgun Username'),
+  recipients: Joi.array()
+    .required()
+    .items(Joi.string().label('Mailgun email recipients'))
+    .label('Mailgun email recipients'),
 })
 
 export const send = async (

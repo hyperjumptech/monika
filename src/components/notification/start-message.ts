@@ -22,77 +22,19 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-/* eslint-disable camelcase */
-export const requiredFieldMessages: Record<string, any> = {
-  smtp: {
-    hostname: 'Hostname not found',
-    port: 'Port not found',
-    username: 'Username not found',
-    password: 'Password not found',
-  },
-  mailgun: {
-    apiKey: 'Api key not found',
-    domain: 'Domain not found',
-  },
-  sendgrid: {
-    apiKey: 'apiKey not found',
-  },
-  webhook: {
-    url: 'URL not found',
-  },
-  discord: {
-    url: 'URL not found',
-  },
-  slack: {
-    url: 'URL not found',
-  },
-  telegram: {},
-  whatsapp: {
-    url: 'URL not found',
-    username: 'username not found',
-    password: 'password not found',
-  },
-  teams: {
-    url: 'Teams Webhook URL not found',
-  },
-  'monika-notif': {
-    url: 'Monika Notification Webhook URL not found',
-  },
-  workplace: {
-    access_token: 'Workplace Access Token not found',
-    thread_id: 'Workplace Thread ID not found',
-  },
-  desktop: {},
-  lark: {
-    url: 'URL not found',
-  },
-  'google-chat': {
-    url: 'URL not found',
-  },
-  dingtalk: {
-    access_token: 'Dingtalk Access Token not found',
-  },
-  opsgenie: {
-    geniekey: 'Opsgenie Geniekey not found',
-  },
-  pushover: {
-    token: 'TOKEN not found',
-    user: 'USER not found',
-  },
-  gotify: {
-    token: 'TOKEN not found',
-    url: 'URL not found',
-  },
-  pushbullet: {
-    token:
-      'Pushbullet Access Token not found! You can create your Access Token at https://www.pushbullet.com/#settings',
-  },
-  instatus: {
-    apiKey: 'apiKey not found',
-    pageID: 'pageID not found',
-  },
-  statuspage: {
-    apiKey: 'apiKey not found',
-    pageID: 'pageID not found',
-  },
+import { hostname } from 'os'
+import { NotificationSendingError, sendNotifications } from '.'
+import getIp from '../../utils/ip'
+import { getMessageForStart } from './alert-message'
+import type { Notification } from './channel'
+
+// reexported with alias because this `errorMessage` function is used in test file
+export const errorMessage = NotificationSendingError.create
+
+export const sendMonikaStartMessage = async (
+  notifications: Notification[]
+): Promise<void> => {
+  const message = await getMessageForStart(hostname(), getIp())
+
+  await sendNotifications(notifications, message)
 }

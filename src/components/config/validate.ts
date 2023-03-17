@@ -24,35 +24,31 @@
 
 import { getContext } from '../../context'
 import { Config } from '../../interfaces/config'
-import { Validation } from '../../interfaces/validation'
-import { setInvalidResponse, VALID_CONFIG } from '../../utils/validate-response'
 import validator from './validation'
 
-export const validateConfig = (configuration: Config): Validation => {
+export const validateConfig = async (configuration: Config): Promise<void> => {
   const { flags } = getContext()
   const { notifications = [], probes = [], symon } = configuration
   const symonConfigError = validator.validateSymonConfig(symon)
-
-  const validateNotificationError =
-    validator.validateNotification(notifications)
-  if (validateNotificationError) {
-    return setInvalidResponse(validateNotificationError)
-  }
-
   const validateProbesError = validator.validateProbes(probes)
+  const hasConfig = flags.config.length > 0
+
+  await validator.validateNotification(notifications)
+
   if (validateProbesError) {
-    return setInvalidResponse(validateProbesError)
+    throw new Error(validateProbesError)
   }
 
   if (symonConfigError) {
-    return setInvalidResponse(`Monika configuration: symon ${symonConfigError}`)
+    throw new Error(`Monika configuration: symon ${symonConfigError}`)
   }
 
   // check config file against monika-config-schema.json only if a config file is passed
-  if (flags.config.length > 0) {
+  if (hasConfig) {
     const isValidConfig = validator.validateConfigWithSchema(configuration)
-    if (isValidConfig.valid === false) return isValidConfig
-  }
 
-  return VALID_CONFIG
+    if (!isValidConfig.valid) {
+      throw new Error(isValidConfig.message)
+    }
+  }
 }

@@ -197,8 +197,6 @@ Username: ${data.username}
       case 'mailgun':
         startupMessage += `    Domain: ${data.domain}\n`
         break
-      case 'sendgrid':
-        break
       case 'webhook':
       case 'slack':
       case 'lark':

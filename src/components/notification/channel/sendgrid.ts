@@ -42,6 +42,10 @@ export type SendgridNotification = {
 export const validator = dataBaseEmailSchemaValidator('Sendgrid').keys({
   apiKey: Joi.string().required().label('Sendgrid API Key'),
   sender: Joi.string().required().label('Sendgrid sender email'),
+  recipients: Joi.array()
+    .required()
+    .items(Joi.string().label('Sendgrid email recipients'))
+    .label('Sendgrid email recipients'),
 })
 
 export const send = async (
