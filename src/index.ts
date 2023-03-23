@@ -26,8 +26,10 @@ import { Command, Errors, Flags, Interfaces } from '@oclif/core'
 
 import { flush, help } from './commands'
 import { createConfig, getConfigIterator } from './components/config'
+import { sortProbes } from './components/config/sort'
 import { printAllLogs } from './components/logger'
 import { closeLog, openLogfile } from './components/logger/history'
+import { openLogPouch } from './components/logger/history-pouch'
 import { logStartupMessage } from './components/logger/startup-message'
 import { notificationChecker } from './components/notification/checker'
 import {
@@ -46,7 +48,6 @@ import { sanitizeProbe, startProbing } from './looper'
 import SymonClient from './symon'
 import { getEventEmitter } from './utils/events'
 import { log } from './utils/pino'
-import { sortProbes } from './components/config/sort'
 
 const em = getEventEmitter()
 let symonClient: SymonClient
@@ -282,7 +283,11 @@ class Monika extends Command {
         return
       }
 
-      await openLogfile()
+      if (_flags.symonExperimental) {
+        openLogPouch()
+      } else {
+        await openLogfile()
+      }
 
       if (_flags.logs) {
         await printAllLogs()

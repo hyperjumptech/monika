@@ -33,56 +33,56 @@ import {
   deleteNotificationLogs,
   deleteRequestLogs,
   getUnreportedLogs,
-  UnreportedLog,
   UnreportedNotificationsLog,
   UnreportedRequestsLog,
 } from '../../components/logger/history'
+import { pouchDBReporting } from '../../components/logger/history-pouch'
 import { log } from '../../utils/pino'
 const dbPath = path.resolve(process.cwd(), 'monika-logs.db')
 
-const pouchDBReporting = async (
-  monikaId: any,
-  logs: UnreportedLog,
-  symonCouchDB: string
-) => {
-  const requests = logs.requests
-  const notifications = logs.notifications
-  const pouch = new PouchDB('symon')
+// const pouchDBReporting = async (
+//   monikaId: any,
+//   logs: UnreportedLog,
+//   symonCouchDB: string
+// ) => {
+//   const requests = logs.requests
+//   const notifications = logs.notifications
+//   const pouch = new PouchDB('symon')
 
-  try {
-    const reportData = {
-      monikaId: monikaId,
-      data: {
-        requests,
-        notifications,
-      },
-    }
+//   try {
+//     const reportData = {
+//       monikaId: monikaId,
+//       data: {
+//         requests,
+//         notifications,
+//       },
+//     }
 
-    const id = new Date().toISOString()
-    const pouchData = await pouch.put({ _id: id, ...reportData })
+//     const id = new Date().toISOString()
+//     const pouchData = await pouch.put({ _id: id, ...reportData })
 
-    pouch.replicate
-      .to(symonCouchDB, {
-        live: true,
-        retry: true,
-      })
-      .then(async () => {
-        console.log('complete replicating to remote DB')
-        await Promise.all([
-          deleteRequestLogs(requests.map((log) => log.probeId)),
-          deleteNotificationLogs(notifications.map((log) => log.probeId)),
-        ])
-        pouch.remove({ _id: pouchData.id, _rev: pouchData.rev })
-        console.log('complete replicating to remote DB')
-      })
-      .catch((error: any) => {
-        console.log('failed replicating to remote DB')
-        console.log(error)
-      })
-  } catch (error) {
-    console.error(`error occured : ${error}`)
-  }
-}
+//     pouch.replicate
+//       .to(symonCouchDB, {
+//         live: true,
+//         retry: true,
+//       })
+//       .then(async () => {
+//         console.log('complete replicating to remote DB')
+//         await Promise.all([
+//           deleteRequestLogs(requests.map((log) => log.probeId)),
+//           deleteNotificationLogs(notifications.map((log) => log.probeId)),
+//         ])
+//         pouch.remove({ _id: pouchData.id, _rev: pouchData.rev })
+//         console.log('complete replicating to remote DB')
+//       })
+//       .catch((error: any) => {
+//         console.log('failed replicating to remote DB')
+//         console.log(error)
+//       })
+//   } catch (error) {
+//     console.error(`error occured : ${error}`)
+//   }
+// }
 
 const main = async (data: Record<string, any>) => {
   try {
@@ -124,7 +124,8 @@ const main = async (data: Record<string, any>) => {
     }
 
     if (isSymonExperimental) {
-      await pouchDBReporting(monikaId, logs, symonCouchDB)
+      const pouchToCouchConn = new PouchDB('symon')
+      await pouchDBReporting(pouchToCouchConn, symonCouchDB)
       return
     }
 
