@@ -24,7 +24,6 @@
 
 import { validator as dataStatuspageSchemaValidator } from '../../../../plugins/visualization/atlassian-status-page'
 import { validator as dataInstatusSchemaValidator } from '../../../../plugins/visualization/instatus'
-import { NotificationSendingError } from '../../../notification'
 import {
   dataDingtalkSchemaValidator,
   dataDiscordSchemaValidator,
@@ -42,14 +41,12 @@ import {
   dataTeamsSchemaValidator,
   dataTelegramSchemaValidator,
   dataWebhookSchemaValidator,
+  dataWhatsappSchemaValidator,
   dataWorkplaceSchemaValidator,
   newPagerDuty,
   Notification,
   validator,
 } from '../../../notification/channel'
-
-// reexported with alias because this `errorMessage` function is used in test file
-export const errorMessage = NotificationSendingError.create
 
 export const validateNotification = async (
   notifications: Notification[]
@@ -81,23 +78,19 @@ export const validateNotification = async (
     teams: dataTeamsSchemaValidator,
     telegram: dataTelegramSchemaValidator,
     webhook: dataWebhookSchemaValidator,
-    whatsapp: dataWebhookSchemaValidator,
+    whatsapp: dataWhatsappSchemaValidator,
     workplace: dataWorkplaceSchemaValidator,
   }
 
   await Promise.all(
-    notifications.map(async (notification) => {
-      const validator = validators[notification.type]
+    notifications.map(async ({ data, type }) => {
+      const validator = validators[type]
 
       if (!validator) {
-        return
+        throw new Error(`Notifications type is not allowed (${type})`)
       }
 
-      try {
-        await validator.validateAsync(notification.data)
-      } catch (error: any) {
-        throw NotificationSendingError.create(notification.type, error?.message)
-      }
+      await validator.validateAsync(data)
     })
   )
 }

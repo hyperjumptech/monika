@@ -263,9 +263,7 @@ describe('monika', () => {
       ])
     )
     .catch((error) => {
-      expect(error.message).to.contain(
-        'Recipients does not exists or has length lower than 1!'
-      )
+      expect(error.message).to.contain('"Mailgun Recipients" is required')
     })
     .it('runs with mailgun config but without recipients')
 
@@ -292,9 +290,7 @@ describe('monika', () => {
       ])
     )
     .catch((error) => {
-      expect(error.message).to.contain(
-        'Recipients does not exists or has length lower than 1!'
-      )
+      expect(error.message).to.contain('"SendGrid recipients" is required')
     })
     .it('runs with sendgrid config but without recipients')
 
@@ -324,9 +320,7 @@ describe('monika', () => {
       ])
     )
     .catch((error) => {
-      expect(error.message).to.contain(
-        'Recipients does not exists or has length lower than 1!'
-      )
+      expect(error.message).to.contain('"Email Recipients" is required')
     })
     .it('runs with SMTP config but without recipients')
 
@@ -383,7 +377,7 @@ describe('monika', () => {
       ])
     )
     .catch((error) => {
-      expect(error.message).to.contain('Teams Webhook URL not found')
+      expect(error.message).to.contain('"Teams URL" is required')
     })
     .it('runs with teams config but without webhook url')
 

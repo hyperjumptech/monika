@@ -43,7 +43,8 @@ export type MailgunNotification = {
 
 export const validator = Joi.object().keys({
   recipients: Joi.array()
-    .items(Joi.string().email().label('Mailgun Recipients'))
+    .required()
+    .items(Joi.string().required().email().label('Mailgun Email Recipients'))
     .label('Mailgun Recipients'),
   apiKey: Joi.string().required().label('Mailgun API Key'),
   domain: Joi.string().required().label('Mailgun Domain'),

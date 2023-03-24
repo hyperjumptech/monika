@@ -177,9 +177,9 @@ describe('send alerts', () => {
     expect(mailgun.send).to.have.been.called.exactly(1)
   })
 
-  it.skip('should send webhook & slack notifications', async () => {
-    chai.spy.on(webhook, 'sendWebhook', () => Promise.resolve())
-    chai.spy.on(slack, 'sendSlack', () => Promise.resolve())
+  it('should send webhook & slack notifications', async () => {
+    chai.spy.on(webhook, 'send', () => Promise.resolve())
+    chai.spy.on(slack, 'send', () => Promise.resolve())
 
     await sendAlerts({
       probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
@@ -219,8 +219,8 @@ describe('send alerts', () => {
     expect(slack.send).to.have.been.called.exactly(1)
   })
 
-  it.skip('should send SMTP notification', async () => {
-    chai.spy.on(smtp, 'sendSmtpMail', () => Promise.resolve())
+  it('should send SMTP notification', async () => {
+    chai.spy.on(smtp, 'send', () => Promise.resolve())
     await sendAlerts({
       probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
       validation: {
@@ -254,8 +254,8 @@ describe('send alerts', () => {
     expect(smtp.send).to.have.been.called.exactly(1)
   })
 
-  it.skip('should send whatsapp notifications', async () => {
-    chai.spy.on(whatsapp, 'sendWhatsapp', () => Promise.resolve())
+  it('should send whatsapp notifications', async () => {
+    chai.spy.on(whatsapp, 'send', () => Promise.resolve())
 
     await sendAlerts({
       probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
@@ -290,9 +290,9 @@ describe('send alerts', () => {
     expect(whatsapp.send).to.have.been.called.exactly(1)
   })
 
-  it.skip('should send whatsapp notifications', async () => {
+  it('should send whatsapp notifications', async () => {
     chai.spy.on(whatsapp, 'loginUser', () => Promise.resolve('token'))
-    chai.spy.on(whatsapp, 'sendTextMessage', () => Promise.resolve())
+    chai.spy.on(whatsapp, 'send', () => Promise.resolve())
 
     await whatsapp.send(
       {
@@ -307,8 +307,8 @@ describe('send alerts', () => {
     expect(whatsapp.send).to.have.been.called.exactly(1)
   })
 
-  it.skip('should send telegram notifications', async () => {
-    chai.spy.on(telegram, 'sendTelegram', () => Promise.resolve())
+  it('should send telegram notifications', async () => {
+    chai.spy.on(telegram, 'send', () => Promise.resolve())
 
     await sendAlerts({
       probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
@@ -343,8 +343,8 @@ describe('send alerts', () => {
     expect(telegram.send).to.have.been.called.exactly(1)
   })
 
-  it.skip('should send webhook discord', async () => {
-    chai.spy.on(discord, 'sendDiscord', () => Promise.resolve())
+  it('should send webhook discord', async () => {
+    chai.spy.on(discord, 'send', () => Promise.resolve())
 
     await sendAlerts({
       probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
@@ -376,8 +376,8 @@ describe('send alerts', () => {
     expect(discord.send).to.have.been.called.exactly(1)
   })
 
-  it.skip('should send webhook monika-notif', async () => {
-    chai.spy.on(monikaNotif, 'sendMonikaNotif', () => Promise.resolve())
+  it('should send webhook monika-notif', async () => {
+    chai.spy.on(monikaNotif, 'send', () => Promise.resolve())
 
     await sendAlerts({
       probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
@@ -409,8 +409,8 @@ describe('send alerts', () => {
     expect(monikaNotif.send).to.have.been.called.exactly(1)
   })
 
-  it.skip('should send larksuite notification ', async () => {
-    chai.spy.on(lark, 'sendLark', () => Promise.resolve())
+  it('should send larksuite notification ', async () => {
+    chai.spy.on(lark, 'send', () => Promise.resolve())
 
     await sendAlerts({
       probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
@@ -442,8 +442,8 @@ describe('send alerts', () => {
     expect(lark.send).to.have.been.called.exactly(1)
   })
 
-  it.skip('should send google chat notification ', async () => {
-    chai.spy.on(googlechat, 'sendGoogleChat', () => Promise.resolve())
+  it('should send google chat notification ', async () => {
+    chai.spy.on(googlechat, 'send', () => Promise.resolve())
 
     await sendAlerts({
       probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',

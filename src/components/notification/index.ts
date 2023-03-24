@@ -63,16 +63,9 @@ export class NotificationSendingError extends Error {
     notificationType: string,
     originalErrorMessage?: string
   ): NotificationSendingError {
-    // for the sake of passing test
-    const notificationTypeformatted = notificationType
-      .split('-')
-      .map((s) => s[0].toUpperCase() + s.slice(1))
-      .join('-')
-      .replace(/^smtp$/i, 'SMTP')
-
     return new NotificationSendingError(
       notificationType,
-      `Failed to send message using ${notificationTypeformatted}, please check your ${notificationTypeformatted} notification config.\nMessage: ${originalErrorMessage}`
+      `Failed to send message using ${notificationType}, please check your ${notificationType} notification config.\nMessage: ${originalErrorMessage}`
     )
   }
 }

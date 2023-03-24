@@ -23,6 +23,7 @@
  **********************************************************************************/
 
 import { execSync, spawnSync } from 'child_process'
+import Joi from 'joi'
 import { type } from 'os'
 import type { NotificationMessage } from '.'
 
@@ -34,7 +35,7 @@ export type DesktopNotification = {
   data: undefined
 }
 
-export const validator = null
+export const validator = Joi.any()
 
 export const send = async (
   // actually do not need data property

@@ -1,10 +1,7 @@
 import chai, { expect } from 'chai'
 import spies from 'chai-spies'
 
-import {
-  errorMessage,
-  validateNotification,
-} from '../../validation/validator/notification'
+import { validateNotification } from '../../validation/validator/notification'
 
 chai.use(spies)
 
@@ -31,9 +28,7 @@ describe('notificationChecker - sendgridNotification', () => {
         },
       ])
     } catch (error) {
-      const originalErrorMessage =
-        '"Sendgrid API Key" is not allowed to be empty'
-      const { message } = errorMessage('Sendgrid', originalErrorMessage)
+      const message = '"SendGrid API Key" is not allowed to be empty'
 
       expect(() => {
         throw error

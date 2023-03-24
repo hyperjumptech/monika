@@ -24,16 +24,21 @@
 
 import { getContext } from '../../context'
 import { Config } from '../../interfaces/config'
-import validator from './validation'
+import {
+  validateConfigWithSchema,
+  validateNotification,
+  validateProbes,
+  validateSymonConfig,
+} from './validation'
 
 export const validateConfig = async (configuration: Config): Promise<void> => {
   const { flags } = getContext()
   const { notifications = [], probes = [], symon } = configuration
-  const symonConfigError = validator.validateSymonConfig(symon)
-  const validateProbesError = validator.validateProbes(probes)
+  const symonConfigError = validateSymonConfig(symon)
+  const validateProbesError = validateProbes(probes)
   const hasConfig = flags.config.length > 0
 
-  await validator.validateNotification(notifications)
+  await validateNotification(notifications)
 
   if (validateProbesError) {
     throw new Error(validateProbesError)
@@ -45,7 +50,7 @@ export const validateConfig = async (configuration: Config): Promise<void> => {
 
   // check config file against monika-config-schema.json only if a config file is passed
   if (hasConfig) {
-    const isValidConfig = validator.validateConfigWithSchema(configuration)
+    const isValidConfig = validateConfigWithSchema(configuration)
 
     if (!isValidConfig.valid) {
       throw new Error(isValidConfig.message)

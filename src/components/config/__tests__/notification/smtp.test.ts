@@ -2,10 +2,7 @@ import chai, { expect } from 'chai'
 import spies from 'chai-spies'
 
 import * as smtp from '../../../notification/channel/smtp'
-import {
-  errorMessage,
-  validateNotification,
-} from '../../validation/validator/notification'
+import { validateNotification } from '../../validation/validator/notification'
 
 chai.use(spies)
 
@@ -55,8 +52,7 @@ describe('notificationChecker - smtpNotification', () => {
         },
       ])
     } catch (error) {
-      const originalErrorMessage = '"SMTP Hostname" is not allowed to be empty'
-      const { message } = errorMessage('SMTP', originalErrorMessage)
+      const message = '"SMTP Hostname" is not allowed to be empty'
 
       expect(() => {
         throw error
@@ -79,8 +75,7 @@ describe('notificationChecker - smtpNotification', () => {
         },
       ])
     } catch (error) {
-      const originalErrorMessage = '"SMTP Port" is not allowed to be empty'
-      const { message } = errorMessage('SMTP', originalErrorMessage)
+      const message = '"SMTP Port" is not allowed to be empty'
 
       expect(() => {
         throw error
@@ -103,8 +98,7 @@ describe('notificationChecker - smtpNotification', () => {
         },
       ])
     } catch (error) {
-      const originalErrorMessage = '"SMTP Port" must be a valid port'
-      const { message } = errorMessage('SMTP', originalErrorMessage)
+      const message = '"SMTP Port" must be a valid port'
 
       expect(() => {
         throw error
@@ -127,8 +121,7 @@ describe('notificationChecker - smtpNotification', () => {
         },
       ])
     } catch (error) {
-      const originalErrorMessage = '"SMTP Username" is not allowed to be empty'
-      const { message } = errorMessage('SMTP', originalErrorMessage)
+      const message = '"SMTP Username" is not allowed to be empty'
 
       expect(() => {
         throw error
@@ -151,8 +144,7 @@ describe('notificationChecker - smtpNotification', () => {
         },
       ])
     } catch (error) {
-      const originalErrorMessage = '"SMTP Password" is not allowed to be empty'
-      const { message } = errorMessage('SMTP', originalErrorMessage)
+      const message = '"SMTP Password" is not allowed to be empty'
 
       expect(() => {
         throw error

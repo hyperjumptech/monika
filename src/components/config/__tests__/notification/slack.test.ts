@@ -1,10 +1,7 @@
 import chai, { expect } from 'chai'
 import spies from 'chai-spies'
 
-import {
-  errorMessage,
-  validateNotification,
-} from '../../validation/validator/notification'
+import { validateNotification } from '../../validation/validator/notification'
 
 chai.use(spies)
 
@@ -27,8 +24,7 @@ describe('notificationChecker - slackNotification', () => {
         },
       ])
     } catch (error) {
-      const originalErrorMessage = '"Slack URL" is not allowed to be empty'
-      const { message } = errorMessage('Slack', originalErrorMessage)
+      const message = '"Slack URL" is not allowed to be empty'
 
       expect(() => {
         throw error
@@ -47,8 +43,7 @@ describe('notificationChecker - slackNotification', () => {
         },
       ])
     } catch (error) {
-      const originalErrorMessage = '"Slack URL" must be a valid uri'
-      const { message } = errorMessage('Slack', originalErrorMessage)
+      const message = '"Slack URL" must be a valid uri'
 
       expect(() => {
         throw error

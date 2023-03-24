@@ -1,4 +1,3 @@
-import Joi from 'joi'
 import type { StatuspageNotification } from '../../../plugins/visualization/atlassian-status-page'
 import type { InstatusPageNotification } from '../../../plugins/visualization/instatus'
 
@@ -83,7 +82,10 @@ export {
   validator as dataWebhookSchemaValidator,
 } from './webhook'
 import type { WebhookNotification } from './webhook'
-export { send as sendWhatsapp } from './whatsapp'
+export {
+  send as sendWhatsapp,
+  validator as dataWhatsappSchemaValidator,
+} from './whatsapp'
 import type { WhatsappBusinessNotification } from './whatsapp'
 export {
   send as sendWorkplace,
@@ -155,9 +157,4 @@ export type NotificationMessage = {
     | NotificationIncidentRecoveryMessageMeta
     | NotificationStartTerminationMessageMeta
     | NotificationStatusUpdateMessageMeta
-}
-
-export interface Notifier {
-  send(data: Notification, message: NotificationMessage): Promise<void>
-  validator: Joi.ObjectSchema<any>
 }

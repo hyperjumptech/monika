@@ -40,10 +40,11 @@ export type SendgridNotification = {
 }
 
 export const validator = Joi.object().keys({
-  apiKey: Joi.string().required().label('Sendgrid API Key'),
-  sender: Joi.string().required().label('Sendgrid sender email'),
+  apiKey: Joi.string().required().label('SendGrid API Key'),
+  sender: Joi.string().required().label('SendGrid sender email'),
   recipients: Joi.array()
-    .items(Joi.string().email().label('SendGrid recipients'))
+    .required()
+    .items(Joi.string().required().email().label('SendGrid email recipients'))
     .label('SendGrid recipients'),
 })
 

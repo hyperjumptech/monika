@@ -2,10 +2,7 @@
 import chai, { expect } from 'chai'
 import spies from 'chai-spies'
 
-import {
-  errorMessage,
-  validateNotification,
-} from '../../validation/validator/notification'
+import { validateNotification } from '../../validation/validator/notification'
 
 chai.use(spies)
 
@@ -31,9 +28,7 @@ describe('notificationChecker - workplaceNotification', () => {
         },
       ])
     } catch (error) {
-      const originalErrorMessage =
-        '"Workplace Thread ID" is not allowed to be empty'
-      const { message } = errorMessage('Workplace', originalErrorMessage)
+      const message = '"Workplace Thread ID" is not allowed to be empty'
 
       expect(() => {
         throw error
@@ -53,9 +48,7 @@ describe('notificationChecker - workplaceNotification', () => {
         },
       ])
     } catch (error) {
-      const originalErrorMessage =
-        '"Workplace Access Token" is not allowed to be empty'
-      const { message } = errorMessage('Workplace', originalErrorMessage)
+      const message = '"Workplace Access Token" is not allowed to be empty'
 
       expect(() => {
         throw error

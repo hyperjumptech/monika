@@ -135,7 +135,7 @@ const sendTextMessage = async ({
 
 export const validator = Joi.object().keys({
   recipients: Joi.array()
-    .items(Joi.string().email().label('WhatsApp Recipients'))
+    .items(Joi.string().label('WhatsApp Recipients'))
     .label('WhatsApp Recipients'),
   url: Joi.string().uri().required().label('WhatsApp URL'),
   username: Joi.string().required().label('WhatsApp Username'),

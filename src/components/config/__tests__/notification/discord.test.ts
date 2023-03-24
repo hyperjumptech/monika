@@ -25,10 +25,7 @@
 import chai, { expect } from 'chai'
 import spies from 'chai-spies'
 
-import {
-  errorMessage,
-  validateNotification,
-} from '../../validation/validator/notification'
+import { validateNotification } from '../../validation/validator/notification'
 
 chai.use(spies)
 
@@ -53,8 +50,7 @@ describe('notificationChecker - discordNotification', () => {
         },
       ])
     } catch (error) {
-      const originalErrorMessage = '"Discord URL" is not allowed to be empty'
-      const { message } = errorMessage('Discord', originalErrorMessage)
+      const message = '"Discord URL" is not allowed to be empty'
 
       expect(() => {
         throw error
@@ -73,8 +69,7 @@ describe('notificationChecker - discordNotification', () => {
         },
       ])
     } catch (error) {
-      const originalErrorMessage = '"Discord URL" must be a valid uri'
-      const { message } = errorMessage('Discord', originalErrorMessage)
+      const message = '"Discord URL" must be a valid uri'
 
       expect(() => {
         throw error

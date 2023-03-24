@@ -62,7 +62,8 @@ export const validator = Joi.object().keys({
   username: Joi.string().required().label('SMTP Username'),
   password: Joi.string().required().label('SMTP Password'),
   recipients: Joi.array()
-    .items(Joi.string().email().label('Email Recipients'))
+    .required()
+    .items(Joi.string().required().email().label('Email Email Recipients'))
     .label('Email Recipients'),
 })
 

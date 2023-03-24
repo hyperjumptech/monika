@@ -1,10 +1,7 @@
 import chai, { expect } from 'chai'
 import spies from 'chai-spies'
 
-import {
-  errorMessage,
-  validateNotification,
-} from '../../validation/validator/notification'
+import { validateNotification } from '../../validation/validator/notification'
 
 chai.use(spies)
 
@@ -53,9 +50,7 @@ describe('notificationChecker - pushbulletNotification', () => {
         },
       ])
     } catch (error) {
-      const originalErrorMessage =
-        '"Pushbullet token" is not allowed to be empty'
-      const { message } = errorMessage('Pushbullet', originalErrorMessage)
+      const message = '"Pushbullet token" is not allowed to be empty'
 
       expect(() => {
         throw error

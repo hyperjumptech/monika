@@ -90,6 +90,11 @@ export const updateConfig = async (
     try {
       await validateConfig(config)
     } catch (error: any) {
+      if (process.env.NODE_ENV === 'test') {
+        // return error during tests
+        throw new Error(error.message)
+      }
+
       log.error(error?.message)
       exit(1)
     }
@@ -158,7 +163,7 @@ function scheduleRemoteConfigFetcher({
         defaultConfigs[index] = newConfig
       }
 
-      updateConfig(mergeConfigs())
+      await updateConfig(mergeConfigs())
     } catch (error: any) {
       log.error(error?.message)
     }
@@ -256,7 +261,7 @@ export const setupConfig = async (flags: MonikaFlags): Promise<void> => {
     nonDefaultConfig = addDefaultNotifications(nonDefaultConfig)
   }
 
-  updateConfig(mergeConfigs())
+  await updateConfig(mergeConfigs())
 }
 
 const getPathAndTypeFromFlag = (flags: MonikaFlags) => {
