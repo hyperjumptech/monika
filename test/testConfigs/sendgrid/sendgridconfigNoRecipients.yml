@@ -5,7 +5,7 @@ notifications:
       apiKey: adfsafdsadfdsafsafds
       sender: name@example.com
 probes:
-  - id: "1"
+  - id: '1'
     name: Example
     description: Probe
     interval: 10
@@ -13,7 +13,7 @@ probes:
       - method: POST
         url: https://something/login
         headers:
-          Authorization: ""
+          Authorization: ''
         body:
           username: someusername
           password: somepassword
