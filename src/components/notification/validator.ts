@@ -39,8 +39,8 @@ export const dataSMTPSchemaValidator = dataBaseEmailSchemaValidator(
 ).keys({
   hostname: Joi.string().required().label('SMTP Hostname'),
   port: Joi.number().port().required().label('SMTP Port'),
-  username: Joi.string().required().label('SMTP Username'),
-  password: Joi.string().required().label('SMTP Password'),
+  username: Joi.string().label('SMTP Username'),
+  password: Joi.string().label('SMTP Password'),
 })
 
 export const dataMailgunSchemaValidator = dataBaseEmailSchemaValidator(
