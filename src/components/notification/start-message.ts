@@ -23,13 +23,10 @@
  **********************************************************************************/
 
 import { hostname } from 'os'
-import { NotificationSendingError, sendNotifications } from '.'
+import { sendNotifications } from '.'
 import getIp from '../../utils/ip'
 import { getMessageForStart } from './alert-message'
 import type { Notification } from './channel'
-
-// reexported with alias because this `errorMessage` function is used in test file
-export const errorMessage = NotificationSendingError.create
 
 export const sendMonikaStartMessage = async (
   notifications: Notification[]

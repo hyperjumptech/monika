@@ -23,12 +23,11 @@
  **********************************************************************************/
 
 import Joi from 'joi'
-import { dataBaseEmailSchemaValidator, type NotificationMessage } from './'
+import type { NotificationMessage } from './'
 import { sendHttpRequest } from '../../../utils/http'
 
 type DiscordData = {
   url: string
-  body: string
 }
 
 export type DiscordNotification = {
@@ -37,7 +36,7 @@ export type DiscordNotification = {
   data: DiscordData
 }
 
-export const validator = dataBaseEmailSchemaValidator('Discord').keys({
+export const validator = Joi.object().keys({
   url: Joi.string().uri().required().label('Discord URL'),
 })
 

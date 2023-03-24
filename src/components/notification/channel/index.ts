@@ -157,16 +157,7 @@ export type NotificationMessage = {
     | NotificationStatusUpdateMessageMeta
 }
 
-export const dataBaseEmailSchemaValidator = (
-  type: string
-): Joi.ObjectSchema<any> => {
-  return Joi.object().keys({
-    recipients: Joi.array()
-      .items(Joi.string().email().label(`${type} Recipients`))
-      .label(`${type} Recipients`),
-  })
-}
-
 export interface Notifier {
   send(data: Notification, message: NotificationMessage): Promise<void>
+  validator: Joi.ObjectSchema<any>
 }

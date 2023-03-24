@@ -24,7 +24,7 @@
 
 import Joi from 'joi'
 import { sendHttpRequest } from '../../../utils/http'
-import { dataBaseEmailSchemaValidator, type NotificationMessage } from './'
+import type { NotificationMessage } from './'
 
 type TeamsData = {
   url: string
@@ -51,7 +51,7 @@ type Content = {
   themeColor?: string
 }
 
-export const validator = dataBaseEmailSchemaValidator('Teams').keys({
+export const validator = Joi.object().keys({
   url: Joi.string().uri().required().label('Teams URL'),
 })
 

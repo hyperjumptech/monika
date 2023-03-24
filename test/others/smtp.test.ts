@@ -23,29 +23,16 @@
  **********************************************************************************/
 
 import { expect } from '@oclif/test'
-import mailMock from 'nodemailer-mock'
 import {
-  createSmtpTransport,
+  NotificationMessage,
   sendSmtpMail,
-} from '../../src/components/notification/channel/smtp'
+} from '../../src/components/notification/channel'
 import Mail from 'nodemailer/lib/mailer'
-import { SMTPData } from '../../src/interfaces/data'
-
-const transport: Mail = mailMock.createTransport({
-  host: '127.0.0.1',
-  port: 2323,
-})
-const opt: Mail.Options = {
-  from: 'me@example.com',
-  to: 'symontest@example.com',
-  subject: 'unit test',
-  html: '<p>A unit test</p>',
-}
 
 describe('Smtp test', () => {
   describe('createSmtpTransport test', () => {
     it('should return transporter', async function () {
-      const mockCfg: SMTPData = {
+      const mockCfg = {
         hostname: 'smtp.symon.org',
         port: 587,
         username: 'me@symon.org',
@@ -53,27 +40,11 @@ describe('Smtp test', () => {
         recipients: ['symon@example.com'],
       }
 
-      const res = createSmtpTransport(mockCfg)
+      const res = sendSmtpMail(mockCfg, {
+        body: '',
+        subject: '',
+      } as NotificationMessage)
       expect(res).instanceOf(Mail)
-    })
-  })
-
-  describe('sendSmtp test', () => {
-    it('should return success info', async function () {
-      transport.sendMail(opt, function () {
-        return {
-          accepted: ['successEmail'],
-        }
-      })
-
-      const res = await sendSmtpMail(transport, {
-        from: 'me@example.com',
-        to: 'symontest@example.com',
-        subject: 'unit test',
-        html: '<p>A unit test</p>',
-      })
-
-      expect(res.accepted).length(1)
     })
   })
 })

@@ -27,7 +27,7 @@ import Mailgen from 'mailgen'
 import Joi from 'joi'
 
 import { convertTextToHTML } from '../../../utils/text'
-import { dataBaseEmailSchemaValidator, type NotificationMessage } from '.'
+import type { NotificationMessage } from '.'
 
 type SMTPData = {
   hostname: string
@@ -56,15 +56,14 @@ const createSmtpTransport = ({
   })
 }
 
-export const validator = dataBaseEmailSchemaValidator('SMTP').keys({
+export const validator = Joi.object().keys({
   hostname: Joi.string().required().label('SMTP Hostname'),
   port: Joi.number().port().required().label('SMTP Port'),
   username: Joi.string().required().label('SMTP Username'),
   password: Joi.string().required().label('SMTP Password'),
   recipients: Joi.array()
-    .required()
-    .items(Joi.string().label('Email recipients'))
-    .label('Email recipients'),
+    .items(Joi.string().email().label('Email Recipients'))
+    .label('Email Recipients'),
 })
 
 export const send = async (

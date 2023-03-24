@@ -3,9 +3,8 @@ import spies from 'chai-spies'
 
 import {
   errorMessage,
-  notificationChecker,
-} from '../../../src/components/notification/checker'
-import { PushbulletData } from '../../../src/interfaces/data'
+  validateNotification,
+} from '../../validation/validator/notification'
 
 chai.use(spies)
 
@@ -19,22 +18,22 @@ describe('notificationChecker - pushbulletNotification', () => {
     type: 'pushbullet' as const,
   }
   const fn = () =>
-    notificationChecker([
+    validateNotification([
       {
         ...notificationConfig,
         data: {
           token: 'qwertyuiop',
           deviceID: 'asdfghjkl',
-        } as PushbulletData,
+        },
       },
     ])
   const notificationCheckerWithoutDeviceID = () =>
-    notificationChecker([
+    validateNotification([
       {
         ...notificationConfig,
         data: {
           token: 'qwertyuiop',
-        } as PushbulletData,
+        },
       },
     ])
 
@@ -44,13 +43,13 @@ describe('notificationChecker - pushbulletNotification', () => {
 
   it('should handle validation error - no token', async () => {
     try {
-      await notificationChecker([
+      await validateNotification([
         {
           ...notificationConfig,
           data: {
             token: '',
             deviceID: 'asdfghjkl',
-          } as PushbulletData,
+          },
         },
       ])
     } catch (error) {

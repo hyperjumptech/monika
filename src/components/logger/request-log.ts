@@ -22,9 +22,9 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Probe, ProbeAlert } from '../../interfaces/probe'
-import { Notification } from '../../interfaces/notification'
-import { ProbeRequestResponse } from '../../interfaces/request'
+import type { Probe, ProbeAlert } from '../../interfaces/probe'
+import type { Notification } from '../notification/channel'
+import type { ProbeRequestResponse } from '../../interfaces/request'
 import { log } from '../../utils/pino'
 import { saveProbeRequestLog, saveNotificationLog } from './history'
 import { getContext } from '../../context'

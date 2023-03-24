@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import Joi from 'joi'
-import { dataBaseEmailSchemaValidator, type NotificationMessage } from '.'
+import type { NotificationMessage } from '.'
 import { sendHttpRequest } from '../../../utils/http'
 
 type MonikaAlertNotifDataBody = {
@@ -68,7 +68,7 @@ export type MonikaWhatsappNotification = {
   data: MonikaNotifData
 }
 
-export const validator = dataBaseEmailSchemaValidator('MonikaNotif').keys({
+export const validator = Joi.object().keys({
   url: Joi.string().uri().required().label('Monika Notification URL'),
 })
 

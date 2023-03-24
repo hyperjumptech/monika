@@ -3,9 +3,8 @@ import spies from 'chai-spies'
 
 import {
   errorMessage,
-  notificationChecker,
-} from '../../../src/components/notification/checker'
-import { MailgunData } from '../../../src/interfaces/data'
+  validateNotification,
+} from '../../validation/validator/notification'
 
 chai.use(spies)
 
@@ -21,18 +20,19 @@ describe('notificationChecker - mailgunNotification', () => {
 
   it('should handle validation error - without apiKey', async () => {
     try {
-      await notificationChecker([
+      await validateNotification([
         {
           ...notificationConfig,
           data: {
+            apiKey: '',
             domain: 'mailgun.com',
-            username: 'mailgunuser',
             recipients: [],
-          } as unknown as MailgunData,
+          },
         },
       ])
     } catch (error) {
-      const originalErrorMessage = '"Mailgun API Key" is required'
+      const originalErrorMessage =
+        '"Mailgun API Key" is not allowed to be empty'
       const { message } = errorMessage('Mailgun', originalErrorMessage)
 
       expect(() => {
@@ -43,17 +43,18 @@ describe('notificationChecker - mailgunNotification', () => {
 
   it('should handle validation error - without domain', async () => {
     try {
-      await notificationChecker([
+      await validateNotification([
         {
           ...notificationConfig,
           data: {
             apiKey: 'ABC-EFG-HIJ-KLM-NOP-QRS-TUV-WXY-Z',
-            username: 'mailgunuser',
-          } as MailgunData,
+            domain: '',
+            recipients: [],
+          },
         },
       ])
     } catch (error) {
-      const originalErrorMessage = '"Mailgun Domain" is required'
+      const originalErrorMessage = '"Mailgun Domain" is not allowed to be empty'
       const { message } = errorMessage('Mailgun', originalErrorMessage)
 
       expect(() => {

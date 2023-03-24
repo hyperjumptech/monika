@@ -3,33 +3,32 @@ import spies from 'chai-spies'
 
 import {
   errorMessage,
-  notificationChecker,
-} from '../../../src/components/notification/checker'
-import { WebhookData } from '../../../src/interfaces/data'
+  validateNotification,
+} from '../../validation/validator/notification'
 
 chai.use(spies)
 
-describe('notificationChecker - webhookNotification', () => {
+describe('notificationChecker - slackNotification', () => {
   afterEach(() => {
     chai.spy.restore()
   })
 
   const notificationConfig = {
-    id: 'webhook',
-    type: 'webhook' as const,
+    id: 'slack',
+    type: 'slack' as const,
   }
 
   it('should handle validation error - without URL', async () => {
     try {
-      await notificationChecker([
+      await validateNotification([
         {
           ...notificationConfig,
-          data: {} as WebhookData,
+          data: { url: '' },
         },
       ])
     } catch (error) {
-      const originalErrorMessage = '"Webhook URL" is required'
-      const { message } = errorMessage('Webhook', originalErrorMessage)
+      const originalErrorMessage = '"Slack URL" is not allowed to be empty'
+      const { message } = errorMessage('Slack', originalErrorMessage)
 
       expect(() => {
         throw error
@@ -39,17 +38,17 @@ describe('notificationChecker - webhookNotification', () => {
 
   it('should handle validation error - invalid URL', async () => {
     try {
-      await notificationChecker([
+      await validateNotification([
         {
           ...notificationConfig,
           data: {
             url: 'example',
-          } as WebhookData,
+          },
         },
       ])
     } catch (error) {
-      const originalErrorMessage = '"Webhook URL" must be a valid uri'
-      const { message } = errorMessage('Webhook', originalErrorMessage)
+      const originalErrorMessage = '"Slack URL" must be a valid uri'
+      const { message } = errorMessage('Slack', originalErrorMessage)
 
       expect(() => {
         throw error

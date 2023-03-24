@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import Joi from 'joi'
-import { dataBaseEmailSchemaValidator, type NotificationMessage } from './'
+import type { NotificationMessage } from './'
 import { sendHttpRequest } from '../../../utils/http'
 
 type GoogleChatData = {
@@ -59,7 +59,7 @@ type Content = {
   }[]
 }
 
-export const validator = dataBaseEmailSchemaValidator('google-chat').keys({
+export const validator = Joi.object().keys({
   url: Joi.string().uri().required().label('Google URL'),
 })
 

@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import Joi from 'joi'
-import { dataBaseEmailSchemaValidator, type NotificationMessage } from './'
+import type { NotificationMessage } from './'
 import { sendHttpRequest } from '../../../utils/http'
 
 type SlackData = {
@@ -46,7 +46,7 @@ type Content = {
   blocks: ContentBlock[]
 }
 
-export const validator = dataBaseEmailSchemaValidator('Slack').keys({
+export const validator = Joi.object().keys({
   url: Joi.string().uri().required().label('Slack URL'),
 })
 

@@ -48,6 +48,9 @@ import {
   validator,
 } from '../../../notification/channel'
 
+// reexported with alias because this `errorMessage` function is used in test file
+export const errorMessage = NotificationSendingError.create
+
 export const validateNotification = async (
   notifications: Notification[]
 ): Promise<void> => {

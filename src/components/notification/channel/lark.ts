@@ -24,7 +24,7 @@
 
 /* eslint-disable camelcase */
 import Joi from 'joi'
-import { dataBaseEmailSchemaValidator, type NotificationMessage } from './'
+import type { NotificationMessage } from './'
 import { sendHttpRequest } from '../../../utils/http'
 
 type LarkData = {
@@ -53,7 +53,7 @@ type Content = {
   }
 }
 
-export const validator = dataBaseEmailSchemaValidator('lark').keys({
+export const validator = Joi.object().keys({
   url: Joi.string().uri().required().label('Lark URL'),
 })
 

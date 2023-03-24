@@ -3,33 +3,35 @@ import spies from 'chai-spies'
 
 import {
   errorMessage,
-  notificationChecker,
-} from '../../../src/components/notification/checker'
-import { TeamsData } from '../../../src/interfaces/data'
+  validateNotification,
+} from '../../validation/validator/notification'
 
 chai.use(spies)
 
-describe('notificationChecker - teamsNotification', () => {
+describe('notificationChecker - MonikaNotification', () => {
   afterEach(() => {
     chai.spy.restore()
   })
 
   const notificationConfig = {
-    id: 'teams',
-    type: 'teams' as const,
+    id: 'monika-notif',
+    type: 'monika-notif' as const,
   }
 
   it('should handle validation error - without URL', async () => {
     try {
-      await notificationChecker([
+      await validateNotification([
         {
           ...notificationConfig,
-          data: {} as TeamsData,
+          data: {
+            url: '',
+          },
         },
       ])
     } catch (error) {
-      const originalErrorMessage = '"Teams URL" is required'
-      const { message } = errorMessage('Teams', originalErrorMessage)
+      const originalErrorMessage =
+        '"Monika Notification URL" is not allowed to be empty'
+      const { message } = errorMessage('Monika-Notif', originalErrorMessage)
 
       expect(() => {
         throw error
@@ -39,17 +41,18 @@ describe('notificationChecker - teamsNotification', () => {
 
   it('should handle validation error - invalid URL', async () => {
     try {
-      await notificationChecker([
+      await validateNotification([
         {
           ...notificationConfig,
           data: {
             url: 'example',
-          } as TeamsData,
+          },
         },
       ])
     } catch (error) {
-      const originalErrorMessage = '"Teams URL" must be a valid uri'
-      const { message } = errorMessage('Teams', originalErrorMessage)
+      const originalErrorMessage =
+        '"Monika Notification URL" must be a valid uri'
+      const { message } = errorMessage('Monika-Notif', originalErrorMessage)
 
       expect(() => {
         throw error

@@ -24,7 +24,7 @@
 
 /* eslint-disable camelcase */
 import Joi from 'joi'
-import { dataBaseEmailSchemaValidator, type NotificationMessage } from '.'
+import type { NotificationMessage } from '.'
 import { sendHttpRequest } from '../../../utils/http'
 
 type WorkplaceData = {
@@ -38,7 +38,7 @@ export type WorkplaceNotification = {
   data: WorkplaceData
 }
 
-export const validator = dataBaseEmailSchemaValidator('Workplace').keys({
+export const validator = Joi.object().keys({
   thread_id: Joi.string().required().label('Workplace Thread ID'),
   access_token: Joi.string().required().label('Workplace Access Token'),
 })

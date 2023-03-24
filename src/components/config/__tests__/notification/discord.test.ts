@@ -22,48 +22,63 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import Joi from 'joi'
-import type { NotificationMessage } from './'
-import { sendHttpRequest } from '../../../utils/http'
+import chai, { expect } from 'chai'
+import spies from 'chai-spies'
 
-type PushoverData = {
-  token: string
-  user: string
-  message: string
-}
+import {
+  errorMessage,
+  validateNotification,
+} from '../../validation/validator/notification'
 
-export type PushoverNotification = {
-  id: string
-  type: 'pushover'
-  data: PushoverData
-}
+chai.use(spies)
 
-export const validator = Joi.object().keys({
-  token: Joi.string().required().label('Pushover token'),
-  user: Joi.string().required().label('Pushover user'),
-})
-
-export const send = async (
-  { token, user }: PushoverData,
-  { body, meta }: NotificationMessage
-): Promise<void> => {
-  const notificationType = meta.type[0].toUpperCase() + meta.type.slice(1)
-  const content =
-    meta.type === 'incident' || meta.type === 'recovery'
-      ? `New ${notificationType} event from Monika\n\n${body}`
-      : body
-
-  await sendHttpRequest({
-    method: 'POST',
-    url: `https://api.pushover.net/1/messages.json`,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    data: {
-      user,
-      token,
-      message: content,
-      html: 1,
-    },
+describe('notificationChecker - discordNotification', () => {
+  afterEach(() => {
+    chai.spy.restore()
   })
-}
+
+  const notificationConfig = {
+    id: 'discord',
+    type: 'discord' as const,
+  }
+
+  it('should handle validation error - without URL', async () => {
+    try {
+      await validateNotification([
+        {
+          ...notificationConfig,
+          data: {
+            url: '',
+          },
+        },
+      ])
+    } catch (error) {
+      const originalErrorMessage = '"Discord URL" is not allowed to be empty'
+      const { message } = errorMessage('Discord', originalErrorMessage)
+
+      expect(() => {
+        throw error
+      }).to.throw(message)
+    }
+  })
+
+  it('should handle validation error - invalid URL', async () => {
+    try {
+      await validateNotification([
+        {
+          ...notificationConfig,
+          data: {
+            url: 'example',
+          },
+        },
+      ])
+    } catch (error) {
+      const originalErrorMessage = '"Discord URL" must be a valid uri'
+      const { message } = errorMessage('Discord', originalErrorMessage)
+
+      expect(() => {
+        throw error
+      }).to.throw(message)
+    }
+  })
+})

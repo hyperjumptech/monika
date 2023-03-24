@@ -22,13 +22,13 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+/* eslint-disable camelcase */
 import format from 'date-fns/format'
 import Joi from 'joi'
-import { dataBaseEmailSchemaValidator, type NotificationMessage } from './'
+import type { NotificationMessage } from './'
 import { sendHttpRequest } from '../../../utils/http'
 
 type DingtalkData = {
-  // eslint-disable-next-line camelcase
   access_token: string
 }
 
@@ -53,13 +53,11 @@ type Content = {
   markdown?: MarkdownContent
 }
 
-export const validator = dataBaseEmailSchemaValidator('Discord').keys({
-  // eslint-disable-next-line camelcase
+export const validator = Joi.object().keys({
   access_token: Joi.string().required().label('Dingtalk access token'),
 })
 
 export const send = async (
-  // eslint-disable-next-line camelcase
   { access_token }: DingtalkData,
   message: NotificationMessage
 ): Promise<void> => {

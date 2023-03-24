@@ -1,11 +1,11 @@
+/* eslint-disable camelcase */
 import chai, { expect } from 'chai'
 import spies from 'chai-spies'
 
 import {
   errorMessage,
-  notificationChecker,
-} from '../../../src/components/notification/checker'
-import { WorkplaceData } from '../../../src/interfaces/data'
+  validateNotification,
+} from '../../validation/validator/notification'
 
 chai.use(spies)
 
@@ -21,17 +21,18 @@ describe('notificationChecker - workplaceNotification', () => {
 
   it('should handle validation error - without Thread ID', async () => {
     try {
-      await notificationChecker([
+      await validateNotification([
         {
           ...notificationConfig,
           data: {
-            // eslint-disable-next-line camelcase
             access_token: 'ABC-EFG-HIJ-KLM-NOP-QRS-TUV-WXY-Z',
-          } as WorkplaceData,
+            thread_id: '',
+          },
         },
       ])
     } catch (error) {
-      const originalErrorMessage = '"Workplace Thread ID" is required'
+      const originalErrorMessage =
+        '"Workplace Thread ID" is not allowed to be empty'
       const { message } = errorMessage('Workplace', originalErrorMessage)
 
       expect(() => {
@@ -42,17 +43,18 @@ describe('notificationChecker - workplaceNotification', () => {
 
   it('should handle validation error - without Access Token', async () => {
     try {
-      await notificationChecker([
+      await validateNotification([
         {
           ...notificationConfig,
           data: {
-            // eslint-disable-next-line camelcase
+            access_token: '',
             thread_id: 'ABC-EFG-HIJ-KLM-NOP-QRS-TUV-WXY-Z',
-          } as WorkplaceData,
+          },
         },
       ])
     } catch (error) {
-      const originalErrorMessage = '"Workplace Access Token" is required'
+      const originalErrorMessage =
+        '"Workplace Access Token" is not allowed to be empty'
       const { message } = errorMessage('Workplace', originalErrorMessage)
 
       expect(() => {

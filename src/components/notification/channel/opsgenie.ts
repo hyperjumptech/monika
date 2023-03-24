@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import Joi from 'joi'
-import { dataBaseEmailSchemaValidator, type NotificationMessage } from './'
+import type { NotificationMessage } from './'
 import { sendHttpRequest } from '../../../utils/http'
 
 type OpsgenieData = {
@@ -41,7 +41,7 @@ type Content = {
   description: string
 }
 
-export const validator = dataBaseEmailSchemaValidator('Opsgenie').keys({
+export const validator = Joi.object().keys({
   geniekey: Joi.string().required().label('Opsgenie geniekey'),
 })
 

@@ -3,35 +3,32 @@ import spies from 'chai-spies'
 
 import {
   errorMessage,
-  notificationChecker,
-} from '../../../src/components/notification/checker'
-import { WebhookData } from '../../../src/interfaces/data'
+  validateNotification,
+} from '../../validation/validator/notification'
 
 chai.use(spies)
 
-describe('notificationChecker - discordNotification', () => {
+describe('notificationChecker - teamsNotification', () => {
   afterEach(() => {
     chai.spy.restore()
   })
 
   const notificationConfig = {
-    id: 'discord',
-    type: 'discord' as const,
+    id: 'teams',
+    type: 'teams' as const,
   }
 
   it('should handle validation error - without URL', async () => {
     try {
-      await notificationChecker([
+      await validateNotification([
         {
           ...notificationConfig,
-          data: {
-            body: '',
-          } as WebhookData,
+          data: { url: '' },
         },
       ])
     } catch (error) {
-      const originalErrorMessage = '"Discord URL" is required'
-      const { message } = errorMessage('Discord', originalErrorMessage)
+      const originalErrorMessage = '"Teams URL" is not allowed to be empty'
+      const { message } = errorMessage('Teams', originalErrorMessage)
 
       expect(() => {
         throw error
@@ -41,17 +38,17 @@ describe('notificationChecker - discordNotification', () => {
 
   it('should handle validation error - invalid URL', async () => {
     try {
-      await notificationChecker([
+      await validateNotification([
         {
           ...notificationConfig,
           data: {
             url: 'example',
-          } as WebhookData,
+          },
         },
       ])
     } catch (error) {
-      const originalErrorMessage = '"Discord URL" must be a valid uri'
-      const { message } = errorMessage('Discord', originalErrorMessage)
+      const originalErrorMessage = '"Teams URL" must be a valid uri'
+      const { message } = errorMessage('Teams', originalErrorMessage)
 
       expect(() => {
         throw error

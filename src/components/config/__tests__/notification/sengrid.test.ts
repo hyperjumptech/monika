@@ -3,9 +3,8 @@ import spies from 'chai-spies'
 
 import {
   errorMessage,
-  notificationChecker,
-} from '../../../src/components/notification/checker'
-import { SendgridData } from '../../../src/interfaces/data'
+  validateNotification,
+} from '../../validation/validator/notification'
 
 chai.use(spies)
 
@@ -21,14 +20,19 @@ describe('notificationChecker - sendgridNotification', () => {
 
   it('should handle validation error - without apiKey', async () => {
     try {
-      await notificationChecker([
+      await validateNotification([
         {
           ...notificationConfig,
-          data: {} as SendgridData,
+          data: {
+            apiKey: '',
+            sender: 'name@example.com',
+            recipients: ['john@example.com'],
+          },
         },
       ])
     } catch (error) {
-      const originalErrorMessage = '"Sendgrid API Key" is required'
+      const originalErrorMessage =
+        '"Sendgrid API Key" is not allowed to be empty'
       const { message } = errorMessage('Sendgrid', originalErrorMessage)
 
       expect(() => {

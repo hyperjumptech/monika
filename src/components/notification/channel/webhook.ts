@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import Joi from 'joi'
-import { dataBaseEmailSchemaValidator, type NotificationMessage } from '.'
+import type { NotificationMessage } from '.'
 import { sendHttpRequest } from '../../../utils/http'
 
 type WebhookData = {
@@ -36,7 +36,7 @@ export type WebhookNotification = {
   data: WebhookData
 }
 
-export const validator = dataBaseEmailSchemaValidator('Webhook').keys({
+export const validator = Joi.object().keys({
   url: Joi.string().uri().required().label('Webhook URL'),
 })
 
