@@ -121,6 +121,8 @@ const mergeConfigs = (): Config => {
     return {
       ...prev,
       ...current,
+      notifications: current.notifications || prev.notifications,
+      probes: current.probes || prev.probes,
     }
   }, nonDefaultConfig || {})
 
