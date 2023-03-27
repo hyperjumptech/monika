@@ -252,7 +252,8 @@ export async function getUnreportedLogsCount(): Promise<number> {
 
 export async function getUnreportedLogs(
   ids: string[],
-  limit: number
+  limit: number,
+  database: Database<SQLite3.Database, SQLite3.Statement> = db
 ): Promise<UnreportedLog> {
   const readUnreportedRequestsSQL = `
     SELECT PR.id,
@@ -296,7 +297,7 @@ export async function getUnreportedLogs(
     LIMIT ${limit};`
 
   const [unreportedRequests, unreportedNotifications] = await Promise.all([
-    db.all(readUnreportedRequestsSQL).then(
+    database.all(readUnreportedRequestsSQL).then(
       (unreportedProbeRequests: UnreportedProbeRequestDB[]) =>
         /* eslint-disable camelcase */
         unreportedProbeRequests.map(
@@ -343,7 +344,7 @@ export async function getUnreportedLogs(
 
       /* eslint-enable camelcase */
     ),
-    db
+    database
       .all(readUnreportedNotificationsSQL)
       .then((unreportedNotifications: UnreportedNotificationDB[]) =>
         unreportedNotifications.map((unreportedNotification) => {
@@ -381,21 +382,23 @@ export async function getUnreportedLogs(
 }
 
 export async function deleteRequestLogs(
-  ids: string[]
+  ids: string[],
+  database: Database<SQLite3.Database, SQLite3.Statement> = db
 ): Promise<ISqlite.RunResult> {
   const idsString = ids.join("','")
   const sql = `DELETE FROM probe_requests WHERE probe_id IN ('${idsString}');`
 
-  return db.run(sql)
+  return database.run(sql)
 }
 
 export async function deleteNotificationLogs(
-  ids: string[]
+  ids: string[],
+  database: Database<SQLite3.Database, SQLite3.Statement> = db
 ): Promise<ISqlite.RunResult> {
   const idsString = ids.join("','")
   const sql = `DELETE FROM notifications WHERE probe_id IN ('${idsString}');`
 
-  return db.run(sql)
+  return database.run(sql)
 }
 
 /**
@@ -405,6 +408,8 @@ export async function deleteNotificationLogs(
 export async function flushAllLogs(): Promise<void> {
   const dropAtlassianStatusPageTableSQL =
     'DROP TABLE IF EXISTS atlassian_status_page_incidents;'
+  const dropInstatusPageTableSQL =
+    'DROP TABLE IF EXISTS instatus_page_incidents;'
   const dropProbeRequestsTableSQL = 'DROP TABLE IF EXISTS probe_requests;'
   const dropAlertsTableSQL = 'DROP TABLE IF EXISTS alerts;'
   const dropNotificationsTableSQL = 'DROP TABLE IF EXISTS notifications;'
@@ -416,6 +421,7 @@ export async function flushAllLogs(): Promise<void> {
     db.run(dropAlertsTableSQL),
     db.run(dropNotificationsTableSQL),
     db.run(dropMigrationsTableSQL),
+    db.run(dropInstatusPageTableSQL),
 
     // The VACUUM command cleans the main database by copying its contents to a temporary database file and reloading the original database file from the copy.
     // This eliminates free pages, aligns table data to be contiguous, and otherwise cleans up the database file structure.

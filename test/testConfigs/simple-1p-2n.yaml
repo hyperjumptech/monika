@@ -1,0 +1,20 @@
+# simple notification 2
+# 1 probe, 2 notifications
+notifications:
+  - id: desktop
+    type: desktop
+  - id: desktop2
+    type: desktop
+probes:
+  - id: 6a31bcff-48f1-40b0-98aa-8c7610f4f428
+    name: Google
+    requests:
+      - url: https://www.google.com
+        method: GET
+    alerts:
+      - assertion: response.status < 200 or response.status > 299
+        message: HTTP Status is not 200
+      - assertion: response.time > 2000
+        message: Response time is more than 2000ms
+    incidentThreshold: 3
+    recoveryThreshold: 3

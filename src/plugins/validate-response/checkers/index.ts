@@ -43,17 +43,18 @@ export const parseAlertStringTime = (str: string): number => {
   return number
 }
 
-// resonseChecker checks some result and returns ()
+// responseChecker checks some result and returns boolean if alert requered
 const responseChecker = (
   alert: ProbeAlert,
   res: ProbeRequestResponse
 ): boolean => {
-  // TODO: improve the flag/alert triggers away from axios centric status
-  // if status is 599 : timeout or uri is not found (0), worth reporting so return true for alert
-  if (res.status === 599 || res.status === 0 || res.status === 1) {
+  // If the probe did not succeed (ex: invalid address etc),
+  // then automatic alert-able event.
+  if (!res.isProbeResponsive) {
     return true
   }
 
+  // Else we check for user assertion
   return queryExpression(res, alert.assertion || (alert.query as string))
 }
 

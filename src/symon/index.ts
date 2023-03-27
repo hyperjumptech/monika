@@ -30,6 +30,7 @@ import { hostname } from 'os'
 import Bree from 'bree'
 import path from 'path'
 
+import { updateConfig } from '../components/config'
 import { getOSName } from '../components/notification/alert-message'
 import { getContext } from '../context'
 import events from '../events'
@@ -46,24 +47,8 @@ import {
   publicIpAddress,
   publicNetworkInfo,
 } from '../utils/public-ip'
-import {
-  deleteNotificationLogs,
-  deleteRequestLogs,
-  getUnreportedLogs,
-  UnreportedNotificationsLog,
-  UnreportedRequestsLog,
-} from '../components/logger/history'
 
 Bree.extend(require('@breejs/ts-worker'))
-
-type ReportWorkerMessage = {
-  success: boolean
-  data?: {
-    requests: UnreportedRequestsLog[]
-    notifications: UnreportedNotificationsLog[]
-  }
-  error?: any
-}
 
 type SymonHandshakeData = {
   macAddress: string
@@ -84,7 +69,7 @@ type SymonClientEvent = {
   event: 'incident' | 'recovery'
   alertId: string
   response: {
-    status: number
+    status: number // httpStatus Code
     time?: number
     size?: number
     headers?: Record<string, unknown>
@@ -161,10 +146,6 @@ class SymonClient {
 
   private configListeners: ConfigListener[] = []
 
-  private unreportedRequestsLog: UnreportedRequestsLog[] = []
-
-  private unreportedNotificationsLog: Partial<UnreportedNotificationsLog>[] = []
-
   private bree = new Bree({
     root: false,
     defaultExtension: process.env.NODE_ENV === 'test' ? 'ts' : 'js',
@@ -177,44 +158,6 @@ class SymonClient {
       log.debug(workerMetadata)
     },
     outputWorkerMetadata: true,
-    workerMessageHandler: async (msg) => {
-      try {
-        // Get worker metadata
-        const workerMetaData = this.bree.getWorkerMetadata('report', msg)
-        const { success, data, error } =
-          workerMetaData.message as ReportWorkerMessage
-
-        // If the message says that the worker successfully processed the data
-        // And there is a data contains the reported logs and notifications
-        if (success && data) {
-          // Delete the reported requests
-          if (data.requests.length > 0) {
-            await deleteRequestLogs(data.requests.map((log) => log.probeId))
-            log.debug(`Deleted ${data.requests.length} reported request`)
-          }
-
-          // Delete the reported notifications
-          if (data.notifications.length > 0) {
-            await deleteNotificationLogs(
-              data.notifications.map((log) => log.probeId)
-            )
-            log.debug(`Deleted ${data.notifications.length} reported request`)
-          }
-
-          // Reset the currently stored logs
-          this.unreportedRequestsLog = []
-          this.unreportedNotificationsLog = []
-        } else {
-          // Else, throw error from the worker
-          throw error
-        }
-      } catch (error) {
-        log.error(`Failed to process the worker metadata, got: ${error}`)
-      } finally {
-        // Run the report again
-        await this.report()
-      }
-    },
   })
 
   constructor({
@@ -272,7 +215,7 @@ class SymonClient {
           event: args.probeState === 'DOWN' ? 'incident' : 'recovery',
           alertId: args.validation.alert.id ?? '',
           response: {
-            status: args.validation.response.status,
+            status: args.validation.response.status, // status is http status code
             time: args.validation.response.responseTime,
             size: args.validation.response.headers['content-length'],
             headers: args.validation.response.headers ?? {},
@@ -293,6 +236,7 @@ class SymonClient {
     }
 
     await this.report()
+    this.onConfig((config) => updateConfig(config, false))
   }
 
   async notifyEvent(event: SymonClientEvent): Promise<void> {
@@ -407,20 +351,13 @@ class SymonClient {
 
       // Updating requests and notifications to report
       const probeIds = this.probes.map((probe: Probe) => probe.id)
-      const logs = await getUnreportedLogs(probeIds, this.reportProbesLimit)
-      const requests = logs.requests
-      const notifications = logs.notifications.map(({ id: _, ...n }) => n)
-
-      // Set the stored logs
-      this.unreportedRequestsLog = requests
-      this.unreportedNotificationsLog = notifications
 
       // Creating/updating report job
       const jobInterval = this.reportProbesInterval / 1000 // Convert probes interval to second
       const jobData = {
         hasConnectionToSymon,
-        requests: this.unreportedRequestsLog,
-        notifications: this.unreportedNotificationsLog,
+        probeIds,
+        reportProbesLimit: this.reportProbesLimit,
         httpClient: this.httpClient,
         monikaId: this.monikaId,
         url: this.url,

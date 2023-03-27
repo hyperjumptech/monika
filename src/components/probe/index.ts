@@ -22,9 +22,6 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import * as mongodbURI from 'mongodb-uri'
-import { parse } from 'pg-connection-string'
-
 import { getContext } from '../../context'
 import events from '../../events'
 import { Notification } from '../../interfaces/notification'
@@ -37,16 +34,18 @@ import validateResponse, {
 import { getEventEmitter } from '../../utils/events'
 import { log } from '../../utils/pino'
 import { setProbeFinish, setProbeRunning } from '../../utils/probe-state'
-import { httpRequest } from '../http-request'
 import { RequestLog } from '../logger'
-import { logResponseTime } from '../logger/response-time-log'
-import { mariaRequest } from '../mariadb-request'
-import { mongoRequest } from '../mongodb-request'
 import { sendAlerts } from '../notification'
 import { processThresholds } from '../notification/process-server-status'
-import { PostgresParam, postgresRequest } from '../postgres-request'
-import { redisRequest } from '../redis-request'
-import { tcpRequest } from '../tcp-request'
+import {
+  type ProbeResult,
+  probeHTTP,
+  probeMariaDB,
+  probeMongo,
+  probePostgres,
+  probeRedis,
+  probeSocket,
+} from './prober'
 
 interface ProbeStatusProcessed {
   probe: Probe
@@ -101,10 +100,10 @@ const probeSendNotification = async (data: ProbeSendNotification) => {
 }
 
 // Probes Thresholds processed, Send out notifications/alerts.
-function checkThresholdsAndSendAlert(
+export function checkThresholdsAndSendAlert(
   data: ProbeStatusProcessed,
   requestLog: RequestLog
-) {
+): void {
   const {
     probe,
     statuses,
@@ -164,20 +163,18 @@ type respProsessingParams = {
  * @param {object} param is response Processing type
  * @returns void
  */
-async function responseProcessing({
+function responseProcessing({
   probe,
   probeResult,
   notifications,
   logMessage,
   isAlertTriggered,
   index,
-}: respProsessingParams): Promise<void> {
+}: respProsessingParams): void {
   const { flags } = getContext()
   const isSymonMode = Boolean(flags.symonUrl) && Boolean(flags.symonKey)
-  const verboseLogs = isSymonMode || flags['keep-verbose-logs']
-
-  isAlertTriggered ? log.warn(logMessage) : log.info(logMessage)
-
+  const eventEmitter = getEventEmitter()
+  const isVerbose = isSymonMode || flags['keep-verbose-logs']
   const { alerts } = probe
   const validatedResponse = validateResponse(
     alerts || [
@@ -189,19 +186,25 @@ async function responseProcessing({
     probeResult
   )
   const requestLog = new RequestLog(probe, index, 0)
-
-  requestLog.addAlerts(
-    validatedResponse
-      .filter((item) => item.isAlertTriggered)
-      .map((item) => item.alert)
-  )
   const statuses = processThresholds({
     probe,
     requestIndex: index,
     validatedResponse,
   })
 
+  eventEmitter.emit(events.probe.response.received, {
+    probe,
+    requestIndex: index,
+    response: probeResult,
+  })
+  isAlertTriggered ? log.warn(logMessage) : log.info(logMessage)
+  requestLog.addAlerts(
+    validatedResponse
+      .filter((item) => item.isAlertTriggered)
+      .map((item) => item.alert)
+  )
   requestLog.setResponse(probeResult)
+  // Done processing results, check if need to send out alerts
   checkThresholdsAndSendAlert(
     {
       probe,
@@ -212,8 +215,9 @@ async function responseProcessing({
     },
     requestLog
   )
+  requestLog.print()
 
-  if (verboseLogs || requestLog.hasIncidentOrRecovery) {
+  if (isVerbose || requestLog.hasIncidentOrRecovery) {
     requestLog.saveToDatabase().catch((error) => log.error(error.message))
   }
 }
@@ -225,7 +229,7 @@ type doProbeParams = {
 }
 /**
  * doProbe sends out the http request
- * @param {object} param object parameter
+ * @param {object} doProbeParams doProbe parameter
  * @returns {Promise<void>} void
  */
 export async function doProbe({
@@ -233,298 +237,97 @@ export async function doProbe({
   probe,
   notifications,
 }: doProbeParams): Promise<void> {
-  const { flags } = getContext()
-  const isSymonMode = Boolean(flags.symonUrl) && Boolean(flags.symonKey)
-  const verboseLogs = isSymonMode || flags['keep-verbose-logs']
+  const randomTimeoutMilliseconds = getRandomTimeoutMilliseconds()
 
   setProbeRunning(probe.id)
 
-  const randomTimeout = [1000, 2000, 3000].sort(() => {
-    return Math.random() - 0.5
-  })[0]
-
-  // eslint-disable-next-line complexity
   setTimeout(async () => {
-    const eventEmitter = getEventEmitter()
-    const responses = []
-
-    if (probe?.mongo) {
-      const { id, mongo } = probe
-      let mongoRequestIndex = 0
-      for await (const mongoDB of mongo) {
-        const { uri } = mongoDB
-        let host: string | undefined
-        let port: number | undefined
-        let username: string | undefined
-        let password: string | undefined
-
-        if (uri) {
-          const parsed = mongodbURI.parse(uri)
-          host = parsed.hosts[0].host
-          port = parsed.hosts[0].port
-          username = parsed.username
-          password = parsed.password
-        } else {
-          host = mongoDB.host
-          port = mongoDB.port
-          username = mongoDB.username
-          password = mongoDB.password
-        }
-
-        const mongoResult = await mongoRequest({
-          uri,
-          host,
-          port,
-          username,
-          password,
-        })
-        const timeNow = new Date().toISOString()
-        const logMessage = `${timeNow} ${checkOrder} id:${id} mongo:${host}:${port} ${mongoResult.responseTime}ms msg:${mongoResult.body}`
-        const isAlertTriggered = mongoResult.status !== 200
-        responseProcessing({
-          probe: probe,
-          probeResult: mongoResult,
-          notifications: notifications,
-          logMessage: logMessage,
-          isAlertTriggered: isAlertTriggered,
-          index: mongoRequestIndex,
-        })
-        mongoRequestIndex++
-      }
-    }
-
-    if (probe?.mariadb || probe?.mysql) {
-      const { id, mariadb, mysql } = probe
-      let mariaReqIndex = 0
-      let logMessage = ''
-
-      const mydb = mariadb ?? mysql
-
-      if (mydb !== undefined) {
-        for await (const mariaIndex of mydb) {
-          const { host, port, database, username, password } = mariaIndex
-
-          const mariaResult = await mariaRequest({
-            host,
-            port,
-            database,
-            username,
-            password,
-          })
-          const timeNow = new Date().toISOString()
-
-          // eslint-disable-next-line unicorn/prefer-ternary
-          if (mariadb) {
-            logMessage = `${timeNow} ${checkOrder} id:${id} mariadb:${host}:${port} ${mariaResult.responseTime}ms msg:${mariaResult.body}`
-          } else {
-            logMessage = `${timeNow} ${checkOrder} id:${id} mysql:${host}:${port} ${mariaResult.responseTime}ms msg:${mariaResult.body}`
-          }
-
-          const isAlertTriggered = mariaResult.status !== 200
-
-          responseProcessing({
-            probe: probe,
-            probeResult: mariaResult,
-            notifications: notifications,
-            logMessage: logMessage,
-            isAlertTriggered: isAlertTriggered,
-            index: mariaReqIndex,
-          })
-          mariaReqIndex++
-        }
-      }
-    }
-
-    if (probe?.postgres) {
-      const { id, postgres } = probe
-      let pgReqIndex = 0
-      const postgresParams: PostgresParam = {
-        host: '',
-        port: 0,
-        database: '',
-        username: '',
-        password: '',
-      }
-
-      for await (const pgIndex of postgres) {
-        const { host, port, database, username, password, uri } = pgIndex
-
-        if (uri !== undefined) {
-          const config = parse(uri)
-
-          // If got uri format, parse and use that instead
-          postgresParams.host = config.host ?? '0.0.0.0'
-          postgresParams.port = Number(config.port) ?? 5432
-          postgresParams.database = config.database ?? ''
-          postgresParams.username = config.user ?? ''
-          postgresParams.password = config.password ?? ''
-        } else if (uri === undefined) {
-          postgresParams.host = host
-          postgresParams.port = port
-          postgresParams.database = database
-          postgresParams.username = username
-          postgresParams.password = password
-        }
-
-        const pgResult = await postgresRequest(postgresParams)
-
-        const timeNow = new Date().toISOString()
-        const logMessage = `${timeNow} ${checkOrder} id:${id} postgres:${postgresParams.host}:${postgresParams.port} ${pgResult.responseTime}ms msg:${pgResult.body}`
-        const isAlertTriggered = pgResult.status !== 200
-
-        responseProcessing({
-          probe: probe,
-          probeResult: pgResult,
-          notifications: notifications,
-          logMessage: logMessage,
-          isAlertTriggered: isAlertTriggered,
-          index: pgReqIndex,
-        })
-        pgReqIndex++
-      }
-    }
-
-    if (probe?.redis) {
-      const { id, redis } = probe
-      let redisRequestIndex = 0
-      for await (const redisIndex of redis) {
-        const { host, port } = redisIndex
-        const redisRes = await redisRequest({ host: host, port: port })
-        const timeNow = new Date().toISOString()
-        const logMessage = `${timeNow} ${checkOrder} id:${id} redis:${host}:${port} ${redisRes.responseTime}ms msg:${redisRes.body}`
-        const isAlertTriggered = redisRes.status !== 200
-        responseProcessing({
-          probe: probe,
-          probeResult: redisRes,
-          notifications: notifications,
-          logMessage: logMessage,
-          isAlertTriggered: isAlertTriggered,
-          index: redisRequestIndex,
-        })
-        redisRequestIndex++
-      }
-    }
-
-    if (probe?.socket) {
-      const { id, socket } = probe
-      const { host, port, data } = socket
-      const url = `${host}:${port}`
-      const probeRes = await tcpRequest({ host, port, data })
-      const timeNow = new Date().toISOString()
-      const logMessage = `${timeNow} ${checkOrder} id:${id} tcp:${url} ${probeRes.responseTime}ms msg:${probeRes.body}`
-      const isAlertTriggered = probeRes.status !== 200
-      const TCPrequestIndex = 0
-      responseProcessing({
-        probe: probe,
-        probeResult: probeRes,
-        notifications: notifications,
-        logMessage: logMessage,
-        isAlertTriggered: isAlertTriggered,
-        index: TCPrequestIndex,
-      })
-    }
-
-    // sending multiple http-type requests
-    for (
-      let requestIndex = 0;
-      requestIndex < probe?.requests?.length;
-      requestIndex++
-    ) {
-      const request = probe.requests?.[requestIndex]
-      const requestLog = new RequestLog(probe, requestIndex, checkOrder)
-
-      try {
-        // intentionally wait for a request to finish before processing next request in loop
-        // eslint-disable-next-line no-await-in-loop
-        const probeRes: ProbeRequestResponse = await httpRequest({
-          requestConfig: request,
-          responses,
-        })
-
-        logResponseTime(probeRes.responseTime)
-
-        eventEmitter.emit(events.probe.response.received, {
-          probe: probe,
-          requestIndex,
-          response: probeRes,
-        })
-
-        // Add to a response array to be accessed by another request for chaining later
-        responses.push(probeRes)
-        requestLog.setResponse(probeRes)
-
-        // decode error message based on returned driver status
-        if ([0, 1, 2, 3, 4, 599].includes(probeRes.status)) {
-          const errorMessageMap: Record<number, string> = {
-            0: 'URI not found', // axios error
-            1: 'Connection reset', // axios error
-            2: 'Connection refused', // axios error
-            3: 'Unknown error', // axios error
-            599: 'Request Timed out', // axios error
-          }
-
-          requestLog.addError(errorMessageMap[probeRes.status])
-        }
-
-        // combine global probe alerts with all individual request alerts
-        const probeAlerts = probe.alerts ?? []
-        const combinedAlerts = [...probeAlerts, ...(request.alerts || [])]
-
-        // Responses have been processed and validated
-        const validatedResponse = validateResponse(combinedAlerts, probeRes)
-
-        requestLog.addAlerts(
-          validatedResponse
-            .filter((item) => item.isAlertTriggered)
-            .map((item) => item.alert)
-        )
-
-        // done probing, got some result, process it, check for thresholds and notifications
-        const statuses = processThresholds({
-          probe: probe,
-          requestIndex,
-          validatedResponse,
-        })
-
-        // Done processing results, check if need to send out alerts
-        checkThresholdsAndSendAlert(
-          {
-            probe: probe,
-            statuses,
-            notifications: notifications,
-            requestIndex,
-            validatedResponseStatuses: validatedResponse,
-          },
-          requestLog
-        )
-
-        // Exit the chaining loop if there is any alert triggered
-        if (validatedResponse.some((item) => item.isAlertTriggered)) {
-          const triggeredAlertResponse = validatedResponse.find(
-            (item) => item.isAlertTriggered
-          )
-
-          if (triggeredAlertResponse) {
-            eventEmitter.emit(events.probe.alert.triggered, {
-              probe: probe,
-              requestIndex,
-              alertQuery: triggeredAlertResponse.alert.query,
-            })
-          }
-
-          break
-        }
-      } catch (error) {
-        requestLog.addError((error as any).message)
-        break
-      } finally {
-        requestLog.print()
-        if (verboseLogs || requestLog.hasIncidentOrRecovery) {
-          requestLog.saveToDatabase().catch((error) => log.error(error.message))
-        }
-      }
-    }
+    await probeNonHTTP(probe, checkOrder, notifications)
+    await probeHTTP(probe, checkOrder, notifications)
 
     setProbeFinish(probe.id)
-  }, randomTimeout)
+  }, randomTimeoutMilliseconds)
+}
+
+function processProbeResults(
+  probeResults: ProbeResult[],
+  probe: Probe,
+  notifications: Notification[]
+): void {
+  for (const index of probeResults.keys()) {
+    const { isAlertTriggered, logMessage, requestResponse } =
+      probeResults[index]
+
+    responseProcessing({
+      probe,
+      probeResult: requestResponse,
+      notifications,
+      logMessage,
+      isAlertTriggered,
+      index,
+    })
+  }
+}
+
+function getRandomTimeoutMilliseconds(): number {
+  return [1000, 2000, 3000].sort(() => {
+    return Math.random() - 0.5
+  })[0]
+}
+
+async function probeNonHTTP(
+  probe: Probe,
+  checkOrder: number,
+  notifications: Notification[]
+) {
+  if (probe?.mongo) {
+    const probeResults = await probeMongo({
+      id: probe.id,
+      checkOrder,
+      mongo: probe.mongo,
+    })
+
+    processProbeResults(probeResults, probe, notifications)
+  }
+
+  if (probe?.mariadb || probe?.mysql) {
+    const probeResults = await probeMariaDB({
+      id: probe.id,
+      checkOrder,
+      mysql: probe?.mysql,
+      mariaDB: probe?.mariadb,
+    })
+
+    processProbeResults(probeResults, probe, notifications)
+  }
+
+  if (probe?.postgres) {
+    const probeResults = await probePostgres({
+      id: probe.id,
+      checkOrder,
+      postgres: probe.postgres,
+    })
+
+    processProbeResults(probeResults, probe, notifications)
+  }
+
+  if (probe?.redis) {
+    const probeResults = await probeRedis({
+      id: probe.id,
+      checkOrder,
+      redis: probe.redis,
+    })
+
+    processProbeResults(probeResults, probe, notifications)
+  }
+
+  if (probe?.socket) {
+    const probeResults = await probeSocket({
+      id: probe.id,
+      checkOrder,
+      socket: probe.socket,
+    })
+
+    processProbeResults(probeResults, probe, notifications)
+  }
 }

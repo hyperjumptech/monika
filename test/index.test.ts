@@ -51,6 +51,30 @@ describe('monika', () => {
 
   test
     .stderr()
+    .do(() => cmd.run(['--config', 'https://example.com/monika.yaml']))
+    .catch((error) => {
+      expect(error.message).to.contain(
+        'The configuration file in https://example.com/monika.yaml is unreachable.'
+      )
+    })
+    .it('detects invalid remote config')
+
+  test
+    .stdout()
+    .do(() =>
+      cmd.run([
+        '--config',
+        'https://raw.githubusercontent.com/hyperjumptech/monika/main/monika.example.yml',
+      ])
+    )
+    .it('detects valid remote config', (ctx) => {
+      expect(ctx.stdout).to.contain(
+        'Starting Monika. Probes: 1. Notifications: 0'
+      )
+    })
+
+  test
+    .stderr()
     .do(() =>
       cmd.run([
         '--config',
@@ -392,14 +416,32 @@ describe('monika', () => {
     .do(() =>
       cmd.run([
         '--config',
-        resolve('./test/testConfigs/fullConfig.yml'),
-        resolve('./test/testConfigs/manyProbes.yml'),
+        resolve('./test/testConfigs/simple-1p-1n.yaml'),
+        resolve('./test/testConfigs/simple-1p-2n.yaml'),
       ])
     )
     .it('runs multiple config override', (ctx) => {
-      expect(ctx.stdout).to.contain('Probes: 2.')
-      expect(ctx.stdout).to.contain('Notifications: 7')
+      expect(ctx.stdout).to.contain('Probes: 1.')
+      expect(ctx.stdout).to.contain('Notifications: 2')
     })
+
+  test
+    .stdout()
+    .do(() =>
+      cmd.run([
+        '-c',
+        resolve('./test/testConfigs/manyNotif.yml'),
+        resolve('./test/testConfigs/noProbes.yml'),
+      ])
+    )
+    .it(
+      'run wth multiple config override: no probes on the second config',
+      (ctx) => {
+        expect(ctx.stdout)
+          .to.contain('Notifications: 1')
+          .and.contain('Probes: 1')
+      }
+    )
 
   test
     .stdout()
