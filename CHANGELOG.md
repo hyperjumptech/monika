@@ -3,7 +3,38 @@
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).##
+
+## [1.15.1] - 2023-03-24
+
+## Added
+
+- Add mention of json schema in documentations (#1003)
+- Instastatus integration (#971)
+- Add Probe Fail Notification (#947)
+- Add complementary prod_test using cli-testing library (#985)
+
+## Changed
+
+- Refactor: Reduce Code Complexity on run Function (#1006)
+- Refactor: reduce function complexity (#998)
+- Move the db operations to worker (#988)
+- Refactor complex functions in validate.ts (#995)
+
+## Updated
+
+- Update schema testing workflow (#1005)
+- Update Axios (#1014)
+- Improves `package.json` keywords (#997)
+
+## Fixed
+
+- Loading multiple config files does not work (#1011)
+- Reduce function complexity by separate and centralized all the prober in one directory (#1009)
+- Loading Remote Config (#993)
+- Create validate statuspage (#996)
+- Fix Node.js version matrix (#992)
+- Fix error when running -v and remove the unnecessary message (#984)
 
 ## [1.15.0] - 2023-01-20
 
