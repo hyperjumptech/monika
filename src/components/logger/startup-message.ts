@@ -66,6 +66,8 @@ export function logStartupMessage({
       log.info(`Using config file: ${path.resolve(configFlag[x])}`)
     }
   }
+
+  console.log(startupMessage)
 }
 
 type GenerateStartupMessageParams = {
