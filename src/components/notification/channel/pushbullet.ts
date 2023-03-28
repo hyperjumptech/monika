@@ -26,15 +26,9 @@ import Joi from 'joi'
 import { sendHttpRequest } from '../../../utils/http'
 import type { NotificationMessage } from './'
 
-type PushbulletData = {
+type NotificationData = {
   token: string
   deviceID?: string
-}
-
-export type PushbulletNotification = {
-  id: string
-  type: 'pushbullet'
-  data: PushbulletData
 }
 
 type Content = {
@@ -42,6 +36,8 @@ type Content = {
   body: string
   type: 'note'
 }
+
+export const type = 'pushbullet'
 
 export const validator = Joi.object().keys({
   token: Joi.string().required().label('Pushbullet token'),
@@ -51,7 +47,7 @@ export const validator = Joi.object().keys({
 })
 
 export const send = async (
-  { deviceID, token }: PushbulletData,
+  { deviceID, token }: NotificationData,
   message: NotificationMessage
 ): Promise<void> => {
   const notificationType =

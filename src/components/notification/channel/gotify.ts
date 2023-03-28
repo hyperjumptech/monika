@@ -26,18 +26,14 @@ import Joi from 'joi'
 import { sendHttpRequest } from '../../../utils/http'
 import type { NotificationMessage } from './'
 
-type GotifyData = {
+type NotificationData = {
   token: string
   url: string
 }
 
-export type GotifyNotification = {
-  id: string
-  type: 'gotify'
-  data: GotifyData
-}
-
 type Content = { title: string; message: string }
+
+export const type = 'gotify'
 
 export const validator = Joi.object().keys({
   token: Joi.string().required().label('Gotify token'),
@@ -45,7 +41,7 @@ export const validator = Joi.object().keys({
 })
 
 export const send = async (
-  { token, url }: GotifyData,
+  { token, url }: NotificationData,
   message: NotificationMessage
 ): Promise<void> => {
   const notificationType =

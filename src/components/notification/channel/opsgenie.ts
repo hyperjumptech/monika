@@ -26,14 +26,8 @@ import Joi from 'joi'
 import type { NotificationMessage } from './'
 import { sendHttpRequest } from '../../../utils/http'
 
-type OpsgenieData = {
+type NotificationData = {
   geniekey: string
-}
-
-export type OpsgenieNotification = {
-  id: string
-  type: 'opsgenie'
-  data: OpsgenieData
 }
 
 type Content = {
@@ -41,12 +35,14 @@ type Content = {
   description: string
 }
 
+export const type = 'opsgenie'
+
 export const validator = Joi.object().keys({
   geniekey: Joi.string().required().label('Opsgenie geniekey'),
 })
 
 export const send = async (
-  { geniekey }: OpsgenieData,
+  { geniekey }: NotificationData,
   message: NotificationMessage
 ): Promise<void> => {
   const notificationType =

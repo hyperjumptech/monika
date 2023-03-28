@@ -28,14 +28,8 @@ import Joi from 'joi'
 import type { NotificationMessage } from './'
 import { sendHttpRequest } from '../../../utils/http'
 
-type DingtalkData = {
+type NotificationData = {
   access_token: string
-}
-
-export type DingtalkNotification = {
-  id: string
-  type: 'dingtalk'
-  data: DingtalkData
 }
 
 type TextContent = {
@@ -53,12 +47,14 @@ type Content = {
   markdown?: MarkdownContent
 }
 
+export const type = 'dingtalk'
+
 export const validator = Joi.object().keys({
   access_token: Joi.string().required().label('Dingtalk access token'),
 })
 
 export const send = async (
-  { access_token }: DingtalkData,
+  { access_token }: NotificationData,
   message: NotificationMessage
 ): Promise<void> => {
   const notificationType =
@@ -67,7 +63,6 @@ export const send = async (
 
   await sendHttpRequest({
     method: 'POST',
-    // eslint-disable-next-line camelcase
     url: `https://oapi.dingtalk.com/robot/send?access_token=${access_token}`,
     headers: {
       'Content-Type': 'application/json',

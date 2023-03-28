@@ -27,168 +27,26 @@ import type { Notification, NotificationMessage } from './channel'
 import { ValidatedResponse } from '../../plugins/validate-response'
 import getIp from '../../utils/ip'
 import { getMessageForAlert } from './alert-message'
-import {
-  sendDesktop,
-  newPagerDuty,
-  sendDingtalk,
-  sendDiscord,
-  sendGoogleChat,
-  sendGotify,
-  sendLark,
-  sendMailgun,
-  sendMonikaNotif,
-  sendOpsgenie,
-  sendPushbullet,
-  sendPushover,
-  sendSendgrid,
-  sendSlack,
-  sendSmtpMail,
-  sendTeams,
-  sendTelegram,
-  sendWebhook,
-  sendWhatsapp,
-  sendWorkplace,
-} from './channel'
-
-export class NotificationSendingError extends Error {
-  notificationType: string
-
-  private constructor(notificationType: string, message: string) {
-    super(message)
-    this.name = 'NotificationSendingError'
-    this.notificationType = notificationType
-  }
-
-  static create(
-    notificationType: string,
-    originalErrorMessage?: string
-  ): NotificationSendingError {
-    return new NotificationSendingError(
-      notificationType,
-      `Failed to send message using ${notificationType}, please check your ${notificationType} notification config.\nMessage: ${originalErrorMessage}`
-    )
-  }
-}
+import { channels } from './channel'
 
 export async function sendNotifications(
   notifications: Notification[],
   message: NotificationMessage
 ): Promise<void> {
-  const pagerduty = newPagerDuty()
-
   await Promise.all(
-    // eslint-disable-next-line complexity
     notifications.map(async ({ data, type }) => {
-      // catch and rethrow error to add information about which notification channel errors.
+      const channel = channels.find((channel) => channel.type === type)
+
       try {
-        switch (type) {
-          case 'mailgun': {
-            await sendMailgun(data, message)
-            break
-          }
-
-          case 'sendgrid': {
-            await sendSendgrid(data, message)
-            break
-          }
-
-          case 'webhook': {
-            await sendWebhook(data, message)
-            break
-          }
-
-          case 'discord': {
-            await sendDiscord(data, message)
-            break
-          }
-
-          case 'dingtalk': {
-            await sendDingtalk(data, message)
-            break
-          }
-
-          case 'opsgenie': {
-            await sendOpsgenie(data, message)
-            break
-          }
-
-          case 'slack': {
-            await sendSlack(data, message)
-            break
-          }
-
-          case 'telegram': {
-            await sendTelegram(data, message)
-            break
-          }
-
-          case 'pushover': {
-            await sendPushover(data, message)
-            break
-          }
-
-          case 'gotify': {
-            await sendGotify(data, message)
-            break
-          }
-
-          case 'pushbullet': {
-            await sendPushbullet(data, message)
-            break
-          }
-
-          case 'smtp': {
-            await sendSmtpMail(data, message)
-            break
-          }
-
-          case 'whatsapp': {
-            await sendWhatsapp(data, message)
-            break
-          }
-
-          case 'teams': {
-            await sendTeams(data, message)
-            break
-          }
-
-          case 'monika-notif': {
-            await sendMonikaNotif(data, message)
-            break
-          }
-
-          case 'workplace': {
-            await sendWorkplace(data, message)
-            break
-          }
-
-          case 'desktop': {
-            sendDesktop(data, message)
-            break
-          }
-
-          case 'lark': {
-            await sendLark(data, message)
-            break
-          }
-
-          case 'google-chat': {
-            await sendGoogleChat(data, message)
-            break
-          }
-
-          case pagerduty.slug:
-            await pagerduty.send(data, message)
-            break
-
-          default: {
-            break
-          }
+        if (!channel) {
+          throw new Error('Notification channel is not available')
         }
 
-        return Promise.resolve()
+        await channel.send(data, message)
       } catch (error: any) {
-        throw NotificationSendingError.create(type, error?.message)
+        throw new Error(
+          `Failed to send message using ${type}, please check your ${type} notification config.\nMessage: ${error?.message}`
+        )
       }
     })
   )

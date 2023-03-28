@@ -26,17 +26,13 @@ import Joi from 'joi'
 import type { NotificationMessage } from './'
 import { sendHttpRequest } from '../../../utils/http'
 
-type PushoverData = {
+type NotificationData = {
   token: string
   user: string
   message: string
 }
 
-export type PushoverNotification = {
-  id: string
-  type: 'pushover'
-  data: PushoverData
-}
+export const type = 'pushover'
 
 export const validator = Joi.object().keys({
   token: Joi.string().required().label('Pushover token'),
@@ -44,7 +40,7 @@ export const validator = Joi.object().keys({
 })
 
 export const send = async (
-  { token, user }: PushoverData,
+  { token, user }: NotificationData,
   { body, meta }: NotificationMessage
 ): Promise<void> => {
   const notificationType = meta.type[0].toUpperCase() + meta.type.slice(1)

@@ -24,20 +24,16 @@
 
 import sgMail from '@sendgrid/mail'
 import Joi from 'joi'
+import Mailgen from 'mailgen'
 import type { NotificationMessage } from '.'
-import { convertTextToHTML } from '../../../utils/text'
 
-type SendgridData = {
+type NotificationData = {
   apiKey: string
   sender: string
   recipients: string[]
 }
 
-export type SendgridNotification = {
-  id: string
-  type: 'sendgrid'
-  data: SendgridData
-}
+export const type = 'sendgrid'
 
 export const validator = Joi.object().keys({
   apiKey: Joi.string().required().label('SendGrid API Key'),
@@ -49,18 +45,39 @@ export const validator = Joi.object().keys({
 })
 
 export const send = async (
-  { apiKey, recipients, sender }: SendgridData,
+  { apiKey, recipients, sender }: NotificationData,
   { body, subject }: NotificationMessage
 ): Promise<void> => {
   const to = recipients?.join(',')
-  const html = convertTextToHTML(body)
+  const mailGenerator = new Mailgen({
+    theme: 'default',
+    product: {
+      name: 'Monika',
+      link: 'https://monika.hyperjump.tech/',
+      logo: 'https://raw.githubusercontent.com/hyperjumptech/monika/main/docs/public/monika.svg',
+    },
+  })
+  const email = {
+    body: {
+      intro: [subject, ...body.split(/\r?\n/)],
+    },
+  }
+  const html = mailGenerator.generate(email)
+  const text = mailGenerator.generatePlaintext(email)
   const msg = {
     to,
     from: sender,
     subject,
     html,
+    text,
   }
 
   sgMail.setApiKey(apiKey)
   await sgMail.send(msg)
+}
+
+export function additionalStartupMessage({
+  recipients,
+}: NotificationData): string {
+  return `    Recipients: ${recipients.join(', ')}\n`
 }

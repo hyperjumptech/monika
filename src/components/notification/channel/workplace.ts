@@ -27,16 +27,12 @@ import Joi from 'joi'
 import type { NotificationMessage } from '.'
 import { sendHttpRequest } from '../../../utils/http'
 
-type WorkplaceData = {
+type NotificationData = {
   thread_id: string
   access_token: string
 }
 
-export type WorkplaceNotification = {
-  id: string
-  type: 'workplace'
-  data: WorkplaceData
-}
+export const type = 'workplace'
 
 export const validator = Joi.object().keys({
   thread_id: Joi.string().required().label('Workplace Thread ID'),
@@ -44,7 +40,7 @@ export const validator = Joi.object().keys({
 })
 
 export const send = async (
-  { access_token, thread_id }: WorkplaceData,
+  { access_token, thread_id }: NotificationData,
   { body }: NotificationMessage
 ): Promise<void> => {
   await sendHttpRequest({

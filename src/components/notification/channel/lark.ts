@@ -27,14 +27,8 @@ import Joi from 'joi'
 import type { NotificationMessage } from './'
 import { sendHttpRequest } from '../../../utils/http'
 
-type LarkData = {
+type NotificationData = {
   url: string
-}
-
-export type LarkNotification = {
-  id: string
-  type: 'lark'
-  data: LarkData
 }
 
 type Content = {
@@ -53,12 +47,14 @@ type Content = {
   }
 }
 
+export const type = 'lark'
+
 export const validator = Joi.object().keys({
   url: Joi.string().uri().required().label('Lark URL'),
 })
 
 export const send = async (
-  { url }: LarkData,
+  { url }: NotificationData,
   message: NotificationMessage
 ): Promise<void> => {
   const notificationType =
@@ -74,6 +70,10 @@ export const send = async (
     },
     data: larkMessage,
   })
+}
+
+export function additionalStartupMessage({ url }: NotificationData): string {
+  return `    URL: ${url}\n`
 }
 
 function getContent(

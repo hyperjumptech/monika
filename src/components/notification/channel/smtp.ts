@@ -26,10 +26,9 @@ import * as nodemailer from 'nodemailer'
 import Mailgen from 'mailgen'
 import Joi from 'joi'
 
-import { convertTextToHTML } from '../../../utils/text'
 import type { NotificationMessage } from '.'
 
-type SMTPData = {
+type NotificationData = {
   hostname: string
   port: number
   username: string
@@ -37,24 +36,7 @@ type SMTPData = {
   recipients: string[]
 }
 
-export type SMTPNotification = {
-  id: string
-  type: 'smtp'
-  data: SMTPData
-}
-
-const createSmtpTransport = ({
-  hostname,
-  password,
-  port,
-  username,
-}: Omit<SMTPData, 'recipients'>): any => {
-  return nodemailer.createTransport({
-    host: hostname,
-    port: port,
-    auth: { user: username, pass: password },
-  })
-}
+export const type = 'smtp'
 
 export const validator = Joi.object().keys({
   hostname: Joi.string().required().label('SMTP Hostname'),
@@ -68,18 +50,21 @@ export const validator = Joi.object().keys({
 })
 
 export const send = async (
-  data: SMTPData,
+  { hostname, password, port, recipients, username }: NotificationData,
   { body, subject }: NotificationMessage
 ): Promise<void> => {
   // TODO: Read from ENV Variables
   const DEFAULT_EMAIL = 'monika@hyperjump.tech'
-  const transporter = createSmtpTransport(data)
-  const opt = {
-    from: DEFAULT_EMAIL,
-    to: data?.recipients?.join(','),
-    subject,
-    text: body,
-  }
+  const DEFAULT_SENDER_NAME = 'Monika'
+  const transporter = nodemailer.createTransport({
+    host: hostname,
+    port: port,
+    secure: port === 465,
+    auth: {
+      user: username,
+      pass: password,
+    },
+  })
   const mailGenerator = new Mailgen({
     theme: 'default',
     product: {
@@ -88,22 +73,30 @@ export const send = async (
       logo: 'https://raw.githubusercontent.com/hyperjumptech/monika/main/docs/public/monika.svg',
     },
   })
-
-  const toNew = (opt.to as string).replace(',', ', ')
   const email = {
     body: {
-      name: `${toNew}`,
-      intro: [`${opt.subject}`, convertTextToHTML(`${opt.text}`)],
+      intro: [subject, ...body.split(/\r?\n/)],
     },
   }
-
-  const emailTemplate = mailGenerator.generate(email)
-  const to = (opt.to as string).split(',')
+  const html = mailGenerator.generate(email)
+  const text = mailGenerator.generatePlaintext(email)
 
   await transporter.sendMail({
-    from: opt.from,
-    to: to,
-    subject: opt.subject,
-    html: emailTemplate,
+    from: `"${DEFAULT_SENDER_NAME}" <${DEFAULT_EMAIL}>`,
+    to: recipients?.join(','),
+    subject,
+    text,
+    html,
   })
+}
+
+export function additionalStartupMessage({
+  hostname,
+  port,
+  recipients,
+  username,
+}: NotificationData): string {
+  return `    Recipients: ${recipients.join(
+    ', '
+  )}\n    Hostname: ${hostname}\n    Port: ${port}\n    Username: ${username}\n`
 }

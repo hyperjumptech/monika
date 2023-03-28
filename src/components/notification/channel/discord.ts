@@ -26,22 +26,18 @@ import Joi from 'joi'
 import type { NotificationMessage } from './'
 import { sendHttpRequest } from '../../../utils/http'
 
-type DiscordData = {
+type NotificationData = {
   url: string
 }
 
-export type DiscordNotification = {
-  id: string
-  type: 'discord'
-  data: DiscordData
-}
+export const type = 'discord'
 
 export const validator = Joi.object().keys({
   url: Joi.string().uri().required().label('Discord URL'),
 })
 
 export const send = async (
-  { url }: DiscordData,
+  { url }: NotificationData,
   message: NotificationMessage
 ): Promise<void> => {
   const notificationType =

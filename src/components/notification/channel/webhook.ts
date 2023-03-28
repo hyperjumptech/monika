@@ -26,22 +26,18 @@ import Joi from 'joi'
 import type { NotificationMessage } from '.'
 import { sendHttpRequest } from '../../../utils/http'
 
-type WebhookData = {
+type NotificationData = {
   url: string
 }
 
-export type WebhookNotification = {
-  id: string
-  type: 'webhook'
-  data: WebhookData
-}
+export const type = 'webhook'
 
 export const validator = Joi.object().keys({
   url: Joi.string().uri().required().label('Webhook URL'),
 })
 
 export const send = async (
-  { url }: WebhookData,
+  { url }: NotificationData,
   { body }: NotificationMessage
 ): Promise<void> => {
   await sendHttpRequest({
@@ -49,4 +45,8 @@ export const send = async (
     url,
     data: body,
   })
+}
+
+export function additionalStartupMessage({ url }: NotificationData): string {
+  return `    URL: ${url}\n`
 }

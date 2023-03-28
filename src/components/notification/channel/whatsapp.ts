@@ -34,17 +34,11 @@ type SendTextMessageParams = {
   baseUrl: string
 }
 
-type WhatsappData = {
+type NotificationData = {
   url: string
   username: string
   password: string
   recipients: string[]
-}
-
-export type WhatsappBusinessNotification = {
-  id: string
-  type: 'whatsapp'
-  data: WhatsappData
 }
 
 type User = {
@@ -64,47 +58,41 @@ type LoginUserSuccessResponse = {
   meta: Meta
 }
 
-const loginUser = async ({
-  password,
-  url: baseURL,
-  username,
-}: WhatsappData): Promise<string> => {
-  try {
-    const auth = authorize('basic', {
-      username,
-      password,
+export const type = 'whatsapp'
+
+export const validator = Joi.object().keys({
+  recipients: Joi.array()
+    .items(Joi.string().label('WhatsApp Recipients'))
+    .label('WhatsApp Recipients'),
+  url: Joi.string().uri().required().label('WhatsApp URL'),
+  username: Joi.string().required().label('WhatsApp Username'),
+  password: Joi.string().required().label('WhatsApp Password'),
+})
+
+export const send = async (
+  data: NotificationData,
+  { body }: NotificationMessage
+): Promise<void> => {
+  const token = await loginUser(data)
+
+  await Promise.all(
+    data.recipients.map(async (recipient) => {
+      await sendTextMessage({
+        recipient,
+        token,
+        baseUrl: data.url,
+        message: body,
+      })
     })
-
-    const url = `${baseURL}/v1/users/login`
-    const resp = await sendHttpRequest({
-      method: 'POST',
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: auth,
-      },
-    })
-    const loginResp: LoginUserSuccessResponse = resp?.data
-    const hasUser = loginResp.users?.length > 0
-
-    if (!hasUser) {
-      throw new Error('User not found')
-    }
-
-    return loginResp.users[0].token
-  } catch (error) {
-    throw new Error(
-      `Something wrong with your whatsapp config please check again. error: ${error}`
-    )
-  }
+  )
 }
 
-const sendTextMessage = async ({
+async function sendTextMessage({
   recipient,
   message,
   token,
   baseUrl,
-}: SendTextMessageParams): Promise<void> => {
+}: SendTextMessageParams): Promise<void> {
   try {
     const auth = authorize('bearer', token)
     const url = `${baseUrl}/v1/messages`
@@ -133,29 +121,37 @@ const sendTextMessage = async ({
   }
 }
 
-export const validator = Joi.object().keys({
-  recipients: Joi.array()
-    .items(Joi.string().label('WhatsApp Recipients'))
-    .label('WhatsApp Recipients'),
-  url: Joi.string().uri().required().label('WhatsApp URL'),
-  username: Joi.string().required().label('WhatsApp Username'),
-  password: Joi.string().required().label('WhatsApp Password'),
-})
-
-export const send = async (
-  data: WhatsappData,
-  { body }: NotificationMessage
-): Promise<void> => {
-  const token = await loginUser(data)
-
-  await Promise.all(
-    data.recipients.map(async (recipient) => {
-      await sendTextMessage({
-        recipient,
-        token,
-        baseUrl: data.url,
-        message: body,
-      })
+async function loginUser({
+  password,
+  url: baseURL,
+  username,
+}: NotificationData): Promise<string> {
+  try {
+    const auth = authorize('basic', {
+      username,
+      password,
     })
-  )
+
+    const url = `${baseURL}/v1/users/login`
+    const resp = await sendHttpRequest({
+      method: 'POST',
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: auth,
+      },
+    })
+    const loginResp: LoginUserSuccessResponse = resp?.data
+    const hasUser = loginResp.users?.length > 0
+
+    if (!hasUser) {
+      throw new Error('User not found')
+    }
+
+    return loginResp.users[0].token
+  } catch (error) {
+    throw new Error(
+      `Something wrong with your whatsapp config please check again. error: ${error}`
+    )
+  }
 }

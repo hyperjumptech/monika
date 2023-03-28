@@ -27,16 +27,12 @@ import Joi from 'joi'
 import type { NotificationMessage } from './'
 import { sendHttpRequest } from '../../../utils/http'
 
-type TelegramData = {
+type NotificationData = {
   group_id: string
   bot_token: string
 }
 
-export type TelegramNotification = {
-  id: string
-  type: 'telegram'
-  data: TelegramData
-}
+export const type = 'telegram'
 
 export const validator = Joi.object().keys({
   group_id: Joi.string().required().label('Telegram Group ID'),
@@ -44,7 +40,7 @@ export const validator = Joi.object().keys({
 })
 
 export const send = async (
-  { bot_token, group_id }: TelegramData,
+  { bot_token, group_id }: NotificationData,
   { body, meta }: NotificationMessage
 ): Promise<void> => {
   const notificationType = meta.type[0].toUpperCase() + meta.type.slice(1)

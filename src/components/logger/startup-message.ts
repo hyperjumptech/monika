@@ -27,7 +27,7 @@ import isUrl from 'is-url'
 import boxen from 'boxen'
 import chalk from 'chalk'
 import type { Config } from '../../interfaces/config'
-import type { Notification } from '../notification/channel'
+import { channels, type Notification } from '../notification/channel'
 import type { Probe, ProbeAlert } from '../../interfaces/probe'
 import type { RequestConfig } from '../../interfaces/request'
 import { log } from '../../utils/pino'
@@ -66,8 +66,6 @@ export function logStartupMessage({
       log.info(`Using config file: ${path.resolve(configFlag[x])}`)
     }
   }
-
-  console.log(startupMessage)
 }
 
 type GenerateStartupMessageParams = {
@@ -201,32 +199,14 @@ function generateNotificationMessage(notifications: Notification[]): string {
 
   for (const notification of notifications) {
     const { data, id, type } = notification
+    const channel = channels.find((channel) => channel.type === type)
 
     startupMessage += `- Notification ID: ${id}
 Type: ${type}
 `
-    // Only show recipients if type is mailgun, smtp, or sendgrid
-    // check one-by-one instead of using indexOf to avoid using type assertion
-    if (type === 'mailgun' || type === 'smtp' || type === 'sendgrid') {
-      startupMessage += `    Recipients: ${data.recipients.join(', ')}\n`
-    }
 
-    switch (type) {
-      case 'smtp':
-        startupMessage += `    Hostname: ${data.hostname}
-Port: ${data.port}
-Username: ${data.username}
-`
-        break
-      case 'mailgun':
-        startupMessage += `    Domain: ${data.domain}\n`
-        break
-      case 'webhook':
-      case 'slack':
-      case 'lark':
-      case 'google-chat':
-        startupMessage += `    URL: ${data.url}\n`
-        break
+    if (channel?.additionalStartupMessage) {
+      startupMessage += channel.additionalStartupMessage(data)
     }
   }
 

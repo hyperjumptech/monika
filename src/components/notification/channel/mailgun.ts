@@ -25,21 +25,17 @@
 import Mailgun from 'mailgun.js'
 import formData from 'form-data'
 import Joi from 'joi'
-import { convertTextToHTML } from '../../../utils/text'
 import type { NotificationMessage } from '.'
+import Mailgen from 'mailgen'
 
-type MailgunData = {
+type NotificationData = {
   apiKey: string
   domain: string
   recipients: string[]
   username?: string
 }
 
-export type MailgunNotification = {
-  id: string
-  type: 'mailgun'
-  data: MailgunData
-}
+export const type = 'mailgun'
 
 export const validator = Joi.object().keys({
   recipients: Joi.array()
@@ -52,14 +48,28 @@ export const validator = Joi.object().keys({
 })
 
 export const send = async (
-  { apiKey: key, domain, recipients, username = 'api' }: MailgunData,
+  { apiKey: key, domain, recipients, username = 'api' }: NotificationData,
   { body, subject }: NotificationMessage
 ): Promise<void> => {
   // TODO: Read from ENV Variables
   const DEFAULT_EMAIL = 'monika@hyperjump.tech'
   const DEFAULT_SENDER_NAME = 'Monika'
   const to = recipients?.join(',')
-  const html = convertTextToHTML(body)
+  const mailGenerator = new Mailgen({
+    theme: 'default',
+    product: {
+      name: 'Monika',
+      link: 'https://monika.hyperjump.tech/',
+      logo: 'https://raw.githubusercontent.com/hyperjumptech/monika/main/docs/public/monika.svg',
+    },
+  })
+  const email = {
+    body: {
+      intro: [subject, ...body.split(/\r?\n/)],
+    },
+  }
+  const html = mailGenerator.generate(email)
+  const text = mailGenerator.generatePlaintext(email)
   const mailgun = new Mailgun(formData)
   const mg = mailgun.client({ username, key })
   const data = {
@@ -67,7 +77,15 @@ export const send = async (
     to,
     subject,
     html,
+    text,
   }
 
   await mg.messages.create(domain, data)
+}
+
+export function additionalStartupMessage({
+  domain,
+  recipients,
+}: NotificationData): string {
+  return `    Recipients: ${recipients.join(', ')}\n    Domain: ${domain}\n`
 }

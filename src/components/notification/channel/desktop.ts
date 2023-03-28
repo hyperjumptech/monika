@@ -24,16 +24,10 @@
 
 import { execSync, spawnSync } from 'child_process'
 import Joi from 'joi'
-import { type } from 'os'
+import { type as osType } from 'os'
 import type { NotificationMessage } from '.'
 
-export type DesktopNotification = {
-  id: string
-  type: 'desktop'
-  // actually do not need data property
-  // it is here just to make type consistent and does not throw type error in other parts of app
-  data: undefined
-}
+export const type = 'desktop'
 
 export const validator = Joi.any()
 
@@ -44,7 +38,7 @@ export const send = async (
   { body, subject, summary }: NotificationMessage
 ): Promise<void> => {
   const content = summary || body
-  const operatingSystem = type()
+  const operatingSystem = osType()
 
   // OSAScript for OS X
   const osascript = `display notification "${content}" with title "Monika" subtitle "${subject}"`

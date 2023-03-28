@@ -26,64 +26,50 @@ import { expect } from 'chai'
 import { rest } from 'msw'
 import { setupServer } from 'msw/node'
 import type { NotificationMessage } from '../../notification/channel'
-import { newPagerDuty } from './pagerduty'
+import { send, type, validator } from './pagerduty'
 
 describe('PagerDuty notification', () => {
-  describe('check the slug', () => {
-    it('should return the slug', () => {
-      // arrange
-      const pagerduty = newPagerDuty()
-
+  describe('check the type', () => {
+    it('should return the type', () => {
       // assert
-      expect(pagerduty.slug).eq('pagerduty')
+      expect(type).eq('pagerduty')
     })
   })
 
   describe('validate configuration', () => {
     it('should validate probe ID', () => {
-      // arrange
-      const pagerduty = newPagerDuty()
-
       // act
-      const error = pagerduty.validateConfig([
-        { key: 'IV2Wu3GRXL3PCaddevIRd' },
-      ] as any)
+      const error = validator.validate([{ key: 'IV2Wu3GRXL3PCaddevIRd' }])
 
       // assert
-      expect(error).eq('PagerDuty notification: "Probe ID" is required')
+      expect(error.error?.message).eq('"Probe ID" is required')
     })
 
     it('should validate PagerDuty key', () => {
-      // arrange
-      const pagerduty = newPagerDuty()
-
       // act
-      const error = pagerduty.validateConfig([
+      const error = validator.validate([
         { probeID: '65DDKmmB9mSaeE-8bMXRN' },
       ] as any)
 
       // assert
-      expect(error).eq('PagerDuty notification: "Key" is required')
+      expect(error.error?.message).eq('"Key" is required')
     })
 
     it('should sucessfully validate the configuration', () => {
-      // arrange
-      const pagerduty = newPagerDuty()
-
       // act
-      const error = pagerduty.validateConfig([
+      const error = validator.validate([
         { key: 'IV2Wu3GRXL3PCaddevIRd', probeID: '65DDKmmB9mSaeE-8bMXRN' },
       ])
 
       // assert
-      expect(error).eq('')
+      // eslint-disable-next-line unicorn/no-useless-undefined
+      expect(error.error).eq(undefined)
     })
   })
 
   describe('send the event', () => {
     it('should ignore non incident/recovery event', async () => {
       // arrange
-      const pagerduty = newPagerDuty()
       const message: NotificationMessage = {
         subject: '',
         body: '',
@@ -99,7 +85,7 @@ describe('PagerDuty notification', () => {
       }
 
       // act
-      await pagerduty.send(
+      await send(
         [{ key: 'IV2Wu3GRXL3PCaddevIRd', probeID: '65DDKmmB9mSaeE-8bMXRN' }],
         message
       )
@@ -110,7 +96,6 @@ describe('PagerDuty notification', () => {
 
     it('should send incident event', async () => {
       // arrange
-      const pagerduty = newPagerDuty()
       const routingKey = 'IV2Wu3GRXL3PCaddevIRd'
       const message: NotificationMessage = {
         subject: '',
@@ -144,7 +129,7 @@ describe('PagerDuty notification', () => {
 
       // act
       server.listen()
-      await pagerduty.send(
+      await send(
         [{ key: routingKey, probeID: '65DDKmmB9mSaeE-8bMXRN' }],
         message
       )
@@ -168,7 +153,6 @@ describe('PagerDuty notification', () => {
 
     it('should send recovery event', async () => {
       // arrange
-      const pagerduty = newPagerDuty()
       const routingKey = 'IV2Wu3GRXL3PCaddevIRd'
       const message: NotificationMessage = {
         subject: '',
@@ -202,7 +186,7 @@ describe('PagerDuty notification', () => {
 
       // act
       server.listen()
-      await pagerduty.send(
+      await send(
         [{ key: routingKey, probeID: '65DDKmmB9mSaeE-8bMXRN' }],
         message
       )

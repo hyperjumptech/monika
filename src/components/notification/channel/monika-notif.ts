@@ -58,22 +58,18 @@ type MonikaNotifDataBody =
   | MonikaStartAndTerminationNotifDataBody
   | MonikaStatusUpdateNotifDataBody
 
-type MonikaNotifData = {
+type NotificationData = {
   url: string
 }
 
-export type MonikaWhatsappNotification = {
-  id: string
-  type: 'monika-notif'
-  data: MonikaNotifData
-}
+export const type = 'monika-notif'
 
 export const validator = Joi.object().keys({
   url: Joi.string().uri().required().label('Monika Notification URL'),
 })
 
 export const send = async (
-  { url }: MonikaNotifData,
+  { url }: NotificationData,
   message: NotificationMessage
 ): Promise<void> => {
   const content = getContent(message)

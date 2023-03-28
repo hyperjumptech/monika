@@ -22,75 +22,32 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { validator as dataStatuspageSchemaValidator } from '../../../../plugins/visualization/atlassian-status-page'
-import { validator as dataInstatusSchemaValidator } from '../../../../plugins/visualization/instatus'
-import {
-  dataDingtalkSchemaValidator,
-  dataDiscordSchemaValidator,
-  dataGoogleChatSchemaValidator,
-  dataGotifySchemaValidator,
-  dataLarkSchemaValidator,
-  dataMailgunSchemaValidator,
-  dataMonikaNotifSchemaValidator,
-  dataOpsgenieSchemaValidator,
-  dataPushbulletSchemaValidator,
-  dataPushoverSchemaValidator,
-  dataSendgridSchemaValidator,
-  dataSlackSchemaValidator,
-  dataSMTPSchemaValidator,
-  dataTeamsSchemaValidator,
-  dataTelegramSchemaValidator,
-  dataWebhookSchemaValidator,
-  dataWhatsappSchemaValidator,
-  dataWorkplaceSchemaValidator,
-  newPagerDuty,
-  Notification,
-  validator,
-} from '../../../notification/channel'
+import { channels, type Notification } from '../../../notification/channel'
 
 export const validateNotification = async (
   notifications: Notification[]
 ): Promise<void> => {
   const hasNotification = notifications.length > 0
+
   if (!hasNotification) {
     return
   }
 
-  const pagerduty = newPagerDuty()
-  const validators = {
-    desktop: validator,
-    dingtalk: dataDingtalkSchemaValidator,
-    discord: dataDiscordSchemaValidator,
-    'google-chat': dataGoogleChatSchemaValidator,
-    gotify: dataGotifySchemaValidator,
-    instatus: dataInstatusSchemaValidator,
-    lark: dataLarkSchemaValidator,
-    mailgun: dataMailgunSchemaValidator,
-    'monika-notif': dataMonikaNotifSchemaValidator,
-    opsgenie: dataOpsgenieSchemaValidator,
-    pagerduty: pagerduty.validator,
-    pushbullet: dataPushbulletSchemaValidator,
-    pushover: dataPushoverSchemaValidator,
-    sendgrid: dataSendgridSchemaValidator,
-    slack: dataSlackSchemaValidator,
-    smtp: dataSMTPSchemaValidator,
-    statuspage: dataStatuspageSchemaValidator,
-    teams: dataTeamsSchemaValidator,
-    telegram: dataTelegramSchemaValidator,
-    webhook: dataWebhookSchemaValidator,
-    whatsapp: dataWhatsappSchemaValidator,
-    workplace: dataWorkplaceSchemaValidator,
-  }
-
   await Promise.all(
     notifications.map(async ({ data, type }) => {
-      const validator = validators[type]
+      const validator = channels.find(
+        (channel) => channel.type === type
+      )?.validator
 
-      if (!validator) {
-        throw new Error(`Notifications type is not allowed (${type})`)
+      try {
+        if (!validator) {
+          throw new Error('Notifications type is not allowed')
+        }
+
+        await validator.validateAsync(data)
+      } catch (error: any) {
+        throw new Error(`${error?.message} (${type})`)
       }
-
-      await validator.validateAsync(data)
     })
   )
 }

@@ -26,14 +26,8 @@ import Joi from 'joi'
 import type { NotificationMessage } from './'
 import { sendHttpRequest } from '../../../utils/http'
 
-type SlackData = {
+type NotificationData = {
   url: string
-}
-
-export type SlackNotification = {
-  id: string
-  type: 'slack'
-  data: SlackData
 }
 
 type ContentBlock = {
@@ -46,12 +40,14 @@ type Content = {
   blocks: ContentBlock[]
 }
 
+export const type = 'slack'
+
 export const validator = Joi.object().keys({
   url: Joi.string().uri().required().label('Slack URL'),
 })
 
 export const send = async (
-  { url }: SlackData,
+  { url }: NotificationData,
   message: NotificationMessage
 ): Promise<void> => {
   const notificationType =
@@ -67,6 +63,10 @@ export const send = async (
     url,
     data: content,
   })
+}
+
+export function additionalStartupMessage({ url }: NotificationData): string {
+  return `    URL: ${url}\n`
 }
 
 function getContent(

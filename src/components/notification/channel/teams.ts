@@ -26,14 +26,8 @@ import Joi from 'joi'
 import { sendHttpRequest } from '../../../utils/http'
 import type { NotificationMessage } from './'
 
-type TeamsData = {
+type NotificationData = {
   url: string
-}
-
-export type TeamsNotification = {
-  id: string
-  type: 'teams'
-  data: TeamsData
 }
 
 type Content = {
@@ -51,12 +45,14 @@ type Content = {
   themeColor?: string
 }
 
+export const type = 'teams'
+
 export const validator = Joi.object().keys({
   url: Joi.string().uri().required().label('Teams URL'),
 })
 
 export const send = async (
-  { url }: TeamsData,
+  { url }: NotificationData,
   message: NotificationMessage
 ): Promise<void> => {
   const notificationType =

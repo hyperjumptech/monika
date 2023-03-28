@@ -26,14 +26,8 @@ import Joi from 'joi'
 import type { NotificationMessage } from './'
 import { sendHttpRequest } from '../../../utils/http'
 
-type GoogleChatData = {
+type NotificationData = {
   url: string
-}
-
-export type GoogleChatNotification = {
-  id: string
-  type: 'google-chat'
-  data: GoogleChatData
 }
 
 type ContentHeader = {
@@ -59,12 +53,14 @@ type Content = {
   }[]
 }
 
+export const type = 'google-chat'
+
 export const validator = Joi.object().keys({
   url: Joi.string().uri().required().label('Google URL'),
 })
 
 export const send = async (
-  { url }: GoogleChatData,
+  { url }: NotificationData,
   message: NotificationMessage
 ): Promise<void> => {
   const notificationType =
@@ -80,6 +76,10 @@ export const send = async (
     },
     data: content,
   })
+}
+
+export function additionalStartupMessage({ url }: NotificationData): string {
+  return `    URL: ${url}\n`
 }
 
 function getContent(
