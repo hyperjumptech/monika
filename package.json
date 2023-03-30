@@ -208,5 +208,8 @@
   "volta": {
     "node": "16.16.0",
     "npm": "8.19.0"
-  }
+  },
+  "workspaces": [
+    "packages/monika-notification"
+  ]
 }
