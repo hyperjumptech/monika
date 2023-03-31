@@ -27,8 +27,6 @@ export const requiredFieldMessages: Record<string, any> = {
   smtp: {
     hostname: 'Hostname not found',
     port: 'Port not found',
-    username: 'Username not found',
-    password: 'Password not found',
   },
   mailgun: {
     apiKey: 'Api key not found',

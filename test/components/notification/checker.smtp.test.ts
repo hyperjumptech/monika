@@ -116,11 +116,13 @@ describe('notificationChecker - smtpNotification', () => {
             hostname: 'localhost',
             port: 1000,
             password: 'password',
+            recipients: ['recipient@example.com'],
           } as SMTPData,
         },
       ])
     } catch (error) {
-      const originalErrorMessage = '"SMTP Username" is required'
+      // note: the expected is success, but since smtp at port 1000 does not exit, error is connection error
+      const originalErrorMessage = 'connect ECONNREFUSED 127.0.0.1:1000'
       const { message } = errorMessage('SMTP', originalErrorMessage)
 
       expect(() => {
@@ -138,11 +140,12 @@ describe('notificationChecker - smtpNotification', () => {
             hostname: 'localhost',
             port: 1000,
             username: 'username',
+            recipients: ['recipient@example.com'],
           } as SMTPData,
         },
       ])
     } catch (error) {
-      const originalErrorMessage = '"SMTP Password" is required'
+      const originalErrorMessage = 'connect ECONNREFUSED 127.0.0.1:1000'
       const { message } = errorMessage('SMTP', originalErrorMessage)
 
       expect(() => {
