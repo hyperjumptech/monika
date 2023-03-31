@@ -1,35 +1,32 @@
 import chai, { expect } from 'chai'
 import spies from 'chai-spies'
 
-import {
-  errorMessage,
-  notificationChecker,
-} from '../../../src/components/notification/checker'
-import { SlackData } from '../../../src/interfaces/data'
+import { validateNotification } from '../../validation/validator/notification'
 
 chai.use(spies)
 
-describe('notificationChecker - slackNotification', () => {
+describe('notificationChecker - MonikaNotification', () => {
   afterEach(() => {
     chai.spy.restore()
   })
 
   const notificationConfig = {
-    id: 'slack',
-    type: 'slack' as const,
+    id: 'monika-notif',
+    type: 'monika-notif' as const,
   }
 
   it('should handle validation error - without URL', async () => {
     try {
-      await notificationChecker([
+      await validateNotification([
         {
           ...notificationConfig,
-          data: {} as SlackData,
+          data: {
+            url: '',
+          },
         },
       ])
     } catch (error) {
-      const originalErrorMessage = '"Slack URL" is required'
-      const { message } = errorMessage('Slack', originalErrorMessage)
+      const message = '"Monika Notification URL" is not allowed to be empty'
 
       expect(() => {
         throw error
@@ -39,17 +36,16 @@ describe('notificationChecker - slackNotification', () => {
 
   it('should handle validation error - invalid URL', async () => {
     try {
-      await notificationChecker([
+      await validateNotification([
         {
           ...notificationConfig,
           data: {
             url: 'example',
-          } as SlackData,
+          },
         },
       ])
     } catch (error) {
-      const originalErrorMessage = '"Slack URL" must be a valid uri'
-      const { message } = errorMessage('Slack', originalErrorMessage)
+      const message = '"Monika Notification URL" must be a valid uri'
 
       expect(() => {
         throw error

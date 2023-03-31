@@ -22,18 +22,29 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { AxiosResponse } from 'axios'
-import { WebhookData } from '../../../interfaces/data'
+import Joi from 'joi'
+import type { NotificationMessage } from '.'
 import { sendHttpRequest } from '../../../utils/http'
 
-export const sendWebhook = async (
-  data: WebhookData
-): Promise<AxiosResponse> => {
-  const res = await sendHttpRequest({
-    method: 'POST',
-    url: data.url,
-    data: data.body,
-  })
+type NotificationData = {
+  url: string
+}
 
-  return res
+export const validator = Joi.object().keys({
+  url: Joi.string().uri().required().label('Webhook URL'),
+})
+
+export const send = async (
+  { url }: NotificationData,
+  { body }: NotificationMessage
+): Promise<void> => {
+  await sendHttpRequest({
+    method: 'POST',
+    url,
+    data: body,
+  })
+}
+
+export function additionalStartupMessage({ url }: NotificationData): string {
+  return `    URL: ${url}\n`
 }

@@ -22,137 +22,161 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { NotificationMessage } from '../../../interfaces/notification'
+import Joi from 'joi'
 import { sendHttpRequest } from '../../../utils/http'
-import { TeamsData } from './../../../interfaces/data'
+import type { NotificationMessage } from './'
 
-export const sendTeams = async (
-  data: TeamsData,
+type NotificationData = {
+  url: string
+}
+
+type Content = {
+  '@type': string
+  summary: string
+  sections?: {
+    activityTitle?: string
+    facts?: {
+      name?: string
+      value?: any
+    }[]
+    activitySubtitle?: string
+    markdown?: boolean
+  }[]
+  themeColor?: string
+}
+
+export const validator = Joi.object().keys({
+  url: Joi.string().uri().required().label('Teams URL'),
+})
+
+export const send = async (
+  { url }: NotificationData,
   message: NotificationMessage
 ): Promise<void> => {
-  switch (message.meta.type) {
+  const notificationType =
+    message.meta.type[0].toUpperCase() + message.meta.type.slice(1)
+  const content = getContent(message, notificationType)
+
+  await sendHttpRequest({
+    method: 'POST',
+    url,
+    data: content,
+  })
+}
+
+function getContent(
+  { body, meta, subject, summary }: NotificationMessage,
+  notificationType: string
+): Content {
+  switch (meta.type) {
     case 'start':
     case 'termination': {
-      await sendHttpRequest({
-        method: 'POST',
-        url: data.url,
-        data: {
-          '@type': 'MessageCard',
-          themeColor: '3BAFDA',
-          summary: message.summary,
-          sections: [
-            {
-              activityTitle: message.subject,
-              markdown: true,
-              facts: [
-                {
-                  name: 'Message',
-                  value: message.body,
-                },
-              ],
-            },
-          ],
-        },
-      })
-      break
+      return {
+        '@type': 'MessageCard',
+        themeColor: '3BAFDA',
+        summary,
+        sections: [
+          {
+            activityTitle: subject,
+            markdown: true,
+            facts: [
+              {
+                name: 'Message',
+                value: body,
+              },
+            ],
+          },
+        ],
+      }
     }
 
     case 'incident':
     case 'recovery': {
-      const notifType =
-        message.meta.type[0].toUpperCase() + message.meta.type.slice(1)
-      const notifColor = message.meta.type === 'incident' ? 'DF202E' : '8CC152'
+      const themeColor = meta.type === 'incident' ? 'DF202E' : '8CC152'
 
-      await sendHttpRequest({
-        method: 'POST',
-        url: data.url,
-        data: {
-          '@type': 'MessageCard',
-          themeColor: notifColor,
-          summary: `New ${notifType} from Monika`,
-          sections: [
-            {
-              activityTitle: `New ${notifType} from Monika`,
-              facts: [
-                {
-                  name: 'Message',
-                  value: message.summary,
-                },
-                {
-                  name: 'URL',
-                  value: `[${message.meta.url}](${message.meta.url})`,
-                },
-                {
-                  name: 'Time',
-                  value: message.meta.time,
-                },
-                {
-                  name: 'From',
-                  value: message.meta.monikaInstance,
-                },
-                { name: 'Version', value: message.meta.version },
-              ],
-              markdown: true,
-            },
-          ],
-        },
-      })
-      break
+      return {
+        '@type': 'MessageCard',
+        themeColor,
+        summary: `New ${notificationType} from Monika`,
+        sections: [
+          {
+            activityTitle: `New ${notificationType} from Monika`,
+            facts: [
+              {
+                name: 'Message',
+                value: summary,
+              },
+              {
+                name: 'URL',
+                value: `[${meta.url}](${meta.url})`,
+              },
+              {
+                name: 'Time',
+                value: meta.time,
+              },
+              {
+                name: 'From',
+                value: meta.monikaInstance,
+              },
+              { name: 'Version', value: meta.version },
+            ],
+            markdown: true,
+          },
+        ],
+      }
     }
 
     case 'status-update': {
-      await sendHttpRequest({
-        method: 'POST',
-        url: data.url,
-        data: {
-          '@type': 'MessageCard',
-          summary: message.summary,
-          sections: [
-            {
-              activityTitle: 'Monika Status',
-              activitySubtitle: message.subject,
-              facts: [
-                {
-                  name: 'Host',
-                  value: message.meta.monikaInstance,
-                },
-                {
-                  name: 'Number of Probes',
-                  value: message.meta.numberOfProbes,
-                },
-                {
-                  name: 'Maximum Response Time',
-                  value: `${message.meta.maxResponseTime} ms in the last ${message.meta.responseTimelogLifeTimeInHour} hours`,
-                },
-                {
-                  name: 'Minimum Response Time',
-                  value: `${message.meta.minResponseTime} ms in the last ${message.meta.responseTimelogLifeTimeInHour} hours`,
-                },
-                {
-                  name: 'Average Response Time',
-                  value: `${message.meta.averageResponseTime} ms in the last ${message.meta.responseTimelogLifeTimeInHour} hours`,
-                },
-                {
-                  name: 'Incidents',
-                  value: `${message.meta.numberOfIncidents} in the last 24 hours`,
-                },
-                {
-                  name: 'Recoveries',
-                  value: `${message.meta.numberOfRecoveries} in the last 24 hours`,
-                },
-                {
-                  name: 'Notifications',
-                  value: message.meta.numberOfSentNotifications,
-                },
-              ],
-            },
-          ],
-        },
-      })
-      break
+      return {
+        '@type': 'MessageCard',
+        summary: summary,
+        sections: [
+          {
+            activityTitle: 'Monika Status',
+            activitySubtitle: subject,
+            facts: [
+              {
+                name: 'Host',
+                value: meta.monikaInstance,
+              },
+              {
+                name: 'Number of Probes',
+                value: meta.numberOfProbes,
+              },
+              {
+                name: 'Maximum Response Time',
+                value: `${meta.maxResponseTime} ms in the last ${meta.responseTimelogLifeTimeInHour} hours`,
+              },
+              {
+                name: 'Minimum Response Time',
+                value: `${meta.minResponseTime} ms in the last ${meta.responseTimelogLifeTimeInHour} hours`,
+              },
+              {
+                name: 'Average Response Time',
+                value: `${meta.averageResponseTime} ms in the last ${meta.responseTimelogLifeTimeInHour} hours`,
+              },
+              {
+                name: 'Incidents',
+                value: `${meta.numberOfIncidents} in the last 24 hours`,
+              },
+              {
+                name: 'Recoveries',
+                value: `${meta.numberOfRecoveries} in the last 24 hours`,
+              },
+              {
+                name: 'Notifications',
+                value: meta.numberOfSentNotifications,
+              },
+            ],
+          },
+        ],
+      }
     }
 
     default:
-      break
+      return {
+        '@type': 'MessageCard',
+        summary,
+      }
   }
 }

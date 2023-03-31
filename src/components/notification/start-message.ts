@@ -22,58 +22,16 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { expect } from '@oclif/test'
-import mailMock from 'nodemailer-mock'
-import {
-  createSmtpTransport,
-  sendSmtpMail,
-} from '../../src/components/notification/channel/smtp'
-import Mail from 'nodemailer/lib/mailer'
-import { SMTPData } from '../../src/interfaces/data'
+import { hostname } from 'os'
+import { sendNotifications } from '.'
+import getIp from '../../utils/ip'
+import { getMessageForStart } from './alert-message'
+import type { Notification } from './channel'
 
-const transport: Mail = mailMock.createTransport({
-  host: '127.0.0.1',
-  port: 2323,
-})
-const opt: Mail.Options = {
-  from: 'me@example.com',
-  to: 'symontest@example.com',
-  subject: 'unit test',
-  html: '<p>A unit test</p>',
+export const sendMonikaStartMessage = async (
+  notifications: Notification[]
+): Promise<void> => {
+  const message = await getMessageForStart(hostname(), getIp())
+
+  await sendNotifications(notifications, message)
 }
-
-describe('Smtp test', () => {
-  describe('createSmtpTransport test', () => {
-    it('should return transporter', async function () {
-      const mockCfg: SMTPData = {
-        hostname: 'smtp.symon.org',
-        port: 587,
-        username: 'me@symon.org',
-        password: 'symonPass',
-        recipients: ['symon@example.com'],
-      }
-
-      const res = createSmtpTransport(mockCfg)
-      expect(res).instanceOf(Mail)
-    })
-  })
-
-  describe('sendSmtp test', () => {
-    it('should return success info', async function () {
-      transport.sendMail(opt, function () {
-        return {
-          accepted: ['successEmail'],
-        }
-      })
-
-      const res = await sendSmtpMail(transport, {
-        from: 'me@example.com',
-        to: 'symontest@example.com',
-        subject: 'unit test',
-        html: '<p>A unit test</p>',
-      })
-
-      expect(res.accepted).length(1)
-    })
-  })
-})

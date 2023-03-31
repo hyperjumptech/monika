@@ -22,51 +22,64 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios, { AxiosResponse } from 'axios'
+import Joi from 'joi'
+import { sendHttpRequest } from '../../../utils/http'
+import type { NotificationMessage } from './'
 
-import { GotifyData } from '../../../interfaces/data'
-import { NotificationMessage } from '../../../interfaces/notification'
+type NotificationData = {
+  token: string
+  url: string
+}
 
-export const sendGotify = async (
-  data: GotifyData,
+type Content = { title: string; message: string }
+
+export const validator = Joi.object().keys({
+  token: Joi.string().required().label('Gotify token'),
+  url: Joi.string().required().label('Gotify url'),
+})
+
+export const send = async (
+  { token, url }: NotificationData,
   message: NotificationMessage
-): Promise<AxiosResponse<any>> => {
+): Promise<void> => {
   const notificationType =
     message.meta.type[0].toUpperCase() + message.meta.type.slice(1)
+  const content = getContent(message, notificationType)
 
-  let title
-  let content
-  switch (message.meta.type) {
-    case 'incident':
-    case 'recovery': {
-      title = message.meta.type.toUpperCase() + ': '
-      content = `New ${notificationType} event from Monika\n\n${message.body}`
-      break
-    }
-
-    default:
-      title = ''
-      content = message.body
-      break
-  }
-
-  if (message.meta.url) {
-    title += `[${message.meta.url}] `
-  }
-
-  title += `${message.summary}`
-
-  const res = await axios.request({
+  await sendHttpRequest({
     method: 'POST',
-    url: `${data.url}/message?token=${data.token}`,
+    url: `${url}/message?token=${token}`,
     headers: {
       'Content-Type': 'application/json',
     },
-    data: {
-      title,
-      message: content,
-    },
+    data: content,
   })
+}
 
-  return res
+function getContent(
+  notificationMessage: NotificationMessage,
+  notificationType: string
+): Content {
+  const { body, meta } = notificationMessage
+  const title = getTitle(notificationMessage)
+  const message =
+    meta.type === 'incident' || meta.type === 'recovery'
+      ? `New ${notificationType} event from Monika\n\n${body}`
+      : body
+
+  return { title, message }
+}
+
+function getTitle({ meta, summary }: NotificationMessage): string {
+  const { type, url } = meta
+  let title =
+    type === 'incident' || type === 'recovery' ? `${type.toUpperCase()}: ` : ''
+
+  if (url) {
+    title += `[${url}] `
+  }
+
+  title += summary
+
+  return title
 }

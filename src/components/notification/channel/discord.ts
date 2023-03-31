@@ -22,47 +22,51 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { WebhookData } from '../../../interfaces/data'
-import { NotificationMessage } from '../../../interfaces/notification'
+import Joi from 'joi'
+import type { NotificationMessage } from './'
 import { sendHttpRequest } from '../../../utils/http'
-import { log } from '../../../utils/pino'
 
-export const sendDiscord = async (
-  data: WebhookData,
+type NotificationData = {
+  url: string
+}
+
+export const validator = Joi.object().keys({
+  url: Joi.string().uri().required().label('Discord URL'),
+})
+
+export const send = async (
+  { url }: NotificationData,
   message: NotificationMessage
-): Promise<any> => {
-  try {
-    const notificationType =
-      message.meta.type[0].toUpperCase() + message.meta.type.slice(1)
-    let content
-    switch (message.meta.type) {
-      case 'incident':
-      case 'recovery': {
-        content = `New *\`${notificationType}\`* event from Monika\n${message.body}`
-        content = content.replaceAll('\n\n', '\n')
-        break
-      }
+): Promise<void> => {
+  const notificationType =
+    message.meta.type[0].toUpperCase() + message.meta.type.slice(1)
+  const content = getContent(message, notificationType)
 
-      default:
-        content = message.body
-        break
-    }
+  await sendHttpRequest({
+    method: 'POST',
+    url,
+    headers: {
+      Accept: 'application/json',
+      'Content-type': 'application/json',
+    },
+    data: {
+      content,
+    },
+  })
+}
 
-    const res = await sendHttpRequest({
-      method: 'POST',
-      url: data.url,
-      headers: {
-        Accept: 'application/json',
-        'Content-type': 'application/json',
-      },
-      data: {
-        content: content,
-      },
-    })
-    return res
-  } catch (error: any) {
-    log.error(
-      "Couldn't send notification to Discord. Got this error: " + error.message
+function getContent(
+  message: NotificationMessage,
+  notificationType: string
+): string {
+  const { body, meta } = message
+
+  if (meta.type === 'incident' || meta.type === 'recovery') {
+    return `New *\`${notificationType}\`* event from Monika\n${body}`.replaceAll(
+      '\n\n',
+      '\n'
     )
   }
+
+  return body
 }

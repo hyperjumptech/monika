@@ -23,11 +23,62 @@
  **********************************************************************************/
 
 import { execSync, spawnSync } from 'child_process'
-import { type } from 'os'
+import Joi from 'joi'
+import { type as osType } from 'os'
+import type { NotificationMessage } from '.'
 
-interface NotifyData {
-  title: string
-  message: string
+export const validator = Joi.any()
+
+export const send = async (
+  // actually do not need data property
+  // it is here just to make type consistent and does not throw type error in other parts of app
+  _data: undefined,
+  { body, subject, summary }: NotificationMessage
+): Promise<void> => {
+  const content = summary || body
+  const operatingSystem = osType()
+
+  // OSAScript for OS X
+  const osascript = `display notification "${content}" with title "Monika" subtitle "${subject}"`
+
+  // Powershell Script for Windows
+  const powershellScript = `
+  [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] > $null;
+  $templateType = [Windows.UI.Notifications.ToastTemplateType]::ToastText02;
+  $template = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent($templateType);
+  $template.SelectSingleNode("//text[@id=1]").InnerText = '${psEscape(
+    subject
+  )}';
+  $template.SelectSingleNode("//text[@id=2]").InnerText = '${psEscape(
+    content
+  )}';
+  $toast = [Windows.UI.Notifications.ToastNotification]::new($template);
+  $notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('Monika');
+  $notifier.Show($toast);
+  `
+
+  switch (operatingSystem) {
+    case 'Linux': {
+      spawnSync('notify-send', ['-a', 'Monika', subject, content])
+
+      return
+    }
+
+    case 'Darwin': {
+      spawnSync('osascript', ['-e', osascript])
+
+      return
+    }
+
+    case 'Windows_NT': {
+      execSync(powershellScript, { shell: 'powershell.exe' })
+
+      return
+    }
+
+    default:
+      throw new Error('Unknown operating system')
+  }
 }
 
 /**
@@ -35,7 +86,7 @@ interface NotifyData {
  * @param {string} str input string
  * @return {string} escape single quote with another
  */
-export const psEscape = (str: string): string => {
+function psEscape(str: string): string {
   let result = ''
   for (const ch of str) {
     if (ch.charCodeAt(0) === 39) {
@@ -47,46 +98,4 @@ export const psEscape = (str: string): string => {
   }
 
   return result
-}
-
-/**
- * Send notification according to the operating system
- * @param {NotifyData} data notification data
- * @return {void}
- */
-export const sendDesktop = (data: NotifyData): any => {
-  const { title, message } = data
-  const operatingSystem = type()
-
-  // OSAScript for OS X
-  const osascript = `display notification "${message}" with title "Monika" subtitle "${title}"`
-
-  // Powershell Script for Windows
-  const powershellScript = `
-  [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] > $null;
-  $templateType = [Windows.UI.Notifications.ToastTemplateType]::ToastText02;
-  $template = [Windows.UI.Notifications.ToastNotificationManager]::GetTemplateContent($templateType);
-  $template.SelectSingleNode("//text[@id=1]").InnerText = '${psEscape(title)}';
-  $template.SelectSingleNode("//text[@id=2]").InnerText = '${psEscape(
-    message
-  )}';
-  $toast = [Windows.UI.Notifications.ToastNotification]::new($template);
-  $notifier = [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier('Monika');
-  $notifier.Show($toast);
-  `
-
-  switch (operatingSystem) {
-    case 'Linux':
-      spawnSync('notify-send', ['-a', 'Monika', title, message])
-      break
-    case 'Darwin':
-      spawnSync('osascript', ['-e', osascript])
-      break
-    case 'Windows_NT':
-      execSync(powershellScript, { shell: 'powershell.exe' })
-      break
-    default:
-      // TODO: New operating system?
-      break
-  }
 }

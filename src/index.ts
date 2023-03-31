@@ -29,7 +29,7 @@ import { createConfig, getConfigIterator } from './components/config'
 import { printAllLogs } from './components/logger'
 import { closeLog, openLogfile } from './components/logger/history'
 import { logStartupMessage } from './components/logger/startup-message'
-import { notificationChecker } from './components/notification/checker'
+import { sendMonikaStartMessage } from './components/notification/start-message'
 import {
   resetScheduledTasks,
   scheduleSummaryNotification,
@@ -328,7 +328,7 @@ class Monika extends Command {
         resetScheduledTasks()
 
         if (!isTestEnvironment) {
-          await notificationChecker(notifications ?? [])
+          await sendMonikaStartMessage(notifications ?? [])
         }
 
         await this.deprecationHandler(config)

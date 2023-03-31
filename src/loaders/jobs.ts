@@ -27,11 +27,11 @@ import { checkDBSize } from '../jobs/check-database'
 import { getConfig } from '../components/config'
 
 export function jobsLoader(): any {
-  const { db_limit: DBLimit } = getConfig()
+  const config = getConfig()
   // schedule TLS checker every day at 00:00
   cron.schedule('0 0 * * *', tlsChecker)
   // schedule database size check
-  if (DBLimit && DBLimit.cron_schedule) {
-    cron.schedule(DBLimit.cron_schedule, checkDBSize)
+  if (config?.db_limit && config?.db_limit.cron_schedule) {
+    cron.schedule(config.db_limit.cron_schedule, checkDBSize)
   }
 }
