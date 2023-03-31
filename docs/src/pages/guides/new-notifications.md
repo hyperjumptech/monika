@@ -23,7 +23,6 @@ There are few requirements to start adding a new notification to Monika:
 
 ```typescript
 type NotificationChannel<T = any> = {
-  type: string
   validator: Joi.AnySchema
   send: (notificationData: T, message: NotificationMessage) => Promise<void>
   additionalStartupMessage?: (notificationData: T) => string
@@ -32,12 +31,27 @@ type NotificationChannel<T = any> = {
 
 | Property                 | Description                                                                            | Example                                                     |
 | ------------------------ | -------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
-| type                     | To identify the notification type in the Monika configuration                          | whatsapp                                                    |
 | validator                | To validate the `notificationData` field by using [Joi](https://github.com/hapijs/joi) | `Joi.object().keys({ url: Joi.string().uri().required() })` |
 | send                     | It will be invoked if the application needs to send a message through the channel      | -                                                           |
 | additionalStartupMessage | To display additional message on the startup when using `verbose` flag                 | -                                                           |
 
-2. Register the implemented notification by importing the file in the `src/components/notification/channel/index.ts` file and add the imported file it to the `channels` variable in the same file
+2. Import the implemented notification file to the `src/components/notification/channel/index.ts` file.
+
+```typescript
+import * as whatsapp from './whatsapp'
+```
+
+3. Register it to the `channels` variable in the same file. The key in the channels variable will be used in the Monika configuration to identify the notification type.
+
+```typescript
+export const channels: Record<string, NotificationChannel> = {
+  desktop,
+  'google-chat': googlechat,
+  // ...
+  whatsapp,
+  workplace,
+}
+```
 
 ## Events
 
