@@ -45,8 +45,6 @@ type Content = {
   themeColor?: string
 }
 
-export const type = 'teams'
-
 export const validator = Joi.object().keys({
   url: Joi.string().uri().required().label('Teams URL'),
 })

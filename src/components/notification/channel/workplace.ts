@@ -32,8 +32,6 @@ type NotificationData = {
   access_token: string
 }
 
-export const type = 'workplace'
-
 export const validator = Joi.object().keys({
   thread_id: Joi.string().required().label('Workplace Thread ID'),
   access_token: Joi.string().required().label('Workplace Access Token'),

@@ -37,8 +37,6 @@ type Content = {
   type: 'note'
 }
 
-export const type = 'pushbullet'
-
 export const validator = Joi.object().keys({
   token: Joi.string().required().label('Pushbullet token'),
   deviceID: Joi.string()

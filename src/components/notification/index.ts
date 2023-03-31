@@ -35,7 +35,7 @@ export async function sendNotifications(
 ): Promise<void> {
   await Promise.all(
     notifications.map(async ({ data, type }) => {
-      const channel = channels.find((channel) => channel.type === type)
+      const channel = channels[type]
 
       try {
         if (!channel) {

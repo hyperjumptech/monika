@@ -35,8 +35,6 @@ type Content = {
   description: string
 }
 
-export const type = 'opsgenie'
-
 export const validator = Joi.object().keys({
   geniekey: Joi.string().required().label('Opsgenie geniekey'),
 })

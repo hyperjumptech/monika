@@ -35,8 +35,6 @@ type NotificationData = {
   username?: string
 }
 
-export const type = 'mailgun'
-
 export const validator = Joi.object().keys({
   recipients: Joi.array()
     .required()

@@ -30,8 +30,6 @@ type PagerDutyConfig = {
   probeID: string
 }
 
-export const type = 'pagerduty'
-
 export const validator = Joi.array()
   .items(
     Joi.object({

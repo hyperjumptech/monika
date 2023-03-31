@@ -33,8 +33,6 @@ type NotificationData = {
 
 type Content = { title: string; message: string }
 
-export const type = 'gotify'
-
 export const validator = Joi.object().keys({
   token: Joi.string().required().label('Gotify token'),
   url: Joi.string().required().label('Gotify url'),

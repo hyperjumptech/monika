@@ -35,16 +35,14 @@ export const validateNotification = async (
 
   await Promise.all(
     notifications.map(async ({ data, type }) => {
-      const validator = channels.find(
-        (channel) => channel.type === type
-      )?.validator
-
       try {
-        if (!validator) {
+        const channel = channels[type]
+
+        if (!channel?.validator) {
           throw new Error('Notifications type is not allowed')
         }
 
-        await validator.validateAsync(data)
+        await channel.validator.validateAsync(data)
       } catch (error: any) {
         throw new Error(`${error?.message} (${type})`)
       }

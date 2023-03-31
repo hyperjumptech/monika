@@ -47,8 +47,6 @@ type Content = {
   }
 }
 
-export const type = 'lark'
-
 export const validator = Joi.object().keys({
   url: Joi.string().uri().required().label('Lark URL'),
 })

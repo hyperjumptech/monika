@@ -62,8 +62,6 @@ type NotificationData = {
   url: string
 }
 
-export const type = 'monika-notif'
-
 export const validator = Joi.object().keys({
   url: Joi.string().uri().required().label('Monika Notification URL'),
 })

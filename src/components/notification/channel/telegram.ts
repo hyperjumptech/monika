@@ -32,8 +32,6 @@ type NotificationData = {
   bot_token: string
 }
 
-export const type = 'telegram'
-
 export const validator = Joi.object().keys({
   group_id: Joi.string().required().label('Telegram Group ID'),
   bot_token: Joi.string().required().label('Telegram Bot Token'),

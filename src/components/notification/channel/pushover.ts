@@ -32,8 +32,6 @@ type NotificationData = {
   message: string
 }
 
-export const type = 'pushover'
-
 export const validator = Joi.object().keys({
   token: Joi.string().required().label('Pushover token'),
   user: Joi.string().required().label('Pushover user'),

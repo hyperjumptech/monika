@@ -27,8 +27,6 @@ import Joi from 'joi'
 import { type as osType } from 'os'
 import type { NotificationMessage } from '.'
 
-export const type = 'desktop'
-
 export const validator = Joi.any()
 
 export const send = async (

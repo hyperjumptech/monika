@@ -27,7 +27,8 @@ import isUrl from 'is-url'
 import boxen from 'boxen'
 import chalk from 'chalk'
 import type { Config } from '../../interfaces/config'
-import { channels, type Notification } from '../notification/channel'
+import type { Notification } from '../notification/channel'
+import { channels } from '../notification/channel'
 import type { Probe, ProbeAlert } from '../../interfaces/probe'
 import type { RequestConfig } from '../../interfaces/request'
 import { log } from '../../utils/pino'
@@ -197,20 +198,29 @@ function generateNotificationMessage(notifications: Notification[]): string {
     return ''
   }
 
-  let startupMessage = `\nNotifications:\n`
+  let result = '`\nNotifications:\n`'
 
   for (const notification of notifications) {
-    const { data, id, type } = notification
-    const channel = channels.find((channel) => channel.type === type)
-
-    startupMessage += `- Notification ID: ${id}
-Type: ${type}
-`
-
-    if (channel?.additionalStartupMessage) {
-      startupMessage += channel.additionalStartupMessage(data)
-    }
+    result += getIDMessage(notification)
+    result += getAdditionalMessage(notification)
   }
 
-  return startupMessage
+  return result
+}
+
+function getIDMessage({ id, type }: Notification) {
+  return `- Notification ID: ${id}
+Type: ${type}
+`
+}
+
+function getAdditionalMessage(notification: Notification) {
+  const { data, type } = notification
+  const channel = channels[type]
+
+  if (!channel?.additionalStartupMessage) {
+    return ''
+  }
+
+  return channel.additionalStartupMessage(data)
 }

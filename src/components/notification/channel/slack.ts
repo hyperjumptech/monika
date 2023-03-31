@@ -40,8 +40,6 @@ type Content = {
   blocks: ContentBlock[]
 }
 
-export const type = 'slack'
-
 export const validator = Joi.object().keys({
   url: Joi.string().uri().required().label('Slack URL'),
 })

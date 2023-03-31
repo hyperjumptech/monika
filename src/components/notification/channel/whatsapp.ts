@@ -58,8 +58,6 @@ type LoginUserSuccessResponse = {
   meta: Meta
 }
 
-export const type = 'whatsapp'
-
 export const validator = Joi.object().keys({
   recipients: Joi.array()
     .items(Joi.string().label('WhatsApp Recipients'))

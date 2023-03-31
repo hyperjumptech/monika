@@ -30,8 +30,6 @@ type NotificationData = {
   url: string
 }
 
-export const type = 'webhook'
-
 export const validator = Joi.object().keys({
   url: Joi.string().uri().required().label('Webhook URL'),
 })

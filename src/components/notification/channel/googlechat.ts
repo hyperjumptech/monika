@@ -53,8 +53,6 @@ type Content = {
   }[]
 }
 
-export const type = 'google-chat'
-
 export const validator = Joi.object().keys({
   url: Joi.string().uri().required().label('Google URL'),
 })

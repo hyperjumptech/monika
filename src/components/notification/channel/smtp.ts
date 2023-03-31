@@ -36,8 +36,6 @@ type NotificationData = {
   recipients: string[]
 }
 
-export const type = 'smtp'
-
 export const validator = Joi.object().keys({
   hostname: Joi.string().required().label('SMTP Hostname'),
   port: Joi.number().port().required().label('SMTP Port'),

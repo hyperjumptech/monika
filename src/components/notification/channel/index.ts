@@ -63,8 +63,7 @@ export type NotificationMessage = {
     | NotificationStatusUpdateMessageMeta
 }
 
-type NotificationChannel<T = any> = {
-  type: string
+export type NotificationChannel<T = any> = {
   validator: AnySchema
   send: (notificationData: T, message: NotificationMessage) => Promise<void>
   additionalStartupMessage?: (notificationData: T) => string
@@ -76,15 +75,15 @@ export type Notification = {
   data: any
 }
 
-export const channels: NotificationChannel[] = [
+export const channels: Record<string, NotificationChannel> = {
   dingtalk,
   discord,
   desktop,
-  googlechat,
+  'google-chat': googlechat,
   gotify,
   lark,
   mailgun,
-  monikaNotif,
+  'monika-notif': monikaNotif,
   opsgenie,
   pagerduty,
   pushbullet,
@@ -97,4 +96,4 @@ export const channels: NotificationChannel[] = [
   webhook,
   whatsapp,
   workplace,
-]
+}

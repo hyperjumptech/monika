@@ -26,16 +26,9 @@ import { expect } from 'chai'
 import { rest } from 'msw'
 import { setupServer } from 'msw/node'
 import type { NotificationMessage } from '../../notification/channel'
-import { send, type, validator } from './pagerduty'
+import { send, validator } from './pagerduty'
 
 describe('PagerDuty notification', () => {
-  describe('check the type', () => {
-    it('should return the type', () => {
-      // assert
-      expect(type).eq('pagerduty')
-    })
-  })
-
   describe('validate configuration', () => {
     it('should validate probe ID', () => {
       // act

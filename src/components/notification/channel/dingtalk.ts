@@ -47,8 +47,6 @@ type Content = {
   markdown?: MarkdownContent
 }
 
-export const type = 'dingtalk'
-
 export const validator = Joi.object().keys({
   access_token: Joi.string().required().label('Dingtalk access token'),
 })

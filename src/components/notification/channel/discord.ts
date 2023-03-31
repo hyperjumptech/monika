@@ -30,8 +30,6 @@ type NotificationData = {
   url: string
 }
 
-export const type = 'discord'
-
 export const validator = Joi.object().keys({
   url: Joi.string().uri().required().label('Discord URL'),
 })
