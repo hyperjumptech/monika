@@ -22,22 +22,86 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { NotificationMessage } from '../../../interfaces/notification'
-import { GoogleChatData } from '../../../interfaces/data'
-import { log } from '../../../utils/pino'
+import Joi from 'joi'
+import type { NotificationMessage } from './'
 import { sendHttpRequest } from '../../../utils/http'
 
-export const sendGoogleChat = async (
-  data: GoogleChatData,
-  message: NotificationMessage
-): Promise<any> => {
-  const notifType =
-    message.meta.type[0].toUpperCase() + message.meta.type.slice(1)
-  let chatMessage
+type NotificationData = {
+  url: string
+}
 
-  switch (message.meta.type) {
+type ContentHeader = {
+  title: string
+  subtitle: string
+  imageUrl: string
+}
+
+type Widget = {
+  textParagraph: {
+    text: string
+  }
+}
+
+type Section = {
+  widgets: Widget[]
+}
+
+type Content = {
+  cards: {
+    header: ContentHeader
+    sections: Section[]
+  }[]
+}
+
+export const validator = Joi.object().keys({
+  url: Joi.string().uri().required().label('Google URL'),
+})
+
+export const send = async (
+  { url }: NotificationData,
+  message: NotificationMessage
+): Promise<void> => {
+  const notificationType =
+    message.meta.type[0].toUpperCase() + message.meta.type.slice(1)
+  const content = getContent(message, notificationType)
+
+  await sendHttpRequest({
+    method: 'POST',
+    url,
+    headers: {
+      Accept: 'application/json',
+      'Content-type': 'application/json',
+    },
+    data: content,
+  })
+}
+
+export function additionalStartupMessage({ url }: NotificationData): string {
+  return `    URL: ${url}\n`
+}
+
+function getContent(
+  { body, meta, summary }: NotificationMessage,
+  notificationType: string
+): Content {
+  const {
+    averageResponseTime,
+    maxResponseTime,
+    minResponseTime,
+    numberOfIncidents,
+    numberOfProbes,
+    numberOfRecoveries,
+    numberOfSentNotifications,
+    responseTimelogLifeTimeInHour,
+    time,
+    type,
+    url,
+    monikaInstance,
+  } = meta
+
+  switch (type) {
     case 'start':
-      chatMessage = {
+      return {
         cards: [
           {
             header: {
@@ -55,12 +119,12 @@ export const sendGoogleChat = async (
                   },
                   {
                     textParagraph: {
-                      text: `<b>Time:</b> ${message.meta.time}`,
+                      text: `<b>Time:</b> ${time}`,
                     },
                   },
                   {
                     textParagraph: {
-                      text: `<b>From:</b> ${message.body}`,
+                      text: `<b>From:</b> ${body}`,
                     },
                   },
                 ],
@@ -69,15 +133,14 @@ export const sendGoogleChat = async (
           },
         ],
       }
-      break
     case 'termination':
     case 'incident':
-      chatMessage = {
+      return {
         cards: [
           {
             header: {
               title: 'Monika Notification',
-              subtitle: `New ${notifType} from Monika`,
+              subtitle: `New ${notificationType} from Monika`,
               imageUrl: 'https://bit.ly/3kckaGO',
             },
             sections: [
@@ -85,22 +148,22 @@ export const sendGoogleChat = async (
                 widgets: [
                   {
                     textParagraph: {
-                      text: `<b>Message: <font color=#ff0000>Alert!</font></b> ${message.summary}`,
+                      text: `<b>Message: <font color=#ff0000>Alert!</font></b> ${summary}`,
                     },
                   },
                   {
                     textParagraph: {
-                      text: `<b>URL:</b> <a href>${message.meta.url}</a>`,
+                      text: `<b>URL:</b> <a href>${url}</a>`,
                     },
                   },
                   {
                     textParagraph: {
-                      text: `<b>Time:</b> ${message.meta.time}`,
+                      text: `<b>Time:</b> ${time}`,
                     },
                   },
                   {
                     textParagraph: {
-                      text: `<b>From:</b> ${message.meta.monikaInstance}`,
+                      text: `<b>From:</b> ${monikaInstance}`,
                     },
                   },
                 ],
@@ -109,14 +172,13 @@ export const sendGoogleChat = async (
           },
         ],
       }
-      break
     case 'recovery':
-      chatMessage = {
+      return {
         cards: [
           {
             header: {
               title: 'Monika Notification',
-              subtitle: `New ${notifType} from Monika`,
+              subtitle: `New ${notificationType} from Monika`,
               imageUrl: 'https://bit.ly/3kckaGO',
             },
             sections: [
@@ -124,22 +186,22 @@ export const sendGoogleChat = async (
                 widgets: [
                   {
                     textParagraph: {
-                      text: `<b>Message: <font color=#0000ff>Recovery</font></b> ${message.summary}`,
+                      text: `<b>Message: <font color=#0000ff>Recovery</font></b> ${summary}`,
                     },
                   },
                   {
                     textParagraph: {
-                      text: `<b>URL:</b> <a href>${message.meta.url}<a>`,
+                      text: `<b>URL:</b> <a href>${url}<a>`,
                     },
                   },
                   {
                     textParagraph: {
-                      text: `<b>Time:</b> ${message.meta.time}`,
+                      text: `<b>Time:</b> ${time}`,
                     },
                   },
                   {
                     textParagraph: {
-                      text: `<b>From:</b> ${message.meta.monikaInstance}`,
+                      text: `<b>From:</b> ${monikaInstance}`,
                     },
                   },
                 ],
@@ -148,9 +210,8 @@ export const sendGoogleChat = async (
           },
         ],
       }
-      break
     case 'status-update':
-      chatMessage = {
+      return {
         cards: [
           {
             header: {
@@ -163,42 +224,42 @@ export const sendGoogleChat = async (
                 widgets: [
                   {
                     textParagraph: {
-                      text: `<b>Host:</b> ${message.meta.monikaInstance}`,
+                      text: `<b>Host:</b> ${monikaInstance}`,
                     },
                   },
                   {
                     textParagraph: {
-                      text: `<b>Number of Probes:</b> ${message.meta.numberOfProbes}`,
+                      text: `<b>Number of Probes:</b> ${numberOfProbes}`,
                     },
                   },
                   {
                     textParagraph: {
-                      text: `<b>Maximum Response Time:</b> ${message.meta.maxResponseTime} ms in the last ${message.meta.responseTimelogLifeTimeInHour} hours`,
+                      text: `<b>Maximum Response Time:</b> ${maxResponseTime} ms in the last ${responseTimelogLifeTimeInHour} hours`,
                     },
                   },
                   {
                     textParagraph: {
-                      text: `<b>Minimum Response Time:</b> ${message.meta.minResponseTime} ms in the last ${message.meta.responseTimelogLifeTimeInHour} hours`,
+                      text: `<b>Minimum Response Time:</b> ${minResponseTime} ms in the last ${responseTimelogLifeTimeInHour} hours`,
                     },
                   },
                   {
                     textParagraph: {
-                      text: `<b>Average Response Time:</b> ${message.meta.averageResponseTime} ms in the last ${message.meta.responseTimelogLifeTimeInHour} hours`,
+                      text: `<b>Average Response Time:</b> ${averageResponseTime} ms in the last ${responseTimelogLifeTimeInHour} hours`,
                     },
                   },
                   {
                     textParagraph: {
-                      text: `<b>Incidents:</b> ${message.meta.numberOfIncidents} in the last 24 hours`,
+                      text: `<b>Incidents:</b> ${numberOfIncidents} in the last 24 hours`,
                     },
                   },
                   {
                     textParagraph: {
-                      text: `<b>Recoveries:</b> ${message.meta.numberOfRecoveries} in the last 24 hours`,
+                      text: `<b>Recoveries:</b> ${numberOfRecoveries} in the last 24 hours`,
                     },
                   },
                   {
                     textParagraph: {
-                      text: `<b>Notifications:</b> ${message.meta.numberOfSentNotifications}`,
+                      text: `<b>Notifications:</b> ${numberOfSentNotifications}`,
                     },
                   },
                 ],
@@ -207,27 +268,28 @@ export const sendGoogleChat = async (
           },
         ],
       }
-      break
     default:
-      break
-  }
-
-  try {
-    const res = await sendHttpRequest({
-      method: 'POST',
-      url: data.url,
-      headers: {
-        Accept: 'application/json',
-        'Content-type': 'application/json',
-      },
-      data: chatMessage,
-    })
-
-    return res
-  } catch (error: any) {
-    log.error(
-      "Couldn't send notification to Google Chat. Got this error: " +
-        error.message
-    )
+      return {
+        cards: [
+          {
+            header: {
+              title: 'Monika Notification',
+              subtitle: 'Monika Status',
+              imageUrl: 'https://bit.ly/3kckaGO',
+            },
+            sections: [
+              {
+                widgets: [
+                  {
+                    textParagraph: {
+                      text: summary,
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      }
   }
 }

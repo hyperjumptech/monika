@@ -1,11 +1,8 @@
+/* eslint-disable camelcase */
 import chai, { expect } from 'chai'
 import spies from 'chai-spies'
 
-import {
-  errorMessage,
-  notificationChecker,
-} from '../../../src/components/notification/checker'
-import { TelegramData } from '../../../src/interfaces/data'
+import { validateNotification } from '../../validation/validator/notification'
 
 chai.use(spies)
 
@@ -21,18 +18,17 @@ describe('notificationChecker - telegramNotification', () => {
 
   it('should handle validation error - without Group ID', async () => {
     try {
-      await notificationChecker([
+      await validateNotification([
         {
           ...notificationConfig,
           data: {
-            // eslint-disable-next-line camelcase
             bot_token: 'ABC-EFG-HIJ-KLM-NOP-QRS-TUV-WXY-Z',
-          } as TelegramData,
+            group_id: '',
+          },
         },
       ])
     } catch (error) {
-      const originalErrorMessage = '"Telegram Group ID" is required'
-      const { message } = errorMessage('Telegram', originalErrorMessage)
+      const message = '"Telegram Group ID" is not allowed to be empty'
 
       expect(() => {
         throw error
@@ -42,18 +38,17 @@ describe('notificationChecker - telegramNotification', () => {
 
   it('should handle validation error - without Bot Token', async () => {
     try {
-      await notificationChecker([
+      await validateNotification([
         {
           ...notificationConfig,
           data: {
-            // eslint-disable-next-line camelcase
+            bot_token: '',
             group_id: 'ABC-EFG-HIJ-KLM-NOP-QRS-TUV-WXY-Z',
-          } as TelegramData,
+          },
         },
       ])
     } catch (error) {
-      const originalErrorMessage = '"Telegram Bot Token" is required'
-      const { message } = errorMessage('Telegram', originalErrorMessage)
+      const message = '"Telegram Bot Token" is not allowed to be empty'
 
       expect(() => {
         throw error

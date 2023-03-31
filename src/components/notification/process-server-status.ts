@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /**********************************************************************************
  * MIT License                                                                    *
  *                                                                                *
@@ -115,15 +114,17 @@ export const serverAlertStateMachine = createMachine<ServerAlertStateContext>(
   }
 )
 
+type ProcessThresholdsParams = {
+  probe: Probe
+  requestIndex: number
+  validatedResponse: ValidatedResponse[]
+}
+
 export const processThresholds = ({
   probe,
   requestIndex,
   validatedResponse,
-}: {
-  probe: Probe
-  requestIndex: number
-  validatedResponse: ValidatedResponse[]
-}) => {
+}: ProcessThresholdsParams): ServerAlertState[] => {
   const { requests, incidentThreshold, recoveryThreshold, socket, name } = probe
   const request = requests?.[requestIndex]
 

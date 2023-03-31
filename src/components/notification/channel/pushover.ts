@@ -22,44 +22,42 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { AxiosResponse } from 'axios'
-import { PushoverData } from '../../../interfaces/data'
-import { NotificationMessage } from '../../../interfaces/notification'
+import Joi from 'joi'
+import type { NotificationMessage } from './'
 import { sendHttpRequest } from '../../../utils/http'
 
-export const sendPushover = async (
-  data: PushoverData,
-  message: NotificationMessage
-): Promise<AxiosResponse> => {
-  const notificationType =
-    message.meta.type[0].toUpperCase() + message.meta.type.slice(1)
+type NotificationData = {
+  token: string
+  user: string
+  message: string
+}
 
-  let content
-  switch (message.meta.type) {
-    case 'incident':
-    case 'recovery': {
-      content = `New ${notificationType} event from Monika\n\n${message.body}`
-      break
-    }
+export const validator = Joi.object().keys({
+  token: Joi.string().required().label('Pushover token'),
+  user: Joi.string().required().label('Pushover user'),
+})
 
-    default:
-      content = message.body
-      break
-  }
+export const send = async (
+  { token, user }: NotificationData,
+  { body, meta }: NotificationMessage
+): Promise<void> => {
+  const notificationType = meta.type[0].toUpperCase() + meta.type.slice(1)
+  const content =
+    meta.type === 'incident' || meta.type === 'recovery'
+      ? `New ${notificationType} event from Monika\n\n${body}`
+      : body
 
-  const res = await sendHttpRequest({
+  await sendHttpRequest({
     method: 'POST',
     url: `https://api.pushover.net/1/messages.json`,
     headers: {
       'Content-Type': 'application/json',
     },
     data: {
-      user: data.user,
-      token: data.token,
+      user,
+      token,
       message: content,
       html: 1,
     },
   })
-
-  return res
 }

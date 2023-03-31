@@ -23,30 +23,14 @@
  **********************************************************************************/
 
 import Joi from 'joi'
-import { NotificationMessage } from '../../../interfaces/notification'
+import type { NotificationMessage } from './'
 
 type PagerDutyConfig = {
   key: string
   probeID: string
 }
 
-export type PagerDutyNotification = {
-  id: string
-  type: 'pagerduty'
-  data: PagerDutyConfig[]
-}
-
-type NotificationChannel = {
-  slug: 'pagerduty'
-  validateConfig: (config: PagerDutyConfig[]) => string
-  send: (
-    config: PagerDutyConfig[],
-    message: NotificationMessage
-  ) => Promise<void>
-  validator: Joi.AnySchema
-}
-
-const validator = Joi.array()
+export const validator = Joi.array()
   .items(
     Joi.object({
       key: Joi.string().required().label('Key'),
@@ -58,22 +42,7 @@ const validator = Joi.array()
   )
   .required()
 
-export function newPagerDuty(): NotificationChannel {
-  return {
-    slug: 'pagerduty',
-    validateConfig,
-    send,
-    validator,
-  }
-}
-
-function validateConfig(configurations: PagerDutyConfig[]): string {
-  const { error } = validator.validate(configurations)
-
-  return error ? `PagerDuty notification: ${error?.message}` : ''
-}
-
-async function send(
+export async function send(
   configurations: PagerDutyConfig[],
   message: NotificationMessage
 ): Promise<void> {
@@ -105,11 +74,7 @@ async function send(
       body: JSON.stringify(eventPayload),
     }
 
-    try {
-      await fetch(url, options)
-    } catch (error: any) {
-      throw new Error(`PagerDuty notification: ${error?.message}`)
-    }
+    await fetch(url, options)
   }
 }
 

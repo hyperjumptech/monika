@@ -22,27 +22,39 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { WorkplaceData } from '../../../interfaces/data'
+/* eslint-disable camelcase */
+import Joi from 'joi'
+import type { NotificationMessage } from '.'
 import { sendHttpRequest } from '../../../utils/http'
 
-export const sendWorkplace = async (data: WorkplaceData): Promise<any> => {
-  const res = await sendHttpRequest({
+type NotificationData = {
+  thread_id: string
+  access_token: string
+}
+
+export const validator = Joi.object().keys({
+  thread_id: Joi.string().required().label('Workplace Thread ID'),
+  access_token: Joi.string().required().label('Workplace Access Token'),
+})
+
+export const send = async (
+  { access_token, thread_id }: NotificationData,
+  { body }: NotificationMessage
+): Promise<void> => {
+  await sendHttpRequest({
     baseURL: 'https://graph.workplace.com',
     headers: {
-      Authorization: `Bearer ${data.access_token}`,
+      Authorization: `Bearer ${access_token}`,
     },
     method: 'POST',
     url: '/me/messages',
     data: {
       recipient: {
-        // eslint-disable-next-line camelcase
-        thread_key: data.thread_id,
+        thread_key: thread_id,
       },
       message: {
-        text: data.body,
+        text: body,
       },
     },
   })
-
-  return res
 }

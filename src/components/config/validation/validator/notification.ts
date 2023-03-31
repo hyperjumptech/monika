@@ -22,93 +22,30 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Notification } from '../../../../interfaces/notification'
-import {
-  slug as atlassianStatuspageSlug,
-  validateConfig as atlassianStatuspageValidateConfig,
-} from '../../../../plugins/visualization/atlassian-status-page'
-import {
-  slug as instatusPageSlug,
-  validateConfig as instatusPageValidateConfig,
-} from '../../../../plugins/visualization/instatus'
-import { newPagerDuty } from '../../../notification/channel/pagerduty'
-import { requiredFieldMessages } from '../notification-required-fields'
+import { channels, type Notification } from '../../../notification/channel'
 
-const checkRecipients = (notification: Notification): string | undefined => {
-  // check one-by-one instead of using indexOf or includes so the type is correct without type assertion
-  const notifData: any = notification.data
-  if (
-    (notifData?.recipients?.length ?? 0) === 0 &&
-    (notification.type === 'mailgun' ||
-      notification.type === 'smtp' ||
-      notification.type === 'sendgrid' ||
-      notification.type === 'whatsapp')
-  ) {
-    return 'Recipients does not exists or has length lower than 1!'
-  }
-}
-
-const validateRequiredFields = (
-  notification: Notification
-): string | undefined => {
-  const { data }: any = notification
-  const reqFields = requiredFieldMessages[notification.type]
-  if (!reqFields)
-    return `Notifications type is not allowed (${(notification as any)?.type})`
-
-  const keys = Object.keys(reqFields)
-  for (const field of keys) {
-    if (!data[field]) {
-      return reqFields[field]
-    }
-  }
-}
-
-const checkByNotificationType = (
-  notification: Notification
-): string | undefined => {
-  const pagerduty = newPagerDuty()
-  if (
-    notification.type === atlassianStatuspageSlug &&
-    atlassianStatuspageValidateConfig(notification.data)
-  ) {
-    return atlassianStatuspageValidateConfig(notification.data)
-  }
-
-  if (
-    notification.type === pagerduty.slug &&
-    pagerduty.validateConfig(notification.data)
-  ) {
-    return pagerduty.validateConfig(notification.data)
-  }
-
-  if (
-    notification.type === instatusPageSlug &&
-    instatusPageValidateConfig(notification.data)
-  ) {
-    return instatusPageValidateConfig(notification.data)
-  }
-
-  const missingField = validateRequiredFields(notification)
-  if (missingField) {
-    return missingField
-  }
-}
-
-export const validateNotification = (
+export const validateNotification = async (
   notifications: Notification[]
-): string | undefined => {
-  if (notifications.length === 0) return
+): Promise<void> => {
+  const hasNotification = notifications.length > 0
 
-  for (const notification of notifications) {
-    const missingRecipient = checkRecipients(notification)
-    if (missingRecipient) {
-      return missingRecipient
-    }
-
-    const missingSlug = checkByNotificationType(notification)
-    if (missingSlug) {
-      return missingSlug
-    }
+  if (!hasNotification) {
+    return
   }
+
+  await Promise.all(
+    notifications.map(async ({ data, type }) => {
+      try {
+        const channel = channels[type]
+
+        if (!channel?.validator) {
+          throw new Error('Notifications type is not allowed')
+        }
+
+        await channel.validator.validateAsync(data)
+      } catch (error: any) {
+        throw new Error(`${error?.message} (${type})`)
+      }
+    })
+  )
 }
