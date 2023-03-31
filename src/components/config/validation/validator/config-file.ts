@@ -33,7 +33,11 @@ const ajv = new Ajv()
 export function validateConfigWithSchema(config: Config): Validation {
   const result: Validation = {
     valid: false,
-    message: `Errors detected in config file ${config}`,
+    message: `Errors detected in config file ${JSON.stringify(
+      config,
+      null,
+      2
+    )}`,
   }
 
   const validate = ajv.compile(mySchema)

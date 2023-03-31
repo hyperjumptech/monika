@@ -81,17 +81,21 @@ export async function* getConfigIterator(
   }
 }
 
-export const updateConfig = (config: Config, validate = true): void => {
+export const updateConfig = async (
+  config: Config,
+  validate = true
+): Promise<void> => {
   log.info('Updating config')
   if (validate) {
-    const validated = validateConfig(config)
-
-    if (!validated.valid) {
+    try {
+      await validateConfig(config)
+    } catch (error: any) {
       if (process.env.NODE_ENV === 'test') {
-        throw new Error(validated.message) // return error during tests
+        // return error during tests
+        throw new Error(error.message)
       }
 
-      log.error(validated.message)
+      log.error(error?.message)
       exit(1)
     }
   }
@@ -141,7 +145,7 @@ function watchConfigFile({ path, type, index, repeat }: WatchConfigFileParams) {
         defaultConfigs[index] = newConfig
       }
 
-      updateConfig(mergeConfigs())
+      await updateConfig(mergeConfigs())
     })
   }
 }
@@ -161,7 +165,7 @@ function scheduleRemoteConfigFetcher({
         defaultConfigs[index] = newConfig
       }
 
-      updateConfig(mergeConfigs())
+      await updateConfig(mergeConfigs())
     } catch (error: any) {
       log.error(error?.message)
     }
@@ -259,7 +263,7 @@ export const setupConfig = async (flags: MonikaFlags): Promise<void> => {
     nonDefaultConfig = addDefaultNotifications(nonDefaultConfig)
   }
 
-  updateConfig(mergeConfigs())
+  await updateConfig(mergeConfigs())
 }
 
 const getPathAndTypeFromFlag = (flags: MonikaFlags) => {

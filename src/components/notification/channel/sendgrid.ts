@@ -23,24 +23,59 @@
  **********************************************************************************/
 
 import sgMail from '@sendgrid/mail'
-import { SendgridData } from '../../../interfaces/data'
-import { SendInput } from '../../../interfaces/mailgun'
-import { convertTextToHTML } from '../../../utils/text'
+import Joi from 'joi'
+import Mailgen from 'mailgen'
+import type { NotificationMessage } from '.'
 
-export const sendSendgrid = async (
-  inputData: SendInput,
-  sendgridConfigData: SendgridData
-): Promise<any> => {
-  const { subject, body, sender, recipients } = inputData
-  const API_KEY = sendgridConfigData.apiKey
+type NotificationData = {
+  apiKey: string
+  sender: string
+  recipients: string[]
+}
 
-  sgMail.setApiKey(API_KEY)
+export const validator = Joi.object().keys({
+  apiKey: Joi.string().required().label('SendGrid API Key'),
+  sender: Joi.string().required().label('SendGrid sender email'),
+  recipients: Joi.array()
+    .required()
+    .items(Joi.string().required().email().label('SendGrid email recipients'))
+    .label('SendGrid recipients'),
+})
+
+export const send = async (
+  { apiKey, recipients, sender }: NotificationData,
+  { body, subject }: NotificationMessage
+): Promise<void> => {
+  const to = recipients?.join(',')
+  const mailGenerator = new Mailgen({
+    theme: 'default',
+    product: {
+      name: 'Monika',
+      link: 'https://monika.hyperjump.tech/',
+      logo: 'https://raw.githubusercontent.com/hyperjumptech/monika/main/docs/public/monika.svg',
+    },
+  })
+  const email = {
+    body: {
+      intro: [subject, ...body.split(/\r?\n/)],
+    },
+  }
+  const html = mailGenerator.generate(email)
+  const text = mailGenerator.generatePlaintext(email)
   const msg = {
-    to: recipients,
-    from: sender.email,
+    to,
+    from: sender,
     subject,
-    html: convertTextToHTML(body),
+    html,
+    text,
   }
 
-  return sgMail.send(msg)
+  sgMail.setApiKey(apiKey)
+  await sgMail.send(msg)
+}
+
+export function additionalStartupMessage({
+  recipients,
+}: NotificationData): string {
+  return `    Recipients: ${recipients.join(', ')}\n`
 }

@@ -1,7 +1,7 @@
 import { checkThresholdsAndSendAlert } from '../..'
 import { getContext } from '../../../../context'
 import events from '../../../../events'
-import type { Notification } from '../../../../interfaces/notification'
+import type { Notification } from '../../../notification/channel'
 import type { Probe } from '../../../../interfaces/probe'
 import type { ProbeRequestResponse } from '../../../../interfaces/request'
 import validateResponse from '../../../../plugins/validate-response'

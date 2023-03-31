@@ -22,52 +22,76 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { AxiosResponse } from 'axios'
-import { OpsgenieData } from '../../../interfaces/data'
-import { NotificationMessage } from '../../../interfaces/notification'
+import Joi from 'joi'
+import type { NotificationMessage } from './'
 import { sendHttpRequest } from '../../../utils/http'
 
-export const sendOpsgenie = async (
-  data: OpsgenieData,
+type NotificationData = {
+  geniekey: string
+}
+
+type Content = {
+  message: string
+  description: string
+}
+
+export const validator = Joi.object().keys({
+  geniekey: Joi.string().required().label('Opsgenie geniekey'),
+})
+
+export const send = async (
+  { geniekey }: NotificationData,
   message: NotificationMessage
-): Promise<AxiosResponse> => {
+): Promise<void> => {
   const notificationType =
     message.meta.type[0].toUpperCase() + message.meta.type.slice(1)
+  const content = getContent(message, notificationType)
 
-  let content
-  let title
-  switch (message.meta.type) {
-    case 'incident':
-    case 'recovery': {
-      title = `New ${notificationType} event from Monika`
-      content = `New ${notificationType} event from Monika\n\n${message.body}`
-      break
-    }
-
-    case 'status-update': {
-      title = `Monika status update`
-      content = `New ${notificationType} event from Monika\n\n${message.body}`
-      break
-    }
-
-    default:
-      title = `Monika ${message.meta.type}`
-      content = message.body
-      break
-  }
-
-  const res = await sendHttpRequest({
+  await sendHttpRequest({
     method: 'POST',
     url: `https://api.opsgenie.com/v2/alerts`,
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `GenieKey ${data.geniekey}`,
+      Authorization: `GenieKey ${geniekey}`,
     },
-    data: {
-      message: title,
-      description: content,
-    },
+    data: content,
   })
+}
 
-  return res
+function getContent(
+  { body, meta }: NotificationMessage,
+  notificationType: string
+): Content {
+  switch (meta.type) {
+    case 'incident':
+    case 'recovery': {
+      const message = `New ${notificationType} event from Monika`
+      const description = `New ${notificationType} event from Monika\n\n${body}`
+
+      return {
+        message,
+        description,
+      }
+    }
+
+    case 'status-update': {
+      const message = `Monika status update`
+      const description = `New ${notificationType} event from Monika\n\n${body}`
+
+      return {
+        message,
+        description,
+      }
+    }
+
+    default: {
+      const message = `Monika ${meta.type}`
+      const description = body
+
+      return {
+        message,
+        description,
+      }
+    }
+  }
 }

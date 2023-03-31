@@ -23,24 +23,46 @@
  **********************************************************************************/
 
 import * as nodemailer from 'nodemailer'
-import Mail from 'nodemailer/lib/mailer'
 import Mailgen from 'mailgen'
+import Joi from 'joi'
 
-import { SMTPData } from '../../../interfaces/data'
-import { convertTextToHTML } from '../../../utils/text'
+import type { NotificationMessage } from '.'
 
-export const createSmtpTransport = (cfg: SMTPData): any => {
-  return nodemailer.createTransport({
-    host: cfg.hostname,
-    port: cfg.port,
-    auth: { user: cfg.username, pass: cfg.password },
-  })
+type NotificationData = {
+  hostname: string
+  port: number
+  username: string
+  password: string
+  recipients: string[]
 }
 
-export const sendSmtpMail = async (
-  transporter: Mail,
-  opt: Mail.Options
-): Promise<any> => {
+export const validator = Joi.object().keys({
+  hostname: Joi.string().required().label('SMTP Hostname'),
+  port: Joi.number().port().required().label('SMTP Port'),
+  username: Joi.string().required().label('SMTP Username'),
+  password: Joi.string().required().label('SMTP Password'),
+  recipients: Joi.array()
+    .required()
+    .items(Joi.string().required().email().label('Email Email Recipients'))
+    .label('Email Recipients'),
+})
+
+export const send = async (
+  { hostname, password, port, recipients, username }: NotificationData,
+  { body, subject }: NotificationMessage
+): Promise<void> => {
+  // TODO: Read from ENV Variables
+  const DEFAULT_EMAIL = 'monika@hyperjump.tech'
+  const DEFAULT_SENDER_NAME = 'Monika'
+  const transporter = nodemailer.createTransport({
+    host: hostname,
+    port: port,
+    secure: port === 465,
+    auth: {
+      user: username,
+      pass: password,
+    },
+  })
   const mailGenerator = new Mailgen({
     theme: 'default',
     product: {
@@ -49,22 +71,30 @@ export const sendSmtpMail = async (
       logo: 'https://raw.githubusercontent.com/hyperjumptech/monika/main/docs/public/monika.svg',
     },
   })
-
-  const toNew = (opt.to as string).replace(',', ', ')
   const email = {
     body: {
-      name: `${toNew}`,
-      intro: [`${opt.subject}`, convertTextToHTML(`${opt.text}`)],
+      intro: [subject, ...body.split(/\r?\n/)],
     },
   }
+  const html = mailGenerator.generate(email)
+  const text = mailGenerator.generatePlaintext(email)
 
-  const emailTemplate = mailGenerator.generate(email)
-  const to = (opt.to as string).split(',')
-
-  return transporter.sendMail({
-    from: opt.from,
-    to: to,
-    subject: opt.subject,
-    html: emailTemplate,
+  await transporter.sendMail({
+    from: `"${DEFAULT_SENDER_NAME}" <${DEFAULT_EMAIL}>`,
+    to: recipients?.join(','),
+    subject,
+    text,
+    html,
   })
+}
+
+export function additionalStartupMessage({
+  hostname,
+  port,
+  recipients,
+  username,
+}: NotificationData): string {
+  return `    Recipients: ${recipients.join(
+    ', '
+  )}\n    Hostname: ${hostname}\n    Port: ${port}\n    Username: ${username}\n`
 }
