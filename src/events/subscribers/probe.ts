@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import events from '../../events'
-import type { Notification } from '../../interfaces/notification'
+import type { Notification } from '../../components/notification/channel'
 import type { StatuspageNotification } from '../../plugins/visualization/atlassian-status-page'
 import { AtlassianStatusPageAPI } from '../../plugins/visualization/atlassian-status-page'
 import type { InstatusPageNotification } from '../../plugins/visualization/instatus'

@@ -24,7 +24,7 @@
 
 import { getContext } from '../../context'
 import events from '../../events'
-import { Notification } from '../../interfaces/notification'
+import type { Notification } from '../notification/channel'
 import { Probe } from '../../interfaces/probe'
 import { ServerAlertState } from '../../interfaces/probe-status'
 import { ProbeRequestResponse } from '../../interfaces/request'

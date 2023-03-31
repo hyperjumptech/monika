@@ -22,89 +22,119 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { AxiosResponse } from 'axios'
+/* eslint-disable camelcase */
 import format from 'date-fns/format'
-import { DingtalkData } from '../../../interfaces/data'
-import { NotificationMessage } from '../../../interfaces/notification'
+import Joi from 'joi'
+import type { NotificationMessage } from './'
 import { sendHttpRequest } from '../../../utils/http'
 
-export const sendDingtalk = async (
-  data: DingtalkData,
+type NotificationData = {
+  access_token: string
+}
+
+type TextContent = {
+  content: string
+}
+
+type MarkdownContent = {
+  title: string
+  text: string
+}
+
+type Content = {
+  msgtype: string
+  text?: TextContent
+  markdown?: MarkdownContent
+}
+
+export const validator = Joi.object().keys({
+  access_token: Joi.string().required().label('Dingtalk access token'),
+})
+
+export const send = async (
+  { access_token }: NotificationData,
   message: NotificationMessage
-): Promise<AxiosResponse> => {
+): Promise<void> => {
   const notificationType =
     message.meta.type[0].toUpperCase() + message.meta.type.slice(1)
+  const content = getContent(message, notificationType)
 
-  let content
-  let bodyJson
-  switch (message.meta.type) {
-    case 'incident':
-    case 'recovery': {
-      content = `New ${notificationType} event from Monika\n\n${message.body}`
-      bodyJson = {
-        msgtype: 'text',
-        text: {
-          content: content,
-        },
-      }
-      break
-    }
-
-    case 'status-update': {
-      content = `Status Update ${format(
-        new Date(),
-        'yyyy-MM-dd HH:mm:ss XXX'
-      )}\n
-Host: ${message.meta.monikaInstance}\n
-Number of Probes: ${message.meta.numberOfProbes}\n
-Maximum Response Time: ${message.meta.maxResponseTime} ms in the last ${
-        message.meta.responseTimelogLifeTimeInHour
-      } hours\n
-Minimum Response Time: ${message.meta.minResponseTime} ms in the last ${
-        message.meta.responseTimelogLifeTimeInHour
-      } hours\n
-Average Response Time: ${message.meta.averageResponseTime} ms in the last ${
-        message.meta.responseTimelogLifeTimeInHour
-      } hours\n
-Incidents: ${message.meta.numberOfIncidents} in the last 24 hours\n
-Recoveries: ${message.meta.numberOfRecoveries} in the last 24 hours\n
-Notifications: ${message.meta.numberOfSentNotifications}\n
- \n
-`
-      const indexTweet = message.body.indexOf('<a href')
-      let tweet = message.body.slice(indexTweet)
-      tweet = tweet.replace('<a href=', '[Tweet this status!](')
-      tweet = tweet.replace('Tweet this status!</a>', ')')
-
-      bodyJson = {
-        msgtype: 'markdown',
-        markdown: {
-          title: message.meta.type,
-          text: content + tweet,
-        },
-      }
-      break
-    }
-
-    default:
-      content = message.body
-      bodyJson = {
-        msgtype: 'text',
-        text: {
-          content: content,
-        },
-      }
-      break
-  }
-
-  const res = await sendHttpRequest({
+  await sendHttpRequest({
     method: 'POST',
-    url: `https://oapi.dingtalk.com/robot/send?access_token=${data.access_token}`,
+    url: `https://oapi.dingtalk.com/robot/send?access_token=${access_token}`,
     headers: {
       'Content-Type': 'application/json',
     },
-    data: bodyJson,
+    data: content,
   })
+}
 
-  return res
+function getContent(
+  { body, meta, summary }: NotificationMessage,
+  notificationType: string
+): Content {
+  const {
+    averageResponseTime,
+    numberOfIncidents,
+    numberOfProbes,
+    numberOfRecoveries,
+    numberOfSentNotifications,
+    minResponseTime,
+    maxResponseTime,
+    responseTimelogLifeTimeInHour,
+    type,
+    monikaInstance,
+  } = meta
+
+  switch (type) {
+    case 'incident':
+    case 'recovery': {
+      const content = `New ${notificationType} event from Monika\n\n${body}`
+
+      return {
+        msgtype: 'text',
+        text: {
+          content,
+        },
+      }
+    }
+
+    case 'status-update': {
+      const content = `Status Update ${format(
+        new Date(),
+        'yyyy-MM-dd HH:mm:ss XXX'
+      )}\n
+Host: ${monikaInstance}\n
+Number of Probes: ${numberOfProbes}\n
+Maximum Response Time: ${maxResponseTime} ms in the last ${responseTimelogLifeTimeInHour} hours\n
+Minimum Response Time: ${minResponseTime} ms in the last ${responseTimelogLifeTimeInHour} hours\n
+Average Response Time: ${averageResponseTime} ms in the last ${responseTimelogLifeTimeInHour} hours\n
+Incidents: ${numberOfIncidents} in the last 24 hours\n
+Recoveries: ${numberOfRecoveries} in the last 24 hours\n
+Notifications: ${numberOfSentNotifications}\n
+ \n
+`
+      const indexTweet = body.indexOf('<a href')
+      const tweet = body
+        .slice(indexTweet)
+        .replace('<a href=', '[Tweet this status!](')
+        .replace('Tweet this status!</a>', ')')
+
+      return {
+        msgtype: 'markdown',
+        markdown: {
+          title: type,
+          text: content + tweet,
+        },
+      }
+    }
+
+    default:
+      return {
+        msgtype: 'text',
+        text: {
+          content: summary,
+        },
+      }
+  }
 }

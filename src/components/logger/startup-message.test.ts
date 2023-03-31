@@ -25,7 +25,6 @@
 import chai, { expect } from 'chai'
 import spies from 'chai-spies'
 import type { Config } from '../../interfaces/config'
-import type { MailgunData, SMTPData, WebhookData } from '../../interfaces/data'
 import { log } from '../../utils/pino'
 import { logStartupMessage } from './startup-message'
 
@@ -349,8 +348,9 @@ describe('Startup message', () => {
                   hostname: 'example.com',
                   port: 25,
                   username: 'name@example.com',
+                  password: '',
                   recipients: ['john@example.com', 'jane@example.com'],
-                } as SMTPData,
+                },
               },
             ],
           },
@@ -378,7 +378,8 @@ describe('Startup message', () => {
                 data: {
                   recipients: ['john@example.com'],
                   domain: 'https://example.com',
-                } as MailgunData,
+                  apiKey: '',
+                },
               },
             ],
           },
@@ -402,7 +403,7 @@ describe('Startup message', () => {
                 type: 'webhook',
                 data: {
                   url: 'https://example.com',
-                } as WebhookData,
+                },
               },
             ],
           },
