@@ -1,3 +1,27 @@
+/**********************************************************************************
+ * MIT License                                                                    *
+ *                                                                                *
+ * Copyright (c) 2021 Hyperjump Technology                                        *
+ *                                                                                *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy   *
+ * of this software and associated documentation files (the "Software"), to deal  *
+ * in the Software without restriction, including without limitation the rights   *
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell      *
+ * copies of the Software, and to permit persons to whom the Software is          *
+ * furnished to do so, subject to the following conditions:                       *
+ *                                                                                *
+ * The above copyright notice and this permission notice shall be included in all *
+ * copies or substantial portions of the Software.                                *
+ *                                                                                *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR     *
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,       *
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE    *
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER         *
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,  *
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  *
+ * SOFTWARE.                                                                      *
+ **********************************************************************************/
+
 import chai, { expect } from 'chai'
 import spies from 'chai-spies'
 
@@ -106,7 +130,7 @@ describe('notificationChecker - smtpNotification', () => {
     }
   })
 
-  it('should handle validation error - without username', async () => {
+  it('should handle validation error - with empty username', async () => {
     try {
       await validateNotification([
         {
@@ -121,7 +145,50 @@ describe('notificationChecker - smtpNotification', () => {
         },
       ])
     } catch (error) {
-      // note: the expected is success, but since smtp at port 1000 does not exit, error is connection error
+      const message = '"SMTP Username" is not allowed to be empty'
+      expect(() => {
+        throw error
+      }).to.throw(message)
+    }
+  })
+
+  it('should handle validation error - with empty password', async () => {
+    try {
+      await validateNotification([
+        {
+          ...smtpNotificationConfig,
+          data: {
+            hostname: 'localhost',
+            port: 25,
+            username: 'username',
+            password: '',
+            recipients: ['name@example.com'],
+          },
+        },
+      ])
+    } catch (error) {
+      const message = '"SMTP Password" is not allowed to be empty'
+
+      expect(() => {
+        throw error
+      }).to.throw(message)
+    }
+  })
+
+  it('should handle validation error - without username', async () => {
+    try {
+      await validateNotification([
+        {
+          ...smtpNotificationConfig,
+          data: {
+            hostname: 'localhost',
+            port: 25,
+            password: 'password',
+            recipients: ['name@example.com'],
+          },
+        },
+      ])
+    } catch (error) {
       const message = 'connect ECONNREFUSED 127.0.0.1:1000'
       expect(() => {
         throw error
@@ -138,7 +205,6 @@ describe('notificationChecker - smtpNotification', () => {
             hostname: 'localhost',
             port: 25,
             username: 'username',
-            password: '',
             recipients: ['name@example.com'],
           },
         },

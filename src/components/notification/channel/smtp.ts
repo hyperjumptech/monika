@@ -39,8 +39,8 @@ type NotificationData = {
 export const validator = Joi.object().keys({
   hostname: Joi.string().required().label('SMTP Hostname'),
   port: Joi.number().port().required().label('SMTP Port'),
-  username: Joi.string().required().label('SMTP Username'),
-  password: Joi.string().required().label('SMTP Password'),
+  username: Joi.string().label('SMTP Username'),
+  password: Joi.string().label('SMTP Password'),
   recipients: Joi.array()
     .required()
     .items(Joi.string().required().email().label('Email Email Recipients'))
