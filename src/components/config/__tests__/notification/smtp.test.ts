@@ -27,7 +27,6 @@ import spies from 'chai-spies'
 
 import * as smtp from '../../../notification/channel/smtp'
 import { validateNotification } from '../../validation/validator/notification'
-import sinon from 'sinon'
 
 chai.use(spies)
 
@@ -176,38 +175,45 @@ describe('notificationChecker - smtpNotification', () => {
     }
   })
 
-  it('should handle validation error - without username', async () => {
-    const stub = sinon.stub(smtp, 'send').returns(Promise.resolve())
-
-    await validateNotification([
-      {
-        ...smtpNotificationConfig,
-        data: {
-          hostname: 'localhost',
-          port: 25,
-          password: 'password',
-          recipients: ['name@example.com'],
+  it('should accept smtp - without username', async () => {
+    try {
+      await validateNotification([
+        {
+          ...smtpNotificationConfig,
+          data: {
+            hostname: 'localhost',
+            port: 25,
+            password: 'password',
+            recipients: ['name@example.com'],
+          },
         },
-      },
-    ])
-    expect(stub.calledOnce)
+      ])
+    } catch (error) {
+      const message = 'should pass without error'
+      expect(() => {
+        throw error
+      }).to.throw(message)
+    }
   })
 
-  it('should handle validation error - without password', async () => {
-    const stub = sinon.stub(smtp, 'send').returns(Promise.resolve())
-
-    await validateNotification([
-      {
-        ...smtpNotificationConfig,
-        data: {
-          hostname: 'localhost',
-          port: 25,
-          username: 'username',
-          recipients: ['name@example.com'],
+  it('should accpet smtp - without password', async () => {
+    try {
+      await validateNotification([
+        {
+          ...smtpNotificationConfig,
+          data: {
+            hostname: 'localhost',
+            port: 25,
+            username: 'username',
+            recipients: ['name@example.com'],
+          },
         },
-      },
-    ])
-
-    expect(stub.calledOnce)
+      ])
+    } catch (error) {
+      const message = 'should pass without error'
+      expect(() => {
+        throw error
+      }).to.throw(message)
+    }
   })
 })
