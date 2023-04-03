@@ -22,7 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { channels, type Notification } from '../../../notification/channel'
+import { channels, type Notification } from '../channel'
 
 export const validateNotification = async (
   notifications: Notification[]
