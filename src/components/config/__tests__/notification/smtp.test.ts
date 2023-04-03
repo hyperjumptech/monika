@@ -27,6 +27,7 @@ import spies from 'chai-spies'
 
 import * as smtp from '../../../notification/channel/smtp'
 import { validateNotification } from '../../validation/validator/notification'
+import sinon from 'sinon'
 
 chai.use(spies)
 
@@ -176,45 +177,37 @@ describe('notificationChecker - smtpNotification', () => {
   })
 
   it('should handle validation error - without username', async () => {
-    try {
-      await validateNotification([
-        {
-          ...smtpNotificationConfig,
-          data: {
-            hostname: 'localhost',
-            port: 25,
-            password: 'password',
-            recipients: ['name@example.com'],
-          },
+    const stub = sinon.stub(smtp, 'send').returns(Promise.resolve())
+
+    await validateNotification([
+      {
+        ...smtpNotificationConfig,
+        data: {
+          hostname: 'localhost',
+          port: 25,
+          password: 'password',
+          recipients: ['name@example.com'],
         },
-      ])
-    } catch (error) {
-      const message = 'connect ECONNREFUSED 127.0.0.1:1000'
-      expect(() => {
-        throw error
-      }).to.throw(message)
-    }
+      },
+    ])
+    expect(stub.calledOnce)
   })
 
   it('should handle validation error - without password', async () => {
-    try {
-      await validateNotification([
-        {
-          ...smtpNotificationConfig,
-          data: {
-            hostname: 'localhost',
-            port: 25,
-            username: 'username',
-            recipients: ['name@example.com'],
-          },
-        },
-      ])
-    } catch (error) {
-      const message = 'connect ECONNREFUSED 127.0.0.1:1000'
+    const stub = sinon.stub(smtp, 'send').returns(Promise.resolve())
 
-      expect(() => {
-        throw error
-      }).to.throw(message)
-    }
+    await validateNotification([
+      {
+        ...smtpNotificationConfig,
+        data: {
+          hostname: 'localhost',
+          port: 25,
+          username: 'username',
+          recipients: ['name@example.com'],
+        },
+      },
+    ])
+
+    expect(stub.calledOnce)
   })
 })
