@@ -384,7 +384,7 @@ class Monika extends Command {
   }
 
   async deprecationHandler(config: Config): Promise<Config> {
-    let showMessage = false
+    let showDeprecateMsg = false
 
     const checkedConfig = {
       ...config,
@@ -393,9 +393,8 @@ class Monika extends Command {
         requests: probe.requests?.map((request) => ({
           ...request,
           alert: request.alerts?.map((alert) => {
-            showMessage = true
-
             if (alert.query) {
+              showDeprecateMsg = true
               return { ...alert, assertion: alert.query }
             }
 
@@ -403,9 +402,8 @@ class Monika extends Command {
           }),
         })),
         alerts: probe.alerts?.map((alert) => {
-          showMessage = true
-
           if (alert.query) {
+            showDeprecateMsg = true
             return { ...alert, assertion: alert.query }
           }
 
@@ -414,7 +412,7 @@ class Monika extends Command {
       })),
     }
 
-    if (showMessage) {
+    if (showDeprecateMsg) {
       log.warn('"alerts.query" is deprecated. Please use "alerts.assertion"')
     }
 
