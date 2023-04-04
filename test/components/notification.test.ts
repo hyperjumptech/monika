@@ -25,21 +25,17 @@
 import chai, { expect } from 'chai'
 import spies from 'chai-spies'
 import { sendAlerts } from '../../src/components/notification'
-import { channels } from '@monika/notification'
+import * as discord from '@monika/notification/channel/discord'
+import * as mailgun from '@monika/notification/channel/mailgun'
+import * as monikaNotif from '@monika/notification/channel/monika-notif'
+import * as slack from '@monika/notification/channel/slack'
+import * as smtp from '@monika/notification/channel/smtp'
+import * as telegram from '@monika/notification/channel/telegram'
+import * as webhook from '@monika/notification/channel/webhook'
+import * as whatsapp from '@monika/notification/channel/whatsapp'
+import * as lark from '@monika/notification/channel/lark'
+import * as googlechat from '@monika/notification/channel/googlechat'
 import type { NotificationMessage } from '@monika/notification'
-
-const {
-  discord,
-  mailgun,
-  monikaNotif,
-  slack,
-  smtp,
-  telegram,
-  webhook,
-  whatsapp,
-  lark,
-  googlechat,
-} = channels
 
 chai.use(spies)
 
