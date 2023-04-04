@@ -22,33 +22,26 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { AxiosBasicCredentials } from 'axios'
+import chai, { expect } from 'chai'
+import * as auth from './authorization'
 
-export const authBasic = (cred: AxiosBasicCredentials): any => {
-  if (!cred.username)
-    throw new Error('Username should not be empty or undefined')
-  if (!cred.password || cred.password.length < 6)
-    throw new Error('Password should not be empty or less than 6 character')
+describe('utils authorization tests', () => {
+  it('should return basic authorization', async () => {
+    chai.spy.on(auth, 'authBasic', () => Promise.resolve('basic token'))
+    const token = auth.authorize('basic', {
+      username: 'someusername',
+      password: 'somepassword',
+    })
 
-  const creds = cred.username + ':' + cred.password
-  const buff = Buffer.from(creds)
+    expect(auth.authBasic).to.have.been.called()
+    expect(token).not.undefined
+  })
 
-  const result = buff.toString('base64')
-  return `Basic ${result}`
-}
+  it('should return bearer authorization', async () => {
+    chai.spy.on(auth, 'authBearer', () => Promise.resolve('bearer token'))
+    const token = auth.authorize('bearer', 'token')
 
-export const authBearer = (token: string): string => {
-  return `Bearer ${token}`
-}
-
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export const authorize = (type: string, args: any): any => {
-  switch (type) {
-    case 'basic':
-      return authBasic(args)
-    case 'bearer':
-      return authBearer(args)
-    default:
-      return undefined
-  }
-}
+    expect(auth.authBearer).to.have.been.called()
+    expect(token).not.undefined
+  })
+})

@@ -23,11 +23,14 @@
  **********************************************************************************/
 
 import { getContext, setContext } from '../../context'
-import type { Notification, NotificationMessage } from './channel'
 import { ValidatedResponse } from '../../plugins/validate-response'
 import getIp from '../../utils/ip'
 import { getMessageForAlert } from './alert-message'
-import { channels } from '@hyperjumptech/monika-notification/channel'
+import {
+  channels,
+  Notification,
+  NotificationMessage,
+} from '@hyperjumptech/monika-notification/channel'
 
 export async function sendNotifications(
   notifications: Notification[],
