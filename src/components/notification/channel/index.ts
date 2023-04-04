@@ -1,11 +1,6 @@
 import type { AnySchema } from 'joi'
 
 import * as pagerduty from './pagerduty'
-import * as pushbullet from './pushbullet'
-import * as pushover from './pushover'
-import * as sendgrid from './sendgrid'
-import * as slack from './slack'
-import * as smtp from './smtp'
 import * as teams from './teams'
 import * as telegram from './telegram'
 import * as webhook from './webhook'
@@ -68,11 +63,6 @@ export type Notification = {
 
 export const channels: Record<string, NotificationChannel> = {
   pagerduty,
-  pushbullet,
-  pushover,
-  sendgrid,
-  slack,
-  smtp,
   teams,
   telegram,
   webhook,

@@ -23,98 +23,41 @@
  **********************************************************************************/
 
 import Joi from 'joi'
-import { sendHttpRequest } from '../../../utils/http'
 import type { NotificationMessage } from './'
+import { sendHttpRequest } from '../utils/http'
 
 type NotificationData = {
   token: string
-  deviceID?: string
-}
-
-type Content = {
-  title: string
-  body: string
-  type: 'note'
+  user: string
+  message: string
 }
 
 export const validator = Joi.object().keys({
-  token: Joi.string().required().label('Pushbullet token'),
-  deviceID: Joi.string()
-    .optional()
-    .label('Pushbullet device identifier (optional)'),
+  token: Joi.string().required().label('Pushover token'),
+  user: Joi.string().required().label('Pushover user'),
 })
 
 export const send = async (
-  { deviceID, token }: NotificationData,
-  message: NotificationMessage
+  { token, user }: NotificationData,
+  { body, meta }: NotificationMessage
 ): Promise<void> => {
-  const notificationType =
-    message.meta.type[0].toUpperCase() + message.meta.type.slice(1)
-  const content = getContent(message, notificationType)
-  const url = deviceID
-    ? `https://api.pushbullet.com/v2/pushes?device_iden=${deviceID}`
-    : 'https://api.pushbullet.com/v2/pushes'
+  const notificationType = meta.type[0].toUpperCase() + meta.type.slice(1)
+  const content =
+    meta.type === 'incident' || meta.type === 'recovery'
+      ? `New ${notificationType} event from Monika\n\n${body}`
+      : body
 
   await sendHttpRequest({
     method: 'POST',
-    url,
+    url: `https://api.pushover.net/1/messages.json`,
     headers: {
-      'Access-Token': token,
       'Content-Type': 'application/json',
     },
-    data: content,
+    data: {
+      user,
+      token,
+      message: content,
+      html: 1,
+    },
   })
-}
-
-function getContent(
-  { body, meta }: NotificationMessage,
-  notificationType: string
-): Content {
-  const { type, url } = meta
-  switch (type) {
-    case 'start': {
-      return {
-        body,
-        title: url ? `Monika is starting [${url}]` : 'Monika is starting',
-        type: 'note',
-      }
-    }
-
-    case 'termination': {
-      return {
-        body,
-        title: url ? `Monika is terminating [${url}]` : 'Monika is terminating',
-        type: 'note',
-      }
-    }
-
-    case 'status-update': {
-      return {
-        body,
-        title: url
-          ? `New Monika Status Update [${url}]`
-          : 'New Monika Status Update',
-        type: 'note',
-      }
-    }
-
-    case 'incident':
-    case 'recovery': {
-      return {
-        body,
-        title: url
-          ? `New ${notificationType} from Monika [${url}]`
-          : `New ${notificationType} from Monika`,
-        type: 'note',
-      }
-    }
-
-    default: {
-      return {
-        body,
-        title: url ? `[${url}]` : '',
-        type: 'note',
-      }
-    }
-  }
 }
