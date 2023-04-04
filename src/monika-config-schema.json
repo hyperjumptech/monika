@@ -716,18 +716,22 @@
                 "const": "pagerduty"
               },
               "data": {
-                "type": "object",
-                "description": "Data for your payload",
-                "additionalProperties": false,
-                "required": ["key", "probeID"],
-                "properties": {
-                  "key": {
-                    "type": "string",
-                    "description": "Pagerduty integration key"
-                  },
-                  "probeID": {
-                    "type": "string",
-                    "description": "Monika Probe ID"
+                "type": "array",
+                "description": "An array of email addresses that will receive the e-mail from Monika",
+                "items": {
+                  "type": "object",
+                  "description": "Data for your payload",
+                  "additionalProperties": false,
+                  "required": ["key", "probeID"],
+                  "properties": {
+                    "key": {
+                      "type": "string",
+                      "description": "Pagerduty integration key"
+                    },
+                    "probeID": {
+                      "type": "string",
+                      "description": "Monika Probe ID"
+                    }
                   }
                 }
               }
