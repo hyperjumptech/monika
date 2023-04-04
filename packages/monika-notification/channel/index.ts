@@ -3,9 +3,9 @@ import type { AnySchema } from 'joi'
 import * as dingtalk from './dingtalk'
 import * as discord from './discord'
 import * as desktop from './desktop'
-// import * as googlechat from './googlechat'
-// import * as gotify from './gotify'
-// import * as lark from './lark'
+import * as googlechat from './googlechat'
+import * as gotify from './gotify'
+import * as lark from './lark'
 // import * as mailgun from './mailgun'
 // import * as monikaNotif from './monika-notif'
 // import * as opsgenie from './opsgenie'
@@ -79,9 +79,9 @@ export const channels: Record<string, NotificationChannel> = {
   dingtalk,
   discord,
   desktop,
-  // 'google-chat': googlechat,
-  // gotify,
-  // lark,
+  'google-chat': googlechat,
+  gotify,
+  lark,
   // mailgun,
   // 'monika-notif': monikaNotif,
   // opsgenie,
