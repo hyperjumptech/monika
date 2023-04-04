@@ -24,7 +24,7 @@
 
 /* eslint-disable camelcase */
 import Joi from 'joi'
-import type { NotificationMessage } from './'
+import type { NotificationMessage } from '..'
 import { sendHttpRequest } from '../utils/http'
 
 type NotificationData = {

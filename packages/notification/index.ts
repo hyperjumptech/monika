@@ -24,26 +24,26 @@
 
 import type { AnySchema } from 'joi'
 
-import * as dingtalk from './dingtalk'
-import * as discord from './discord'
-import * as desktop from './desktop'
-import * as googlechat from './googlechat'
-import * as gotify from './gotify'
-import * as lark from './lark'
-import * as mailgun from './mailgun'
-import * as monikaNotif from './monika-notif'
-import * as opsgenie from './opsgenie'
-import * as pagerduty from './pagerduty'
-import * as pushbullet from './pushbullet'
-import * as pushover from './pushover'
-import * as sendgrid from './sendgrid'
-import * as slack from './slack'
-import * as smtp from './smtp'
-import * as teams from './teams'
-import * as telegram from './telegram'
-import * as webhook from './webhook'
-import * as whatsapp from './whatsapp'
-import * as workplace from './workplace'
+import * as dingtalk from './channel/dingtalk'
+import * as discord from './channel/discord'
+import * as desktop from './channel/desktop'
+import * as googlechat from './channel/googlechat'
+import * as gotify from './channel/gotify'
+import * as lark from './channel/lark'
+import * as mailgun from './channel/mailgun'
+import * as monikaNotif from './channel/monika-notif'
+import * as opsgenie from './channel/opsgenie'
+import * as pagerduty from './channel/pagerduty'
+import * as pushbullet from './channel/pushbullet'
+import * as pushover from './channel/pushover'
+import * as sendgrid from './channel/sendgrid'
+import * as slack from './channel/slack'
+import * as smtp from './channel/smtp'
+import * as teams from './channel/teams'
+import * as telegram from './channel/telegram'
+import * as webhook from './channel/webhook'
+import * as whatsapp from './channel/whatsapp'
+import * as workplace from './channel/workplace'
 
 type BaseNotificationMessageMeta = {
   type: string
@@ -87,7 +87,7 @@ export type NotificationMessage = {
     | NotificationStatusUpdateMessageMeta
 }
 
-export type NotificationChannel<T = any> = {
+type NotificationChannel<T = any> = {
   validator: AnySchema
   send: (notificationData: T, message: NotificationMessage) => Promise<void>
   additionalStartupMessage?: (notificationData: T) => string

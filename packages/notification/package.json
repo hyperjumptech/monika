@@ -2,7 +2,7 @@
   "name": "@monika/notification",
   "version": "1.0.0",
   "description": "notification package for monika",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

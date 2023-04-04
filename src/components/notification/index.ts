@@ -30,7 +30,7 @@ import {
   channels,
   Notification,
   NotificationMessage,
-} from '@monika/notification/channel'
+} from '@monika/notification'
 
 export async function sendNotifications(
   notifications: Notification[],

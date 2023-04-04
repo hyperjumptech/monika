@@ -48,7 +48,7 @@ import events from '../events'
 import { Config } from '../interfaces/config'
 
 import { getEventEmitter } from '../utils/events'
-import type { Notification } from '@monika/notification/channel'
+import type { Notification } from '@monika/notification'
 import type { Probe } from '../interfaces/probe'
 const eventEmitter = getEventEmitter()
 
