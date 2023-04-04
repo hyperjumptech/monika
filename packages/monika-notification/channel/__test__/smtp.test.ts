@@ -1,7 +1,7 @@
 import chai, { expect } from 'chai'
 import spies from 'chai-spies'
 
-import * as smtp from '../../../notification/channel/smtp'
+import * as smtp from '../smtp'
 import { validateNotification } from '@hyperjumptech/monika-notification/validator/notification'
 
 chai.use(spies)

@@ -28,7 +28,7 @@ import { open, Database, ISqlite } from 'sqlite'
 
 import { ProbeRequestResponse } from '../../interfaces/request'
 import { Probe } from '../../interfaces/probe'
-import type { Notification } from '../notification/channel'
+import type { Notification } from '@hyperjumptech/monika-notification/channel'
 import { log } from '../../utils/pino'
 import { getConfig } from '../config'
 const sqlite3 = SQLite3.verbose()

@@ -26,7 +26,7 @@ import { differenceInSeconds } from 'date-fns'
 
 import { doProbe } from '../components/probe'
 import { getContext } from '../context'
-import type { Notification } from '../components/notification/channel'
+import type { Notification } from '@hyperjumptech/monika-notification/channel'
 import { Probe } from '../interfaces/probe'
 import { log } from '../utils/pino'
 import {

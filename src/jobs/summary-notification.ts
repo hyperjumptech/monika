@@ -48,7 +48,7 @@ import events from '../events'
 import { Config } from '../interfaces/config'
 
 import { getEventEmitter } from '../utils/events'
-import type { Notification } from '../components/notification/channel'
+import type { Notification } from '@hyperjumptech/monika-notification/channel'
 import type { Probe } from '../interfaces/probe'
 const eventEmitter = getEventEmitter()
 

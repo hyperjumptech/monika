@@ -6,10 +6,7 @@
     "module": "commonjs",
     "outDir": "lib",
     "rootDir": "src",
-    "lib": [
-      "ES2021.String",
-      "DOM"
-    ],
+    "lib": ["ES2021.String", "DOM"],
     "strict": true,
     "target": "es2017",
     "skipLibCheck": true,
@@ -18,7 +15,8 @@
     "typeRoots": ["node_modules/@types", "custom_types"]
   },
   "include": [
-    "src/**/*", 
-    "src/**/*.json", 
-    "../packages/monika-notification/**/*",
-  ]}
+    "src/**/*",
+    "src/**/*.json",
+    "../packages/monika-notification/**/*"
+  ]
+}

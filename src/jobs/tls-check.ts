@@ -26,7 +26,7 @@ import { getConfig } from '../components/config'
 import { saveNotificationLog } from '../components/logger/history'
 import { sendAlerts } from '../components/notification'
 import { checkTLS, getHostname } from '../components/tls-checker'
-import type { Notification } from '../components/notification/channel'
+import type { Notification } from '@hyperjumptech/monika-notification/channel'
 import type { ValidatedResponse } from '../plugins/validate-response'
 import { log } from '../utils/pino'
 
