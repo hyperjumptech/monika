@@ -22,29 +22,66 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { SlackData } from '../../../interfaces/data'
-import { NotificationMessage } from '../../../interfaces/notification'
+import Joi from 'joi'
+import type { NotificationMessage } from './'
 import { sendHttpRequest } from '../../../utils/http'
 
-export const sendSlack = async (
-  data: SlackData,
+type NotificationData = {
+  url: string
+}
+
+type ContentBlock = {
+  type: string
+  text?: string | ContentBlock
+}
+
+type Content = {
+  text: string
+  blocks: ContentBlock[]
+}
+
+export const validator = Joi.object().keys({
+  url: Joi.string().uri().required().label('Slack URL'),
+})
+
+export const send = async (
+  { url }: NotificationData,
   message: NotificationMessage
 ): Promise<void> => {
   const notificationType =
     message.meta.type[0].toUpperCase() + message.meta.type.slice(1)
+  const content = getContent(message, notificationType)
 
-  let content
-  switch (message.meta.type) {
+  if (!content) {
+    return
+  }
+
+  await sendHttpRequest({
+    method: 'POST',
+    url,
+    data: content,
+  })
+}
+
+export function additionalStartupMessage({ url }: NotificationData): string {
+  return `    URL: ${url}\n`
+}
+
+function getContent(
+  { body, meta, summary }: NotificationMessage,
+  notificationType: string
+): Content {
+  switch (meta.type) {
     case 'start':
     case 'termination': {
-      content = {
+      return {
         text: `New '${notificationType}' event from Monika`,
         blocks: [
           {
             type: 'section',
             text: {
               type: 'mrkdwn',
-              text: `${message.body}`,
+              text: body,
             },
           },
           {
@@ -52,12 +89,11 @@ export const sendSlack = async (
           },
         ],
       }
-      break
     }
 
     case 'incident':
     case 'recovery': {
-      content = {
+      return {
         text: `New '${notificationType}' event from Monika`,
         blocks: [
           {
@@ -71,28 +107,28 @@ export const sendSlack = async (
             type: 'section',
             text: {
               type: 'mrkdwn',
-              text: `*Message*: ${message.summary}`,
+              text: `*Message*: ${summary}`,
             },
           },
           {
             type: 'section',
             text: {
               type: 'mrkdwn',
-              text: `*URL*: <${message.meta.url}|${message.meta.url}>`,
+              text: `*URL*: <${meta.url}|${meta.url}>`,
             },
           },
           {
             type: 'section',
             text: {
               type: 'mrkdwn',
-              text: `*Time*: ${message.meta.time}`,
+              text: `*Time*: ${meta.time}`,
             },
           },
           {
             type: 'section',
             text: {
               type: 'mrkdwn',
-              text: `*From*: ${message.meta.hostname}`,
+              text: `*From*: ${meta.hostname}`,
             },
           },
           {
@@ -100,11 +136,10 @@ export const sendSlack = async (
           },
         ],
       }
-      break
     }
 
     case 'status-update': {
-      content = {
+      return {
         text: `New '${notificationType}' from Monika`,
         blocks: [
           {
@@ -118,63 +153,63 @@ export const sendSlack = async (
             type: 'section',
             text: {
               type: 'mrkdwn',
-              text: `*Host*: ${message.meta.monikaInstance}`,
+              text: `*Host*: ${meta.monikaInstance}`,
             },
           },
           {
             type: 'section',
             text: {
               type: 'mrkdwn',
-              text: `*Number of Probes*: ${message.meta.numberOfProbes}>`,
+              text: `*Number of Probes*: ${meta.numberOfProbes}>`,
             },
           },
           {
             type: 'section',
             text: {
               type: 'mrkdwn',
-              text: `*Maximum Response Time*: ${message.meta.maxResponseTime} ms in the last ${message.meta.responseTimelogLifeTimeInHour} hours`,
+              text: `*Maximum Response Time*: ${meta.maxResponseTime} ms in the last ${meta.responseTimelogLifeTimeInHour} hours`,
             },
           },
           {
             type: 'section',
             text: {
               type: 'mrkdwn',
-              text: `*Minimum Response Time*: ${message.meta.minResponseTime} ms in the last ${message.meta.responseTimelogLifeTimeInHour} hours`,
+              text: `*Minimum Response Time*: ${meta.minResponseTime} ms in the last ${meta.responseTimelogLifeTimeInHour} hours`,
             },
           },
           {
             type: 'section',
             text: {
               type: 'mrkdwn',
-              text: `*Average Response Time*: ${message.meta.averageResponseTime} ms in the last ${message.meta.responseTimelogLifeTimeInHour} hours`,
+              text: `*Average Response Time*: ${meta.averageResponseTime} ms in the last ${meta.responseTimelogLifeTimeInHour} hours`,
             },
           },
           {
             type: 'section',
             text: {
               type: 'mrkdwn',
-              text: `*From*: ${message.meta.hostname}`,
+              text: `*From*: ${meta.hostname}`,
             },
           },
           {
             type: 'section',
             text: {
               type: 'mrkdwn',
-              text: `*Incidents*: ${message.meta.numberOfIncidents} in the last 24 hours`,
+              text: `*Incidents*: ${meta.numberOfIncidents} in the last 24 hours`,
             },
           },
           {
             type: 'section',
             text: {
               type: 'mrkdwn',
-              text: `*Recoveries*: ${message.meta.numberOfRecoveries} in the last 24 hours`,
+              text: `*Recoveries*: ${meta.numberOfRecoveries} in the last 24 hours`,
             },
           },
           {
             type: 'section',
             text: {
               type: 'mrkdwn',
-              text: `*Notifications*: ${message.meta.numberOfSentNotifications}`,
+              text: `*Notifications*: ${meta.numberOfSentNotifications}`,
             },
           },
           {
@@ -182,18 +217,23 @@ export const sendSlack = async (
           },
         ],
       }
-      break
     }
 
     default:
-      break
-  }
-
-  if (content) {
-    await sendHttpRequest({
-      method: 'POST',
-      url: data.url,
-      data: content,
-    })
+      return {
+        text: `New notification from Monika`,
+        blocks: [
+          {
+            type: 'section',
+            text: {
+              type: 'mrkdwn',
+              text: summary,
+            },
+          },
+          {
+            type: 'divider',
+          },
+        ],
+      }
   }
 }

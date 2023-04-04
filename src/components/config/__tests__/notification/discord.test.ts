@@ -22,34 +22,58 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-export interface CheckContactBody {
-  blocking: string
-  constact: string[]
-  forceCheck: boolean
-}
+import chai, { expect } from 'chai'
+import spies from 'chai-spies'
 
-export interface SendMessageBody {
-  to: string
-  type: string
-  recipientType: string
-  text: {
-    body: string
+import { validateNotification } from '../../validation/validator/notification'
+
+chai.use(spies)
+
+describe('notificationChecker - discordNotification', () => {
+  afterEach(() => {
+    chai.spy.restore()
+  })
+
+  const notificationConfig = {
+    id: 'discord',
+    type: 'discord' as const,
   }
-}
 
-export interface User {
-  token: string
-  // eslint-disable-next-line camelcase
-  expires_after: string
-}
+  it('should handle validation error - without URL', async () => {
+    try {
+      await validateNotification([
+        {
+          ...notificationConfig,
+          data: {
+            url: '',
+          },
+        },
+      ])
+    } catch (error) {
+      const message = '"Discord URL" is not allowed to be empty'
 
-export interface Meta {
-  version: string
-  // eslint-disable-next-line camelcase
-  api_status: string
-}
+      expect(() => {
+        throw error
+      }).to.throw(message)
+    }
+  })
 
-export interface LoginUserSuccessResponse {
-  users: User[]
-  meta: Meta
-}
+  it('should handle validation error - invalid URL', async () => {
+    try {
+      await validateNotification([
+        {
+          ...notificationConfig,
+          data: {
+            url: 'example',
+          },
+        },
+      ])
+    } catch (error) {
+      const message = '"Discord URL" must be a valid uri'
+
+      expect(() => {
+        throw error
+      }).to.throw(message)
+    }
+  })
+})

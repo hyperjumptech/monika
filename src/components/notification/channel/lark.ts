@@ -22,23 +22,81 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { NotificationMessage } from '../../../interfaces/notification'
-import { LarkData } from '../../../interfaces/data'
-import { log } from '../../../utils/pino'
+/* eslint-disable camelcase */
+import Joi from 'joi'
+import type { NotificationMessage } from './'
 import { sendHttpRequest } from '../../../utils/http'
 
-export const sendLark = async (
-  data: LarkData,
+type NotificationData = {
+  url: string
+}
+
+type Content = {
+  msg_type: string
+  content: {
+    post: {
+      en_us: {
+        title: string
+        content: {
+          tag?: string
+          text: string
+          href?: string
+        }[][]
+      }
+    }
+  }
+}
+
+export const validator = Joi.object().keys({
+  url: Joi.string().uri().required().label('Lark URL'),
+})
+
+export const send = async (
+  { url }: NotificationData,
   message: NotificationMessage
-): Promise<any> => {
-  const notifType =
+): Promise<void> => {
+  const notificationType =
     message.meta.type[0].toUpperCase() + message.meta.type.slice(1)
-  let larkMessage
-  /* eslint-disable camelcase */
-  switch (message.meta.type) {
+  const larkMessage = getContent(message, notificationType)
+
+  await sendHttpRequest({
+    method: 'POST',
+    url,
+    headers: {
+      Accept: 'application/json',
+      'Content-type': 'application/json',
+    },
+    data: larkMessage,
+  })
+}
+
+export function additionalStartupMessage({ url }: NotificationData): string {
+  return `    URL: ${url}\n`
+}
+
+function getContent(
+  { meta, summary }: NotificationMessage,
+  notificationType: string
+): Content {
+  const {
+    averageResponseTime,
+    maxResponseTime,
+    minResponseTime,
+    monikaInstance,
+    numberOfIncidents,
+    numberOfProbes,
+    numberOfRecoveries,
+    numberOfSentNotifications,
+    responseTimelogLifeTimeInHour,
+    time,
+    url,
+    version,
+  } = meta
+
+  switch (meta.type) {
     case 'start':
     case 'termination':
-      larkMessage = {
+      return {
         msg_type: 'post',
         content: {
           post: {
@@ -48,11 +106,11 @@ export const sendLark = async (
                 [
                   {
                     tag: 'text',
-                    text: `New ${notifType} from Monika\n`,
+                    text: `New ${notificationType} from Monika\n`,
                   },
                   {
                     tag: 'text',
-                    text: `${message.summary}\n`,
+                    text: `${summary}\n`,
                   },
                 ],
               ],
@@ -60,10 +118,9 @@ export const sendLark = async (
           },
         },
       }
-      break
     case 'incident':
     case 'recovery':
-      larkMessage = {
+      return {
         msg_type: 'post',
         content: {
           post: {
@@ -73,28 +130,28 @@ export const sendLark = async (
                 [
                   {
                     tag: 'text',
-                    text: `New ${notifType} from Monika\n`,
+                    text: `New ${notificationType} from Monika\n`,
                   },
                   {
                     tag: 'text',
-                    text: `Message: ${message.summary}\n`,
+                    text: `Message: ${summary}\n`,
                   },
                   {
                     tag: 'a',
-                    text: `URL: ${message.meta.url}\n`,
-                    href: `${message.meta.url}`,
+                    text: `URL: ${url}\n`,
+                    href: `${url}`,
                   },
                   {
                     tag: 'text',
-                    text: `Time: ${message.meta.time}\n`,
+                    text: `Time: ${time}\n`,
                   },
                   {
                     tag: 'text',
-                    text: `From: ${message.meta.monikaInstance}`,
+                    text: `From: ${monikaInstance}`,
                   },
                   {
                     tag: 'text',
-                    text: `Version: ${message.meta.version}`,
+                    text: `Version: ${version}`,
                   },
                 ],
               ],
@@ -102,75 +159,72 @@ export const sendLark = async (
           },
         },
       }
-      break
     case 'status-update':
-      larkMessage = {
+      return {
         msg_type: 'post',
         content: {
           post: {
             en_us: {
               title: 'Monika Status Update',
               content: [
-                {
-                  tag: 'a',
-                  text: `${message.meta.monikaInstance}`,
-                  href: `${message.meta.monikaInstance}`,
-                },
-                {
-                  tag: 'text',
-                  value: `${message.meta.numberOfProbes}`,
-                },
-                {
-                  tag: 'text',
-                  value: `${message.meta.maxResponseTime} ms in the last ${message.meta.responseTimelogLifeTimeInHour} hours`,
-                },
-                {
-                  tag: 'text',
-                  value: `${message.meta.minResponseTime} ms in the last ${message.meta.responseTimelogLifeTimeInHour} hours`,
-                },
-                {
-                  tag: 'text',
-                  value: `${message.meta.averageResponseTime} ms in the last ${message.meta.responseTimelogLifeTimeInHour} hours`,
-                },
-                {
-                  tag: 'text',
-                  value: `${message.meta.numberOfIncidents} in the last 24 hours`,
-                },
-                {
-                  tag: 'text',
-                  value: `${message.meta.numberOfRecoveries} in the last 24 hours`,
-                },
-                {
-                  tag: 'text',
-                  value: message.meta.numberOfSentNotifications,
-                },
+                [
+                  {
+                    tag: 'a',
+                    text: `${monikaInstance}`,
+                    href: `${monikaInstance}`,
+                  },
+                  {
+                    tag: 'text',
+                    text: `${numberOfProbes}`,
+                  },
+                  {
+                    tag: 'text',
+                    text: `${maxResponseTime} ms in the last ${responseTimelogLifeTimeInHour} hours`,
+                  },
+                  {
+                    tag: 'text',
+                    text: `${minResponseTime} ms in the last ${responseTimelogLifeTimeInHour} hours`,
+                  },
+                  {
+                    tag: 'text',
+                    text: `${averageResponseTime} ms in the last ${responseTimelogLifeTimeInHour} hours`,
+                  },
+                  {
+                    tag: 'text',
+                    text: `${numberOfIncidents} in the last 24 hours`,
+                  },
+                  {
+                    tag: 'text',
+                    text: `${numberOfRecoveries} in the last 24 hours`,
+                  },
+                  {
+                    tag: 'text',
+                    text: `${numberOfSentNotifications}`,
+                  },
+                ],
               ],
             },
           },
         },
       }
-      break
     default:
-      break
-  }
-
-  /* eslint-enable */
-  try {
-    const res = await sendHttpRequest({
-      method: 'POST',
-      url: data.url,
-      headers: {
-        Accept: 'application/json',
-        'Content-type': 'application/json',
-      },
-      data: larkMessage,
-    })
-
-    return res
-  } catch (error: any) {
-    log.error(
-      "Couldn't send notification to Lark Suite. Got this error: " +
-        error.message
-    )
+      return {
+        msg_type: 'post',
+        content: {
+          post: {
+            en_us: {
+              title: 'Monika Notification',
+              content: [
+                [
+                  {
+                    tag: 'text',
+                    text: summary,
+                  },
+                ],
+              ],
+            },
+          },
+        },
+      }
   }
 }

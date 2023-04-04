@@ -22,35 +22,32 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { AxiosResponse } from 'axios'
-
-import { TelegramData } from '../../../interfaces/data'
-import { NotificationMessage } from '../../../interfaces/notification'
+/* eslint-disable camelcase */
+import Joi from 'joi'
+import type { NotificationMessage } from './'
 import { sendHttpRequest } from '../../../utils/http'
 
-export const sendTelegram = async (
-  data: TelegramData,
-  message: NotificationMessage
-): Promise<AxiosResponse> => {
-  const notificationType =
-    message.meta.type[0].toUpperCase() + message.meta.type.slice(1)
+type NotificationData = {
+  group_id: string
+  bot_token: string
+}
 
-  let content
-  switch (message.meta.type) {
-    case 'incident':
-    case 'recovery': {
-      content = `New ${notificationType} event from Monika\n\n${message.body}`
-      break
-    }
+export const validator = Joi.object().keys({
+  group_id: Joi.string().required().label('Telegram Group ID'),
+  bot_token: Joi.string().required().label('Telegram Bot Token'),
+})
 
-    default:
-      content = message.body
-      break
-  }
+export const send = async (
+  { bot_token, group_id }: NotificationData,
+  { body, meta }: NotificationMessage
+): Promise<void> => {
+  const notificationType = meta.type[0].toUpperCase() + meta.type.slice(1)
+  const content =
+    meta.type === 'incident' || meta.type === 'recovery'
+      ? `New ${notificationType} event from Monika\n\n${body}`
+      : body
 
-  const res = await sendHttpRequest({
-    url: `https://api.telegram.org/bot${data.bot_token}/sendMessage?chat_id=${data.group_id}&text=${content}`,
+  await sendHttpRequest({
+    url: `https://api.telegram.org/bot${bot_token}/sendMessage?chat_id=${group_id}&text=${content}`,
   })
-
-  return res
 }

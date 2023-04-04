@@ -48,8 +48,8 @@ import events from '../events'
 import { Config } from '../interfaces/config'
 
 import { getEventEmitter } from '../utils/events'
-import { Notification } from '../interfaces/notification'
-import { Probe } from '../interfaces/probe'
+import type { Notification } from '../components/notification/channel'
+import type { Probe } from '../interfaces/probe'
 const eventEmitter = getEventEmitter()
 
 type TweetMessage = {

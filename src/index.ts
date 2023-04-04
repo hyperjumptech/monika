@@ -31,7 +31,7 @@ import { printAllLogs } from './components/logger'
 import { closeLog, openLogfile } from './components/logger/history'
 import { openLogPouch } from './components/logger/history-pouch'
 import { logStartupMessage } from './components/logger/startup-message'
-import { notificationChecker } from './components/notification/checker'
+import { sendMonikaStartMessage } from './components/notification/start-message'
 import {
   resetScheduledTasks,
   scheduleSummaryNotification,
@@ -344,7 +344,7 @@ class Monika extends Command {
         resetScheduledTasks()
 
         if (!isTestEnvironment) {
-          await notificationChecker(notifications ?? [])
+          await sendMonikaStartMessage(notifications ?? [])
         }
 
         await this.deprecationHandler(config)
@@ -400,7 +400,7 @@ class Monika extends Command {
   }
 
   async deprecationHandler(config: Config): Promise<Config> {
-    let showMessage = false
+    let showDeprecateMsg = false
 
     const checkedConfig = {
       ...config,
@@ -409,9 +409,8 @@ class Monika extends Command {
         requests: probe.requests?.map((request) => ({
           ...request,
           alert: request.alerts?.map((alert) => {
-            showMessage = true
-
             if (alert.query) {
+              showDeprecateMsg = true
               return { ...alert, assertion: alert.query }
             }
 
@@ -419,9 +418,8 @@ class Monika extends Command {
           }),
         })),
         alerts: probe.alerts?.map((alert) => {
-          showMessage = true
-
           if (alert.query) {
+            showDeprecateMsg = true
             return { ...alert, assertion: alert.query }
           }
 
@@ -430,7 +428,7 @@ class Monika extends Command {
       })),
     }
 
-    if (showMessage) {
+    if (showDeprecateMsg) {
       log.warn('"alerts.query" is deprecated. Please use "alerts.assertion"')
     }
 

@@ -23,10 +23,10 @@
  **********************************************************************************/
 
 import { Certificate } from './certificate'
-import { Notification } from './notification'
+import type { Notification } from '../components/notification/channel'
 import { Probe } from './probe'
 import { SymonConfig } from '../components/reporter'
-import { DBLimit } from './data'
+import type { DBLimit } from './data'
 
 export interface Config {
   certificate?: Certificate

@@ -235,8 +235,8 @@ notifications:
   - id: unique-id-pagerduty-notify
     type: pagerduty
     data:
-      key: YOUR_PAGERDUTY_INTEGRATION_KEY
-      probeID: ZN32nw_KsvTKtLFNu55JV
+      - key: YOUR_PAGERDUTY_INTEGRATION_KEY
+        probeID: ZN32nw_KsvTKtLFNu55JV
 ```
 
 | Key          | Description                  | Example                            |

@@ -23,13 +23,12 @@
  **********************************************************************************/
 
 import { getContext } from '../../context'
-import { Notification } from '../../interfaces/notification'
-import { Probe, ProbeAlert } from '../../interfaces/probe'
-import { ProbeRequestResponse } from '../../interfaces/request'
+import type { Probe, ProbeAlert } from '../../interfaces/probe'
+import type { ProbeRequestResponse } from '../../interfaces/request'
 import { log } from '../../utils/pino'
+import type { Notification } from '../notification/channel'
 import { saveNotificationLog, saveProbeRequestLog } from './history'
 import { saveProbeRequestAndNotifData } from './history-pouch'
-
 export class RequestLog {
   private iteration: number
 

@@ -26,7 +26,7 @@ import { differenceInSeconds } from 'date-fns'
 
 import { doProbe } from '../components/probe'
 import { getContext } from '../context'
-import { Notification } from '../interfaces/notification'
+import type { Notification } from '../components/notification/channel'
 import { Probe } from '../interfaces/probe'
 import { log } from '../utils/pino'
 import {
@@ -110,7 +110,7 @@ export function sanitizeProbe(isSymonMode: boolean, probe: Probe): Probe {
       },
     ]
     log.warn(
-      `Warning: Probe ${id} has no Alerts configuration defined. Using the default status-not-2xx and response-time-greater-than-2-s`
+      `Warning: Probe ${id} has no Alerts configuration defined. Using the default response.status != 200 and response.time > 20000`
     )
   }
 
