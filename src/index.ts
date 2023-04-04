@@ -444,10 +444,4 @@ process.on('SIGINT', async () => {
   process.exit(process.exitCode)
 })
 
-export {
-  channels,
-  Notification,
-  NotificationMessage,
-} from '@monika/notification'
-
-export default Monika
+export = Monika
