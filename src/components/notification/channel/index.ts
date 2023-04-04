@@ -1,8 +1,5 @@
 import type { AnySchema } from 'joi'
 
-import * as mailgun from './mailgun'
-import * as monikaNotif from './monika-notif'
-import * as opsgenie from './opsgenie'
 import * as pagerduty from './pagerduty'
 import * as pushbullet from './pushbullet'
 import * as pushover from './pushover'
@@ -70,9 +67,6 @@ export type Notification = {
 }
 
 export const channels: Record<string, NotificationChannel> = {
-  mailgun,
-  'monika-notif': monikaNotif,
-  opsgenie,
   pagerduty,
   pushbullet,
   pushover,
