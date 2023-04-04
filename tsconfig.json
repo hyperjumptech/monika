@@ -17,6 +17,6 @@
   "include": [
     "src/**/*",
     "src/**/*.json",
-    "../packages/monika-notification/**/*"
+    "../packages/notification/**/*"
   ]
 }

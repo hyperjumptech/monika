@@ -211,6 +211,6 @@
     "npm": "8.19.0"
   },
   "workspaces": [
-    "packages/monika-notification"
+    "packages/notification"
   ]
 }
