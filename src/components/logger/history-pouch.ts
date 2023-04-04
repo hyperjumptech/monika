@@ -28,14 +28,14 @@ import { ProbeRequestResponse } from '../../interfaces/request'
 import { log } from '../../utils/pino'
 
 type NotifData = {
-  alertType: string
-  channel: string
+  alertType: string | undefined
+  channel: string | undefined
   id: string
-  notificationId: string
+  notificationId: string | undefined
   probeId: string
   probeName: string
   timestamp: number
-  type: string
+  type: string | undefined
 }
 
 let localPouchDB: PouchDB.Database
@@ -54,24 +54,25 @@ export function openLogPouch(): void {
 
 export const pouchDBReporting = async (
   pouchToCouchConn: PouchDB.Database,
-  symonCouchDB: string
+  symonCouchDB: string | undefined
 ) => {
-  pouchToCouchConn.replicate
-    .to(symonCouchDB, {
+  if (!symonCouchDB) {
+    return
+  }
+
+  await pouchToCouchConn
+    .sync(symonCouchDB, {
       live: true,
       retry: true,
     })
-    .then(async (res) => {
-      console.log(`complete replicating to remote DB ${res}`)
-      // await Promise.all([
-      //   deleteRequestLogs(requests.map((log) => log.probeId)),
-      //   deleteNotificationLogs(notifications.map((log) => log.probeId)),
-      // ])
-      // pouch.remove({ _id: pouchData.id, _rev: pouchData.rev })
+    .on('change', function (info) {
+      log.info(`Data is changed : ${JSON.stringify(info)}`)
     })
-    .catch((error: any) => {
-      console.log('failed replicating to remote DB')
-      console.log(error)
+    .on('denied', function (info) {
+      log.info(`PouchDB replication denied: ${info}`)
+    })
+    .on('error', function (err) {
+      log.info(`PouchDB replication error happened: ${err}`)
     })
 }
 
@@ -90,65 +91,73 @@ export async function saveProbeRequestAndNotifData({
   notification,
   type,
   monikaId,
+  symonCouchDB,
 }: {
   probe: Probe
   requestIndex: number
   probeRes: ProbeRequestResponse
   alertQueries?: string[]
-  notifAlert: string
-  notification: Notification
-  type: 'NOTIFY-INCIDENT' | 'NOTIFY-RECOVER' | 'NOTIFY-TLS'
-  monikaId: string
+  notifAlert?: string
+  notification?: Notification
+  type?: 'NOTIFY-INCIDENT' | 'NOTIFY-RECOVER' | 'NOTIFY-TLS'
+  monikaId?: string
+  symonCouchDB?: string
 }): Promise<void> {
   const now = Math.round(Date.now() / 1000)
   const requestConfig = probe.requests?.[requestIndex]
 
   const notificationsList: NotifData[] = []
-  await Promise.all(
+  const probeDataId = new Date().toISOString()
+  const reqData = {
+    alerts: '',
+    id: probeDataId,
+    probeId: probe.id,
+    probeName: probe.name,
+    requestBody: JSON.stringify(requestConfig?.body),
+    requestHeader: JSON.stringify(requestConfig?.headers),
+    requestMethod: requestConfig?.method,
+    requestType: probe.socket ? 'tcp' : 'http',
+    requestUrl: requestConfig?.url || 'http://', // if TCP, there's no URL so just set to this http://
+    responseHeader: JSON.stringify(probeRes.headers),
+    responseSize: probeRes.headers['content-length'],
+    responseStatus: probeRes.status,
+    responseTime: probeRes?.responseTime ?? 0,
+    socketHost: probe.socket?.host || '',
+    socketPort: probe.socket?.port || '',
+    timestamp: now,
+  }
+
+  const notifData: NotifData = {
+    alertType: notifAlert,
+    channel: notification?.type,
+    id: probeDataId,
+    notificationId: notification?.id,
+    probeId: probe.id,
+    probeName: probe.name,
+    timestamp: now,
+    type: type,
+  }
+
+  notificationsList.push(notifData)
+  const reportData = {
+    _id: probeDataId,
+    monikaId: monikaId,
+    data: {
+      requests: [reqData],
+      notifications: notificationsList,
+    },
+  }
+
+  if (alertQueries?.length === 0) {
+    localPouchDB.put(reportData)
+  }
+
+  Promise.all(
     (alertQueries ?? []).map(async (alert) => {
-      const probeDataId = new Date().toISOString()
-      const reqData = {
-        alerts: alert,
-        id: probeDataId,
-        probeId: probe.id,
-        probeName: probe.name,
-        requestBody: JSON.stringify(requestConfig?.body),
-        requestHeader: JSON.stringify(requestConfig?.headers),
-        requestMethod: requestConfig?.method,
-        requestType: probe.socket ? 'tcp' : 'http',
-        requestUrl: requestConfig?.url || 'http://', // if TCP, there's no URL so just set to this http://
-        responseHeader: JSON.stringify(probeRes.headers),
-        responseSize: probeRes.headers['content-length'],
-        responseStatus: probeRes.status,
-        responseTime: probeRes?.responseTime ?? 0,
-        socketHost: probe.socket?.host || '',
-        socketPort: probe.socket?.port || '',
-        timestamp: now,
-      }
-
-      const notifData: NotifData = {
-        alertType: notifAlert,
-        channel: notification.type,
-        id: probeDataId,
-        notificationId: notification.id,
-        probeId: probe.id,
-        probeName: probe.name,
-        timestamp: now,
-        type: type,
-      }
-
-      notificationsList.push(notifData)
-
-      const reportData = {
-        _id: probeDataId,
-        monikaId: monikaId,
-        data: {
-          requests: [reqData],
-          notifications: notificationsList,
-        },
-      }
-
+      reportData.data.requests[0].alerts = alert
       localPouchDB.put(reportData)
     })
   )
+
+  await pouchDBReporting(localPouchDB, symonCouchDB)
 }

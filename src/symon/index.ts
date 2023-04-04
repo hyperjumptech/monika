@@ -24,10 +24,10 @@
 
 /* eslint-disable unicorn/prefer-module */
 import axios, { AxiosInstance } from 'axios'
-import Bree from 'bree'
 import { EventEmitter } from 'events'
 import mac from 'macaddress'
 import { hostname } from 'os'
+import Bree from 'bree'
 import path from 'path'
 
 import { updateConfig } from '../components/config'
@@ -150,14 +150,22 @@ class SymonClient {
     root: false,
     defaultExtension: process.env.NODE_ENV === 'test' ? 'ts' : 'js',
     jobs: [],
-    interval: this.reportProbesInterval,
     logger: log,
     doRootCheck: false,
     errorHandler: (error, workerMetadata) => {
       log.error(error)
       log.debug(workerMetadata)
     },
+    removeCompleted: true,
     outputWorkerMetadata: true,
+    workerMessageHandler: async ({ message }) => {
+      console.log(message)
+      if (message.success) {
+        setTimeout(async () => {
+          await this.report()
+        }, this.reportProbesInterval)
+      }
+    },
   })
 
   constructor({
@@ -352,10 +360,7 @@ class SymonClient {
       // Updating requests and notifications to report
       const probeIds = this.probes.map((probe: Probe) => probe.id)
 
-      const { flags } = getContext()
-
       // Creating/updating report job
-      const jobInterval = this.reportProbesInterval / 1000 // Convert probes interval to second
       const jobData = {
         hasConnectionToSymon,
         probeIds,
@@ -364,53 +369,23 @@ class SymonClient {
         monikaId: this.monikaId,
         url: this.url,
         apiKey: this.apiKey,
-        isSymonExperimental: flags.symonExperimental,
-        symonCouchDB:
-          flags.symonCouchDb || 'http://symon:symon@localhost:5984/symon',
       }
 
-      // Find existing report job
-      const reportJob = this.bree.config.jobs.find(
-        ({ name }) => name === 'report'
-      )
-
-      // If the report job is already created
-      if (reportJob) {
-        // Update the report job worker data with the new prepared worker data
-        await this.bree.remove('report')
-        await this.bree.add({
-          name: 'report',
-          interval: `every ${jobInterval} seconds`,
-          outputWorkerMetadata: true,
-          path: path.resolve(
-            __dirname,
-            `bree/report.${this.bree.config.defaultExtension}`
-          ),
-          worker: {
-            workerData: {
-              data: JSON.stringify(jobData),
-            },
+      // Create the report job with the prepared worker data
+      await this.bree.add({
+        name: 'report',
+        outputWorkerMetadata: true,
+        path: path.resolve(
+          __dirname,
+          `bree/report.${this.bree.config.defaultExtension}`
+        ),
+        worker: {
+          workerData: {
+            data: JSON.stringify(jobData),
           },
-        })
-        await this.bree.start('report')
-      } else {
-        // Create the report job with the prepared worker data
-        await this.bree.add({
-          name: 'report',
-          interval: `every ${jobInterval} seconds`,
-          outputWorkerMetadata: true,
-          path: path.resolve(
-            __dirname,
-            `bree/report.${this.bree.config.defaultExtension}`
-          ),
-          worker: {
-            workerData: {
-              data: JSON.stringify(jobData),
-            },
-          },
-        })
-        await this.bree.start('report')
-      }
+        },
+      })
+      await this.bree.run('report')
     } catch (error) {
       hasConnectionToSymon = false
       this.configHash = ''

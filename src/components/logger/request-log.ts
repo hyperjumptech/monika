@@ -22,12 +22,13 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Probe, ProbeAlert } from '../../interfaces/probe'
+import { getContext } from '../../context'
 import { Notification } from '../../interfaces/notification'
+import { Probe, ProbeAlert } from '../../interfaces/probe'
 import { ProbeRequestResponse } from '../../interfaces/request'
 import { log } from '../../utils/pino'
-import { saveProbeRequestLog, saveNotificationLog } from './history'
-import { getContext } from '../../context'
+import { saveNotificationLog, saveProbeRequestLog } from './history'
+import { saveProbeRequestAndNotifData } from './history-pouch'
 
 export class RequestLog {
   private iteration: number
@@ -151,6 +152,39 @@ export class RequestLog {
   }
 
   async saveToDatabase(): Promise<void> {
+    const { flags } = getContext()
+    const monikaId = flags.symonMonikaId
+    const symonCouchDB = flags.symonCouchDb
+
+    if (flags.symonExperimental) {
+      if (this.sentNotifications.length === 0) {
+        await saveProbeRequestAndNotifData({
+          probe: this.probe,
+          requestIndex: this.requestIndex,
+          probeRes: this.response!,
+          alertQueries: this.triggeredAlerts.map((alert) => alert.assertion),
+          symonCouchDB: symonCouchDB,
+        })
+
+        return
+      }
+
+      for (const sent of this.sentNotifications) {
+        saveProbeRequestAndNotifData({
+          probe: this.probe,
+          requestIndex: this.requestIndex,
+          probeRes: this.response!,
+          alertQueries: this.triggeredAlerts.map((alert) => alert.assertion),
+          notifAlert: sent.alertQuery,
+          notification: sent.notification,
+          type: sent.type,
+          monikaId: monikaId,
+        })
+      }
+
+      return
+    }
+
     await Promise.all([
       saveProbeRequestLog({
         probe: this.probe,

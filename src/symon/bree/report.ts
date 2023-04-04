@@ -25,7 +25,6 @@
 import axios, { AxiosRequestConfig } from 'axios'
 import Pako from 'pako'
 import path from 'path'
-import PouchDB from 'pouchdb'
 import { open } from 'sqlite'
 import SQLite3 from 'sqlite3'
 import { parentPort, workerData } from 'worker_threads'
@@ -36,65 +35,12 @@ import {
   UnreportedNotificationsLog,
   UnreportedRequestsLog,
 } from '../../components/logger/history'
-import { pouchDBReporting } from '../../components/logger/history-pouch'
 import { log } from '../../utils/pino'
 const dbPath = path.resolve(process.cwd(), 'monika-logs.db')
 
-// const pouchDBReporting = async (
-//   monikaId: any,
-//   logs: UnreportedLog,
-//   symonCouchDB: string
-// ) => {
-//   const requests = logs.requests
-//   const notifications = logs.notifications
-//   const pouch = new PouchDB('symon')
-
-//   try {
-//     const reportData = {
-//       monikaId: monikaId,
-//       data: {
-//         requests,
-//         notifications,
-//       },
-//     }
-
-//     const id = new Date().toISOString()
-//     const pouchData = await pouch.put({ _id: id, ...reportData })
-
-//     pouch.replicate
-//       .to(symonCouchDB, {
-//         live: true,
-//         retry: true,
-//       })
-//       .then(async () => {
-//         console.log('complete replicating to remote DB')
-//         await Promise.all([
-//           deleteRequestLogs(requests.map((log) => log.probeId)),
-//           deleteNotificationLogs(notifications.map((log) => log.probeId)),
-//         ])
-//         pouch.remove({ _id: pouchData.id, _rev: pouchData.rev })
-//         console.log('complete replicating to remote DB')
-//       })
-//       .catch((error: any) => {
-//         console.log('failed replicating to remote DB')
-//         console.log(error)
-//       })
-//   } catch (error) {
-//     console.error(`error occured : ${error}`)
-//   }
-// }
-
 const main = async (data: Record<string, any>) => {
   try {
-    const {
-      url,
-      apiKey,
-      probeIds,
-      reportProbesLimit,
-      monikaId,
-      isSymonExperimental,
-      symonCouchDB,
-    } = data
+    const { url, apiKey, probeIds, reportProbesLimit, monikaId } = data
 
     // Open database
     const sqlite3 = SQLite3.verbose()
@@ -120,12 +66,6 @@ const main = async (data: Record<string, any>) => {
           notifications,
         },
       })
-      return
-    }
-
-    if (isSymonExperimental) {
-      const pouchToCouchConn = new PouchDB('symon')
-      await pouchDBReporting(pouchToCouchConn, symonCouchDB)
       return
     }
 
