@@ -196,7 +196,7 @@ describe('notificationChecker - smtpNotification', () => {
     }
   })
 
-  it('should accpet smtp - without password', async () => {
+  it('should accept smtp - without password', async () => {
     try {
       await validateNotification([
         {
