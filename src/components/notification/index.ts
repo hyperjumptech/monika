@@ -30,7 +30,7 @@ import {
   channels,
   Notification,
   NotificationMessage,
-} from '@hyperjumptech/monika-notification/channel'
+} from '@monika/notification/channel'
 
 export async function sendNotifications(
   notifications: Notification[],
