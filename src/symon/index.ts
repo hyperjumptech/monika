@@ -24,10 +24,10 @@
 
 /* eslint-disable unicorn/prefer-module */
 import axios, { AxiosInstance } from 'axios'
+import Bree from 'bree'
 import { EventEmitter } from 'events'
 import mac from 'macaddress'
 import { hostname } from 'os'
-import Bree from 'bree'
 import path from 'path'
 
 import { updateConfig } from '../components/config'
@@ -354,6 +354,11 @@ class SymonClient {
   }
 
   async report(): Promise<any> {
+    const { flags } = getContext()
+    if (flags.symonExperimental) {
+      return
+    }
+
     try {
       log.debug('Reporting to Symon')
 

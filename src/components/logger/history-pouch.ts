@@ -22,10 +22,10 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 import PouchDB from 'pouchdb'
-import { Notification } from '../../interfaces/notification'
 import { Probe } from '../../interfaces/probe'
 import { ProbeRequestResponse } from '../../interfaces/request'
 import { log } from '../../utils/pino'
+import type { Notification } from '../notification/channel'
 
 type NotifData = {
   alertType: string | undefined
