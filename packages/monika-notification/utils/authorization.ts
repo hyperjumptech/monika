@@ -22,39 +22,33 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-/* eslint-disable camelcase */
-import Joi from 'joi'
-import type { NotificationMessage } from '.'
-import { sendHttpRequest } from '../../../utils/http'
+import { AxiosBasicCredentials } from 'axios'
 
-type NotificationData = {
-  thread_id: string
-  access_token: string
+export const authBasic = (cred: AxiosBasicCredentials): any => {
+  if (!cred.username)
+    throw new Error('Username should not be empty or undefined')
+  if (!cred.password || cred.password.length < 6)
+    throw new Error('Password should not be empty or less than 6 character')
+
+  const creds = cred.username + ':' + cred.password
+  const buff = Buffer.from(creds)
+
+  const result = buff.toString('base64')
+  return `Basic ${result}`
 }
 
-export const validator = Joi.object().keys({
-  thread_id: Joi.string().required().label('Workplace Thread ID'),
-  access_token: Joi.string().required().label('Workplace Access Token'),
-})
+export const authBearer = (token: string): string => {
+  return `Bearer ${token}`
+}
 
-export const send = async (
-  { access_token, thread_id }: NotificationData,
-  { body }: NotificationMessage
-): Promise<void> => {
-  await sendHttpRequest({
-    baseURL: 'https://graph.workplace.com',
-    headers: {
-      Authorization: `Bearer ${access_token}`,
-    },
-    method: 'POST',
-    url: '/me/messages',
-    data: {
-      recipient: {
-        thread_key: thread_id,
-      },
-      message: {
-        text: body,
-      },
-    },
-  })
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export const authorize = (type: string, args: any): any => {
+  switch (type) {
+    case 'basic':
+      return authBasic(args)
+    case 'bearer':
+      return authBearer(args)
+    default:
+      return undefined
+  }
 }

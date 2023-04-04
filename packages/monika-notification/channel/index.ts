@@ -39,11 +39,11 @@ import * as pushover from './pushover'
 import * as sendgrid from './sendgrid'
 import * as slack from './slack'
 import * as smtp from './smtp'
-// import * as teams from './teams'
-// import * as telegram from './telegram'
-// import * as webhook from './webhook'
-// import * as whatsapp from './whatsapp'
-// import * as workplace from './workplace'
+import * as teams from './teams'
+import * as telegram from './telegram'
+import * as webhook from './webhook'
+import * as whatsapp from './whatsapp'
+import * as workplace from './workplace'
 
 type BaseNotificationMessageMeta = {
   type: string
@@ -115,9 +115,9 @@ export const channels: Record<string, NotificationChannel> = {
   sendgrid,
   slack,
   smtp,
-  // teams,
-  // telegram,
-  // webhook,
-  // whatsapp,
-  // workplace,
+  teams,
+  telegram,
+  webhook,
+  whatsapp,
+  workplace,
 }

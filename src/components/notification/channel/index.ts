@@ -1,11 +1,6 @@
 import type { AnySchema } from 'joi'
 
 import * as pagerduty from './pagerduty'
-import * as teams from './teams'
-import * as telegram from './telegram'
-import * as webhook from './webhook'
-import * as whatsapp from './whatsapp'
-import * as workplace from './workplace'
 
 type BaseNotificationMessageMeta = {
   type: string
@@ -63,9 +58,4 @@ export type Notification = {
 
 export const channels: Record<string, NotificationChannel> = {
   pagerduty,
-  teams,
-  telegram,
-  webhook,
-  whatsapp,
-  workplace,
 }
