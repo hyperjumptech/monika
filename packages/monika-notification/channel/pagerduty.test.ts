@@ -25,7 +25,7 @@
 import { expect } from 'chai'
 import { rest } from 'msw'
 import { setupServer } from 'msw/node'
-import type { NotificationMessage } from '../../notification/channel'
+import type { NotificationMessage } from '.'
 import { send, validator } from './pagerduty'
 
 describe('PagerDuty notification', () => {
