@@ -26,34 +26,8 @@ import { getContext, setContext } from '../../context'
 import { ValidatedResponse } from '../../plugins/validate-response'
 import getIp from '../../utils/ip'
 import { getMessageForAlert } from './alert-message'
-import {
-  channels,
-  Notification,
-  NotificationMessage,
-} from '@hyperjumptech/monika-notification'
-
-export async function sendNotifications(
-  notifications: Notification[],
-  message: NotificationMessage
-): Promise<void> {
-  await Promise.all(
-    notifications.map(async ({ data, type }) => {
-      const channel = channels[type]
-
-      try {
-        if (!channel) {
-          throw new Error('Notification channel is not available')
-        }
-
-        await channel.send(data, message)
-      } catch (error: any) {
-        throw new Error(
-          `Failed to send message using ${type}, please check your ${type} notification config.\nMessage: ${error?.message}`
-        )
-      }
-    })
-  )
-}
+import { sendNotifications } from '@hyperjumptech/monika-notification'
+import type { Notification } from '@hyperjumptech/monika-notification/channel'
 
 type SendAlertsProps = {
   probeID: string

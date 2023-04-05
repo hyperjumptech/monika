@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import { Certificate } from './certificate'
-import type { Notification } from '@hyperjumptech/monika-notification'
+import type { Notification } from '@hyperjumptech/monika-notification/channel'
 import { Probe } from './probe'
 import { SymonConfig } from '../components/reporter'
 import type { DBLimit } from './data'

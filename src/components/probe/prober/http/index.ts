@@ -1,7 +1,7 @@
 import { checkThresholdsAndSendAlert } from '../..'
 import { getContext } from '../../../../context'
 import events from '../../../../events'
-import type { Notification } from '@hyperjumptech/monika-notification'
+import type { Notification } from '@hyperjumptech/monika-notification/channel'
 import type { Probe } from '../../../../interfaces/probe'
 import type { ProbeRequestResponse } from '../../../../interfaces/request'
 import validateResponse from '../../../../plugins/validate-response'

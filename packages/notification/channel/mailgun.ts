@@ -25,7 +25,7 @@
 import Mailgun from 'mailgun.js'
 import formData from 'form-data'
 import Joi from 'joi'
-import type { NotificationMessage } from '..'
+import type { NotificationMessage } from '.'
 import Mailgen from 'mailgen'
 
 type NotificationData = {

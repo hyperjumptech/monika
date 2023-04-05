@@ -35,7 +35,7 @@ import * as webhook from '@hyperjumptech/monika-notification/channel/webhook'
 import * as whatsapp from '@hyperjumptech/monika-notification/channel/whatsapp'
 import * as lark from '@hyperjumptech/monika-notification/channel/lark'
 import * as googlechat from '@hyperjumptech/monika-notification/channel/googlechat'
-import type { NotificationMessage } from '@hyperjumptech/monika-notification'
+import type { NotificationMessage } from '@hyperjumptech/monika-notification/channel'
 
 chai.use(spies)
 

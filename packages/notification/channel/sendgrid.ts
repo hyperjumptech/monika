@@ -25,7 +25,7 @@
 import sgMail from '@sendgrid/mail'
 import Joi from 'joi'
 import Mailgen from 'mailgen'
-import type { NotificationMessage } from '..'
+import type { NotificationMessage } from '.'
 
 type NotificationData = {
   apiKey: string
