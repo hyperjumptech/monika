@@ -51,12 +51,8 @@ export const validator = Joi.object().keys({
 
 export const send = async (
   { url }: NotificationData,
-  message: NotificationMessage
+  content: Content
 ): Promise<void> => {
-  const notificationType =
-    message.meta.type[0].toUpperCase() + message.meta.type.slice(1)
-  const content = getContent(message, notificationType)
-
   await sendHttpRequest({
     method: 'POST',
     url,
@@ -64,10 +60,14 @@ export const send = async (
   })
 }
 
-function getContent(
-  { body, meta, subject, summary }: NotificationMessage,
-  notificationType: string
-): Content {
+export function getContent({
+  body,
+  meta,
+  subject,
+  summary,
+}: NotificationMessage): Content {
+  const notificationType = meta.type[0].toUpperCase() + meta.type.slice(1)
+
   switch (meta.type) {
     case 'start':
     case 'termination': {

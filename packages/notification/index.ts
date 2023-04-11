@@ -1,6 +1,6 @@
 import { channels, Notification, NotificationMessage } from './channel'
 
-export async function sendNotifications(
+async function sendNotifications(
   notifications: Notification[],
   message: NotificationMessage
 ): Promise<void> {
@@ -13,7 +13,11 @@ export async function sendNotifications(
           throw new Error('Notification channel is not available')
         }
 
-        await channel.send(data, message)
+        // TODO: convert contentOrMessage to contact
+        const contentOrMessage = channel.getContent
+          ? channel.getContent(message)
+          : message
+        await channel.send(data, contentOrMessage)
       } catch (error: any) {
         throw new Error(
           `Failed to send message using ${type}, please check your ${type} notification config.\nMessage: ${error?.message}`
@@ -22,3 +26,5 @@ export async function sendNotifications(
     })
   )
 }
+
+export { sendNotifications, channels }
