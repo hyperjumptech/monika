@@ -22,6 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 import PouchDB from 'pouchdb'
+import { getContext } from '../../context'
 import { Probe } from '../../interfaces/probe'
 import { ProbeRequestResponse } from '../../interfaces/request'
 import { log } from '../../utils/pino'
@@ -47,33 +48,39 @@ let localPouchDB: PouchDB.Database
 export function openLogPouch(): void {
   try {
     localPouchDB = new PouchDB('symon')
+
+    const { flags } = getContext()
+    if (flags.symonCouchDb) {
+      const symonCouchDB = new PouchDB(flags.symonCouchDb)
+      localPouchDB.replicate
+        .to(symonCouchDB, {
+          live: true,
+          retry: true,
+          // eslint-disable-next-line camelcase
+          back_off_function(delay) {
+            if (delay === 0) {
+              return 1000
+            }
+
+            return delay * 3
+          },
+          filter: function (doc) {
+            return doc._deleted !== true
+          },
+        })
+        .on('change', async function (info) {
+          const docs = info.docs
+          await Promise.all(
+            docs.map(async (dok) => {
+              await localPouchDB.remove(dok)
+              log.info(`Document id: ${dok._id} is removed from pouchdb`)
+            })
+          )
+        })
+    }
   } catch (error: any) {
     log.error("Warning: Can't open logfile. " + error.message)
   }
-}
-
-export const pouchDBReporting = async (
-  pouchToCouchConn: PouchDB.Database,
-  symonCouchDB: string | undefined
-) => {
-  if (!symonCouchDB) {
-    return
-  }
-
-  await pouchToCouchConn
-    .sync(symonCouchDB, {
-      live: true,
-      retry: true,
-    })
-    .on('change', function (info) {
-      log.info(`Data is changed : ${JSON.stringify(info)}`)
-    })
-    .on('denied', function (info) {
-      log.info(`PouchDB replication denied: ${info}`)
-    })
-    .on('error', function (err) {
-      log.info(`PouchDB replication error happened: ${err}`)
-    })
 }
 
 /**
@@ -82,7 +89,7 @@ export const pouchDBReporting = async (
  * @param {object} data is the log data containing information about probe request
  * @returns Promise<void>
  */
-export async function saveProbeRequestAndNotifData({
+export async function saveProbeRequestToPouchDB({
   probe,
   requestIndex,
   probeRes,
@@ -91,7 +98,6 @@ export async function saveProbeRequestAndNotifData({
   notification,
   type,
   monikaId,
-  symonCouchDB,
 }: {
   probe: Probe
   requestIndex: number
@@ -101,7 +107,6 @@ export async function saveProbeRequestAndNotifData({
   notification?: Notification
   type?: 'NOTIFY-INCIDENT' | 'NOTIFY-RECOVER' | 'NOTIFY-TLS'
   monikaId?: string
-  symonCouchDB?: string
 }): Promise<void> {
   const now = Math.round(Date.now() / 1000)
   const requestConfig = probe.requests?.[requestIndex]
@@ -158,6 +163,4 @@ export async function saveProbeRequestAndNotifData({
       localPouchDB.put(reportData)
     })
   )
-
-  await pouchDBReporting(localPouchDB, symonCouchDB)
 }

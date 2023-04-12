@@ -28,7 +28,7 @@ import type { ProbeRequestResponse } from '../../interfaces/request'
 import { log } from '../../utils/pino'
 import type { Notification } from '../notification/channel'
 import { saveNotificationLog, saveProbeRequestLog } from './history'
-import { saveProbeRequestAndNotifData } from './history-pouch'
+import { saveProbeRequestToPouchDB } from './history-pouch'
 export class RequestLog {
   private iteration: number
 
@@ -153,23 +153,22 @@ export class RequestLog {
   async saveToDatabase(): Promise<void> {
     const { flags } = getContext()
     const monikaId = flags.symonMonikaId
-    const symonCouchDB = flags.symonCouchDb
 
     if (flags.symonExperimental) {
       if (this.sentNotifications.length === 0) {
-        await saveProbeRequestAndNotifData({
+        await saveProbeRequestToPouchDB({
           probe: this.probe,
           requestIndex: this.requestIndex,
           probeRes: this.response!,
           alertQueries: this.triggeredAlerts.map((alert) => alert.assertion),
-          symonCouchDB: symonCouchDB,
+          monikaId: monikaId,
         })
 
         return
       }
 
       for (const sent of this.sentNotifications) {
-        saveProbeRequestAndNotifData({
+        saveProbeRequestToPouchDB({
           probe: this.probe,
           requestIndex: this.requestIndex,
           probeRes: this.response!,
