@@ -1,5 +1,5 @@
 {
-  "name": "@raosan/monika-notification",
+  "name": "@hyperjumptech/monika-notification",
   "version": "0.0.1",
   "description": "notification package for monika",
   "main": "lib/index.js",
@@ -12,9 +12,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/raosan/monika.git"
+    "url": "https://github.com/hyperjumptech/monika"
   },
-  "author": "@raosan",
+  "author": "@hyperjumptech",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/raosan/monika/issues"

@@ -28,7 +28,6 @@ jobs:
       - run: npm ci
         working-directory: ./
       - run: npm run build
-      - run: npm pack
       - run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
