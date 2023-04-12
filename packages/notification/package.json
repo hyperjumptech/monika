@@ -1,6 +1,6 @@
 {
   "name": "@raosan/monika-notification",
-  "version": "0.0.2",
+  "version": "0.0.1",
   "description": "notification package for monika",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",

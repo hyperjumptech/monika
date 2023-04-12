@@ -23,10 +23,10 @@
  **********************************************************************************/
 
 import { hostname } from 'os'
-import { sendNotifications } from '@hyperjumptech/monika-notification'
+import { sendNotifications } from '../../../packages/notification'
 import getIp from '../../utils/ip'
 import { getMessageForStart } from './alert-message'
-import type { Notification } from '@hyperjumptech/monika-notification/channel'
+import type { Notification } from '../../../packages/notification'
 
 export const sendMonikaStartMessage = async (
   notifications: Notification[]

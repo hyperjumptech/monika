@@ -26,8 +26,8 @@ import { getContext, setContext } from '../../context'
 import { ValidatedResponse } from '../../plugins/validate-response'
 import getIp from '../../utils/ip'
 import { getMessageForAlert } from './alert-message'
-import { sendNotifications } from '@hyperjumptech/monika-notification'
-import type { Notification } from '@hyperjumptech/monika-notification/channel'
+import { sendNotifications } from '../../../packages/notification'
+import type { Notification } from '../../../packages/notification'
 
 type SendAlertsProps = {
   probeID: string

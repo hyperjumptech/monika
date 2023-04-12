@@ -16,13 +16,16 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./packages/notification
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
           node-version: 16
       - run: npm ci
-      - run: npm test
+      - run: npm run build
 
   test:
     needs: build
