@@ -8,7 +8,7 @@
     "prepack": "npm run clean && tsc -b",
     "clean": "rm -rf lib tsconfig.tsbuildinfo",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "npm run prepack && npm pack --pack-destination ../../../"
+    "build": "npm run prepack && npm pack"
   },
   "repository": {
     "type": "git",
