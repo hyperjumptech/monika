@@ -5,6 +5,8 @@ name: Notification Node.js Package
 
 on:
   workflow_dispatch:
+  # release:
+  #   types: [published]
   pull_request:
     types: [opened, synchronize, reopened]
     branches: [main]
