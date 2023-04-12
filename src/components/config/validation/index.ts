@@ -23,6 +23,5 @@
  **********************************************************************************/
 
 export { validateConfigWithSchema } from './validator/config-file'
-export { validateNotification } from '@hyperjumptech/monika-notification/validator/notification'
 export { validateProbes } from './validator/probe'
 export { validateSymonConfig } from './validator/symon-config'

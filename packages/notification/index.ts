@@ -1,4 +1,5 @@
 import { channels, Notification, NotificationMessage } from './channel'
+import { validateNotification } from './validator/notification'
 
 async function sendNotifications(
   notifications: Notification[],
@@ -27,4 +28,4 @@ async function sendNotifications(
   )
 }
 
-export { sendNotifications, channels }
+export { sendNotifications, channels, validateNotification }

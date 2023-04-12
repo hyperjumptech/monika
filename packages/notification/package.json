@@ -1,10 +1,14 @@
 {
   "name": "@hyperjumptech/monika-notification",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "notification package for monika",
-  "main": "index.ts",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "prepack": "npm run clean && tsc -b",
+    "clean": "rm -rf lib tsconfig.tsbuildinfo",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npm run prepack && npm pack --pack-destination ../../../"
   },
   "repository": {
     "type": "git",
