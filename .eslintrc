@@ -2,8 +2,7 @@
     "extends": ["oclif", "oclif-typescript", "prettier"],
     "rules": {
         "no-use-before-define": ["warn", "nofunc"],
-        "unicorn/prefer-node-protocol": "off",
-        "node/no-extraneous-import": "off"
+        "unicorn/prefer-node-protocol": "off"
     },
     "overrides": [
         {
