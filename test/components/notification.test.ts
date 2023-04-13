@@ -25,8 +25,8 @@
 import chai, { expect } from 'chai'
 import spies from 'chai-spies'
 import { sendAlerts } from '../../src/components/notification'
-import { channels } from '../../packages/notification'
-import type { NotificationMessage } from '../../packages/notification'
+import { channels } from '@hyperjumptech/monika-notification'
+import type { NotificationMessage } from '@hyperjumptech/monika-notification'
 
 const { discord, mailgun, slack, smtp, telegram, webhook, whatsapp, lark } =
   channels

@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import type { Probe, ProbeAlert } from '../../interfaces/probe'
-import type { Notification } from '../../../packages/notification'
+import type { Notification } from '@hyperjumptech/monika-notification'
 import type { ProbeRequestResponse } from '../../interfaces/request'
 import { log } from '../../utils/pino'
 import { saveProbeRequestLog, saveNotificationLog } from './history'
