@@ -3,7 +3,23 @@
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).##
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [1.15.2] - 2023-04-13
+
+## Fixed
+
+- Update warning messages (#1022)
+- Fix: Downgrade Axios to be able to build binary using PKG (#1029)
+
+## Changed
+
+- Refactor: Simplify Send Notification Interface (#1019)
+
+## Docs
+
+- Docs: update pagerduty notification and json schema (#1020)
+- Docs: Update Deploy to Fly.io documentation (#1024)
 
 ## [1.15.1] - 2023-03-24
 
