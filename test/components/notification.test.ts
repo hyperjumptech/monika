@@ -28,18 +28,8 @@ import { sendAlerts } from '../../src/components/notification'
 import { channels } from '../../packages/notification'
 import type { NotificationMessage } from '../../packages/notification'
 
-const {
-  discord,
-  mailgun,
-  monikaNotif,
-  slack,
-  smtp,
-  telegram,
-  webhook,
-  whatsapp,
-  lark,
-  googlechat,
-} = channels
+const { discord, mailgun, slack, smtp, telegram, webhook, whatsapp, lark } =
+  channels
 
 chai.use(spies)
 
@@ -381,7 +371,7 @@ describe('send alerts', () => {
   })
 
   it('should send webhook monika-notif', async () => {
-    chai.spy.on(monikaNotif, 'send', () => Promise.resolve())
+    chai.spy.on(channels['monika-notif'], 'send', () => Promise.resolve())
 
     await sendAlerts({
       probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
@@ -410,7 +400,7 @@ describe('send alerts', () => {
       probeState: 'DOWN',
     })
 
-    expect(monikaNotif.send).to.have.been.called.exactly(1)
+    expect(channels['monika-notif'].send).to.have.been.called.exactly(1)
   })
 
   it('should send larksuite notification ', async () => {
@@ -447,7 +437,7 @@ describe('send alerts', () => {
   })
 
   it('should send google chat notification ', async () => {
-    chai.spy.on(googlechat, 'send', () => Promise.resolve())
+    chai.spy.on(channels['google-chat'], 'send', () => Promise.resolve())
 
     await sendAlerts({
       probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
@@ -476,6 +466,6 @@ describe('send alerts', () => {
       probeState: 'DOWN',
     })
 
-    expect(googlechat.send).to.have.been.called.exactly(1)
+    expect(channels['google-chat'].send).to.have.been.called.exactly(1)
   })
 })
