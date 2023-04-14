@@ -227,7 +227,10 @@ export function generateRequestChainingBody(
   return isString ? renderedBody : JSON.parse(renderedBody)
 }
 
-function transformContentByType(content: any, contentType?: string) {
+function transformContentByType(
+  content: any,
+  contentType?: string | number | boolean
+) {
   switch (contentType) {
     case 'application/x-www-form-urlencoded':
       return {

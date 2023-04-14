@@ -22,7 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { AxiosRequestConfig } from 'axios'
+import { AxiosRequestConfig, AxiosRequestHeaders } from 'axios'
 import { ProbeAlert } from './probe'
 
 // RequestTypes are used to define the type of request that is being made.
@@ -59,6 +59,7 @@ export interface RequestConfig extends Omit<AxiosRequestConfig, 'data'> {
   body: JSON | string
   timeout: number // request timeout
   alerts?: ProbeAlert[]
+  headers?: AxiosRequestHeaders
   ping?: boolean // is this request for a ping?
   allowUnauthorized?: boolean // ignore ssl cert?
 }
