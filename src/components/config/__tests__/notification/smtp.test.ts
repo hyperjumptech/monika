@@ -24,11 +24,13 @@
 
 import chai, { expect } from 'chai'
 import spies from 'chai-spies'
+import chaiAsPromised from 'chai-as-promised'
 
 import * as smtp from '../../../notification/channel/smtp'
 import { validateNotification } from '../../validation/validator/notification'
 
 chai.use(spies)
+chai.use(chaiAsPromised)
 
 describe('notificationChecker - smtpNotification', () => {
   afterEach(() => {
@@ -61,9 +63,11 @@ describe('notificationChecker - smtpNotification', () => {
     expect(fn).not.to.throws()
   })
 
-  it('should handle validation error - without hostname', async () => {
-    try {
-      await validateNotification([
+  it.only('should handle validation error - without hostname', async () => {
+    // const message = '"SMTP Hostname" is not allowed to be empty (smtp)'
+
+    expect(
+      validateNotification([
         {
           ...smtpNotificationConfig,
           data: {
@@ -75,17 +79,12 @@ describe('notificationChecker - smtpNotification', () => {
           },
         },
       ])
-    } catch (error) {
-      const message = '"SMTP Hostname" is not allowed to be empty'
-
-      expect(() => {
-        throw error
-      }).to.throw(message)
-    }
+    ).to.be.rejectedWith('"SMTP Hostname" is not allowed to be empty (smtp)')
   })
 
   it('should handle validation error - without port', async () => {
-    try {
+    const message = '"SMTP Port" is not allowed to be empty'
+    expect(
       await validateNotification([
         {
           ...smtpNotificationConfig,
@@ -98,17 +97,12 @@ describe('notificationChecker - smtpNotification', () => {
           },
         },
       ])
-    } catch (error) {
-      const message = '"SMTP Port" is not allowed to be empty'
-
-      expect(() => {
-        throw error
-      }).to.throw(message)
-    }
+    ).to.be.rejectedWith(message)
   })
 
   it('should handle validation error - invalid port', async () => {
-    try {
+    const message = '"SMTP Port" must be a valid port'
+    expect(
       await validateNotification([
         {
           ...smtpNotificationConfig,
@@ -121,17 +115,12 @@ describe('notificationChecker - smtpNotification', () => {
           },
         },
       ])
-    } catch (error) {
-      const message = '"SMTP Port" must be a valid port'
-
-      expect(() => {
-        throw error
-      }).to.throw(message)
-    }
+    ).to.be.rejectedWith(message)
   })
 
   it('should handle validation error - with empty username', async () => {
-    try {
+    const message = '"SMTP Username" is not allowed to be empty'
+    expect(
       await validateNotification([
         {
           ...smtpNotificationConfig,
@@ -144,16 +133,12 @@ describe('notificationChecker - smtpNotification', () => {
           },
         },
       ])
-    } catch (error) {
-      const message = '"SMTP Username" is not allowed to be empty'
-      expect(() => {
-        throw error
-      }).to.throw(message)
-    }
+    ).to.be.rejectedWith(message)
   })
 
   it('should handle validation error - with empty password', async () => {
-    try {
+    const message = '"SMTP Password" is not allowed to be empty'
+    expect(
       await validateNotification([
         {
           ...smtpNotificationConfig,
@@ -166,17 +151,11 @@ describe('notificationChecker - smtpNotification', () => {
           },
         },
       ])
-    } catch (error) {
-      const message = '"SMTP Password" is not allowed to be empty'
-
-      expect(() => {
-        throw error
-      }).to.throw(message)
-    }
+    ).to.be.rejectedWith(message)
   })
 
   it('should accept smtp - without username', async () => {
-    try {
+    expect(
       await validateNotification([
         {
           ...smtpNotificationConfig,
@@ -188,16 +167,11 @@ describe('notificationChecker - smtpNotification', () => {
           },
         },
       ])
-    } catch (error) {
-      const message = 'should pass without error'
-      expect(() => {
-        throw error
-      }).to.throw(message)
-    }
+    ).to.be.fulfilled
   })
 
   it('should accept smtp - without password', async () => {
-    try {
+    expect(
       await validateNotification([
         {
           ...smtpNotificationConfig,
@@ -209,11 +183,6 @@ describe('notificationChecker - smtpNotification', () => {
           },
         },
       ])
-    } catch (error) {
-      const message = 'should pass without error'
-      expect(() => {
-        throw error
-      }).to.throw(message)
-    }
+    ).to.be.fulfilled
   })
 })
