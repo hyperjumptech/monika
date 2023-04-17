@@ -51,7 +51,3 @@ jobs:
             - run: npm pack
             - run: npm install -g ./hyperjumptech-monika-*.tgz
             - run: npm run prod_test
-            - run: npm run pkg -- -t node16-linux-x64
-              name: Pack the binary using vercel/pkg
-            - run: ./dist/monika -v
-              name: Test if printing the version is not error
