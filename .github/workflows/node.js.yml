@@ -17,6 +17,7 @@ jobs:
         strategy:
             matrix:
                 node-version: [14.x, 16.x]
+                targets: [node14, node16]
                 # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
         steps:
@@ -31,7 +32,7 @@ jobs:
             - run: npm pack
             - run: npm install -g ./hyperjumptech-monika-*.tgz
             - run: npm run prod_test
-            - run: npm run pkg -- -t node16-linux-x64
+            - run: npm run pkg -- -t ${{ matrix.targets }}-linux-x64
               name: Pack the binary using vercel/pkg
             - run: ./dist/monika -v
               name: Test if printing the version is not error
@@ -51,3 +52,9 @@ jobs:
             - run: npm pack
             - run: npm install -g ./hyperjumptech-monika-*.tgz
             - run: npm run prod_test
+            - run: |
+                echo "No node18 target supported yet, using node16..."
+                npm run pkg -- -t node16-linux-x64
+              name: Pack the binary using vercel/pkg
+            - run: ./dist/monika -v
+              name: Test if printing the version is not error
