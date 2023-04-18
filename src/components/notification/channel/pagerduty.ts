@@ -24,6 +24,7 @@
 
 import Joi from 'joi'
 import type { NotificationMessage } from './'
+import axios from 'axios'
 
 type PagerDutyConfig = {
   key: string
@@ -68,13 +69,9 @@ export async function send(
       )
     }
 
-    const options = {
-      method: 'POST',
+    return axios.post(url, JSON.stringify(eventPayload), {
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(eventPayload),
-    }
-
-    await fetch(url, options)
+    })
   }
 }
 

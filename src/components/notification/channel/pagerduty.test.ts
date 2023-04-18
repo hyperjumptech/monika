@@ -114,7 +114,7 @@ describe('PagerDuty notification', () => {
         rest.post(
           'https://events.pagerduty.com/v2/enqueue',
           (req, res, ctx) => {
-            body = req?.body as Record<string, any>
+            body = req.body as Record<string, any>
             return res(ctx.status(202))
           }
         )
