@@ -64,7 +64,14 @@ const helpers = [
   { fn: faker.finance.currencyCode, expr: 'currency' },
   { fn: () => faker.internet.email().toLowerCase(), expr: 'email' },
   { fn: faker.name.fullName, expr: 'fullName' },
-  { fn: faker.name.gender, expr: 'gender', default: [true] },
+  {
+    fn: () => {
+      const word = faker.name.sex()
+      return word.charAt(0).toUpperCase() + word.slice(1)
+    },
+    expr: 'gender',
+    default: [true],
+  },
   { fn: faker.address.latitude, expr: 'latitude', default: [90, -90, 4] },
   { fn: faker.address.longitude, expr: 'longitude', default: [180, -180, 4] },
   { fn: faker.lorem.lines, expr: 'lines', default: [1] },

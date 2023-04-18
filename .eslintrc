@@ -1,6 +1,7 @@
 {
     "extends": ["oclif", "oclif-typescript", "prettier"],
     "rules": {
+        "unicorn/switch-case-braces": "off",
         "no-use-before-define": ["warn", "nofunc"],
         "unicorn/prefer-node-protocol": "off"
     },
