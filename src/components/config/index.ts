@@ -41,9 +41,15 @@ import { validateConfig } from './validate'
 import { createConfigFile } from './create-config'
 import yml from 'js-yaml'
 import { exit } from 'process'
+import {
+  type ConfigType,
+  addDefaultNotifications,
+  getConfigFrom,
+  mergeConfigs,
+} from './get'
 
 type ScheduleRemoteConfigFetcherParams = {
-  configType: 'monika' | 'har' | 'insomnia' | 'postman' | 'sitemap' | 'text'
+  configType: ConfigType
   interval: number
   url: string
   index?: number
@@ -56,6 +62,7 @@ type WatchConfigFileParams = {
   repeat?: number
 }
 
+const isTestEnvironment = process.env.CI || process.env.NODE_ENV === 'test'
 const emitter = getEventEmitter()
 
 let cfg: Config
@@ -76,7 +83,7 @@ export async function* getConfigIterator(
 
   yield cfg
 
-  if (!(process.env.CI || process.env.NODE_ENV === 'test')) {
+  if (!isTestEnvironment) {
     yield* pEvent.iterator<string, Config>(emitter, events.config.updated)
   }
 }
@@ -90,7 +97,7 @@ export const updateConfig = async (
     try {
       await validateConfig(config)
     } catch (error: any) {
-      if (process.env.NODE_ENV === 'test') {
+      if (isTestEnvironment) {
         // return error during tests
         throw new Error(error.message)
       }
@@ -109,45 +116,81 @@ export const updateConfig = async (
   }
 }
 
-// mergeConfigs merges global configs var by overwriting each other
-// with initial value taken from nonDefaultConfig
-const mergeConfigs = (): Config => {
-  if (defaultConfigs.length === 0 && nonDefaultConfig !== undefined) {
-    return nonDefaultConfig as Config
-  }
+export const setupConfig = async (flags: MonikaFlags): Promise<void> => {
+  const sanitizedFlags = await sanitizeFlags(flags)
+  const config = await getConfigFrom(sanitizedFlags)
 
-  // eslint-disable-next-line unicorn/no-array-reduce
-  const mergedConfig = defaultConfigs.reduce((prev, current) => {
-    return {
-      ...prev,
-      ...current,
-      notifications: current.notifications || prev.notifications,
-      probes: current.probes || prev.probes,
-    }
-  }, nonDefaultConfig || {})
+  watchConfigsChange(sanitizedFlags)
 
-  return mergedConfig as Config
+  await updateConfig(config)
 }
 
-function watchConfigFile({ path, type, index, repeat }: WatchConfigFileParams) {
-  const isWatchConfigFile = !(
-    process.env.CI ||
-    process.env.NODE_ENV === 'test' ||
-    repeat !== 0
-  )
-  if (isWatchConfigFile) {
-    const watcher = chokidar.watch(path)
-    watcher.on('change', async () => {
-      const newConfig = await parseConfig(path, type)
-      if (index === undefined) {
-        nonDefaultConfig = newConfig
-      } else {
-        defaultConfigs[index] = newConfig
-      }
+async function sanitizeFlags(flags: MonikaFlags): Promise<MonikaFlags> {
+  // check for default config path when -c/--config not provided
+  const hasConfig =
+    flags.config.length > 0 ||
+    flags.har ||
+    flags.postman ||
+    flags.insomnia ||
+    flags.sitemap ||
+    flags.text
 
-      await updateConfig(mergeConfigs())
-    })
+  if (!hasConfig) {
+    log.info('No Monika configuration available, initializing...')
+    const configFilename = await createConfigFile(flags)
+    return { ...flags, config: [configFilename] }
   }
+
+  return flags
+}
+
+async function watchConfigsChange(flags: MonikaFlags) {
+  await Promise.all(
+    flags.config.map((source, index) =>
+      watchConfigChange({
+        interval:
+          flags['config-interval'] ||
+          monikaFlagsDefaultValue['config-interval'],
+        repeat: flags.repeat,
+        source,
+        type: 'monika',
+        index,
+      })
+    )
+  )
+}
+
+type WatchConfigChangeParams = {
+  interval: number
+  repeat: number
+  source: string
+  type: ConfigType
+  index?: number
+}
+
+function watchConfigChange({
+  interval,
+  repeat,
+  source,
+  type,
+  index,
+}: WatchConfigChangeParams) {
+  if (isUrl(source)) {
+    scheduleRemoteConfigFetcher({
+      configType: type,
+      interval,
+      url: source,
+      index,
+    })
+    return
+  }
+
+  watchConfigFile({
+    path: source,
+    type,
+    index,
+    repeat,
+  })
 }
 
 function scheduleRemoteConfigFetcher({
@@ -165,105 +208,28 @@ function scheduleRemoteConfigFetcher({
         defaultConfigs[index] = newConfig
       }
 
-      await updateConfig(mergeConfigs())
+      await updateConfig(mergeConfigs(defaultConfigs, nonDefaultConfig))
     } catch (error: any) {
       log.error(error?.message)
     }
   }, interval * 1000)
 }
 
-const parseConfigType = async (
-  source: string,
-  configType: 'monika' | 'har' | 'insomnia' | 'postman' | 'sitemap' | 'text',
-  flags: MonikaFlags,
-  index?: number
-): Promise<Partial<Config>> => {
-  if (isUrl(source)) {
-    const interval: number =
-      flags['config-interval'] || monikaFlagsDefaultValue['config-interval']
-    scheduleRemoteConfigFetcher({ configType, interval, url: source, index })
-  } else {
-    watchConfigFile({
-      path: source,
-      type: configType,
-      index,
-      repeat: flags.repeat,
-    })
-  }
-
-  const parsed = await parseConfig(source, configType, flags)
-
-  return {
-    ...parsed,
-    probes: parsed.probes?.map((probe) => {
-      const requests =
-        probe?.requests?.map((request) => ({
-          ...request,
-          timeout: request.timeout ?? 10_000,
-        })) ?? []
-
-      const interval = () => {
-        if (typeof probe?.interval === 'number') return probe.interval
-        return requests.length * 10 === 0 ? 10 : requests.length * 10
+function watchConfigFile({ path, type, index, repeat }: WatchConfigFileParams) {
+  const isWatchConfigFile = !(isTestEnvironment || repeat !== 0)
+  if (isWatchConfigFile) {
+    const watcher = chokidar.watch(path)
+    watcher.on('change', async () => {
+      const newConfig = await parseConfig(path, type)
+      if (index === undefined) {
+        nonDefaultConfig = newConfig
+      } else {
+        defaultConfigs[index] = newConfig
       }
 
-      return { ...probe, interval: interval(), requests }
-    }),
+      await updateConfig(mergeConfigs(defaultConfigs, nonDefaultConfig))
+    })
   }
-}
-
-const parseDefaultConfig = async (
-  flags: MonikaFlags
-): Promise<Partial<Config>[]> => {
-  return Promise.all(
-    (flags.config as Array<string>).map((source, index) =>
-      parseConfigType(source, 'monika', flags, index)
-    )
-  )
-}
-
-const addDefaultNotifications = (config: Partial<Config>): Partial<Config> => {
-  log.info('Notifications not found, using desktop as default...')
-  return {
-    ...config,
-    notifications: [{ id: 'default', type: 'desktop', data: undefined }],
-  }
-}
-
-export const setupConfig = async (flags: MonikaFlags): Promise<void> => {
-  // check for default config path when -c/--config not provided
-  if (
-    flags.config.length === 0 &&
-    flags.har === undefined &&
-    flags.postman === undefined &&
-    flags.insomnia === undefined &&
-    flags.sitemap === undefined &&
-    flags.text === undefined
-  ) {
-    log.info(`No Monika configuration available, initializing...`)
-    const configFilename = await createConfigFile(flags)
-    flags.config = [configFilename]
-  }
-
-  defaultConfigs = await parseDefaultConfig(flags)
-
-  if (flags.har) {
-    nonDefaultConfig = await parseConfigType(flags.har, 'har', flags)
-  } else if (flags.postman) {
-    nonDefaultConfig = await parseConfigType(flags.postman, 'postman', flags)
-  } else if (flags.insomnia) {
-    nonDefaultConfig = await parseConfigType(flags.insomnia, 'insomnia', flags)
-  } else if (flags.sitemap) {
-    nonDefaultConfig = await parseConfigType(flags.sitemap, 'sitemap', flags)
-  } else if (flags.text) {
-    nonDefaultConfig = await parseConfigType(flags.text, 'text', flags)
-  }
-
-  if (defaultConfigs.length === 0 && nonDefaultConfig !== undefined) {
-    nonDefaultConfig = addDefaultNotifications(nonDefaultConfig)
-  }
-
-  await updateConfig(mergeConfigs())
 }
 
 const getPathAndTypeFromFlag = (flags: MonikaFlags) => {
@@ -323,7 +289,7 @@ export const createConfig = async (flags: MonikaFlags): Promise<void> => {
     }
 
     const parse = await parseConfig(path, type, flags)
-    const result = await addDefaultNotifications(parse)
+    const result = addDefaultNotifications(parse)
     const file = flags.output || 'monika.yml'
 
     if (existsSync(file) && !flags.force) {
