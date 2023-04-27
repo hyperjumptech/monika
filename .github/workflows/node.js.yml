@@ -18,8 +18,8 @@ jobs:
     strategy:
       matrix:
         include:
-          - node-version: 14.x
-            targets: node14
+          # - node-version: 14.x
+          #   targets: node14
           - node-version: 16.x
             targets: node16
     steps:
