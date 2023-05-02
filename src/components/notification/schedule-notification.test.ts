@@ -2,10 +2,7 @@ import cron from 'node-cron'
 import sinon from 'sinon'
 import chai, { expect } from 'chai'
 import spies from 'chai-spies'
-import {
-  resetScheduledTasks,
-  scheduleSummaryNotification,
-} from './schedule-notification'
+import { scheduleSummaryNotification } from './schedule-notification'
 
 chai.use(spies)
 
@@ -31,7 +28,6 @@ describe('Schedule notification', () => {
   afterEach(() => {
     sinon.restore()
     cronExpression = ''
-    resetScheduledTasks()
     taskStopCalledTotal = 0
   })
 
@@ -96,12 +92,9 @@ describe('Schedule notification', () => {
 
   describe('Reset schedule notification', () => {
     it('should stop all running scheduled notification', () => {
-      // arrange
-      scheduleSummaryNotification({ config: {}, flags: {} })
-      scheduleSummaryNotification({ config: {}, flags: {} })
-
       // act
-      resetScheduledTasks()
+      scheduleSummaryNotification({ config: {}, flags: {} })
+      scheduleSummaryNotification({ config: {}, flags: {} })
 
       // arrange
       expect(taskStopCalledTotal).eq(2)

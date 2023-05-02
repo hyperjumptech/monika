@@ -23,25 +23,19 @@
  **********************************************************************************/
 
 import { Command, Errors, Flags, Interfaces } from '@oclif/core'
+import pEvent from 'p-event'
 
 import { flush, help } from './commands'
-import {
-  createConfig,
-  getConfigIterator,
-  isSymonModeFrom,
-} from './components/config'
+import { createConfig, getConfig, isSymonModeFrom } from './components/config'
 import { printAllLogs } from './components/logger'
 import { closeLog, openLogfile } from './components/logger/history'
 import { logStartupMessage } from './components/logger/startup-message'
 import { sendMonikaStartMessage } from './components/notification/start-message'
-import {
-  resetScheduledTasks,
-  scheduleSummaryNotification,
-} from './components/notification/schedule-notification'
+import { scheduleSummaryNotification } from './components/notification/schedule-notification'
 import { setContext } from './context'
 import events from './events'
-import { Config } from './interfaces/config'
-import { Probe } from './interfaces/probe'
+import type { Config } from './interfaces/config'
+import type { Probe } from './interfaces/probe'
 import { printSummary, savePidFile } from './jobs/summary-notification'
 import initLoaders from './loaders'
 import { sanitizeProbe, startProbing } from './looper'
@@ -307,46 +301,46 @@ class Monika extends Command {
         await symonClient.initiate()
       }
 
-      let abortCurrentLooper: (() => void) | undefined
-      const isTestEnvironment = process.env.NODE_ENV === 'test'
+      let isFirstRun = true
 
-      for await (const config of getConfigIterator()) {
-        if (!config) continue
-
+      for (;;) {
+        const config = getConfig()
         const notifications = config.notifications || []
         const probes = this.getProbes({ config, flags: _flags })
 
         // emit the sanitized probe
         em.emit(events.config.sanitized, probes)
 
-        if (abortCurrentLooper) {
-          abortCurrentLooper()
-        }
-
-        resetScheduledTasks()
-
-        if (!isTestEnvironment) {
-          await sendMonikaStartMessage(notifications)
-        }
-
-        await this.deprecationHandler(config)
-
-        logStartupMessage({
-          config,
-          flags: _flags,
-          isFirstRun: !abortCurrentLooper,
-        })
+        // schedule status update notification
+        scheduleSummaryNotification({ config, flags: _flags })
 
         // save some data into files for later
         savePidFile(_flags.config, config)
 
-        // schedule status update notification
-        scheduleSummaryNotification({ config, flags: _flags })
+        this.deprecationHandler(config)
 
-        abortCurrentLooper = startProbing({
+        logStartupMessage({
+          config,
+          flags: _flags,
+          isFirstRun,
+        })
+
+        if (process.env.NODE_ENV !== 'test') {
+          sendMonikaStartMessage(notifications).catch((error) =>
+            log.error(error.message)
+          )
+        }
+
+        startProbing({
           probes,
           notifications,
         })
+
+        isFirstRun = false
+
+        // block the loop until receives config updated event
+        // eslint-disable-next-line no-await-in-loop
+        await pEvent(em, events.config.updated)
       }
     } catch (error) {
       await closeLog()
@@ -375,7 +369,7 @@ class Monika extends Command {
     throw error
   }
 
-  async deprecationHandler(config: Config): Promise<Config> {
+  deprecationHandler(config: Config): Config {
     let showDeprecateMsg = false
 
     const checkedConfig = {

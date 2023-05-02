@@ -27,7 +27,7 @@ import { differenceInSeconds } from 'date-fns'
 import { doProbe } from '../components/probe'
 import { getContext } from '../context'
 import type { Notification } from '../components/notification/channel'
-import { Probe } from '../interfaces/probe'
+import type { Probe } from '../interfaces/probe'
 import { log } from '../utils/pino'
 import {
   getProbeContext,
@@ -154,21 +154,20 @@ type StartProbingArgs = {
   notifications: Notification[]
 }
 
-export function startProbing({
+export async function startProbing({
   probes,
   notifications,
-}: StartProbingArgs): () => void {
-  const flags = getContext().flags
-  const repeat = flags.repeat
-
+}: StartProbingArgs): Promise<void> {
   initializeProbeStates(probes)
 
-  const probeInterval = setInterval(() => {
-    if (repeat) {
-      const finishedProbe = probes.every((probe) => {
-        const context = getProbeContext(probe.id)
+  setInterval(() => {
+    const { repeat, stun } = getContext().flags
 
-        return context.cycle === repeat && getProbeState(probe.id) === 'idle'
+    if (repeat) {
+      const finishedProbe = probes.every(({ id }) => {
+        const context = getProbeContext(id)
+
+        return context.cycle === repeat && getProbeState(id) === 'idle'
       })
 
       if (finishedProbe) {
@@ -177,7 +176,7 @@ export function startProbing({
       }
     }
 
-    if ((isConnectedToSTUNServer && !isPaused) || flags.stun === DISABLE_STUN) {
+    if ((isConnectedToSTUNServer && !isPaused) || stun === DISABLE_STUN) {
       for (const probe of probes) {
         const probeState = getProbeState(probe.id)
         const context = getProbeContext(probe.id)
@@ -197,6 +196,4 @@ export function startProbing({
       }
     }
   }, 1000)
-
-  return () => clearInterval(probeInterval)
 }

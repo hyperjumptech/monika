@@ -13,7 +13,7 @@ type scheduleSummaryNotification = {
 let scheduledTasks: ScheduledTask[] = []
 
 // Stop and clear all previous cron tasks
-export function resetScheduledTasks(): void {
+function resetScheduledTasks(): void {
   for (const task of scheduledTasks) {
     task.stop()
   }
@@ -28,6 +28,8 @@ export function scheduleSummaryNotification({
   if (isSymonModeFrom(flags) || flags['status-notification'] === 'false') {
     return
   }
+
+  resetScheduledTasks()
 
   // defaults to 6 AM
   // default value is not defined in flag configuration,

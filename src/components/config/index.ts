@@ -26,7 +26,6 @@ import chokidar from 'chokidar'
 import { CliUx } from '@oclif/core'
 import { existsSync, writeFileSync } from 'fs'
 import isUrl from 'is-url'
-import pEvent from 'p-event'
 
 import events from '../../events'
 import type { Config } from '../../interfaces/config'
@@ -77,24 +76,6 @@ export const getConfig = (): Config => {
   return config
 }
 
-export async function* getConfigIterator(): AsyncGenerator<
-  Config,
-  void,
-  undefined
-> {
-  const config = getConfig()
-  const { flags } = getContext()
-
-  if (!isSymonModeFrom(flags) && !config)
-    throw new Error('Configuration setup has not been run yet')
-
-  yield config
-
-  if (!isTestEnvironment) {
-    yield* pEvent.iterator<string, Config>(emitter, events.config.updated)
-  }
-}
-
 export const updateConfig = async (
   config: Config,
   validate = true
@@ -115,9 +96,9 @@ export const updateConfig = async (
   }
 
   const newConfigVersion = config.version || md5Hash(config)
-  const hasConfigChange = getContext()?.config?.version !== newConfigVersion
+  const hasChangeConfig = getContext()?.config?.version !== newConfigVersion
 
-  if (hasConfigChange) {
+  if (hasChangeConfig) {
     const newConfig = { ...config, version: newConfigVersion }
 
     setContext({ config: newConfig })
