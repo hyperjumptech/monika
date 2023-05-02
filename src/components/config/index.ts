@@ -319,3 +319,10 @@ export const createConfig = async (flags: MonikaFlags): Promise<void> => {
     log.info(`${file} file has been created.`)
   }
 }
+
+export function isSymonModeFrom({
+  symonKey,
+  symonUrl,
+}: Pick<MonikaFlags, 'symonKey' | 'symonUrl'>): boolean {
+  return Boolean(symonUrl) && Boolean(symonKey)
+}

@@ -25,7 +25,11 @@
 import { Command, Errors, Flags, Interfaces } from '@oclif/core'
 
 import { flush, help } from './commands'
-import { createConfig, getConfigIterator } from './components/config'
+import {
+  createConfig,
+  getConfigIterator,
+  isSymonModeFrom,
+} from './components/config'
 import { printAllLogs } from './components/logger'
 import { closeLog, openLogfile } from './components/logger/history'
 import { logStartupMessage } from './components/logger/startup-message'
@@ -293,7 +297,7 @@ class Monika extends Command {
 
       await initLoaders(_flags, this.config)
 
-      const isSymonMode = Boolean(_flags.symonUrl) && Boolean(_flags.symonKey)
+      const isSymonMode = isSymonModeFrom(_flags)
       if (isSymonMode) {
         symonClient = new SymonClient({
           url: _flags.symonUrl as string,

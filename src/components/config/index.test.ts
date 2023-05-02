@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import { expect } from '@oclif/test'
-import { getConfig } from '.'
+import { getConfig, isSymonModeFrom } from '.'
 import { resetContext, setContext } from '../../context'
 
 describe('getConfig', () => {
@@ -56,5 +56,51 @@ describe('getConfig', () => {
 
     // assert
     expect(getConfig()).to.deep.eq(config)
+  })
+})
+
+describe('isSymonModeFrom', () => {
+  it('should return true', () => {
+    // act
+    const isSymonMode = isSymonModeFrom({
+      symonKey: 'secret-key',
+      symonUrl: 'https://example.com',
+    })
+
+    // assert
+    expect(isSymonMode).eq(true)
+  })
+
+  it('should return false when symon key and url is empty', () => {
+    // act
+    const isSymonMode = isSymonModeFrom({
+      symonKey: '',
+      symonUrl: '',
+    })
+
+    // assert
+    expect(isSymonMode).eq(false)
+  })
+
+  it('should return false when symon key is empty', () => {
+    // act
+    const isSymonMode = isSymonModeFrom({
+      symonKey: '',
+      symonUrl: 'https://example.com',
+    })
+
+    // assert
+    expect(isSymonMode).eq(false)
+  })
+
+  it('should return false when symon url is empty', () => {
+    // act
+    const isSymonMode = isSymonModeFrom({
+      symonKey: 'secret-key',
+      symonUrl: '',
+    })
+
+    // assert
+    expect(isSymonMode).eq(false)
   })
 })
