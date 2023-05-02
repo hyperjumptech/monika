@@ -22,60 +22,39 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import type { Config } from '../interfaces/config'
-import { monikaFlagsDefaultValue } from './monika-flags'
-import type { MonikaFlags } from './monika-flags'
+import { expect } from '@oclif/test'
+import { getConfig } from '.'
+import { resetContext, setContext } from '../../context'
 
-type Incident = {
-  probeID: string
-  probeRequestURL: string
-  createdAt: Date
-}
+describe('getConfig', () => {
+  afterEach(() => {
+    resetContext()
+  })
 
-type Context = {
-  // userAgent example: @hyperjumptech/monika/1.2.3 linux-x64 node-14.17.0
-  userAgent: string
-  incidents: Incident[]
-  config?: Config
-  flags: MonikaFlags
-}
+  it('should throw error when config is empty', () => {
+    expect(() => getConfig()).to.throw(
+      'Configuration setup has not been run yet'
+    )
+  })
 
-type NewContext = Partial<Context>
+  it('should return config', () => {
+    // arrange
+    const config = {
+      probes: [
+        {
+          id: '1',
+          name: 'example',
+          interval: 1000,
+          incidentThreshold: 1,
+          recoveryThreshold: 1,
+          alerts: [],
+          requests: [{ body: '', url: 'https://example.com', timeout: 1000 }],
+        },
+      ],
+    }
+    setContext({ config })
 
-const initialContext: Context = {
-  userAgent: '',
-  incidents: [],
-  flags: {
-    config: monikaFlagsDefaultValue.config,
-    'config-filename': monikaFlagsDefaultValue['config-filename'],
-    'config-interval': monikaFlagsDefaultValue['config-interval'],
-    'create-config': false,
-    flush: false,
-    'follow-redirects': monikaFlagsDefaultValue['follow-redirects'],
-    force: false,
-    help: false,
-    'keep-verbose-logs': false,
-    logs: false,
-    'max-start-delay': monikaFlagsDefaultValue['max-start-delay'],
-    'one-probe': false,
-    repeat: 0,
-    stun: monikaFlagsDefaultValue.stun,
-    summary: false,
-    verbose: false,
-    version: undefined,
-  },
-}
-
-let context: Context = initialContext
-
-export function getContext(): Context {
-  return context
-}
-
-export function setContext(newContext: NewContext): void {
-  context = { ...context, ...newContext }
-}
-
-export function resetContext(): void {
-  context = initialContext
-}
+    // assert
+    expect(getConfig()).to.deep.eq(config)
+  })
+})
