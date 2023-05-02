@@ -77,12 +77,15 @@ export const getConfig = (): Config => {
   return config
 }
 
-export async function* getConfigIterator(
-  skipConfigCheck = true
-): AsyncGenerator<Config, void, undefined> {
+export async function* getConfigIterator(): AsyncGenerator<
+  Config,
+  void,
+  undefined
+> {
   const config = getConfig()
+  const { flags } = getContext()
 
-  if (!skipConfigCheck && !config)
+  if (!isSymonModeFrom(flags) && !config)
     throw new Error('Configuration setup has not been run yet')
 
   yield config
