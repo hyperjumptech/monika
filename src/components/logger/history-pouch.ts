@@ -42,13 +42,15 @@ type NotifData = {
 let localPouchDB: PouchDB.Database
 
 /**
- * openLogfile will open the file history.db and if it doesn't exist, create it and sets up the table
- * @returns Promise<void>
+ * openLogPouch will create a pouchDB connection and sets a replication to the CouchDB
+ * live = true, means the replication is immediate when there is a put process
+ * @returns <void>
  */
 export function openLogPouch(): void {
   try {
     localPouchDB = new PouchDB('symon')
 
+    // to symon couchdb replication setting
     const { flags } = getContext()
     if (flags.symonCouchDb) {
       const symonCouchDB = new PouchDB(flags.symonCouchDb)
