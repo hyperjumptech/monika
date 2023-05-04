@@ -25,14 +25,7 @@
 import { createClient } from 'redis'
 import type { ProbeRequestResponse } from '../../../../interfaces/request'
 import { differenceInMilliseconds } from 'date-fns'
-
-type RedisRequest = {
-  host: string // Host address of the redis-server
-  port: number // Port number of the redis-server
-  password?: string // Password string if AUTH is used, optional
-  username?: string // Username stgring if used, optional
-  command?: string
-}
+import type { Redis } from '../../../../interfaces/probe'
 
 type RedisResult = {
   isAlive: boolean // If redis responds to PING/commands
@@ -46,7 +39,7 @@ type RedisResult = {
  * @returns {object} ProbeRequestResponse type mapped from RedisResult
  **/
 export async function redisRequest(
-  params: RedisRequest
+  params: Redis
 ): Promise<ProbeRequestResponse> {
   const baseResponse: ProbeRequestResponse = {
     requestType: 'redis',
@@ -82,8 +75,8 @@ const CONNECTTIMEOUTMS = 10_000
  * @param {object} params is a RedisRequest type
  * @returns {object} RedisResult type contain client response
  */
-async function sendRedisRequest(params: RedisRequest): Promise<RedisResult> {
-  const { host, port, username, password } = params
+async function sendRedisRequest(params: Redis): Promise<RedisResult> {
+  const { host, port, username, password, uri } = params
 
   const result: RedisResult = {
     isAlive: false,
@@ -91,15 +84,18 @@ async function sendRedisRequest(params: RedisRequest): Promise<RedisResult> {
   }
 
   try {
-    const client = createClient({
-      socket: {
-        host: host,
-        port: port,
-        connectTimeout: CONNECTTIMEOUTMS,
-      },
-      password: password,
-      username: username,
-    })
+    const client =
+      host && port
+        ? createClient({
+            socket: {
+              host: host,
+              port: port,
+              connectTimeout: CONNECTTIMEOUTMS,
+            },
+            password: password,
+            username: username,
+          })
+        : createClient({ url: uri })
 
     await client.connect()
 
