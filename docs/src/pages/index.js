@@ -630,7 +630,7 @@ export default function IndexPage() {
               <h2 className="text-white md:text-left lg:text-32 text-2xl mt-6 text-center font-bold">
                 Get Started with Monika Now!
               </h2>
-              <p className="text-white font-medium lg:text-lg lg:w-3/4 w-full my-4 md:text-left text-center">
+              <p className="text-white font-medium lg:text-lg lg:w-3/4 w-full my-5 md:text-left text-center">
                 Monika is an open source synthetic monitoring command line
                 application. It is actively developed and completely free!
               </p>
@@ -655,7 +655,7 @@ export default function IndexPage() {
                 Looking for a Low-Code Version Monitoring Solution? Try Neo
                 Sense!
               </h2>
-              <p className="text-white font-medium lg:text-lg my-4 md:text-left text-center">
+              <p className="text-white font-medium lg:w-3/4 w-full lg:text-lg my-5 md:text-left text-center">
                 Elevate your Monika experience with Neo Sense, featuring an
                 intuitive interface and dashboard.
               </p>
@@ -1421,19 +1421,12 @@ export default function IndexPage() {
             justify-content: center;
           }
           .container20 {
-            flex: 0 0 auto;
-            width: 100%;
-            display: flex;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
             z-index: 100;
             max-width: 1110px;
-            align-items: center;
-            padding-top: var(--dl-space-space-doubleunit);
-            padding-left: var(--dl-space-space-doubleunit);
-            padding-right: var(--dl-space-space-tripleunit);
-            flex-direction: row;
-            padding-bottom: var(--dl-space-space-doubleunit);
-            justify-content: space-between;
-            border-radius: 10px;
+            margin-bottom: var(--dl-space-space-doubleunit);
           }
           .container21 {
             flex: 1;
@@ -1443,7 +1436,7 @@ export default function IndexPage() {
             justify-content: flex-start;
             background-color: #1b1b1b;
             border-radius: 12px;
-            margin: var(--dl-space-space-doubleunit);
+            margin: var(--dl-space-space-unit);
           }
           .text23 {
             color: var(--dl-color-gray-white);
@@ -1471,7 +1464,7 @@ export default function IndexPage() {
               linear-gradient(45deg, #2fdcdc, rgba(0, 255, 0, 0) 30.71%),
               linear-gradient(336deg, #987ce8, #987ce8 80.71%);
             border-radius: 12px;
-            margin: var(--dl-space-space-doubleunit);
+            margin: var(--dl-space-space-unit);
           }
           .buttonFooter {
             flex: 0 0 auto;
