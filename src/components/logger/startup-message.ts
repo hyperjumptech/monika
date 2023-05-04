@@ -46,25 +46,24 @@ export function logStartupMessage({
   flags,
   isFirstRun,
 }: LogStartupMessage): void {
+  if (isSymonModeFrom(flags)) {
+    log.info('Running in Symon mode')
+    return
+  }
+
+  for (const configSource of flags.config) {
+    if (isUrl(configSource)) {
+      log.info(`Using remote config: ${configSource}`)
+    } else if (configSource.length > 0) {
+      log.info(`Using config file: ${path.resolve(configSource)}`)
+    }
+  }
+
   const startupMessage = generateStartupMessage({
     config,
     flags,
     isFirstRun,
   })
-
-  if (isSymonModeFrom(flags)) {
-    log.info(startupMessage)
-    return
-  }
-
-  for (const cfg of flags.config) {
-    if (isUrl(cfg)) {
-      log.info('Using remote config:', cfg)
-    } else if (cfg.length > 0) {
-      log.info(`Using config file: ${path.resolve(cfg)}`)
-    }
-  }
-
   console.log(startupMessage)
 }
 
@@ -73,10 +72,6 @@ function generateStartupMessage({
   flags,
   isFirstRun,
 }: LogStartupMessage): string {
-  if (isSymonModeFrom(flags)) {
-    return 'Running in Symon mode'
-  }
-
   const { notifications = [], probes } = config
   const notificationTotal = notifications.length
   const probeTotal = probes.length

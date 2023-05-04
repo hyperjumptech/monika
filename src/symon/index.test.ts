@@ -135,6 +135,7 @@ describe('Symon initiate', () => {
     sinon.spy(symon, 'report')
 
     await symon.initiate()
+    await symon.stopReport()
     expect(symon.monikaId).equals('1234')
 
     const body = JSON.parse(sentBody)
@@ -216,6 +217,7 @@ describe('Symon initiate', () => {
     expect(symon.config).to.be.null
 
     await symon.initiate()
+    await symon.stopReport()
 
     expect(symon.config).deep.equals(config)
   })
@@ -265,6 +267,7 @@ describe('Symon initiate', () => {
     const reportSpy = sinon.spy(symon, 'report')
 
     await symon.initiate()
+    await symon.stopReport()
 
     expect(reportSpy.called).equals(true)
   })

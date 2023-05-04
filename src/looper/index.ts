@@ -154,13 +154,13 @@ type StartProbingArgs = {
   notifications: Notification[]
 }
 
-export async function startProbing({
+export function startProbing({
   probes,
   notifications,
-}: StartProbingArgs): Promise<void> {
+}: StartProbingArgs): () => void {
   initializeProbeStates(probes)
 
-  setInterval(() => {
+  const probeInterval = setInterval(() => {
     const { repeat, stun } = getContext().flags
 
     if (repeat) {
@@ -196,4 +196,6 @@ export async function startProbing({
       }
     }
   }, 1000)
+
+  return () => clearInterval(probeInterval)
 }

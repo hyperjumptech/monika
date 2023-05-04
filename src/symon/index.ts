@@ -439,6 +439,10 @@ class SymonClient {
       log.warn(`Warning: Can't send status to Symon. ${error?.message}`)
     }
   }
+
+  async stopReport(): Promise<void> {
+    await this.bree.stop()
+  }
 }
 
 export default SymonClient

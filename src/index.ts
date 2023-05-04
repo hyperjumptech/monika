@@ -302,17 +302,19 @@ class Monika extends Command {
       }
 
       let isFirstRun = true
+      let abortCurrentLooper: (() => void) | undefined
 
       for (;;) {
         const config = getConfig()
         const notifications = config.notifications || []
         const probes = this.getProbes({ config, flags: _flags })
 
+        if (abortCurrentLooper) {
+          abortCurrentLooper()
+        }
+
         // emit the sanitized probe
         em.emit(events.config.sanitized, probes)
-
-        // schedule status update notification
-        scheduleSummaryNotification({ config, flags: _flags })
 
         // save some data into files for later
         savePidFile(_flags.config, config)
@@ -325,16 +327,21 @@ class Monika extends Command {
           isFirstRun,
         })
 
-        if (process.env.NODE_ENV !== 'test') {
-          sendMonikaStartMessage(notifications).catch((error) =>
-            log.error(error.message)
-          )
-        }
-
-        startProbing({
+        abortCurrentLooper = startProbing({
           probes,
           notifications,
         })
+
+        if (process.env.NODE_ENV === 'test') {
+          break
+        }
+
+        sendMonikaStartMessage(notifications).catch((error) =>
+          log.error(error.message)
+        )
+
+        // schedule status update notification
+        scheduleSummaryNotification({ config, flags: _flags })
 
         isFirstRun = false
 
