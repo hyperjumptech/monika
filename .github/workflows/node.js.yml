@@ -46,7 +46,7 @@ jobs:
         with:
           node-version: 18.x
       - run: npm ci
-      - run: npm run build --if-present
+      - run: npm run build -w packages/notification
       - run: NODE_OPTIONS='--no-experimental-fetch' npm test && npx codecov
       - run: npm pack
       - run: npm install -g ./hyperjumptech-monika-*.tgz
