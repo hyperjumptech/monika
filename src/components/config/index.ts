@@ -95,11 +95,11 @@ export const updateConfig = async (
     }
   }
 
-  const newConfigVersion = config.version || md5Hash(config)
-  const hasChangeConfig = getContext()?.config?.version !== newConfigVersion
+  const version = md5Hash(config)
+  const hasChangeConfig = getContext()?.config?.version !== version
 
   if (hasChangeConfig) {
-    const newConfig = { ...config, version: newConfigVersion }
+    const newConfig = { ...config, version }
 
     setContext({ config: newConfig })
     emitter.emit(events.config.updated, newConfig)

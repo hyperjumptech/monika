@@ -23,8 +23,12 @@
  **********************************************************************************/
 
 import { expect } from '@oclif/test'
-import { getConfig, isSymonModeFrom } from '.'
-import { resetContext, setContext } from '../../context'
+import { getConfig, isSymonModeFrom, updateConfig } from '.'
+import { getContext, resetContext, setContext } from '../../context'
+import type { Config } from '../../interfaces/config'
+import events from '../../events'
+import { md5Hash } from '../../utils/hash'
+import { getEventEmitter } from '../../utils/events'
 
 describe('getConfig', () => {
   afterEach(() => {
@@ -102,5 +106,92 @@ describe('isSymonModeFrom', () => {
 
     // assert
     expect(isSymonMode).eq(false)
+  })
+})
+
+describe('updateConfig', () => {
+  afterEach(() => {
+    resetContext()
+  })
+
+  it('should throw error when config is invalid', async () => {
+    // arrange
+    let errorMessage = ''
+
+    try {
+      // act
+      await updateConfig({ probes: [] })
+    } catch (error: any) {
+      errorMessage = error.message
+    }
+
+    // assert
+    expect(errorMessage).eq(
+      'Probes object does not exists or has length lower than 1!'
+    )
+  })
+
+  it('should update config', async () => {
+    // arrange
+    const config: Config = {
+      probes: [
+        {
+          id: '1',
+          name: '',
+          interval: 1000,
+          requests: [{ url: 'https://example.com', body: '', timeout: 1000 }],
+          incidentThreshold: 1,
+          recoveryThreshold: 1,
+          alerts: [],
+        },
+      ],
+    }
+    let configFromEmitter = ''
+    const eventEmitter = getEventEmitter()
+    eventEmitter.once(events.config.updated, (data) => {
+      configFromEmitter = data
+    })
+
+    // act
+    await updateConfig(config)
+
+    // assert
+    expect(getContext().config).to.deep.eq({
+      ...config,
+      version: md5Hash(config),
+    })
+    expect(configFromEmitter).not.eq('')
+  })
+
+  it('should should not update config', async () => {
+    // arrange
+    const config: Config = {
+      probes: [
+        {
+          id: '1',
+          name: '',
+          interval: 1000,
+          requests: [{ url: 'https://example.com', body: '', timeout: 1000 }],
+          incidentThreshold: 1,
+          recoveryThreshold: 1,
+          alerts: [],
+        },
+      ],
+    }
+    setContext({ config: { ...config, version: md5Hash(config) } })
+    let configFromEmitter = ''
+    const eventEmitter = getEventEmitter()
+    const eventListener = (data: any) => {
+      configFromEmitter = data
+    }
+
+    eventEmitter.once(events.config.updated, eventListener)
+
+    // act
+    await updateConfig(config)
+
+    // assert
+    expect(configFromEmitter).eq('')
+    eventEmitter.removeListener(events.config.updated, eventListener)
   })
 })
