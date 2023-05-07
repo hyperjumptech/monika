@@ -106,7 +106,7 @@ async function sendRedisRequest(params: Redis): Promise<RedisResult> {
     const ping = await client.ping()
     if (ping === 'PONG') {
       result.isAlive = true
-      result.message = `${host}:${port} PONGED`
+      result.message = `redis PONGED`
     }
   } catch (error: any) {
     result.message = error

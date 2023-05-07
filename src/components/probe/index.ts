@@ -215,7 +215,6 @@ function responseProcessing({
     },
     requestLog
   )
-  requestLog.print()
 
   if (isVerbose || requestLog.hasIncidentOrRecovery) {
     requestLog.saveToDatabase().catch((error) => log.error(error.message))
