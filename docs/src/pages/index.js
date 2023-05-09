@@ -630,9 +630,9 @@ export default function IndexPage() {
               <h2 className="text-white md:text-left lg:text-32 text-2xl mt-6 text-center font-bold">
                 Get Started with Monika Now!
               </h2>
-              <p className="text-white font-medium lg:text-lg lg:w-3/4 w-full my-5 md:text-left text-center">
+              <p className="text-white font-medium lg:text-lg lg:w-11/12 w-full my-5 md:text-left text-center">
                 Monika is an open source synthetic monitoring command line
-                application. It is actively developed and completely free!
+                application. it is actively developed and completely free!
               </p>
               <div className="buttonFooter">
                 <Link href="/quick-start">
@@ -655,7 +655,7 @@ export default function IndexPage() {
                 Looking for a Low-Code Version Monitoring Solution? Try Neo
                 Sense!
               </h2>
-              <p className="text-white font-medium lg:w-3/4 w-full lg:text-lg my-5 md:text-left text-center">
+              <p className="text-white font-medium lg:w-11/12 w-full lg:text-lg my-5 md:text-left text-center">
                 Elevate your Monika experience with Neo Sense, featuring an
                 intuitive interface and dashboard.
               </p>
@@ -1637,6 +1637,25 @@ export default function IndexPage() {
           .text31 {
             color: var(--dl-color-gray-300);
             margin-top: var(--dl-space-space-unit);
+          }
+          .imageFooter {
+            display: relative;
+          }
+          .imageFooter2 {
+            // display: flex;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            // background-position: right bottom;
+            width: 300px;
+            // position: absolute;
+            // right: 500px;
+            // bottom: 100px;
+            position: absolute;
+            bottom: 300px;
+            right: 600px;
+            z-index: 100;
+            // object-fit: cover;
+            display: block;
           }
           @media (max-width: 991px) {
             .hero {
