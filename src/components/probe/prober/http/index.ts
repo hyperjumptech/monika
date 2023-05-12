@@ -1,3 +1,4 @@
+import { isSymonModeFrom } from '../../../config'
 import { checkThresholdsAndSendAlert } from '../..'
 import { getContext } from '../../../../context'
 import events from '../../../../events'
@@ -24,7 +25,7 @@ export async function probeHTTP(
 ): Promise<void> {
   const eventEmitter = getEventEmitter()
   const { flags } = getContext()
-  const isSymonMode = Boolean(flags.symonUrl) && Boolean(flags.symonKey)
+  const isSymonMode = isSymonModeFrom(flags)
   const isVerbose = isSymonMode || flags['keep-verbose-logs']
   const responses = []
 
