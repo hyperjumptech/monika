@@ -26,10 +26,10 @@ import chokidar from 'chokidar'
 import { CliUx } from '@oclif/core'
 import { existsSync, writeFileSync } from 'fs'
 import isUrl from 'is-url'
-import pEvent from 'p-event'
 
 import events from '../../events'
-import { Config } from '../../interfaces/config'
+import type { Config } from '../../interfaces/config'
+import { getContext, setContext } from '../../context'
 import { monikaFlagsDefaultValue } from '../../context/monika-flags'
 import type { MonikaFlags } from '../../context/monika-flags'
 import { getEventEmitter } from '../../utils/events'
@@ -65,27 +65,15 @@ type WatchConfigFileParams = {
 const isTestEnvironment = process.env.CI || process.env.NODE_ENV === 'test'
 const emitter = getEventEmitter()
 
-let cfg: Config
-let defaultConfigs: Partial<Config>[]
+const defaultConfigs: Partial<Config>[] = []
 let nonDefaultConfig: Partial<Config>
 
-export const getConfig = (skipConfigCheck = true): Config => {
-  if (!skipConfigCheck && !cfg)
-    throw new Error('Configuration setup has not been run yet')
-  return cfg
-}
+export const getConfig = (): Config => {
+  const { config } = getContext()
 
-export async function* getConfigIterator(
-  skipConfigCheck = true
-): AsyncGenerator<Config, void, undefined> {
-  if (!skipConfigCheck && !cfg)
-    throw new Error('Configuration setup has not been run yet')
+  if (!config) throw new Error('Configuration setup has not been run yet')
 
-  yield cfg
-
-  if (!isTestEnvironment) {
-    yield* pEvent.iterator<string, Config>(emitter, events.config.updated)
-  }
+  return config
 }
 
 export const updateConfig = async (
@@ -107,11 +95,14 @@ export const updateConfig = async (
     }
   }
 
-  const lastConfigVersion = cfg?.version
-  cfg = config
-  cfg.version = cfg.version || md5Hash(cfg)
-  if (lastConfigVersion !== undefined && lastConfigVersion !== cfg.version) {
-    emitter.emit(events.config.updated, cfg)
+  const version = md5Hash(config)
+  const hasChangeConfig = getContext()?.config?.version !== version
+
+  if (hasChangeConfig) {
+    const newConfig = { ...config, version }
+
+    setContext({ config: newConfig })
+    emitter.emit(events.config.updated, newConfig)
     log.warn('config file update detected')
   }
 }
@@ -119,10 +110,12 @@ export const updateConfig = async (
 export const setupConfig = async (flags: MonikaFlags): Promise<void> => {
   const sanitizedFlags = await sanitizeFlags(flags)
   const config = await getConfigFrom(sanitizedFlags)
+  await validateConfig(config)
+  const version = config.version || md5Hash(config)
+
+  setContext({ config: { ...config, version } })
 
   watchConfigsChange(sanitizedFlags)
-
-  await updateConfig(config)
 }
 
 async function sanitizeFlags(flags: MonikaFlags): Promise<MonikaFlags> {
@@ -309,4 +302,11 @@ export const createConfig = async (flags: MonikaFlags): Promise<void> => {
     writeFileSync(file, yamlDoc, 'utf8')
     log.info(`${file} file has been created.`)
   }
+}
+
+export function isSymonModeFrom({
+  symonKey,
+  symonUrl,
+}: Pick<MonikaFlags, 'symonKey' | 'symonUrl'>): boolean {
+  return Boolean(symonUrl) && Boolean(symonKey)
 }

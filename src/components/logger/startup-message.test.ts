@@ -72,10 +72,13 @@ describe('Startup message', () => {
       // act
       logStartupMessage({
         config: { probes: [] },
-        configFlag: [],
+        flags: {
+          config: [],
+          symonKey: 'secret-key',
+          symonUrl: 'https://example.com',
+          verbose: false,
+        },
         isFirstRun: false,
-        isSymonMode: true,
-        isVerbose: false,
       })
 
       // assert
@@ -89,10 +92,8 @@ describe('Startup message', () => {
         // arrange
         logStartupMessage({
           config: { probes: [] },
-          configFlag: [],
+          flags: { config: [], symonKey: '', symonUrl: '', verbose: false },
           isFirstRun: false,
-          isSymonMode: false,
-          isVerbose: false,
         })
 
         // assert
@@ -105,10 +106,8 @@ describe('Startup message', () => {
         // arrange
         logStartupMessage({
           config: defaultConfig,
-          configFlag: [],
+          flags: { config: [], symonKey: '', symonUrl: '', verbose: false },
           isFirstRun: true,
-          isSymonMode: false,
-          isVerbose: false,
         })
 
         // assert
@@ -119,10 +118,8 @@ describe('Startup message', () => {
         // arrange
         logStartupMessage({
           config: defaultConfig,
-          configFlag: [],
+          flags: { config: [], symonKey: '', symonUrl: '', verbose: false },
           isFirstRun: false,
-          isSymonMode: false,
-          isVerbose: false,
         })
 
         // assert
@@ -133,10 +130,8 @@ describe('Startup message', () => {
         // arrange
         logStartupMessage({
           config: defaultConfig,
-          configFlag: [],
+          flags: { config: [], symonKey: '', symonUrl: '', verbose: false },
           isFirstRun: true,
-          isSymonMode: false,
-          isVerbose: false,
         })
 
         // assert
@@ -151,10 +146,8 @@ describe('Startup message', () => {
             ...defaultConfig,
             notifications: [],
           },
-          configFlag: [],
+          flags: { config: [], symonKey: '', symonUrl: '', verbose: false },
           isFirstRun: true,
-          isSymonMode: false,
-          isVerbose: false,
         })
 
         // assert
@@ -177,10 +170,8 @@ describe('Startup message', () => {
               },
             ],
           },
-          configFlag: [],
+          flags: { config: [], symonKey: '', symonUrl: '', verbose: true },
           isFirstRun: true,
-          isSymonMode: false,
-          isVerbose: true,
         })
         // assert
         expect(consoleLogMessage).include('uYJaw')
@@ -206,10 +197,8 @@ describe('Startup message', () => {
               },
             ],
           },
-          configFlag: [],
+          flags: { config: [], symonKey: '', symonUrl: '', verbose: true },
           isFirstRun: true,
-          isSymonMode: false,
-          isVerbose: true,
         })
         // assert
         expect(consoleLogMessage).include('uYJaw')
@@ -224,10 +213,8 @@ describe('Startup message', () => {
         // arrange
         logStartupMessage({
           config: defaultConfig,
-          configFlag: [],
+          flags: { config: [], symonKey: '', symonUrl: '', verbose: true },
           isFirstRun: true,
-          isSymonMode: false,
-          isVerbose: true,
         })
         // assert
         expect(consoleLogMessage).include('GET')
@@ -260,10 +247,8 @@ describe('Startup message', () => {
               },
             ],
           },
-          configFlag: [],
+          flags: { config: [], symonKey: '', symonUrl: '', verbose: true },
           isFirstRun: true,
-          isSymonMode: false,
-          isVerbose: true,
         })
         // assert
         expect(consoleLogMessage).include('POST')
@@ -276,10 +261,8 @@ describe('Startup message', () => {
         // arrange
         logStartupMessage({
           config: defaultConfig,
-          configFlag: [],
+          flags: { config: [], symonKey: '', symonUrl: '', verbose: true },
           isFirstRun: true,
-          isSymonMode: false,
-          isVerbose: true,
         })
         // assert
         expect(consoleLogMessage).include(
@@ -304,10 +287,8 @@ describe('Startup message', () => {
               },
             ],
           },
-          configFlag: [],
+          flags: { config: [], symonKey: '', symonUrl: '', verbose: true },
           isFirstRun: true,
-          isSymonMode: false,
-          isVerbose: true,
         })
         // assert
         expect(consoleLogMessage).include(
@@ -324,10 +305,8 @@ describe('Startup message', () => {
             ...defaultConfig,
             notifications: [{ id: 'UVIsL', type: 'desktop', data: undefined }],
           },
-          configFlag: [],
+          flags: { config: [], symonKey: '', symonUrl: '', verbose: true },
           isFirstRun: true,
-          isSymonMode: false,
-          isVerbose: true,
         })
         // assert
         expect(consoleLogMessage).include('Notifications')
@@ -354,10 +333,8 @@ describe('Startup message', () => {
               },
             ],
           },
-          configFlag: [],
+          flags: { config: [], symonKey: '', symonUrl: '', verbose: true },
           isFirstRun: true,
-          isSymonMode: false,
-          isVerbose: true,
         })
         // assert
         expect(consoleLogMessage).include('john@example.com, jane@example.com')
@@ -383,10 +360,8 @@ describe('Startup message', () => {
               },
             ],
           },
-          configFlag: [],
+          flags: { config: [], symonKey: '', symonUrl: '', verbose: true },
           isFirstRun: true,
-          isSymonMode: false,
-          isVerbose: true,
         })
         // assert
         expect(consoleLogMessage).include('https://example.com')
@@ -407,10 +382,8 @@ describe('Startup message', () => {
               },
             ],
           },
-          configFlag: [],
+          flags: { config: [], symonKey: '', symonUrl: '', verbose: true },
           isFirstRun: true,
-          isSymonMode: false,
-          isVerbose: true,
         })
         // assert
         expect(consoleLogMessage).include('https://example.com')
@@ -423,10 +396,13 @@ describe('Startup message', () => {
       // act
       logStartupMessage({
         config: defaultConfig,
-        configFlag: ['https://example.com/monika.yaml'],
+        flags: {
+          config: ['https://example.com/monika.yaml'],
+          symonKey: '',
+          symonUrl: '',
+          verbose: false,
+        },
         isFirstRun: false,
-        isSymonMode: false,
-        isVerbose: false,
       })
 
       // assert
@@ -437,10 +413,13 @@ describe('Startup message', () => {
       // act
       logStartupMessage({
         config: defaultConfig,
-        configFlag: ['./monika.yaml'],
+        flags: {
+          config: ['./monika.yaml'],
+          symonKey: '',
+          symonUrl: '',
+          verbose: false,
+        },
         isFirstRun: false,
-        isSymonMode: false,
-        isVerbose: false,
       })
 
       // assert

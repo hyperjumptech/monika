@@ -26,68 +26,52 @@ import path from 'path'
 import isUrl from 'is-url'
 import boxen from 'boxen'
 import chalk from 'chalk'
+import type { MonikaFlags } from '../../context/monika-flags'
 import type { Config } from '../../interfaces/config'
 import type { Notification } from '../notification/channel'
 import { channels } from '../notification/channel'
 import type { Probe, ProbeAlert } from '../../interfaces/probe'
 import type { RequestConfig } from '../../interfaces/request'
 import { log } from '../../utils/pino'
+import { isSymonModeFrom } from '../config'
 
 type LogStartupMessage = {
   config: Config
-  configFlag: string[]
+  flags: Pick<MonikaFlags, 'config' | 'symonKey' | 'symonUrl' | 'verbose'>
   isFirstRun: boolean
-  isSymonMode: boolean
-  isVerbose: boolean
 }
 
 export function logStartupMessage({
   config,
-  configFlag,
+  flags,
   isFirstRun,
-  isSymonMode,
-  isVerbose,
 }: LogStartupMessage): void {
-  const startupMessage = generateStartupMessage({
-    config,
-    isFirstRun,
-    isSymonMode,
-    isVerbose,
-  })
-
-  if (isSymonMode) {
-    log.info(startupMessage)
+  if (isSymonModeFrom(flags)) {
+    log.info('Running in Symon mode')
     return
   }
 
-  for (const x in configFlag) {
-    if (isUrl(configFlag[x])) {
-      log.info('Using remote config:', configFlag[x])
-    } else if (configFlag[x].length > 0) {
-      log.info(`Using config file: ${path.resolve(configFlag[x])}`)
+  for (const configSource of flags.config) {
+    if (isUrl(configSource)) {
+      log.info(`Using remote config: ${configSource}`)
+    } else if (configSource.length > 0) {
+      log.info(`Using config file: ${path.resolve(configSource)}`)
     }
   }
 
+  const startupMessage = generateStartupMessage({
+    config,
+    flags,
+    isFirstRun,
+  })
   console.log(startupMessage)
-}
-
-type GenerateStartupMessageParams = {
-  config: Config
-  isFirstRun: boolean
-  isVerbose: boolean
-  isSymonMode: boolean
 }
 
 function generateStartupMessage({
   config,
+  flags,
   isFirstRun,
-  isVerbose,
-  isSymonMode,
-}: GenerateStartupMessageParams): string {
-  if (isSymonMode) {
-    return 'Running in Symon mode'
-  }
-
+}: LogStartupMessage): string {
   const { notifications = [], probes } = config
   const notificationTotal = notifications.length
   const probeTotal = probes.length
@@ -106,7 +90,7 @@ function generateStartupMessage({
     probeTotal,
   })
 
-  if (isVerbose) {
+  if (flags.verbose) {
     startupMessage += generateProbeMessage(probes)
     startupMessage += generateNotificationMessage(notifications || [])
   }

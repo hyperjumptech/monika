@@ -25,8 +25,7 @@
 import { parentPort, workerData } from 'worker_threads'
 import path from 'path'
 import { open } from 'sqlite'
-import axios, { AxiosRequestConfig } from 'axios'
-import Pako from 'pako'
+import axios from 'axios'
 import SQLite3 from 'sqlite3'
 import {
   deleteNotificationLogs,
@@ -84,8 +83,6 @@ const main = async (data: Record<string, any>) => {
           'Content-Type': 'application/json',
           'x-api-key': apiKey,
         },
-        transformRequest: (req: AxiosRequestConfig) =>
-          Pako.gzip(JSON.stringify(req)).buffer,
       })
 
       log.info(

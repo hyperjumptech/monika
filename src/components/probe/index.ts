@@ -34,6 +34,7 @@ import validateResponse, {
 import { getEventEmitter } from '../../utils/events'
 import { log } from '../../utils/pino'
 import { setProbeFinish, setProbeRunning } from '../../utils/probe-state'
+import { isSymonModeFrom } from '../config'
 import { RequestLog } from '../logger'
 import { sendAlerts } from '../notification'
 import { processThresholds } from '../notification/process-server-status'
@@ -172,7 +173,7 @@ function responseProcessing({
   index,
 }: respProsessingParams): void {
   const { flags } = getContext()
-  const isSymonMode = Boolean(flags.symonUrl) && Boolean(flags.symonKey)
+  const isSymonMode = isSymonModeFrom(flags)
   const eventEmitter = getEventEmitter()
   const isVerbose = isSymonMode || flags['keep-verbose-logs']
   const { alerts } = probe

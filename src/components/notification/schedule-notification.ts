@@ -1,17 +1,19 @@
 import cron from 'node-cron'
 import type { ScheduledTask } from 'node-cron'
+import type { MonikaFlags } from '../../context/monika-flags'
+import type { Config } from '../../interfaces/config'
 import { getSummaryAndSendNotif } from '../../jobs/summary-notification'
+import { isSymonModeFrom } from '../config'
 
 type scheduleSummaryNotification = {
-  isSymonMode: boolean
-  statusNotificationConfig?: string
-  statusNotificationFlag?: string
+  config: Pick<Config, 'status-notification'>
+  flags: Pick<MonikaFlags, 'status-notification' | 'symonKey' | 'symonUrl'>
 }
 
 let scheduledTasks: ScheduledTask[] = []
 
 // Stop and clear all previous cron tasks
-export function resetScheduledTasks(): void {
+function resetScheduledTasks(): void {
   for (const task of scheduledTasks) {
     task.stop()
   }
@@ -20,21 +22,22 @@ export function resetScheduledTasks(): void {
 }
 
 export function scheduleSummaryNotification({
-  isSymonMode,
-  statusNotificationConfig,
-  statusNotificationFlag,
+  config,
+  flags,
 }: scheduleSummaryNotification): void {
-  if (isSymonMode || statusNotificationFlag === 'false') {
+  if (isSymonModeFrom(flags) || flags['status-notification'] === 'false') {
     return
   }
+
+  resetScheduledTasks()
 
   // defaults to 6 AM
   // default value is not defined in flag configuration,
   // because the value can also come from config file
   const DEFAULT_SCHEDULE_CRON_EXPRESSION = '0 6 * * *'
   const schedule =
-    statusNotificationFlag ||
-    statusNotificationConfig ||
+    flags['status-notification'] ||
+    config['status-notification'] ||
     DEFAULT_SCHEDULE_CRON_EXPRESSION
 
   const scheduledStatusUpdateTask = cron.schedule(
