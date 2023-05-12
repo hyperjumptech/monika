@@ -63,10 +63,10 @@ describe('notificationChecker - smtpNotification', () => {
     expect(fn).not.to.throws()
   })
 
-  it.only('should handle validation error - without hostname', async () => {
+  it('should handle validation error - without hostname', async () => {
     // const message = '"SMTP Hostname" is not allowed to be empty (smtp)'
 
-    expect(
+    await expect(
       validateNotification([
         {
           ...smtpNotificationConfig,
@@ -83,14 +83,13 @@ describe('notificationChecker - smtpNotification', () => {
   })
 
   it('should handle validation error - without port', async () => {
-    const message = '"SMTP Port" is not allowed to be empty'
-    expect(
-      await validateNotification([
+    const message = '"SMTP Port" is required (smtp)'
+    await expect(
+      validateNotification([
         {
           ...smtpNotificationConfig,
           data: {
             hostname: 'localhost',
-            port: 0,
             username: 'username',
             password: 'password',
             recipients: ['name@example.com'],
@@ -102,8 +101,8 @@ describe('notificationChecker - smtpNotification', () => {
 
   it('should handle validation error - invalid port', async () => {
     const message = '"SMTP Port" must be a valid port'
-    expect(
-      await validateNotification([
+    await expect(
+      validateNotification([
         {
           ...smtpNotificationConfig,
           data: {
@@ -120,8 +119,8 @@ describe('notificationChecker - smtpNotification', () => {
 
   it('should handle validation error - with empty username', async () => {
     const message = '"SMTP Username" is not allowed to be empty'
-    expect(
-      await validateNotification([
+    await expect(
+      validateNotification([
         {
           ...smtpNotificationConfig,
           data: {
@@ -138,8 +137,8 @@ describe('notificationChecker - smtpNotification', () => {
 
   it('should handle validation error - with empty password', async () => {
     const message = '"SMTP Password" is not allowed to be empty'
-    expect(
-      await validateNotification([
+    await expect(
+      validateNotification([
         {
           ...smtpNotificationConfig,
           data: {
@@ -155,8 +154,8 @@ describe('notificationChecker - smtpNotification', () => {
   })
 
   it('should accept smtp - without username', async () => {
-    expect(
-      await validateNotification([
+    await expect(
+      validateNotification([
         {
           ...smtpNotificationConfig,
           data: {
@@ -171,8 +170,8 @@ describe('notificationChecker - smtpNotification', () => {
   })
 
   it('should accept smtp - without password', async () => {
-    expect(
-      await validateNotification([
+    await expect(
+      validateNotification([
         {
           ...smtpNotificationConfig,
           data: {
