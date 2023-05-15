@@ -627,7 +627,7 @@ export default function IndexPage() {
           />
           <div className="container20">
             <div className="container21">
-              <h2 className="text-white md:text-left lg:text-32 text-2xl mt-6 text-center font-bold">
+              <h2 className="text-white md:text-left lg:text-32 text-2xl mt-auto text-center font-bold">
                 Get Started with Monika Now!
               </h2>
               <p className="text-white font-medium lg:text-lg lg:w-11/12 w-full my-5 md:text-left text-center">
@@ -651,7 +651,7 @@ export default function IndexPage() {
               </div>
             </div>
             <div className="container22">
-              <h2 className="text-white md:text-left lg:text-32 text-2xl text-center font-bold">
+              <h2 className="text-white md:text-left lg:text-32 text-2xl mt-auto text-center font-bold">
                 Looking for a Low-Code Version Monitoring Solution? Try Neo
                 Sense!
               </h2>
@@ -1475,7 +1475,7 @@ export default function IndexPage() {
             flex-direction: column;
             justify-content: center;
             background: linear-gradient(310deg, #2fdcdc, #987ce8);
-            margin-bottom: 15px;
+            margin-top: auto;
           }
           .buttonFooter2 {
             flex: 0 0 auto;
@@ -1486,6 +1486,7 @@ export default function IndexPage() {
             flex-direction: column;
             justify-content: center;
             background-color: var(--dl-color-gray-white);
+            margin-top: auto;
           }
           .link15 {
             font-size: 16px;
