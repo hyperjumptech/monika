@@ -233,7 +233,7 @@ probes:
     description: requesting redis PONG
     interval: 30 # in seconds
     redis:
-      - urI: 'redis://alice:mypassword@172.15.0.2:6379'
+      - uri: 'redis://alice:mypassword@172.15.0.2:6379'
 ```
 
 See the full [redis client configurations here](https://github.com/redis/node-redis).
