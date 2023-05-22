@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.15.3] - 2023-05-22
+
+## Added
+
+- Add redis url support (#1039)
+- Allow unauthenticated SMTP (#1017)
+
+## Fixed
+
+- prometheus collector reassign on config change (#1021)
+
+## Changed
+
+- Docs: content footer (#1038)
+- Remove Pako as it is no longer needed (#1044)
+- Separate Initialize and Update Config (#1037)
+- Drop node.js 14 support (#1041)
+- Split the sanitize flag, get config, and update config phase and extract the get config function (#1035)
+- Test out the built binaries from PKG in CI (#1033)
+
 ## [1.15.2] - 2023-04-13
 
 ## Fixed
