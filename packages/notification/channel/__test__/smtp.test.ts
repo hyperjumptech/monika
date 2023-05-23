@@ -24,7 +24,6 @@
 
 import chai, { expect } from 'chai'
 import spies from 'chai-spies'
-// eslint-disable-next-line node/no-extraneous-import
 import chaiAsPromised from 'chai-as-promised'
 
 import * as smtp from '../smtp'
