@@ -224,7 +224,19 @@ probes:
         password: mypassword
 ```
 
-You may also add a `username` property as needed.
+You may also add a `username` property as needed. An alternative format that you can provide is a uri connection string for redis with the following specification `redis://[[username][:password]@][host][:port][/db-number]`:
+
+```yaml
+probes:
+  - id: 'redis-ping'
+    name: redis check with password
+    description: requesting redis PONG
+    interval: 30 # in seconds
+    redis:
+      - uri: 'redis://alice:mypassword@172.15.0.2:6379'
+```
+
+See the full [redis client configurations here](https://github.com/redis/node-redis).
 
 ### TCP
 
