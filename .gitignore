@@ -226,7 +226,6 @@ monika.postman_collection.json
 #ignore databasefile
 monika-logs.db*
 #ignore HAR archives
-*.har
 monika.yml
 monika.yaml
 monika.textfile.yml

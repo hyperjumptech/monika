@@ -87,7 +87,7 @@ export type NotificationMessage = {
     | NotificationStatusUpdateMessageMeta
 }
 
-// TODO: convert contentOrMessage to contact, and defined getContent in every channel
+// TODO: convert contentOrMessage to content, and implement getContent in every channel
 type NotificationChannel<T = any> = {
   validator: AnySchema
   send: (notificationData: T, contentOrMessage: any) => Promise<void>

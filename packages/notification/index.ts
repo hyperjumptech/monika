@@ -38,7 +38,7 @@ async function sendNotifications(
           throw new Error('Notification channel is not available')
         }
 
-        // TODO: convert contentOrMessage to contact
+        // TODO: convert contentOrMessage to content
         const contentOrMessage = channel.getContent
           ? channel.getContent(message)
           : message
