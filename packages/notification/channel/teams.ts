@@ -51,12 +51,13 @@ export const validator = Joi.object().keys({
 
 export const send = async (
   { url }: NotificationData,
-  content: Content
+  message: NotificationMessage,
+  customContent?: Content
 ): Promise<void> => {
   await sendHttpRequest({
     method: 'POST',
     url,
-    data: content,
+    data: customContent ?? getContent(message),
   })
 }
 

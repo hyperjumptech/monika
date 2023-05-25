@@ -38,11 +38,7 @@ async function sendNotifications(
           throw new Error('Notification channel is not available')
         }
 
-        // TODO: convert contentOrMessage to content
-        const contentOrMessage = channel.getContent
-          ? channel.getContent(message)
-          : message
-        await channel.send(data, contentOrMessage)
+        await channel.send(data, message)
       } catch (error: any) {
         throw new Error(
           `Failed to send message using ${type}, please check your ${type} notification config.\nMessage: ${error?.message}`
