@@ -229,7 +229,7 @@ notifications:
 Please note, to receive messages from the WhatsApp cloud API the following requirements are mandatory.
 
 - The recipient phone number must be a WhatsApp phone number.
-- The recipient must accept [Meta's] new Terms of Service and Privacy Policy.
+- The recipient must accept [Meta's new Terms of Service and Privacy Policy](https://www.whatsapp.com/legal/terms-of-service).
 - The recipient must use the following WhatsApp version or greater:  
    Android: 2.21.15.15  
    SMBA: 2.21.15.15  
@@ -237,8 +237,6 @@ Please note, to receive messages from the WhatsApp cloud API the following requi
    SMBI: 2.21.170.4  
    KaiOS: 2.2130.10  
    Web: 2.2132.6
-
-See Meta's WhatsApp ToS [here](https://www.whatsapp.com/legal/terms-of-service).
 
 ## PagerDuty
 
