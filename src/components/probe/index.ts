@@ -46,6 +46,7 @@ import {
   probePostgres,
   probeRedis,
   probeSocket,
+  probeScript,
 } from './prober'
 
 interface ProbeStatusProcessed {
@@ -326,6 +327,16 @@ async function probeNonHTTP(
       id: probe.id,
       checkOrder,
       socket: probe.socket,
+    })
+
+    processProbeResults(probeResults, probe, notifications)
+  }
+
+  if (probe?.script) {
+    const probeResults = await probeScript({
+      id: probe.id,
+      checkOrder,
+      script: probe?.script,
     })
 
     processProbeResults(probeResults, probe, notifications)

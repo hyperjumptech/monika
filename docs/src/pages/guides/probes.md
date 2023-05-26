@@ -214,7 +214,7 @@ probes:
       - uri: postgresql://user:password@172.15.0.1:5432/mydb
 ```
 
-If uri is provided along with host, port, user and password fields, connection will be derived from the uri string and the other fields will be ignored.  
+If uri is provided along with host, port, user and password fields, connection will be derived from the uri string and the other fields will be ignored.
 Please see the [postgres connection specification](https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING) for details on uri formatting.
 
 ### Redis Request
@@ -272,6 +272,28 @@ probes:
       host: localhost
       port: 3333
       data: Hello from Monika
+```
+
+### Script
+
+You can execute a local script, if you need to do something more complex. The probe will fail if the script completes with an exit code of anything besides `0`.
+
+```yaml
+probes:
+  - id: 'tcp-example'
+    socket:
+      - cmd: node /app/probe.js
+```
+
+You can also specify the working directory and timeout.
+
+```yaml
+probes:
+  - id: 'tcp-example'
+    socket:
+      - cmd: node ./probe.js
+        workingDir: /app
+        timeout: 3000 # 3 seconds
 ```
 
 ## Probe Response Anatomy

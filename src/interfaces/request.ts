@@ -36,6 +36,7 @@ export type RequestTypes =
   | 'mariadb'
   | 'mongo'
   | 'postgres'
+  | 'script'
 
 // ProbeRequestResponse is used to define the response from a probe requests.
 export interface ProbeRequestResponse<T = any> {

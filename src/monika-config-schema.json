@@ -299,6 +299,32 @@
         }
       }
     },
+    "script": {
+      "title": "Script",
+      "type": "array",
+      "description": "Run a local shell script",
+      "items": {
+        "type": "object",
+        "required": ["cmd"],
+        "properties": {
+          "cmd": {
+            "title": "Command",
+            "type": "string",
+            "description": "The shell command to run"
+          },
+          "workingDir": {
+            "title": "Working Directory",
+            "type": "string",
+            "description": "Where to run the script from"
+          },
+          "data": {
+            "title": "timeout",
+            "type": "integer",
+            "description": "How many milliseconds to wait before timing out (defaults to 10 seconds)."
+          }
+        }
+      }
+    },
     "alerts": {
       "title": "Alerts",
       "type": "array",
@@ -461,6 +487,9 @@
           },
           "socket": {
             "$ref": "#/definitions/socket"
+          },
+          "script": {
+            "$ref": "#/definitions/script"
           },
           "incidentThreshold": {
             "$ref": "#/definitions/incidentThreshold"

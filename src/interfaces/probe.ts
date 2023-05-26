@@ -80,6 +80,12 @@ export type Postgres = {
   alerts?: ProbeAlert[]
 }
 
+export type Script = {
+  cmd: string
+  workingDir?: string
+  timeout?: number
+}
+
 export interface Probe {
   id: string
   name: string
@@ -92,6 +98,7 @@ export interface Probe {
   mariadb?: MariaDB[]
   mysql?: MariaDB[]
   postgres?: Postgres[]
+  script?: Script[]
   incidentThreshold: number
   recoveryThreshold: number
   alerts: ProbeAlert[]
