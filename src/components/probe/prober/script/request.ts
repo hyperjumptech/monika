@@ -14,7 +14,7 @@ export async function scriptRequest(
     const response: ProbeRequestResponse = {
       requestType: 'script',
       body: '',
-      status: 200,
+      status: 0,
       responseTime: 0,
       isProbeResponsive: false,
       data: '',
@@ -22,19 +22,23 @@ export async function scriptRequest(
     }
 
     try {
-      exec(cmd, { cwd: workingDir, timeout }, (error, body, errMessage) => {
-        const endTime = new Date()
-        response.responseTime = differenceInMilliseconds(endTime, startTime)
+      exec(
+        cmd,
+        { cwd: workingDir, timeout },
+        (error: any, body, errMessage) => {
+          const endTime = new Date()
+          response.responseTime = differenceInMilliseconds(endTime, startTime)
 
-        response.body = body
-        if (error) {
-          response.status = 0
-          response.body = errMessage
-          response.errMessage = errMessage
+          response.body = body
+          if (error) {
+            response.status = error?.code || 1
+            response.body = errMessage
+            response.errMessage = errMessage
+          }
+
+          resolve(response)
         }
-
-        resolve(response)
-      })
+      )
     } catch (error: any) {
       response.status = 0
       response.errMessage = error.message
