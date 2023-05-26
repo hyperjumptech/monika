@@ -238,6 +238,8 @@ Please note, to receive message from the whatssap cloud API the following requir
    KaiOS: 2.2130.10  
    Web: 2.2132.6
 
+See Meta's documentations [here](https://developers.facebook.com/docs/whatsapp/cloud-api/support/error-codes/).
+
 ## PagerDuty
 
 PagerDuty is a platform for agile incident management. You need the integration key to use PagerDuty which can get by following the steps in [the documentation](https://support.pagerduty.com/docs/services-and-integrations). To give you the flexibility to choose which probe belongs to which PagerDuty service. You need to map the PagerDuty integration key with your Monika probe id in the configuration.
