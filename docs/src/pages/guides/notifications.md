@@ -226,9 +226,21 @@ notifications:
 | Type | Notification types                       | `monika-notif`                                                     |
 | Url  | The URL of the Monika Notif Webhook link | `https://whatsapp.hyperjump.tech/api/notify?token=<webhook.token>` |
 
+Please note, to receive message from the whatssap cloud API the following requirements are mandatory.
+
+- The recipient phone number must be a WhatsApp phone number.
+- The recipient must accept [Meta's] new Terms of Service and Privacy Policy.
+- The recipient must use the following WhatsApp version or greater:  
+   Android: 2.21.15.15  
+   SMBA: 2.21.15.15  
+   iOS: 2.21.170.4  
+   SMBI: 2.21.170.4  
+   KaiOS: 2.2130.10  
+   Web: 2.2132.6
+
 ## PagerDuty
 
-PagerDuty is a platform for agile incident management. You need the integration key to use PagerDuty. You can get the integration key by following the steps in [the documentation](https://support.pagerduty.com/docs/services-and-integrations). To give you the flexibility to choose which probe belongs to which PagerDuty service. You need to map the PagerDuty integration key with your Monika probe id in the configuration.
+PagerDuty is a platform for agile incident management. You need the integration key to use PagerDuty which can get by following the steps in [the documentation](https://support.pagerduty.com/docs/services-and-integrations). To give you the flexibility to choose which probe belongs to which PagerDuty service. You need to map the PagerDuty integration key with your Monika probe id in the configuration.
 
 ```yaml
 notifications:
