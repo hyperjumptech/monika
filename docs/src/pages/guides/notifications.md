@@ -238,7 +238,7 @@ Please note, to receive messages from the WhatsApp cloud API the following requi
    KaiOS: 2.2130.10  
    Web: 2.2132.6
 
-See Meta's documentations [here](https://developers.facebook.com/docs/whatsapp/cloud-api/support/error-codes/).
+See Meta's WhatsApp ToS [here](https://www.whatsapp.com/legal/terms-of-service).
 
 ## PagerDuty
 
