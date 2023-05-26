@@ -89,10 +89,10 @@ export type NotificationMessage = {
 
 type NotificationChannel<T = any> = {
   validator: AnySchema
-  send: (
+  send: (notificationData: T, message: NotificationMessage) => Promise<void>
+  sendWithCustomContent?: (
     notificationData: T,
-    message: NotificationMessage,
-    customContent?: T
+    customContent: teams.Content // TODO: add other Content type from other channel
   ) => Promise<void>
   additionalStartupMessage?: (notificationData: T) => string
 }

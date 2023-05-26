@@ -30,7 +30,7 @@ type NotificationData = {
   url: string
 }
 
-type Content = {
+export type Content = {
   '@type': string
   summary: string
   sections?: {
@@ -51,13 +51,23 @@ export const validator = Joi.object().keys({
 
 export const send = async (
   { url }: NotificationData,
-  message: NotificationMessage,
-  customContent?: Content
+  message: NotificationMessage
 ): Promise<void> => {
   await sendHttpRequest({
     method: 'POST',
     url,
-    data: customContent ?? getContent(message),
+    data: getContent(message),
+  })
+}
+
+export const sendWithCustomContent = async (
+  { url }: NotificationData,
+  content: Content
+): Promise<void> => {
+  await sendHttpRequest({
+    method: 'POST',
+    url,
+    data: content,
   })
 }
 
