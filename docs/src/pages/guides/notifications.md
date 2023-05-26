@@ -208,9 +208,9 @@ notifications:
 | Type | Notification types                      | `teams`                                                      |
 | Url  | The URL of your Microsoft Teams Webhook | `https://<company>.webhook.office.com/webhookb2/1234-abcdef` |
 
-## Monika Whatsapp Notifier
+## Monika WhatsApp Notifier
 
-You can get a notification from Monika to your Whatsapp number without having a Whatsapp Business account. First, you must create a [Monika Whatsapp Notifier account](https://whatsapp.hyperjump.tech).
+You can get a notification from Monika to your WhatsApp number without having a Whatsapp Business account. First, you must create a [Monika Whatsapp Notifier account](https://whatsapp.hyperjump.tech).
 
 ```yml
 notifications:
@@ -226,7 +226,7 @@ notifications:
 | Type | Notification types                       | `monika-notif`                                                     |
 | Url  | The URL of the Monika Notif Webhook link | `https://whatsapp.hyperjump.tech/api/notify?token=<webhook.token>` |
 
-Please note, to receive message from the whatssap cloud API the following requirements are mandatory.
+Please note, to receive messages from the WhatsApp cloud API the following requirements are mandatory.
 
 - The recipient phone number must be a WhatsApp phone number.
 - The recipient must accept [Meta's] new Terms of Service and Privacy Policy.
