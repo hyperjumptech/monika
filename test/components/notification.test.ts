@@ -25,17 +25,11 @@
 import chai, { expect } from 'chai'
 import spies from 'chai-spies'
 import { sendAlerts } from '../../src/components/notification'
-import * as discord from '../../src/components/notification/channel/discord'
-import * as mailgun from '../../src/components/notification/channel/mailgun'
-import * as monikaNotif from '../../src/components/notification/channel/monika-notif'
-import * as slack from '../../src/components/notification/channel/slack'
-import * as smtp from '../../src/components/notification/channel/smtp'
-import * as telegram from '../../src/components/notification/channel/telegram'
-import * as webhook from '../../src/components/notification/channel/webhook'
-import * as whatsapp from '../../src/components/notification/channel/whatsapp'
-import * as lark from '../../src/components/notification/channel/lark'
-import * as googlechat from '../../src/components/notification/channel/googlechat'
-import type { NotificationMessage } from '../../src/components/notification/channel'
+import { channels } from '@hyperjumptech/monika-notification'
+import type { NotificationMessage } from '@hyperjumptech/monika-notification'
+
+const { discord, mailgun, slack, smtp, telegram, webhook, whatsapp, lark } =
+  channels
 
 chai.use(spies)
 
@@ -377,7 +371,7 @@ describe('send alerts', () => {
   })
 
   it('should send webhook monika-notif', async () => {
-    chai.spy.on(monikaNotif, 'send', () => Promise.resolve())
+    chai.spy.on(channels['monika-notif'], 'send', () => Promise.resolve())
 
     await sendAlerts({
       probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
@@ -406,7 +400,7 @@ describe('send alerts', () => {
       probeState: 'DOWN',
     })
 
-    expect(monikaNotif.send).to.have.been.called.exactly(1)
+    expect(channels['monika-notif'].send).to.have.been.called.exactly(1)
   })
 
   it('should send larksuite notification ', async () => {
@@ -443,7 +437,7 @@ describe('send alerts', () => {
   })
 
   it('should send google chat notification ', async () => {
-    chai.spy.on(googlechat, 'send', () => Promise.resolve())
+    chai.spy.on(channels['google-chat'], 'send', () => Promise.resolve())
 
     await sendAlerts({
       probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
@@ -472,6 +466,6 @@ describe('send alerts', () => {
       probeState: 'DOWN',
     })
 
-    expect(googlechat.send).to.have.been.called.exactly(1)
+    expect(channels['google-chat'].send).to.have.been.called.exactly(1)
   })
 })

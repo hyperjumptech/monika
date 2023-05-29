@@ -26,10 +26,10 @@ import { getContext } from '../../context'
 import { Config } from '../../interfaces/config'
 import {
   validateConfigWithSchema,
-  validateNotification,
   validateProbes,
   validateSymonConfig,
 } from './validation'
+import { validateNotification } from '@hyperjumptech/monika-notification'
 
 export const validateConfig = async (configuration: Config): Promise<void> => {
   const { flags } = getContext()
