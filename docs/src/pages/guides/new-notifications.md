@@ -19,23 +19,28 @@ There are few requirements to start adding a new notification to Monika:
 
 ## Add a New Notification
 
-1. Create a new file in the `src/components/notification/channel` directory that satisfies the `NotificationChannel` type from the `src/components/notification/channel/index.ts` file and implement the new notification.
+1. Create a new file in the `packages/notification/channel` directory that satisfies the `NotificationChannel` type from the `packages/notification/channel/index.ts` file and implement the new notification.
 
 ```typescript
 type NotificationChannel<T = any> = {
   validator: Joi.AnySchema
   send: (notificationData: T, message: NotificationMessage) => Promise<void>
+  sendWithCustomContent?: (
+    notificationData: T,
+    customContent: T
+  ) => Promise<void>
   additionalStartupMessage?: (notificationData: T) => string
 }
 ```
 
-| Property                 | Description                                                                            | Example                                                     |
-| ------------------------ | -------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
-| validator                | To validate the `notificationData` field by using [Joi](https://github.com/hapijs/joi) | `Joi.object().keys({ url: Joi.string().uri().required() })` |
-| send                     | It will be invoked if the application needs to send a message through the channel      | -                                                           |
-| additionalStartupMessage | To display additional message on the startup when using `verbose` flag                 | -                                                           |
+| Property                 | Description                                                                                                                                               | Example                                                     |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| validator                | To validate the `notificationData` field by using [Joi](https://github.com/hapijs/joi)                                                                    | `Joi.object().keys({ url: Joi.string().uri().required() })` |
+| send                     | It will be invoked if the application needs to send a message through the channel                                                                         | -                                                           |
+| sendWithCustomContent    | Optional to implement. It will be invoked by other apps that use package `@hyperjumptech/monika-notification` and need custom content in the notification | -                                                           |
+| additionalStartupMessage | To display additional message on the startup when using `verbose` flag                                                                                    | -                                                           |
 
-2. Import the implemented notification file to the `src/components/notification/channel/index.ts` file.
+2. Import the implemented notification file to the `packages/notification/channel/index.ts` file.
 
 ```typescript
 import * as whatsapp from './whatsapp'

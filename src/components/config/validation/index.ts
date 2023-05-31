@@ -23,6 +23,5 @@
  **********************************************************************************/
 
 export { validateConfigWithSchema } from './validator/config-file'
-export { validateNotification } from './validator/notification'
 export { validateProbes } from './validator/probe'
 export { validateSymonConfig } from './validator/symon-config'
