@@ -107,7 +107,7 @@ export class PrometheusCollector {
     const { probe, requestIndex, response } = probeResult
     const { id, name, requests } = probe
     const request = requests[requestIndex]
-    const { method, url } = request
+    const { method, url } = request ?? { method: '', url: '' }
     const { headers, responseTime, status } = response
     const milliSecond = 1000
     const responseTimeInSecond = responseTime / milliSecond ?? 0
