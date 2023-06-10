@@ -81,7 +81,17 @@ export default async function init(
   }
 
   if (!isSymonMode) {
-    await setupConfig(flags)
+    try {
+      await setupConfig(flags)
+    } catch (error) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Failed to setup config. Got err:', error)
+      } else {
+        console.log('Failed to parse config. Please check your config file.')
+        // eslint-disable-next-line no-process-exit, unicorn/no-process-exit
+        process.exit(1) // since not in symon mode, just exit on fatal config error
+      }
+    }
 
     // check TLS when Monika starts
     tlsChecker()
