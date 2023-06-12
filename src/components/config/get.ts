@@ -40,8 +40,10 @@ export async function getConfigFrom(flags: MonikaFlags): Promise<Config> {
 
   try {
     defaultConfigs = await parseDefaultConfig(flags)
-  } catch {
-    throw new Error('Failed to parse config, please check your config file')
+  } catch (error) {
+    throw new Error(
+      'Failed to parse config, please check your config file. ' + error
+    )
   }
 
   const nonDefaultConfig = setDefaultNotifications(

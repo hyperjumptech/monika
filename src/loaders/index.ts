@@ -83,11 +83,11 @@ export default async function init(
   if (!isSymonMode) {
     try {
       await setupConfig(flags)
-    } catch (error) {
-      if (process.env.NODE_ENV === 'development') {
-        console.log('Failed to setup config. Got err:', error)
+    } catch (error: any) {
+      if (process.env.NODE_ENV === 'development' || isTestEnvironment) {
+        throw new Error('Bad config. Got err: ' + error.message)
       } else {
-        console.log('Failed to parse config. Please check your config file.')
+        console.log('Bad config. Got err:', error.message)
         // eslint-disable-next-line no-process-exit, unicorn/no-process-exit
         process.exit(1) // since not in symon mode, just exit on fatal config error
       }
