@@ -56,10 +56,10 @@ type ScheduleRemoteConfigFetcherParams = {
 }
 
 type WatchConfigFileParams = {
+  flags: MonikaFlags
   path: string
   type: string
   index?: number
-  repeat?: number
 }
 
 const isTestEnvironment = process.env.CI || process.env.NODE_ENV === 'test'
@@ -178,10 +178,10 @@ function watchConfigChange({
   }
 
   watchConfigFile({
+    flags,
     path: source,
     type,
     index,
-    repeat: flags.repeat,
   })
 }
 
@@ -207,8 +207,8 @@ function scheduleRemoteConfigFetcher({
   }, interval * 1000)
 }
 
-function watchConfigFile({ path, type, index, repeat }: WatchConfigFileParams) {
-  const isWatchConfigFile = !(isTestEnvironment || repeat !== 0)
+function watchConfigFile({ flags, path, type, index }: WatchConfigFileParams) {
+  const isWatchConfigFile = !(isTestEnvironment || flags.repeat !== 0)
   if (isWatchConfigFile) {
     const watcher = chokidar.watch(path)
     watcher.on('change', async () => {
