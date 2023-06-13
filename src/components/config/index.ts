@@ -140,10 +140,10 @@ async function watchConfigsChange(flags: MonikaFlags) {
   await Promise.all(
     flags.config.map((source, index) =>
       watchConfigChange({
+        flags,
         interval:
           flags['config-interval'] ||
           monikaFlagsDefaultValue['config-interval'],
-        repeat: flags.repeat,
         source,
         type: 'monika',
         index,
@@ -153,16 +153,16 @@ async function watchConfigsChange(flags: MonikaFlags) {
 }
 
 type WatchConfigChangeParams = {
+  flags: MonikaFlags
   interval: number
-  repeat: number
   source: string
   type: ConfigType
   index?: number
 }
 
 function watchConfigChange({
+  flags,
   interval,
-  repeat,
   source,
   type,
   index,
@@ -181,7 +181,7 @@ function watchConfigChange({
     path: source,
     type,
     index,
-    repeat,
+    repeat: flags.repeat,
   })
 }
 
