@@ -58,8 +58,6 @@ type ScheduleRemoteConfigFetcherParams = {
 type WatchConfigFileParams = {
   flags: MonikaFlags
   path: string
-  type: string
-  index?: number
 }
 
 const isTestEnvironment = process.env.CI || process.env.NODE_ENV === 'test'
@@ -180,8 +178,6 @@ function watchConfigChange({
   watchConfigFile({
     flags,
     path: source,
-    type,
-    index,
   })
 }
 
@@ -207,19 +203,14 @@ function scheduleRemoteConfigFetcher({
   }, interval * 1000)
 }
 
-function watchConfigFile({ flags, path, type, index }: WatchConfigFileParams) {
+function watchConfigFile({ flags, path }: WatchConfigFileParams) {
   const isWatchConfigFile = !(isTestEnvironment || flags.repeat !== 0)
   if (isWatchConfigFile) {
     const watcher = chokidar.watch(path)
     watcher.on('change', async () => {
-      const newConfig = await parseConfig(path, type)
-      if (index === undefined) {
-        nonDefaultConfig = newConfig
-      } else {
-        defaultConfigs[index] = newConfig
-      }
+      const config = await getConfigFrom(flags)
 
-      await updateConfig(mergeConfigs(defaultConfigs, nonDefaultConfig))
+      await updateConfig(config)
     })
   }
 }
