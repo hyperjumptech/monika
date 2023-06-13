@@ -108,14 +108,14 @@ export const updateConfig = async (
 }
 
 export const setupConfig = async (flags: MonikaFlags): Promise<void> => {
-  const sanitizedFlags = await createConfigIfEmpty(flags)
-  const config = await getConfigFrom(sanitizedFlags)
+  const validFlag = await createConfigIfEmpty(flags)
+  const config = await getConfigFrom(validFlag)
   await validateConfig(config)
   const version = config.version || md5Hash(config)
 
   setContext({ config: { ...config, version } })
 
-  watchConfigsChange(sanitizedFlags)
+  watchConfigsChange(validFlag)
 }
 
 async function createConfigIfEmpty(flags: MonikaFlags): Promise<MonikaFlags> {
