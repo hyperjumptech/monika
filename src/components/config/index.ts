@@ -108,7 +108,7 @@ export const updateConfig = async (
 }
 
 export const setupConfig = async (flags: MonikaFlags): Promise<void> => {
-  const sanitizedFlags = await sanitizeFlags(flags)
+  const sanitizedFlags = await createConfigIfEmpty(flags)
   const config = await getConfigFrom(sanitizedFlags)
   await validateConfig(config)
   const version = config.version || md5Hash(config)
@@ -118,7 +118,7 @@ export const setupConfig = async (flags: MonikaFlags): Promise<void> => {
   watchConfigsChange(sanitizedFlags)
 }
 
-async function sanitizeFlags(flags: MonikaFlags): Promise<MonikaFlags> {
+async function createConfigIfEmpty(flags: MonikaFlags): Promise<MonikaFlags> {
   // check for default config path when -c/--config not provided
   const hasConfig =
     flags.config.length > 0 ||
