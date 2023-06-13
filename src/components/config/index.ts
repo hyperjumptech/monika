@@ -111,9 +111,8 @@ export const setupConfig = async (flags: MonikaFlags): Promise<void> => {
   const validFlag = await createConfigIfEmpty(flags)
   const config = await getConfigFrom(validFlag)
   await validateConfig(config)
-  const version = config.version || md5Hash(config)
 
-  setContext({ config: { ...config, version } })
+  setContext({ config })
 
   watchConfigsChange(validFlag)
 }
