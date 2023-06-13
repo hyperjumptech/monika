@@ -24,7 +24,6 @@
 
 import type { MonikaFlags } from '../../context/monika-flags'
 import type { Config } from '../../interfaces/config'
-import { md5Hash } from '../../utils/hash'
 import { log } from '../../utils/pino'
 import { parseConfig } from './parse'
 
@@ -43,17 +42,7 @@ export async function getConfigFrom(flags: MonikaFlags): Promise<Config> {
     await getNonDefaultFlags(flags)
   )
 
-  return addConfigVersion(mergeConfigs(defaultConfigs, nonDefaultConfig))
-}
-
-function addConfigVersion(config: Config) {
-  if (config.version) {
-    return config
-  }
-
-  const version = config.version || md5Hash(config)
-
-  return { ...config, version }
+  return mergeConfigs(defaultConfigs, nonDefaultConfig)
 }
 
 // mergeConfigs merges configs by overwriting each other

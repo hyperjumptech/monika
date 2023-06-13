@@ -110,9 +110,19 @@ export const setupConfig = async (flags: MonikaFlags): Promise<void> => {
   const config = await getConfigFrom(validFlag)
   await validateConfig(config)
 
-  setContext({ config })
+  setContext({ config: addConfigVersion(config) })
 
   watchConfigsChange(validFlag)
+}
+
+function addConfigVersion(config: Config) {
+  if (config.version) {
+    return config
+  }
+
+  const version = config.version || md5Hash(config)
+
+  return { ...config, version }
 }
 
 async function createConfigIfEmpty(flags: MonikaFlags): Promise<MonikaFlags> {
