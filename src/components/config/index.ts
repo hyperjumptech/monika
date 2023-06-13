@@ -97,7 +97,7 @@ export const updateConfig = async (
   const hasChangeConfig = getContext()?.config?.version !== version
 
   if (hasChangeConfig) {
-    const newConfig = { ...config, version }
+    const newConfig = addConfigVersion(config)
 
     setContext({ config: newConfig })
     emitter.emit(events.config.updated, newConfig)
