@@ -1,6 +1,7 @@
 import parse from 'url-parse'
 import type { ProbeResult } from '..'
 import type { Redis } from '../../../../interfaces/probe'
+import { ProbeRequestResult } from '../../../../interfaces/request'
 import { redisRequest } from './request'
 
 type ProbeRedisParams = {
@@ -26,8 +27,8 @@ export async function probeRedis({
       password,
       uri,
     })
-    const { body, responseTime, status } = requestResponse
-    const isAlertTriggered = status !== 200
+    const { body, responseTime, result } = requestResponse
+    const isAlertTriggered = result !== ProbeRequestResult.success
     const timeNow = new Date().toISOString()
 
     // parse uri for logMessage(host:port)

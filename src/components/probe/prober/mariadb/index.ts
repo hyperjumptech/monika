@@ -1,5 +1,6 @@
 import type { ProbeResult } from '../'
 import type { MariaDB } from '../../../../interfaces/probe'
+import { ProbeRequestResult } from '../../../../interfaces/request'
 import { mariaRequest } from './request'
 
 type ProbeMariaDBParams = {
@@ -31,8 +32,8 @@ export async function probeMariaDB({
       username,
       password,
     })
-    const { body, responseTime, status } = requestResponse
-    const isAlertTriggered = status !== 200
+    const { body, responseTime, result } = requestResponse
+    const isAlertTriggered = result !== ProbeRequestResult.success
     const timeNow = new Date().toISOString()
     const logMessage = `${timeNow} ${checkOrder} id:${id} ${databaseText}:${host}:${port} ${responseTime}ms msg:${body}`
 
