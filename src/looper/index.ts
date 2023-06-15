@@ -173,25 +173,27 @@ export function startProbing({
       process.exit(0)
     }
 
-    const { repeat, stun } = getContext().flags
+    if (isStunOK()) {
+      return
+    }
 
-    if ((isConnectedToSTUNServer && !isPaused) || stun === DISABLE_STUN) {
-      for (const probe of probes) {
-        const probeState = getProbeState(probe.id)
-        const context = getProbeContext(probe.id)
-        const diff = differenceInSeconds(new Date(), context.lastFinish)
+    const { repeat } = getContext().flags
 
-        if (probeState === 'idle' && diff >= probe.interval) {
-          if (repeat && context.cycle === repeat) {
-            continue
-          }
+    for (const probe of probes) {
+      const probeState = getProbeState(probe.id)
+      const context = getProbeContext(probe.id)
+      const diff = differenceInSeconds(new Date(), context.lastFinish)
 
-          doProbe({
-            checkOrder: context.cycle,
-            probe,
-            notifications,
-          })
+      if (probeState === 'idle' && diff >= probe.interval) {
+        if (repeat && context.cycle === repeat) {
+          continue
         }
+
+        doProbe({
+          checkOrder: context.cycle,
+          probe,
+          notifications,
+        })
       }
     }
   }, 1000)
@@ -207,4 +209,12 @@ function isEndOfRepeat(probes: Probe[]) {
   })
 
   return repeat && isAllProbeFinished
+}
+
+function isStunOK() {
+  return (
+    getContext().flags.stun === DISABLE_STUN ||
+    !isConnectedToSTUNServer ||
+    isPaused
+  )
 }
