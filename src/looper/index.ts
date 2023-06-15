@@ -168,20 +168,12 @@ export function startProbing({
       return
     }
 
-    const { repeat, stun } = getContext().flags
-
-    if (repeat) {
-      const finishedProbe = probes.every(({ id }) => {
-        const context = getProbeContext(id)
-
-        return context.cycle === repeat && getProbeState(id) === 'idle'
-      })
-
-      if (finishedProbe) {
-        // eslint-disable-next-line unicorn/no-process-exit, no-process-exit
-        process.exit(0)
-      }
+    if (isEndOfRepeat(probes)) {
+      // eslint-disable-next-line unicorn/no-process-exit, no-process-exit
+      process.exit(0)
     }
+
+    const { repeat, stun } = getContext().flags
 
     if ((isConnectedToSTUNServer && !isPaused) || stun === DISABLE_STUN) {
       for (const probe of probes) {
@@ -203,4 +195,16 @@ export function startProbing({
       }
     }
   }, 1000)
+}
+
+function isEndOfRepeat(probes: Probe[]) {
+  const { repeat } = getContext().flags
+  const isAllProbeFinished = probes.every(({ id }) => {
+    const isLastCycle = getProbeContext(id).cycle === repeat
+    const isProbeIdle = getProbeState(id) === 'idle'
+
+    return isLastCycle && isProbeIdle
+  })
+
+  return repeat && isAllProbeFinished
 }
