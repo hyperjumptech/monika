@@ -22,6 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import { differenceInSeconds } from 'date-fns'
 import { getContext } from '../../context'
 import events from '../../events'
 import type { Notification } from '@hyperjumptech/monika-notification'
@@ -33,7 +34,12 @@ import validateResponse, {
 } from '../../plugins/validate-response'
 import { getEventEmitter } from '../../utils/events'
 import { log } from '../../utils/pino'
-import { setProbeFinish, setProbeRunning } from '../../utils/probe-state'
+import {
+  getProbeContext,
+  getProbeState,
+  setProbeFinish,
+  setProbeRunning,
+} from '../../utils/probe-state'
 import { isSymonModeFrom } from '../config'
 import { RequestLog } from '../logger'
 import { sendAlerts } from '../notification'
@@ -237,6 +243,10 @@ export async function doProbe({
   probe,
   notifications,
 }: doProbeParams): Promise<void> {
+  if (!isTimeToProbe(probe) || isCycleEnd(probe.id)) {
+    return
+  }
+
   const randomTimeoutMilliseconds = getRandomTimeoutMilliseconds()
 
   setProbeRunning(probe.id)
@@ -267,6 +277,21 @@ function processProbeResults(
       index,
     })
   }
+}
+
+function isTimeToProbe({ id, interval }: Probe) {
+  const isIdle = getProbeState(id) === 'idle'
+  const isInTime =
+    differenceInSeconds(new Date(), getProbeContext(id).lastFinish) >= interval
+
+  return isIdle && isInTime
+}
+
+function isCycleEnd(probeID: string) {
+  return (
+    getContext().flags.repeat &&
+    getContext().flags.repeat === getProbeContext(probeID).cycle
+  )
 }
 
 function getRandomTimeoutMilliseconds(): number {

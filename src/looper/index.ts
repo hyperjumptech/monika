@@ -22,8 +22,6 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { differenceInSeconds } from 'date-fns'
-
 import { doProbe } from '../components/probe'
 import { getContext } from '../context'
 import type { Notification } from '@hyperjumptech/monika-notification'
@@ -178,10 +176,6 @@ export function startProbing({
     }
 
     for (const probe of probes) {
-      if (!isTimeToProbe(probe) || isCycleEnd(probe.id)) {
-        continue
-      }
-
       doProbe({
         checkOrder: getProbeContext(probe.id).cycle,
         probe,
@@ -205,18 +199,6 @@ function isStunOK() {
     isConnectedToSTUNServer &&
     !isPaused
   )
-}
-
-function isTimeToProbe({ id, interval }: Probe) {
-  const isIdle = getProbeState(id) === 'idle'
-  const isInTime =
-    differenceInSeconds(new Date(), getProbeContext(id).lastFinish) >= interval
-
-  return isIdle && isInTime
-}
-
-function isCycleEnd(probeID: string) {
-  return getContext().flags.repeat && isLastCycleOf(probeID)
 }
 
 function isLastCycleOf(probeID: string) {
