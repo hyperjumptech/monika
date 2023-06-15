@@ -178,17 +178,13 @@ export function startProbing({
     }
 
     for (const probe of probes) {
-      const probeState = getProbeState(probe.id)
-      const context = getProbeContext(probe.id)
-      const diff = differenceInSeconds(new Date(), context.lastFinish)
-
-      if (probeState === 'idle' && diff >= probe.interval) {
+      if (isTimeToProbe(probe)) {
         if (getContext().flags.repeat && isLastCycleOf(probe.id)) {
           continue
         }
 
         doProbe({
-          checkOrder: context.cycle,
+          checkOrder: getProbeContext(probe.id).cycle,
           probe,
           notifications,
         })
@@ -211,6 +207,14 @@ function isStunOK() {
     isConnectedToSTUNServer &&
     !isPaused
   )
+}
+
+function isTimeToProbe({ id, interval }: Probe) {
+  const isIdle = getProbeState(id) === 'idle'
+  const isInTime =
+    differenceInSeconds(new Date(), getProbeContext(id).lastFinish) >= interval
+
+  return isIdle && isInTime
 }
 
 function isLastCycleOf(probeID: string) {
