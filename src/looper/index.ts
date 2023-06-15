@@ -173,7 +173,7 @@ export function startProbing({
       process.exit(0)
     }
 
-    if (isStunOK()) {
+    if (!isStunOK()) {
       return
     }
 
@@ -207,9 +207,9 @@ function isEndOfRepeat(probes: Probe[]) {
 
 function isStunOK() {
   return (
-    getContext().flags.stun === DISABLE_STUN ||
-    !isConnectedToSTUNServer ||
-    isPaused
+    getContext().flags.stun !== DISABLE_STUN &&
+    isConnectedToSTUNServer &&
+    !isPaused
   )
 }
 
