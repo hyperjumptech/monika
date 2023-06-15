@@ -177,7 +177,6 @@ export function startProbing({
 
     for (const probe of probes) {
       doProbe({
-        checkOrder: getProbeContext(probe.id).cycle,
         probe,
         notifications,
       })

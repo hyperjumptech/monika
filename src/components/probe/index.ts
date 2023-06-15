@@ -229,7 +229,6 @@ function responseProcessing({
 }
 
 type doProbeParams = {
-  checkOrder: number // the order of probe being processed
   probe: Probe // probe contains all the probes
   notifications: Notification[] // notifications contains all the notifications
 }
@@ -239,7 +238,6 @@ type doProbeParams = {
  * @returns {Promise<void>} void
  */
 export async function doProbe({
-  checkOrder,
   probe,
   notifications,
 }: doProbeParams): Promise<void> {
@@ -252,8 +250,8 @@ export async function doProbe({
   setProbeRunning(probe.id)
 
   setTimeout(async () => {
-    await probeNonHTTP(probe, checkOrder, notifications)
-    await probeHTTP(probe, checkOrder, notifications)
+    await probeNonHTTP(probe, getProbeContext(probe.id).cycle, notifications)
+    await probeHTTP(probe, getProbeContext(probe.id).cycle, notifications)
 
     setProbeFinish(probe.id)
   }, randomTimeoutMilliseconds)
