@@ -35,7 +35,6 @@ import {
 import { getPublicIp, isConnectedToSTUNServer } from '../utils/public-ip'
 
 export const DEFAULT_THRESHOLD = 5
-let isPaused = false
 let checkSTUNinterval: NodeJS.Timeout
 
 const DISABLE_STUN = -1 // -1 is disable stun checking
@@ -136,17 +135,6 @@ export async function loopCheckSTUNServer(interval: number): Promise<any> {
   return checkSTUNinterval
 }
 
-/**
- * setPauseProbeInterval pause probing process
- * @param {boolean} pause for pausing probes
- * @returns void
- */
-export function setPauseProbeInterval(pause: boolean): void {
-  isPaused = pause
-
-  if (pause) log.info('Probing is paused')
-}
-
 type StartProbingArgs = {
   signal: AbortSignal
   probes: Probe[]
@@ -193,11 +181,7 @@ function isEndOfRepeat(probes: Probe[]) {
 }
 
 function isStunOK() {
-  return (
-    getContext().flags.stun !== DISABLE_STUN &&
-    isConnectedToSTUNServer &&
-    !isPaused
-  )
+  return getContext().flags.stun !== DISABLE_STUN && isConnectedToSTUNServer
 }
 
 function isLastCycleOf(probeID: string) {
