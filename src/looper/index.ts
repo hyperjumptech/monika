@@ -177,15 +177,13 @@ export function startProbing({
       return
     }
 
-    const { repeat } = getContext().flags
-
     for (const probe of probes) {
       const probeState = getProbeState(probe.id)
       const context = getProbeContext(probe.id)
       const diff = differenceInSeconds(new Date(), context.lastFinish)
 
       if (probeState === 'idle' && diff >= probe.interval) {
-        if (repeat && context.cycle === repeat) {
+        if (getContext().flags.repeat && isLastCycleOf(probe.id)) {
           continue
         }
 
@@ -200,15 +198,11 @@ export function startProbing({
 }
 
 function isEndOfRepeat(probes: Probe[]) {
-  const { repeat } = getContext().flags
   const isAllProbeFinished = probes.every(({ id }) => {
-    const isLastCycle = getProbeContext(id).cycle === repeat
-    const isProbeIdle = getProbeState(id) === 'idle'
-
-    return isLastCycle && isProbeIdle
+    return isLastCycleOf(id) && getProbeState(id) === 'idle'
   })
 
-  return repeat && isAllProbeFinished
+  return getContext().flags.repeat && isAllProbeFinished
 }
 
 function isStunOK() {
@@ -217,4 +211,8 @@ function isStunOK() {
     !isConnectedToSTUNServer ||
     isPaused
   )
+}
+
+function isLastCycleOf(probeID: string) {
+  return getContext().flags.repeat === getProbeContext(probeID).cycle
 }
