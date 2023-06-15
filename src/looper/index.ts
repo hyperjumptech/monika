@@ -178,17 +178,15 @@ export function startProbing({
     }
 
     for (const probe of probes) {
-      if (isTimeToProbe(probe)) {
-        if (getContext().flags.repeat && isLastCycleOf(probe.id)) {
-          continue
-        }
-
-        doProbe({
-          checkOrder: getProbeContext(probe.id).cycle,
-          probe,
-          notifications,
-        })
+      if (!isTimeToProbe(probe) || isCycleEnd(probe.id)) {
+        continue
       }
+
+      doProbe({
+        checkOrder: getProbeContext(probe.id).cycle,
+        probe,
+        notifications,
+      })
     }
   }, 1000)
 }
@@ -215,6 +213,10 @@ function isTimeToProbe({ id, interval }: Probe) {
     differenceInSeconds(new Date(), getProbeContext(id).lastFinish) >= interval
 
   return isIdle && isInTime
+}
+
+function isCycleEnd(probeID: string) {
+  return getContext().flags.repeat && isLastCycleOf(probeID)
 }
 
 function isLastCycleOf(probeID: string) {
