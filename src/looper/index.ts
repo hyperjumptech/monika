@@ -150,17 +150,24 @@ export function setPauseProbeInterval(pause: boolean): void {
 }
 
 type StartProbingArgs = {
+  signal: AbortSignal
   probes: Probe[]
   notifications: Notification[]
 }
 
 export function startProbing({
+  signal,
   probes,
   notifications,
-}: StartProbingArgs): () => void {
+}: StartProbingArgs): void {
   initializeProbeStates(probes)
 
   const probeInterval = setInterval(() => {
+    if (signal?.aborted) {
+      clearInterval(probeInterval)
+      return
+    }
+
     const { repeat, stun } = getContext().flags
 
     if (repeat) {
@@ -196,6 +203,4 @@ export function startProbing({
       }
     }
   }, 1000)
-
-  return () => clearInterval(probeInterval)
 }

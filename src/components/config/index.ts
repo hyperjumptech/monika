@@ -56,10 +56,8 @@ type ScheduleRemoteConfigFetcherParams = {
 }
 
 type WatchConfigFileParams = {
+  flags: MonikaFlags
   path: string
-  type: string
-  index?: number
-  repeat?: number
 }
 
 const isTestEnvironment = process.env.CI || process.env.NODE_ENV === 'test'
@@ -99,7 +97,7 @@ export const updateConfig = async (
   const hasChangeConfig = getContext()?.config?.version !== version
 
   if (hasChangeConfig) {
-    const newConfig = { ...config, version }
+    const newConfig = addConfigVersion(config)
 
     setContext({ config: newConfig })
     emitter.emit(events.config.updated, newConfig)
@@ -108,17 +106,26 @@ export const updateConfig = async (
 }
 
 export const setupConfig = async (flags: MonikaFlags): Promise<void> => {
-  const sanitizedFlags = await sanitizeFlags(flags)
-  const config = await getConfigFrom(sanitizedFlags)
+  const validFlag = await createConfigIfEmpty(flags)
+  const config = await getConfigFrom(validFlag)
   await validateConfig(config)
-  const version = config.version || md5Hash(config)
 
-  setContext({ config: { ...config, version } })
+  setContext({ config: addConfigVersion(config) })
 
-  watchConfigsChange(sanitizedFlags)
+  watchConfigsChange(validFlag)
 }
 
-async function sanitizeFlags(flags: MonikaFlags): Promise<MonikaFlags> {
+function addConfigVersion(config: Config) {
+  if (config.version) {
+    return config
+  }
+
+  const version = config.version || md5Hash(config)
+
+  return { ...config, version }
+}
+
+async function createConfigIfEmpty(flags: MonikaFlags): Promise<MonikaFlags> {
   // check for default config path when -c/--config not provided
   const hasConfig =
     flags.config.length > 0 ||
@@ -141,10 +148,10 @@ async function watchConfigsChange(flags: MonikaFlags) {
   await Promise.all(
     flags.config.map((source, index) =>
       watchConfigChange({
+        flags,
         interval:
           flags['config-interval'] ||
           monikaFlagsDefaultValue['config-interval'],
-        repeat: flags.repeat,
         source,
         type: 'monika',
         index,
@@ -154,16 +161,16 @@ async function watchConfigsChange(flags: MonikaFlags) {
 }
 
 type WatchConfigChangeParams = {
+  flags: MonikaFlags
   interval: number
-  repeat: number
   source: string
   type: ConfigType
   index?: number
 }
 
 function watchConfigChange({
+  flags,
   interval,
-  repeat,
   source,
   type,
   index,
@@ -179,10 +186,8 @@ function watchConfigChange({
   }
 
   watchConfigFile({
+    flags,
     path: source,
-    type,
-    index,
-    repeat,
   })
 }
 
@@ -208,19 +213,14 @@ function scheduleRemoteConfigFetcher({
   }, interval * 1000)
 }
 
-function watchConfigFile({ path, type, index, repeat }: WatchConfigFileParams) {
-  const isWatchConfigFile = !(isTestEnvironment || repeat !== 0)
+function watchConfigFile({ flags, path }: WatchConfigFileParams) {
+  const isWatchConfigFile = !(isTestEnvironment || flags.repeat !== 0)
   if (isWatchConfigFile) {
     const watcher = chokidar.watch(path)
     watcher.on('change', async () => {
-      const newConfig = await parseConfig(path, type)
-      if (index === undefined) {
-        nonDefaultConfig = newConfig
-      } else {
-        defaultConfigs[index] = newConfig
-      }
+      const config = await getConfigFrom(flags)
 
-      await updateConfig(mergeConfigs(defaultConfigs, nonDefaultConfig))
+      await updateConfig(config)
     })
   }
 }

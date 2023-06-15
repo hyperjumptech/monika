@@ -302,16 +302,13 @@ class Monika extends Command {
       }
 
       let isFirstRun = true
-      let abortCurrentLooper: (() => void) | undefined
 
       for (;;) {
+        const controller = new AbortController()
+        const { signal } = controller
         const config = getConfig()
         const notifications = config.notifications || []
         const probes = this.getProbes({ config, flags: _flags })
-
-        if (abortCurrentLooper) {
-          abortCurrentLooper()
-        }
 
         // emit the sanitized probe
         em.emit(events.config.sanitized, probes)
@@ -327,7 +324,8 @@ class Monika extends Command {
           isFirstRun,
         })
 
-        abortCurrentLooper = startProbing({
+        startProbing({
+          signal,
           probes,
           notifications,
         })
@@ -348,6 +346,7 @@ class Monika extends Command {
         // block the loop until receives config updated event
         // eslint-disable-next-line no-await-in-loop
         await pEvent(em, events.config.updated)
+        controller.abort('Monika configuration updated')
       }
     } catch (error) {
       await closeLog()
