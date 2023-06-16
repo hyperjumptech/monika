@@ -27,7 +27,9 @@ import { Config } from '../../interfaces/config'
 import { validateProbes, validateSymonConfig } from './validation'
 import { validateNotification } from '@hyperjumptech/monika-notification'
 
-export const validateConfig = async (configuration: Config): Promise<void> => {
+export const validateConfig = async (
+  configuration: Partial<Config>
+): Promise<void> => {
   // const { flags } = getContext()
   const { notifications = [], probes = [], symon } = configuration
   const symonConfigError = validateSymonConfig(symon)

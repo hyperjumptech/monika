@@ -27,6 +27,7 @@ import type { Config } from '../../interfaces/config'
 import { log } from '../../utils/pino'
 import { parseConfig } from './parse'
 import { validateConfigWithSchema } from './validation'
+import { validateConfig } from './validate'
 
 export type ConfigType =
   | 'monika'
@@ -96,9 +97,12 @@ async function parseConfigType(
   const parsed = await parseConfig(source, configType, flags)
 
   // ensure that the parsed config meets our specification
-  const isValidConfig = validateConfigWithSchema(parsed)
-  if (!isValidConfig.valid) {
-    throw new Error(isValidConfig.message)
+  await validateConfig(parsed)
+  if (configType !== 'har') {
+    const isValidConfig = validateConfigWithSchema(parsed)
+    if (!isValidConfig.valid) {
+      throw new Error(isValidConfig.message)
+    }
   }
 
   return {
