@@ -250,8 +250,10 @@ export async function doProbe({
   setProbeRunning(probe.id)
 
   setTimeout(async () => {
-    await probeNonHTTP(probe, getProbeContext(probe.id).cycle, notifications)
-    await probeHTTP(probe, getProbeContext(probe.id).cycle, notifications)
+    const checkOrder = getProbeContext(probe.id).cycle
+
+    await probeNonHTTP(probe, checkOrder, notifications)
+    await probeHTTP(probe, checkOrder, notifications)
 
     setProbeFinish(probe.id)
   }, randomTimeoutMilliseconds)
