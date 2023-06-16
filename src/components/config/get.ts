@@ -26,6 +26,7 @@ import type { MonikaFlags } from '../../context/monika-flags'
 import type { Config } from '../../interfaces/config'
 import { log } from '../../utils/pino'
 import { parseConfig } from './parse'
+import { validateConfigWithSchema } from './validation'
 
 export type ConfigType =
   | 'monika'
@@ -36,15 +37,7 @@ export type ConfigType =
   | 'text'
 
 export async function getConfigFrom(flags: MonikaFlags): Promise<Config> {
-  let defaultConfigs: any
-
-  try {
-    defaultConfigs = await parseDefaultConfig(flags)
-  } catch (error) {
-    throw new Error(
-      'Failed to parse config, please check your config file. ' + error
-    )
-  }
+  const defaultConfigs = await parseDefaultConfig(flags)
 
   const nonDefaultConfig = setDefaultNotifications(
     defaultConfigs,
@@ -101,6 +94,12 @@ async function parseConfigType(
   flags: MonikaFlags
 ): Promise<Partial<Config>> {
   const parsed = await parseConfig(source, configType, flags)
+
+  // ensure that the parsed config meets our specification
+  const isValidConfig = validateConfigWithSchema(parsed)
+  if (!isValidConfig.valid) {
+    throw new Error(isValidConfig.message)
+  }
 
   return {
     ...parsed,
