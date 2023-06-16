@@ -181,7 +181,7 @@ function isEndOfRepeat(probes: Probe[]) {
 }
 
 function isStunOK() {
-  return getContext().flags.stun !== DISABLE_STUN && isConnectedToSTUNServer
+  return getContext().flags.stun === DISABLE_STUN || isConnectedToSTUNServer
 }
 
 function isLastCycleOf(probeID: string) {
