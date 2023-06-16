@@ -1,7 +1,7 @@
 {
   "name": "@hyperjumptech/monika",
   "description": "Synthetic monitoring made easy",
-  "version": "1.15.0",
+  "version": "1.15.3",
   "license": "MIT",
   "author": "@hyperjumptech",
   "main": "lib/index.js",
@@ -26,8 +26,16 @@
   },
   "keywords": [
     "monika",
-    "cli",
-    "monitoring"
+    "Website monitoring",
+    "Uptime monitoring",
+    "Performance tracking",
+    "Command-line interface",
+    "Alert notifications",
+    "Slow site notifications",
+    "Resource monitoring",
+    "Availability monitoring",
+    "Web health tracking",
+    "Synthetic monitoring"
   ],
   "scripts": {
     "clean": "rm -rf coverage lib tsconfig.tsbuildinfo oclif.manifest.json",
@@ -39,25 +47,27 @@
     "start:prod": "npm run prepack && ./bin/run",
     "test": "npm run clean && cross-env NODE_ENV=test nyc --reporter=lcov --extension .ts mocha --config .mocharc.json --forbid-only \"{src,test}/**/*.test.ts\" --exclude test/cli.test.ts",
     "cli-test": "npx bats test/bats/cli.bats",
-    "prod_test": "npx bats prod_test/test.bats",
+    "prod_test": "npm run prod_test:bats && npm run prod_test:cli",
+    "prod_test:bats": "npx bats prod_test/test.bats",
+    "prod_test:cli": "mocha prod_test/test.ts --timeout=60000",
     "version": "oclif readme && git add README.md",
     "format": "prettier --write .",
     "check-format": "prettier --check .",
-    "pkg": "npm run prepack && pkg . --compress brotli",
-    "test:e2e": "npm run prepack && mocha test/cli.test.ts --timeout=20000"
+    "pkg": "npm run prepack && pkg . --compress brotli"
   },
   "dependencies": {
     "@alicloud/dingtalk": "^1.3.53",
     "@breejs/ts-worker": "^2.0.0",
     "@faker-js/faker": "^7.4.0",
     "@hyperjumptech/db-connection-checker": "^0.0.1",
+    "@hyperjumptech/monika-notification": "packages/notification/hyperjumptech-monika-notification-0.0.1.tgz",
     "@oclif/core": "^1.9.0",
     "@oclif/plugin-help": "^5.1.11",
     "@oclif/plugin-version": "^1",
     "@sendgrid/mail": "^7.4.2",
     "@types/chai-spies": "^1.0.3",
     "ajv": "^8.11.0",
-    "axios": "^0.21.1",
+    "axios": "^0.27.2",
     "boxen": "^5.0.0",
     "bree": "^9.1.3",
     "chalk": "^4.1.2",
@@ -87,7 +97,6 @@
     "nodemailer": "^6.5.0",
     "os-name": "4.0.1",
     "p-event": "^4.2.0",
-    "pako": "^2.0.3",
     "pg": "^8.8.0",
     "pg-connection-string": "^2.5.0",
     "ping": "^0.4.1",
@@ -96,7 +105,7 @@
     "pkg": "^5.6.0",
     "prom-client": "13.1.0",
     "redis": "^4.3.0",
-    "sinon": "^11.1.2",
+    "sinon": "^15.0.1",
     "smtp-server": "^3.8.0",
     "sqlite": "^4.0.21",
     "sqlite3": "^5.0.2",
@@ -105,6 +114,7 @@
     "tslib": "^1.14.1",
     "unzip-stream": "^0.3.1",
     "unzipper": "^0.10.11",
+    "url-parse": "^1.5.10",
     "xstate": "^4.35.0",
     "yaml": "1.10.2"
   },
@@ -124,12 +134,12 @@
     "@types/node": "^12.12.6",
     "@types/node-cron": "^2.0.4",
     "@types/nodemailer": "^6.4.1",
-    "@types/pako": "^1.0.1",
     "@types/pino": "^7.0.5",
     "@types/sinon": "^10.0.2",
     "@types/smtp-server": "^3.5.6",
     "@types/sqlite3": "^3.1.7",
     "@types/unzipper": "^0.10.5",
+    "@types/url-parse": "^1.4.8",
     "bats": "^1.5.0",
     "bats-assert": "^2.0.0",
     "chai": "^4.3.4",
@@ -149,14 +159,14 @@
     "oclif": "^3.0.1",
     "prettier": "2.5.1",
     "ts-node": "^10.4.0",
-    "typescript": "4.4.4"
+    "typescript": "4.9.5"
   },
   "prettier": {
     "semi": false,
     "singleQuote": true
   },
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=16.0.0"
   },
   "files": [
     "/bin",
@@ -198,5 +208,8 @@
   },
   "volta": {
     "node": "18.14.0"
-  }
+  },
+  "workspaces": [
+    "packages/*"
+  ]
 }

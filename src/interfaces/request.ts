@@ -22,7 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { AxiosRequestConfig } from 'axios'
+import { AxiosRequestConfig, AxiosRequestHeaders } from 'axios'
 import { ProbeAlert } from './probe'
 
 // RequestTypes are used to define the type of request that is being made.
@@ -42,10 +42,13 @@ export interface ProbeRequestResponse<T = any> {
   requestType?: RequestTypes // is this for http (default) or icmp  or others
   data: T
   body: T
-  status: number // TODO: Improve status management. Status as number is pretty limiting here if we want to support other protocols other than http
-  // statusMsg: string // string messge of the satus code
+  status: number
+
   headers: any
   responseTime: number
+
+  isProbeResponsive: boolean // did the command/request response to requests/queries?
+  errMessage?: string // any error message from drivers
 }
 
 // ProbeRequest is used to define the requests that is being made.
@@ -56,6 +59,7 @@ export interface RequestConfig extends Omit<AxiosRequestConfig, 'data'> {
   body: JSON | string
   timeout: number // request timeout
   alerts?: ProbeAlert[]
+  headers?: AxiosRequestHeaders
   ping?: boolean // is this request for a ping?
   allowUnauthorized?: boolean // ignore ssl cert?
 }

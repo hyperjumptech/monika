@@ -19,6 +19,7 @@ To start developing, clone this repository, then install the dependencies:
 
 ```bash
 git clone git@github.com:hyperjumptech/monika.git
+npm run build -w packages/notification
 npm ci
 ```
 

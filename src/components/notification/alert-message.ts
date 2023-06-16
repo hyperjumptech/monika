@@ -29,7 +29,7 @@ import * as Handlebars from 'handlebars'
 import getos from 'getos'
 import osName from 'os-name'
 import { getContext } from '../../context'
-import { NotificationMessage } from '../../interfaces/notification'
+import type { NotificationMessage } from '@hyperjumptech/monika-notification'
 import { ProbeRequestResponse } from '../../interfaces/request'
 import { ProbeAlert } from '../../interfaces/probe'
 import { publicIpAddress, publicNetworkInfo } from '../../utils/public-ip'
@@ -66,29 +66,11 @@ const getExpectedMessage = (
   isRecovery: boolean
 ): string | number => {
   const { status, data, headers, responseTime } = response
-  const isHTTPStatusCode = status >= 100 && status <= 599
 
   if (!alert.message) {
     if (isRecovery)
-      return `The request is back to normal and pass the query: ${alert.query}`
-    return `The request failed because the response does not pass the query: ${alert.query}. The actual response status is ${status} and the response time is ${responseTime}.`
-  }
-
-  if (!isHTTPStatusCode) {
-    switch (status) {
-      case 0:
-        return 'Host cannot be reached'
-      case 1:
-        return 'Connection reset'
-      case 2:
-        return 'Connection refused'
-      // for TCP request
-      case 5:
-        return isRecovery ? 'The request is back to normal' : alert?.message
-
-      default:
-        return status
-    }
+      return `The request is back to normal and passed the assertion: ${alert.query}`
+    return `The request failed because the response did not pass the query: ${alert.query}. The actual response status is ${status} and the response time is ${responseTime}.`
   }
 
   return Handlebars.compile(alert.message)({

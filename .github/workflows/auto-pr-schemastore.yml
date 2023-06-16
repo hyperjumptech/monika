@@ -34,11 +34,19 @@ jobs:
           git config --global user.name "$USERNAME"
           git config --global user.email "$EMAIL"
           git add .
-          git commit -m "update json schema"
-      
+          git commit -m "update json schema"      
+
+      - name: ✍🏻 Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
       - name: Run Test on Schema
         run : |
-          make
+          cd src
+          npm ci
+          npm run build -w packages/notification
+          npm run build
 
       - name: Create Pull Request
         id: cpr

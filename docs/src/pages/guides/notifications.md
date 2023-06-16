@@ -28,6 +28,7 @@ At this moment, Monika support these channel of notifications (You can use just 
 17. [Pushover](https://hyperjumptech.github.io/monika/guides/notifications#pushover)
 18. [Opsgenie](https://hyperjumptech.github.io/monika/guides/notifications#opsgenie)
 19. [Pushbullet](https://hyperjumptech.github.io/monika/guides/notifications#pushbullet)
+20. [Instatus](https://hyperjumptech.github.io/monika/guides/notifications#instatus)
 
 ## Configurations
 
@@ -207,9 +208,9 @@ notifications:
 | Type | Notification types                      | `teams`                                                      |
 | Url  | The URL of your Microsoft Teams Webhook | `https://<company>.webhook.office.com/webhookb2/1234-abcdef` |
 
-## Monika Whatsapp Notifier
+## Monika WhatsApp Notifier
 
-You can get a notification from Monika to your Whatsapp number without having a Whatsapp Business account. First, you must create a [Monika Whatsapp Notifier account](https://whatsapp.hyperjump.tech).
+You can get a notification from Monika to your WhatsApp number without having a Whatsapp Business account. First, you must create a [Monika Whatsapp Notifier account](https://whatsapp.hyperjump.tech).
 
 ```yml
 notifications:
@@ -225,17 +226,29 @@ notifications:
 | Type | Notification types                       | `monika-notif`                                                     |
 | Url  | The URL of the Monika Notif Webhook link | `https://whatsapp.hyperjump.tech/api/notify?token=<webhook.token>` |
 
+Please note, to receive messages from the WhatsApp cloud API the following requirements are mandatory.
+
+- The recipient phone number must be a WhatsApp phone number.
+- The recipient must accept [Meta's new Terms of Service and Privacy Policy](https://www.whatsapp.com/legal/terms-of-service).
+- The recipient must use the following WhatsApp version or greater:  
+   Android: 2.21.15.15  
+   SMBA: 2.21.15.15  
+   iOS: 2.21.170.4  
+   SMBI: 2.21.170.4  
+   KaiOS: 2.2130.10  
+   Web: 2.2132.6
+
 ## PagerDuty
 
-PagerDuty is a platform for agile incident management. You need the integration key to use PagerDuty. You can get the integration key by following the steps in [the documentation](https://support.pagerduty.com/docs/services-and-integrations). To give you the flexibility to choose which probe belongs to which PagerDuty service. You need to map the PagerDuty integration key with your Monika probe id in the configuration.
+PagerDuty is a platform for agile incident management. You need the integration key to use PagerDuty which you can get by following the steps in [PagerDuty's services and integration docs](https://support.pagerduty.com/docs/services-and-integrations). To give you the flexibility to choose which probe belongs to which PagerDuty service. You need to map the PagerDuty integration key with your Monika probe id in the configuration.
 
 ```yaml
 notifications:
   - id: unique-id-pagerduty-notify
     type: pagerduty
     data:
-      key: YOUR_PAGERDUTY_INTEGRATION_KEY
-      probeID: ZN32nw_KsvTKtLFNu55JV
+      - key: YOUR_PAGERDUTY_INTEGRATION_KEY
+        probeID: ZN32nw_KsvTKtLFNu55JV
 ```
 
 | Key          | Description                  | Example                            |
@@ -510,3 +523,23 @@ notifications:
 | -------- | ---------------------------- | ---------------------- |
 | token    | Pushbullet Access Token      | `a6FJVAA0LVJKrT8k`     |
 | deviceID | Pushbullet Device Identifier | `ujpah72o0sjAoRtnM0jc` |
+
+## Instatus
+
+[Instatus](https://instatus.com/) is a status and incident communication tool. You need a page ID and an API key to use Instatus. You can obtain it by following the steps in [the documentation](https://dashboard.instatus.com/developer).
+
+```yaml
+notifications:
+  - id: unique-id-instatus
+    type: instatus
+    data:
+      apiKey: YOUR_INSTATUS_API_KEY
+      pageID: YOUR_INSTATUS_PAGE_ID //You can get it with client.pages.get()
+```
+
+| Key              | Description                  | Example                            |
+| ---------------- | ---------------------------- | ---------------------------------- |
+| id               | Notification identity number | `instatus-id`                      |
+| type             | Notification types           | `instatus`                         |
+| data.apiKey      | Instatus API key             | `43d43d2c06ae223a88a9c35523acd00a` |
+| data.data.pageID | Instatus page ID             | `2hu1aj8r6td7mog6uz1sh`            |

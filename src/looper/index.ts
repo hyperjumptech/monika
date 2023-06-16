@@ -26,8 +26,8 @@ import { differenceInSeconds } from 'date-fns'
 
 import { doProbe } from '../components/probe'
 import { getContext } from '../context'
-import { Notification } from '../interfaces/notification'
-import { Probe } from '../interfaces/probe'
+import type { Notification } from '@hyperjumptech/monika-notification'
+import type { Probe } from '../interfaces/probe'
 import { log } from '../utils/pino'
 import {
   getProbeContext,
@@ -44,13 +44,13 @@ const DISABLE_STUN = -1 // -1 is disable stun checking
 
 /**
  * sanitizeProbe sanitize currently mapped probe name, alerts, and threshold
+ * @param {boolean} isSymonMode is running in Symon mode
  * @param {object} probe is the probe configuration
- * @param {array} id is the probe ID
  * @returns {object} as probe
  */
-export function sanitizeProbe(probe: Probe, id: string): Probe {
-  const { name, requests, incidentThreshold, recoveryThreshold, alerts } = probe
-  probe.id = `${id}`
+export function sanitizeProbe(isSymonMode: boolean, probe: Probe): Probe {
+  const { id, name, requests, incidentThreshold, recoveryThreshold, alerts } =
+    probe
   probe.alerts = alerts?.map((alert) => {
     if (alert.query) {
       return { ...alert, assertion: alert.query }
@@ -77,23 +77,23 @@ export function sanitizeProbe(probe: Probe, id: string): Probe {
   })
 
   if (!name) {
-    probe.name = `monika_${probe.id}`
+    probe.name = `monika_${id}`
     log.warn(
-      `Warning: Probe ${probe.id} has no name defined. Using the default name started by monika`
+      `Warning: Probe ${id} has no name defined. Using the default name started by monika`
     )
   }
 
   if (!incidentThreshold) {
     probe.incidentThreshold = DEFAULT_THRESHOLD
     log.warn(
-      `Warning: Probe ${probe.id} has no incidentThreshold configuration defined. Using the default threshold: 5`
+      `Warning: Probe ${id} has no incidentThreshold configuration defined. Using the default threshold: 5`
     )
   }
 
   if (!recoveryThreshold) {
     probe.recoveryThreshold = DEFAULT_THRESHOLD
     log.warn(
-      `Warning: Probe ${probe.id} has no recoveryThreshold configuration defined. Using the default threshold: 5`
+      `Warning: Probe ${id} has no recoveryThreshold configuration defined. Using the default threshold: 5`
     )
   }
 
@@ -110,8 +110,12 @@ export function sanitizeProbe(probe: Probe, id: string): Probe {
       },
     ]
     log.warn(
-      `Warning: Probe ${probe.id} has no Alerts configuration defined. Using the default status-not-2xx and response-time-greater-than-2-s`
+      `Warning: Probe ${id} has no Alerts configuration defined. Using the default response.status != 200 and response.time > 20000`
     )
+  }
+
+  if (isSymonMode) {
+    probe.alerts = []
   }
 
   return probe
@@ -146,25 +150,31 @@ export function setPauseProbeInterval(pause: boolean): void {
 }
 
 type StartProbingArgs = {
+  signal: AbortSignal
   probes: Probe[]
   notifications: Notification[]
 }
 
 export function startProbing({
+  signal,
   probes,
   notifications,
-}: StartProbingArgs): () => void {
-  const flags = getContext().flags
-  const repeat = flags.repeat
-
+}: StartProbingArgs): void {
   initializeProbeStates(probes)
 
   const probeInterval = setInterval(() => {
-    if (repeat) {
-      const finishedProbe = probes.every((probe) => {
-        const context = getProbeContext(probe.id)
+    if (signal?.aborted) {
+      clearInterval(probeInterval)
+      return
+    }
 
-        return context.cycle === repeat && getProbeState(probe.id) === 'idle'
+    const { repeat, stun } = getContext().flags
+
+    if (repeat) {
+      const finishedProbe = probes.every(({ id }) => {
+        const context = getProbeContext(id)
+
+        return context.cycle === repeat && getProbeState(id) === 'idle'
       })
 
       if (finishedProbe) {
@@ -173,7 +183,7 @@ export function startProbing({
       }
     }
 
-    if ((isConnectedToSTUNServer && !isPaused) || flags.stun === DISABLE_STUN) {
+    if ((isConnectedToSTUNServer && !isPaused) || stun === DISABLE_STUN) {
       for (const probe of probes) {
         const probeState = getProbeState(probe.id)
         const context = getProbeContext(probe.id)
@@ -193,6 +203,4 @@ export function startProbing({
       }
     }
   }, 1000)
-
-  return () => clearInterval(probeInterval)
 }

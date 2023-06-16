@@ -25,25 +25,11 @@
 import chai, { expect } from 'chai'
 import spies from 'chai-spies'
 import { sendAlerts } from '../../src/components/notification'
-import * as discord from '../../src/components/notification/channel/discord'
-import * as mailgun from '../../src/components/notification/channel/mailgun'
-import * as monikaNotif from '../../src/components/notification/channel/monika-notif'
-import * as slack from '../../src/components/notification/channel/slack'
-import * as smtp from '../../src/components/notification/channel/smtp'
-import * as telegram from '../../src/components/notification/channel/telegram'
-import * as webhook from '../../src/components/notification/channel/webhook'
-import * as whatsapp from '../../src/components/notification/channel/whatsapp'
-import * as lark from '../../src/components/notification/channel/lark'
-import * as googlechat from '../../src/components/notification/channel/googlechat'
-import {
-  MailgunData,
-  MonikaNotifData,
-  TelegramData,
-  WebhookData,
-  WhatsappData,
-  LarkData,
-  GoogleChatData,
-} from '../../src/interfaces/data'
+import { channels } from '@hyperjumptech/monika-notification'
+import type { NotificationMessage } from '@hyperjumptech/monika-notification'
+
+const { discord, mailgun, slack, smtp, telegram, webhook, whatsapp, lark } =
+  channels
 
 chai.use(spies)
 
@@ -53,7 +39,7 @@ describe('send alerts', () => {
   })
 
   it('should send UP alert', async () => {
-    chai.spy.on(mailgun, 'sendMailgun', () => Promise.resolve())
+    chai.spy.on(mailgun, 'send', () => Promise.resolve())
     await sendAlerts({
       probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
       validation: {
@@ -65,6 +51,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          isProbeResponsive: true,
         },
       },
       notifications: [
@@ -75,17 +62,17 @@ describe('send alerts', () => {
             recipients: ['xx@xx'],
             apiKey: 'xx',
             domain: 'xxx',
-          } as MailgunData,
+          },
         },
       ],
       url: 'https://hyperjump.tech',
       probeState: 'UP',
     })
-    expect(mailgun.sendMailgun).to.have.been.called.exactly(1)
+    expect(mailgun.send).to.have.been.called.exactly(1)
   })
 
   it('should send DOWN alert', async () => {
-    chai.spy.on(mailgun, 'sendMailgun', () => Promise.resolve())
+    chai.spy.on(mailgun, 'send', () => Promise.resolve())
     await sendAlerts({
       probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
       validation: {
@@ -97,6 +84,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          isProbeResponsive: true,
         },
       },
       notifications: [
@@ -107,17 +95,17 @@ describe('send alerts', () => {
             recipients: ['xx@xx'],
             apiKey: 'xx',
             domain: 'xxx',
-          } as MailgunData,
+          },
         },
       ],
       url: 'https://hyperjump.tech',
       probeState: 'DOWN',
     })
-    expect(mailgun.sendMailgun).to.have.been.called.exactly(1)
+    expect(mailgun.send).to.have.been.called.exactly(1)
   })
 
   it('should send mailgun notification', async () => {
-    chai.spy.on(mailgun, 'sendMailgun', () => Promise.resolve())
+    chai.spy.on(mailgun, 'send', () => Promise.resolve())
     await sendAlerts({
       probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
       validation: {
@@ -129,6 +117,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          isProbeResponsive: true,
         },
       },
       notifications: [
@@ -146,11 +135,11 @@ describe('send alerts', () => {
       url: 'https://hyperjump.tech',
       probeState: 'DOWN',
     })
-    expect(mailgun.sendMailgun).to.have.been.called.exactly(1)
+    expect(mailgun.send).to.have.been.called.exactly(1)
   })
 
   it('should send mailgun notification without username', async () => {
-    chai.spy.on(mailgun, 'sendMailgun', () => Promise.resolve())
+    chai.spy.on(mailgun, 'send', () => Promise.resolve())
     await sendAlerts({
       probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
       validation: {
@@ -162,6 +151,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          isProbeResponsive: true,
         },
       },
       notifications: [
@@ -178,12 +168,12 @@ describe('send alerts', () => {
       url: 'https://hyperjump.tech',
       probeState: 'DOWN',
     })
-    expect(mailgun.sendMailgun).to.have.been.called.exactly(1)
+    expect(mailgun.send).to.have.been.called.exactly(1)
   })
 
   it('should send webhook & slack notifications', async () => {
-    chai.spy.on(webhook, 'sendWebhook', () => Promise.resolve())
-    chai.spy.on(slack, 'sendSlack', () => Promise.resolve())
+    chai.spy.on(webhook, 'send', () => Promise.resolve())
+    chai.spy.on(slack, 'send', () => Promise.resolve())
 
     await sendAlerts({
       probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
@@ -196,6 +186,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          isProbeResponsive: true,
         },
       },
       notifications: [
@@ -204,26 +195,26 @@ describe('send alerts', () => {
           type: 'webhook',
           data: {
             url: 'xx',
-          } as WebhookData,
+          },
         },
         {
           id: 'one',
           type: 'slack',
           data: {
             url: 'xx',
-          } as WebhookData,
+          },
         },
       ],
       url: 'https://hyperjump.tech',
       probeState: 'DOWN',
     })
 
-    expect(webhook.sendWebhook).to.have.been.called.exactly(1)
-    expect(slack.sendSlack).to.have.been.called.exactly(1)
+    expect(webhook.send).to.have.been.called.exactly(1)
+    expect(slack.send).to.have.been.called.exactly(1)
   })
 
   it('should send SMTP notification', async () => {
-    chai.spy.on(smtp, 'sendSmtpMail', () => Promise.resolve())
+    chai.spy.on(smtp, 'send', () => Promise.resolve())
     await sendAlerts({
       probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
       validation: {
@@ -235,6 +226,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          isProbeResponsive: true,
         },
       },
       notifications: [
@@ -253,11 +245,11 @@ describe('send alerts', () => {
       url: 'https://hyperjump.tech',
       probeState: 'DOWN',
     })
-    expect(smtp.sendSmtpMail).to.have.been.called.exactly(1)
+    expect(smtp.send).to.have.been.called.exactly(1)
   })
 
   it('should send whatsapp notifications', async () => {
-    chai.spy.on(whatsapp, 'sendWhatsapp', () => Promise.resolve())
+    chai.spy.on(whatsapp, 'send', () => Promise.resolve())
 
     await sendAlerts({
       probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
@@ -270,6 +262,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          isProbeResponsive: true,
         },
       },
       notifications: [
@@ -281,36 +274,35 @@ describe('send alerts', () => {
             url: 'xx',
             username: 'someusername',
             password: 'somepassword',
-          } as WhatsappData,
+          },
         },
       ],
       url: 'https://hyperjump.tech',
       probeState: 'DOWN',
     })
 
-    expect(whatsapp.sendWhatsapp).to.have.been.called.exactly(1)
+    expect(whatsapp.send).to.have.been.called.exactly(1)
   })
 
   it('should send whatsapp notifications', async () => {
     chai.spy.on(whatsapp, 'loginUser', () => Promise.resolve('token'))
-    chai.spy.on(whatsapp, 'sendTextMessage', () => Promise.resolve())
+    chai.spy.on(whatsapp, 'send', () => Promise.resolve())
 
-    await whatsapp.sendWhatsapp(
+    await whatsapp.send(
       {
         recipients: ['6254583425894'],
         url: 'https://somewhere.com',
         username: 'someusername',
         password: 'somepassword',
       },
-      'some alert message'
+      { body: 'some alert message' } as NotificationMessage
     )
 
-    expect(whatsapp.loginUser).to.have.been.called()
-    expect(whatsapp.sendTextMessage).to.have.been.called.exactly(1)
+    expect(whatsapp.send).to.have.been.called.exactly(1)
   })
 
   it('should send telegram notifications', async () => {
-    chai.spy.on(telegram, 'sendTelegram', () => Promise.resolve())
+    chai.spy.on(telegram, 'send', () => Promise.resolve())
 
     await sendAlerts({
       probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
@@ -323,6 +315,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          isProbeResponsive: true,
         },
       },
       notifications: [
@@ -334,19 +327,18 @@ describe('send alerts', () => {
             group_id: '123',
             // eslint-disable-next-line camelcase
             bot_token: '123',
-            body: `url: 'https://hyperjump.tech'`,
-          } as TelegramData,
+          },
         },
       ],
       url: 'https://hyperjump.tech',
       probeState: 'DOWN',
     })
 
-    expect(telegram.sendTelegram).to.have.been.called.exactly(1)
+    expect(telegram.send).to.have.been.called.exactly(1)
   })
 
   it('should send webhook discord', async () => {
-    chai.spy.on(discord, 'sendDiscord', () => Promise.resolve())
+    chai.spy.on(discord, 'send', () => Promise.resolve())
 
     await sendAlerts({
       probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
@@ -359,6 +351,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          isProbeResponsive: true,
         },
       },
       notifications: [
@@ -367,18 +360,18 @@ describe('send alerts', () => {
           type: 'discord',
           data: {
             url: 'xx',
-          } as WebhookData,
+          },
         },
       ],
       url: 'https://hyperjump.tech',
       probeState: 'DOWN',
     })
 
-    expect(discord.sendDiscord).to.have.been.called.exactly(1)
+    expect(discord.send).to.have.been.called.exactly(1)
   })
 
   it('should send webhook monika-notif', async () => {
-    chai.spy.on(monikaNotif, 'sendMonikaNotif', () => Promise.resolve())
+    chai.spy.on(channels['monika-notif'], 'send', () => Promise.resolve())
 
     await sendAlerts({
       probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
@@ -391,6 +384,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          isProbeResponsive: true,
         },
       },
       notifications: [
@@ -399,18 +393,18 @@ describe('send alerts', () => {
           type: 'monika-notif',
           data: {
             url: 'xx',
-          } as MonikaNotifData,
+          },
         },
       ],
       url: 'https://hyperjump.tech',
       probeState: 'DOWN',
     })
 
-    expect(monikaNotif.sendMonikaNotif).to.have.been.called.exactly(1)
+    expect(channels['monika-notif'].send).to.have.been.called.exactly(1)
   })
 
   it('should send larksuite notification ', async () => {
-    chai.spy.on(lark, 'sendLark', () => Promise.resolve())
+    chai.spy.on(lark, 'send', () => Promise.resolve())
 
     await sendAlerts({
       probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
@@ -423,6 +417,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          isProbeResponsive: true,
         },
       },
       notifications: [
@@ -431,18 +426,18 @@ describe('send alerts', () => {
           type: 'lark',
           data: {
             url: 'xx',
-          } as LarkData,
+          },
         },
       ],
       url: 'https://hyperjump.tech',
       probeState: 'DOWN',
     })
 
-    expect(lark.sendLark).to.have.been.called.exactly(1)
+    expect(lark.send).to.have.been.called.exactly(1)
   })
 
   it('should send google chat notification ', async () => {
-    chai.spy.on(googlechat, 'sendGoogleChat', () => Promise.resolve())
+    chai.spy.on(channels['google-chat'], 'send', () => Promise.resolve())
 
     await sendAlerts({
       probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
@@ -455,6 +450,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          isProbeResponsive: true,
         },
       },
       notifications: [
@@ -463,13 +459,13 @@ describe('send alerts', () => {
           type: 'google-chat',
           data: {
             url: 'xx',
-          } as GoogleChatData,
+          },
         },
       ],
       url: 'https://hyperjump.tech',
       probeState: 'DOWN',
     })
 
-    expect(googlechat.sendGoogleChat).to.have.been.called.exactly(1)
+    expect(channels['google-chat'].send).to.have.been.called.exactly(1)
   })
 })

@@ -37,6 +37,7 @@ type PrometheusCustomCollector = {
   responseTime: Histogram<'id' | 'name' | 'url' | 'method' | 'statusCode'>
   responseSize: Gauge<'id' | 'name' | 'url' | 'method' | 'statusCode'>
   alertTriggeredTotal: Counter<'id' | 'name' | 'url' | 'method' | 'alertQuery'>
+  probesTotal: Gauge<string>
 }
 
 type ProbeResult = {
@@ -73,6 +74,10 @@ export class PrometheusCollector {
       help: 'Total alert triggered',
       labelNames: ['id', 'name', 'url', 'method', 'alertQuery'] as const,
     })
+    const probesTotal = new Gauge({
+      name: 'monika_probes_total',
+      help: 'Total of all probe',
+    })
 
     // register and collect default Node.js metrics
     collectDefaultMetrics({ register })
@@ -82,15 +87,16 @@ export class PrometheusCollector {
       responseTime,
       responseSize,
       alertTriggeredTotal,
+      probesTotal,
     }
   }
 
   collectProbeTotal(total: number): void {
-    // register and collect probe total
-    new Gauge({
-      name: 'monika_probes_total',
-      help: 'Total of all probe',
-    }).set(total)
+    if (!prometheusCustomCollector) {
+      throw new Error('Prometheus collector is not registered')
+    }
+
+    prometheusCustomCollector.probesTotal.set(total)
   }
 
   collectProbeRequestMetrics(probeResult: ProbeResult): void {

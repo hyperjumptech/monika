@@ -17,6 +17,7 @@ jobs:
           node-version: 18
       - run: npm ci
         name: Install dependencies
+      - run: npm run build -w packages/notification
       - run: npm test
         name: Run tests
       - run: npm pack
@@ -34,6 +35,7 @@ jobs:
         with:
           node-version: 18
       - run: npm ci
+      - run: npm run build -w packages/notification
         name: Install dependencies
       - run: npm install -g oclif
         name: Install Oclif

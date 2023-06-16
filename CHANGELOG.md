@@ -5,6 +5,73 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.15.3] - 2023-05-22
+
+## Added
+
+- Add redis url support (#1039)
+- Allow unauthenticated SMTP (#1017)
+
+## Fixed
+
+- prometheus collector reassign on config change (#1021)
+
+## Changed
+
+- Docs: content footer (#1038)
+- Remove Pako as it is no longer needed (#1044)
+- Separate Initialize and Update Config (#1037)
+- Drop node.js 14 support (#1041)
+- Split the sanitize flag, get config, and update config phase and extract the get config function (#1035)
+- Test out the built binaries from PKG in CI (#1033)
+
+## [1.15.2] - 2023-04-13
+
+## Fixed
+
+- Update warning messages (#1022)
+- Fix: Downgrade Axios to be able to build binary using PKG (#1029)
+
+## Changed
+
+- Refactor: Simplify Send Notification Interface (#1019)
+
+## Docs
+
+- Docs: update pagerduty notification and json schema (#1020)
+- Docs: Update Deploy to Fly.io documentation (#1024)
+
+## [1.15.1] - 2023-03-24
+
+## Added
+
+- Add mention of json schema in documentations (#1003)
+- Instastatus integration (#971)
+- Add Probe Fail Notification (#947)
+- Add complementary prod_test using cli-testing library (#985)
+
+## Changed
+
+- Refactor: Reduce Code Complexity on run Function (#1006)
+- Refactor: reduce function complexity (#998)
+- Move the db operations to worker (#988)
+- Refactor complex functions in validate.ts (#995)
+
+## Updated
+
+- Update schema testing workflow (#1005)
+- Update Axios (#1014)
+- Improves `package.json` keywords (#997)
+
+## Fixed
+
+- Loading multiple config files does not work (#1011)
+- Reduce function complexity by separate and centralized all the prober in one directory (#1009)
+- Loading Remote Config (#993)
+- Create validate statuspage (#996)
+- Fix Node.js version matrix (#992)
+- Fix error when running -v and remove the unnecessary message (#984)
+
 ## [1.15.0] - 2023-01-20
 
 ## Added

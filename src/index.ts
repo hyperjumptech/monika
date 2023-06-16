@@ -22,51 +22,34 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import boxen from 'boxen'
-import chalk from 'chalk'
-import isUrl from 'is-url'
-import cron, { ScheduledTask } from 'node-cron'
-import path from 'path'
+import { Command, Errors, Flags, Interfaces } from '@oclif/core'
+import pEvent from 'p-event'
 
-import {
-  CliUx,
-  Command,
-  Errors,
-  Flags,
-  Interfaces,
-  loadHelpClass,
-  toCached,
-} from '@oclif/core'
-
-import {
-  createConfig,
-  getConfigIterator,
-  updateConfig,
-} from './components/config'
+import { flush, help } from './commands'
+import { createConfig, getConfig, isSymonModeFrom } from './components/config'
 import { printAllLogs } from './components/logger'
-import {
-  closeLog,
-  flushAllLogs,
-  openLogfile,
-} from './components/logger/history'
-import { notificationChecker } from './components/notification/checker'
+import { closeLog, openLogfile } from './components/logger/history'
+import { logStartupMessage } from './components/logger/startup-message'
+import { sendMonikaStartMessage } from './components/notification/start-message'
+import { scheduleSummaryNotification } from './components/notification/schedule-notification'
 import { setContext } from './context'
 import events from './events'
-import { Config } from './interfaces/config'
-import { Probe } from './interfaces/probe'
-import {
-  getSummaryAndSendNotif,
-  printSummary,
-  savePidFile,
-} from './jobs/summary-notification'
+import type { Config } from './interfaces/config'
+import type { Probe } from './interfaces/probe'
+import { printSummary, savePidFile } from './jobs/summary-notification'
 import initLoaders from './loaders'
 import { sanitizeProbe, startProbing } from './looper'
 import { monikaFlagsDefaultValue } from './context/monika-flags'
 import type { MonikaFlags } from './context/monika-flags'
 import SymonClient from './symon'
-import { checkProbeId } from './utils/check-probe-id'
 import { getEventEmitter } from './utils/events'
 import { log } from './utils/pino'
+import { sortProbes } from './components/config/sort'
+
+type GetProbesParams = {
+  config: Config
+  flags: MonikaFlags
+}
 
 const em = getEventEmitter()
 let symonClient: SymonClient
@@ -272,7 +255,6 @@ class Monika extends Command {
     }),
   }
 
-  /* eslint-disable complexity */
   async run(): Promise<void> {
     const monika = await this.parse(Monika)
     const _flags: MonikaFlags = monika.flags
@@ -280,12 +262,10 @@ class Monika extends Command {
 
     try {
       if (_flags.help) {
-        const Help = await loadHelpClass(this.config)
-        const help = new Help(this.config)
-        const cmd = await toCached(
+        await help(
+          this.config,
           this.ctor as unknown as Interfaces.Command.Class
         )
-        await help.showCommandHelp(cmd, [])
         return
       }
 
@@ -303,264 +283,75 @@ class Monika extends Command {
       }
 
       if (_flags.flush) {
-        let ans
-
-        if (!_flags.force) {
-          ans = await CliUx.ux.prompt(
-            'Are you sure you want to flush all logs in monika-logs.db (Y/n)?'
-          )
-        }
-
-        if (ans === 'Y' || _flags.force) {
-          await flushAllLogs()
-          log.warn('Records flushed, thank you.')
-        } else {
-          log.info('Cancelled. Thank you.')
-        }
-
+        await flush(_flags.force)
         await closeLog()
-
         return
       }
 
       if (_flags.summary) {
         printSummary(this.config)
+        await closeLog()
         return
       }
 
       await initLoaders(_flags, this.config)
 
-      const isSymonMode = Boolean(_flags.symonUrl) && Boolean(_flags.symonKey)
-      if (isSymonMode) {
-        symonClient = new SymonClient({
-          url: _flags.symonUrl as string,
-          apiKey: _flags.symonKey as string,
-          locationId: _flags.symonLocationId as string,
-          monikaId: _flags.symonMonikaId as string,
-          reportInterval: _flags.symonReportInterval,
-          reportLimit: _flags.symonReportLimit,
-        })
+      if (isSymonModeFrom(_flags)) {
+        symonClient = new SymonClient(_flags)
         await symonClient.initiate()
-        symonClient.onConfig((config) => updateConfig(config, false))
       }
 
-      let scheduledTasks: ScheduledTask[] = []
-      let abortCurrentLooper: (() => void) | undefined
+      let isFirstRun = true
 
-      for await (const config of getConfigIterator(isSymonMode)) {
-        if (!config) continue
-        if (abortCurrentLooper) {
-          abortCurrentLooper()
-        }
+      for (;;) {
+        const controller = new AbortController()
+        const { signal } = controller
+        const config = getConfig()
+        const notifications = config.notifications || []
+        const probes = this.getProbes({ config, flags: _flags })
 
-        // Stop, destroy, and clear all previous cron tasks
-        for (const task of scheduledTasks) {
-          task.stop()
-        }
-
-        scheduledTasks = []
-
-        if (process.env.NODE_ENV !== 'test') {
-          await notificationChecker(config.notifications ?? [])
-        }
-
-        await this.deprecationHandler(config)
-
-        const startupMessage = this.buildStartupMessage(
-          config,
-          !abortCurrentLooper,
-          _flags.verbose,
-          isSymonMode
-        )
-
-        // Display config files being used
-        if (isSymonMode) {
-          log.info(startupMessage)
-        } else {
-          for (const x in _flags.config) {
-            // eslint-disable-next-line max-depth
-            if (isUrl(_flags.config[x])) {
-              this.log('Using remote config:', _flags.config[x])
-            } else if (_flags.config[x].length > 0) {
-              this.log('Using config file:', path.resolve(_flags.config[x]))
-            }
-          }
-
-          this.log(startupMessage)
-        }
-
-        // config probes to be run by the looper
-        // default sequence for Each element
-        let probesToRun = config.probes
-        if (_flags.id) {
-          if (!checkProbeId(probesToRun, _flags.id)) {
-            throw new Error('Input error') // can't continue, exit from app
-          }
-
-          // doing custom sequences if list of ids is declared
-          const idSplit = new Set(
-            _flags.id.split(',').map((item: string) => item.trim())
-          )
-          probesToRun = config.probes.filter((probe) => idSplit.has(probe.id))
-        }
-
-        const sanitizedProbe = probesToRun.map((probe: Probe) => {
-          const sanitized = sanitizeProbe(probe, probe.id)
-          if (isSymonMode) {
-            sanitized.alerts = []
-          }
-
-          return sanitized
-        })
+        // emit the sanitized probe
+        em.emit(events.config.sanitized, probes)
 
         // save some data into files for later
         savePidFile(_flags.config, config)
 
-        // emit the sanitized probe
-        if (sanitizedProbe.length > 0) {
-          em.emit(events.config.sanitized, sanitizedProbe)
+        this.deprecationHandler(config)
+
+        logStartupMessage({
+          config,
+          flags: _flags,
+          isFirstRun,
+        })
+
+        startProbing({
+          signal,
+          probes,
+          notifications,
+        })
+
+        if (process.env.NODE_ENV === 'test') {
+          break
         }
+
+        sendMonikaStartMessage(notifications).catch((error) =>
+          log.error(error.message)
+        )
 
         // schedule status update notification
-        if (
-          process.env.NODE_ENV !== 'test' &&
-          _flags['status-notification'] !== 'false' &&
-          !isSymonMode
-        ) {
-          // defaults to 6 AM
-          // default value is not defined in flag configuration,
-          // because the value can also come from config file
-          const schedule =
-            _flags['status-notification'] ||
-            config['status-notification'] ||
-            '0 6 * * *'
+        scheduleSummaryNotification({ config, flags: _flags })
 
-          const scheduledStatusUpdateTask = cron.schedule(
-            schedule,
-            getSummaryAndSendNotif
-          )
+        isFirstRun = false
 
-          scheduledTasks.push(scheduledStatusUpdateTask)
-        }
-
-        abortCurrentLooper = startProbing({
-          probes: sanitizedProbe,
-          notifications: config.notifications ?? [],
-        })
+        // block the loop until receives config updated event
+        // eslint-disable-next-line no-await-in-loop
+        await pEvent(em, events.config.updated)
+        controller.abort('Monika configuration updated')
       }
     } catch (error) {
       await closeLog()
       this.error((error as any)?.message, { exit: 1 })
     }
-  }
-
-  buildStartupMessage(
-    config: Config,
-    firstRun: boolean,
-    verbose = false,
-    isSymonMode = false
-  ): string {
-    if (isSymonMode) {
-      return 'Running in Symon mode'
-    }
-
-    const { probes, notifications } = config
-
-    let startupMessage = ''
-
-    // warn if config is empty
-    if ((notifications?.length ?? 0) === 0) {
-      const NO_NOTIFICATIONS_MESSAGE = `Notifications has not been set. We will not be able to notify you when an INCIDENT occurs!
-Please refer to the Monika documentations on how to how to configure notifications (e.g., Telegram, Slack, Desktop notification, etc.) at https://monika.hyperjump.tech/guides/notifications.`
-
-      startupMessage += boxen(chalk.yellow(NO_NOTIFICATIONS_MESSAGE), {
-        padding: 1,
-        margin: {
-          top: 2,
-          right: 1,
-          bottom: 2,
-          left: 1,
-        },
-        borderStyle: 'bold',
-        borderColor: 'yellow',
-      })
-    }
-
-    startupMessage += `${
-      firstRun ? 'Starting' : 'Restarting'
-    } Monika. Probes: ${probes.length}. Notifications: ${
-      notifications?.length ?? 0
-    }\n\n`
-
-    if (verbose) {
-      startupMessage += 'Probes:\n'
-
-      for (const probe of probes) {
-        startupMessage += `- Probe ID: ${probe.id}
-    Name: ${probe.name}
-    Description: ${probe.description}
-    Interval: ${probe.interval}
-`
-        startupMessage += `    Requests:\n`
-        for (const request of probe.requests) {
-          startupMessage += `      - Request Method: ${request.method || `GET`}
-        Request URL: ${request.url}
-        Request Headers: ${JSON.stringify(request.headers) || `-`}
-        Request Body: ${JSON.stringify(request.body) || `-`}
-`
-        }
-
-        startupMessage += `    Alerts: ${
-          probe?.alerts === undefined || probe?.alerts.length === 0
-            ? `[{ "assertion": "response.status < 200 or response.status > 299", "message": "HTTP Status is not 200"},
-            { "assertion": "response.time > 2000", "message": "Response time is more than 2000ms" }]`
-            : JSON.stringify(probe.alerts)
-        }\n`
-      }
-
-      if (notifications && notifications.length > 0) {
-        startupMessage += `\nNotifications:\n`
-
-        for (const item of notifications) {
-          startupMessage += `- Notification ID: ${item.id}
-    Type: ${item.type}
-`
-          // Only show recipients if type is mailgun, smtp, or sendgrid
-          // check one-by-one instead of using indexOf to avoid using type assertion
-          if (
-            item.type === 'mailgun' ||
-            item.type === 'smtp' ||
-            item.type === 'sendgrid'
-          ) {
-            startupMessage += `    Recipients: ${item.data.recipients.join(
-              ', '
-            )}\n`
-          }
-
-          switch (item.type) {
-            case 'smtp':
-              startupMessage += `    Hostname: ${item.data.hostname}
-    Port: ${item.data.port}
-    Username: ${item.data.username}
-`
-              break
-            case 'mailgun':
-              startupMessage += `    Domain: ${item.data.domain}\n`
-              break
-            case 'sendgrid':
-              break
-            case 'webhook':
-            case 'slack':
-            case 'lark':
-            case 'google-chat':
-              startupMessage += `    URL: ${item.data.url}\n`
-              break
-          }
-        }
-      }
-    }
-
-    return startupMessage
   }
 
   async catch(error: Error): Promise<any> {
@@ -584,8 +375,8 @@ Please refer to the Monika documentations on how to how to configure notificatio
     throw error
   }
 
-  async deprecationHandler(config: Config): Promise<Config> {
-    let showMessage = false
+  deprecationHandler(config: Config): Config {
+    let showDeprecateMsg = false
 
     const checkedConfig = {
       ...config,
@@ -594,9 +385,8 @@ Please refer to the Monika documentations on how to how to configure notificatio
         requests: probe.requests?.map((request) => ({
           ...request,
           alert: request.alerts?.map((alert) => {
-            showMessage = true
-
             if (alert.query) {
+              showDeprecateMsg = true
               return { ...alert, assertion: alert.query }
             }
 
@@ -604,9 +394,8 @@ Please refer to the Monika documentations on how to how to configure notificatio
           }),
         })),
         alerts: probe.alerts?.map((alert) => {
-          showMessage = true
-
           if (alert.query) {
+            showDeprecateMsg = true
             return { ...alert, assertion: alert.query }
           }
 
@@ -615,11 +404,19 @@ Please refer to the Monika documentations on how to how to configure notificatio
       })),
     }
 
-    if (showMessage) {
+    if (showDeprecateMsg) {
       log.warn('"alerts.query" is deprecated. Please use "alerts.assertion"')
     }
 
     return checkedConfig
+  }
+
+  getProbes({ config, flags }: GetProbesParams): Probe[] {
+    const sortedProbes = sortProbes(config.probes, flags.id)
+
+    return sortedProbes.map((probe: Probe) =>
+      sanitizeProbe(isSymonModeFrom(flags), probe)
+    )
   }
 }
 

@@ -25,7 +25,7 @@ import { hostname } from 'os'
 import format from 'date-fns/format'
 import { getConfig } from '../components/config'
 import { getSummary } from '../components/logger/history'
-import { sendNotifications } from '../components/notification'
+import { sendNotifications } from '@hyperjumptech/monika-notification'
 import {
   getOSName,
   getMonikaInstance,
@@ -48,8 +48,8 @@ import events from '../events'
 import { Config } from '../interfaces/config'
 
 import { getEventEmitter } from '../utils/events'
-import { Notification } from '../interfaces/notification'
-import { Probe } from '../interfaces/probe'
+import type { Notification } from '@hyperjumptech/monika-notification'
+import type { Probe } from '../interfaces/probe'
 const eventEmitter = getEventEmitter()
 
 type TweetMessage = {
