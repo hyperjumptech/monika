@@ -22,7 +22,6 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-// const hasConfig = flags.config.length > 0
 import { Config } from '../../interfaces/config'
 import { validateProbes, validateSymonConfig } from './validation'
 import { validateNotification } from '@hyperjumptech/monika-notification'
@@ -30,11 +29,9 @@ import { validateNotification } from '@hyperjumptech/monika-notification'
 export const validateConfig = async (
   configuration: Partial<Config>
 ): Promise<void> => {
-  // const { flags } = getContext()
   const { notifications = [], probes = [], symon } = configuration
   const symonConfigError = validateSymonConfig(symon)
   const validateProbesError = validateProbes(probes)
-  // const hasConfig = flags.config.length > 0
 
   await validateNotification(notifications)
 
