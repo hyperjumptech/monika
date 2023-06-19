@@ -29,6 +29,7 @@ import * as discord from './discord'
 import * as desktop from './desktop'
 import * as googlechat from './googlechat'
 import * as gotify from './gotify'
+import * as instatus from './instatus'
 import * as lark from './lark'
 import * as mailgun from './mailgun'
 import * as monikaNotif from './monika-notif'
@@ -58,6 +59,7 @@ type BaseNotificationMessageMeta = {
 
 interface NotificationIncidentRecoveryMessageMeta
   extends BaseNotificationMessageMeta {
+  probeID: string
   type: 'incident' | 'recovery'
   url: string
 }
@@ -109,6 +111,7 @@ export const channels: Record<string, NotificationChannel> = {
   desktop,
   'google-chat': googlechat,
   gotify,
+  instatus,
   lark,
   mailgun,
   'monika-notif': monikaNotif,
