@@ -23,8 +23,46 @@
  **********************************************************************************/
 
 import { expect } from 'chai'
-import { getProbeStatesWithValidAlert } from '.'
+
+import { rest } from 'msw'
+import { setupServer } from 'msw/node'
+import { doProbe, getProbeStatesWithValidAlert } from '.'
 import type { ServerAlertState } from '../../interfaces/probe-status'
+import { initializeProbeStates } from '../../utils/probe-state'
+import type { Probe } from '../../interfaces/probe'
+import { afterEach, beforeEach } from 'mocha'
+import { getContext, resetContext, setContext } from '../../context'
+
+let urlRequestTotal = 0
+const server = setupServer(
+  rest.get('https://example.com', (_, res, ctx) => {
+    urlRequestTotal += 1
+    return res(ctx.status(200))
+  })
+)
+const probes: Probe[] = [
+  {
+    id: '1',
+    name: 'Example',
+    interval: 1,
+    requests: [
+      {
+        url: 'https://example.com',
+        body: '',
+        timeout: 30,
+      },
+    ],
+    incidentThreshold: 1,
+    recoveryThreshold: 1,
+    alerts: [],
+  },
+]
+
+beforeEach(() => server.listen())
+afterEach(() => {
+  urlRequestTotal = 0
+  server.close()
+})
 
 describe('Probe processing', () => {
   describe('getProbeStatesWithValidAlert function', () => {
@@ -92,4 +130,88 @@ describe('Probe processing', () => {
       expect(probeStatesWithValidAlert).deep.eq(expected)
     })
   })
+
+  describe('HTTP Probe', () => {
+    it('should not run probe if the probe is running', async () => {
+      // arrange
+      initializeProbeStates(probes)
+      // wait until the interval passed
+      const seconds = 1000
+      await sleep(seconds)
+
+      // act
+      doProbe({ probe: probes[0], notifications: [] })
+      await doProbe({ probe: probes[0], notifications: [] })
+      // wait for random timeout
+      await sleep(3 * seconds)
+
+      // assert
+      expect(urlRequestTotal).eq(1)
+    })
+
+    it('should not run probe if it is not the time', () => {
+      // arrange
+      initializeProbeStates(probes)
+
+      // act
+      doProbe({ probe: probes[0], notifications: [] })
+
+      // assert
+      expect(urlRequestTotal).eq(0)
+    })
+
+    it('should not run probe if the cycle is end', async () => {
+      // arrange
+      initializeProbeStates(probes)
+      setContext({
+        ...getContext(),
+        flags: { ...getContext().flags, repeat: 1 },
+      })
+      // wait until the interval passed
+      const seconds = 1000
+      await sleep(seconds)
+
+      // act
+      await doProbe({ probe: probes[0], notifications: [] })
+      await doProbe({ probe: probes[0], notifications: [] })
+      await doProbe({ probe: probes[0], notifications: [] })
+      // wait for random timeout
+      await sleep(3 * seconds)
+
+      resetContext()
+
+      // assert
+      expect(urlRequestTotal).eq(1)
+    })
+
+    it('should run the probe', async () => {
+      // arrange
+      const uniqueProbes: Probe[] = Array.from({ length: 5 }).map(
+        (_, index) => ({
+          ...probes[0],
+          id: `${index}`,
+        })
+      )
+      initializeProbeStates(uniqueProbes)
+      // wait until the interval passed
+      const seconds = 1000
+      await sleep(seconds)
+
+      // act
+      await Promise.all(
+        uniqueProbes.map((probe) => doProbe({ probe, notifications: [] }))
+      )
+      // wait for random timeout
+      await sleep(3 * seconds)
+
+      // assert
+      expect(urlRequestTotal).eq(5)
+    })
+  })
 })
+
+function sleep(durationMs: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, durationMs)
+  })
+}

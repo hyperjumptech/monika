@@ -22,8 +22,6 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { differenceInSeconds } from 'date-fns'
-
 import { doProbe } from '../components/probe'
 import { getContext } from '../context'
 import type { Notification } from '@hyperjumptech/monika-notification'
@@ -37,7 +35,6 @@ import {
 import { getPublicIp, isConnectedToSTUNServer } from '../utils/public-ip'
 
 export const DEFAULT_THRESHOLD = 5
-let isPaused = false
 let checkSTUNinterval: NodeJS.Timeout
 
 const DISABLE_STUN = -1 // -1 is disable stun checking
@@ -138,17 +135,6 @@ export async function loopCheckSTUNServer(interval: number): Promise<any> {
   return checkSTUNinterval
 }
 
-/**
- * setPauseProbeInterval pause probing process
- * @param {boolean} pause for pausing probes
- * @returns void
- */
-export function setPauseProbeInterval(pause: boolean): void {
-  isPaused = pause
-
-  if (pause) log.info('Probing is paused')
-}
-
 type StartProbingArgs = {
   signal: AbortSignal
   probes: Probe[]
@@ -168,39 +154,36 @@ export function startProbing({
       return
     }
 
-    const { repeat, stun } = getContext().flags
-
-    if (repeat) {
-      const finishedProbe = probes.every(({ id }) => {
-        const context = getProbeContext(id)
-
-        return context.cycle === repeat && getProbeState(id) === 'idle'
-      })
-
-      if (finishedProbe) {
-        // eslint-disable-next-line unicorn/no-process-exit, no-process-exit
-        process.exit(0)
-      }
+    if (isEndOfRepeat(probes)) {
+      // eslint-disable-next-line unicorn/no-process-exit, no-process-exit
+      process.exit(0)
     }
 
-    if ((isConnectedToSTUNServer && !isPaused) || stun === DISABLE_STUN) {
-      for (const probe of probes) {
-        const probeState = getProbeState(probe.id)
-        const context = getProbeContext(probe.id)
-        const diff = differenceInSeconds(new Date(), context.lastFinish)
+    if (!isStunOK()) {
+      return
+    }
 
-        if (probeState === 'idle' && diff >= probe.interval) {
-          if (repeat && context.cycle === repeat) {
-            continue
-          }
-
-          doProbe({
-            checkOrder: context.cycle,
-            probe,
-            notifications,
-          })
-        }
-      }
+    for (const probe of probes) {
+      doProbe({
+        probe,
+        notifications,
+      })
     }
   }, 1000)
+}
+
+function isEndOfRepeat(probes: Probe[]) {
+  const isAllProbeFinished = probes.every(({ id }) => {
+    return isLastCycleOf(id) && getProbeState(id) === 'idle'
+  })
+
+  return getContext().flags.repeat && isAllProbeFinished
+}
+
+function isStunOK() {
+  return getContext().flags.stun === DISABLE_STUN || isConnectedToSTUNServer
+}
+
+function isLastCycleOf(probeID: string) {
+  return getContext().flags.repeat === getProbeContext(probeID).cycle
 }
