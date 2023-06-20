@@ -31,22 +31,6 @@ import * as request from './request'
 let scriptRequestStub: sinon.SinonStub
 
 describe('Script Prober', () => {
-  beforeEach(() => {
-    scriptRequestStub = sinon
-      .stub(request, 'scriptRequest')
-      .callsFake(async (_options): Promise<ProbeRequestResponse> => {
-        return {
-          requestType: 'script',
-          data: '',
-          body: '',
-          status: 200,
-          headers: '',
-          responseTime: 0,
-          isProbeResponsive: false,
-        }
-      })
-  })
-
   afterEach(() => {
     sinon.restore()
   })
@@ -56,11 +40,7 @@ describe('Script Prober', () => {
     const probeParams = {
       id: 'FgYCA',
       checkOrder: 1,
-      script: [
-        {
-          cmd: 'echo Hello World',
-        },
-      ],
+      script: [{ cmd: 'echo Hello World' }],
     }
 
     // act
@@ -69,7 +49,6 @@ describe('Script Prober', () => {
     // assert
     expect(probeResults.length).deep.eq(1)
     expect(probeResults[0].logMessage).include('script')
-    sinon.assert.calledOnce(scriptRequestStub)
   })
 
   it('should probe multiple probes', async () => {
@@ -77,14 +56,7 @@ describe('Script Prober', () => {
     const probeParams = {
       id: 'wTBPV',
       checkOrder: 1,
-      script: [
-        {
-          cmd: 'echo Hello World',
-        },
-        {
-          cmd: 'echo Good-buy',
-        },
-      ],
+      script: [{ cmd: 'echo Hello World' }, { cmd: 'echo Good-bye' }],
     }
 
     // act
@@ -92,12 +64,9 @@ describe('Script Prober', () => {
 
     // assert
     expect(probeResults.length).eq(2)
-    sinon.assert.calledTwice(scriptRequestStub)
   })
 
   it('should return alert triggered', async () => {
-    // arrange
-    sinon.restore()
     scriptRequestStub = sinon
       .stub(request, 'scriptRequest')
       .callsFake(async (_options): Promise<ProbeRequestResponse> => {
@@ -111,6 +80,7 @@ describe('Script Prober', () => {
           isProbeResponsive: false,
         }
       })
+
     const probeParams = {
       id: 'wTBPV',
       checkOrder: 1,
@@ -127,5 +97,18 @@ describe('Script Prober', () => {
     // assert
     expect(probeResults[0].isAlertTriggered).eq(true)
     sinon.assert.calledOnce(scriptRequestStub)
+  })
+
+  it('stop processing scripts when one fails', async () => {
+    const probeParams = {
+      id: 'wTBPV',
+      checkOrder: 1,
+      script: [{ cmd: 'exit 0' }, { cmd: 'exit 1' }, { cmd: 'exit 0' }],
+    }
+
+    const probeResults = await probeScript(probeParams)
+    expect(probeResults.length).eq(2)
+    expect(probeResults[0].isAlertTriggered).eq(false)
+    expect(probeResults[1].isAlertTriggered).eq(true)
   })
 })

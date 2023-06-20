@@ -48,6 +48,11 @@ export async function probeScript({
     const logMessage = `${timeNow} ${checkOrder} id:${id} ${status} script:${cmd} ${responseTime}ms msg:${body}`
 
     probeResults.push({ isAlertTriggered, logMessage, requestResponse })
+
+    // Stop executing additional scripts if one fails
+    if (isAlertTriggered) {
+      break
+    }
   }
 
   return probeResults
