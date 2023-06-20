@@ -167,7 +167,7 @@ describe('monika', () => {
     )
     .catch((error) => {
       expect(error.message).to.contain(
-        'Probe request URL should start with http:// or https://'
+        'Probe request URL (something/something) should start with http:// or https://'
       )
     })
     .it('runs with config with invalid probe request URL')
