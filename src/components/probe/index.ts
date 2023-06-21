@@ -241,19 +241,15 @@ export async function doProbe({
   probe,
   notifications,
 }: doProbeParams): Promise<void> {
-  if (!isTimeToProbe(probe) || isCycleEnd(probe.id)) {
+  if (
+    !isTimeToProbe(probe) ||
+    isCycleEnd(probe.id) ||
+    !setProbeRunning(probe.id)
+  ) {
     return
   }
 
-  const randomTimeoutMilliseconds = getRandomTimeoutMilliseconds()
-
   setTimeout(async () => {
-    const isSuccess = setProbeRunning(probe.id)
-
-    if (!isSuccess) {
-      return
-    }
-
     const probeCtx = getProbeContext(probe.id)
     if (!probeCtx) {
       return
@@ -263,7 +259,7 @@ export async function doProbe({
     await probeHTTP(probe, probeCtx.cycle, notifications)
 
     setProbeFinish(probe.id)
-  }, randomTimeoutMilliseconds)
+  }, getRandomTimeoutMilliseconds())
 }
 
 function processProbeResults(
