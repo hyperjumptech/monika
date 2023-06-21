@@ -22,9 +22,9 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { assign, createMachine, EventObject, interpret } from 'xstate'
+import { assign, createMachine, type EventObject, interpret } from 'xstate'
 
-import { Probe } from '../interfaces/probe'
+import type { Probe } from '../interfaces/probe'
 
 type ProbeStateValue = any
 
@@ -111,7 +111,7 @@ export function setProbeFinish(probeId: string): void {
   interpreter?.send('FINISH')
 }
 
-export function getProbeState(probeId: string): ProbeStateValue {
+export function getProbeState(probeId: string): 'idle' | 'running' | undefined {
   const interpreter = probeInterpreters.get(probeId)
   return interpreter?.state?.value
 }
