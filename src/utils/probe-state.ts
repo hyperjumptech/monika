@@ -101,9 +101,16 @@ export function initializeProbeStates(probes: Probe[]): void {
   }
 }
 
-export function setProbeRunning(probeId: string): void {
+export function setProbeRunning(probeId: string): string {
   const interpreter = probeInterpreters.get(probeId)
-  interpreter?.send('RUN')
+
+  if (!interpreter) {
+    return ''
+  }
+
+  interpreter.send('RUN')
+
+  return probeId
 }
 
 export function setProbeFinish(probeId: string): void {
