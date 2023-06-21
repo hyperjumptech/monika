@@ -253,7 +253,7 @@ describe('probe-state', () => {
       setProbeRunning('1')
 
       // assert
-      expect(getProbeContext('1')?.cycle).eq(1)
+      expect(getProbeContext('1').cycle).eq(1)
     })
 
     it('should update the cycle only once', () => {
@@ -276,7 +276,7 @@ describe('probe-state', () => {
       setProbeRunning('1')
 
       // assert
-      expect(getProbeContext('1')?.cycle).eq(1)
+      expect(getProbeContext('1').cycle).eq(1)
     })
 
     it('should update the cycle on transition from idle to run', () => {
@@ -300,7 +300,7 @@ describe('probe-state', () => {
       setProbeRunning('1')
 
       // assert
-      expect(getProbeContext('1')?.cycle).eq(2)
+      expect(getProbeContext('1').cycle).eq(2)
     })
 
     it('should update last start on transition from idle to running', () => {
@@ -323,8 +323,7 @@ describe('probe-state', () => {
       setProbeRunning('1')
 
       // assert
-      expect(getProbeContext('1')?.lastStart).not.undefined
-      expect(getProbeContext('1')?.lastStart).not.eq(timeNow)
+      expect(getProbeContext('1').lastStart).not.eq(timeNow)
     })
 
     it('should update last finish on transition from running to idle', () => {
@@ -348,8 +347,7 @@ describe('probe-state', () => {
       setProbeFinish('1')
 
       // assert
-      expect(getProbeContext('1')?.lastFinish).not.undefined
-      expect(getProbeContext('1')?.lastFinish).not.eq(timeNow)
+      expect(getProbeContext('1').lastFinish).not.eq(timeNow)
     })
 
     it('should ignore not found probeId', () => {
