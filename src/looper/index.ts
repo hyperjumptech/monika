@@ -185,5 +185,10 @@ function isStunOK() {
 }
 
 function isLastCycleOf(probeID: string) {
-  return getContext().flags.repeat === getProbeContext(probeID).cycle
+  const probeCtx = getProbeContext(probeID)
+  if (!probeCtx) {
+    return true
+  }
+
+  return getContext().flags.repeat === probeCtx.cycle
 }

@@ -116,7 +116,9 @@ export function getProbeState(probeId: string): 'idle' | 'running' | undefined {
   return interpreter?.state?.value
 }
 
-export function getProbeContext(probeId: string): ProbeStateContext {
+export function getProbeContext(
+  probeId: string
+): ProbeStateContext | undefined {
   const interpreter = probeInterpreters.get(probeId)
   return interpreter?.state?.context
 }
