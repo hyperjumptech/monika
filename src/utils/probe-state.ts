@@ -101,22 +101,46 @@ export function initializeProbeStates(probes: Probe[]): void {
   }
 }
 
-export function setProbeRunning(probeId: string): void {
+export function setProbeRunning(probeId: string): string | undefined {
   const interpreter = probeInterpreters.get(probeId)
+
+  if (!interpreter) {
+    return
+  }
+
   interpreter.send('RUN')
+
+  return probeId
 }
 
-export function setProbeFinish(probeId: string): void {
+export function setProbeFinish(probeId: string): string | undefined {
   const interpreter = probeInterpreters.get(probeId)
+
+  if (!interpreter) {
+    return
+  }
+
   interpreter.send('FINISH')
 }
 
-export function getProbeState(probeId: string): ProbeStateValue {
+export function getProbeState(probeId: string): 'idle' | 'running' | undefined {
   const interpreter = probeInterpreters.get(probeId)
+
+  if (!interpreter) {
+    return
+  }
+
   return interpreter.state.value
 }
 
-export function getProbeContext(probeId: string): ProbeStateContext {
+export function getProbeContext(
+  probeId: string
+): ProbeStateContext | undefined {
   const interpreter = probeInterpreters.get(probeId)
+
+  if (!interpreter) {
+    return
+  }
+
   return interpreter.state.context
 }
