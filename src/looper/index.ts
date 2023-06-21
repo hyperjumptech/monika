@@ -174,7 +174,7 @@ export function startProbing({
 
 function isEndOfRepeat(probes: Probe[]) {
   const isAllProbeFinished = probes.every(({ id }) => {
-    return isLastCycleOf(id) && getProbeState(id) === 'idle'
+    return isLastCycleOf(id) && getProbeState(id) !== 'running'
   })
 
   return getContext().flags.repeat && isAllProbeFinished
