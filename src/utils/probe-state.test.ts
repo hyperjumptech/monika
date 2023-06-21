@@ -31,20 +31,20 @@ import {
   setProbeFinish,
   setProbeRunning,
 } from './probe-state'
-import Sinon from 'sinon'
-
-const timeNow = new Date()
-let clock: Sinon.SinonFakeTimers
-
-beforeEach(() => {
-  clock = Sinon.useFakeTimers(timeNow.getTime())
-})
-
-afterEach(() => {
-  clock.restore()
-})
+import sinon from 'sinon'
 
 describe('probe-state', () => {
+  const timeNow = new Date()
+  let clock: sinon.SinonFakeTimers
+
+  beforeEach(() => {
+    clock = sinon.useFakeTimers(timeNow.getTime())
+  })
+
+  afterEach(() => {
+    clock.restore()
+  })
+
   describe('Initial probe', () => {
     it('should set initial state', () => {
       // arrange
