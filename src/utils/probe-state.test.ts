@@ -349,5 +349,31 @@ describe('probe-state', () => {
       // assert
       expect(getProbeContext('1').lastFinish).not.eq(timeNow)
     })
+
+    it('should ignore not found probeId', () => {
+      // arrange
+      const probes: Probe[] = [
+        {
+          alerts: [],
+          id: '1',
+          incidentThreshold: 1,
+          interval: 1,
+          name: 'Example',
+          recoveryThreshold: 1,
+          requests: [{ url: 'https://example.com', body: '', timeout: 2 }],
+        },
+      ]
+
+      // act
+      initializeProbeStates(probes)
+      setProbeRunning('2')
+      setProbeFinish('2')
+      getProbeState('2')
+      getProbeContext('2')
+
+      // assert
+      // just to make sure it is not throw error
+      expect(1).eq(1)
+    })
   })
 })
