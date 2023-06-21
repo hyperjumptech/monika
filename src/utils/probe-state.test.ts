@@ -370,12 +370,13 @@ describe('probe-state', () => {
       initializeProbeStates(probes)
       setProbeRunning('2')
       setProbeFinish('2')
-      getProbeState('2')
-      getProbeContext('2')
 
       // assert
-      // just to make sure it is not throw error
-      expect(1).eq(1)
+      const probeState = getProbeState('2')
+      expect(probeState).undefined
+
+      const probeCtx = getProbeContext('2')
+      expect(probeCtx).undefined
     })
   })
 })
