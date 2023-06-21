@@ -82,18 +82,18 @@ export function initializeProbeStates(probes: Probe[]): void {
       : new Date()
   }
 
-  for (const probe of probes) {
-    const recoveredAt = probe.lastEvent?.recoveredAt
+  const getLastFinish = (probe: Probe) => {
+    return probe.lastEvent?.recoveredAt
       ? new Date(probe.lastEvent.recoveredAt)
-      : new Date()
+      : getLastStart(probe)
+  }
 
+  for (const probe of probes) {
     const interpreter = interpret(
       probeStateMachine.withContext({
         cycle: 0,
         lastStart: getLastStart(probe),
-        lastFinish: probe.lastEvent?.recoveredAt
-          ? recoveredAt
-          : getLastStart(probe),
+        lastFinish: getLastFinish(probe),
       })
     ).start()
 
