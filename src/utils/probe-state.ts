@@ -103,20 +103,20 @@ export function initializeProbeStates(probes: Probe[]): void {
 
 export function setProbeRunning(probeId: string): void {
   const interpreter = probeInterpreters.get(probeId)
-  interpreter.send('RUN')
+  interpreter?.send('RUN')
 }
 
 export function setProbeFinish(probeId: string): void {
   const interpreter = probeInterpreters.get(probeId)
-  interpreter.send('FINISH')
+  interpreter?.send('FINISH')
 }
 
 export function getProbeState(probeId: string): ProbeStateValue {
   const interpreter = probeInterpreters.get(probeId)
-  return interpreter.state.value
+  return interpreter?.state?.value
 }
 
 export function getProbeContext(probeId: string): ProbeStateContext {
   const interpreter = probeInterpreters.get(probeId)
-  return interpreter.state.context
+  return interpreter?.state?.context
 }
