@@ -248,7 +248,11 @@ export async function doProbe({
   const randomTimeoutMilliseconds = getRandomTimeoutMilliseconds()
 
   setTimeout(async () => {
-    setProbeRunning(probe.id)
+    const isSuccess = setProbeRunning(probe.id)
+
+    if (!isSuccess) {
+      return
+    }
 
     const probeCtx = getProbeContext(probe.id)
     if (!probeCtx) {
