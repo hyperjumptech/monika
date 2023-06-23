@@ -373,10 +373,10 @@ describe('probe-state', () => {
 
       // assert
       const probeState = getProbeState('2')
-      expect(probeState).undefined
+      expect(probeState).to.be.undefined
 
       const probeCtx = getProbeContext('2')
-      expect(probeCtx).undefined
+      expect(probeCtx).to.be.undefined
     })
   })
 })
