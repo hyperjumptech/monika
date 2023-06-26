@@ -242,22 +242,25 @@ export async function doProbe({
   probe,
   notifications,
 }: doProbeParams): Promise<void> {
-  if (!isTimeToProbe(probe) || isCycleEnd(probe.id)) {
+  if (
+    !isTimeToProbe(probe) ||
+    isCycleEnd(probe.id) ||
+    !setProbeRunning(probe.id)
+  ) {
     return
   }
 
-  const randomTimeoutMilliseconds = getRandomTimeoutMilliseconds()
-
-  setProbeRunning(probe.id)
-
   setTimeout(async () => {
-    const checkOrder = getProbeContext(probe.id).cycle
+    const probeCtx = getProbeContext(probe.id)
+    if (!probeCtx) {
+      return
+    }
 
-    await probeNonHTTP(probe, checkOrder, notifications)
-    await probeHTTP(probe, checkOrder, notifications)
+    await probeNonHTTP(probe, probeCtx.cycle, notifications)
+    await probeHTTP(probe, probeCtx.cycle, notifications)
 
     setProbeFinish(probe.id)
-  }, randomTimeoutMilliseconds)
+  }, getRandomTimeoutMilliseconds())
 }
 
 function processProbeResults(
@@ -281,17 +284,26 @@ function processProbeResults(
 }
 
 function isTimeToProbe({ id, interval }: Probe) {
+  const probeCtx = getProbeContext(id)
+  if (!probeCtx) {
+    return false
+  }
+
   const isIdle = getProbeState(id) === 'idle'
   const isInTime =
-    differenceInSeconds(new Date(), getProbeContext(id).lastFinish) >= interval
+    differenceInSeconds(new Date(), probeCtx.lastFinish) >= interval
 
   return isIdle && isInTime
 }
 
 function isCycleEnd(probeID: string) {
+  const probeCtx = getProbeContext(probeID)
+  if (!probeCtx) {
+    return true
+  }
+
   return (
-    getContext().flags.repeat &&
-    getContext().flags.repeat === getProbeContext(probeID).cycle
+    getContext().flags.repeat && getContext().flags.repeat === probeCtx.cycle
   )
 }
 
