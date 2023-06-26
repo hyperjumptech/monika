@@ -26,6 +26,8 @@ import type { MonikaFlags } from '../../context/monika-flags'
 import type { Config } from '../../interfaces/config'
 import { log } from '../../utils/pino'
 import { parseConfig } from './parse'
+import { validateConfigWithSchema } from './validation'
+import { validateConfig } from './validate'
 
 export type ConfigType =
   | 'monika'
@@ -93,11 +95,22 @@ async function parseConfigType(
   flags: MonikaFlags
 ): Promise<Partial<Config>> {
   const parsed = await parseConfig(source, configType, flags)
+
+  // ensure that the parsed config meets our formatting
+  await validateConfig(parsed)
+
+  if (configType !== 'har') {
+    const isValidConfig = validateConfigWithSchema(parsed)
+    if (!isValidConfig.valid) {
+      throw new Error(isValidConfig.message)
+    }
+  }
+
   return {
     ...parsed,
     probes: parsed.probes?.map((probe) => {
       const requests =
-        (probe?.requests || [])?.map((request) => ({
+        (probe?.requests ?? [])?.map((request) => ({
           ...request,
           timeout: request.timeout ?? 10_000,
         })) ?? []

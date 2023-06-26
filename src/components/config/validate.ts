@@ -22,23 +22,16 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { getContext } from '../../context'
 import { Config } from '../../interfaces/config'
-import {
-  validateConfigWithSchema,
-  validateProbes,
-  validateSymonConfig,
-} from './validation'
+import { validateProbes, validateSymonConfig } from './validation'
 import { validateNotification } from '@hyperjumptech/monika-notification'
 
 export const validateConfig = async (
   configuration: Partial<Config>
 ): Promise<void> => {
-  const { flags } = getContext()
   const { notifications = [], probes = [], symon } = configuration
   const symonConfigError = validateSymonConfig(symon)
   const validateProbesError = validateProbes(probes)
-  const hasConfig = flags.config.length > 0
 
   await validateNotification(notifications)
 
@@ -48,14 +41,5 @@ export const validateConfig = async (
 
   if (symonConfigError) {
     throw new Error(`Monika configuration: symon ${symonConfigError}`)
-  }
-
-  // check config file against monika-config-schema.json only if a config file is passed
-  if (hasConfig) {
-    const isValidConfig = validateConfigWithSchema(configuration)
-
-    if (!isValidConfig.valid) {
-      throw new Error(isValidConfig.message)
-    }
   }
 }
