@@ -68,13 +68,20 @@ export function sanitizeProbe(isSymonMode: boolean, probe: Probe): Probe {
     )
   }
 
+  const isHTTPProbe = requests?.length > 0
+  const isAlertsEmpty = alerts === undefined || alerts.length === 0
+  if (!isSymonMode && isHTTPProbe && isAlertsEmpty) {
+    log.warn(
+      `Warning: Probe ${id} has no Alerts configuration defined. Using the default response.status != 200 and response.time > 20000`
+    )
+  }
+
   return {
     ...probe,
     alerts: sanitizeAlerts({
       alerts,
       isHTTPProbe: requests?.length > 0,
       isSymonMode,
-      probeID: id,
     }),
     name: name || `monika_${id}`,
     incidentThreshold: incidentThreshold || DEFAULT_THRESHOLD,
@@ -87,26 +94,18 @@ type SanitizeAlertsParams = {
   alerts: ProbeAlert[]
   isHTTPProbe: boolean
   isSymonMode: boolean
-  probeID: string
 }
 
 function sanitizeAlerts({
   alerts,
   isHTTPProbe,
   isSymonMode,
-  probeID,
 }: SanitizeAlertsParams) {
   if (isSymonMode) {
     return []
   }
 
   if (alerts === undefined || alerts.length === 0) {
-    if (isHTTPProbe) {
-      log.warn(
-        `Warning: Probe ${probeID} has no Alerts configuration defined. Using the default response.status != 200 and response.time > 20000`
-      )
-    }
-
     return getDefaultAlerts(isHTTPProbe)
   }
 
