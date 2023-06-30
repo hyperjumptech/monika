@@ -56,22 +56,17 @@ export function sanitizeProbe(isSymonMode: boolean, probe: Probe): Probe {
     return alert
   })
 
-  probe.requests = requests?.map((request) => {
-    if (!request.method) {
-      return { ...request, method: 'GET' }
-    }
+  probe.requests = requests?.map((request) => ({
+    ...request,
+    method: request.method ? request.method : 'GET',
+    alerts: request.alerts?.map((alert) => {
+      if (alert.query) {
+        return { ...alert, assertion: alert.query }
+      }
 
-    return {
-      ...request,
-      alerts: request.alerts?.map((alert) => {
-        if (alert.query) {
-          return { ...alert, assertion: alert.query }
-        }
-
-        return alert
-      }),
-    }
-  })
+      return alert
+    }),
+  }))
 
   if (!name) {
     probe.name = `monika_${id}`
