@@ -51,21 +51,18 @@ export function sanitizeProbe(isSymonMode: boolean, probe: Probe): Probe {
     probe
 
   if (!name) {
-    probe.name = `monika_${id}`
     log.warn(
       `Warning: Probe ${id} has no name defined. Using the default name started by monika`
     )
   }
 
   if (!incidentThreshold) {
-    probe.incidentThreshold = DEFAULT_THRESHOLD
     log.warn(
       `Warning: Probe ${id} has no incidentThreshold configuration defined. Using the default threshold: 5`
     )
   }
 
   if (!recoveryThreshold) {
-    probe.recoveryThreshold = DEFAULT_THRESHOLD
     log.warn(
       `Warning: Probe ${id} has no recoveryThreshold configuration defined. Using the default threshold: 5`
     )
@@ -79,6 +76,9 @@ export function sanitizeProbe(isSymonMode: boolean, probe: Probe): Probe {
       isSymonMode,
       probeID: id,
     }),
+    name: name || `monika_${id}`,
+    incidentThreshold: incidentThreshold || DEFAULT_THRESHOLD,
+    recoveryThreshold: recoveryThreshold || DEFAULT_THRESHOLD,
     requests: sanitizeRequests(requests),
   }
 }
