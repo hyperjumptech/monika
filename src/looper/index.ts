@@ -33,6 +33,7 @@ import {
   initializeProbeStates,
 } from '../utils/probe-state'
 import { getPublicIp, isConnectedToSTUNServer } from '../utils/public-ip'
+import type { RequestConfig } from '../interfaces/request'
 
 export const DEFAULT_THRESHOLD = 5
 let checkSTUNinterval: NodeJS.Timeout
@@ -56,17 +57,7 @@ export function sanitizeProbe(isSymonMode: boolean, probe: Probe): Probe {
     probeID: id,
   })
 
-  probe.requests = requests?.map((request) => ({
-    ...request,
-    method: request.method ? request.method : 'GET',
-    alerts: request.alerts?.map((alert) => {
-      if (alert.query) {
-        return { ...alert, assertion: alert.query }
-      }
-
-      return alert
-    }),
-  }))
+  probe.requests = sanitizeRequests(requests)
 
   if (!name) {
     probe.name = `monika_${id}`
@@ -149,6 +140,20 @@ function getDefaultAlerts(isHTTPProbe: boolean) {
         'Response time is {{ response.time }}ms, expecting less than 2000ms',
     },
   ]
+}
+
+function sanitizeRequests(requests: RequestConfig[]) {
+  return requests?.map((request) => ({
+    ...request,
+    method: request.method || 'GET',
+    alerts: request.alerts?.map((alert) => {
+      if (alert.query) {
+        return { ...alert, assertion: alert.query }
+      }
+
+      return alert
+    }),
+  }))
 }
 
 export async function loopCheckSTUNServer(interval: number): Promise<any> {
