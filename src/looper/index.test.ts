@@ -171,7 +171,7 @@ describe('Looper', () => {
       ])
     })
 
-    it('should set default remove alerts on Symon mode', () => {
+    it('should remove alerts on Symon mode', () => {
       // arrange
       const probe = {
         id: 'Example',
