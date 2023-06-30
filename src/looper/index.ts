@@ -50,8 +50,6 @@ export function sanitizeProbe(isSymonMode: boolean, probe: Probe): Probe {
   const { id, name, requests, incidentThreshold, recoveryThreshold, alerts } =
     probe
 
-  probe.requests = sanitizeRequests(requests)
-
   if (!name) {
     probe.name = `monika_${id}`
     log.warn(
@@ -81,6 +79,7 @@ export function sanitizeProbe(isSymonMode: boolean, probe: Probe): Probe {
       isSymonMode,
       probeID: id,
     }),
+    requests: sanitizeRequests(requests),
   }
 }
 
