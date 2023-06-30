@@ -39,12 +39,6 @@ let checkSTUNinterval: NodeJS.Timeout
 
 const DISABLE_STUN = -1 // -1 is disable stun checking
 
-/**
- * sanitizeProbe sanitize currently mapped probe name, alerts, and threshold
- * @param {boolean} isSymonMode is running in Symon mode
- * @param {object} probe is the probe configuration
- * @returns {object} as probe
- */
 export function sanitizeProbe(isSymonMode: boolean, probe: Probe): Probe {
   const { id, name, requests, incidentThreshold, recoveryThreshold, alerts } =
     probe
