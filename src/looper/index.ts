@@ -50,13 +50,6 @@ export function sanitizeProbe(isSymonMode: boolean, probe: Probe): Probe {
   const { id, name, requests, incidentThreshold, recoveryThreshold, alerts } =
     probe
 
-  probe.alerts = sanitizeAlerts({
-    alerts,
-    isHTTPProbe: requests?.length > 0,
-    isSymonMode,
-    probeID: id,
-  })
-
   probe.requests = sanitizeRequests(requests)
 
   if (!name) {
@@ -80,7 +73,15 @@ export function sanitizeProbe(isSymonMode: boolean, probe: Probe): Probe {
     )
   }
 
-  return probe
+  return {
+    ...probe,
+    alerts: sanitizeAlerts({
+      alerts,
+      isHTTPProbe: requests?.length > 0,
+      isSymonMode,
+      probeID: id,
+    }),
+  }
 }
 
 type SanitizeAlertsParams = {
