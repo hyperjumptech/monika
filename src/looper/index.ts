@@ -95,20 +95,36 @@ export function sanitizeProbe(isSymonMode: boolean, probe: Probe): Probe {
   }
 
   if (alerts === undefined || alerts.length === 0) {
-    probe.alerts = [
-      {
-        assertion: 'response.status < 200 or response.status > 299',
-        message: 'HTTP Status is {{ response.status }}, expecting 200',
-      },
-      {
-        assertion: 'response.time > 2000',
-        message:
-          'Response time is {{ response.time }}ms, expecting less than 2000ms',
-      },
-    ]
-    log.warn(
-      `Warning: Probe ${id} has no Alerts configuration defined. Using the default response.status != 200 and response.time > 20000`
-    )
+    const getDefaultAlerts = (isHTTPProbe: boolean) => {
+      if (!isHTTPProbe) {
+        return [
+          {
+            assertion: 'response.status < 200 or response.status > 299',
+            message: 'Probe is not accesible',
+          },
+        ]
+      }
+
+      return [
+        {
+          assertion: 'response.status < 200 or response.status > 299',
+          message: 'HTTP Status is {{ response.status }}, expecting 200',
+        },
+        {
+          assertion: 'response.time > 2000',
+          message:
+            'Response time is {{ response.time }}ms, expecting less than 2000ms',
+        },
+      ]
+    }
+
+    const isHTTPProbe = requests.length > 0
+    probe.alerts = getDefaultAlerts(isHTTPProbe)
+    if (isHTTPProbe) {
+      log.warn(
+        `Warning: Probe ${id} has no Alerts configuration defined. Using the default response.status != 200 and response.time > 20000`
+      )
+    }
   }
 
   if (isSymonMode) {
