@@ -25,7 +25,7 @@
 import { doProbe } from '../components/probe'
 import { getContext } from '../context'
 import type { Notification } from '@hyperjumptech/monika-notification'
-import type { Probe } from '../interfaces/probe'
+import type { Probe, ProbeAlert } from '../interfaces/probe'
 import { log } from '../utils/pino'
 import {
   getProbeContext,
@@ -48,12 +48,12 @@ const DISABLE_STUN = -1 // -1 is disable stun checking
 export function sanitizeProbe(isSymonMode: boolean, probe: Probe): Probe {
   const { id, name, requests, incidentThreshold, recoveryThreshold, alerts } =
     probe
-  probe.alerts = alerts?.map((alert) => {
-    if (alert.query) {
-      return { ...alert, assertion: alert.query }
-    }
 
-    return alert
+  probe.alerts = sanitizeAlerts({
+    alerts,
+    isHTTPProbe: requests?.length > 0,
+    isSymonMode,
+    probeID: id,
   })
 
   probe.requests = requests?.map((request) => ({
@@ -89,44 +89,66 @@ export function sanitizeProbe(isSymonMode: boolean, probe: Probe): Probe {
     )
   }
 
+  return probe
+}
+
+type SanitizeAlertsParams = {
+  alerts: ProbeAlert[]
+  isHTTPProbe: boolean
+  isSymonMode: boolean
+  probeID: string
+}
+
+function sanitizeAlerts({
+  alerts,
+  isHTTPProbe,
+  isSymonMode,
+  probeID,
+}: SanitizeAlertsParams) {
+  if (isSymonMode) {
+    return []
+  }
+
   if (alerts === undefined || alerts.length === 0) {
-    const getDefaultAlerts = (isHTTPProbe: boolean) => {
-      if (!isHTTPProbe) {
-        return [
-          {
-            assertion: 'response.status < 200 or response.status > 299',
-            message: 'Probe is not accesible',
-          },
-        ]
-      }
-
-      return [
-        {
-          assertion: 'response.status < 200 or response.status > 299',
-          message: 'HTTP Status is {{ response.status }}, expecting 200',
-        },
-        {
-          assertion: 'response.time > 2000',
-          message:
-            'Response time is {{ response.time }}ms, expecting less than 2000ms',
-        },
-      ]
-    }
-
-    const isHTTPProbe = requests.length > 0
-    probe.alerts = getDefaultAlerts(isHTTPProbe)
     if (isHTTPProbe) {
       log.warn(
-        `Warning: Probe ${id} has no Alerts configuration defined. Using the default response.status != 200 and response.time > 20000`
+        `Warning: Probe ${probeID} has no Alerts configuration defined. Using the default response.status != 200 and response.time > 20000`
       )
     }
+
+    return getDefaultAlerts(isHTTPProbe)
   }
 
-  if (isSymonMode) {
-    probe.alerts = []
+  return alerts.map((alert) => {
+    if (alert.query) {
+      return { ...alert, assertion: alert.query }
+    }
+
+    return alert
+  })
+}
+
+function getDefaultAlerts(isHTTPProbe: boolean) {
+  if (!isHTTPProbe) {
+    return [
+      {
+        assertion: 'response.status < 200 or response.status > 299',
+        message: 'Probe is not accesible',
+      },
+    ]
   }
 
-  return probe
+  return [
+    {
+      assertion: 'response.status < 200 or response.status > 299',
+      message: 'HTTP Status is {{ response.status }}, expecting 200',
+    },
+    {
+      assertion: 'response.time > 2000',
+      message:
+        'Response time is {{ response.time }}ms, expecting less than 2000ms',
+    },
+  ]
 }
 
 export async function loopCheckSTUNServer(interval: number): Promise<any> {
