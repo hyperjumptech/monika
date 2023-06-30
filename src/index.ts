@@ -38,7 +38,7 @@ import type { Config } from './interfaces/config'
 import type { Probe } from './interfaces/probe'
 import { printSummary, savePidFile } from './jobs/summary-notification'
 import initLoaders from './loaders'
-import { sanitizeProbe, startProbing } from './looper'
+import { DEFAULT_THRESHOLD, startProbing } from './looper'
 import { monikaFlagsDefaultValue } from './context/monika-flags'
 import type { MonikaFlags } from './context/monika-flags'
 import SymonClient from './symon'
@@ -415,8 +415,97 @@ class Monika extends Command {
     const sortedProbes = sortProbes(config.probes, flags.id)
 
     return sortedProbes.map((probe: Probe) =>
-      sanitizeProbe(isSymonModeFrom(flags), probe)
+      this.sanitizeProbe(isSymonModeFrom(flags), probe)
     )
+  }
+
+  sanitizeProbe(isSymonMode: boolean, probe: Probe): Probe {
+    const { id, name, requests, incidentThreshold, recoveryThreshold, alerts } =
+      probe
+    probe.alerts = alerts?.map((alert) => {
+      if (alert.query) {
+        return { ...alert, assertion: alert.query }
+      }
+
+      return alert
+    })
+
+    probe.requests = requests?.map((request) => {
+      if (!request.method) {
+        return { ...request, method: 'GET' }
+      }
+
+      return {
+        ...request,
+        alerts: request.alerts?.map((alert) => {
+          if (alert.query) {
+            return { ...alert, assertion: alert.query }
+          }
+
+          return alert
+        }),
+      }
+    })
+
+    if (!name) {
+      probe.name = `monika_${id}`
+      log.warn(
+        `Warning: Probe ${id} has no name defined. Using the default name started by monika`
+      )
+    }
+
+    if (!incidentThreshold) {
+      probe.incidentThreshold = DEFAULT_THRESHOLD
+      log.warn(
+        `Warning: Probe ${id} has no incidentThreshold configuration defined. Using the default threshold: 5`
+      )
+    }
+
+    if (!recoveryThreshold) {
+      probe.recoveryThreshold = DEFAULT_THRESHOLD
+      log.warn(
+        `Warning: Probe ${id} has no recoveryThreshold configuration defined. Using the default threshold: 5`
+      )
+    }
+
+    if (alerts === undefined || alerts.length === 0) {
+      const getDefaultAlerts = (isHTTPProbe: boolean) => {
+        if (!isHTTPProbe) {
+          return [
+            {
+              assertion: 'response.status < 200 or response.status > 299',
+              message: 'Probe is not accesible',
+            },
+          ]
+        }
+
+        return [
+          {
+            assertion: 'response.status < 200 or response.status > 299',
+            message: 'HTTP Status is {{ response.status }}, expecting 200',
+          },
+          {
+            assertion: 'response.time > 2000',
+            message:
+              'Response time is {{ response.time }}ms, expecting less than 2000ms',
+          },
+        ]
+      }
+
+      const isHTTPProbe = requests.length > 0
+      probe.alerts = getDefaultAlerts(isHTTPProbe)
+      if (isHTTPProbe) {
+        log.warn(
+          `Warning: Probe ${id} has no Alerts configuration defined. Using the default response.status != 200 and response.time > 20000`
+        )
+      }
+    }
+
+    if (isSymonMode) {
+      probe.alerts = []
+    }
+
+    return probe
   }
 }
 
