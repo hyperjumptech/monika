@@ -425,11 +425,11 @@ describe('monika', () => {
       cmd.run([
         '-c',
         resolve('./test/testConfigs/manyNotif.yml'),
-        resolve('./test/testConfigs/noProbes.yml'),
+        resolve('./test/testConfigs/simple-1p-1n.yaml'),
       ])
     )
     .it(
-      'run wth multiple config override: no probes on the second config',
+      'run with multiple config override: no probes on the second config',
       (ctx) => {
         expect(ctx.stdout)
           .to.contain('Notifications: 1')
