@@ -53,8 +53,12 @@ const checkProbeRequestProperties = (
 }
 
 export const validateRequests = (
-  requests: RequestConfig[]
+  requests?: RequestConfig[]
 ): string | undefined => {
+  if (requests === undefined) {
+    return
+  }
+
   for (const req of requests) {
     if (req.timeout <= 0) {
       return `The timeout in the request with id "${req.id}" should be greater than 0.`

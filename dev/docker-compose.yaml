@@ -1,0 +1,11 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: monika-postgre
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: postgres_password
+      POSTGRES_USER: postgres_user
+      POSTGRES_DB: postgres_db
+    restart: unless-stopped
