@@ -55,15 +55,59 @@ If you need to test a probe locally, there are predefined services in /dev/docke
 
 #### Available Services
 
-##### PostgreSQL
-
 Use the following Monika config to probe the service.
+
+##### MariaDB
+
+```yaml
+probes:
+  - id: mariadb
+    mariadb:
+      - host: localhost
+        port: 3306
+        username: mariadb_user
+        password: mariadb_password
+        database:
+```
+
+##### MySQL
+
+```yaml
+probes:
+  - id: mysql
+    mysql:
+      - host: localhost
+        port: 3307
+        username: mysql_user
+        password: mysql_password
+        database:
+```
+
+##### MongoDB
+
+```yaml
+probes:
+  - id: mongo
+    mongo:
+      - uri: mongodb://mongo_user:mongo_password@localhost:27017
+```
+
+##### PostgreSQL
 
 ```yaml
 probes:
   - id: postgres
     postgres:
       - uri: postgres://postgres_user:postgres_password@localhost:5432/postgres_db
+```
+
+##### Redis
+
+```yaml
+probes:
+  - id: redis
+    redis:
+      - uri: redis://:redis_password@localhost:6379
 ```
 
 ## Development References
