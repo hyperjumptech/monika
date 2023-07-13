@@ -1,6 +1,19 @@
-import type { ProbeResult } from '../'
+import { BaseProber, type ProbeResult } from '../'
 import type { MariaDB } from '../../../../interfaces/probe'
 import { mariaRequest } from './request'
+
+export class MariaDBProber extends BaseProber {
+  async probe(): Promise<void> {
+    const result = await probeMariaDB({
+      id: this.probeConfig.id,
+      checkOrder: this.counter,
+      mariaDB: this.probeConfig.mariadb,
+      mysql: this.probeConfig.mysql,
+    })
+
+    this.processProbeResults(result)
+  }
+}
 
 type ProbeMariaDBParams = {
   id: string
