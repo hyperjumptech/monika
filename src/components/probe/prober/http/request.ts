@@ -37,6 +37,10 @@ import { getContext } from '../../../../context'
 import { icmpRequest } from '../icmp/request'
 import registerFakes from '../../../../utils/fakes'
 import { sendHttpRequest } from '../../../../utils/http'
+import { exit } from 'process'
+
+//* *********** debugdebudebug */
+let RequestNum = 0
 
 // Register Handlebars helpers
 registerFakes(Handlebars)
@@ -145,6 +149,9 @@ export async function httpRequest({
       return icmpRequest({ host: renderedURL })
     }
 
+    RequestNum++
+    console.log('** requesting probe no:', RequestNum)
+
     // Do the request using compiled URL and compiled headers (if exists)
     const resp = await sendHttpRequest({
       ...newReq,
@@ -157,6 +164,8 @@ export async function httpRequest({
 
     const responseTime = Date.now() - requestStartedAt
     const { data, headers, status } = resp
+
+    RequestNum--
 
     return {
       requestType: 'HTTP',
@@ -171,6 +180,7 @@ export async function httpRequest({
   } catch (error: any) {
     const responseTime = Date.now() - requestStartedAt
 
+    RequestNum--
     // The request was made and the server responded with a status code
     // 400, 500 get here
     if (error?.response) {
@@ -265,6 +275,10 @@ function errorRequestCodeToNumber(
 ): number {
   switch (errorRequestCode) {
     case 'ECONNABORTED':
+      console.log('******************')
+      console.log('Total Request here:', RequestNum)
+
+      exit(599)
       return 599 // https://httpstatuses.com/599
 
     case 'ENOTFOUND':
