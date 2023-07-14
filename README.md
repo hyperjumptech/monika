@@ -94,6 +94,8 @@ probes:
 
 ##### PostgreSQL
 
+Use the following Monika config to probe the service.
+
 ```yaml
 probes:
   - id: postgres
