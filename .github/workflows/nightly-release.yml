@@ -11,6 +11,8 @@ permissions:
   
 jobs:
   nightly:
+    permissions:
+      contents: write
     name: 🌒 Nightly Release
     if: github.repository == 'hyperjumptech/monika'
     runs-on: ubuntu-latest
