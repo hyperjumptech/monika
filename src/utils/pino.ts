@@ -36,17 +36,19 @@ const prettyPrint = {
   sync: false, // async mode for better performance
 }
 
-const transport: LoggerOptions = dev
-  ? {
-      prettyPrint: {
-        ...prettyPrint,
-        colorize: true,
-      },
-      level: 'debug',
-    }
-  : {
-      prettyPrint,
-      level: 'info',
-    }
+const transport: LoggerOptions = pino.transport({
+  targets: [
+    {
+      target: 'pino-pretty',
+      level: dev ? 'debug' : 'info',
+      options: dev
+        ? {
+            ...prettyPrint,
+            colorize: true,
+          }
+        : prettyPrint,
+    },
+  ],
+})
 
 export const log = pino(transport)
