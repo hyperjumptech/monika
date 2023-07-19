@@ -49,6 +49,23 @@ Once you have made the changes, open a Pull Request and explain the issue your c
 
 For contribution details on how to add custom notifications [see the New Notifications guide here](https://monika.hyperjump.tech/guides/new-notifications).
 
+### How to Test Probe Locally
+
+If you need to test a probe locally, there are predefined services in /dev/docker-compose.yaml. You are **encouraged** to add other services that can be probed by Monika. Run `cd dev && docker compose up` to run those services.
+
+#### Available Services
+
+##### PostgreSQL
+
+Use the following Monika config to probe the service.
+
+```yaml
+probes:
+  - id: postgres
+    postgres:
+      - uri: postgres://postgres_user:postgres_password@localhost:5432/postgres_db
+```
+
 ## Development References
 
 The tools and frameworks we used in this project are listed below:

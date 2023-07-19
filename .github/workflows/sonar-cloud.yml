@@ -11,6 +11,10 @@ on:
     types: [opened, reopened]
   workflow_dispatch: # allow manual trigger for scans    
 
+permissions:
+  issues: read
+  pull-requests: read
+
 jobs:
   sonarcloud:
     runs-on: ubuntu-latest

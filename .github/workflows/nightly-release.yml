@@ -5,8 +5,14 @@ on:
   schedule:
     - cron: "0 7 * * *" # every day at 12AM PST
 
+permissions:
+  issues: read
+  pull-requests: read
+  
 jobs:
   nightly:
+    permissions:
+      contents: write
     name: 🌒 Nightly Release
     if: github.repository == 'hyperjumptech/monika'
     runs-on: ubuntu-latest
