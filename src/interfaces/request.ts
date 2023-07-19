@@ -39,9 +39,9 @@ export type RequestTypes =
 
 // The success/failure result of a probe
 export enum ProbeRequestResult {
-  unknown = -1,
   failed = 0,
   success = 1,
+  unknown = 2,
 }
 
 // ProbeRequestResponse is used to define the response from a probe requests.
