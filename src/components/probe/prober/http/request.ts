@@ -150,7 +150,6 @@ export async function httpRequest({
     }
 
     RequestNum++
-    console.log('** requesting probe no:', RequestNum)
 
     // Do the request using compiled URL and compiled headers (if exists)
     const resp = await sendHttpRequest({
@@ -199,6 +198,13 @@ export async function httpRequest({
     // timeout is here, ECONNABORTED, ENOTFOUND, ECONNRESET, ECONNREFUSED
     if (error?.request) {
       const status = errorRequestCodeToNumber(error?.code)
+
+      //* ******** debug debug **/
+      if (status === 599) {
+        console.log('request url:', url)
+        console.log('response time:', responseTime)
+        exit(599)
+      }
 
       return {
         data: '',
@@ -277,8 +283,6 @@ function errorRequestCodeToNumber(
     case 'ECONNABORTED':
       console.log('******************')
       console.log('Total Request here:', RequestNum)
-
-      exit(599)
       return 599 // https://httpstatuses.com/599
 
     case 'ENOTFOUND':
