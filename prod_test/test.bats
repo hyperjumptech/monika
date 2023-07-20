@@ -1,5 +1,5 @@
 function setup() {
-    load './node_modules/bats-assert/load.bash'
+    load '../node_modules/bats-assert/load.bash'
 }
 
 @test "shows version" {
