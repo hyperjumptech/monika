@@ -37,18 +37,14 @@ const prettyPrint = {
 }
 
 const transport: LoggerOptions = pino.transport({
-  targets: [
-    {
-      target: 'pino-pretty',
-      level: dev ? 'debug' : 'info',
-      options: dev
-        ? {
-            ...prettyPrint,
-            colorize: true,
-          }
-        : prettyPrint,
-    },
-  ],
+  target: 'pino-pretty',
+  options: dev
+    ? {
+        ...prettyPrint,
+
+        colorize: true,
+      }
+    : prettyPrint,
 })
 
 export const log = pino(transport)

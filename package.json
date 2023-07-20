@@ -100,9 +100,9 @@
     "pg": "^8.8.0",
     "pg-connection-string": "^2.5.0",
     "ping": "^0.4.1",
-    "pino": "7.11.0",
-    "pino-pretty": "7.6.1",
-    "pkg": "^5.6.0",
+    "pino": "8.14.1",
+    "pino-pretty": "10.0.1",
+    "pkg": "5.6.0",
     "prom-client": "13.1.0",
     "redis": "^4.3.0",
     "sinon": "^15.0.1",
@@ -192,7 +192,9 @@
   },
   "pkg": {
     "scripts": [
-      "./lib/**/*.js"
+      "./lib/**/*.js",
+      "./node_modules/thread-stream/lib/worker.js",
+      "./node_modules/pino/lib/worker.js"
     ],
     "assets": [
       "db/migrations/*.sql",
@@ -203,6 +205,16 @@
       "node16-macos-x64",
       "node16-win-x64"
     ],
+    "patches": {
+      "./node_modules/thread-stream/lib/worker.js": [
+        "fn = (await realImport(workerData.filename)).default",
+        "fn = realRequire(workerData.filename.replace('file://', ''))"
+      ],
+      "./node_modules/pino/lib/worker.js": [
+        "fn = (await realImport(toLoad)).default",
+        "fn = realRequire(t.target)"
+      ]
+    },
     "outputPath": "dist"
   },
   "volta": {
