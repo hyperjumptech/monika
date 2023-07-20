@@ -41,7 +41,7 @@ const transport: LoggerOptions = pino.transport({
   options: dev
     ? {
         ...prettyPrint,
-
+        level: 'debug',
         colorize: true,
       }
     : prettyPrint,
