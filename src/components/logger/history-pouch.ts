@@ -160,11 +160,6 @@ export async function saveProbeRequestToPouchDB({
     return
   }
 
-  await Promise.all(
-    alertQueries.map(async (alert) => {
-      reportData._id = new Date().toISOString()
-      reportData.data.requests[0].alerts = alert
-      await localPouchDB.put(reportData)
-    })
-  )
+  reportData.data.requests[0].alerts = alertQueries.toString()
+  await localPouchDB.put(reportData)
 }
