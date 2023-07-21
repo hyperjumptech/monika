@@ -151,54 +151,61 @@ export class RequestLog {
   }
 
   async saveToDatabase(): Promise<void> {
-    const { flags } = getContext()
-    const monikaId = flags.symonMonikaId
+    const { flags, monikaID } = getContext()
 
     if (flags.symonExperimental) {
-      if (this.sentNotifications.length === 0) {
-        await saveProbeRequestToPouchDB({
-          probe: this.probe,
-          requestIndex: this.requestIndex,
-          probeRes: this.response!,
-          alertQueries: this.triggeredAlerts.map((alert) => alert.assertion),
-          monikaId: monikaId,
-        })
-
-        return
-      }
-
-      for (const sent of this.sentNotifications) {
-        saveProbeRequestToPouchDB({
-          probe: this.probe,
-          requestIndex: this.requestIndex,
-          probeRes: this.response!,
-          alertQueries: this.triggeredAlerts.map((alert) => alert.assertion),
-          notifAlert: sent.alertQuery,
-          notification: sent.notification,
-          type: sent.type,
-          monikaId: monikaId,
-        })
-      }
-
+      await this.saveToPouchDB(monikaID)
       return
     }
 
-    await Promise.all([
-      saveProbeRequestLog({
-        probe: this.probe,
-        requestIndex: this.requestIndex,
-        probeRes: this.response!,
-        alertQueries: this.triggeredAlerts.map((alert) => alert.assertion),
-        error: this.errors.join(', '),
-      }),
-      ...this.sentNotifications.map((sent) =>
-        saveNotificationLog(
-          this.probe,
-          sent.notification,
-          sent.type,
-          sent.alertQuery
-        )
-      ),
-    ])
+    await this.saveToSQLite()
+  }
+
+  async saveToPouchDB(monikaID: string): Promise<void> {
+    const commonData = {
+      probe: this.probe,
+      requestIndex: this.requestIndex,
+      probeRes: this.response!,
+      alertQueries: this.triggeredAlerts.map((alert) => alert.assertion),
+      monikaId: monikaID,
+    }
+
+    if (this.sentNotifications.length === 0) {
+      await saveProbeRequestToPouchDB(commonData)
+      return
+    }
+
+    await Promise.all(
+      this.sentNotifications.map((sent) =>
+        saveProbeRequestToPouchDB({
+          ...commonData,
+          notifAlert: sent.alertQuery,
+          notification: sent.notification,
+          type: sent.type,
+        })
+      )
+    )
+  }
+
+  async saveToSQLite(): Promise<void> {
+    const probeData = {
+      probe: this.probe,
+      requestIndex: this.requestIndex,
+      probeRes: this.response!,
+      alertQueries: this.triggeredAlerts.map((alert) => alert.assertion),
+      error: this.errors.join(', '),
+    }
+
+    const probeRequestPromise = saveProbeRequestLog(probeData)
+    const notificationPromises = this.sentNotifications.map((sent) =>
+      saveNotificationLog(
+        this.probe,
+        sent.notification,
+        sent.type,
+        sent.alertQuery
+      )
+    )
+
+    await Promise.all([probeRequestPromise, ...notificationPromises])
   }
 }

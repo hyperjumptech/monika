@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/prefer-ternary */
 /**********************************************************************************
  * MIT License                                                                    *
  *                                                                                *
@@ -31,11 +32,11 @@ import { printAllLogs } from './components/logger'
 import { closeLog, openLogfile } from './components/logger/history'
 import { openLogPouch } from './components/logger/history-pouch'
 import { logStartupMessage } from './components/logger/startup-message'
-import { sendMonikaStartMessage } from './components/notification/start-message'
 import {
   resetScheduledTasks,
   scheduleSummaryNotification,
 } from './components/notification/schedule-notification'
+import { sendMonikaStartMessage } from './components/notification/start-message'
 import { setContext } from './context'
 import type { MonikaFlags } from './context/monika-flags'
 import { monikaFlagsDefaultValue } from './context/monika-flags'
@@ -284,7 +285,7 @@ class Monika extends Command {
       }
 
       if (_flags.symonExperimental) {
-        openLogPouch()
+        await openLogPouch()
       } else {
         await openLogfile()
       }

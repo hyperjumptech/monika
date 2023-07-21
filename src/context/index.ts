@@ -35,6 +35,7 @@ type Context = {
   // userAgent example: @hyperjumptech/monika/1.2.3 linux-x64 node-14.17.0
   userAgent: string
   incidents: Incident[]
+  monikaID: string
   flags: MonikaFlags
 }
 
@@ -43,6 +44,7 @@ type NewContext = Partial<Context>
 const initialContext: Context = {
   userAgent: '',
   incidents: [],
+  monikaID: '',
   flags: {
     config: monikaFlagsDefaultValue.config,
     'config-filename': monikaFlagsDefaultValue['config-filename'],

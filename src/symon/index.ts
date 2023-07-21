@@ -32,7 +32,7 @@ import path from 'path'
 
 import { updateConfig } from '../components/config'
 import { getOSName } from '../components/notification/alert-message'
-import { getContext } from '../context'
+import { getContext, setContext } from '../context'
 import events from '../events'
 import { Config } from '../interfaces/config'
 import { Probe } from '../interfaces/probe'
@@ -212,6 +212,8 @@ class SymonClient {
   async initiate(): Promise<void> {
     this.monikaId = await this.handshake()
     await this.sendStatus({ isOnline: true })
+
+    setContext({ monikaID: this.monikaId })
 
     log.debug('Handshake succesful')
 

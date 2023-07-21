@@ -46,7 +46,7 @@ let localPouchDB: PouchDB.Database
  * live = true, means the replication is immediate when there is a put process
  * @returns <void>
  */
-export function openLogPouch(): void {
+export async function openLogPouch(): Promise<void> {
   try {
     localPouchDB = new PouchDB('symon')
 
@@ -155,14 +155,16 @@ export async function saveProbeRequestToPouchDB({
     },
   }
 
-  if (alertQueries?.length === 0) {
-    localPouchDB.put(reportData)
+  if (!alertQueries || alertQueries.length === 0) {
+    await localPouchDB.put(reportData)
+    return
   }
 
-  Promise.all(
-    (alertQueries ?? []).map(async (alert) => {
+  await Promise.all(
+    alertQueries.map(async (alert) => {
+      reportData._id = new Date().toISOString()
       reportData.data.requests[0].alerts = alert
-      localPouchDB.put(reportData)
+      await localPouchDB.put(reportData)
     })
   )
 }
