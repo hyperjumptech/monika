@@ -13,7 +13,7 @@ import { logResponseTime } from '../../../logger/response-time-log'
 import { processThresholds } from '../../../notification/process-server-status'
 import { httpRequest } from './request'
 
-const CONNNECTION_RECOVERY_MESSAGE = 'Probe is accessible again'
+const CONNECTION_RECOVERY_MESSAGE = 'Probe is accessible again'
 const CONNECTION_INCIDENT_MESSAGE = 'Probe not accessible'
 const isConnectionDown = new Map<string, boolean>()
 
@@ -86,7 +86,7 @@ export async function probeHTTP(
         ) {
           validatedResponse[0].alert = {
             assertion: '',
-            message: CONNNECTION_RECOVERY_MESSAGE,
+            message: CONNECTION_RECOVERY_MESSAGE,
           }
           isConnectionDown.delete(id) // connection is up, so remove from entry
         } else if (!isProbeResponsive) {
