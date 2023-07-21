@@ -27,18 +27,6 @@ import { Probe } from '../../interfaces/probe'
 import { ProbeRequestResponse } from '../../interfaces/request'
 import { log } from '../../utils/pino'
 import type { Notification } from '../notification/channel'
-
-type NotifData = {
-  alertType: string | undefined
-  channel: string | undefined
-  id: string
-  notificationId: string | undefined
-  probeId: string
-  probeName: string
-  timestamp: number
-  type: string | undefined
-}
-
 let localPouchDB: PouchDB.Database
 
 /**
@@ -59,30 +47,34 @@ export async function openLogPouch(): Promise<void> {
           live: true,
           retry: true,
           // eslint-disable-next-line camelcase
-          back_off_function(delay) {
-            if (delay === 0) {
-              return 1000
-            }
-
-            return delay * 3
-          },
-          filter: function (doc) {
+          back_off_function: (delay: number) =>
+            delay === 0 ? 1000 : delay * 3,
+          filter: (doc: PouchDB.Core.ExistingDocument<any>) => {
             return doc._deleted !== true
           },
         })
         .on('change', async function (info) {
           const docs = info.docs
-          await Promise.all(
-            docs.map(async (dok) => {
-              await localPouchDB.remove(dok)
-              log.info(`Document id: ${dok._id} is removed from pouchdb`)
-            })
-          )
+          if (docs) {
+            await removeDocumentsFromLocalDB(localPouchDB, docs)
+          }
         })
     }
   } catch (error: any) {
     log.error("Warning: Can't open logfile. " + error.message)
   }
+}
+
+async function removeDocumentsFromLocalDB(
+  localDB: PouchDB.Database,
+  docs: PouchDB.Core.ExistingDocument<any>[]
+) {
+  await Promise.all(
+    docs.map(async (doc) => {
+      await localDB.remove(doc)
+      log.info(`Document id: ${doc._id} is removed from pouchdb`)
+    })
+  )
 }
 
 /**
@@ -113,7 +105,6 @@ export async function saveProbeRequestToPouchDB({
   const now = Math.round(Date.now() / 1000)
   const requestConfig = probe.requests?.[requestIndex]
 
-  const notificationsList: NotifData[] = []
   const probeDataId = new Date().toISOString()
   const reqData = {
     alerts: '',
@@ -124,7 +115,7 @@ export async function saveProbeRequestToPouchDB({
     requestHeader: JSON.stringify(requestConfig?.headers),
     requestMethod: requestConfig?.method,
     requestType: probe.socket ? 'tcp' : 'http',
-    requestUrl: requestConfig?.url || 'http://', // if TCP, there's no URL so just set to this http://
+    requestUrl: requestConfig?.url || 'http://',
     responseHeader: JSON.stringify(probeRes.headers),
     responseSize: probeRes.headers['content-length'],
     responseStatus: probeRes.status,
@@ -134,7 +125,7 @@ export async function saveProbeRequestToPouchDB({
     timestamp: now,
   }
 
-  const notifData: NotifData = {
+  const notifData = {
     alertType: notifAlert,
     channel: notification?.type,
     id: probeDataId,
@@ -145,21 +136,18 @@ export async function saveProbeRequestToPouchDB({
     type: type,
   }
 
-  notificationsList.push(notifData)
   const reportData = {
     _id: probeDataId,
     monikaId: monikaId,
     data: {
       requests: [reqData],
-      notifications: notificationsList,
+      notifications: [notifData],
     },
   }
 
-  if (!alertQueries || alertQueries.length === 0) {
-    await localPouchDB.put(reportData)
-    return
+  if (alertQueries && alertQueries.length > 0) {
+    reportData.data.requests[0].alerts = alertQueries.toString()
   }
 
-  reportData.data.requests[0].alerts = alertQueries.toString()
   await localPouchDB.put(reportData)
 }
