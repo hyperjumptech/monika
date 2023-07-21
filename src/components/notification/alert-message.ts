@@ -122,7 +122,7 @@ export async function getMessageForAlert({
   const expectedMessage = getExpectedMessage(alert, response, isRecovery)
   const bodyString = `Message: ${recoveryMessage}${expectedMessage}
 
-URL: ${meta.url}
+${meta.url ? `URL: ${meta.url}` : `Probe ID: ${probeID}`}
 
 Time: ${meta.time}
 
