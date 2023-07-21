@@ -9,27 +9,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Added
 
-d1190f8 Feat: Improve Error Message When Request URL is not Using Protocol (#1063)
-52c7ec6 update readme to import exported notification package (#1054)
-ab16356 Doc/1050 update whatsapps docs (#1051)
-33f0db0 update guides doc on payload (#1048)
+Feat: Improve Error Message When Request URL is not Using Protocol (#1063)
+update readme to import exported notification package (#1054)
+Doc/1050 update whatsapps docs (#1051)
+update guides doc on payload (#1048)
 
 ## Fixed
 
+Fix broken Nightly Workflow (#1076)
 Fixed: Confusing Notification Message for Non-HTTP Probe (#1072)
-b734b28 Clean error msg when failed to load config file (#1057)
-c83d9d1 Fix: crashes when some of the probe is removed from the configuration (#1067)
-d4724b2 fix: move instatus to notification workspace and register it as a notification channel (#1056)
-5aecb29 Fix: Probe Doesn't Run After Change Config (#1059)
+Clean error msg when failed to load config file (#1057)
+Fix: crashes when some of the probe is removed from the configuration (#1067)
+fix: move instatus to notification workspace and register it as a notification channel (#1056)
+Fix: Probe Doesn't Run After Change Config (#1059)
 
 ## Changed
 
-9febe8b update workflows (#1073)
-89e36d4 Limit workflow permissions and use environment vars to prevent injection. (#1071)
-2bb9ad7 (origin/main, origin/HEAD) Refactor: Add Test for doProbe Function (#1064)
-3bb855b refactor: add abort controller to cancel running probe (#1058)
-ee3712c update workflows to build the notification package (#1055)
-806a15b Chore: extract notification to workspace package (#1028)
+Chore: Upgrade Pino Version (#1079)
+update workflows (#1073)
+Limit workflow permissions and use environment vars to prevent injection. (#1071)
+(origin/main, origin/HEAD) Refactor: Add Test for doProbe Function (#1064)
+refactor: add abort controller to cancel running probe (#1058)
+update workflows to build the notification package (#1055)
+Chore: extract notification to workspace package (#1028)
 
 ## [1.15.3] - 2023-05-22
 
