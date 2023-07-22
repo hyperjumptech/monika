@@ -77,7 +77,7 @@ describe('Fake data', () => {
 
   it('should returns a random gender', () => {
     const case1 = Handlebars.compile('{{ gender }}')
-    expect(case1({})).to.be.oneOf(['Male', 'Female'])
+    expect(case1({})).to.be.oneOf(['male', 'female'])
 
     const case2 = Handlebars.compile('{{ gender false }}')
     expect(case2({})).to.have.lengthOf.greaterThanOrEqual(3)
