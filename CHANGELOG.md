@@ -17,6 +17,7 @@ update guides doc on payload (#1048)
 ## Fixed
 
 chore: bump typescript and clean up (#1082)
+tweak teams notification (#1080)
 Fix broken Nightly Workflow (#1076)
 Fixed: Confusing Notification Message for Non-HTTP Probe (#1072)
 Clean error msg when failed to load config file (#1057)
