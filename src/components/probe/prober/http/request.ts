@@ -37,7 +37,6 @@ import { getContext } from '../../../../context'
 import { icmpRequest } from '../icmp/request'
 import registerFakes from '../../../../utils/fakes'
 import { sendHttpRequest } from '../../../../utils/http'
-import { exit } from 'process'
 
 //* *********** debugdebudebug */
 let RequestNum = 0
@@ -199,11 +198,11 @@ export async function httpRequest({
     if (error?.request) {
       const status = errorRequestCodeToNumber(error?.code)
 
-      //* ******** debug debug **/
+      //* ******** debug debug
       if (status === 599) {
         console.log('request url:', url)
         console.log('response time:', responseTime)
-        exit(599)
+        // exit(599)
       }
 
       return {
