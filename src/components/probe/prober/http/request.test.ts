@@ -179,7 +179,7 @@ describe('probingHTTP', () => {
       const flags = { followRedirects: 0 } as unknown as MonikaFlags
       setContext({ flags })
       // act
-      server.listen()
+      server.listen({ onUnhandledRequest: 'bypass' })
       const res = await httpRequest({
         requestConfig: request,
         responses: [],
@@ -218,7 +218,7 @@ describe('probingHTTP', () => {
       }
 
       // act
-      server.listen()
+      server.listen({ onUnhandledRequest: 'bypass' })
       const flag = { followRedirects: 0 } as unknown as MonikaFlags
       setContext({ flags: flag })
       const res = await httpRequest({
@@ -259,7 +259,7 @@ describe('probingHTTP', () => {
       }
 
       // act
-      server.listen()
+      server.listen({ onUnhandledRequest: 'bypass' })
       const flag = { followRedirects: 0 } as unknown as MonikaFlags
       setContext({ flags: flag })
       const res = await httpRequest({
@@ -301,7 +301,7 @@ describe('probingHTTP', () => {
       }
 
       // act
-      server.listen()
+      server.listen({ onUnhandledRequest: 'bypass' })
       const flag = { followRedirects: 0 } as unknown as MonikaFlags
       setContext({ flags: flag })
       const res = await httpRequest({
@@ -343,7 +343,7 @@ describe('probingHTTP', () => {
       }
 
       // act
-      server.listen()
+      server.listen({ onUnhandledRequest: 'bypass' })
       const flag = { followRedirects: 0 } as unknown as MonikaFlags
       setContext({ flags: flag })
       const res = await httpRequest({

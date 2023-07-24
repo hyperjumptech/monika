@@ -58,7 +58,7 @@ const probes: Probe[] = [
   },
 ]
 
-beforeEach(() => server.listen())
+beforeEach(() => server.listen({ onUnhandledRequest: 'bypass' }))
 afterEach(() => {
   urlRequestTotal = 0
   server.close()
