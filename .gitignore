@@ -219,6 +219,7 @@ $RECYCLE.BIN/
 /yarn.lock
 config.json
 docs/out
+build
 
 #ignore personal configs
 monika.json
