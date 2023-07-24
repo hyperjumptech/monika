@@ -1,7 +1,7 @@
 {
   "name": "@hyperjumptech/monika",
   "description": "Synthetic monitoring made easy",
-  "version": "1.15.3",
+  "version": "1.15.4",
   "license": "MIT",
   "author": "@hyperjumptech",
   "main": "lib/index.js",
@@ -158,7 +158,7 @@
     "oclif": "^3.0.1",
     "prettier": "2.5.1",
     "ts-node": "^10.4.0",
-    "typescript": "4.9.5"
+    "typescript": "^5.1.6"
   },
   "prettier": {
     "semi": false,
