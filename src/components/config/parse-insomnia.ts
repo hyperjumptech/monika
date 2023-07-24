@@ -27,7 +27,7 @@ import yml from 'js-yaml'
 import { Probe } from '../../interfaces/probe'
 import { DEFAULT_THRESHOLD } from '../../looper'
 import { compile } from 'handlebars'
-import { AxiosRequestHeaders, Method } from 'axios'
+import { Method, RawAxiosRequestHeaders } from 'axios'
 
 interface InsomniaResource {
   _id: string
@@ -106,10 +106,10 @@ function mapInsomniaRequestToConfig(res: InsomniaResource): Probe {
   // eslint-disable-next-line camelcase
   const url = compile(res.url)({ base_url: baseUrl })
   const authorization = getAuthorizationHeader(res)
-  let headers: AxiosRequestHeaders | undefined
+  let headers: RawAxiosRequestHeaders | undefined
   if (authorization)
     headers = {
-      authorization,
+      Authorization: authorization,
     }
   if (res.headers) {
     if (headers === undefined) headers = {}

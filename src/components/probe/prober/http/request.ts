@@ -37,6 +37,7 @@ import { getContext } from '../../../../context'
 import { icmpRequest } from '../icmp/request'
 import registerFakes from '../../../../utils/fakes'
 import { sendHttpRequest } from '../../../../utils/http'
+import { AxiosHeaderValue } from 'axios'
 
 // Register Handlebars helpers
 registerFakes(Handlebars)
@@ -227,10 +228,7 @@ export function generateRequestChainingBody(
   return isString ? renderedBody : JSON.parse(renderedBody)
 }
 
-function transformContentByType(
-  content: any,
-  contentType?: string | number | boolean
-) {
+function transformContentByType(content: any, contentType?: AxiosHeaderValue) {
   switch (contentType) {
     case 'application/x-www-form-urlencoded':
       return {
