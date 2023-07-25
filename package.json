@@ -54,7 +54,7 @@
     "format": "prettier --write .",
     "check-format": "prettier --check .",
     "compile-js": "ncc build bin/run -o build",
-    "pkg": "npm run prepack && compile-js && pkg . --compress brotli"
+    "pkg": "npm run prepack && pkg . --compress brotli"
   },
   "dependencies": {
     "@alicloud/dingtalk": "^1.3.53",
