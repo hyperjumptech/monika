@@ -61,8 +61,8 @@ Details of the field are given in the table below.
 
 | Topic                        | Description                                                                                                                                                                                                                                                                                                                                               |
 | :--------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| method                       | Http method such as GET, POST, PUT, DELETE.                                                                                                                                                                                                                                                                                                               |
-| url                          | This is the url endpoint to dispatch the request to.                                                                                                                                                                                                                                                                                                      |
+| method (optional)            | Http method such as GET, POST, PUT, DELETE.                                                                                                                                                                                                                                                                                                               |
+| url (required)               | This is the url endpoint to dispatch the request to.                                                                                                                                                                                                                                                                                                      |
 | timeout (optional)           | Request timeout in **milliseconds**, Default value is 10000 which corresponds to 10 seconds. If the request takes longer than `timeout`, the request will be aborted.                                                                                                                                                                                     |
 | headers (optional)           | Http headers you might need for your request.                                                                                                                                                                                                                                                                                                             |
 | body (optional)              | Any http body if your method requires it.                                                                                                                                                                                                                                                                                                                 |
@@ -74,6 +74,29 @@ Details of the field are given in the table below.
 | alerts (optional)            | See [alerts](./alerts) section for detailed information.                                                                                                                                                                                                                                                                                                  |
 | ping (optional)              | (boolean), If set true then send a PING to the specified url instead.                                                                                                                                                                                                                                                                                     |
 | allowUnauthorized (optional) | (boolean), If set to true, will make https agent to not check for ssl certificate validity                                                                                                                                                                                                                                                                |
+
+## Request Body
+
+By default, the request body will be treated as-is. If the request header's `Content-Type` is set to `application/x-www-form-urlencoded`, it will be serialized into URL-safe string in UTF-8 encoding. Body payloads will vary on the specific probes being requested. For HTTP requests, the body and headers are defined like this:
+
+```yaml
+requests:
+  - method: POST
+    url: https://example.com/auth/login
+    timeout: 7000 # in milliseconds
+    saveBody: true
+    headers:
+      Authorization: Bearer __your_token_here__
+    body:
+      username: someusername
+      password: somepassword
+```
+
+You can use responses from previous http requests in the body of your next request, see how [requests chaining](https://hyperjumptech.github.io/monika/guides/examples#requests-chaining) work in the sections further below. It is also possible to automatically generate data in your payload. See the fake data payload section [here](https://hyperjumptech.github.io/monika/guides/probes#fake-data).
+
+## Content-Type header
+
+Currently, Monika only supports Content-Type value `application/x-www-form-urlencoded` and `application/json` with UTF-8 encoding.
 
 ### Mariadb or MySQL Probes
 
@@ -224,7 +247,19 @@ probes:
         password: mypassword
 ```
 
-You may also add a `username` property as needed.
+You may also add a `username` property as needed. An alternative format that you can provide is a uri connection string for redis with the following specification `redis://[[username][:password]@][host][:port][/db-number]`:
+
+```yaml
+probes:
+  - id: 'redis-ping'
+    name: redis check with password
+    description: requesting redis PONG
+    interval: 30 # in seconds
+    redis:
+      - uri: 'redis://alice:mypassword@172.15.0.2:6379'
+```
+
+See the full [redis client configurations here](https://github.com/redis/node-redis).
 
 ### TCP
 
@@ -276,14 +311,6 @@ Probe response data could be used for [Request Chaining](https://hyperjumptech.g
 In a configuration with multiple probes, `Monika` will load the requests in the order that they are entered, one after another. However, probes may be performed out of sequence depending on their interval setting, network latency and response times. By default Monika loops through all the probe configurations in the order they are entered, but you can use the `--id` or the `--repeat` flags to specify or repeat a particular sequence. See the [cli options here](https://monika.hyperjump.tech/guides/cli-options) for more information.
 
 In general, Monika will sleep until the next `interval` timer to repeat a probe. If no `interval` time is specified for a probe, the default value will be used. If the configured probe `interval` is shorter than the amount of time to dispatch all the requests, then `Monika` will immediately repeat after the last response and any notification alerts sent.
-
-## Content-Type header
-
-Currently, Monika only supports Content-Type value `application/x-www-form-urlencoded` and `application/json` with UTF-8 encoding.
-
-## Request Body
-
-By default, the request body will be treated as-is. If the request header's `Content-Type` is set to `application/x-www-form-urlencoded`, it will be serialized into URL-safe string in UTF-8 encoding.
 
 ## Fake Data
 

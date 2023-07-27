@@ -24,31 +24,34 @@
  **********************************************************************************/
 
 import { Command, Errors, Flags, Interfaces } from '@oclif/core'
+import pEvent from 'p-event'
 
 import { flush, help } from './commands'
-import { createConfig, getConfigIterator } from './components/config'
+import { createConfig, getConfig, isSymonModeFrom } from './components/config'
 import { sortProbes } from './components/config/sort'
 import { printAllLogs } from './components/logger'
 import { closeLog, openLogfile } from './components/logger/history'
 import { openLogPouch } from './components/logger/history-pouch'
 import { logStartupMessage } from './components/logger/startup-message'
-import {
-  resetScheduledTasks,
-  scheduleSummaryNotification,
-} from './components/notification/schedule-notification'
+import { scheduleSummaryNotification } from './components/notification/schedule-notification'
 import { sendMonikaStartMessage } from './components/notification/start-message'
 import { setContext } from './context'
 import type { MonikaFlags } from './context/monika-flags'
 import { monikaFlagsDefaultValue } from './context/monika-flags'
 import events from './events'
-import { Config } from './interfaces/config'
-import { Probe } from './interfaces/probe'
+import type { Config } from './interfaces/config'
+import type { Probe } from './interfaces/probe'
 import { printSummary, savePidFile } from './jobs/summary-notification'
 import initLoaders from './loaders'
 import { sanitizeProbe, startProbing } from './looper'
 import SymonClient from './symon'
 import { getEventEmitter } from './utils/events'
 import { log } from './utils/pino'
+
+type GetProbesParams = {
+  config: Config
+  flags: MonikaFlags
+}
 
 const em = getEventEmitter()
 let symonClient: SymonClient
@@ -310,68 +313,57 @@ class Monika extends Command {
 
       await initLoaders(_flags, this.config)
 
-      const isSymonMode = Boolean(_flags.symonUrl) && Boolean(_flags.symonKey)
-      if (isSymonMode) {
-        symonClient = new SymonClient({
-          url: _flags.symonUrl as string,
-          apiKey: _flags.symonKey as string,
-          locationId: _flags.symonLocationId as string,
-          monikaId: _flags.symonMonikaId as string,
-          reportInterval: _flags.symonReportInterval,
-          reportLimit: _flags.symonReportLimit,
-        })
+      if (isSymonModeFrom(_flags)) {
+        symonClient = new SymonClient(_flags)
         await symonClient.initiate()
       }
 
-      let abortCurrentLooper: (() => void) | undefined
-      const isTestEnvironment = process.env.NODE_ENV === 'test'
+      let isFirstRun = true
 
-      for await (const config of getConfigIterator(isSymonMode)) {
-        if (!config) continue
-
-        const { notifications, probes } = config
-        const sortedProbes = sortProbes(probes, _flags.id)
-        const sanitizedProbe = sortedProbes.map((probe: Probe) =>
-          sanitizeProbe(isSymonMode, probe)
-        )
+      for (;;) {
+        const controller = new AbortController()
+        const { signal } = controller
+        const config = getConfig()
+        const notifications = config.notifications || []
+        const probes = this.getProbes({ config, flags: _flags })
 
         // emit the sanitized probe
-        em.emit(events.config.sanitized, sanitizedProbe)
-
-        if (abortCurrentLooper) {
-          abortCurrentLooper()
-        }
-
-        resetScheduledTasks()
-
-        if (!isTestEnvironment) {
-          await sendMonikaStartMessage(notifications ?? [])
-        }
-
-        await this.deprecationHandler(config)
-
-        logStartupMessage({
-          config,
-          configFlag: _flags.config,
-          isFirstRun: !abortCurrentLooper,
-          isSymonMode,
-          isVerbose: _flags.verbose,
-        })
+        em.emit(events.config.sanitized, probes)
 
         // save some data into files for later
         savePidFile(_flags.config, config)
 
-        // schedule status update notification
-        scheduleSummaryNotification({
-          isSymonMode,
-          statusNotificationConfig: config['status-notification'],
-          statusNotificationFlag: _flags['status-notification'],
+        this.deprecationHandler(config)
+
+        logStartupMessage({
+          config,
+          flags: _flags,
+          isFirstRun,
         })
 
-        abortCurrentLooper = startProbing({
-          probes: sanitizedProbe,
-          notifications: notifications ?? [],
+        startProbing({
+          signal,
+          probes,
+          notifications,
         })
+
+        if (process.env.NODE_ENV === 'test') {
+          break
+        }
+
+        sendMonikaStartMessage(notifications).catch((error) =>
+          log.error(error.message)
+        )
+
+        // schedule status update notification
+        scheduleSummaryNotification({ config, flags: _flags })
+
+        isFirstRun = false
+
+        // block the loop until receives config updated event
+        // eslint-disable-next-line no-await-in-loop
+        await pEvent(em, events.config.updated)
+        controller.abort('Monika configuration updated')
       }
     } catch (error) {
       await closeLog()
@@ -400,7 +392,7 @@ class Monika extends Command {
     throw error
   }
 
-  async deprecationHandler(config: Config): Promise<Config> {
+  deprecationHandler(config: Config): Config {
     let showDeprecateMsg = false
 
     const checkedConfig = {
@@ -434,6 +426,14 @@ class Monika extends Command {
     }
 
     return checkedConfig
+  }
+
+  getProbes({ config, flags }: GetProbesParams): Probe[] {
+    const sortedProbes = sortProbes(config.probes, flags.id)
+
+    return sortedProbes.map((probe: Probe) =>
+      sanitizeProbe(isSymonModeFrom(flags), probe)
+    )
   }
 }
 

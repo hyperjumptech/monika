@@ -15,6 +15,10 @@ on:
 env:
   USERNAME: ${{ github.actor }}
   EMAIL: ${{ github.actor}}@users.noreply.github.com
+
+permissions:
+  issues: read
+  pull-requests: read
   
 jobs:
   create-auto-PR:
@@ -45,6 +49,7 @@ jobs:
         run : |
           cd src
           npm ci
+          npm run build -w packages/notification
           npm run build
 
       - name: Create Pull Request
@@ -69,6 +74,9 @@ jobs:
 
       - name: Check outputs
         if: ${{ steps.cpr.outputs.pull-request-number }}
+        env: 
+          PR_NUMBER: ${{ steps.cpr.outputs.pull-request-number }}
+          PR_URL: ${{ steps.cpr.outputs.pull-request-url }}
         run: |
-          echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
-          echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
+          echo "Pull Request Number - $PR_NUMBER"
+          echo "Pull Request URL - $PR_URL"

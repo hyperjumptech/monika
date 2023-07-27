@@ -1,7 +1,8 @@
+import { isSymonModeFrom } from '../../../config'
 import { checkThresholdsAndSendAlert } from '../..'
 import { getContext } from '../../../../context'
 import events from '../../../../events'
-import type { Notification } from '../../../notification/channel'
+import type { Notification } from '@hyperjumptech/monika-notification'
 import type { Probe } from '../../../../interfaces/probe'
 import type { ProbeRequestResponse } from '../../../../interfaces/request'
 import validateResponse from '../../../../plugins/validate-response'
@@ -12,7 +13,7 @@ import { logResponseTime } from '../../../logger/response-time-log'
 import { processThresholds } from '../../../notification/process-server-status'
 import { httpRequest } from './request'
 
-const CONNNECTION_RECOVERY_MESSAGE = 'Probe is accessible again'
+const CONNECTION_RECOVERY_MESSAGE = 'Probe is accessible again'
 const CONNECTION_INCIDENT_MESSAGE = 'Probe not accessible'
 const isConnectionDown = new Map<string, boolean>()
 
@@ -24,7 +25,7 @@ export async function probeHTTP(
 ): Promise<void> {
   const eventEmitter = getEventEmitter()
   const { flags } = getContext()
-  const isSymonMode = Boolean(flags.symonUrl) && Boolean(flags.symonKey)
+  const isSymonMode = isSymonModeFrom(flags)
   const isVerbose = isSymonMode || flags['keep-verbose-logs']
   const responses = []
 
@@ -85,7 +86,7 @@ export async function probeHTTP(
         ) {
           validatedResponse[0].alert = {
             assertion: '',
-            message: CONNNECTION_RECOVERY_MESSAGE,
+            message: CONNECTION_RECOVERY_MESSAGE,
           }
           isConnectionDown.delete(id) // connection is up, so remove from entry
         } else if (!isProbeResponsive) {

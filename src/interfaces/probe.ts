@@ -39,13 +39,14 @@ export type Socket = {
 }
 
 export type Redis = {
-  host: string
-  port: number
+  host?: string
+  port?: number
   username?: string
   password?: string
   command?: string
   data?: string | Uint8Array
   alerts?: ProbeAlert[]
+  uri?: string
 }
 
 export type MariaDB = {

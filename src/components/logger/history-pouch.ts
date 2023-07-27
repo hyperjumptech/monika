@@ -21,12 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  *
  * SOFTWARE.                                                                      *
  **********************************************************************************/
+import type { Notification } from '@hyperjumptech/monika-notification'
 import PouchDB from 'pouchdb'
 import { getContext } from '../../context'
 import { Probe } from '../../interfaces/probe'
 import { ProbeRequestResponse } from '../../interfaces/request'
 import { log } from '../../utils/pino'
-import type { Notification } from '../notification/channel'
 let localPouchDB: PouchDB.Database
 
 /**

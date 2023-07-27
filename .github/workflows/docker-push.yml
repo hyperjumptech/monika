@@ -6,6 +6,10 @@ on:
   release:
     types: [created]
 
+permissions:
+  issues: read
+  pull-requests: read
+  
 jobs:
   docker:
     runs-on: ubuntu-latest

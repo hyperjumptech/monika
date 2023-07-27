@@ -29,7 +29,7 @@ import * as Handlebars from 'handlebars'
 import getos from 'getos'
 import osName from 'os-name'
 import { getContext } from '../../context'
-import type { NotificationMessage } from '../notification/channel'
+import type { NotificationMessage } from '@hyperjumptech/monika-notification'
 import { ProbeRequestResponse } from '../../interfaces/request'
 import { ProbeAlert } from '../../interfaces/probe'
 import { publicIpAddress, publicNetworkInfo } from '../../utils/public-ip'
@@ -122,7 +122,7 @@ export async function getMessageForAlert({
   const expectedMessage = getExpectedMessage(alert, response, isRecovery)
   const bodyString = `Message: ${recoveryMessage}${expectedMessage}
 
-URL: ${meta.url}
+${meta.url ? `URL: ${meta.url}` : `Probe ID: ${probeID}`}
 
 Time: ${meta.time}
 

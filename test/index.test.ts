@@ -167,7 +167,7 @@ describe('monika', () => {
     )
     .catch((error) => {
       expect(error.message).to.contain(
-        'Probe request URL should start with http:// or https://'
+        'Probe request URL (something/something) should start with http:// or https://'
       )
     })
     .it('runs with config with invalid probe request URL')
@@ -425,11 +425,11 @@ describe('monika', () => {
       cmd.run([
         '-c',
         resolve('./test/testConfigs/manyNotif.yml'),
-        resolve('./test/testConfigs/noProbes.yml'),
+        resolve('./test/testConfigs/simple-1p-1n.yaml'),
       ])
     )
     .it(
-      'run wth multiple config override: no probes on the second config',
+      'run with multiple config override: no probes on the second config',
       (ctx) => {
         expect(ctx.stdout)
           .to.contain('Notifications: 1')

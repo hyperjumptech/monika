@@ -8,6 +8,10 @@ on:
   release:
     types: [published]
 
+permissions:
+  issues: read
+  pull-requests: read    
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -18,6 +22,7 @@ jobs:
           node-version: 16
       - run: npm ci
         name: Install dependencies
+      - run: npm run build -w packages/notification
       - run: npm test
         name: Run tests
       - run: npm pack
@@ -60,6 +65,7 @@ jobs:
 
       - run: npm ci
         name: Install dependencies
+      - run: npm run build -w packages/notification
 
       - run: npm run pkg -- -t node16-${{ matrix.platform }}
         name: Pack the binary using vercel/pkg

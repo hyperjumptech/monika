@@ -1,7 +1,25 @@
 import * as mongodbURI from 'mongodb-uri'
-import type { ProbeResult } from '..'
+import { BaseProber, type ProbeResult } from '..'
 import type { Mongo } from '../../../../interfaces/probe'
 import { mongoRequest } from './request'
+
+export class MongoProber extends BaseProber {
+  async probe(): Promise<void> {
+    if (!this.probeConfig.mongo) {
+      throw new Error(
+        `Mongo configuration is empty. Probe ID: ${this.probeConfig.id}`
+      )
+    }
+
+    const result = await probeMongo({
+      id: this.probeConfig.id,
+      checkOrder: this.counter,
+      mongo: this.probeConfig.mongo,
+    })
+
+    this.processProbeResults(result)
+  }
+}
 
 type ProbeMongoParams = {
   id: string

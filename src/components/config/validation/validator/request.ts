@@ -26,8 +26,6 @@ import { RequestConfig } from '../../../../interfaces/request'
 import { HTTPMethods } from '../../../../utils/http'
 import { isValidURL } from '../../../../utils/is-valid-url'
 
-const PROBE_REQUEST_INVALID_URL =
-  'Probe request URL should start with http:// or https://'
 const PROBE_REQUEST_INVALID_METHOD =
   'Probe request method is invalid! Valid methods are GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS, PURGE, LINK, and UNLINK'
 const PROBE_REQUEST_NO_URL = 'Probe request URL does not exists'
@@ -45,7 +43,7 @@ const checkProbeRequestProperties = (
 
       // if not a ping request and url not valid, return INVLID_URL error
       if (ping !== true && !isValidURL(url)) {
-        return PROBE_REQUEST_INVALID_URL
+        return `Probe request URL (${url}) should start with http:// or https://`
       }
 
       if (!HTTPMethods.has(method?.toUpperCase() ?? 'GET'))
@@ -55,8 +53,12 @@ const checkProbeRequestProperties = (
 }
 
 export const validateRequests = (
-  requests: RequestConfig[]
+  requests?: RequestConfig[]
 ): string | undefined => {
+  if (requests === undefined) {
+    return
+  }
+
   for (const req of requests) {
     if (req.timeout <= 0) {
       return `The timeout in the request with id "${req.id}" should be greater than 0.`

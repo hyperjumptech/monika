@@ -49,6 +49,27 @@ describe('Redis Prober', () => {
     sinon.assert.calledOnce(redisPingStub)
   })
 
+  it('should probe using Redis url', async () => {
+    // arrange
+    const probeParams = {
+      id: 'FgYCA',
+      checkOrder: 1,
+      redis: [
+        {
+          uri: 'redis://0.0.0.0:6379',
+        },
+      ],
+    }
+
+    // act
+    const probeResults = await probeRedis(probeParams)
+
+    // assert
+    expect(probeResults.length).deep.eq(1)
+    expect(probeResults[0].logMessage).include('redis')
+    sinon.assert.calledOnce(redisPingStub)
+  })
+
   it('should probe multiple probes', async () => {
     // arrange
     const probeParams = {

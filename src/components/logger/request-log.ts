@@ -22,11 +22,11 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import type { Notification } from '@hyperjumptech/monika-notification'
 import { getContext } from '../../context'
 import type { Probe, ProbeAlert } from '../../interfaces/probe'
 import type { ProbeRequestResponse } from '../../interfaces/request'
 import { log } from '../../utils/pino'
-import type { Notification } from '../notification/channel'
 import { saveNotificationLog, saveProbeRequestLog } from './history'
 import { saveProbeRequestToPouchDB } from './history-pouch'
 export class RequestLog {

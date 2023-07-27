@@ -22,6 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import type { Config } from '../interfaces/config'
 import type { MonikaFlags } from './monika-flags'
 import { monikaFlagsDefaultValue } from './monika-flags'
 
@@ -36,6 +37,7 @@ type Context = {
   userAgent: string
   incidents: Incident[]
   monikaID: string
+  config?: Config
   flags: MonikaFlags
 }
 

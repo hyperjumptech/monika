@@ -22,18 +22,17 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios, { AxiosRequestConfig } from 'axios'
-import Pako from 'pako'
+import axios from 'axios'
 import path from 'path'
 import { open } from 'sqlite'
 import SQLite3 from 'sqlite3'
 import { parentPort, workerData } from 'worker_threads'
 import {
+  UnreportedNotificationsLog,
+  UnreportedRequestsLog,
   deleteNotificationLogs,
   deleteRequestLogs,
   getUnreportedLogs,
-  UnreportedNotificationsLog,
-  UnreportedRequestsLog,
 } from '../../components/logger/history'
 import { log } from '../../utils/pino'
 const dbPath = path.resolve(process.cwd(), 'monika-logs.db')
@@ -86,8 +85,6 @@ const main = async (data: Record<string, any>) => {
         'Content-Type': 'application/json',
         'x-api-key': apiKey,
       },
-      transformRequest: (req: AxiosRequestConfig) =>
-        Pako.gzip(JSON.stringify(req)).buffer,
     })
 
     log.info(
@@ -108,8 +105,6 @@ const main = async (data: Record<string, any>) => {
     )
     log.debug(`Deleted ${notifications.length} reported request`)
 
-    // Send message to parentPort so that
-    // the reported logs and notifications can be deleted
     parentPort?.postMessage({
       success: true,
       data: {
