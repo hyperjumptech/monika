@@ -26,6 +26,7 @@ type RespProsessingParams = {
 
 export interface Prober {
   probe: () => Promise<void>
+  generateVerboseStartupMessage: () => string
 }
 
 export type ProberMetadata = {
@@ -47,6 +48,46 @@ export class BaseProber implements Prober {
 
   async probe(): Promise<void> {
     this.processProbeResults([])
+  }
+
+  generateVerboseStartupMessage(): string {
+    const { description, id, interval, name } = this.probeConfig
+
+    let result = `- Probe ID: ${id}
+Name: ${name}
+Description: ${description || '-'}
+Interval: ${interval}
+`
+    result += `    Requests:\n`
+    result += this.generateProbeRequestMessage()
+    result += this.generateAlertMessage()
+
+    return result
+  }
+
+  private generateProbeRequestMessage(): string {
+    let startupMessage = ''
+
+    for (const request of this.probeConfig.requests || []) {
+      const { body, headers, method, url } = request
+
+      startupMessage += `      - Request Method: ${method || `GET`}
+    Request URL: ${url}
+    Request Headers: ${JSON.stringify(headers) || `-`}
+    Request Body: ${JSON.stringify(body) || `-`}
+  `
+    }
+
+    return startupMessage
+  }
+
+  private generateAlertMessage(): string {
+    const hasAlert = this.probeConfig.alerts.length > 0
+    const defaultAlertsInString =
+      '[{ "assertion": "response.status < 200 or response.status > 299", "message": "HTTP Status is not 200"}, { "assertion": "response.time > 2000", "message": "Response time is more than 2000ms" }]'
+    const alertsInString = JSON.stringify(this.probeConfig.alerts)
+
+    return `    Alerts: ${hasAlert ? alertsInString : defaultAlertsInString}\n`
   }
 
   protected processProbeResults(probeResults: ProbeResult[]): void {
