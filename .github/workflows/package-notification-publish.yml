@@ -8,6 +8,10 @@ on:
   release:
     types: [created]
 
+permissions:
+  issues: read
+  pull-requests: read
+  
 jobs:
   publish-npm:
     runs-on: ubuntu-latest

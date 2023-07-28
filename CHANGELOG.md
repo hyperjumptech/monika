@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.15.4] - 2023-07-24
+
+## Added
+
+Feat: Improve Error Message When Request URL is not Using Protocol (#1063)
+update readme to import exported notification package (#1054)
+Doc/1050 update whatsapps docs (#1051)
+update guides doc on payload (#1048)
+
+## Fixed
+
+chore: bump typescript and clean up (#1082)
+tweak teams notification (#1080)
+Fix broken Nightly Workflow (#1076)
+Fixed: Confusing Notification Message for Non-HTTP Probe (#1072)
+Clean error msg when failed to load config file (#1057)
+Fix: crashes when some of the probe is removed from the configuration (#1067)
+fix: move instatus to notification workspace and register it as a notification channel (#1056)
+Fix: Probe Doesn't Run After Change Config (#1059)
+
+## Changed
+
+Chore: Upgrade Pino Version (#1079)
+update workflows (#1073)
+Limit workflow permissions and use environment vars to prevent injection. (#1071)
+(origin/main, origin/HEAD) Refactor: Add Test for doProbe Function (#1064)
+refactor: add abort controller to cancel running probe (#1058)
+update workflows to build the notification package (#1055)
+Chore: extract notification to workspace package (#1028)
+
 ## [1.15.3] - 2023-05-22
 
 ## Added
