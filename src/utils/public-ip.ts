@@ -29,6 +29,10 @@ import getIp from './ip'
 import { sendPing } from './ping'
 import { sendHttpRequest } from './http'
 
+// import type { MonikaFlags } from '../context/monika-flags'
+import { getContext } from '../context'
+const { flags } = getContext()
+
 export let publicIpAddress = ''
 export let isConnectedToSTUNServer = true
 export let publicNetworkInfo: { country: string; city: string; isp: string }
@@ -63,13 +67,18 @@ export async function getPublicNetworkInfo(): Promise<any> {
     })
     const { country, city, isp } = response.data
     publicNetworkInfo = { country, city, isp }
-    log.info(
-      `Monika is running from: ${publicNetworkInfo.city} - ${
-        publicNetworkInfo.isp
-      } (${ip}) - ${hostname()} (${getIp()})`
-    )
+
+    if (flags.verbose) {
+      log.info(
+        `Monika is running from: ${publicNetworkInfo.city} - ${
+          publicNetworkInfo.isp
+        } (${ip}) - ${hostname()} (${getIp()})`
+      )
+    } else {
+      log.info('network connectivity ok')
+    }
   } catch (error) {
-    log.warn(`Failed to obtain location/ISP info. Got: ${error}`)
+    log.warn(`Network connectivity issues. Got: ${error}`)
     return Promise.resolve() // couldn't resolve publicNetworkInfo, fail gracefully and continue
   }
 
@@ -88,9 +97,13 @@ export async function getPublicIp(): Promise<any> {
     if (address) {
       publicIpAddress = address
       isConnectedToSTUNServer = true
-      log.info(
-        `${time} - Connected to STUN Server. Monika is running from: ${address}`
-      )
+      if (flags.verbose) {
+        log.info(
+          `${time} - Connected to STUN Server. Monika is running from: ${address}`
+        )
+      } else {
+        log.info(`${time} - Connected to STUN Server.`)
+      }
     }
   } catch {
     isConnectedToSTUNServer = false
