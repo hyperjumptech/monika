@@ -40,14 +40,6 @@ type PublicNetwork = {
   publicIp: string
 }
 
-type PublicNetwork = {
-  country: string
-  city: string
-  hostname: string
-  isp: string
-  privateIp: string
-  publicIp: string
-}
 
 export let publicIpAddress = ''
 export let isConnectedToSTUNServer = true
