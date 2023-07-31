@@ -33,7 +33,6 @@ import {
   mkdirs,
   move,
 } from 'fs-extra'
-import { Stream } from 'stream'
 import * as os from 'os'
 import { setInterval } from 'timers'
 import { log } from '../../utils/pino'
@@ -88,9 +87,10 @@ export async function enableAutoUpdate(
 async function runUpdater(config: IConfig, updateMode: UpdateMode) {
   log.info('Updater: starting')
   const currentVersion = config.version
-  const { data } = await sendHttpRequest({
+  const res = await sendHttpRequest({
     url: 'https://registry.npmjs.org/@hyperjumptech/monika',
   })
+  const data = await res.json()
 
   const latestVersion = data['dist-tags'].latest
   if (latestVersion === currentVersion || config.debug) {
@@ -263,20 +263,18 @@ async function downloadMonika(
   const filename = `monika-v${remoteVersion}-${platformName}-x64`
   const downloadUri = `https://github.com/hyperjumptech/monika/releases/download/v${remoteVersion}/${filename}.zip`
   log.info(`Updater: download from ${downloadUri}`)
-  const { data: downloadStream } = await sendHttpRequest({
+  const res = await sendHttpRequest({
     url: downloadUri,
-    responseType: 'stream',
   })
-
-  const { data: checksum }: { data: string } = await sendHttpRequest({
+  const resChecksum = await sendHttpRequest({
     url: `https://github.com/hyperjumptech/monika/releases/download/v${remoteVersion}/${filename}-CHECKSUM.txt`,
   })
+  const checksum = await resChecksum.text()
 
   return new Promise((resolve, reject) => {
     const targetPath = `${os.tmpdir()}/${filename}`
     const writer = createWriteStream(targetPath)
-    const stream = downloadStream as Stream
-    stream.pipe(writer)
+    res.body.pipe(writer)
     writer.on('error', (err) => {
       writer.close()
       reject(err)

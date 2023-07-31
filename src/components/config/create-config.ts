@@ -33,8 +33,8 @@ export const createConfigFile = async (flags: MonikaFlags): Promise<string> => {
   try {
     const url =
       'https://raw.githubusercontent.com/hyperjumptech/monika/main/monika.example.yml'
-    await sendHttpRequest({ url: url }).then((resp) => {
-      fs.writeFileSync(filename, resp.data, 'utf-8')
+    await sendHttpRequest({ url: url }).then(async (resp) => {
+      fs.writeFileSync(filename, await resp.text(), 'utf-8')
     })
     log.info(
       `${filename} file has been created in this directory. You can change the URL to probe and other configurations in that ${filename} file.`

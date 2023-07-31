@@ -61,7 +61,7 @@ export async function getPublicNetworkInfo(): Promise<any> {
     const response = await sendHttpRequest({
       url: `http://ip-api.com/json/${ip}`,
     })
-    const { country, city, isp } = response.data
+    const { country, city, isp } = await response.json()
     publicNetworkInfo = { country, city, isp }
     log.info(
       `Monika is running from: ${publicNetworkInfo.city} - ${

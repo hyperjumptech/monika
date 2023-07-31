@@ -22,14 +22,10 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios'
-import http from 'http'
+import fetch, { RequestInit, Response } from 'node-fetch'
+import http, { RequestOptions } from 'http'
 import https from 'https'
 
-// Keep the agents alive to reduce the overhead of DNS queries and creating TCP connection.
-// More information here: https://rakshanshetty.in/nodejs-http-keep-alive/
-const httpAgent = new http.Agent({ keepAlive: true })
-const httpsAgent = new https.Agent({ keepAlive: true })
 export const DEFAULT_TIMEOUT = 10_000
 
 export const HTTPMethods = new Set([
@@ -45,18 +41,21 @@ export const HTTPMethods = new Set([
   'UNLINK',
 ])
 
-// Create an instance of axios here so it will be reused instead of creating a new one all the time.
-const axiosInstance = axios.create()
-
 export async function sendHttpRequest(
-  config: AxiosRequestConfig
-): Promise<AxiosResponse> {
-  const resp = await axiosInstance.request({
-    ...config,
-    timeout: config.timeout ?? DEFAULT_TIMEOUT, // Ensure default timeout if not filled.
-    httpAgent: config.httpAgent ?? httpAgent,
-    httpsAgent: config.httpsAgent ?? httpsAgent,
+  config: { url: string } & RequestInit
+): Promise<Response> {
+  const { url, timeout, agent, ...init } = config
+  return fetch(url, {
+    ...init,
+    timeout: timeout ?? DEFAULT_TIMEOUT,
+    agent: agent ?? defaultAgent,
   })
+}
 
-  return resp
+// Keep the agents alive to reduce the overhead of DNS queries and creating TCP connection.
+// More information here: https://rakshanshetty.in/nodejs-http-keep-alive/
+function defaultAgent(parsedUrl: URL): RequestOptions['agent'] {
+  return parsedUrl.protocol === 'http:'
+    ? new http.Agent({ keepAlive: true })
+    : new https.Agent({ keepAlive: true })
 }

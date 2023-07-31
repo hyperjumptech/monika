@@ -31,20 +31,16 @@ import {
 } from '../../../../interfaces/request'
 import * as qs from 'querystring'
 
-import http from 'http'
+import http, { RequestOptions } from 'http'
 import https from 'https'
 import { getContext } from '../../../../context'
 import { icmpRequest } from '../icmp/request'
 import registerFakes from '../../../../utils/fakes'
 import { sendHttpRequest } from '../../../../utils/http'
+import { Readable } from 'stream'
 
 // Register Handlebars helpers
 registerFakes(Handlebars)
-
-// Keep the agents alive to reduce the overhead of DNS queries and creating TCP connection.
-// More information here: https://rakshanshetty.in/nodejs-http-keep-alive/
-const httpAgent = new http.Agent({ keepAlive: true })
-const httpsAgent = new https.Agent({ keepAlive: true })
 
 type probingParams = {
   requestConfig: Omit<RequestConfig, 'saveBody' | 'alert'> // is a config object
@@ -130,13 +126,6 @@ export async function httpRequest({
     }
   }
 
-  // check if this request must ignore ssl cert
-  // if it is, then create new https agent solely for this request
-  let optHttpsAgent = httpsAgent
-  if (allowUnauthorized) {
-    optHttpsAgent = new https.Agent({ rejectUnauthorized: !allowUnauthorized })
-  }
-
   const requestStartedAt = Date.now()
 
   try {
@@ -149,14 +138,20 @@ export async function httpRequest({
     const resp = await sendHttpRequest({
       ...newReq,
       url: renderedURL,
-      data: newReq.body,
-      maxRedirects: flags['follow-redirects'],
-      httpAgent,
-      httpsAgent: optHttpsAgent,
+      body:
+        typeof newReq.body === 'string'
+          ? Readable.from(newReq.body)
+          : Readable.from(JSON.stringify(newReq.body)),
+      redirect: 'manual',
+      follow: flags['follow-redirects'],
+      agent: allowUnauthorized
+        ? optHttpsAgent(allowUnauthorized)
+        : defaultAgent,
     })
 
     const responseTime = Date.now() - requestStartedAt
-    const { data, headers, status } = resp
+    const { headers, status } = resp
+    const data = await resp.text()
 
     return {
       requestType: 'HTTP',
@@ -165,7 +160,6 @@ export async function httpRequest({
       status,
       headers,
       responseTime,
-
       isProbeResponsive: true,
     }
   } catch (error: any) {
@@ -258,6 +252,21 @@ function transformContentByType(
     default:
       return { content, contentType }
   }
+}
+
+// Keep the agents alive to reduce the overhead of DNS queries and creating TCP connection.
+// More information here: https://rakshanshetty.in/nodejs-http-keep-alive/
+function defaultAgent(parsedUrl: URL): RequestOptions['agent'] {
+  return parsedUrl.protocol === 'http:'
+    ? new http.Agent({ keepAlive: true })
+    : new https.Agent({ keepAlive: true })
+}
+
+function optHttpsAgent(allowUntrustedSSL: boolean): RequestOptions['agent'] {
+  return new https.Agent({
+    keepAlive: true,
+    rejectUnauthorized: !allowUntrustedSSL,
+  })
 }
 
 function errorRequestCodeToNumber(
