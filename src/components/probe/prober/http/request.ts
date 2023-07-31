@@ -37,7 +37,6 @@ import { getContext } from '../../../../context'
 import { icmpRequest } from '../icmp/request'
 import registerFakes from '../../../../utils/fakes'
 import { sendHttpRequest } from '../../../../utils/http'
-import { Readable } from 'stream'
 
 // Register Handlebars helpers
 registerFakes(Handlebars)
@@ -105,9 +104,9 @@ export async function httpRequest({
     newReq.body = generateRequestChainingBody(body, responses)
 
     if (newReq.headers) {
-      const contentTypeKey = Object.keys(headers || {}).find((hk) => {
-        return hk.toLocaleLowerCase() === 'content-type'
-      })
+      const contentTypeKey = Object.keys(headers || {}).find(
+        (hk) => hk.toLocaleLowerCase() === 'content-type'
+      )
 
       if (contentTypeKey) {
         const { content, contentType } = transformContentByType(
@@ -138,10 +137,7 @@ export async function httpRequest({
     const resp = await sendHttpRequest({
       ...newReq,
       url: renderedURL,
-      body:
-        typeof newReq.body === 'string'
-          ? Readable.from(newReq.body)
-          : Readable.from(JSON.stringify(newReq.body)),
+      body: transformBody(newReq.body, method),
       redirect: 'manual',
       follow: flags['follow-redirects'],
       agent: allowUnauthorized
@@ -151,7 +147,7 @@ export async function httpRequest({
 
     const responseTime = Date.now() - requestStartedAt
     const { headers, status } = resp
-    const data = await resp.text()
+    const data = await resp.json()
 
     return {
       requestType: 'HTTP',
@@ -267,6 +263,25 @@ function optHttpsAgent(allowUntrustedSSL: boolean): RequestOptions['agent'] {
     keepAlive: true,
     rejectUnauthorized: !allowUntrustedSSL,
   })
+}
+
+function transformBody(
+  configBody?: JSON | string,
+  method?: string
+): string | undefined {
+  if (!method || method === 'GET' || method === 'HEAD') {
+    return undefined
+  }
+
+  if (configBody && typeof configBody === 'string') {
+    return configBody
+  }
+
+  if (configBody) {
+    return JSON.stringify(configBody)
+  }
+
+  return undefined
 }
 
 function errorRequestCodeToNumber(

@@ -44,9 +44,10 @@ export const HTTPMethods = new Set([
 export async function sendHttpRequest(
   config: { url: string } & RequestInit
 ): Promise<Response> {
-  const { url, timeout, agent, ...init } = config
+  const { url, timeout, agent, body, ...init } = config
   return fetch(url, {
     ...init,
+    body: body ? body : undefined,
     timeout: timeout ?? DEFAULT_TIMEOUT,
     agent: agent ?? defaultAgent,
   })
