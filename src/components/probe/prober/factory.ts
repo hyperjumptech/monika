@@ -59,12 +59,12 @@ export function createProbers(probeMetadata: ProberMetadata): Prober[] {
 export function createProber(probeMetadata: ProberMetadata): Prober {
   const { probeConfig } = probeMetadata
 
-  if (probeConfig?.mongo) {
-    return new MongoProber(probeMetadata)
-  }
-
   if (probeConfig?.mariadb || probeConfig?.mysql) {
     return new MariaDBProber(probeMetadata)
+  }
+
+  if (probeConfig?.mongo) {
+    return new MongoProber(probeMetadata)
   }
 
   if (probeConfig?.postgres) {

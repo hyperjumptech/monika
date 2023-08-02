@@ -24,7 +24,7 @@ export class RedisProber extends BaseProber {
     const { description, id, interval, name } = this.probeConfig
 
     let result = `- Probe ID: ${id}
-  Name: ${name || '-'}
+  Name: ${name}
   Description: ${description || '-'}
   Interval: ${interval}
 `
