@@ -102,7 +102,6 @@
     "ping": "^0.4.1",
     "pino": "8.14.1",
     "pino-pretty": "10.0.1",
-    "pkg": "5.6.0",
     "prom-client": "13.1.0",
     "redis": "^4.3.0",
     "sinon": "^15.0.1",
@@ -154,6 +153,7 @@
     "node-request-interceptor": "^0.6.3",
     "nyc": "^15.1.0",
     "oclif": "^3.0.1",
+    "pkg": "^5.8.1",
     "prettier": "2.5.1",
     "ts-node": "^10.4.0",
     "typescript": "^5.1.6"
@@ -163,7 +163,7 @@
     "singleQuote": true
   },
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=18.0.0"
   },
   "files": [
     "/bin",
@@ -199,9 +199,9 @@
       "node_modules/sqlite3/lib/binding/**/*"
     ],
     "targets": [
-      "node16-linux-x64",
-      "node16-macos-x64",
-      "node16-win-x64"
+      "node18-linux-x64",
+      "node18-macos-x64",
+      "node18-win-x64"
     ],
     "patches": {
       "./node_modules/thread-stream/lib/worker.js": [
@@ -216,8 +216,7 @@
     "outputPath": "dist"
   },
   "volta": {
-    "node": "16.16.0",
-    "npm": "8.19.0"
+    "node": "18.14.0"
   },
   "workspaces": [
     "packages/*"
