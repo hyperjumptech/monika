@@ -13,7 +13,7 @@ You can find many ways to install Monika and how to start monitoring from the [Q
 ## Contributing
 
 Monika is a Node.js application written in TypeScript using the [oclif framework](https://oclif.io/).  
-It was developed on **node v16 (LTS)**, and **npm v8**.
+It was developed on **node v18 (LTS)**, and **npm v9**.
 
 To start developing, clone this repository, then install the dependencies:
 
@@ -55,6 +55,43 @@ If you need to test a probe locally, there are predefined services in /dev/docke
 
 #### Available Services
 
+Use the following Monika config to probe the service.
+
+##### MariaDB
+
+```yaml
+probes:
+  - id: mariadb
+    mariadb:
+      - host: localhost
+        port: 3306
+        username: mariadb_user
+        password: mariadb_password
+        database:
+```
+
+##### MySQL
+
+```yaml
+probes:
+  - id: mysql
+    mysql:
+      - host: localhost
+        port: 3307
+        username: mysql_user
+        password: mysql_password
+        database:
+```
+
+##### MongoDB
+
+```yaml
+probes:
+  - id: mongo
+    mongo:
+      - uri: mongodb://mongo_user:mongo_password@localhost:27017
+```
+
 ##### PostgreSQL
 
 Use the following Monika config to probe the service.
@@ -64,6 +101,15 @@ probes:
   - id: postgres
     postgres:
       - uri: postgres://postgres_user:postgres_password@localhost:5432/postgres_db
+```
+
+##### Redis
+
+```yaml
+probes:
+  - id: redis
+    redis:
+      - uri: redis://:redis_password@localhost:6379
 ```
 
 ## Development References

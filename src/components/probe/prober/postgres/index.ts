@@ -1,8 +1,26 @@
 import { parse } from 'pg-connection-string'
-import type { ProbeResult } from '..'
+import { BaseProber, type ProbeResult } from '..'
 import type { Postgres } from '../../../../interfaces/probe'
 import { ProbeRequestResult } from '../../../../interfaces/request'
 import { postgresRequest } from './request'
+
+export class PostgresProber extends BaseProber {
+  async probe(): Promise<void> {
+    if (!this.probeConfig.postgres) {
+      throw new Error(
+        `Postgres configuration is empty. Probe ID: ${this.probeConfig.id}`
+      )
+    }
+
+    const result = await probePostgres({
+      id: this.probeConfig.id,
+      checkOrder: this.counter,
+      postgres: this.probeConfig.postgres,
+    })
+
+    this.processProbeResults(result)
+  }
+}
 
 type ProbePostgresParams = {
   id: string

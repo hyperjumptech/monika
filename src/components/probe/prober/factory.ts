@@ -22,4 +22,36 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-declare module 'nodemailer-mock'
+import { MongoProber } from './mongo'
+import { MariaDBProber } from './mariadb'
+import { PostgresProber } from './postgres'
+import { RedisProber } from './redis'
+import { SocketProber } from './socket'
+import type { Prober, ProberMetadata } from '.'
+
+export function createProbers(probeMetadata: ProberMetadata): Prober[] {
+  const { probeConfig } = probeMetadata
+  const result: Prober[] = []
+
+  if (probeConfig?.mongo) {
+    result.push(new MongoProber(probeMetadata))
+  }
+
+  if (probeConfig?.mariadb || probeConfig?.mysql) {
+    result.push(new MariaDBProber(probeMetadata))
+  }
+
+  if (probeConfig?.postgres) {
+    result.push(new PostgresProber(probeMetadata))
+  }
+
+  if (probeConfig?.redis) {
+    result.push(new RedisProber(probeMetadata))
+  }
+
+  if (probeConfig?.socket) {
+    result.push(new SocketProber(probeMetadata))
+  }
+
+  return result
+}
