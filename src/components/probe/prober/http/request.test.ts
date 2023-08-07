@@ -37,12 +37,12 @@ import type {
 import { generateRequestChainingBody, httpRequest } from './request'
 
 describe('probingHTTP', () => {
-  let interceptor: any
+  let interceptor: RequestInterceptor
   beforeEach(() => {
     interceptor = new RequestInterceptor(withDefaultInterceptors)
   })
   afterEach(() => {
-    interceptor.restore()
+    interceptor?.restore()
   })
   describe('httpRequest function', () => {
     it('should render correct headers', async () => {
@@ -108,21 +108,14 @@ describe('probingHTTP', () => {
             responses.push(resp)
             if (j !== 0) {
               results.push({
-                sentToken: verifyHeader.authorization,
+                sentToken: verifyHeader.authorization.join(','),
                 expectedToken: sentToken,
               })
             }
           } catch {}
         }
       }
-      // correct
-      // [
-      //   { sentToken: '2', expectedToken: '2' },
-      //   { sentToken: '1', expectedToken: '1' },
-      // ]
 
-      console.log(`asdf`)
-      console.log(results)
       for (const result of results) {
         expect(result.sentToken).to.be.equals(result.expectedToken)
       }
@@ -131,6 +124,7 @@ describe('probingHTTP', () => {
     it('should submit correct form', async () => {
       interceptor.use((req: any) => {
         if (['http://localhost:4000/login'].includes(req.url.href)) {
+          console.log('MASUK SINIII')
           if (req.body === 'username=example%40example.com&password=example')
             return { status: 200 }
 

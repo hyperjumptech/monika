@@ -29,7 +29,6 @@ import {
   ProbeRequestResponse,
   RequestConfig,
 } from '../../../../interfaces/request'
-import * as qs from 'querystring'
 
 import http, { RequestOptions } from 'http'
 import https from 'https'
@@ -37,7 +36,6 @@ import { getContext } from '../../../../context'
 import { icmpRequest } from '../icmp/request'
 import registerFakes from '../../../../utils/fakes'
 import { sendHttpRequest } from '../../../../utils/http'
-import { log } from '../../../../utils/pino'
 
 // Register Handlebars helpers
 registerFakes(Handlebars)
@@ -73,7 +71,6 @@ export async function httpRequest({
       const rawHeader = headers[header]
       const renderHeader = Handlebars.compile(rawHeader)
       const renderedHeader = renderHeader({ responses })
-      log.warn(`rendered header ${renderedHeader}`)
 
       newReq.headers = {
         ...newReq.headers,
@@ -226,7 +223,7 @@ function transformContentByType(
   switch (contentType) {
     case 'application/x-www-form-urlencoded':
       return {
-        content: qs.stringify(content),
+        content: new URLSearchParams(content).toString(),
         contentType,
       }
 
