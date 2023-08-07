@@ -37,6 +37,7 @@ import { getContext } from '../../../../context'
 import { icmpRequest } from '../icmp/request'
 import registerFakes from '../../../../utils/fakes'
 import { sendHttpRequest } from '../../../../utils/http'
+import { log } from '../../../../utils/pino'
 
 // Register Handlebars helpers
 registerFakes(Handlebars)
@@ -72,6 +73,7 @@ export async function httpRequest({
       const rawHeader = headers[header]
       const renderHeader = Handlebars.compile(rawHeader)
       const renderedHeader = renderHeader({ responses })
+      log.warn(`rendered header ${renderedHeader}`)
 
       newReq.headers = {
         ...newReq.headers,

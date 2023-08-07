@@ -115,7 +115,14 @@ describe('probingHTTP', () => {
           } catch {}
         }
       }
+      // correct
+      // [
+      //   { sentToken: '2', expectedToken: '2' },
+      //   { sentToken: '1', expectedToken: '1' },
+      // ]
 
+      console.log(`asdf`)
+      console.log(results)
       for (const result of results) {
         expect(result.sentToken).to.be.equals(result.expectedToken)
       }
