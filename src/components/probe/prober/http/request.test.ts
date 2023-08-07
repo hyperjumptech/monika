@@ -124,7 +124,10 @@ describe('probingHTTP', () => {
     it('should submit correct form', async () => {
       interceptor.use((req: any) => {
         if (['http://localhost:4000/login'].includes(req.url.href)) {
-          console.log('MASUK SINIII')
+          console.log(
+            'MASUK SINIII',
+            req.body === 'username=example%40example.com&password=example'
+          )
           if (req.body === 'username=example%40example.com&password=example')
             return { status: 200 }
 
