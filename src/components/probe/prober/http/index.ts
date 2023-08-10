@@ -105,7 +105,7 @@ export async function probeHTTP(
 
         if (
           isProbeResponsive && // if connection is successful but
-          isConnectionDown.has(id) // if connection was down then send custom alert. Else use user's alert.
+          isConnectionDown.has(id) // if connection WAS down then send a custom recovery alert. Else use user's alert.
         ) {
           validatedResponse[0].alert = {
             assertion: '',
