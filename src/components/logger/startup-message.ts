@@ -150,8 +150,12 @@ Interval: ${interval}
   return startupMessage
 }
 
-function generateProbeRequestMessage(requests: RequestConfig[]): string {
+function generateProbeRequestMessage(requests?: RequestConfig[]): string {
   let startupMessage = ''
+
+  if (!requests) {
+    return startupMessage
+  }
 
   for (const request of requests) {
     const { body, headers, method, url } = request

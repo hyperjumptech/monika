@@ -53,7 +53,7 @@ describe('Looper', () => {
       const result = sanitizeProbe(false, probe)
 
       // assert
-      expect(result.requests[0].method).eq('GET')
+      expect(result?.requests?.[0].method).eq('GET')
     })
 
     it('should change request alert query to alert assertion', () => {
@@ -70,11 +70,11 @@ describe('Looper', () => {
       const result = sanitizeProbe(false, probe)
 
       // assert
-      expect(result.requests[0]?.alerts?.[0].assertion).eq(
-        probe.requests[0].alerts?.[0].query
+      expect(result?.requests?.[0]?.alerts?.[0].assertion).eq(
+        probe?.requests?.[0].alerts?.[0].query
       )
-      expect(result.requests[1]?.alerts?.[0].assertion).eq(
-        probe.requests[1].alerts?.[0].query
+      expect(result?.requests?.[1]?.alerts?.[0].assertion).eq(
+        probe?.requests?.[1].alerts?.[0].query
       )
     })
 

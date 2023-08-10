@@ -29,6 +29,10 @@ export async function probeHTTP(
   const isVerbose = isSymonMode || flags['keep-verbose-logs']
   const responses = []
 
+  if (!probe.requests) {
+    return
+  }
+
   for (
     let requestIndex = 0;
     requestIndex < probe?.requests?.length;
