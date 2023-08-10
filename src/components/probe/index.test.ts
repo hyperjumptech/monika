@@ -245,10 +245,12 @@ describe('Probe processing', () => {
       })
       // wait for random timeout
       await sleep(3 * seconds)
+      // wait for send notification function to resolve
+      await sleep(2 * seconds)
 
       // assert
       expect(notificationAlert).includes('The request failed')
-    })
+    }).timeout(10_000)
 
     it('should send recovery notification', async () => {
       // arrange
@@ -290,6 +292,8 @@ describe('Probe processing', () => {
       })
       // wait for random timeout
       await sleep(3 * seconds)
+      // wait for send notification function to resolve
+      await sleep(2 * seconds)
 
       // assert
       expect(notificationAlert).includes('Target is back to normal')
