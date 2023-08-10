@@ -199,7 +199,7 @@ Inside the message string, you can also get the response object similar to asser
 
 ## Built-in Alerts
 
-Monika will automatically issue an alert when it detects a probe is inaccessible. An incident and recovery alert will be sent to all configured notification channels. Note that connection assertion or custom messages are not yet supported.
+Monika will automatically issue an alert when it detects a probe is inaccessible. An incident and recovery alert will be sent to all configured notification channels. Note that connection checking is always on and customized message strings are not yet supported.
 
 ## Further reading
 
