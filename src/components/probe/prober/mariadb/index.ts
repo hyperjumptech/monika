@@ -13,6 +13,39 @@ export class MariaDBProber extends BaseProber {
 
     this.processProbeResults(result)
   }
+
+  generateVerboseStartupMessage(): string {
+    const { description, id, interval, name } = this.probeConfig
+
+    let result = `- Probe ID: ${id}
+  Name: ${name}
+  Description: ${description || '-'}
+  Interval: ${interval}
+`
+    result += '  Connection Details:'
+    result += this.getConnectionDetails()
+
+    return result
+  }
+
+  private getConnectionDetails(): string {
+    const connectionDetails = this.probeConfig?.mariadb
+      ? this.probeConfig?.mariadb
+      : this.probeConfig?.mysql
+
+    return (
+      connectionDetails
+        ?.map(
+          (db) => `
+    Host: ${db.host}
+    Port: ${db.port}
+    Database: ${db.database}
+    Username: ${db.username}
+`
+        )
+        .join('\n') || ''
+    )
+  }
 }
 
 type ProbeMariaDBParams = {
