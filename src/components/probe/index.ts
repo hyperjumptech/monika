@@ -114,7 +114,6 @@ export function checkThresholdsAndSendAlert(
 
     // send only notifications that we have messages for (if it was truncated)
     if (index === validatedResponseStatuses.length) {
-      console.log('index:', index)
       break
     }
 
