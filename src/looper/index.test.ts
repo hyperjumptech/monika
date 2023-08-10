@@ -156,7 +156,6 @@ describe('Looper', () => {
       // arrange
       const probe = {
         id: 'Example',
-        requests: [],
       } as unknown as Probe
 
       // act
