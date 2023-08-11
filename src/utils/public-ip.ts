@@ -29,6 +29,7 @@ import getIp from './ip'
 import { sendPing } from './ping'
 import { sendHttpRequest } from './http'
 import { getContext } from '../context'
+import { isSymonModeFrom } from '../components/config'
 
 export let publicIpAddress = '0.0.0.0'
 export let isConnectedToSTUNServer = true
@@ -58,6 +59,7 @@ async function pokeStun(): Promise<string> {
 
 export async function getPublicNetworkInfo(): Promise<any> {
   const { flags } = getContext()
+  const isSymonMode = isSymonModeFrom(flags)
 
   try {
     let ip = await pokeStun()
@@ -67,7 +69,7 @@ export async function getPublicNetworkInfo(): Promise<any> {
     const { country, city, isp } = response.data
 
     // do we reveal ip and location details?
-    if (flags.verbose) {
+    if (flags.verbose || isSymonMode) {
       publicNetworkInfo = { country, city, isp }
       publicIpAddress = ip // store public ip
       log.info(
@@ -95,12 +97,13 @@ export async function getPublicNetworkInfo(): Promise<any> {
 export async function getPublicIp(): Promise<any> {
   const { flags } = getContext()
   const time = new Date().toISOString()
+  const isSymonMode = isSymonModeFrom(flags)
 
   try {
     const address = await pokeStun()
     if (address) {
       isConnectedToSTUNServer = true
-      if (flags.verbose) {
+      if (flags.verbose || isSymonMode) {
         // reveal address info?
         publicIpAddress = address
         log.info(
