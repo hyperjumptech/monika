@@ -41,7 +41,7 @@ type PublicNetwork = {
 }
 
 
-export let publicIpAddress = ''
+export let publicIpAddress = 'x.x.x.x'
 export let isConnectedToSTUNServer = true
 export let publicNetworkInfo: PublicNetwork | undefined
 
