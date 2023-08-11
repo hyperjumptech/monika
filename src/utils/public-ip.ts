@@ -30,7 +30,7 @@ import { sendPing } from './ping'
 import { sendHttpRequest } from './http'
 import { getContext } from '../context'
 
-export let publicIpAddress = ''
+export let publicIpAddress = '0.0.0.0'
 export let isConnectedToSTUNServer = true
 export let publicNetworkInfo: { country: string; city: string; isp: string }
 
@@ -60,15 +60,16 @@ export async function getPublicNetworkInfo(): Promise<any> {
   const { flags } = getContext()
 
   try {
-    const ip = await pokeStun()
+    let ip = await pokeStun()
     const response = await sendHttpRequest({
       url: `http://ip-api.com/json/${ip}`,
     })
     const { country, city, isp } = response.data
-    publicNetworkInfo = { country, city, isp }
 
+    // do we reveal ip and location details?
     if (flags.verbose) {
-      // do we reveal ip and location details?
+      publicNetworkInfo = { country, city, isp }
+      publicIpAddress = ip // store public ip
       log.info(
         `Monika is running from: ${publicNetworkInfo.city} - ${
           publicNetworkInfo.isp
@@ -76,6 +77,8 @@ export async function getPublicNetworkInfo(): Promise<any> {
       )
     } else {
       log.info('network connectivity ok')
+      publicNetworkInfo = { country: '', city: 'Earth', isp: 'localhost' } // Hide specifics
+      ip = '0.0.0.0'
     }
   } catch (error) {
     log.warn(`Network connectivity issues. Got: ${error}`)
@@ -96,10 +99,10 @@ export async function getPublicIp(): Promise<any> {
   try {
     const address = await pokeStun()
     if (address) {
-      publicIpAddress = address
       isConnectedToSTUNServer = true
       if (flags.verbose) {
         // reveal address info?
+        publicIpAddress = address
         log.info(
           `${time} - Connected to STUN Server. Monika is running from: ${address}`
         )
