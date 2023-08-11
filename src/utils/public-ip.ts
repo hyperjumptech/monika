@@ -28,10 +28,7 @@ import { hostname } from 'os'
 import getIp from './ip'
 import { sendPing } from './ping'
 import { sendHttpRequest } from './http'
-
-// import type { MonikaFlags } from '../context/monika-flags'
 import { getContext } from '../context'
-const { flags } = getContext()
 
 export let publicIpAddress = ''
 export let isConnectedToSTUNServer = true
@@ -60,6 +57,8 @@ async function pokeStun(): Promise<string> {
 }
 
 export async function getPublicNetworkInfo(): Promise<any> {
+  const { flags } = getContext()
+
   try {
     const ip = await pokeStun()
     const response = await sendHttpRequest({
@@ -69,6 +68,7 @@ export async function getPublicNetworkInfo(): Promise<any> {
     publicNetworkInfo = { country, city, isp }
 
     if (flags.verbose) {
+      // do we reveal ip and location details?
       log.info(
         `Monika is running from: ${publicNetworkInfo.city} - ${
           publicNetworkInfo.isp
@@ -90,6 +90,7 @@ export async function getPublicNetworkInfo(): Promise<any> {
  * @returns Promise<any>
  */
 export async function getPublicIp(): Promise<any> {
+  const { flags } = getContext()
   const time = new Date().toISOString()
 
   try {
@@ -98,6 +99,7 @@ export async function getPublicIp(): Promise<any> {
       publicIpAddress = address
       isConnectedToSTUNServer = true
       if (flags.verbose) {
+        // reveal address info?
         log.info(
           `${time} - Connected to STUN Server. Monika is running from: ${address}`
         )

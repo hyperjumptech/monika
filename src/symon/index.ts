@@ -92,6 +92,7 @@ const isTestEnvironment = process.env.NODE_ENV === 'test' || process.env.CI
 let hasConnectionToSymon = false
 
 const getHandshakeData = async (): Promise<SymonHandshakeData> => {
+  // trigger network/ip scan so exported variables are initialized
   await getPublicNetworkInfo()
   await getPublicIp()
 
