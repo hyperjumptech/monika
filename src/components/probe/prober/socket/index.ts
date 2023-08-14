@@ -19,6 +19,28 @@ export class SocketProber extends BaseProber {
 
     this.processProbeResults(result)
   }
+
+  generateVerboseStartupMessage(): string {
+    const { description, id, interval, name } = this.probeConfig
+
+    let result = `- Probe ID: ${id}
+  Name: ${name}
+  Description: ${description || '-'}
+  Interval: ${interval}
+`
+    result += '  Connection Details:'
+    result += this.getConnectionDetails()
+
+    return result
+  }
+
+  private getConnectionDetails(): string {
+    return `
+    Host: ${this.probeConfig?.socket?.host}
+    Port: ${this.probeConfig?.socket?.port}
+    Username: ${this.probeConfig?.socket?.data}
+`
+  }
 }
 
 type ProbeSocketParams = {

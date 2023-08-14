@@ -20,6 +20,41 @@ export class PostgresProber extends BaseProber {
 
     this.processProbeResults(result)
   }
+
+  generateVerboseStartupMessage(): string {
+    const { description, id, interval, name } = this.probeConfig
+
+    let result = `- Probe ID: ${id}
+  Name: ${name || '-'}
+  Description: ${description || '-'}
+  Interval: ${interval}
+`
+    result += '  Connection Details:'
+    result += this.getConnectionDetails()
+
+    return result
+  }
+
+  private getConnectionDetails(): string {
+    return (
+      this.probeConfig.postgres
+        ?.map((db) => {
+          if (db.uri) {
+            return `
+    URI: ${db.uri}
+`
+          }
+
+          return `
+    Host: ${db.host}
+    Port: ${db.port}
+    Username: ${db.username}
+    Database: ${db.database}
+`
+        })
+        .join('\n') || ''
+    )
+  }
 }
 
 type ProbePostgresParams = {

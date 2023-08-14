@@ -132,6 +132,11 @@ export class PrometheusCollector {
 
     const { probe, requestIndex, response } = probeResult
     const { id, name, requests } = probe
+
+    if (!requests || requests.length === 0) {
+      return
+    }
+
     const request = requests[requestIndex]
     const { method, url } = request
     const { headers, responseTime, status } = response
@@ -186,6 +191,11 @@ export class PrometheusCollector {
 
     const { alertQuery, probe, requestIndex } = probeResult
     const { id, name, requests } = probe
+
+    if (!requests || requests.length === 0) {
+      return
+    }
+
     const request = requests[requestIndex]
     const { method, url } = request
     const labels = {
