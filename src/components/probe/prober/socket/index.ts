@@ -1,6 +1,24 @@
-import type { ProbeResult } from '..'
+import { BaseProber, type ProbeResult } from '..'
 import type { Socket } from '../../../../interfaces/probe'
 import { tcpRequest } from './request'
+
+export class SocketProber extends BaseProber {
+  async probe(): Promise<void> {
+    if (!this.probeConfig.socket) {
+      throw new Error(
+        `Socket configuration is empty. Probe ID: ${this.probeConfig.id}`
+      )
+    }
+
+    const result = await probeSocket({
+      id: this.probeConfig.id,
+      checkOrder: this.counter,
+      socket: this.probeConfig.socket,
+    })
+
+    this.processProbeResults(result)
+  }
+}
 
 type ProbeSocketParams = {
   id: string

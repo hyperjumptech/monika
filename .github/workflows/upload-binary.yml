@@ -36,6 +36,8 @@ jobs:
     needs: test
     name: Publish for ${{ matrix.os }}
     runs-on: ${{ matrix.runs_on }}
+    permissions:
+      contents: write
     strategy:
       matrix:
         include:
