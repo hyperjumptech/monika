@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.15.5 2023-08-14
+
+## Fixed
+
+- Fix permision for docs deployment (#1085)
+- Fixed: Broken Docker Release Pipeline (#1086)
+- Fix binary upload workflow (#1087)
+- Fixed: Broken Publish Snapcraft Pipeline (#1088)
+- Fixed: Empty Request Info for Non HTTP Probe (#1091)
+- Fix doc build workflow (#1097)
+- Fix default maxRedirect too shallow (#1070)
+- Fix: Prevent Non-HTTP Probe to Create Prometheus Metrics (#1093)
+
+## Changed
+
+- Refactor: Add Base Class for Non HTTP Prober (#0174)
+- Chore: Upgrade Node.js Version to 18 (#98)
+
+**Full Changelog**: https://github.com/hyperjumptech/monika/compare/v1.15.4...v1.15.5
+
 ## [1.15.4] - 2023-07-24
 
 ## Added
