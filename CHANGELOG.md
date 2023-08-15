@@ -23,8 +23,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactor: Add Base Class for Non HTTP Prober (#0174)
 - Chore: Upgrade Node.js Version to 18 (#986)
 
-**Full Changelog**: https://github.com/hyperjumptech/monika/compare/v1.15.4...v1.15.5
-
 ## [1.15.4] - 2023-07-24
 
 ## Added
