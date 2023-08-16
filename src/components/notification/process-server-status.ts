@@ -131,7 +131,7 @@ export const processThresholds = ({
   const id = `${probe?.id}:${name}:${requestIndex}:${
     request?.id || ''
   }-${incidentThreshold}:${recoveryThreshold} ${
-    request?.url || (socket ? `${socket?.host}:${socket?.port}` : '')
+    request?.url || (socket ? `${socket.host}:${socket.port}` : '')
   }`
 
   const results: Array<ServerAlertState> = []

@@ -85,7 +85,7 @@ export interface Probe {
   name: string
   description?: string
   interval: number
-  requests: RequestConfig[]
+  requests?: RequestConfig[]
   socket?: Socket
   redis?: Redis[]
   mongo?: Mongo[]
