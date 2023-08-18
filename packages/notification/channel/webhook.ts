@@ -38,7 +38,7 @@ export const send = async (
   { url }: NotificationData,
   { meta }: NotificationMessage
 ): Promise<void> => {
-  if (meta.type !== 'incident') {
+  if (meta.type !== 'incident' && meta.type !== 'recovery') {
     return
   }
 

@@ -97,7 +97,7 @@ describe('Webhook Notification', () => {
       server.close()
     })
 
-    it('should send notification through webhook', async () => {
+    it('should send incident notification', async () => {
       // act
       await send({ url: 'https://example.com' }, {
         meta: {
@@ -119,7 +119,7 @@ describe('Webhook Notification', () => {
       })
     })
 
-    it('should send notification through webhook and use probeID as an identifier', async () => {
+    it('should send incident notification and use probeID as an identifier', async () => {
       // act
       await send({ url: 'https://example.com' }, {
         meta: {
@@ -140,7 +140,7 @@ describe('Webhook Notification', () => {
       })
     })
 
-    it('should not send notification if notification type is not incident', async () => {
+    it('should not send recovery notification', async () => {
       // act
       await send({ url: 'https://example.com' }, {
         meta: {
@@ -152,7 +152,13 @@ describe('Webhook Notification', () => {
       } as unknown as NotificationMessage)
 
       // assert
-      expect(body).deep.eq({})
+      expect(body).deep.eq({
+        body: {
+          alert: 'response.status != 200',
+          url: 'ua53D',
+          time: '2022-09-27 18:00:00.000',
+        },
+      })
     })
   })
 })

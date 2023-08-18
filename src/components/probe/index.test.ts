@@ -40,14 +40,15 @@ import { afterEach, beforeEach } from 'mocha'
 import { getContext, resetContext, setContext } from '../../context'
 
 let urlRequestTotal = 0
-let notificationAlert = ''
+let notificationAlert: Record<string, any> = {}
 const server = setupServer(
   rest.get('https://example.com', (_, res, ctx) => {
     urlRequestTotal += 1
     return res(ctx.status(200))
   }),
   rest.post('https://example.com/webhook', (req, res, ctx) => {
-    notificationAlert = req.body?.toString() || ''
+    notificationAlert = req.body as Record<string, string>
+
     return res(ctx.status(200))
   })
 )
@@ -72,7 +73,7 @@ const probes: Probe[] = [
 beforeEach(() => server.listen())
 afterEach(() => {
   urlRequestTotal = 0
-  notificationAlert = ''
+  notificationAlert = {}
   server.close()
 })
 
@@ -249,7 +250,8 @@ describe('Probe processing', () => {
       await sleep(2 * seconds)
 
       // assert
-      expect(notificationAlert).includes('The request failed')
+      expect(notificationAlert.body.url).eq('https://example.com')
+      expect(notificationAlert.body.alert).eq('response.status == 200')
     }).timeout(10_000)
 
     it('should send recovery notification', async () => {
@@ -296,7 +298,8 @@ describe('Probe processing', () => {
       await sleep(2 * seconds)
 
       // assert
-      expect(notificationAlert).includes('Target is back to normal')
+      expect(notificationAlert.body.url).eq('https://example.com')
+      expect(notificationAlert.body.alert).eq('response.status == 200')
     }).timeout(10_000)
   })
 
