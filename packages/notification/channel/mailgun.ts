@@ -28,11 +28,19 @@ import Joi from 'joi'
 import type { NotificationMessage } from '.'
 import Mailgen from 'mailgen'
 
-type NotificationData = {
+export type NotificationData = {
   apiKey: string
   domain: string
   recipients: string[]
   username?: string
+}
+
+export type Content = {
+  from: string
+  to: string
+  subject: string
+  html: string
+  text: string
 }
 
 export const validator = Joi.object().keys({
@@ -49,6 +57,21 @@ export const send = async (
   { apiKey: key, domain, recipients, username = 'api' }: NotificationData,
   { body, subject }: NotificationMessage
 ): Promise<void> => {
+  const mailgun = new Mailgun(formData)
+  const mg = mailgun.client({ username, key })
+  const data = getContent({ recipients, subject, body })
+  await mg.messages.create(domain, data)
+}
+
+export function getContent({
+  recipients,
+  subject,
+  body,
+}: {
+  recipients: string[]
+  subject: string
+  body: string
+}): Content {
   // TODO: Read from ENV Variables
   const DEFAULT_EMAIL = 'monika@hyperjump.tech'
   const DEFAULT_SENDER_NAME = 'Monika'
@@ -68,17 +91,22 @@ export const send = async (
   }
   const html = mailGenerator.generate(email)
   const text = mailGenerator.generatePlaintext(email)
-  const mailgun = new Mailgun(formData)
-  const mg = mailgun.client({ username, key })
-  const data = {
-    from: `${DEFAULT_SENDER_NAME} <${DEFAULT_EMAIL}>`,
+  return {
+    from: `${DEFAULT_EMAIL} <${DEFAULT_SENDER_NAME}>`,
     to,
     subject,
     html,
     text,
   }
+}
 
-  await mg.messages.create(domain, data)
+export const sendWithCustomContent = async (
+  { apiKey: key, domain, username = 'api' }: NotificationData,
+  content: Content
+): Promise<void> => {
+  const mailgun = new Mailgun(formData)
+  const mg = mailgun.client({ username, key })
+  await mg.messages.create(domain, content)
 }
 
 export function additionalStartupMessage({
