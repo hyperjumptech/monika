@@ -299,7 +299,7 @@ describe('Probe processing', () => {
 
       // assert
       expect(notificationAlert.body.url).eq('https://example.com')
-      expect(notificationAlert.body.alert).eq('response.status == 200')
+      expect(notificationAlert.body.alert).eq('response.status != 200')
     }).timeout(10_000)
   })
 
