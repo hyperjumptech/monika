@@ -70,7 +70,7 @@ probes:
           password: somepassword
 ```
 
-Using the configuration above, Monika will send a POST request to `http://www.rxample.com/login.php` with the defined request's body.
+Using the configuration above, Monika will send a POST request to `http://www.example.com/login.php` with the defined request's body.
 
 ## Multiple requests
 
@@ -284,7 +284,7 @@ probes:
       - url: https://example.com/token
         body: {user: 'xxxx', password: 'yyyy'}
         method: POST
-      - url: https://seample.com/userdata
+      - url: https://example.com/userdata
         method: GET
         headers:
           Authorization: Bearer {{ responses.[0].body.accessToken }}
