@@ -36,6 +36,7 @@ import { getContext } from '../../../../context'
 import { icmpRequest } from '../icmp/request'
 import registerFakes from '../../../../utils/fakes'
 import { sendHttpRequest } from '../../../../utils/http'
+import { XMLBuilder } from 'fast-xml-parser'
 
 // Register Handlebars helpers
 registerFakes(Handlebars)
@@ -71,7 +72,6 @@ export async function httpRequest({
       const rawHeader = headers[header]
       const renderHeader = Handlebars.compile(rawHeader)
       const renderedHeader = renderHeader({ responses })
-
       newReq.headers = {
         ...newReq.headers,
         [header]: renderedHeader,
@@ -89,7 +89,6 @@ export async function httpRequest({
           // to
           //    "content-type": "multipart/form-data; boundary=--------------------------012345678900123456789012"
           delete newReq.headers[header]
-
           newReq.headers = {
             ...newReq.headers,
             'content-type': contentType,
@@ -136,7 +135,11 @@ export async function httpRequest({
     const resp = await sendHttpRequest({
       ...newReq,
       url: renderedURL,
-      body: transformBody(newReq.body, method),
+      body: transformBody(
+        method,
+        newReq.body,
+        newReq.headers?.['content-type']
+      ),
       redirect: 'manual',
       follow: flags['follow-redirects'],
       agent: allowUnauthorized
@@ -146,7 +149,10 @@ export async function httpRequest({
 
     const responseTime = Date.now() - requestStartedAt
     const { headers, status } = resp
-    const data = await resp.json()
+    const data =
+      headers.get('content-type') === 'application/json'
+        ? await resp.json()
+        : await resp.text()
 
     return {
       requestType: 'HTTP',
@@ -206,7 +212,7 @@ export async function httpRequest({
 }
 
 export function generateRequestChainingBody(
-  body: JSON | string,
+  body: JSON | string | FormData,
   responses: ProbeRequestResponse[]
 ): JSON | string {
   const isString = typeof body === 'string'
@@ -217,13 +223,13 @@ export function generateRequestChainingBody(
 }
 
 function transformContentByType(
-  content: any,
+  content: string | JSON | FormData,
   contentType?: string | number | boolean
 ) {
   switch (contentType) {
     case 'application/x-www-form-urlencoded':
       return {
-        content: new URLSearchParams(content).toString(),
+        content: new URLSearchParams(content as string).toString(),
         contentType,
       }
 
@@ -231,7 +237,7 @@ function transformContentByType(
       const form = new FormData()
 
       for (const contentKey of Object.keys(content)) {
-        form.append(contentKey, content[contentKey])
+        form.append(contentKey, (content as Record<string, any>)[contentKey])
       }
 
       return { content: form, contentType: form.getHeaders()['content-type'] }
@@ -244,9 +250,22 @@ function transformContentByType(
       return { content: yamlDoc.toString(), contentType }
     }
 
+    case 'text/xml':
+    case 'application/xml': {
+      return { content: new XMLBuilder().build(content), contentType }
+    }
+
     default:
       return { content, contentType }
   }
+}
+
+function transformBody(method?: string, body?: any, contentType?: string) {
+  return method === undefined || method === 'GET' || method === 'HEAD'
+    ? undefined
+    : contentType === 'application/json'
+    ? JSON.stringify(body)
+    : body
 }
 
 // Keep the agents alive to reduce the overhead of DNS queries and creating TCP connection.
@@ -262,25 +281,6 @@ function optHttpsAgent(allowUntrustedSSL: boolean): RequestOptions['agent'] {
     keepAlive: true,
     rejectUnauthorized: !allowUntrustedSSL,
   })
-}
-
-function transformBody(
-  configBody?: JSON | string,
-  method?: string
-): string | undefined {
-  if (!method || method === 'GET' || method === 'HEAD') {
-    return undefined
-  }
-
-  if (configBody && typeof configBody === 'string') {
-    return configBody
-  }
-
-  if (configBody) {
-    return JSON.stringify(configBody)
-  }
-
-  return undefined
 }
 
 function errorRequestCodeToNumber(

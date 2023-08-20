@@ -22,6 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import FormData from 'form-data'
 import { ProbeAlert } from './probe'
 
 // RequestTypes are used to define the type of request that is being made.
@@ -55,7 +56,7 @@ export interface RequestConfig extends Omit<RequestInit, 'body' | 'headers'> {
   id?: string
   saveBody?: boolean // save response body to db?
   url: string
-  body: JSON | string
+  body: JSON | string | FormData
   timeout: number // request timeout
   alerts?: ProbeAlert[]
   headers?: { [key: string]: string }

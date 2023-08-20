@@ -23,10 +23,7 @@
  **********************************************************************************/
 
 import { expect } from 'chai'
-import { rest } from 'msw'
-import { setupServer } from 'msw/node'
-import { RequestInterceptor } from 'node-request-interceptor'
-import withDefaultInterceptors from 'node-request-interceptor/lib/presets/default'
+import { HttpResponse, http } from 'msw'
 import { setContext } from '../../../../context'
 import type { MonikaFlags } from '../../../../context/monika-flags'
 import type {
@@ -35,45 +32,32 @@ import type {
 } from '../../../../interfaces/request'
 
 import { generateRequestChainingBody, httpRequest } from './request'
+import { SetupServer, setupServer } from 'msw/node'
+import { XMLParser } from 'fast-xml-parser'
 
 describe('probingHTTP', () => {
-  let interceptor: RequestInterceptor
-  beforeEach(() => {
-    interceptor = new RequestInterceptor(withDefaultInterceptors)
-  })
-  afterEach(() => {
-    interceptor?.restore()
-  })
+  const server: SetupServer = setupServer()
+  // intentionally throw error for implicit handler
+  server.listen({ onUnhandledRequest: 'error' })
+  beforeEach(() => server.resetHandlers())
+  after(() => server.close())
   describe('httpRequest function', () => {
     it('should render correct headers', async () => {
       let verifyHeader: any = {}
       let tokens = ['1', '2']
       let sentToken = ''
-      interceptor.use((req: any) => {
-        // mock login
-        if (['http://localhost:4000/get_key'].includes(req.url.href)) {
+      server.use(
+        http.get('http://localhost:4000/get_key', () => {
           const token = tokens[tokens.length - 1]
           tokens = tokens.slice(0, -1)
           sentToken = token
-          return {
-            status: 200,
-            body: JSON.stringify({
-              token,
-            }),
-          }
-        }
-
-        // mock verify
-        if (['http://localhost:4000/verify'].includes(req.url.href)) {
-          verifyHeader = req.headers
-          return {
-            status: 200,
-            body: JSON.stringify({
-              verified: 'true',
-            }),
-          }
-        }
-      })
+          return HttpResponse.json({ token }, { status: 200 })
+        }),
+        http.post('http://localhost:4000/verify', ({ request }) => {
+          verifyHeader = request.headers.get('authorization')
+          return HttpResponse.json({ verified: 'true' }, { status: 200 })
+        })
+      )
 
       // create the requests
       const requests: any = [
@@ -93,7 +77,7 @@ describe('probingHTTP', () => {
         },
       ]
 
-      const results: any = []
+      const results: any[] = []
       const flag = { followRedirects: 0 } as unknown as MonikaFlags
       setContext({ flags: flag })
       for (let i = 0; i < 2; i++) {
@@ -108,7 +92,7 @@ describe('probingHTTP', () => {
             responses.push(resp)
             if (j !== 0) {
               results.push({
-                sentToken: verifyHeader.authorization.join(','),
+                sentToken: verifyHeader,
                 expectedToken: sentToken,
               })
             }
@@ -116,24 +100,25 @@ describe('probingHTTP', () => {
         }
       }
 
+      expect(results.length).to.above(0)
       for (const result of results) {
         expect(result.sentToken).to.be.equals(result.expectedToken)
       }
     })
 
     it('should submit correct form', async () => {
-      interceptor.use((req: any) => {
-        if (['http://localhost:4000/login'].includes(req.url.href)) {
-          console.log(
-            'MASUK SINIII',
-            req.body === 'username=example%40example.com&password=example'
-          )
-          if (req.body === 'username=example%40example.com&password=example')
-            return { status: 200 }
+      server.use(
+        http.post('http://localhost:4000/login', async ({ request }) => {
+          if (
+            (await request.text()) ===
+            'username=example%40example.com&password=example'
+          ) {
+            return HttpResponse.text(undefined, { status: 200 })
+          }
 
-          return { status: 400 }
-        }
-      })
+          return HttpResponse.text(undefined, { status: 400 })
+        })
+      )
 
       const request: any = {
         url: 'http://localhost:4000/login',
@@ -156,22 +141,23 @@ describe('probingHTTP', () => {
 
     it('should send request with multipart/form-data content-type', async () => {
       // arrange
-      const server = setupServer(
-        rest.post('https://example.com', (req, res, ctx) => {
-          const { headers, body } = req
-          const reqBody = body as Record<string, any>
+      server.use(
+        http.post('https://example.com', async ({ request }) => {
+          const { headers } = request
+          const reqBody = await request.formData()
 
           if (
-            !headers.get('content-type')?.startsWith('multipart/form-data') ||
-            reqBody?.username !== 'john@example.com' ||
-            reqBody?.password !== 'drowssap'
+            headers.get('content-type')?.includes('multipart/form-data') &&
+            reqBody?.get('username') === 'john@example.com' &&
+            reqBody?.get('password') === 'drowssap'
           ) {
-            return res(ctx.status(400))
+            return HttpResponse.text(undefined, { status: 200 })
           }
 
-          return res(ctx.status(200))
+          return HttpResponse.text(undefined, { status: 400 })
         })
       )
+
       const request: RequestConfig = {
         url: 'https://example.com',
         method: 'POST',
@@ -183,12 +169,10 @@ describe('probingHTTP', () => {
       const flags = { followRedirects: 0 } as unknown as MonikaFlags
       setContext({ flags })
       // act
-      server.listen()
       const res = await httpRequest({
         requestConfig: request,
         responses: [],
       })
-      server.close()
 
       // assert
       expect(res.status).to.eq(200)
@@ -196,9 +180,10 @@ describe('probingHTTP', () => {
 
     it('should send request with text-plain content-type', async () => {
       // arrange
-      const server = setupServer(
-        rest.post('https://example.com', (req, res, ctx) => {
-          const { headers, body } = req
+      server.use(
+        http.post('https://example.com', async ({ request }) => {
+          const { headers } = request
+          const body = await request.text()
 
           if (
             headers.get('content-type') !== 'text/plain' ||
@@ -207,10 +192,10 @@ describe('probingHTTP', () => {
             console.error(headers.get('content-type'))
             console.error(body)
 
-            return res(ctx.status(400))
+            return HttpResponse.text(undefined, { status: 400 })
           }
 
-          return res(ctx.status(200))
+          return HttpResponse.text(undefined, { status: 200 })
         })
       )
       const request: RequestConfig = {
@@ -222,14 +207,12 @@ describe('probingHTTP', () => {
       }
 
       // act
-      server.listen()
       const flag = { followRedirects: 0 } as unknown as MonikaFlags
       setContext({ flags: flag })
       const res = await httpRequest({
         requestConfig: request,
         responses: [],
       })
-      server.close()
 
       // assert
       expect(res.status).to.eq(200)
@@ -237,9 +220,10 @@ describe('probingHTTP', () => {
 
     it('should send request with text/yaml content-type', async () => {
       // arrange
-      const server = setupServer(
-        rest.post('https://example.com', (req, res, ctx) => {
-          const { headers, body } = req
+      server.use(
+        http.post('https://example.com', async ({ request }) => {
+          const { headers } = request
+          const body = await request.text()
 
           if (
             headers.get('content-type') !== 'text/yaml' ||
@@ -248,10 +232,10 @@ describe('probingHTTP', () => {
             console.error(headers.get('content-type'))
             console.error(body)
 
-            return res(ctx.status(400))
+            return HttpResponse.text(undefined, { status: 400 })
           }
 
-          return res(ctx.status(200))
+          return HttpResponse.text(undefined, { status: 200 })
         })
       )
       const request: RequestConfig = {
@@ -263,14 +247,12 @@ describe('probingHTTP', () => {
       }
 
       // act
-      server.listen()
       const flag = { followRedirects: 0 } as unknown as MonikaFlags
       setContext({ flags: flag })
       const res = await httpRequest({
         requestConfig: request,
         responses: [],
       })
-      server.close()
 
       // assert
       expect(res.status).to.eq(200)
@@ -278,22 +260,23 @@ describe('probingHTTP', () => {
 
     it('should send request with application/xml content-type', async () => {
       // arrange
-      const server = setupServer(
-        rest.post('https://example.com', (req, res, ctx) => {
-          const { headers, body } = req
-          const reqBody = JSON.parse(body as string)
+      server.use(
+        http.post('https://example.com', async ({ request }) => {
+          const { headers } = request
+          const reqBody = await request.text()
+          const parsedReqBody = new XMLParser().parse(reqBody)
 
           if (
             headers.get('content-type') !== 'application/xml' ||
-            reqBody?.username !== 'john@example.com'
+            parsedReqBody?.username !== 'john@example.com'
           ) {
             console.error(headers.get('content-type'))
-            console.error(body)
+            console.error(reqBody)
 
-            return res(ctx.status(400))
+            return HttpResponse.text(undefined, { status: 400 })
           }
 
-          return res(ctx.status(200))
+          return HttpResponse.text(undefined, { status: 200 })
         })
       )
       const request: RequestConfig = {
@@ -305,14 +288,12 @@ describe('probingHTTP', () => {
       }
 
       // act
-      server.listen()
       const flag = { followRedirects: 0 } as unknown as MonikaFlags
       setContext({ flags: flag })
       const res = await httpRequest({
         requestConfig: request,
         responses: [],
       })
-      server.close()
 
       // assert
       expect(res.status).to.eq(200)
@@ -320,9 +301,10 @@ describe('probingHTTP', () => {
 
     it('should send request with text-plain content-type even with allowUnauthorized option', async () => {
       // arrange
-      const server = setupServer(
-        rest.post('https://example.com', (req, res, ctx) => {
-          const { headers, body } = req
+      server.use(
+        http.post('https://example.com', async ({ request }) => {
+          const { headers } = request
+          const body = await request.text()
 
           if (
             headers.get('content-type') !== 'text/plain' ||
@@ -331,10 +313,10 @@ describe('probingHTTP', () => {
             console.error(headers.get('content-type'))
             console.error(body)
 
-            return res(ctx.status(400))
+            return HttpResponse.text(undefined, { status: 400 })
           }
 
-          return res(ctx.status(200))
+          return HttpResponse.text(undefined, { status: 200 })
         })
       )
       const request: RequestConfig = {
@@ -347,14 +329,12 @@ describe('probingHTTP', () => {
       }
 
       // act
-      server.listen()
       const flag = { followRedirects: 0 } as unknown as MonikaFlags
       setContext({ flags: flag })
       const res = await httpRequest({
         requestConfig: request,
         responses: [],
       })
-      server.close()
 
       // assert
       expect(res.status).to.eq(200)
