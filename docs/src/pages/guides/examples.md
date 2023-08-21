@@ -5,7 +5,7 @@ title: Examples
 
 ## Minimal Configuration
 
-Creating a probe configuration is fairly simple. You only need a `probe` key type, a probe type such as an (http) `request` and the `url` to probe. The example below performs a GET probe request to github.com:
+At minimum, you only need to specify the `url` you want to monitor. For example to monitor `github.com`:
 
 ```yaml
 probes:
@@ -17,7 +17,7 @@ If you didn't define the http method, it will use the GET method by default. Ple
 
 ## Enabling Notification
 
-Probes are more useful with notifications enabled to alert when something is amiss. Below is a probe example to monitor Monika landing page with an email notification:
+Probes are more useful with notifications enabled to alert when something is amiss. The following is an example configuration to get notification via e-mail when an incident occurs:
 
 ```yaml
 notifications:
@@ -51,7 +51,7 @@ Using the above configuration, Monika will check the landing page every 10 secon
 
 ## HTML Form Submission Example
 
-Monika support POST methods. Belows is an example probe with a POST request to simulate HTML form submission:
+You can also send POST requests using Monika. The following is an example of sending a POST request to simulate HTML form submission.
 
 ```yaml
 probes:
@@ -74,7 +74,7 @@ Using the configuration above, Monika will send a POST request to `http://www.ex
 
 ## Multiple requests
 
-Monika support multiple requests, below is an example configuration:
+Monika supports sending multiple requests **one after another** in a single probe. Below is one such configuration:
 
 ```yaml
 probes:
