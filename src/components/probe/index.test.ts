@@ -225,7 +225,12 @@ describe('Probe processing', () => {
       const probe = {
         ...probes[0],
         id: '2md9o',
-        alerts: [{ assertion: 'response.status == 200', message: '' }],
+        alerts: [
+          {
+            assertion: 'response.status == 200',
+            message: 'The request failed.',
+          },
+        ],
       }
       initializeProbeStates([probe])
       // wait until the interval passed
