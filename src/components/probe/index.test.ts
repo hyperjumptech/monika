@@ -24,8 +24,8 @@
 
 import { expect } from 'chai'
 
-import { rest } from 'msw'
-import { setupServer } from 'msw/node'
+import { HttpResponse, http } from 'msw'
+import { SetupServer, setupServer } from 'msw/node'
 import sinon from 'sinon'
 import mariadb from 'mariadb'
 import { MongoClient, type Db } from 'mongodb'
@@ -36,16 +36,9 @@ import { doProbe, getProbeStatesWithValidAlert } from '.'
 import type { ServerAlertState } from '../../interfaces/probe-status'
 import { initializeProbeStates } from '../../utils/probe-state'
 import type { Probe } from '../../interfaces/probe'
-import { afterEach, beforeEach } from 'mocha'
+import { after, afterEach } from 'mocha'
 import { getContext, resetContext, setContext } from '../../context'
 
-let urlRequestTotal = 0
-const server = setupServer(
-  rest.get('https://example.com', (_, res, ctx) => {
-    urlRequestTotal += 1
-    return res(ctx.status(200))
-  })
-)
 const probes: Probe[] = [
   {
     id: '1',
@@ -53,7 +46,7 @@ const probes: Probe[] = [
     interval: 1,
     requests: [
       {
-        url: 'https://example.com',
+        url: 'https://example.com/',
         body: '',
         timeout: 30,
       },
@@ -63,11 +56,23 @@ const probes: Probe[] = [
     alerts: [],
   },
 ]
+let urlRequestTotal = 0
+let server: SetupServer
+before(() => {
+  server = setupServer(
+    http.get('https://example.com/', () => {
+      urlRequestTotal += 1
+      return HttpResponse.text(undefined, { status: 200 })
+    })
+  )
 
-beforeEach(() => server.listen())
+  server.listen({ onUnhandledRequest: 'bypass' })
+})
+
+after(() => server.close())
+
 afterEach(() => {
   urlRequestTotal = 0
-  server.close()
 })
 
 describe('Probe processing', () => {
@@ -149,7 +154,7 @@ describe('Probe processing', () => {
       doProbe({ probe: probes[0], notifications: [] })
       await doProbe({ probe: probes[0], notifications: [] })
       // wait for random timeout
-      await sleep(3 * seconds)
+      await sleep(3700)
 
       // assert
       expect(urlRequestTotal).eq(1)
