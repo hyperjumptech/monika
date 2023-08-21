@@ -62,9 +62,18 @@ type MessageAlertProps = {
 
 const getExpectedMessage = (
   alert: ProbeAlert,
-  response: ProbeRequestResponse
+  response: ProbeRequestResponse,
+  isRecovery: boolean
 ): string | number => {
   const { status, data, headers, responseTime } = response
+
+  if (alert.message === '') {
+    if (isRecovery) {
+      return `The request is back to normal and passed the assertion: ${alert.assertion}`
+    }
+
+    return `The request failed because the response did not pass the query: ${alert.assertion}. The actual response status is ${status} and the response time is ${responseTime}.`
+  }
 
   return Handlebars.compile(alert.message)({
     response: {
@@ -112,7 +121,7 @@ export async function getMessageForAlert({
     isRecovery,
     lastIncident?.createdAt
   )
-  const expectedMessage = getExpectedMessage(alert, response)
+  const expectedMessage = getExpectedMessage(alert, response, isRecovery)
   const bodyString = `Message: ${recoveryMessage}${expectedMessage}
 
 ${meta.url ? `URL: ${meta.url}` : `Probe ID: ${probeID}`}
