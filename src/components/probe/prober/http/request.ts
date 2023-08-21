@@ -294,16 +294,38 @@ function errorRequestCodeToNumber(
       // not found, the abyss never returned a statusCode
       // assign some unique errResponseCode for decoding later.
       return 0
-
     case 'ECONNRESET':
       // connection reset from target, assign some unique number responsecCode
       return 1
-
     case 'ECONNREFUSED':
       // got rejected, again
       return 2
+    case 'ERR_FR_TOO_MANY_REDIRECTS':
+      // redirect higher than set in maxRedirects
+      return 3
+    // cover all possible axios connection issues
+    case 'ERR_BAD_OPTION_VALUE':
+      return 4
+    case 'ERR_BAD_OPTION':
+      return 5
+    case 'ETIMEDOUT':
+      return 6
+    case 'ERR_NETWORK':
+      return 7
+    case 'ERR_DEPRECATED':
+      return 8
+    case 'ERR_BAD_RESPONSE':
+      return 9
+    case 'ERR_BAD_REQUEST':
+      return 11
+    case 'ERR_CANCELED':
+      return 12
+    case 'ERR_NOT_SUPPORT':
+      return 13
+    case 'ERR_INVALID_URL':
+      return 14
 
     default:
-      return 3
+      return 99 // in the event an unlikely unknown error, send here
   }
 }

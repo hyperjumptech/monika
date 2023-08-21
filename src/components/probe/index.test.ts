@@ -57,11 +57,16 @@ const probes: Probe[] = [
   },
 ]
 let urlRequestTotal = 0
+let notificationAlert = ''
 let server: SetupServer
 before(() => {
   server = setupServer(
     http.get('https://example.com/', () => {
       urlRequestTotal += 1
+      return HttpResponse.text(undefined, { status: 200 })
+    }),
+    http.post('https://example.com/webhook', async ({ request }) => {
+      notificationAlert = await request.text()
       return HttpResponse.text(undefined, { status: 200 })
     })
   )
@@ -73,6 +78,7 @@ after(() => server.close())
 
 afterEach(() => {
   urlRequestTotal = 0
+  notificationAlert = ''
 })
 
 describe('Probe processing', () => {
@@ -154,11 +160,11 @@ describe('Probe processing', () => {
       doProbe({ probe: probes[0], notifications: [] })
       await doProbe({ probe: probes[0], notifications: [] })
       // wait for random timeout
-      await sleep(3700)
+      await sleep(4000)
 
       // assert
       expect(urlRequestTotal).eq(1)
-    })
+    }).timeout(10_000)
 
     it('should not run probe if it is not the time', () => {
       // arrange
@@ -218,6 +224,86 @@ describe('Probe processing', () => {
       // assert
       expect(urlRequestTotal).eq(5)
     })
+
+    it('should send incident notification', async () => {
+      // arrange
+      const probe = {
+        ...probes[0],
+        id: '2md9o',
+        alerts: [{ assertion: 'response.status == 200' }],
+      }
+      initializeProbeStates([probe])
+      // wait until the interval passed
+      const seconds = 1000
+      await sleep(seconds)
+
+      // act
+      await doProbe({
+        probe,
+        notifications: [
+          {
+            id: 'jFQBd',
+            data: { url: 'https://example.com/webhook' },
+            type: 'webhook',
+          },
+        ],
+      })
+      // wait for random timeout
+      await sleep(3 * seconds)
+      // wait for send notification function to resolve
+      await sleep(2 * seconds)
+
+      // assert
+      expect(notificationAlert).includes('The request failed')
+    }).timeout(10_000)
+
+    it('should send recovery notification', async () => {
+      // arrange
+      server.use(
+        http.get('https://example.com', () => {
+          urlRequestTotal += 1
+          return HttpResponse.text(undefined, { status: 404 })
+        })
+      )
+      const probe = {
+        ...probes[0],
+        id: 'fj43l',
+        requests: [{ url: 'https://example.com', body: '', timeout: 30 }],
+        alerts: [{ assertion: 'response.status != 200' }],
+      }
+      const notifications = [
+        {
+          id: 'jFQBd',
+          data: { url: 'https://example.com/webhook' },
+          type: 'webhook',
+        },
+      ]
+      initializeProbeStates([probe])
+      // wait until the interval passed
+      const seconds = 1000
+      await sleep(seconds)
+
+      // act
+      await doProbe({
+        probe,
+        notifications,
+      })
+      // wait for random timeout
+      await sleep(3 * seconds)
+      server.resetHandlers()
+      await doProbe({
+        probe,
+        notifications,
+      })
+      // wait for random timeout
+      await sleep(3 * seconds)
+      // wait for send notification function to resolve
+      await sleep(2 * seconds)
+
+      // assert
+      console.log(notificationAlert)
+      expect(notificationAlert).includes('Target is back to normal')
+    }).timeout(10_000)
   })
 
   describe('Non HTTP Probe', () => {
