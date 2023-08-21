@@ -90,7 +90,6 @@
     "lodash": "^4.17.21",
     "macaddress": "^0.5.2",
     "mailgen": "^2.0.15",
-    "mailgun.js": "^3.5.4",
     "mariadb": "^3.0.2",
     "mongodb": "^4.10.0",
     "mongodb-uri": "^0.9.7",
