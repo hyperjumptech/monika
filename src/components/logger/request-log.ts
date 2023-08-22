@@ -153,7 +153,7 @@ export class RequestLog {
   async saveToDatabase(): Promise<void> {
     const { flags, monikaID } = getContext()
 
-    if (flags.symonExperimental) {
+    if (flags.symonCouchDb) {
       await this.saveToPouchDB(monikaID)
       return
     }

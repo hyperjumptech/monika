@@ -256,15 +256,9 @@ class Monika extends Command {
         'Monika will follow redirects as many times as the specified value here. By default, Monika will follow redirects once. To disable redirects following, set the value to zero.',
     }),
 
-    symonExperimental: Flags.boolean({
-      description: 'to run an experimental feature of monika related to symon',
-      default: false,
-    }),
-
     symonCouchDb: Flags.string({
       hidden: false,
       description: 'URL of remote couchDB',
-      dependsOn: ['symonExperimental'],
     }),
   }
 
@@ -287,7 +281,7 @@ class Monika extends Command {
         return
       }
 
-      if (_flags.symonExperimental) {
+      if (_flags.symonCouchDb) {
         await openLogPouch()
       } else {
         await openLogfile()

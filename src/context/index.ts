@@ -65,7 +65,6 @@ const initialContext: Context = {
     summary: false,
     verbose: false,
     version: undefined,
-    symonExperimental: false,
   },
 }
 

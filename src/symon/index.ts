@@ -359,7 +359,7 @@ class SymonClient {
 
   async report(): Promise<any> {
     const { flags } = getContext()
-    if (flags.symonExperimental) {
+    if (flags.symonCouchDb) {
       return
     }
 

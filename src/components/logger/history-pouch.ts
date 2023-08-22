@@ -40,26 +40,23 @@ export async function openLogPouch(): Promise<void> {
 
     // to symon couchdb replication setting
     const { flags } = getContext()
-    if (flags.symonCouchDb) {
-      const symonCouchDB = new PouchDB(flags.symonCouchDb)
-      localPouchDB.replicate
-        .to(symonCouchDB, {
-          live: true,
-          retry: true,
-          // eslint-disable-next-line camelcase
-          back_off_function: (delay: number) =>
-            delay === 0 ? 1000 : delay * 3,
-          filter: (doc: PouchDB.Core.ExistingDocument<any>) => {
-            return doc._deleted !== true
-          },
-        })
-        .on('change', async function (info) {
-          const docs = info.docs
-          if (docs) {
-            await removeDocumentsFromLocalDB(localPouchDB, docs)
-          }
-        })
-    }
+    const symonCouchDB = new PouchDB(flags.symonCouchDb)
+    localPouchDB.replicate
+      .to(symonCouchDB, {
+        live: true,
+        retry: true,
+        // eslint-disable-next-line camelcase
+        back_off_function: (delay: number) => (delay === 0 ? 1000 : delay * 3),
+        filter: (doc: PouchDB.Core.ExistingDocument<any>) => {
+          return doc._deleted !== true
+        },
+      })
+      .on('change', async function (info) {
+        const docs = info.docs
+        if (docs) {
+          await removeDocumentsFromLocalDB(localPouchDB, docs)
+        }
+      })
   } catch (error: any) {
     log.error("Warning: Can't open logfile. " + error.message)
   }
@@ -105,7 +102,7 @@ export async function saveProbeRequestToPouchDB({
   const now = Math.round(Date.now() / 1000)
   const requestConfig = probe.requests?.[requestIndex]
 
-  const probeDataId = new Date().toISOString()
+  const probeDataId = Date.now().toString()
   const reqData = {
     alerts: '',
     id: probeDataId,
@@ -137,7 +134,7 @@ export async function saveProbeRequestToPouchDB({
   }
 
   const reportData = {
-    _id: probeDataId,
+    _id: probe.name + '-' + probeDataId,
     monikaId: monikaId,
     data: {
       requests: [reqData],

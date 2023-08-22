@@ -60,7 +60,6 @@ export type MonikaFlags = {
   text?: string
   verbose: boolean
   version: void
-  symonExperimental: boolean
   symonCouchDb?: string
 }
 
