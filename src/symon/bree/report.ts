@@ -25,7 +25,6 @@
 import { parentPort, workerData } from 'worker_threads'
 import path from 'path'
 import { open } from 'sqlite'
-import axios from 'axios'
 import SQLite3 from 'sqlite3'
 import {
   deleteNotificationLogs,
@@ -35,7 +34,23 @@ import {
   UnreportedRequestsLog,
 } from '../../components/logger/history'
 import { log } from '../../utils/pino'
+import { DEFAULT_TIMEOUT } from '../../utils/http'
+import fetch, { RequestInit } from 'node-fetch'
 const dbPath = path.resolve(process.cwd(), 'monika-logs.db')
+
+async function symonFetcher(config: { url: string } & RequestInit) {
+  const { url, timeout, redirect, headers, ...restConfig } = config
+  return fetch(url, {
+    ...restConfig,
+    headers,
+    timeout: timeout || DEFAULT_TIMEOUT,
+    redirect: redirect || 'follow',
+  }).then((res) => {
+    if (res.status >= 400 || res.status < 200)
+      throw new Error(`Error fetching ${path}! Got ${res.status}.`)
+    return res
+  })
+}
 
 const main = async (data: Record<string, any>) => {
   try {
@@ -68,16 +83,16 @@ const main = async (data: Record<string, any>) => {
     } else {
       // Hit the Symon API for receiving Monika report
       // With the compressed requests and notifications data
-      await axios({
+      await symonFetcher({
         url: `${url}/api/v1/monika/report`,
         method: 'POST',
-        data: {
+        body: JSON.stringify({
           monikaId: monikaId,
           data: {
             requests,
             notifications,
           },
-        },
+        }),
         headers: {
           'Content-Encoding': 'gzip',
           'Content-Type': 'application/json',

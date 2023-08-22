@@ -23,7 +23,6 @@
  **********************************************************************************/
 
 /* eslint-disable unicorn/prefer-module */
-import axios, { AxiosInstance } from 'axios'
 import { EventEmitter } from 'events'
 import mac from 'macaddress'
 import { hostname } from 'os'
@@ -48,6 +47,7 @@ import {
   publicIpAddress,
   publicNetworkInfo,
 } from '../utils/public-ip'
+import fetch, { RequestInit } from 'node-fetch'
 
 Bree.extend(require('@breejs/ts-worker'))
 
@@ -127,6 +127,7 @@ class SymonClient {
 
   configHash = ''
 
+  private apiBaseUrl = ''
   private apiKey = ''
 
   private url = ''
@@ -140,8 +141,6 @@ class SymonClient {
   private probes: Probe[] = []
 
   eventEmitter: EventEmitter | null = null
-
-  private httpClient: AxiosInstance
 
   private locationId: string
 
@@ -177,13 +176,7 @@ class SymonClient {
     | 'symonReportInterval'
     | 'symonReportLimit'
   >) {
-    this.httpClient = axios.create({
-      baseURL: `${symonUrl}/api/v1/monika`,
-      headers: {
-        'x-api-key': symonKey,
-      },
-      timeout: DEFAULT_TIMEOUT,
-    })
+    this.apiBaseUrl = `${symonUrl}/api/v1/monika`
 
     this.url = symonUrl
 
@@ -201,6 +194,24 @@ class SymonClient {
     this.reportProbesInterval = symonReportInterval ?? 10_000
 
     this.reportProbesLimit = symonReportLimit ?? 100
+  }
+
+  private async symonFetcher(config: { path: string } & RequestInit) {
+    const { path, timeout, redirect, headers, ...restConfig } = config
+    return fetch(this.apiBaseUrl + path, {
+      ...restConfig,
+      headers: {
+        'x-api-key': this.apiKey,
+        'content-type': 'application/json',
+        ...headers,
+      },
+      timeout: timeout || DEFAULT_TIMEOUT,
+      redirect: redirect || 'follow',
+    }).then((res) => {
+      if (res.status >= 400 || res.status < 200)
+        throw new Error(`Error fetching ${path}! Got ${res.status}.`)
+      return res
+    })
   }
 
   async initiate(): Promise<void> {
@@ -243,7 +254,14 @@ class SymonClient {
 
   async notifyEvent(event: SymonClientEvent): Promise<void> {
     log.debug('Sending incident/recovery event to Symon')
-    await this.httpClient.post('/events', { monikaId: this.monikaId, ...event })
+    await this.symonFetcher({
+      path: '/events',
+      method: 'POST',
+      body: JSON.stringify({
+        monikaId: this.monikaId,
+        ...event,
+      }),
+    })
   }
 
   // monika subscribes to config update by providing listener callback
@@ -281,32 +299,35 @@ class SymonClient {
       }
     }
 
-    return this.httpClient
-      .post('/client-handshake', handshakeData)
-      .then((res) => res.data?.data.monikaId)
+    return this.symonFetcher({
+      path: '/client-handshake',
+      method: 'POST',
+      body: JSON.stringify(handshakeData),
+    })
+      .then((res) => res.json())
+      .then((jsonRes) => jsonRes.data.monikaId)
   }
 
   private async fetchProbes() {
     log.debug('Getting probes from symon')
-    return this.httpClient
-      .get<{ data: Probe[] }>(`/${this.monikaId}/probes`, {
-        headers: {
-          ...(this.configHash ? { 'If-None-Match': this.configHash } : {}),
-        },
-        validateStatus(status) {
-          return [200, 304].includes(status)
-        },
-      })
-      .then((res) => {
-        if (res.data.data) {
-          this.probes = res.data.data
+    return this.symonFetcher({
+      path: `/${this.monikaId}/probes`,
+      method: 'GET',
+      headers: {
+        ...(this.configHash ? { 'If-None-Match': this.configHash } : {}),
+      },
+    })
+      .then(async (res) => {
+        const body: { data: Probe[] } = await res.json()
+        if (body.data) {
+          this.probes = body.data
 
-          log.debug(`Received ${res.data.data.length} probes`)
+          log.debug(`Received ${body.data.length} probes`)
         } else {
           log.debug(`No new config from Symon`)
         }
 
-        return { probes: res.data.data, hash: res.headers.etag }
+        return { probes: body.data, hash: res.headers.get('etag') || undefined }
       })
       .catch((error) => {
         if (error.isAxiosError) {
@@ -360,7 +381,6 @@ class SymonClient {
         hasConnectionToSymon,
         probeIds,
         reportProbesLimit: this.reportProbesLimit,
-        httpClient: this.httpClient,
         monikaId: this.monikaId,
         url: this.url,
         apiKey: this.apiKey,
@@ -421,13 +441,13 @@ class SymonClient {
 
   async sendStatus({ isOnline }: { isOnline: boolean }): Promise<void> {
     try {
-      const response = await this.httpClient({
-        url: '/status',
+      const response = await this.symonFetcher({
+        path: '/status',
         method: 'POST',
-        data: {
+        body: JSON.stringify({
           monikaId: this.monikaId,
           status: isOnline,
-        },
+        }),
       })
 
       if (response.status === 200) {
