@@ -32,7 +32,6 @@ export type NotificationData = {
   apiKey: string
   domain: string
   recipients: string[]
-  username?: string
 }
 
 export type Content = {
@@ -50,23 +49,32 @@ export const validator = Joi.object().keys({
     .label('Mailgun Recipients'),
   apiKey: Joi.string().required().label('Mailgun API Key'),
   domain: Joi.string().required().label('Mailgun Domain'),
-  username: Joi.string().label('Mailgun Username'),
 })
 
-export const send = async (
-  { apiKey, domain, recipients, username = 'api' }: NotificationData,
-  { body, subject }: NotificationMessage
+const isContent = (data: NotificationMessage | Content): data is Content => {
+  const keys: Array<keyof Content> = ['from', 'subject', 'html', 'text']
+
+  return keys.every((k) => Object.prototype.hasOwnProperty.call(data, k))
+}
+
+const _send = async (
+  { apiKey, domain, recipients }: NotificationData,
+  data: NotificationMessage | Content
 ): Promise<void> => {
   const url = `https://api.mailgun.net/v3/${domain}/messages`
-  const auth = Buffer.from(username + ':' + apiKey).toString('base64')
-  const data = getContent({ body, subject, domain })
+  const auth = Buffer.from('api:' + apiKey).toString('base64')
+  const theData = isContent(data)
+    ? data
+    : getContent({ body: data.body, subject: data.subject, domain })
 
   const formData = new FormData()
-  formData.append('from', data.from)
-  formData.append('subject', data.subject)
-  formData.append('html', data.html)
-  formData.append('text', data.text)
+  formData.append('from', theData.from)
+  formData.append('subject', theData.subject)
+  formData.append('html', theData.html)
+  formData.append('text', theData.text)
   for (const email of recipients) formData.append('to', email)
+  if (theData.headerReference)
+    formData.append('h:References', theData.headerReference)
 
   await sendHttpRequest({
     method: 'POST',
@@ -78,31 +86,18 @@ export const send = async (
   })
 }
 
+export const send = async (
+  notificationData: NotificationData,
+  notificationMessage: NotificationMessage
+): Promise<void> => {
+  await _send(notificationData, notificationMessage)
+}
+
 export const sendWithCustomContent = async (
-  { apiKey, domain, recipients, username = 'api' }: NotificationData,
+  notificationData: NotificationData,
   content: Content
 ): Promise<void> => {
-  const url = `https://api.mailgun.net/v3/${domain}/messages`
-  const auth = Buffer.from(username + ':' + apiKey).toString('base64')
-  const data = content
-
-  const formData = new FormData()
-  formData.append('from', data.from)
-  formData.append('subject', data.subject)
-  formData.append('html', data.html)
-  formData.append('text', data.text)
-  for (const email of recipients) formData.append('to', email)
-  if (data.headerReference)
-    formData.append('h:References', data.headerReference)
-
-  await sendHttpRequest({
-    method: 'POST',
-    url,
-    headers: {
-      Authorization: 'Basic ' + auth,
-    },
-    data: formData,
-  })
+  await _send(notificationData, content)
 }
 
 export function getContent({
