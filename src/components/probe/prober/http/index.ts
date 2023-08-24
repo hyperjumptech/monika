@@ -1,3 +1,27 @@
+/**********************************************************************************
+ * MIT License                                                                    *
+ *                                                                                *
+ * Copyright (c) 2021 Hyperjump Technology                                        *
+ *                                                                                *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy   *
+ * of this software and associated documentation files (the "Software"), to deal  *
+ * in the Software without restriction, including without limitation the rights   *
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell      *
+ * copies of the Software, and to permit persons to whom the Software is          *
+ * furnished to do so, subject to the following conditions:                       *
+ *                                                                                *
+ * The above copyright notice and this permission notice shall be included in all *
+ * copies or substantial portions of the Software.                                *
+ *                                                                                *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR     *
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,       *
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE    *
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER         *
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,  *
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  *
+ * SOFTWARE.                                                                      *
+ **********************************************************************************/
+
 import { isSymonModeFrom } from '../../../config'
 import { checkThresholdsAndSendAlert } from '../..'
 import { getContext } from '../../../../context'
@@ -12,13 +36,60 @@ import { RequestLog } from '../../../logger'
 import { logResponseTime } from '../../../logger/response-time-log'
 import { processThresholds } from '../../../notification/process-server-status'
 import { httpRequest } from './request'
+import { BaseProber } from '..'
 
 const CONNECTION_RECOVERY_MESSAGE = 'Probe is accessible again'
 const CONNECTION_INCIDENT_MESSAGE = 'Probe not accessible'
 const isConnectionDown = new Map<string, boolean>()
 
+export class HTTPProber extends BaseProber {
+  async probe(): Promise<void> {
+    await probeHTTP(this.probeConfig, this.counter, this.notifications)
+  }
+
+  generateVerboseStartupMessage(): string {
+    const { description, id, interval, name } = this.probeConfig
+
+    let result = `- Probe ID: ${id}
+  Name: ${name}
+  Description: ${description || '-'}
+  Interval: ${interval}
+`
+    result += '  Requests:\n'
+    result += this.generateProbeRequestMessage()
+    result += this.generateAlertMessage()
+
+    return result
+  }
+
+  private generateProbeRequestMessage(): string {
+    let startupMessage = ''
+
+    for (const request of this.probeConfig.requests || []) {
+      const { body, headers, method, url } = request
+
+      startupMessage += `  - Request Method: ${method || `GET`}
+    Request URL: ${url}
+    Request Headers: ${JSON.stringify(headers) || `-`}
+    Request Body: ${JSON.stringify(body) || `-`}
+`
+    }
+
+    return startupMessage
+  }
+
+  private generateAlertMessage(): string {
+    const hasAlert = this.probeConfig.alerts.length > 0
+    const defaultAlertsInString =
+      '[{ "assertion": "response.status < 200 or response.status > 299", "message": "HTTP Status is not 200"}, { "assertion": "response.time > 2000", "message": "Response time is more than 2000ms" }]'
+    const alertsInString = JSON.stringify(this.probeConfig.alerts)
+
+    return `    Alerts: ${hasAlert ? alertsInString : defaultAlertsInString}\n`
+  }
+}
+
 // sending multiple http-type requests
-export async function probeHTTP(
+async function probeHTTP(
   probe: Probe,
   checkOrder: number,
   notifications: Notification[]
