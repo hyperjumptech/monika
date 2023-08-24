@@ -89,7 +89,7 @@ export class HTTPProber extends BaseProber {
 }
 
 // sending multiple http-type requests
-export async function probeHTTP(
+async function probeHTTP(
   probe: Probe,
   checkOrder: number,
   notifications: Notification[]

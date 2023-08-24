@@ -39,7 +39,6 @@ import {
 } from '../../utils/probe-state'
 import { RequestLog } from '../logger'
 import { sendAlerts } from '../notification'
-import { probeHTTP } from './prober/http'
 import { createProbers } from './prober/factory'
 
 interface ProbeStatusProcessed {
@@ -172,7 +171,6 @@ export async function doProbe({
     }
 
     await probeNonHTTP(probe, probeCtx.cycle, notifications)
-    await probeHTTP(probe, probeCtx.cycle, notifications)
 
     setProbeFinish(probe.id)
   }, getRandomTimeoutMilliseconds())

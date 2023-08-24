@@ -34,6 +34,10 @@ export function createProbers(probeMetadata: ProberMetadata): Prober[] {
   const { probeConfig } = probeMetadata
   const result: Prober[] = []
 
+  if (probeConfig?.requests) {
+    result.push(createProber(probeMetadata))
+  }
+
   if (probeConfig?.mongo) {
     result.push(createProber(probeMetadata))
   }
