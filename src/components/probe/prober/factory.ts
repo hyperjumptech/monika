@@ -22,6 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import { HTTPProber } from './http'
 import { MongoProber } from './mongo'
 import { MariaDBProber } from './mariadb'
 import { PostgresProber } from './postgres'
@@ -58,6 +59,10 @@ export function createProbers(probeMetadata: ProberMetadata): Prober[] {
 
 export function createProber(probeMetadata: ProberMetadata): Prober {
   const { probeConfig } = probeMetadata
+
+  if (probeConfig?.requests) {
+    return new HTTPProber(probeMetadata)
+  }
 
   if (probeConfig?.mariadb || probeConfig?.mysql) {
     return new MariaDBProber(probeMetadata)

@@ -39,7 +39,7 @@ import {
 } from '../../utils/probe-state'
 import { RequestLog } from '../logger'
 import { sendAlerts } from '../notification'
-import { probeHTTP } from './prober'
+import { probeHTTP } from './prober/http'
 import { createProbers } from './prober/factory'
 
 interface ProbeStatusProcessed {
