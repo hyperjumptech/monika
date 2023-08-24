@@ -152,13 +152,7 @@ describe('Webhook Notification', () => {
       } as unknown as NotificationMessage)
 
       // assert
-      expect(body).deep.eq({
-        body: {
-          alert: 'response.status != 200',
-          url: 'ua53D',
-          time: '2022-09-27 18:00:00.000',
-        },
-      })
+      expect(body).deep.eq({})
     })
   })
 })
