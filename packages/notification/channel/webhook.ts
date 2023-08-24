@@ -36,12 +36,24 @@ export const validator = Joi.object().keys({
 
 export const send = async (
   { url }: NotificationData,
-  { body }: NotificationMessage
+  { meta }: NotificationMessage
 ): Promise<void> => {
+  if (meta.type !== 'incident' && meta.type !== 'recovery') {
+    return
+  }
+
+  const { alertQuery, probeID, time } = meta
+
   await sendHttpRequest({
     method: 'POST',
     url,
-    data: body,
+    data: {
+      body: {
+        url: meta.url || probeID,
+        time,
+        alert: alertQuery,
+      },
+    },
   })
 }
 

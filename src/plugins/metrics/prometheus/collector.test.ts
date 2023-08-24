@@ -64,6 +64,7 @@ describe('Prometheus collector', () => {
           alerts: [
             {
               assertion: '',
+              message: '',
             },
           ],
         },
@@ -100,6 +101,7 @@ describe('Prometheus collector', () => {
           alerts: [
             {
               assertion: '',
+              message: '',
             },
           ],
         },
@@ -181,6 +183,7 @@ describe('Prometheus collector', () => {
           alerts: [
             {
               assertion: '',
+              message: '',
             },
           ],
         },
@@ -212,6 +215,7 @@ describe('Prometheus collector', () => {
           alerts: [
             {
               assertion: '',
+              message: '',
             },
           ],
         },
