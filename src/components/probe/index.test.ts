@@ -57,7 +57,7 @@ const probes: Probe[] = [
   },
 ]
 let urlRequestTotal = 0
-let notificationAlert = ''
+let notificationAlert: Record<string, any> = {}
 let server: SetupServer
 before(() => {
   server = setupServer(
@@ -66,7 +66,7 @@ before(() => {
       return HttpResponse.text(undefined, { status: 200 })
     }),
     http.post('https://example.com/webhook', async ({ request }) => {
-      notificationAlert = await request.text()
+      notificationAlert = (await request.json()) as Record<string, any>
       return HttpResponse.text(undefined, { status: 200 })
     })
   )
@@ -78,7 +78,7 @@ after(() => server.close())
 
 afterEach(() => {
   urlRequestTotal = 0
-  notificationAlert = ''
+  notificationAlert = {}
 })
 
 describe('Probe processing', () => {
@@ -230,7 +230,12 @@ describe('Probe processing', () => {
       const probe = {
         ...probes[0],
         id: '2md9o',
-        alerts: [{ assertion: 'response.status == 200' }],
+        alerts: [
+          {
+            assertion: 'response.status == 200',
+            message: 'The request failed.',
+          },
+        ],
       }
       initializeProbeStates([probe])
       // wait until the interval passed
@@ -254,7 +259,8 @@ describe('Probe processing', () => {
       await sleep(2 * seconds)
 
       // assert
-      expect(notificationAlert).includes('The request failed')
+      expect(notificationAlert.body.url).eq('https://example.com')
+      expect(notificationAlert.body.alert).eq('response.status == 200')
     }).timeout(10_000)
 
     it('should send recovery notification', async () => {
@@ -269,7 +275,7 @@ describe('Probe processing', () => {
         ...probes[0],
         id: 'fj43l',
         requests: [{ url: 'https://example.com', body: '', timeout: 30 }],
-        alerts: [{ assertion: 'response.status != 200' }],
+        alerts: [{ assertion: 'response.status != 200', message: '' }],
       }
       const notifications = [
         {
@@ -301,8 +307,8 @@ describe('Probe processing', () => {
       await sleep(2 * seconds)
 
       // assert
-      console.log(notificationAlert)
-      expect(notificationAlert).includes('Target is back to normal')
+      expect(notificationAlert.body.url).eq('https://example.com')
+      expect(notificationAlert.body.alert).eq('response.status != 200')
     }).timeout(10_000)
   })
 
