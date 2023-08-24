@@ -125,7 +125,9 @@ export async function probeHTTP(
           eventEmitter.emit(events.probe.alert.triggered, {
             probe,
             requestIndex,
-            alertQuery: triggeredAlertResponse.alert.query,
+            alertQuery:
+              triggeredAlertResponse.alert.assertion ||
+              triggeredAlertResponse.alert.query,
           })
         }
 
