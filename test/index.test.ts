@@ -240,32 +240,32 @@ describe('monika', () => {
     })
 
   // Mailgun Tests
-  // test
-  //   .stdout()
-  //   .do(() =>
-  //     cmd.run([
-  //       '--config',
-  //       resolve('./test/testConfigs/mailgun/mailgunconfig.yml'),
-  //       '--verbose',
-  //     ])
-  //   )
-  //   .it('runs with mailgun config', (ctx) => {
-  //     expect(ctx.stdout).to.contain('Type: mailgun')
-  //     expect(ctx.stdout).to.contain('Domain:')
-  //   })
+  test
+    .stdout()
+    .do(() =>
+      cmd.run([
+        '--config',
+        resolve('./test/testConfigs/mailgun/mailgunconfig.yml'),
+        '--verbose',
+      ])
+    )
+    .it('runs with mailgun config', (ctx) => {
+      expect(ctx.stdout).to.contain('Type: mailgun')
+      expect(ctx.stdout).to.contain('Domain:')
+    })
 
-  // test
-  //   .stderr()
-  //   .do(() =>
-  //     cmd.run([
-  //       '--config',
-  //       resolve('./test/testConfigs/mailgun/mailgunconfigNoRecipients.yml'),
-  //     ])
-  //   )
-  //   .catch((error) => {
-  //     expect(error.message).to.contain('"Mailgun Recipients" is required')
-  //   })
-  //   .it('runs with mailgun config but without recipients')
+  test
+    .stderr()
+    .do(() =>
+      cmd.run([
+        '--config',
+        resolve('./test/testConfigs/mailgun/mailgunconfigNoRecipients.yml'),
+      ])
+    )
+    .catch((error) => {
+      expect(error.message).to.contain('"Mailgun Recipients" is required')
+    })
+    .it('runs with mailgun config but without recipients')
 
   // Sendgrid Tests
   test
