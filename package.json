@@ -1,7 +1,7 @@
 {
   "name": "@hyperjumptech/monika",
   "description": "Synthetic monitoring made easy",
-  "version": "1.15.4",
+  "version": "1.15.5",
   "license": "MIT",
   "author": "@hyperjumptech",
   "main": "lib/index.js",
@@ -45,7 +45,7 @@
     "start": "npm run prepack && ./bin/dev",
     "start:windows": "npm run prepack && /bin/dev",
     "start:prod": "npm run prepack && ./bin/run",
-    "test": "npm run clean && cross-env NODE_ENV=test nyc --reporter=lcov --extension .ts mocha --config .mocharc.json --forbid-only \"{src,test}/**/*.test.ts\" --exclude test/cli.test.ts",
+    "test": "npm run clean && cross-env NODE_ENV=test nyc --reporter=lcov --extension .ts mocha --config .mocharc.json --forbid-only \"{packages,src,test}/**/*.test.ts\" --exclude test/cli.test.ts",
     "cli-test": "npx bats test/bats/cli.bats",
     "prod_test": "npm run prod_test:bats && npm run prod_test:cli",
     "prod_test:bats": "npx bats prod_test/test.bats",

@@ -54,6 +54,10 @@ export async function probeHTTP(
   const isVerbose = isSymonMode || flags['keep-verbose-logs']
   const responses = []
 
+  if (!probe.requests) {
+    return
+  }
+
   for (
     let requestIndex = 0;
     requestIndex < probe?.requests?.length;
@@ -152,7 +156,9 @@ export async function probeHTTP(
           eventEmitter.emit(events.probe.alert.triggered, {
             probe,
             requestIndex,
-            alertQuery: triggeredAlertResponse.alert.query,
+            alertQuery:
+              triggeredAlertResponse.alert.assertion ||
+              triggeredAlertResponse.alert.query,
           })
         }
 

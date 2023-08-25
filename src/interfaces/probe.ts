@@ -27,7 +27,7 @@ import { RequestConfig } from './request'
 export interface ProbeAlert {
   query?: string
   assertion: string
-  message?: string
+  message: string
   id?: string
 }
 
@@ -85,7 +85,7 @@ export interface Probe {
   name: string
   description?: string
   interval: number
-  requests: RequestConfig[]
+  requests?: RequestConfig[]
   socket?: Socket
   redis?: Redis[]
   mongo?: Mongo[]

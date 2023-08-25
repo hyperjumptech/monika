@@ -49,7 +49,7 @@ export class RequestLog {
   private errors: string[] = []
 
   private get request() {
-    return this.probe.requests[this.requestIndex]
+    return this.probe?.requests?.[this.requestIndex]
   }
 
   get hasIncidentOrRecovery(): boolean {
