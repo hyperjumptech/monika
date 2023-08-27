@@ -6,7 +6,7 @@
     "module": "commonjs",
     "outDir": "lib",
     "rootDir": "src",
-    "lib": ["ES2015", "DOM"],
+    "lib": ["ES2021", "DOM"],
     "strict": true,
     "target": "ES2015",
     "skipLibCheck": true,
