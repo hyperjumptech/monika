@@ -164,6 +164,8 @@ export async function httpRequest({
       isProbeResponsive: true,
     }
   } catch (error: any) {
+    console.log('DEBUG ERROR HTTP REQ')
+    console.log(JSON.stringify(error))
     const responseTime = Date.now() - requestStartedAt
 
     // The request was made and the server responded with a status code

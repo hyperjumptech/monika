@@ -36,7 +36,6 @@ import { doProbe, getProbeStatesWithValidAlert } from '.'
 import type { ServerAlertState } from '../../interfaces/probe-status'
 import { initializeProbeStates } from '../../utils/probe-state'
 import type { Probe } from '../../interfaces/probe'
-import { after, afterEach } from 'mocha'
 import { getContext, resetContext, setContext } from '../../context'
 
 const probes: Probe[] = [
@@ -46,7 +45,7 @@ const probes: Probe[] = [
     interval: 1,
     requests: [
       {
-        url: 'https://example.com/',
+        url: 'http://localhost:4000',
         body: '',
         timeout: 30,
       },
@@ -56,32 +55,35 @@ const probes: Probe[] = [
     alerts: [],
   },
 ]
-let urlRequestTotal = 0
-let notificationAlert: Record<string, any> = {}
-let server: SetupServer
-before(() => {
-  server = setupServer(
-    http.get('https://example.com/', () => {
-      urlRequestTotal += 1
-      return HttpResponse.text(undefined, { status: 200 })
-    }),
-    http.post('https://example.com/webhook', async ({ request }) => {
-      notificationAlert = (await request.json()) as Record<string, any>
-      return HttpResponse.text(undefined, { status: 200 })
-    })
-  )
 
-  server.listen({ onUnhandledRequest: 'bypass' })
-})
-
-after(() => server.close())
-
-afterEach(() => {
-  urlRequestTotal = 0
-  notificationAlert = {}
-})
+// must use beforeEach and afterEach to setup / close mock server
 
 describe('Probe processing', () => {
+  let urlRequestTotal = 0
+  let notificationAlert: Record<string, any> = {}
+  let server: SetupServer
+  beforeEach(() => {
+    server = setupServer()
+    // intentionally throw error for implicit handler
+    server.listen({ onUnhandledRequest: 'error' })
+    server.use(
+      http.get('http://localhost:4000', () => {
+        urlRequestTotal += 1
+        return HttpResponse.text(undefined, { status: 200 })
+      }),
+      http.post('http://localhost:4000/webhook', async ({ request }) => {
+        notificationAlert = (await request.json()) as Record<string, any>
+        return HttpResponse.text(undefined, { status: 200 })
+      })
+    )
+  })
+
+  afterEach(() => {
+    urlRequestTotal = 0
+    notificationAlert = {}
+    server.close()
+  })
+
   describe('getProbeStatesWithValidAlert function', () => {
     const probeStates: ServerAlertState[] = [
       {
@@ -248,7 +250,7 @@ describe('Probe processing', () => {
         notifications: [
           {
             id: 'jFQBd',
-            data: { url: 'https://example.com/webhook' },
+            data: { url: 'http://localhost:4000/webhook' },
             type: 'webhook',
           },
         ],
@@ -259,14 +261,14 @@ describe('Probe processing', () => {
       await sleep(2 * seconds)
 
       // assert
-      expect(notificationAlert.body.url).eq('https://example.com')
+      expect(notificationAlert.body.url).eq('http://localhost:4000')
       expect(notificationAlert.body.alert).eq('response.status == 200')
     }).timeout(10_000)
 
     it('should send recovery notification', async () => {
       // arrange
       server.use(
-        http.get('https://example.com', () => {
+        http.get('http://localhost:4000', () => {
           urlRequestTotal += 1
           return HttpResponse.text(undefined, { status: 404 })
         })
@@ -274,13 +276,13 @@ describe('Probe processing', () => {
       const probe = {
         ...probes[0],
         id: 'fj43l',
-        requests: [{ url: 'https://example.com', body: '', timeout: 30 }],
+        requests: [{ url: 'http://localhost:4000', body: '', timeout: 30 }],
         alerts: [{ assertion: 'response.status != 200', message: '' }],
       }
       const notifications = [
         {
           id: 'jFQBd',
-          data: { url: 'https://example.com/webhook' },
+          data: { url: 'http://localhost:4000/webhook' },
           type: 'webhook',
         },
       ]
@@ -307,7 +309,7 @@ describe('Probe processing', () => {
       await sleep(2 * seconds)
 
       // assert
-      expect(notificationAlert.body.url).eq('https://example.com')
+      expect(notificationAlert.body.url).eq('http://localhost:4000')
       expect(notificationAlert.body.alert).eq('response.status != 200')
     }).timeout(10_000)
   })

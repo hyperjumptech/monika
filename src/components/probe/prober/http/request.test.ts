@@ -36,11 +36,13 @@ import { SetupServer, setupServer } from 'msw/node'
 import { XMLParser } from 'fast-xml-parser'
 
 describe('probingHTTP', () => {
-  const server: SetupServer = setupServer()
-  // intentionally throw error for implicit handler
-  server.listen({ onUnhandledRequest: 'error' })
-  beforeEach(() => server.resetHandlers())
-  after(() => server.close())
+  let server: SetupServer
+  beforeEach(() => {
+    server = setupServer()
+    // intentionally throw error for implicit handler
+    server.listen({ onUnhandledRequest: 'error' })
+  })
+  afterEach(() => server.close())
   describe('httpRequest function', () => {
     it('should render correct headers', async () => {
       let verifyHeader: any = {}
