@@ -1,3 +1,27 @@
+/**********************************************************************************
+ * MIT License                                                                    *
+ *                                                                                *
+ * Copyright (c) 2021 Hyperjump Technology                                        *
+ *                                                                                *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy   *
+ * of this software and associated documentation files (the "Software"), to deal  *
+ * in the Software without restriction, including without limitation the rights   *
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell      *
+ * copies of the Software, and to permit persons to whom the Software is          *
+ * furnished to do so, subject to the following conditions:                       *
+ *                                                                                *
+ * The above copyright notice and this permission notice shall be included in all *
+ * copies or substantial portions of the Software.                                *
+ *                                                                                *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR     *
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,       *
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE    *
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER         *
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,  *
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  *
+ * SOFTWARE.                                                                      *
+ **********************************************************************************/
+
 import { isSymonModeFrom } from '../../../config'
 import { checkThresholdsAndSendAlert } from '../..'
 import { getContext } from '../../../../context'
@@ -76,7 +100,6 @@ export async function probeHTTP(
           .filter((item) => item.isAlertTriggered)
           .map((item) => item.alert)
       )
-
       // so we've got a status that need to be reported/alerted
       // 1. check first, this connection is up, but was it ever down? if yes then use a specific connection recovery msg
       // 2. if this connection is down, save to map and send specific connection incident msg
@@ -86,13 +109,14 @@ export async function probeHTTP(
 
         if (
           isProbeResponsive && // if connection is successful but
-          isConnectionDown.has(id) // if connection was down then send custom alert. Else use user's alert.
+          isConnectionDown.has(id) // if connection WAS down then send a custom recovery alert. Else use user's alert.
         ) {
           validatedResponse[0].alert = {
             assertion: '',
             message: CONNECTION_RECOVERY_MESSAGE,
           }
           isConnectionDown.delete(id) // connection is up, so remove from entry
+          validatedResponse.splice(1, validatedResponse.length) // truncate and use custom message
         } else if (!isProbeResponsive) {
           // if connection has failed, then lets send out specific notification
           validatedResponse[0].alert = {
@@ -100,6 +124,7 @@ export async function probeHTTP(
             message: CONNECTION_INCIDENT_MESSAGE,
           }
           isConnectionDown.set(id, true) // connection is down, so add to map
+          validatedResponse.splice(1, validatedResponse.length) // truncate and use custom message
         }
       }
 
