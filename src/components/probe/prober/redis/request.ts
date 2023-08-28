@@ -26,6 +26,7 @@ import { createClient } from 'redis'
 import type { ProbeRequestResponse } from '../../../../interfaces/request'
 import { differenceInMilliseconds } from 'date-fns'
 import type { Redis } from '../../../../interfaces/probe'
+import { ProbeRequestResult } from '../../../../interfaces/request'
 
 type RedisResult = {
   isAlive: boolean // If redis responds to PING/commands
@@ -48,6 +49,7 @@ export async function redisRequest(
     status: 0,
     headers: '',
     responseTime: 0,
+    result: ProbeRequestResult.unknown,
     isProbeResponsive: false,
   }
   const startTime = new Date()
@@ -60,8 +62,10 @@ export async function redisRequest(
     baseResponse.body = result.message
     baseResponse.status = 200
     baseResponse.isProbeResponsive = true
+    baseResponse.result = ProbeRequestResult.success
   } else {
     baseResponse.body = result.message
+    baseResponse.result = ProbeRequestResult.failed
     baseResponse.errMessage = result.message
   }
 
