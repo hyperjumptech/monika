@@ -147,7 +147,6 @@ async function probeHTTP(
           .filter((item) => item.isAlertTriggered)
           .map((item) => item.alert)
       )
-
       // so we've got a status that need to be reported/alerted
       // 1. check first, this connection is up, but was it ever down? if yes then use a specific connection recovery msg
       // 2. if this connection is down, save to map and send specific connection incident msg
@@ -157,13 +156,14 @@ async function probeHTTP(
 
         if (
           isProbeResponsive && // if connection is successful but
-          isConnectionDown.has(id) // if connection was down then send custom alert. Else use user's alert.
+          isConnectionDown.has(id) // if connection WAS down then send a custom recovery alert. Else use user's alert.
         ) {
           validatedResponse[0].alert = {
             assertion: '',
             message: CONNECTION_RECOVERY_MESSAGE,
           }
           isConnectionDown.delete(id) // connection is up, so remove from entry
+          validatedResponse.splice(1, validatedResponse.length) // truncate and use custom message
         } else if (!isProbeResponsive) {
           // if connection has failed, then lets send out specific notification
           validatedResponse[0].alert = {
@@ -171,6 +171,7 @@ async function probeHTTP(
             message: CONNECTION_INCIDENT_MESSAGE,
           }
           isConnectionDown.set(id, true) // connection is down, so add to map
+          validatedResponse.splice(1, validatedResponse.length) // truncate and use custom message
         }
       }
 
