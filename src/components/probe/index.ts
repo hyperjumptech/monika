@@ -112,6 +112,11 @@ export function checkThresholdsAndSendAlert(
   for (const [index, probeState] of probeStatesWithValidAlert.entries()) {
     const { alertQuery, state } = probeState
 
+    // send only notifications that we have messages for (if it was truncated)
+    if (index === validatedResponseStatuses.length) {
+      break
+    }
+
     probeSendNotification({
       index,
       probe,
