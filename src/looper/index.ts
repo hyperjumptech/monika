@@ -68,7 +68,7 @@ export function sanitizeProbe(isSymonMode: boolean, probe: Probe): Probe {
     )
   }
 
-  const isHTTPProbe = requests?.length > 0
+  const isHTTPProbe = Boolean(requests)
   const isAlertsEmpty = alerts === undefined || alerts.length === 0
   if (!isSymonMode && isHTTPProbe && isAlertsEmpty) {
     log.warn(
@@ -80,7 +80,7 @@ export function sanitizeProbe(isSymonMode: boolean, probe: Probe): Probe {
     ...probe,
     alerts: sanitizeAlerts({
       alerts,
-      isHTTPProbe: requests?.length > 0,
+      isHTTPProbe,
       isSymonMode,
     }),
     name: name || `monika_${id}`,
@@ -141,7 +141,7 @@ function getDefaultAlerts(isHTTPProbe: boolean) {
   ]
 }
 
-function sanitizeRequests(requests: RequestConfig[]) {
+function sanitizeRequests(requests?: RequestConfig[]) {
   return requests?.map((request) => ({
     ...request,
     method: request.method || 'GET',
