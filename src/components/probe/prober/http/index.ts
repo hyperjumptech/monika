@@ -29,6 +29,7 @@ import events from '../../../../events'
 import type { Notification } from '@hyperjumptech/monika-notification'
 import type { Probe } from '../../../../interfaces/probe'
 import type { ProbeRequestResponse } from '../../../../interfaces/request'
+import { ProbeRequestResult } from '../../../../interfaces/request'
 import validateResponse from '../../../../plugins/validate-response'
 import { getEventEmitter } from '../../../../utils/events'
 import { log } from '../../../../utils/pino'
@@ -131,6 +132,12 @@ async function probeHTTP(
         requestIndex,
         validatedResponse,
       })
+
+      // Set request result value
+      const isDown = statuses.some((item) => item.state === 'DOWN')
+      probeRes.result = isDown
+        ? ProbeRequestResult.failed
+        : ProbeRequestResult.success
 
       eventEmitter.emit(events.probe.response.received, {
         probe,
