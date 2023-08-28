@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.15.6 2023-08-28
+
+## Fixed
+
+- Undefined Notification Message (#1103)
+- Webhook Notification is Not Working (#1102)
+- Make Probe Requests Property Optional (#1096)
+
+## Changed
+
+- Make HTTP Prober a Subclass (#1107)
+- Test the Packages Directory (#1106)
+- Update chaining request docs (#1101)
+- Improve Disconnect Notification (#1095)
+- Add simple success/fail result to each probe and new prometheus metric (#1061)
+
 ## 1.15.5 2023-08-14
 
 ## Fixed
