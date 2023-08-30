@@ -25,7 +25,6 @@
 import { isSymonModeFrom } from '../../../config'
 import { getContext } from '../../../../context'
 import events from '../../../../events'
-import type { ProbeRequestResponse } from '../../../../interfaces/request'
 import { ProbeRequestResult } from '../../../../interfaces/request'
 import { getEventEmitter } from '../../../../utils/events'
 import { log } from '../../../../utils/pino'
@@ -39,32 +38,30 @@ const isConnectionDown = new Map<string, boolean>()
 
 export class HTTPProber extends BaseProber {
   async probe(): Promise<void> {
-    const { counter: checkOrder, notifications, probeConfig: probe } = this
-    const eventEmitter = getEventEmitter()
-    const { flags } = getContext()
-    const isSymonMode = isSymonModeFrom(flags)
-    const isVerbose = isSymonMode || flags['keep-verbose-logs']
-    const responses = []
-
-    if (!probe.requests) {
+    if (!this.probeConfig.requests) {
       return
     }
 
     // sending multiple http requests for request chaining
+    const responses = []
+
     for (
       let requestIndex = 0;
-      requestIndex < probe?.requests?.length;
+      requestIndex < this.probeConfig?.requests?.length;
       requestIndex++
     ) {
-      const request = probe.requests?.[requestIndex]
-      const requestLog = new RequestLog(probe, requestIndex, checkOrder)
+      const requestLog = new RequestLog(
+        this.probeConfig,
+        requestIndex,
+        this.counter
+      )
       // create id-request
-      const id = `${probe?.id}:${request.url}:${requestIndex}:${request?.id} `
+      const request = this.probeConfig.requests?.[requestIndex]
 
       try {
         // intentionally wait for a request to finish before processing next request in loop
         // eslint-disable-next-line no-await-in-loop
-        const probeRes: ProbeRequestResponse = await httpRequest({
+        const probeRes = await httpRequest({
           requestConfig: request,
           responses,
         })
@@ -84,15 +81,15 @@ export class HTTPProber extends BaseProber {
         probeRes.result = isDown
           ? ProbeRequestResult.failed
           : ProbeRequestResult.success
+        // Add to a response array to be accessed by another request for chaining later
+        responses.push(probeRes)
 
-        eventEmitter.emit(events.probe.response.received, {
-          probe,
+        getEventEmitter().emit(events.probe.response.received, {
+          probe: this.probeConfig,
           requestIndex,
           response: probeRes,
         })
 
-        // Add to a response array to be accessed by another request for chaining later
-        responses.push(probeRes)
         requestLog.setResponse(probeRes)
         requestLog.addAlerts(
           validatedResponse
@@ -105,6 +102,7 @@ export class HTTPProber extends BaseProber {
         // 3. if event is not for connection failure, send user specified notification msg
         if (statuses[0].shouldSendNotification) {
           const { isProbeResponsive } = probeRes
+          const id = `${this.probeConfig?.id}:${request.url}:${requestIndex}:${request?.id}`
 
           if (
             isProbeResponsive && // if connection is successful but
@@ -130,9 +128,9 @@ export class HTTPProber extends BaseProber {
         // Done processing results, check if need to send out alerts
         this.checkThresholdsAndSendAlert(
           {
-            probe,
+            probe: this.probeConfig,
             statuses,
-            notifications,
+            notifications: this.notifications,
             requestIndex,
             validatedResponseStatuses: validatedResponse,
           },
@@ -146,8 +144,8 @@ export class HTTPProber extends BaseProber {
           )
 
           if (triggeredAlertResponse) {
-            eventEmitter.emit(events.probe.alert.triggered, {
-              probe,
+            getEventEmitter().emit(events.probe.alert.triggered, {
+              probe: this.probeConfig,
               requestIndex,
               alertQuery:
                 triggeredAlertResponse.alert.assertion ||
@@ -166,7 +164,12 @@ export class HTTPProber extends BaseProber {
         }
 
         requestLog.print()
-        if (isVerbose || requestLog.hasIncidentOrRecovery) {
+
+        if (
+          isSymonModeFrom(getContext().flags) ||
+          getContext().flags['keep-verbose-logs'] ||
+          requestLog.hasIncidentOrRecovery
+        ) {
           requestLog.saveToDatabase().catch((error) => log.error(error.message))
         }
       }
