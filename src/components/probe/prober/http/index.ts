@@ -93,7 +93,6 @@ export class HTTPProber extends BaseProber {
           response: probeRes,
         })
 
-        logResponseTime(probeRes.responseTime)
         // Add to a response array to be accessed by another request for chaining later
         responses.push(probeRes)
         requestLog.setResponse(probeRes)
@@ -164,6 +163,10 @@ export class HTTPProber extends BaseProber {
         requestLog.addError((error as any).message)
         break
       } finally {
+        for (const { responseTime } of responses) {
+          logResponseTime(responseTime)
+        }
+
         requestLog.print()
         if (isVerbose || requestLog.hasIncidentOrRecovery) {
           requestLog.saveToDatabase().catch((error) => log.error(error.message))
