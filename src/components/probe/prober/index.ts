@@ -194,22 +194,22 @@ export class BaseProber implements Prober {
     index,
     probeResults,
   }: RespProsessingParams): void {
-    const { requestResponse: probeResult } = probeResults[index]
-    const validatedResponse = this.validateResponse(probeResult)
+    const { requestResponse } = probeResults[index]
     const requestLog = new RequestLog(this.probeConfig, index, 0)
 
     getEventEmitter().emit(events.probe.response.received, {
       probe: this.probeConfig,
       requestIndex: index,
-      response: probeResult,
+      response: requestResponse,
     })
     this.logMessage(probeResults[index])
+    const validatedResponse = this.validateResponse(requestResponse)
     requestLog.addAlerts(
       validatedResponse
         .filter((item) => item.isAlertTriggered)
         .map((item) => item.alert)
     )
-    requestLog.setResponse(probeResult)
+    requestLog.setResponse(requestResponse)
     // Done processing results, check if need to send out alerts
     checkThresholdsAndSendAlert(
       {
