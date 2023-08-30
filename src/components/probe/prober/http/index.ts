@@ -32,7 +32,6 @@ import { getEventEmitter } from '../../../../utils/events'
 import { log } from '../../../../utils/pino'
 import { RequestLog } from '../../../logger'
 import { logResponseTime } from '../../../logger/response-time-log'
-import { processThresholds } from '../../../notification/process-server-status'
 import { httpRequest } from './request'
 import { BaseProber } from '..'
 
@@ -77,8 +76,7 @@ export class HTTPProber extends BaseProber {
           request.alerts || []
         )
         // done probing, got some result, process it, check for thresholds and notifications
-        const statuses = processThresholds({
-          probe,
+        const statuses = this.processThresholds({
           requestIndex,
           validatedResponse,
         })
