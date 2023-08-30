@@ -195,14 +195,14 @@ export class BaseProber implements Prober {
     probeResults,
   }: RespProsessingParams): void {
     const { requestResponse } = probeResults[index]
-    const requestLog = new RequestLog(this.probeConfig, index, 0)
-
     getEventEmitter().emit(events.probe.response.received, {
       probe: this.probeConfig,
       requestIndex: index,
       response: requestResponse,
     })
     this.logMessage(probeResults[index])
+
+    const requestLog = new RequestLog(this.probeConfig, index, 0)
     const validatedResponse = this.validateResponse(requestResponse)
     requestLog.addAlerts(
       validatedResponse
