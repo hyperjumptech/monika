@@ -86,6 +86,61 @@ export class RequestLog {
 
   // print() generates the text and prints the logs for the past request iteration
   print(): void {
+    if (this.errors.length > 0 || this.triggeredAlerts.length > 0) {
+      log.warn(this.getLogMessage())
+      return
+    }
+
+    log.info(this.getLogMessage())
+  }
+
+  private getLogMessage(): string {
+    return `${new Date().toISOString()} ${this.getProbeResultMessage()}${
+      this.getErrorMessage() || this.getAlertMessage()
+    }${this.getNotificationMessage()}`
+  }
+
+  private getProbeResultMessage(): string {
+    const { iteration, probe, response, request } = this
+
+    // TODO: make this more generic not probe dependent
+    if (request?.ping) {
+      return `${iteration} id:${probe.id} ${response?.body}`
+    }
+
+    if (getContext().flags.verbose) {
+      return `${iteration} id:${probe.id} ${response?.status || '-'} ${
+        request?.method
+      } ${request?.url} ${response?.responseTime || '-'}ms
+      Request Headers: ${JSON.stringify(request?.headers) || '-'}
+      Request Body: ${JSON.stringify(request?.body) || '-'}
+      Response Body: ${JSON.stringify(response?.body) || '-'}`
+    }
+
+    return `${iteration} id:${probe.id} ${response?.status || '-'} ${
+      request?.method
+    } ${request?.url} ${response?.responseTime || '-'}ms`
+  }
+
+  private getErrorMessage(): string {
+    if (this.errors.length > 0) {
+      return `, ERROR: ${this.errors.join(', ')}`
+    }
+
+    return ''
+  }
+
+  private getAlertMessage(): string {
+    if (this.triggeredAlerts.length > 0) {
+      return `, ALERT: ${this.triggeredAlerts
+        .map((alert) => alert.assertion)
+        .join(', ')}`
+    }
+
+    return ''
+  }
+
+  private getNotificationMessage(): string {
     const reversedSentNotifications = [...this.sentNotifications].reverse()
     const printedNotification =
       reversedSentNotifications.find(
@@ -93,61 +148,15 @@ export class RequestLog {
       ) ||
       reversedSentNotifications.find((notif) => notif.type === 'NOTIFY-RECOVER')
 
-    const time = new Date().toISOString()
-    const { flags } = getContext()
-
-    let alertMsg = ''
-    let errorMsg = ''
-    let notifMsg = ''
-
-    // generate probe result messages
-    let probeMsg = ''
-
-    // TODO: make this more generic not probe dependent
-    if (this.request?.ping) {
-      probeMsg = `${this.iteration} id:${this.probe.id} ${this.response?.body}`
-    } else {
-      probeMsg = flags.verbose
-        ? `${this.iteration} id:${this.probe.id} ${
-            this.response?.status || '-'
-          } ${this.request?.method} ${this.request?.url} ${
-            this.response?.responseTime || '-'
-          }ms
-    Request Headers: ${JSON.stringify(this.request?.headers) || '-'}
-    Request Body: ${JSON.stringify(this.request?.body) || '-'}
-    Response Body: ${JSON.stringify(this.response?.body) || '-'}`
-        : `${this.iteration} id:${this.probe.id} ${
-            this.response?.status || '-'
-          } ${this.request?.method} ${this.request?.url} ${
-            this.response?.responseTime || '-'
-          }ms`
-    }
-
     if (printedNotification) {
-      notifMsg = `, NOTIF: ${
+      return `, NOTIF: ${
         printedNotification.type === 'NOTIFY-INCIDENT'
-          ? 'service probably down'
-          : 'service is back up'
+          ? 'Service probably down'
+          : 'Service is back up'
       }`
     }
 
-    if (this.errors.length > 0) {
-      errorMsg = `, ERROR: ${this.errors.join(', ')}`
-    }
-
-    if (this.triggeredAlerts.length > 0) {
-      alertMsg = `, ALERT: ${this.triggeredAlerts
-        .map((alert) => alert.assertion)
-        .join(', ')}`
-    }
-
-    const logMsg = `${time} ${probeMsg}${errorMsg || alertMsg}${notifMsg}`
-
-    if (this.errors.length > 0 || this.triggeredAlerts.length > 0) {
-      log.warn(logMsg)
-    } else {
-      log.info(logMsg)
-    }
+    return ''
   }
 
   async saveToDatabase(): Promise<void> {
