@@ -222,8 +222,8 @@ export class BaseProber implements Prober {
     })
     this.logMessage(probeResult)
 
-    const requestLog = new RequestLog(this.probeConfig, index, 0)
     const validatedResponse = this.validateResponse(requestResponse)
+    const requestLog = new RequestLog(this.probeConfig, index, 0)
     requestLog.addAlerts(
       validatedResponse
         .filter((item) => item.isAlertTriggered)
