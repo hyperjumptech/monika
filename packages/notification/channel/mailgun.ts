@@ -39,7 +39,7 @@ export type Content = {
   subject: string
   html: string
   text: string
-  headerReference?: string
+  headers?: { References: string }
 }
 
 export const validator = Joi.object().keys({
@@ -73,8 +73,8 @@ const _send = async (
   formData.append('html', theData.html)
   formData.append('text', theData.text)
   for (const email of recipients) formData.append('to', email)
-  if (theData.headerReference)
-    formData.append('h:References', theData.headerReference)
+  if (theData.headers?.References)
+    formData.append('h:References', theData.headers?.References)
 
   await sendHttpRequest({
     method: 'POST',
