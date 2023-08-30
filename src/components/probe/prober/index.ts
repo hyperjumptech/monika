@@ -50,7 +50,7 @@ export type ProbeResult = {
 
 type RespProsessingParams = {
   index: number
-  probeResults: ProbeResult[]
+  probeResult: ProbeResult
 }
 
 type ProcessThresholdsParams = {
@@ -202,10 +202,7 @@ export class BaseProber implements Prober {
 
   protected processProbeResults(probeResults: ProbeResult[]): void {
     for (const index of probeResults.keys()) {
-      this.responseProcessing({
-        index,
-        probeResults,
-      })
+      this.responseProcessing({ index, probeResult: probeResults[index] })
     }
   }
 
@@ -215,15 +212,15 @@ export class BaseProber implements Prober {
 
   private responseProcessing({
     index,
-    probeResults,
+    probeResult,
   }: RespProsessingParams): void {
-    const { requestResponse } = probeResults[index]
+    const { requestResponse } = probeResult
     getEventEmitter().emit(events.probe.response.received, {
       probe: this.probeConfig,
       requestIndex: index,
       response: requestResponse,
     })
-    this.logMessage(probeResults[index])
+    this.logMessage(probeResult)
 
     const requestLog = new RequestLog(this.probeConfig, index, 0)
     const validatedResponse = this.validateResponse(requestResponse)
