@@ -22,9 +22,10 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { expect } from 'chai'
-import validateResponse from '..'
-import { ProbeRequestResponse } from '../../../interfaces/request'
+import { expect } from '@oclif/test'
+import type { ProbeRequestResponse } from '../../../interfaces/request'
+import type { Probe } from '../../../interfaces/probe'
+import { createProber } from '../../../components/probe/prober/factory'
 
 describe('validateResponse', () => {
   const mockedAlerts = [
@@ -36,8 +37,13 @@ describe('validateResponse', () => {
   ]
 
   it('status-not-2xx = true && response-time-greater-than-10-ms = true', () => {
+    const prober = createProber({
+      counter: 0,
+      notifications: [],
+      probeConfig: { alerts: mockedAlerts } as Probe,
+    })
     const res = generateMockedResponse(300, 20, true)
-    const data = validateResponse(mockedAlerts, res)
+    const data = prober.validateResponse(res)
 
     expect(data).to.eql([
       {
@@ -74,8 +80,13 @@ describe('validateResponse', () => {
   })
 
   it('status-not-2xx = false && response-time-greater-than-10-ms = true', () => {
+    const prober = createProber({
+      counter: 0,
+      notifications: [],
+      probeConfig: { alerts: mockedAlerts } as Probe,
+    })
     const res = generateMockedResponse(200, 20, true)
-    const data = validateResponse(mockedAlerts, res)
+    const data = prober.validateResponse(res)
 
     expect(data).to.eql([
       {
@@ -112,8 +123,13 @@ describe('validateResponse', () => {
   })
 
   it('status-not-2xx = true && response-time-greater-than-10-ms = false', () => {
+    const prober = createProber({
+      counter: 0,
+      notifications: [],
+      probeConfig: { alerts: mockedAlerts } as Probe,
+    })
     const res = generateMockedResponse(300, 10, true)
-    const data = validateResponse(mockedAlerts, res)
+    const data = prober.validateResponse(res)
 
     expect(data).to.eql([
       {
@@ -150,8 +166,13 @@ describe('validateResponse', () => {
   })
 
   it('status-not-2xx = false && response-time-greater-than-10-ms = false', () => {
+    const prober = createProber({
+      counter: 0,
+      notifications: [],
+      probeConfig: { alerts: mockedAlerts } as Probe,
+    })
     const res = generateMockedResponse(200, 10, true)
-    const data = validateResponse(mockedAlerts, res)
+    const data = prober.validateResponse(res)
 
     expect(data).to.eql([
       {
@@ -183,6 +204,66 @@ describe('validateResponse', () => {
           isProbeResponsive: true,
         },
         isAlertTriggered: false,
+      },
+    ])
+  })
+
+  it('should assert with additional query', () => {
+    const prober = createProber({
+      counter: 0,
+      notifications: [],
+      probeConfig: { alerts: mockedAlerts } as Probe,
+    })
+    const res = generateMockedResponse(200, 10, true)
+    const data = prober.validateResponse(res, [
+      { assertion: 'response.time > 5', message: '' },
+    ])
+
+    expect(data).to.eql([
+      {
+        alert: {
+          assertion: 'response.status < 200 or response.status > 299',
+          message: '',
+        },
+        response: {
+          data: '',
+          body: '',
+          responseTime: 10,
+          headers: {},
+          status: 200,
+          isProbeResponsive: true,
+        },
+        isAlertTriggered: false,
+      },
+      {
+        alert: {
+          assertion: 'response.time > 10',
+          message: '',
+        },
+        response: {
+          data: '',
+          body: '',
+          responseTime: 10,
+          headers: {},
+          status: 200,
+          isProbeResponsive: true,
+        },
+        isAlertTriggered: false,
+      },
+      {
+        alert: {
+          assertion: 'response.time > 5',
+          message: '',
+        },
+        response: {
+          data: '',
+          body: '',
+          responseTime: 10,
+          headers: {},
+          status: 200,
+          isProbeResponsive: true,
+        },
+        isAlertTriggered: true,
       },
     ])
   })

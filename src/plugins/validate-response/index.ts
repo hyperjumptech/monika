@@ -22,33 +22,11 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { ProbeAlert } from '../../interfaces/probe'
-import { ProbeRequestResponse } from '../../interfaces/request'
-import responseChecker from './checkers'
+import type { ProbeAlert } from '../../interfaces/probe'
+import type { ProbeRequestResponse } from '../../interfaces/request'
 
 export interface ValidatedResponse {
   response: ProbeRequestResponse
   alert: ProbeAlert
   isAlertTriggered: boolean
 }
-
-/**
- * validateResponse will check the response against alerts. If an alert is set, and the response demands it, will setup to send alert/notification
- * @param {object} alerts is the alerts setup to trigger
- * @param {object} response is the raw response from axios
- * @returns {object} checks which contains alert type, flag to response time
- */
-const validateResponse = (
-  alerts: ProbeAlert[],
-  response: ProbeRequestResponse
-): ValidatedResponse[] => {
-  const checks = alerts.map((alert) => {
-    const isAlertTriggered = responseChecker(alert, response)
-
-    return { alert, isAlertTriggered, response }
-  })
-
-  return checks
-}
-
-export default validateResponse
