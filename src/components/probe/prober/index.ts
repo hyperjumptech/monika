@@ -24,7 +24,6 @@
 
 import type { Notification } from '@hyperjumptech/monika-notification'
 import { interpret } from 'xstate'
-import { checkThresholdsAndSendAlert } from '..'
 import { getContext } from '../../../context'
 import events from '../../../events'
 import type { Probe, ProbeAlert } from '../../../interfaces/probe'
@@ -41,6 +40,7 @@ import {
   serverAlertStateMachine,
 } from '../../notification/process-server-status'
 import { logResponseTime } from '../../logger/response-time-log'
+import { sendAlerts } from '../../notification'
 
 export type ProbeResult = {
   isAlertTriggered: boolean
@@ -58,6 +58,19 @@ type ProcessThresholdsParams = {
   validatedResponse: ValidatedResponse[]
 }
 
+type ProbeStatusProcessed = {
+  probe: Probe
+  statuses?: ServerAlertState[]
+  notifications: Notification[]
+  validatedResponseStatuses: ValidatedResponse[]
+  requestIndex: number
+}
+
+type ProbeSendNotification = {
+  index: number
+  probeState?: ServerAlertState
+} & Omit<ProbeStatusProcessed, 'statuses'>
+
 export interface Prober {
   probe: () => Promise<void>
   generateVerboseStartupMessage: () => string
@@ -69,6 +82,9 @@ export interface Prober {
     requestIndex,
     validatedResponse,
   }: ProcessThresholdsParams) => ServerAlertState[]
+  getProbeStatesWithValidAlert(
+    probeStates: ServerAlertState[]
+  ): ServerAlertState[]
 }
 
 export type ProberMetadata = {
@@ -218,7 +234,7 @@ export class BaseProber implements Prober {
     )
     requestLog.setResponse(requestResponse)
     // Done processing results, check if need to send out alerts
-    checkThresholdsAndSendAlert(
+    this.checkThresholdsAndSendAlert(
       {
         probe: this.probeConfig,
         statuses: this.processThresholds({
@@ -248,5 +264,102 @@ export class BaseProber implements Prober {
     }
 
     log.info(logMessage)
+  }
+
+  // Probes Thresholds processed, Send out notifications/alerts.
+  protected checkThresholdsAndSendAlert(
+    data: ProbeStatusProcessed,
+    requestLog: RequestLog
+  ): void {
+    const {
+      probe,
+      statuses,
+      notifications,
+      requestIndex,
+      validatedResponseStatuses,
+    } = data
+
+    const probeStatesWithValidAlert = this.getProbeStatesWithValidAlert(
+      statuses || []
+    )
+
+    for (const [index, probeState] of probeStatesWithValidAlert.entries()) {
+      const { alertQuery, state } = probeState
+
+      // send only notifications that we have messages for (if it was truncated)
+      if (index === validatedResponseStatuses.length) {
+        break
+      }
+
+      this.probeSendNotification({
+        index,
+        probe,
+        probeState,
+        notifications,
+        requestIndex,
+        validatedResponseStatuses,
+      }).catch((error: Error) => log.error(error.message))
+
+      requestLog.addNotifications(
+        (notifications ?? []).map((notification) => ({
+          notification,
+          type: state === 'DOWN' ? 'NOTIFY-INCIDENT' : 'NOTIFY-RECOVER',
+          alertQuery: alertQuery || '',
+        }))
+      )
+    }
+  }
+
+  // TODO: make it protected/private
+  getProbeStatesWithValidAlert(
+    probeStates: ServerAlertState[]
+  ): ServerAlertState[] {
+    return probeStates.filter(
+      ({ isFirstTime, shouldSendNotification, state }) => {
+        const isFirstUpEvent = isFirstTime && state === 'UP'
+        const isFirstUpEventForNonSymonMode = isFirstUpEvent
+
+        return shouldSendNotification && !isFirstUpEventForNonSymonMode
+      }
+    )
+  }
+
+  private async probeSendNotification(data: ProbeSendNotification) {
+    const eventEmitter = getEventEmitter()
+
+    const {
+      index,
+      probe,
+      probeState,
+      notifications,
+      requestIndex,
+      validatedResponseStatuses,
+    } = data
+
+    const statusString = probeState?.state ?? 'UP'
+    const url = probe.requests?.[requestIndex]?.url ?? ''
+    const validation =
+      validatedResponseStatuses.find(
+        (validateResponse: ValidatedResponse) =>
+          validateResponse.alert.assertion === probeState?.alertQuery
+      ) || validatedResponseStatuses[index]
+
+    eventEmitter.emit(events.probe.notification.willSend, {
+      probeID: probe.id,
+      notifications: notifications ?? [],
+      url: url,
+      probeState: statusString,
+      validation,
+    })
+
+    if ((notifications?.length ?? 0) > 0) {
+      await sendAlerts({
+        probeID: probe.id,
+        url,
+        probeState: statusString,
+        notifications: notifications ?? [],
+        validation,
+      })
+    }
   }
 }

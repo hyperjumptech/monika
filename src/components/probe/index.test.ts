@@ -22,7 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { expect } from 'chai'
+import { expect } from '@oclif/test'
 
 import { rest } from 'msw'
 import { setupServer } from 'msw/node'
@@ -32,12 +32,13 @@ import { MongoClient, type Db } from 'mongodb'
 import net from 'net'
 import { Pool } from 'pg'
 import * as redis from 'redis'
-import { doProbe, getProbeStatesWithValidAlert } from '.'
+import { doProbe } from '.'
 import type { ServerAlertState } from '../../interfaces/probe-status'
 import { initializeProbeStates } from '../../utils/probe-state'
 import type { Probe } from '../../interfaces/probe'
 import { afterEach, beforeEach } from 'mocha'
 import { getContext, resetContext, setContext } from '../../context'
+import { createProber } from './prober/factory'
 
 let urlRequestTotal = 0
 let notificationAlert: Record<string, any> = {}
@@ -120,6 +121,11 @@ describe('Probe processing', () => {
 
     it('should return probe states with valid alert', () => {
       // arrange
+      const prober = createProber({
+        counter: 0,
+        notifications: [],
+        probeConfig: {} as Probe,
+      })
       const expected: ServerAlertState[] = [
         {
           isFirstTime: true,
@@ -137,7 +143,7 @@ describe('Probe processing', () => {
 
       // act
       const probeStatesWithValidAlert =
-        getProbeStatesWithValidAlert(probeStates)
+        prober.getProbeStatesWithValidAlert(probeStates)
 
       // assert
       expect(probeStatesWithValidAlert).deep.eq(expected)
