@@ -100,7 +100,7 @@ export const sendWithCustomContent = async (
   await _send(notificationData, content)
 }
 
-export function getContent({
+function getContent({
   body,
   subject,
   domain,
