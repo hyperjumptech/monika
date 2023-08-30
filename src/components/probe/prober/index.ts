@@ -194,11 +194,7 @@ export class BaseProber implements Prober {
     index,
     probeResults,
   }: RespProsessingParams): void {
-    const {
-      isAlertTriggered,
-      logMessage,
-      requestResponse: probeResult,
-    } = probeResults[index]
+    const { requestResponse: probeResult } = probeResults[index]
     const validatedResponse = this.validateResponse(probeResult)
     const requestLog = new RequestLog(this.probeConfig, index, 0)
 
@@ -207,7 +203,7 @@ export class BaseProber implements Prober {
       requestIndex: index,
       response: probeResult,
     })
-    isAlertTriggered ? log.warn(logMessage) : log.info(logMessage)
+    this.logMessage(probeResults[index])
     requestLog.addAlerts(
       validatedResponse
         .filter((item) => item.isAlertTriggered)
@@ -236,5 +232,14 @@ export class BaseProber implements Prober {
     ) {
       requestLog.saveToDatabase().catch((error) => log.error(error.message))
     }
+  }
+
+  private logMessage({ isAlertTriggered, logMessage }: ProbeResult) {
+    if (isAlertTriggered) {
+      log.warn(logMessage)
+      return
+    }
+
+    log.info(logMessage)
   }
 }
