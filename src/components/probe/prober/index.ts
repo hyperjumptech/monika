@@ -199,18 +199,10 @@ export class BaseProber implements Prober {
       logMessage,
       requestResponse: probeResult,
     } = probeResults[index]
-    const { flags } = getContext()
-    const isSymonMode = isSymonModeFrom(flags)
-    const eventEmitter = getEventEmitter()
-    const isVerbose = isSymonMode || flags['keep-verbose-logs']
     const validatedResponse = this.validateResponse(probeResult)
     const requestLog = new RequestLog(this.probeConfig, index, 0)
-    const statuses = this.processThresholds({
-      requestIndex: index,
-      validatedResponse,
-    })
 
-    eventEmitter.emit(events.probe.response.received, {
+    getEventEmitter().emit(events.probe.response.received, {
       probe: this.probeConfig,
       requestIndex: index,
       response: probeResult,
@@ -226,7 +218,10 @@ export class BaseProber implements Prober {
     checkThresholdsAndSendAlert(
       {
         probe: this.probeConfig,
-        statuses,
+        statuses: this.processThresholds({
+          requestIndex: index,
+          validatedResponse,
+        }),
         notifications: this.notifications,
         requestIndex: index,
         validatedResponseStatuses: validatedResponse,
@@ -234,7 +229,11 @@ export class BaseProber implements Prober {
       requestLog
     )
 
-    if (isVerbose || requestLog.hasIncidentOrRecovery) {
+    if (
+      isSymonModeFrom(getContext().flags) ||
+      getContext().flags['keep-verbose-logs'] ||
+      requestLog.hasIncidentOrRecovery
+    ) {
       requestLog.saveToDatabase().catch((error) => log.error(error.message))
     }
   }
