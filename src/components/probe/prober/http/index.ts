@@ -31,7 +31,6 @@ import { ProbeRequestResult } from '../../../../interfaces/request'
 import { getEventEmitter } from '../../../../utils/events'
 import { log } from '../../../../utils/pino'
 import { RequestLog } from '../../../logger'
-import { logResponseTime } from '../../../logger/response-time-log'
 import { httpRequest } from './request'
 import { BaseProber } from '..'
 
@@ -164,7 +163,7 @@ export class HTTPProber extends BaseProber {
         break
       } finally {
         for (const { responseTime } of responses) {
-          logResponseTime(responseTime)
+          this.logResponseTime(responseTime)
         }
 
         requestLog.print()

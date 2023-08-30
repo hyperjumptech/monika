@@ -40,6 +40,7 @@ import {
   serverAlertStateInterpreters,
   serverAlertStateMachine,
 } from '../../notification/process-server-status'
+import { logResponseTime } from '../../logger/response-time-log'
 
 export type ProbeResult = {
   isAlertTriggered: boolean
@@ -95,6 +96,7 @@ export class BaseProber implements Prober {
     return ''
   }
 
+  // TODO: make it protected/private
   validateResponse(
     response: ProbeRequestResponse,
     additionalAssertions?: ProbeAlert[]
@@ -116,6 +118,7 @@ export class BaseProber implements Prober {
     }))
   }
 
+  // TODO: make it protected/private
   processThresholds = ({
     requestIndex,
     validatedResponse,
@@ -188,6 +191,10 @@ export class BaseProber implements Prober {
         probeResults,
       })
     }
+  }
+
+  protected logResponseTime(responseTimeInMs: number): void {
+    logResponseTime(responseTimeInMs)
   }
 
   private responseProcessing({
