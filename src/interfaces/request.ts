@@ -57,7 +57,7 @@ export interface ProbeRequestResponse<T = any> {
   isProbeResponsive: boolean // did the command/request response to requests/queries?
   errMessage?: string // any error message from drivers
 
-  result?: probeRequestResult // did the probe succeed or fail?
+  result: probeRequestResult // did the probe succeed or fail?
 }
 
 // ProbeRequest is used to define the requests that is being made.
