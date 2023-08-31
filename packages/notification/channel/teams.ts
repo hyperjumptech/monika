@@ -26,7 +26,7 @@ import Joi from 'joi'
 import { sendHttpRequest } from '../utils/http'
 import type { NotificationMessage } from '.'
 
-type NotificationData = {
+export type NotificationData = {
   url: string
 }
 
