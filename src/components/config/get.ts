@@ -28,6 +28,7 @@ import { log } from '../../utils/pino'
 import { parseConfig } from './parse'
 import { validateConfigWithSchema } from './validation'
 import { validateConfig } from './validate'
+import type { RequestConfig } from '../../interfaces/request'
 
 export type ConfigType =
   | 'monika'
@@ -109,14 +110,20 @@ async function parseConfigType(
   return {
     ...parsed,
     probes: parsed.probes?.map((probe) => {
-      const requests =
-        (probe?.requests ?? [])?.map((request) => ({
+      const requests: RequestConfig[] | undefined = probe?.requests?.map(
+        (request) => ({
           ...request,
           timeout: request.timeout ?? 10_000,
-        })) ?? []
+        })
+      )
 
       const interval = () => {
         if (typeof probe?.interval === 'number') return probe.interval
+
+        if (!requests) {
+          return 10
+        }
+
         return requests.length * 10 === 0 ? 10 : requests.length * 10
       }
 
