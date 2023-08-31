@@ -10,7 +10,7 @@ on:
 
 permissions:
   issues: read
-  pull-requests: read    
+  pull-requests: read
 
 jobs:
   test:
@@ -23,7 +23,7 @@ jobs:
       - run: npm ci
         name: Install dependencies
       - run: npm run build -w packages/notification
-      - run: npm test
+      - run: NODE_OPTIONS='--no-experimental-fetch' npm test
         name: Run tests
       - run: npm pack
         name: Pack using npm pack

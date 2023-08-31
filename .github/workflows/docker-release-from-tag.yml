@@ -11,7 +11,7 @@ on:
 permissions:
   issues: read
   pull-requests: read
-  
+
 jobs:
   testing:
     name: Testing Release
@@ -33,7 +33,7 @@ jobs:
         run: npm ci
 
       - name: 🧪 Run Unit Tests
-        run: npm test
+        run: NODE_OPTIONS='--no-experimental-fetch' npm test
 
       - name: ⤴️ Switch Version based on inputs
         id: version

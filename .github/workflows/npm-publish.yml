@@ -22,7 +22,7 @@ jobs:
           node-version: 18
       - run: npm ci
       - run: npm run build -w packages/notification
-      - run: npm test
+      - run: NODE_OPTIONS='--no-experimental-fetch' npm test
 
   test:
     needs: build
