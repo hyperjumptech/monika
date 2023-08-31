@@ -27,10 +27,19 @@ import Joi from 'joi'
 import Mailgen from 'mailgen'
 import type { NotificationMessage } from '.'
 
-type NotificationData = {
+export type NotificationData = {
   apiKey: string
   sender: string
   recipients: string[]
+}
+
+export type Content = {
+  to: string
+  from: string
+  subject: string
+  html: string
+  text: string
+  headers?: { References: string }
 }
 
 export const validator = Joi.object().keys({
@@ -46,7 +55,32 @@ export const send = async (
   { apiKey, recipients, sender }: NotificationData,
   { body, subject }: NotificationMessage
 ): Promise<void> => {
+  const msg = getContent({ body, subject, sender, recipients })
+  sgMail.setApiKey(apiKey)
+  await sgMail.send(msg)
+}
+
+export const sendWithCustomContent = async (
+  { apiKey }: NotificationData,
+  content: Content
+): Promise<void> => {
+  sgMail.setApiKey(apiKey)
+  await sgMail.send(content)
+}
+
+function getContent({
+  body,
+  subject,
+  sender,
+  recipients,
+}: {
+  body: string
+  subject: string
+  sender: string
+  recipients: string[]
+}): Content {
   const to = recipients?.join(',')
+
   const mailGenerator = new Mailgen({
     theme: 'default',
     product: {
@@ -62,16 +96,13 @@ export const send = async (
   }
   const html = mailGenerator.generate(email)
   const text = mailGenerator.generatePlaintext(email)
-  const msg = {
+  return {
     to,
     from: sender,
     subject,
     html,
     text,
   }
-
-  sgMail.setApiKey(apiKey)
-  await sgMail.send(msg)
 }
 
 export function additionalStartupMessage({
