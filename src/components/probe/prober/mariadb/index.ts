@@ -1,6 +1,6 @@
 import { BaseProber, type ProbeResult } from '../'
 import type { MariaDB } from '../../../../interfaces/probe'
-import { ProbeRequestResult } from '../../../../interfaces/request'
+import { probeRequestResult } from '../../../../interfaces/request'
 import { mariaRequest } from './request'
 
 export class MariaDBProber extends BaseProber {
@@ -79,7 +79,7 @@ export async function probeMariaDB({
       password,
     })
     const { body, responseTime, result } = requestResponse
-    const isAlertTriggered = result !== ProbeRequestResult.success
+    const isAlertTriggered = result !== probeRequestResult.success
     const timeNow = new Date().toISOString()
     const logMessage = `${timeNow} ${checkOrder} id:${id} ${databaseText}:${host}:${port} ${responseTime}ms msg:${body}`
 
