@@ -19,8 +19,8 @@ To start developing, clone this repository, then install the dependencies:
 
 ```bash
 git clone git@github.com:hyperjumptech/monika.git
-npm run build -w packages/notification
 npm ci
+npm run build -w packages/notification
 ```
 
 Then, to run Monika from the source,
@@ -34,7 +34,7 @@ npm start
 - on Windows
 
 ```bash
-.\bin\run.cmd
+.\bin\dev.cmd
 ```
 
 To keep the formatting consistent, run the following command to format the source code:
@@ -48,6 +48,18 @@ Finally you can also run `npm run test` to prevent regression.
 Once you have made the changes, open a Pull Request and explain the issue your change will fix or the feature your change will add.
 
 For contribution details on how to add custom notifications [see the New Notifications guide here](https://monika.hyperjump.tech/guides/new-notifications).
+
+### Applying changes in monorepo workspaces folder (`packages/notification`)
+
+If you are developing feature/fix related to notification by making changes inside the `packages/notification` folder, it's easier to temporarily change the dependency source in `package.json` to be like this
+
+```
+"@hyperjumptech/monika-notification": "*"
+```
+
+it will sync `@hyperjumptech/monika-notification` package `node_modules` to any changes in the `packages/notification` folder without running build on every code change.
+
+See this [docs](https://turbo.build/repo/docs/handbook/workspaces#workspaces-which-depend-on-each-other) for further detail
 
 ### How to Test Probe Locally
 
