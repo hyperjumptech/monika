@@ -22,10 +22,11 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { expect } from 'chai'
+import { expect } from '@oclif/test'
 import { format, subDays } from 'date-fns'
 import { resetContext, setContext } from '../../../context'
 import { getMessageForAlert } from '../alert-message'
+import { probeRequestResult } from '../../../interfaces/request'
 
 afterEach(() => {
   resetContext()
@@ -52,6 +53,7 @@ describe('Alert message', () => {
           status: 404,
           headers: '',
           responseTime: 1000,
+          result: probeRequestResult.success,
           isProbeResponsive: true,
         },
       })
@@ -81,6 +83,7 @@ describe('Alert message', () => {
           status: 404,
           headers: '',
           responseTime: 1000,
+          result: probeRequestResult.success,
           isProbeResponsive: true,
         },
       })
@@ -117,6 +120,7 @@ describe('Alert message', () => {
           status: 404,
           headers: '',
           responseTime: 1000,
+          result: probeRequestResult.success,
           isProbeResponsive: true,
         },
       })
@@ -168,6 +172,7 @@ describe('Alert message', () => {
           status: 404,
           headers: '',
           responseTime: 1000,
+          result: probeRequestResult.success,
           isProbeResponsive: true,
         },
       })

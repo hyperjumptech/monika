@@ -1,7 +1,10 @@
-import { expect } from 'chai'
+import { expect } from '@oclif/test'
 import sinon from 'sinon'
 import { probeRedis } from '.'
-import { ProbeRequestResponse } from '../../../../interfaces/request'
+import {
+  type ProbeRequestResponse,
+  probeRequestResult,
+} from '../../../../interfaces/request'
 import * as request from './request'
 
 let redisPingStub: sinon.SinonStub
@@ -18,6 +21,7 @@ describe('Redis Prober', () => {
           status: 200,
           headers: '',
           responseTime: 0,
+          result: probeRequestResult.failed,
           isProbeResponsive: false,
         }
       })
@@ -108,6 +112,7 @@ describe('Redis Prober', () => {
           status: 0,
           headers: '',
           responseTime: 0,
+          result: probeRequestResult.failed,
           isProbeResponsive: false,
         }
       })

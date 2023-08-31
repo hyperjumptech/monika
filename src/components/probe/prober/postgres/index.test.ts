@@ -1,7 +1,10 @@
-import { expect } from 'chai'
+import { expect } from '@oclif/test'
 import sinon from 'sinon'
 import { probePostgres } from '.'
-import { ProbeRequestResponse } from '../../../../interfaces/request'
+import {
+  type ProbeRequestResponse,
+  probeRequestResult,
+} from '../../../../interfaces/request'
 import * as request from './request'
 
 let postgresRequestStub: sinon.SinonStub
@@ -18,6 +21,7 @@ describe('PostgreSQL Prober', () => {
           status: 200,
           headers: '',
           responseTime: 0,
+          result: probeRequestResult.failed,
           isProbeResponsive: false,
         }
       })
@@ -99,6 +103,7 @@ describe('PostgreSQL Prober', () => {
           status: 0,
           headers: '',
           responseTime: 0,
+          result: probeRequestResult.failed,
           isProbeResponsive: false,
         }
       })
@@ -138,6 +143,7 @@ describe('PostgreSQL Prober', () => {
           status: 0,
           headers: '',
           responseTime: 0,
+          result: probeRequestResult.failed,
           isProbeResponsive: false,
         }
       })

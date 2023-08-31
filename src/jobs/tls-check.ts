@@ -29,6 +29,7 @@ import { checkTLS, getHostname } from '../components/tls-checker'
 import type { Notification } from '@hyperjumptech/monika-notification'
 import type { ValidatedResponse } from '../plugins/validate-response'
 import { log } from '../utils/pino'
+import { probeRequestResult } from '../interfaces/request'
 
 type SendTLSErrorNotificationProps = {
   hostname: string
@@ -101,6 +102,7 @@ function sendTLSErrorNotification({
         data: {},
         body: {},
         headers: {},
+        result: probeRequestResult.success,
         isProbeResponsive: true,
       },
     }

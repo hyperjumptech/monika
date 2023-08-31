@@ -24,7 +24,10 @@
 
 import { expect } from '@oclif/test'
 import type { Probe } from '../../../interfaces/probe'
-import type { ProbeRequestResponse } from '../../../interfaces/request'
+import {
+  probeRequestResult,
+  type ProbeRequestResponse,
+} from '../../../interfaces/request'
 import { PrometheusCollector } from './collector'
 
 type ProbeResult = {
@@ -75,6 +78,7 @@ describe('Prometheus collector', () => {
           status: 0,
           headers: '',
           responseTime: 0,
+          result: probeRequestResult.failed,
           isProbeResponsive: false,
         },
       }
@@ -112,6 +116,7 @@ describe('Prometheus collector', () => {
           status: 0,
           headers: '',
           responseTime: 0,
+          result: probeRequestResult.failed,
           isProbeResponsive: false,
         },
       }
