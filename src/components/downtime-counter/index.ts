@@ -22,37 +22,28 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { ValidatedResponse } from '../../plugins/validate-response'
-import getIp from '../../utils/ip'
-import { getMessageForAlert } from './alert-message'
-import { sendNotifications } from '@hyperjumptech/monika-notification'
-import type { Notification } from '@hyperjumptech/monika-notification'
+import { getContext, setContext } from '../../context'
 
-type SendAlertsProps = {
-  probeID: string
-  validation: ValidatedResponse
-  notifications: Notification[]
+export function updateLastIncidentData(
+  isRecovery: boolean,
+  probeID: string,
   url: string
-  probeState: string
-}
+): void {
+  const { incidents } = getContext()
 
-export async function sendAlerts({
-  probeID,
-  validation,
-  notifications,
-  url,
-  probeState,
-}: SendAlertsProps): Promise<void> {
-  const ipAddress = getIp()
-  const isRecovery = probeState === 'UP'
-  const message = await getMessageForAlert({
-    probeID,
-    alert: validation.alert,
-    url,
-    ipAddress,
-    isRecovery,
-    response: validation.response,
-  })
+  if (isRecovery) {
+    // delete last incident
+    const newIncidents = incidents.filter(
+      (incident) =>
+        incident.probeID !== probeID && incident.probeRequestURL !== url
+    )
 
-  return sendNotifications(notifications, message)
+    setContext({ incidents: newIncidents })
+    return
+  }
+
+  // set incident date time to global context to be used later on recovery notification
+  const newIncident = { probeID, probeRequestURL: url, createdAt: new Date() }
+
+  setContext({ incidents: [...incidents, newIncident] })
 }

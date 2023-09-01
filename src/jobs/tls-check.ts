@@ -24,11 +24,12 @@
 
 import { getConfig } from '../components/config'
 import { saveNotificationLog } from '../components/logger/history'
-import { sendAlerts, updateLastIncidentData } from '../components/notification'
+import { sendAlerts } from '../components/notification'
 import { checkTLS, getHostname } from '../components/tls-checker'
 import type { Notification } from '@hyperjumptech/monika-notification'
 import type { ValidatedResponse } from '../plugins/validate-response'
 import { log } from '../utils/pino'
+import { updateLastIncidentData } from '../components/downtime-counter'
 
 type SendTLSErrorNotificationProps = {
   hostname: string

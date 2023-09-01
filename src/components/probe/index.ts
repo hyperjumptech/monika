@@ -38,8 +38,9 @@ import {
   setProbeRunning,
 } from '../../utils/probe-state'
 import { RequestLog } from '../logger'
-import { sendAlerts, updateLastIncidentData } from '../notification'
+import { sendAlerts } from '../notification'
 import { createProbers } from './prober/factory'
+import { updateLastIncidentData } from '../downtime-counter'
 
 interface ProbeStatusProcessed {
   probe: Probe
