@@ -27,6 +27,7 @@ import spies from 'chai-spies'
 import { sendAlerts } from '../../src/components/notification'
 import { channels } from '@hyperjumptech/monika-notification'
 import type { NotificationMessage } from '@hyperjumptech/monika-notification'
+import { probeRequestResult } from '../../src/interfaces/request'
 
 const { discord, mailgun, slack, smtp, telegram, webhook, whatsapp, lark } =
   channels
@@ -51,6 +52,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          result: probeRequestResult.success,
           isProbeResponsive: true,
         },
       },
@@ -84,6 +86,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          result: probeRequestResult.success,
           isProbeResponsive: true,
         },
       },
@@ -117,6 +120,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          result: probeRequestResult.success,
           isProbeResponsive: true,
         },
       },
@@ -151,6 +155,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          result: probeRequestResult.success,
           isProbeResponsive: true,
         },
       },
@@ -186,6 +191,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          result: probeRequestResult.success,
           isProbeResponsive: true,
         },
       },
@@ -226,6 +232,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          result: probeRequestResult.success,
           isProbeResponsive: true,
         },
       },
@@ -262,6 +269,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          result: probeRequestResult.success,
           isProbeResponsive: true,
         },
       },
@@ -315,6 +323,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          result: probeRequestResult.success,
           isProbeResponsive: true,
         },
       },
@@ -351,6 +360,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          result: probeRequestResult.success,
           isProbeResponsive: true,
         },
       },
@@ -384,6 +394,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          result: probeRequestResult.success,
           isProbeResponsive: true,
         },
       },
@@ -417,6 +428,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          result: probeRequestResult.success,
           isProbeResponsive: true,
         },
       },
@@ -450,6 +462,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          result: probeRequestResult.success,
           isProbeResponsive: true,
         },
       },
