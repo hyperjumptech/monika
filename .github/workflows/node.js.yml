@@ -15,7 +15,7 @@ on:
 permissions:
   issues: read
   pull-requests: read
-  
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -27,7 +27,7 @@ jobs:
           node-version: 18.x
       - run: npm ci
       - run: npm run build -w packages/notification
-      - run: NODE_OPTIONS='--no-experimental-fetch' npm test && npx codecov
+      - run: npm test && npx codecov
       - run: npm pack
       - run: npm install -g ./hyperjumptech-monika-*.tgz
       - run: npm run prod_test
