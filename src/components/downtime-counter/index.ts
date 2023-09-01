@@ -25,26 +25,12 @@
 import { formatDistanceToNow } from 'date-fns'
 import { getContext, setContext } from '../../context'
 
-export function updateLastIncidentData(
-  isRecovery: boolean,
-  probeID: string,
-  url: string
-): void {
-  if (isRecovery) {
-    removeDowntimeCounter({ probeID, url })
-    return
-  }
-
-  startDowntimeCounter({ probeID, url })
-}
-
 type DowntimeCounter = {
   probeID: string
   url: string
 }
 
-function startDowntimeCounter({ probeID, url }: DowntimeCounter) {
-  // set incident date time to global context to be used later on recovery notification
+export function startDowntimeCounter({ probeID, url }: DowntimeCounter): void {
   const newIncident = { probeID, probeRequestURL: url, createdAt: new Date() }
 
   setContext({ incidents: [...getContext().incidents, newIncident] })
@@ -65,7 +51,7 @@ export function getDowntimeDuration({ probeID, url }: DowntimeCounter): string {
   })
 }
 
-function removeDowntimeCounter({ probeID, url }: DowntimeCounter) {
+export function removeDowntimeCounter({ probeID, url }: DowntimeCounter): void {
   const newIncidents = getContext().incidents.filter(
     (incident) =>
       incident.probeID !== probeID && incident.probeRequestURL !== url

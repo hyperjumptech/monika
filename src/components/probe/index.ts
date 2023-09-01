@@ -40,7 +40,10 @@ import {
 import { RequestLog } from '../logger'
 import { sendAlerts } from '../notification'
 import { createProbers } from './prober/factory'
-import { updateLastIncidentData } from '../downtime-counter'
+import {
+  removeDowntimeCounter,
+  startDowntimeCounter,
+} from '../downtime-counter'
 
 interface ProbeStatusProcessed {
   probe: Probe
@@ -122,6 +125,7 @@ export function checkThresholdsAndSendAlert(
       probe.id,
       probe.requests?.[requestIndex].url || ''
     )
+
     probeSendNotification({
       index,
       probe,
@@ -139,6 +143,19 @@ export function checkThresholdsAndSendAlert(
       }))
     )
   }
+}
+
+function updateLastIncidentData(
+  isRecovery: boolean,
+  probeID: string,
+  url: string
+): void {
+  if (isRecovery) {
+    removeDowntimeCounter({ probeID, url })
+    return
+  }
+
+  startDowntimeCounter({ probeID, url })
 }
 
 export function getProbeStatesWithValidAlert(
