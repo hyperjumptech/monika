@@ -42,8 +42,17 @@ export function updateLastIncidentData(
     return
   }
 
+  startDowntimeCounter({ probeID, url })
+}
+
+type DowntimeCounter = {
+  probeID: string
+  url: string
+}
+
+function startDowntimeCounter({ probeID, url }: DowntimeCounter) {
   // set incident date time to global context to be used later on recovery notification
   const newIncident = { probeID, probeRequestURL: url, createdAt: new Date() }
 
-  setContext({ incidents: [...incidents, newIncident] })
+  setContext({ incidents: [...getContext().incidents, newIncident] })
 }
