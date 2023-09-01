@@ -51,7 +51,7 @@ export function getDowntimeDuration({ probeID, url }: DowntimeCounter): string {
   })
 }
 
-export function removeDowntimeCounter({ probeID, url }: DowntimeCounter): void {
+export function stopDowntimeCounter({ probeID, url }: DowntimeCounter): void {
   const newIncidents = getContext().incidents.filter(
     (incident) =>
       incident.probeID !== probeID && incident.probeRequestURL !== url

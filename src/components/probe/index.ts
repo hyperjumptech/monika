@@ -40,10 +40,7 @@ import {
 import { RequestLog } from '../logger'
 import { sendAlerts } from '../notification'
 import { createProbers } from './prober/factory'
-import {
-  removeDowntimeCounter,
-  startDowntimeCounter,
-} from '../downtime-counter'
+import { stopDowntimeCounter, startDowntimeCounter } from '../downtime-counter'
 
 interface ProbeStatusProcessed {
   probe: Probe
@@ -151,7 +148,7 @@ function updateLastIncidentData(
   url: string
 ): void {
   if (isRecovery) {
-    removeDowntimeCounter({ probeID, url })
+    stopDowntimeCounter({ probeID, url })
     return
   }
 
