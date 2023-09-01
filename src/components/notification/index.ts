@@ -55,16 +55,14 @@ export async function sendAlerts({
     response: validation.response,
   })
 
-  updateLastIncidentData(isRecovery, probeID, url)
-
   return sendNotifications(notifications, message)
 }
 
-function updateLastIncidentData(
+export function updateLastIncidentData(
   isRecovery: boolean,
   probeID: string,
   url: string
-) {
+): void {
   const { incidents } = getContext()
 
   if (isRecovery) {

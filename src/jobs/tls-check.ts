@@ -24,7 +24,7 @@
 
 import { getConfig } from '../components/config'
 import { saveNotificationLog } from '../components/logger/history'
-import { sendAlerts } from '../components/notification'
+import { sendAlerts, updateLastIncidentData } from '../components/notification'
 import { checkTLS, getHostname } from '../components/tls-checker'
 import type { Notification } from '@hyperjumptech/monika-notification'
 import type { ValidatedResponse } from '../plugins/validate-response'
@@ -111,6 +111,7 @@ function sendTLSErrorNotification({
 
     // TODO: invoke sendNotifications function instead
     // looks like the sendAlerts function does not handle this
+    updateLastIncidentData(false, '', hostname)
     sendAlerts({
       probeID: '',
       url: hostname,

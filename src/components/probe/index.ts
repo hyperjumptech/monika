@@ -38,7 +38,7 @@ import {
   setProbeRunning,
 } from '../../utils/probe-state'
 import { RequestLog } from '../logger'
-import { sendAlerts } from '../notification'
+import { sendAlerts, updateLastIncidentData } from '../notification'
 import { createProbers } from './prober/factory'
 
 interface ProbeStatusProcessed {
@@ -83,6 +83,7 @@ const probeSendNotification = async (data: ProbeSendNotification) => {
   })
 
   if ((notifications?.length ?? 0) > 0) {
+    updateLastIncidentData(statusString === 'UP', probe.id, url)
     await sendAlerts({
       probeID: probe.id,
       url,
