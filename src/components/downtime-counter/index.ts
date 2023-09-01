@@ -30,16 +30,8 @@ export function updateLastIncidentData(
   probeID: string,
   url: string
 ): void {
-  const { incidents } = getContext()
-
   if (isRecovery) {
-    // delete last incident
-    const newIncidents = incidents.filter(
-      (incident) =>
-        incident.probeID !== probeID && incident.probeRequestURL !== url
-    )
-
-    setContext({ incidents: newIncidents })
+    removeDowntimeCounter({ probeID, url })
     return
   }
 
@@ -71,4 +63,13 @@ export function getDowntimeDuration({ probeID, url }: DowntimeCounter): string {
   return formatDistanceToNow(lastIncident.createdAt, {
     includeSeconds: true,
   })
+}
+
+function removeDowntimeCounter({ probeID, url }: DowntimeCounter) {
+  const newIncidents = getContext().incidents.filter(
+    (incident) =>
+      incident.probeID !== probeID && incident.probeRequestURL !== url
+  )
+
+  setContext({ incidents: newIncidents })
 }
