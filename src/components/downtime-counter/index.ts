@@ -22,6 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import { formatDistanceToNow } from 'date-fns'
 import { getContext, setContext } from '../../context'
 
 export function updateLastIncidentData(
@@ -55,4 +56,19 @@ function startDowntimeCounter({ probeID, url }: DowntimeCounter) {
   const newIncident = { probeID, probeRequestURL: url, createdAt: new Date() }
 
   setContext({ incidents: [...getContext().incidents, newIncident] })
+}
+
+export function getDowntimeDuration({ probeID, url }: DowntimeCounter): string {
+  const lastIncident = getContext().incidents.find(
+    (incident) =>
+      incident.probeID === probeID && incident.probeRequestURL === url
+  )
+
+  if (!lastIncident) {
+    return '0 seconds'
+  }
+
+  return formatDistanceToNow(lastIncident.createdAt, {
+    includeSeconds: true,
+  })
 }

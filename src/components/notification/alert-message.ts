@@ -24,7 +24,7 @@
 
 import { hostname, platform } from 'os'
 import { promisify } from 'util'
-import { format, formatDistanceToNow } from 'date-fns'
+import { format } from 'date-fns'
 import * as Handlebars from 'handlebars'
 import getos from 'getos'
 import osName from 'os-name'
@@ -33,6 +33,7 @@ import type { NotificationMessage } from '@hyperjumptech/monika-notification'
 import { ProbeRequestResponse } from '../../interfaces/request'
 import { ProbeAlert } from '../../interfaces/probe'
 import { publicIpAddress, publicNetworkInfo } from '../../utils/public-ip'
+import { getDowntimeDuration } from '../downtime-counter'
 
 const getLinuxDistro = promisify(getos)
 
@@ -148,9 +149,7 @@ function getRecoveryMessage(isRecovery: boolean, probeID: string, url: string) {
     return ''
   }
 
-  const incidentDuration = formatDistanceToNow(incidentDateTime, {
-    includeSeconds: true,
-  })
+  const incidentDuration = getDowntimeDuration({ probeID, url })
   const humanReadableIncidentDateTime = format(
     incidentDateTime,
     'yyyy-MM-dd HH:mm:ss XXX'
