@@ -113,13 +113,12 @@ export async function getMessageForAlert({
     version: userAgent,
   }
 
-  const lastIncident = incidents.find(
-    (incident) =>
-      incident.probeID === probeID && incident.probeRequestURL === url
-  )
   const recoveryMessage = getRecoveryMessage(
     isRecovery,
-    lastIncident?.createdAt
+    incidents.find(
+      (incident) =>
+        incident.probeID === probeID && incident.probeRequestURL === url
+    )?.createdAt
   )
   const expectedMessage = getExpectedMessage(alert, response, isRecovery)
   const bodyString = `Message: ${recoveryMessage}${expectedMessage}
