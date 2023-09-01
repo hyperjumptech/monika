@@ -29,7 +29,6 @@ import { checkTLS, getHostname } from '../components/tls-checker'
 import type { Notification } from '@hyperjumptech/monika-notification'
 import type { ValidatedResponse } from '../plugins/validate-response'
 import { log } from '../utils/pino'
-import { updateLastIncidentData } from '../components/downtime-counter'
 
 type SendTLSErrorNotificationProps = {
   hostname: string
@@ -64,7 +63,6 @@ export function tlsChecker(): void {
         return
       }
 
-      updateLastIncidentData(false, '', hostname)
       sendTLSErrorNotification({
         hostname,
         notifications: notifications || [],
