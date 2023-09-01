@@ -63,6 +63,7 @@ export function tlsChecker(): void {
         return
       }
 
+      updateLastIncidentData(false, '', hostname)
       sendTLSErrorNotification({
         hostname,
         notifications: notifications || [],
@@ -111,7 +112,6 @@ function sendTLSErrorNotification({
 
     // TODO: invoke sendNotifications function instead
     // looks like the sendAlerts function does not handle this
-    updateLastIncidentData(false, '', hostname)
     sendAlerts({
       probeID: '',
       url: hostname,

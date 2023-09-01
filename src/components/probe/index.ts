@@ -83,7 +83,6 @@ const probeSendNotification = async (data: ProbeSendNotification) => {
   })
 
   if ((notifications?.length ?? 0) > 0) {
-    updateLastIncidentData(statusString === 'UP', probe.id, url)
     await sendAlerts({
       probeID: probe.id,
       url,
@@ -117,6 +116,11 @@ export function checkThresholdsAndSendAlert(
       break
     }
 
+    updateLastIncidentData(
+      (state || 'UP') === 'UP',
+      probe.id,
+      probe.requests?.[requestIndex].url || ''
+    )
     probeSendNotification({
       index,
       probe,
