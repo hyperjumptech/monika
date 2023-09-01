@@ -94,7 +94,7 @@ export async function getMessageForAlert({
   isRecovery,
   response,
 }: MessageAlertProps): Promise<NotificationMessage> {
-  const { userAgent, incidents } = getContext()
+  const { userAgent } = getContext()
   const [monikaInstance, osName] = await Promise.all([
     getMonikaInstance(ipAddress),
     getOSName(),
@@ -113,13 +113,7 @@ export async function getMessageForAlert({
     version: userAgent,
   }
 
-  const recoveryMessage = getRecoveryMessage(
-    isRecovery,
-    incidents.find(
-      (incident) =>
-        incident.probeID === probeID && incident.probeRequestURL === url
-    )?.createdAt
-  )
+  const recoveryMessage = getRecoveryMessage(isRecovery, probeID, url)
   const expectedMessage = getExpectedMessage(alert, response, isRecovery)
   const bodyString = `Message: ${recoveryMessage}${expectedMessage}
 
@@ -145,7 +139,11 @@ Version: ${userAgent}`
   return message
 }
 
-function getRecoveryMessage(isRecovery: boolean, incidentDateTime?: Date) {
+function getRecoveryMessage(isRecovery: boolean, probeID: string, url: string) {
+  const incidentDateTime = getContext().incidents.find(
+    (incident) =>
+      incident.probeID === probeID && incident.probeRequestURL === url
+  )?.createdAt
   if (!isRecovery || !incidentDateTime) {
     return ''
   }
