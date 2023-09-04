@@ -9,8 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Fixed
 
-- remove change empty array fallback for requests (#1113)
-- mailgun notification handle node 18 (#1105)
+- Remove change empty array fallback for requests (#1113)
+- Mailgun notification handle node 18 (#1105)
 
 ## Changed
 
