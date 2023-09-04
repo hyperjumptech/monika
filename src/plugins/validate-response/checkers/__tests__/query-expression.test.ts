@@ -22,8 +22,9 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { expect } from 'chai'
+import { expect } from '@oclif/test'
 import queryExpression from '../query-expression'
+import { probeRequestResult } from '../../../../interfaces/request'
 
 describe('queryExpression', () => {
   it('should handle response time query', () => {
@@ -33,6 +34,7 @@ describe('queryExpression', () => {
       status: 200,
       headers: {},
       responseTime: 150,
+      result: probeRequestResult.success,
       isProbeResponsive: true,
     }
 
@@ -48,6 +50,7 @@ describe('queryExpression', () => {
       status: 200,
       headers: {},
       responseTime: 200,
+      result: probeRequestResult.success,
       isProbeResponsive: true,
     }
 
@@ -63,6 +66,7 @@ describe('queryExpression', () => {
       status: 200,
       headers: { 'content-length': 2000 },
       responseTime: 200,
+      result: probeRequestResult.success,
       isProbeResponsive: true,
     }
 
@@ -78,6 +82,7 @@ describe('queryExpression', () => {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
       responseTime: 200,
+      result: probeRequestResult.success,
       isProbeResponsive: true,
     }
 
@@ -100,6 +105,7 @@ describe('queryExpression', () => {
       body: {
         message: 'Hello',
       },
+      result: probeRequestResult.success,
       isProbeResponsive: true,
     }
 

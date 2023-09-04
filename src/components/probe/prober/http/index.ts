@@ -25,12 +25,12 @@
 import { isSymonModeFrom } from '../../../config'
 import { getContext } from '../../../../context'
 import events from '../../../../events'
-import { ProbeRequestResult } from '../../../../interfaces/request'
 import { getEventEmitter } from '../../../../utils/events'
 import { log } from '../../../../utils/pino'
 import { RequestLog } from '../../../logger'
 import { httpRequest } from './request'
 import { BaseProber } from '..'
+import { probeRequestResult } from '../../../../interfaces/request'
 
 const CONNECTION_RECOVERY_MESSAGE = 'Probe is accessible again'
 const CONNECTION_INCIDENT_MESSAGE = 'Probe not accessible'
@@ -79,8 +79,8 @@ export class HTTPProber extends BaseProber {
         // Set request result value
         const isDown = statuses.some((item) => item.state === 'DOWN')
         probeRes.result = isDown
-          ? ProbeRequestResult.failed
-          : ProbeRequestResult.success
+          ? probeRequestResult.failed
+          : probeRequestResult.success
         // Add to a response array to be accessed by another request for chaining later
         responses.push(probeRes)
 

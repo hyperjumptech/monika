@@ -23,7 +23,10 @@
  **********************************************************************************/
 
 import { expect } from '@oclif/test'
-import type { ProbeRequestResponse } from '../../../interfaces/request'
+import {
+  probeRequestResult,
+  type ProbeRequestResponse,
+} from '../../../interfaces/request'
 import type { Probe } from '../../../interfaces/probe'
 import { createProber } from '../../../components/probe/prober/factory'
 import type { ServerAlertState } from '../../../interfaces/probe-status'
@@ -447,6 +450,9 @@ function generateMockedResponse(
     status,
     responseTime,
     headers: {},
+    result: isProbeResponsive
+      ? probeRequestResult.success
+      : probeRequestResult.failed,
     isProbeResponsive,
   }
 }

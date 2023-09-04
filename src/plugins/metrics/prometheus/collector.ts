@@ -30,7 +30,7 @@ import {
   Counter,
 } from 'prom-client'
 import type { Probe } from '../../../interfaces/probe'
-import { ProbeRequestResult } from '../../../interfaces/request'
+import { probeRequestResult } from '../../../interfaces/request'
 import type { ProbeRequestResponse } from '../../../interfaces/request'
 
 type PrometheusCustomCollector = {
@@ -140,7 +140,7 @@ export class PrometheusCollector {
     const request = requests[requestIndex]
     const { method, url } = request
     const { headers, responseTime, status } = response
-    const result = response.result ?? ProbeRequestResult.unknown
+    const result = response.result ?? probeRequestResult.unknown
     const milliSecond = 1000
     const responseTimeInSecond = responseTime / milliSecond ?? 0
     const responseSizeBytes = Number(headers['content-length'])

@@ -1,7 +1,10 @@
-import { expect } from 'chai'
+import { expect } from '@oclif/test'
 import sinon from 'sinon'
 import { probeMariaDB } from '.'
-import { ProbeRequestResponse } from '../../../../interfaces/request'
+import {
+  type ProbeRequestResponse,
+  probeRequestResult,
+} from '../../../../interfaces/request'
 import * as request from './request'
 
 let mariaDBRequestStub: sinon.SinonStub
@@ -18,6 +21,7 @@ describe('Maria DB/MySQL Prober', () => {
           status: 200,
           headers: '',
           responseTime: 0,
+          result: probeRequestResult.failed,
           isProbeResponsive: false,
         }
       })
@@ -164,6 +168,7 @@ describe('Maria DB/MySQL Prober', () => {
           status: 0,
           headers: '',
           responseTime: 0,
+          result: probeRequestResult.failed,
           isProbeResponsive: false,
         }
       })
