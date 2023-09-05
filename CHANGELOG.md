@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.15.7 2023-09-04
+
+## Fixed
+
+- Remove change empty array fallback for requests (#1113)
+- Mailgun notification handle node 18 (#1105)
+
+## Changed
+
+- Make the Probe Result a Mandatory Type (#1111)
+- Remove node_options environment variable when running test (#1112)
+- Adding sendWithCustomContent in sendgrid (#1109)
+
 ## 1.15.6 2023-08-28
 
 ## Fixed
