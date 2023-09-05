@@ -26,7 +26,10 @@ import type { Notification } from '@hyperjumptech/monika-notification'
 import { getContext, setContext } from '../../../context'
 import events from '../../../events'
 import type { Probe } from '../../../interfaces/probe'
-import type { ProbeRequestResponse } from '../../../interfaces/request'
+import {
+  probeRequestResult,
+  type ProbeRequestResponse,
+} from '../../../interfaces/request'
 import { getEventEmitter } from '../../../utils/events'
 import { log } from '../../../utils/pino'
 import { isSymonModeFrom } from '../../config'
@@ -79,11 +82,15 @@ export class BaseProber implements Prober {
       this.logMessage(probeResults[index])
     }
 
-    const failedProbeResult = probeResults.find((pr) => pr.isAlertTriggered)
+    const failedProbeResult = probeResults.find(
+      ({ requestResponse }) =>
+        requestResponse.result !== probeRequestResult.success
+    )
 
     if (failedProbeResult) {
       const requestIndex = probeResults.findIndex(
-        (probeResult) => probeResult.isAlertTriggered
+        ({ requestResponse }) =>
+          requestResponse.result !== probeRequestResult.success
       )
       saveProbeRequestLog({
         probe: this.probeConfig,
@@ -217,7 +224,7 @@ export class BaseProber implements Prober {
       notifications: this.notifications,
       // TODO: make it possible to send alert without validation
       validation: {
-        alert: { assertion: '', message: 'Probe not accessible' },
+        alert: { assertion: '', message: 'Probe is accessible again' },
         isAlertTriggered: false,
         response: requestResponse,
       },
