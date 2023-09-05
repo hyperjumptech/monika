@@ -26,14 +26,13 @@ import type { Notification } from '@hyperjumptech/monika-notification'
 import { interpret } from 'xstate'
 import { getContext, setContext } from '../../../context'
 import events from '../../../events'
-import type { Probe, ProbeAlert } from '../../../interfaces/probe'
+import type { Probe } from '../../../interfaces/probe'
 import type { ProbeRequestResponse } from '../../../interfaces/request'
 import type { ValidatedResponse } from '../../../plugins/validate-response'
 import { getEventEmitter } from '../../../utils/events'
 import { log } from '../../../utils/pino'
 import { isSymonModeFrom } from '../../config'
 import { RequestLog } from '../../logger'
-import responseChecker from '../../../plugins/validate-response/checkers'
 import type { ServerAlertState } from '../../../interfaces/probe-status'
 import {
   serverAlertStateInterpreters,
@@ -75,10 +74,6 @@ type SendNotificationParams = {
 export interface Prober {
   probe: () => Promise<void>
   generateVerboseStartupMessage: () => string
-  validateResponse: (
-    response: ProbeRequestResponse,
-    additionalAssertions?: ProbeAlert[]
-  ) => ValidatedResponse[]
   processThresholds: ({
     requestIndex,
     validatedResponse,
@@ -111,28 +106,6 @@ export class BaseProber implements Prober {
 
   generateVerboseStartupMessage(): string {
     return ''
-  }
-
-  // TODO: make it protected/private
-  validateResponse(
-    response: ProbeRequestResponse,
-    additionalAssertions?: ProbeAlert[]
-  ): ValidatedResponse[] {
-    const assertions: ProbeAlert[] = [
-      ...(this.probeConfig.alerts || [
-        {
-          assertion: 'response.status < 200 or response.status > 299',
-          message: 'Probe cannot be accessed',
-        },
-      ]),
-      ...(additionalAssertions || []),
-    ]
-
-    return assertions.map((assertion) => ({
-      alert: assertion,
-      isAlertTriggered: responseChecker(assertion, response),
-      response,
-    }))
   }
 
   // TODO: make it protected/private

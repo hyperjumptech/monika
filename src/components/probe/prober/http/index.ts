@@ -30,7 +30,13 @@ import { log } from '../../../../utils/pino'
 import { RequestLog } from '../../../logger'
 import { httpRequest } from './request'
 import { BaseProber } from '..'
-import { probeRequestResult } from '../../../../interfaces/request'
+import {
+  type ProbeRequestResponse,
+  probeRequestResult,
+} from '../../../../interfaces/request'
+import type { ProbeAlert } from '../../../../interfaces/probe'
+import type { ValidatedResponse } from '../../../../plugins/validate-response'
+import responseChecker from '../../../../plugins/validate-response/checkers'
 
 const CONNECTION_RECOVERY_MESSAGE = 'Probe is accessible again'
 const CONNECTION_INCIDENT_MESSAGE = 'Probe not accessible'
@@ -214,5 +220,26 @@ export class HTTPProber extends BaseProber {
     const alertsInString = JSON.stringify(this.probeConfig.alerts)
 
     return `    Alerts: ${hasAlert ? alertsInString : defaultAlertsInString}\n`
+  }
+
+  private validateResponse(
+    response: ProbeRequestResponse,
+    additionalAssertions?: ProbeAlert[]
+  ): ValidatedResponse[] {
+    const assertions: ProbeAlert[] = [
+      ...(this.probeConfig.alerts || [
+        {
+          assertion: 'response.status < 200 or response.status > 299',
+          message: 'Probe cannot be accessed',
+        },
+      ]),
+      ...(additionalAssertions || []),
+    ]
+
+    return assertions.map((assertion) => ({
+      alert: assertion,
+      isAlertTriggered: responseChecker(assertion, response),
+      response,
+    }))
   }
 }
