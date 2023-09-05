@@ -24,7 +24,7 @@
 
 import type { Notification } from '@hyperjumptech/monika-notification'
 import { interpret } from 'xstate'
-import { getContext } from '../../../context'
+import { getContext, setContext } from '../../../context'
 import events from '../../../events'
 import type { Probe, ProbeAlert } from '../../../interfaces/probe'
 import type { ProbeRequestResponse } from '../../../interfaces/request'
@@ -41,16 +41,12 @@ import {
 } from '../../notification/process-server-status'
 import { logResponseTime } from '../../logger/response-time-log'
 import { sendAlerts } from '../../notification'
+import { saveNotificationLog, saveProbeRequestLog } from '../../logger/history'
 
 export type ProbeResult = {
   isAlertTriggered: boolean
   logMessage: string
   requestResponse: ProbeRequestResponse
-}
-
-type RespProsessingParams = {
-  index: number
-  probeResult: ProbeResult
 }
 
 type ProcessThresholdsParams = {
@@ -70,6 +66,11 @@ type ProbeSendNotification = {
   index: number
   probeState?: ServerAlertState
 } & Omit<ProbeStatusProcessed, 'statuses'>
+
+type SendNotificationParams = {
+  requestURL: string
+  requestResponse: ProbeRequestResponse
+}
 
 export interface Prober {
   probe: () => Promise<void>
@@ -135,10 +136,10 @@ export class BaseProber implements Prober {
   }
 
   // TODO: make it protected/private
-  processThresholds = ({
+  processThresholds({
     requestIndex,
     validatedResponse,
-  }: ProcessThresholdsParams): ServerAlertState[] => {
+  }: ProcessThresholdsParams): ServerAlertState[] {
     const { requests, incidentThreshold, recoveryThreshold, socket, name } =
       this.probeConfig
     const request = requests?.[requestIndex]
@@ -202,56 +203,168 @@ export class BaseProber implements Prober {
 
   protected processProbeResults(probeResults: ProbeResult[]): void {
     for (const index of probeResults.keys()) {
-      this.responseProcessing({ index, probeResult: probeResults[index] })
+      this.logMessage(probeResults[index])
     }
+
+    const failedProbeResult = probeResults.find((pr) => pr.isAlertTriggered)
+
+    if (failedProbeResult) {
+      const requestIndex = probeResults.findIndex(
+        (probeResult) => probeResult.isAlertTriggered
+      )
+      saveProbeRequestLog({
+        probe: this.probeConfig,
+        requestIndex,
+        probeRes: probeResults[requestIndex].requestResponse,
+        error: 'Probe not accessible',
+      })
+
+      if (this.hasIncident()) {
+        throw new Error('Probe not accessible')
+      }
+
+      const newIncident = {
+        probeID: this.probeConfig.id,
+        probeRequestURL: this.probeConfig?.requests?.[requestIndex].url || '',
+        createdAt: new Date(),
+      }
+      setContext({ incidents: [...getContext().incidents, newIncident] })
+
+      this.sendIncidentNotification({
+        requestURL: this.probeConfig?.requests?.[requestIndex].url || '',
+        requestResponse: failedProbeResult.requestResponse,
+      })
+
+      throw new Error('Probe not accessible')
+    }
+
+    if (this.hasIncident()) {
+      const recoveredIncident = getContext().incidents.find(
+        (incident) => incident.probeID === this.probeConfig.id
+      )
+      const requestIndex =
+        this.probeConfig?.requests?.findIndex(
+          ({ url }) => url === recoveredIncident?.probeRequestURL
+        ) || 0
+      if (recoveredIncident) {
+        this.sendRecoveryNotification({
+          requestURL: this.probeConfig?.requests?.[requestIndex].url || '',
+          requestResponse: probeResults[requestIndex].requestResponse,
+        })
+      }
+
+      const newIncidents = getContext().incidents.filter(
+        (incident) => incident.probeID !== this.probeConfig.id
+      )
+      setContext({ incidents: newIncidents })
+    }
+
+    for (const index of probeResults.keys()) {
+      const { requestResponse } = probeResults[index]
+      getEventEmitter().emit(events.probe.response.received, {
+        probe: this.probeConfig,
+        requestIndex: index,
+        response: requestResponse,
+      })
+
+      if (
+        isSymonModeFrom(getContext().flags) ||
+        getContext().flags['keep-verbose-logs']
+      ) {
+        saveProbeRequestLog({
+          probe: this.probeConfig,
+          requestIndex: index,
+          probeRes: requestResponse,
+          alertQueries: this.probeConfig?.requests?.[index].alerts?.map(
+            ({ assertion }) => assertion
+          ),
+        })
+      }
+    }
+  }
+
+  private hasNotification() {
+    return this.notifications.length > 0
+  }
+
+  private hasIncident() {
+    return getContext().incidents.find(
+      (incident) => incident.probeID === this.probeConfig.id
+    )
+  }
+
+  private async sendIncidentNotification({
+    requestURL,
+    requestResponse,
+  }: SendNotificationParams) {
+    if (!this.hasNotification()) {
+      return
+    }
+
+    await sendAlerts({
+      probeID: this.probeConfig.id,
+      // TODO: change url based on the prober type
+      url: requestURL,
+      probeState: 'DOWN',
+      notifications: this.notifications,
+      // TODO: make it possible to send alert without validation
+      validation: {
+        alert: { assertion: '', message: 'Probe not accessible' },
+        isAlertTriggered: true,
+        response: requestResponse,
+      },
+    })
+
+    await Promise.all(
+      this.notifications.map((notification) =>
+        saveNotificationLog(
+          this.probeConfig,
+          notification,
+          // TODO: Make enum for notification type
+          'NOTIFY-INCIDENT',
+          ''
+        )
+      )
+    )
+  }
+
+  private async sendRecoveryNotification({
+    requestURL,
+    requestResponse,
+  }: SendNotificationParams) {
+    if (!this.hasNotification()) {
+      return
+    }
+
+    await sendAlerts({
+      probeID: this.probeConfig.id,
+      // TODO: change url based on the prober type
+      url: requestURL,
+      probeState: 'UP',
+      notifications: this.notifications,
+      // TODO: make it possible to send alert without validation
+      validation: {
+        alert: { assertion: '', message: 'Probe not accessible' },
+        isAlertTriggered: false,
+        response: requestResponse,
+      },
+    })
+
+    await Promise.all(
+      this.notifications.map((notification) =>
+        saveNotificationLog(
+          this.probeConfig,
+          notification,
+          // TODO: Make enum for notification type
+          'NOTIFY-RECOVER',
+          ''
+        )
+      )
+    )
   }
 
   protected logResponseTime(responseTimeInMs: number): void {
     logResponseTime(responseTimeInMs)
-  }
-
-  private responseProcessing({
-    index,
-    probeResult,
-  }: RespProsessingParams): void {
-    const { requestResponse } = probeResult
-    getEventEmitter().emit(events.probe.response.received, {
-      probe: this.probeConfig,
-      requestIndex: index,
-      response: requestResponse,
-    })
-    this.logMessage(probeResult)
-
-    const validatedResponse = this.validateResponse(requestResponse)
-    const requestLog = new RequestLog(this.probeConfig, index, 0)
-    requestLog.addAlerts(
-      validatedResponse
-        .filter((item) => item.isAlertTriggered)
-        .map((item) => item.alert)
-    )
-    requestLog.setResponse(requestResponse)
-    // Done processing results, check if need to send out alerts
-    this.checkThresholdsAndSendAlert(
-      {
-        probe: this.probeConfig,
-        statuses: this.processThresholds({
-          requestIndex: index,
-          validatedResponse,
-        }),
-        notifications: this.notifications,
-        requestIndex: index,
-        validatedResponseStatuses: validatedResponse,
-      },
-      requestLog
-    )
-
-    if (
-      isSymonModeFrom(getContext().flags) ||
-      getContext().flags['keep-verbose-logs'] ||
-      requestLog.hasIncidentOrRecovery
-    ) {
-      requestLog.saveToDatabase().catch((error) => log.error(error.message))
-    }
   }
 
   private logMessage({ isAlertTriggered, logMessage }: ProbeResult) {

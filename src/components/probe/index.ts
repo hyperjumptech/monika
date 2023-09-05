@@ -22,6 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import { ExponentialBackoff, retry, handleAll } from 'cockatiel'
 import { differenceInSeconds } from 'date-fns'
 import { getContext } from '../../context'
 import type { Notification } from '@hyperjumptech/monika-notification'
@@ -67,10 +68,16 @@ export async function doProbe({
       probeConfig: probe,
     })
 
-    await Promise.all(
-      probers.map(async (prober) => {
-        await prober.probe()
-      })
+    const retryPolicy = retry(handleAll, {
+      backoff: new ExponentialBackoff({ maxDelay: probe.interval }),
+    })
+
+    await retryPolicy.execute(() =>
+      Promise.all(
+        probers.map(async (prober) => {
+          await prober.probe()
+        })
+      )
     )
 
     setProbeFinish(probe.id)
