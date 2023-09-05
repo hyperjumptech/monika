@@ -65,10 +65,6 @@ type ProbeSendNotification = {
   probeState?: ServerAlertState
 } & Omit<ProbeStatusProcessed, 'statuses'>
 
-const CONNECTION_RECOVERY_MESSAGE = 'Probe is accessible again'
-const CONNECTION_INCIDENT_MESSAGE = 'Probe not accessible'
-const isConnectionDown = new Map<string, boolean>()
-
 export class HTTPProber extends BaseProber {
   async probe(): Promise<void> {
     if (!this.probeConfig.requests) {
@@ -129,34 +125,6 @@ export class HTTPProber extends BaseProber {
             .filter((item) => item.isAlertTriggered)
             .map((item) => item.alert)
         )
-        // so we've got a status that need to be reported/alerted
-        // 1. check first, this connection is up, but was it ever down? if yes then use a specific connection recovery msg
-        // 2. if this connection is down, save to map and send specific connection incident msg
-        // 3. if event is not for connection failure, send user specified notification msg
-        if (statuses[0].shouldSendNotification) {
-          const { isProbeResponsive } = probeRes
-          const id = `${this.probeConfig?.id}:${request.url}:${requestIndex}:${request?.id}`
-
-          if (
-            isProbeResponsive && // if connection is successful but
-            isConnectionDown.has(id) // if connection WAS down then send a custom recovery alert. Else use user's alert.
-          ) {
-            validatedResponse[0].alert = {
-              assertion: '',
-              message: CONNECTION_RECOVERY_MESSAGE,
-            }
-            isConnectionDown.delete(id) // connection is up, so remove from entry
-            validatedResponse.splice(1, validatedResponse.length) // truncate and use custom message
-          } else if (!isProbeResponsive) {
-            // if connection has failed, then lets send out specific notification
-            validatedResponse[0].alert = {
-              assertion: '',
-              message: CONNECTION_INCIDENT_MESSAGE,
-            }
-            isConnectionDown.set(id, true) // connection is down, so add to map
-            validatedResponse.splice(1, validatedResponse.length) // truncate and use custom message
-          }
-        }
 
         // Done processing results, check if need to send out alerts
         this.checkThresholdsAndSendAlert(
