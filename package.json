@@ -60,7 +60,7 @@
     "@breejs/ts-worker": "^2.0.0",
     "@faker-js/faker": "^7.4.0",
     "@hyperjumptech/db-connection-checker": "^0.0.1",
-    "@hyperjumptech/monika-notification": "packages/notification/hyperjumptech-monika-notification-1.15.7.tgz",
+    "@hyperjumptech/monika-notification": "1.15.7",
     "@oclif/core": "^1.9.0",
     "@oclif/plugin-help": "^5.1.11",
     "@oclif/plugin-version": "^1",
