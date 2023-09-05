@@ -33,12 +33,10 @@ import net from 'net'
 import { Pool } from 'pg'
 import * as redis from 'redis'
 import { doProbe } from '.'
-import type { ServerAlertState } from '../../interfaces/probe-status'
 import { initializeProbeStates } from '../../utils/probe-state'
 import type { Probe } from '../../interfaces/probe'
 import { afterEach, beforeEach } from 'mocha'
 import { getContext, resetContext, setContext } from '../../context'
-import { createProber } from './prober/factory'
 
 let urlRequestTotal = 0
 let notificationAlert: Record<string, any> = {}
@@ -79,77 +77,6 @@ afterEach(() => {
 })
 
 describe('Probe processing', () => {
-  describe('getProbeStatesWithValidAlert function', () => {
-    const probeStates: ServerAlertState[] = [
-      {
-        isFirstTime: false,
-        alertQuery: '',
-        state: 'DOWN',
-        shouldSendNotification: false,
-      },
-      {
-        isFirstTime: true,
-        alertQuery: '',
-        state: 'DOWN',
-        shouldSendNotification: false,
-      },
-      {
-        isFirstTime: true,
-        alertQuery: '',
-        state: 'UP',
-        shouldSendNotification: false,
-      },
-      {
-        isFirstTime: true,
-        alertQuery: '',
-        state: 'UP',
-        shouldSendNotification: true,
-      },
-      {
-        isFirstTime: true,
-        alertQuery: '',
-        state: 'DOWN',
-        shouldSendNotification: true,
-      },
-      {
-        isFirstTime: false,
-        alertQuery: '',
-        state: 'DOWN',
-        shouldSendNotification: true,
-      },
-    ]
-
-    it('should return probe states with valid alert', () => {
-      // arrange
-      const prober = createProber({
-        counter: 0,
-        notifications: [],
-        probeConfig: {} as Probe,
-      })
-      const expected: ServerAlertState[] = [
-        {
-          isFirstTime: true,
-          alertQuery: '',
-          state: 'DOWN',
-          shouldSendNotification: true,
-        },
-        {
-          isFirstTime: false,
-          alertQuery: '',
-          state: 'DOWN',
-          shouldSendNotification: true,
-        },
-      ]
-
-      // act
-      const probeStatesWithValidAlert =
-        prober.getProbeStatesWithValidAlert(probeStates)
-
-      // assert
-      expect(probeStatesWithValidAlert).deep.eq(expected)
-    })
-  })
-
   describe('HTTP Probe', () => {
     it('should not run probe if the probe is running', async () => {
       // arrange

@@ -362,4 +362,17 @@ export class HTTPProber extends BaseProber {
       )
     }
   }
+
+  private getProbeStatesWithValidAlert(
+    probeStates: ServerAlertState[]
+  ): ServerAlertState[] {
+    return probeStates.filter(
+      ({ isFirstTime, shouldSendNotification, state }) => {
+        const isFirstUpEvent = isFirstTime && state === 'UP'
+        const isFirstUpEventForNonSymonMode = isFirstUpEvent
+
+        return shouldSendNotification && !isFirstUpEventForNonSymonMode
+      }
+    )
+  }
 }

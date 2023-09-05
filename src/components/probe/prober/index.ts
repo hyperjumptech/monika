@@ -63,9 +63,6 @@ type SendNotificationParams = {
 export interface Prober {
   probe: () => Promise<void>
   generateVerboseStartupMessage: () => string
-  getProbeStatesWithValidAlert(
-    probeStates: ServerAlertState[]
-  ): ServerAlertState[]
 }
 
 export type ProberMetadata = {
@@ -266,20 +263,6 @@ export class BaseProber implements Prober {
     }
 
     log.info(logMessage)
-  }
-
-  // TODO: make it protected/private
-  getProbeStatesWithValidAlert(
-    probeStates: ServerAlertState[]
-  ): ServerAlertState[] {
-    return probeStates.filter(
-      ({ isFirstTime, shouldSendNotification, state }) => {
-        const isFirstUpEvent = isFirstTime && state === 'UP'
-        const isFirstUpEventForNonSymonMode = isFirstUpEvent
-
-        return shouldSendNotification && !isFirstUpEventForNonSymonMode
-      }
-    )
   }
 
   protected async probeSendNotification(
