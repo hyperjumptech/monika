@@ -27,12 +27,9 @@ import { getContext, setContext } from '../../../context'
 import events from '../../../events'
 import type { Probe } from '../../../interfaces/probe'
 import type { ProbeRequestResponse } from '../../../interfaces/request'
-import type { ValidatedResponse } from '../../../plugins/validate-response'
 import { getEventEmitter } from '../../../utils/events'
 import { log } from '../../../utils/pino'
 import { isSymonModeFrom } from '../../config'
-import type { ServerAlertState } from '../../../interfaces/probe-status'
-import { logResponseTime } from '../../logger/response-time-log'
 import { sendAlerts } from '../../notification'
 import { saveNotificationLog, saveProbeRequestLog } from '../../logger/history'
 
@@ -41,19 +38,6 @@ export type ProbeResult = {
   logMessage: string
   requestResponse: ProbeRequestResponse
 }
-
-export type ProbeStatusProcessed = {
-  probe: Probe
-  statuses?: ServerAlertState[]
-  notifications: Notification[]
-  validatedResponseStatuses: ValidatedResponse[]
-  requestIndex: number
-}
-
-type ProbeSendNotification = {
-  index: number
-  probeState?: ServerAlertState
-} & Omit<ProbeStatusProcessed, 'statuses'>
 
 type SendNotificationParams = {
   requestURL: string
@@ -252,10 +236,6 @@ export class BaseProber implements Prober {
     )
   }
 
-  protected logResponseTime(responseTimeInMs: number): void {
-    logResponseTime(responseTimeInMs)
-  }
-
   private logMessage({ isAlertTriggered, logMessage }: ProbeResult) {
     if (isAlertTriggered) {
       log.warn(logMessage)
@@ -263,46 +243,5 @@ export class BaseProber implements Prober {
     }
 
     log.info(logMessage)
-  }
-
-  protected async probeSendNotification(
-    data: ProbeSendNotification
-  ): Promise<void> {
-    const eventEmitter = getEventEmitter()
-
-    const {
-      index,
-      probe,
-      probeState,
-      notifications,
-      requestIndex,
-      validatedResponseStatuses,
-    } = data
-
-    const statusString = probeState?.state ?? 'UP'
-    const url = probe.requests?.[requestIndex]?.url ?? ''
-    const validation =
-      validatedResponseStatuses.find(
-        (validateResponse: ValidatedResponse) =>
-          validateResponse.alert.assertion === probeState?.alertQuery
-      ) || validatedResponseStatuses[index]
-
-    eventEmitter.emit(events.probe.notification.willSend, {
-      probeID: probe.id,
-      notifications: notifications ?? [],
-      url: url,
-      probeState: statusString,
-      validation,
-    })
-
-    if ((notifications?.length ?? 0) > 0) {
-      await sendAlerts({
-        probeID: probe.id,
-        url,
-        probeState: statusString,
-        notifications: notifications ?? [],
-        validation,
-      })
-    }
   }
 }

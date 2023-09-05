@@ -22,6 +22,8 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import type { Notification } from '@hyperjumptech/monika-notification'
+import { interpret } from 'xstate'
 import { isSymonModeFrom } from '../../../config'
 import { getContext } from '../../../../context'
 import events from '../../../../events'
@@ -29,12 +31,12 @@ import { getEventEmitter } from '../../../../utils/events'
 import { log } from '../../../../utils/pino'
 import { RequestLog } from '../../../logger'
 import { httpRequest } from './request'
-import { BaseProber, ProbeStatusProcessed } from '..'
+import { BaseProber } from '..'
 import {
   type ProbeRequestResponse,
   probeRequestResult,
 } from '../../../../interfaces/request'
-import type { ProbeAlert } from '../../../../interfaces/probe'
+import type { Probe, ProbeAlert } from '../../../../interfaces/probe'
 import type { ValidatedResponse } from '../../../../plugins/validate-response'
 import responseChecker from '../../../../plugins/validate-response/checkers'
 import type { ServerAlertState } from '../../../../interfaces/probe-status'
@@ -42,16 +44,30 @@ import {
   serverAlertStateInterpreters,
   serverAlertStateMachine,
 } from '../../../notification/process-server-status'
-import { interpret } from 'xstate'
-
-const CONNECTION_RECOVERY_MESSAGE = 'Probe is accessible again'
-const CONNECTION_INCIDENT_MESSAGE = 'Probe not accessible'
-const isConnectionDown = new Map<string, boolean>()
+import { logResponseTime } from '../../../logger/response-time-log'
+import { sendAlerts } from '../../../notification'
 
 type ProcessThresholdsParams = {
   requestIndex: number
   validatedResponse: ValidatedResponse[]
 }
+
+type ProbeStatusProcessed = {
+  probe: Probe
+  statuses?: ServerAlertState[]
+  notifications: Notification[]
+  validatedResponseStatuses: ValidatedResponse[]
+  requestIndex: number
+}
+
+type ProbeSendNotification = {
+  index: number
+  probeState?: ServerAlertState
+} & Omit<ProbeStatusProcessed, 'statuses'>
+
+const CONNECTION_RECOVERY_MESSAGE = 'Probe is accessible again'
+const CONNECTION_INCIDENT_MESSAGE = 'Probe not accessible'
+const isConnectionDown = new Map<string, boolean>()
 
 export class HTTPProber extends BaseProber {
   async probe(): Promise<void> {
@@ -176,10 +192,6 @@ export class HTTPProber extends BaseProber {
         requestLog.addError((error as any).message)
         break
       } finally {
-        for (const { responseTime } of responses) {
-          this.logResponseTime(responseTime)
-        }
-
         requestLog.print()
 
         if (
@@ -189,6 +201,10 @@ export class HTTPProber extends BaseProber {
         ) {
           requestLog.saveToDatabase().catch((error) => log.error(error.message))
         }
+      }
+
+      for (const { responseTime } of responses) {
+        logResponseTime(responseTime)
       }
     }
   }
@@ -319,7 +335,6 @@ export class HTTPProber extends BaseProber {
     }))
   }
 
-  // Probes Thresholds processed, Send out notifications/alerts.
   private checkThresholdsAndSendAlert(
     data: ProbeStatusProcessed,
     requestLog: RequestLog
@@ -374,5 +389,46 @@ export class HTTPProber extends BaseProber {
         return shouldSendNotification && !isFirstUpEventForNonSymonMode
       }
     )
+  }
+
+  private async probeSendNotification(
+    data: ProbeSendNotification
+  ): Promise<void> {
+    const eventEmitter = getEventEmitter()
+
+    const {
+      index,
+      probe,
+      probeState,
+      notifications,
+      requestIndex,
+      validatedResponseStatuses,
+    } = data
+
+    const statusString = probeState?.state ?? 'UP'
+    const url = probe.requests?.[requestIndex]?.url ?? ''
+    const validation =
+      validatedResponseStatuses.find(
+        (validateResponse: ValidatedResponse) =>
+          validateResponse.alert.assertion === probeState?.alertQuery
+      ) || validatedResponseStatuses[index]
+
+    eventEmitter.emit(events.probe.notification.willSend, {
+      probeID: probe.id,
+      notifications: notifications ?? [],
+      url: url,
+      probeState: statusString,
+      validation,
+    })
+
+    if ((notifications?.length ?? 0) > 0) {
+      await sendAlerts({
+        probeID: probe.id,
+        url,
+        probeState: statusString,
+        notifications: notifications ?? [],
+        validation,
+      })
+    }
   }
 }
