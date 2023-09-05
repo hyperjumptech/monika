@@ -31,7 +31,6 @@ import type { ValidatedResponse } from '../../../plugins/validate-response'
 import { getEventEmitter } from '../../../utils/events'
 import { log } from '../../../utils/pino'
 import { isSymonModeFrom } from '../../config'
-import { RequestLog } from '../../logger'
 import type { ServerAlertState } from '../../../interfaces/probe-status'
 import { logResponseTime } from '../../logger/response-time-log'
 import { sendAlerts } from '../../notification'
@@ -43,7 +42,7 @@ export type ProbeResult = {
   requestResponse: ProbeRequestResponse
 }
 
-type ProbeStatusProcessed = {
+export type ProbeStatusProcessed = {
   probe: Probe
   statuses?: ServerAlertState[]
   notifications: Notification[]
@@ -269,50 +268,6 @@ export class BaseProber implements Prober {
     log.info(logMessage)
   }
 
-  // Probes Thresholds processed, Send out notifications/alerts.
-  protected checkThresholdsAndSendAlert(
-    data: ProbeStatusProcessed,
-    requestLog: RequestLog
-  ): void {
-    const {
-      probe,
-      statuses,
-      notifications,
-      requestIndex,
-      validatedResponseStatuses,
-    } = data
-
-    const probeStatesWithValidAlert = this.getProbeStatesWithValidAlert(
-      statuses || []
-    )
-
-    for (const [index, probeState] of probeStatesWithValidAlert.entries()) {
-      const { alertQuery, state } = probeState
-
-      // send only notifications that we have messages for (if it was truncated)
-      if (index === validatedResponseStatuses.length) {
-        break
-      }
-
-      this.probeSendNotification({
-        index,
-        probe,
-        probeState,
-        notifications,
-        requestIndex,
-        validatedResponseStatuses,
-      }).catch((error: Error) => log.error(error.message))
-
-      requestLog.addNotifications(
-        (notifications ?? []).map((notification) => ({
-          notification,
-          type: state === 'DOWN' ? 'NOTIFY-INCIDENT' : 'NOTIFY-RECOVER',
-          alertQuery: alertQuery || '',
-        }))
-      )
-    }
-  }
-
   // TODO: make it protected/private
   getProbeStatesWithValidAlert(
     probeStates: ServerAlertState[]
@@ -327,7 +282,9 @@ export class BaseProber implements Prober {
     )
   }
 
-  private async probeSendNotification(data: ProbeSendNotification) {
+  protected async probeSendNotification(
+    data: ProbeSendNotification
+  ): Promise<void> {
     const eventEmitter = getEventEmitter()
 
     const {

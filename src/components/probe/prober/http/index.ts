@@ -29,7 +29,7 @@ import { getEventEmitter } from '../../../../utils/events'
 import { log } from '../../../../utils/pino'
 import { RequestLog } from '../../../logger'
 import { httpRequest } from './request'
-import { BaseProber } from '..'
+import { BaseProber, ProbeStatusProcessed } from '..'
 import {
   type ProbeRequestResponse,
   probeRequestResult,
@@ -317,5 +317,49 @@ export class HTTPProber extends BaseProber {
       isAlertTriggered: responseChecker(assertion, response),
       response,
     }))
+  }
+
+  // Probes Thresholds processed, Send out notifications/alerts.
+  private checkThresholdsAndSendAlert(
+    data: ProbeStatusProcessed,
+    requestLog: RequestLog
+  ): void {
+    const {
+      probe,
+      statuses,
+      notifications,
+      requestIndex,
+      validatedResponseStatuses,
+    } = data
+
+    const probeStatesWithValidAlert = this.getProbeStatesWithValidAlert(
+      statuses || []
+    )
+
+    for (const [index, probeState] of probeStatesWithValidAlert.entries()) {
+      const { alertQuery, state } = probeState
+
+      // send only notifications that we have messages for (if it was truncated)
+      if (index === validatedResponseStatuses.length) {
+        break
+      }
+
+      this.probeSendNotification({
+        index,
+        probe,
+        probeState,
+        notifications,
+        requestIndex,
+        validatedResponseStatuses,
+      }).catch((error: Error) => log.error(error.message))
+
+      requestLog.addNotifications(
+        (notifications ?? []).map((notification) => ({
+          notification,
+          type: state === 'DOWN' ? 'NOTIFY-INCIDENT' : 'NOTIFY-RECOVER',
+          alertQuery: alertQuery || '',
+        }))
+      )
+    }
   }
 }
