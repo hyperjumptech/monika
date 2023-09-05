@@ -37,10 +37,21 @@ import {
 import type { ProbeAlert } from '../../../../interfaces/probe'
 import type { ValidatedResponse } from '../../../../plugins/validate-response'
 import responseChecker from '../../../../plugins/validate-response/checkers'
+import type { ServerAlertState } from '../../../../interfaces/probe-status'
+import {
+  serverAlertStateInterpreters,
+  serverAlertStateMachine,
+} from '../../../notification/process-server-status'
+import { interpret } from 'xstate'
 
 const CONNECTION_RECOVERY_MESSAGE = 'Probe is accessible again'
 const CONNECTION_INCIDENT_MESSAGE = 'Probe not accessible'
 const isConnectionDown = new Map<string, boolean>()
+
+type ProcessThresholdsParams = {
+  requestIndex: number
+  validatedResponse: ValidatedResponse[]
+}
 
 export class HTTPProber extends BaseProber {
   async probe(): Promise<void> {
@@ -220,6 +231,71 @@ export class HTTPProber extends BaseProber {
     const alertsInString = JSON.stringify(this.probeConfig.alerts)
 
     return `    Alerts: ${hasAlert ? alertsInString : defaultAlertsInString}\n`
+  }
+
+  private processThresholds({
+    requestIndex,
+    validatedResponse,
+  }: ProcessThresholdsParams): ServerAlertState[] {
+    const { requests, incidentThreshold, recoveryThreshold, socket, name } =
+      this.probeConfig
+    const request = requests?.[requestIndex]
+
+    const id = `${this.probeConfig?.id}:${name}:${requestIndex}:${
+      request?.id || ''
+    }-${incidentThreshold}:${recoveryThreshold} ${
+      request?.url || (socket ? `${socket.host}:${socket.port}` : '')
+    }`
+
+    const results: Array<ServerAlertState> = []
+
+    if (!serverAlertStateInterpreters.has(id!)) {
+      const interpreters: Record<string, any> = {}
+
+      for (const alert of validatedResponse.map((r) => r.alert)) {
+        const stateMachine = serverAlertStateMachine.withContext({
+          incidentThreshold,
+          recoveryThreshold,
+          consecutiveFailures: 0,
+          consecutiveSuccesses: 0,
+          isFirstTimeSendEvent: true,
+        })
+
+        interpreters[alert.assertion] = interpret(stateMachine).start()
+      }
+
+      serverAlertStateInterpreters.set(id!, interpreters)
+    }
+
+    // Send event for successes and failures to state interpreter
+    // then get latest state for each alert
+    for (const validation of validatedResponse) {
+      const { alert, isAlertTriggered } = validation
+      const interpreter = serverAlertStateInterpreters.get(id!)![
+        alert.assertion
+      ]
+
+      const prevStateValue = interpreter.state.value
+
+      interpreter.send(isAlertTriggered ? 'FAILURE' : 'SUCCESS')
+
+      const stateValue = interpreter.state.value
+      const stateContext = interpreter.state.context
+
+      results.push({
+        isFirstTime: stateContext.isFirstTimeSendEvent,
+        alertQuery: alert.assertion,
+        state: stateValue as 'UP' | 'DOWN',
+        shouldSendNotification:
+          stateContext.isFirstTimeSendEvent ||
+          (stateValue === 'DOWN' && prevStateValue === 'UP') ||
+          (stateValue === 'UP' && prevStateValue === 'DOWN'),
+      })
+
+      interpreter.send('FIST_TIME_EVENT_SENT')
+    }
+
+    return results
   }
 
   private validateResponse(

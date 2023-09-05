@@ -23,7 +23,6 @@
  **********************************************************************************/
 
 import type { Notification } from '@hyperjumptech/monika-notification'
-import { interpret } from 'xstate'
 import { getContext, setContext } from '../../../context'
 import events from '../../../events'
 import type { Probe } from '../../../interfaces/probe'
@@ -34,10 +33,6 @@ import { log } from '../../../utils/pino'
 import { isSymonModeFrom } from '../../config'
 import { RequestLog } from '../../logger'
 import type { ServerAlertState } from '../../../interfaces/probe-status'
-import {
-  serverAlertStateInterpreters,
-  serverAlertStateMachine,
-} from '../../notification/process-server-status'
 import { logResponseTime } from '../../logger/response-time-log'
 import { sendAlerts } from '../../notification'
 import { saveNotificationLog, saveProbeRequestLog } from '../../logger/history'
@@ -46,11 +41,6 @@ export type ProbeResult = {
   isAlertTriggered: boolean
   logMessage: string
   requestResponse: ProbeRequestResponse
-}
-
-type ProcessThresholdsParams = {
-  requestIndex: number
-  validatedResponse: ValidatedResponse[]
 }
 
 type ProbeStatusProcessed = {
@@ -74,10 +64,6 @@ type SendNotificationParams = {
 export interface Prober {
   probe: () => Promise<void>
   generateVerboseStartupMessage: () => string
-  processThresholds: ({
-    requestIndex,
-    validatedResponse,
-  }: ProcessThresholdsParams) => ServerAlertState[]
   getProbeStatesWithValidAlert(
     probeStates: ServerAlertState[]
   ): ServerAlertState[]
@@ -106,72 +92,6 @@ export class BaseProber implements Prober {
 
   generateVerboseStartupMessage(): string {
     return ''
-  }
-
-  // TODO: make it protected/private
-  processThresholds({
-    requestIndex,
-    validatedResponse,
-  }: ProcessThresholdsParams): ServerAlertState[] {
-    const { requests, incidentThreshold, recoveryThreshold, socket, name } =
-      this.probeConfig
-    const request = requests?.[requestIndex]
-
-    const id = `${this.probeConfig?.id}:${name}:${requestIndex}:${
-      request?.id || ''
-    }-${incidentThreshold}:${recoveryThreshold} ${
-      request?.url || (socket ? `${socket.host}:${socket.port}` : '')
-    }`
-
-    const results: Array<ServerAlertState> = []
-
-    if (!serverAlertStateInterpreters.has(id!)) {
-      const interpreters: Record<string, any> = {}
-
-      for (const alert of validatedResponse.map((r) => r.alert)) {
-        const stateMachine = serverAlertStateMachine.withContext({
-          incidentThreshold,
-          recoveryThreshold,
-          consecutiveFailures: 0,
-          consecutiveSuccesses: 0,
-          isFirstTimeSendEvent: true,
-        })
-
-        interpreters[alert.assertion] = interpret(stateMachine).start()
-      }
-
-      serverAlertStateInterpreters.set(id!, interpreters)
-    }
-
-    // Send event for successes and failures to state interpreter
-    // then get latest state for each alert
-    for (const validation of validatedResponse) {
-      const { alert, isAlertTriggered } = validation
-      const interpreter = serverAlertStateInterpreters.get(id!)![
-        alert.assertion
-      ]
-
-      const prevStateValue = interpreter.state.value
-
-      interpreter.send(isAlertTriggered ? 'FAILURE' : 'SUCCESS')
-
-      const stateValue = interpreter.state.value
-      const stateContext = interpreter.state.context
-
-      results.push({
-        isFirstTime: stateContext.isFirstTimeSendEvent,
-        alertQuery: alert.assertion,
-        state: stateValue as 'UP' | 'DOWN',
-        shouldSendNotification:
-          stateContext.isFirstTimeSendEvent ||
-          (stateValue === 'DOWN' && prevStateValue === 'UP') ||
-          (stateValue === 'UP' && prevStateValue === 'DOWN'),
-      })
-
-      interpreter.send('FIST_TIME_EVENT_SENT')
-    }
-
-    return results
   }
 
   protected processProbeResults(probeResults: ProbeResult[]): void {
