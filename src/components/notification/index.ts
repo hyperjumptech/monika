@@ -22,7 +22,8 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { getContext, setContext } from '../../context'
+import { type Incident, getContext, setContext } from '../../context'
+import type { ProbeAlert } from '../../interfaces/probe'
 import { ValidatedResponse } from '../../plugins/validate-response'
 import getIp from '../../utils/ip'
 import { getMessageForAlert } from './alert-message'
@@ -55,7 +56,7 @@ export async function sendAlerts({
     response: validation.response,
   })
 
-  updateLastIncidentData(isRecovery, probeID, url)
+  updateLastIncidentData(isRecovery, probeID, url, validation.alert)
 
   return sendNotifications(notifications, message)
 }
@@ -63,7 +64,8 @@ export async function sendAlerts({
 function updateLastIncidentData(
   isRecovery: boolean,
   probeID: string,
-  url: string
+  url: string,
+  alert: ProbeAlert
 ) {
   const { incidents } = getContext()
 
@@ -79,7 +81,12 @@ function updateLastIncidentData(
   }
 
   // set incident date time to global context to be used later on recovery notification
-  const newIncident = { probeID, probeRequestURL: url, createdAt: new Date() }
+  const newIncident: Incident = {
+    probeID,
+    probeRequestURL: url,
+    alert,
+    createdAt: new Date(),
+  }
 
   setContext({ incidents: [...incidents, newIncident] })
 }
