@@ -71,7 +71,7 @@ export class HTTPProber extends BaseProber {
     )
     if (hasFailedRequest) {
       if (this.hasIncident()) {
-        printLogMessage(
+        this.printLogMessage(
           false,
           getErrorMessage(hasFailedRequest.errMessage || 'Unknown error.')
         )
@@ -96,7 +96,7 @@ export class HTTPProber extends BaseProber {
         const { alert } = triggeredAlertResponse
 
         if (this.hasIncident()) {
-          printLogMessage(false, getAssertionMessage(alert.assertion))
+          this.printLogMessage(false, getAssertionMessage(alert.assertion))
           throw new Error(alert.message)
         }
 
@@ -117,13 +117,13 @@ export class HTTPProber extends BaseProber {
         requestIndex,
         response,
       })
-      printLogMessage(
+
+      this.printLogMessage(
         true,
-        this.getProbeResultMessage({
+        getProbeResultMessage({
           request: requests[requestIndex],
           response,
-        }),
-        isRecovery ? getNotificationMessage({ isIncident: false }) : ''
+        })
       )
       logResponseTime(response.responseTime)
 
@@ -195,7 +195,7 @@ export class HTTPProber extends BaseProber {
       },
     })
 
-    printLogMessage(
+    this.printLogMessage(
       false,
       getErrorMessage(hasFailedRequest!.errMessage || 'Unknown error.'),
       getNotificationMessage({ isIncident: true })
@@ -220,6 +220,8 @@ export class HTTPProber extends BaseProber {
           response: responses[requestIndex],
         },
       }).catch((error) => log.error(error.mesage))
+
+      this.printLogMessage(true, getNotificationMessage({ isIncident: false }))
     }
 
     saveProbeRequestLog({
@@ -264,7 +266,7 @@ export class HTTPProber extends BaseProber {
       },
     })
 
-    printLogMessage(
+    this.printLogMessage(
       false,
       getAssertionMessage(triggeredAlert.assertion),
       getNotificationMessage({ isIncident: true })
@@ -311,41 +313,45 @@ export class HTTPProber extends BaseProber {
     }))
   }
 
-  private getProbeResultMessage({
-    request,
-    response,
-  }: ProbeResultMessageParams): string {
-    const { probeConfig, counter } = this
-
-    // TODO: make this more generic not probe dependent
-    if (request?.ping) {
-      return `${counter} id:${probeConfig.id} ${response?.body}`
+  private printLogMessage(isSuccess: boolean, ...message: string[]): void {
+    if (isSuccess) {
+      log.info(
+        `${this.getMessagePrefix()} ${message.filter(Boolean).join(', ')}`
+      )
+      return
     }
 
-    if (getContext().flags.verbose) {
-      return `${counter} id:${probeConfig.id} ${response?.status || '-'} ${
-        request?.method
-      } ${request?.url} ${response?.responseTime || '-'}ms
-      Request Headers: ${JSON.stringify(request?.headers) || '-'}
-      Request Body: ${JSON.stringify(request?.body) || '-'}
-      Response Body: ${JSON.stringify(response?.body) || '-'}`
-    }
+    log.warn(`${this.getMessagePrefix()} ${message.filter(Boolean).join(', ')}`)
+  }
 
-    return `${counter} id:${probeConfig.id} ${response?.status || '-'} ${
-      request?.method
-    } ${request?.url} ${response?.responseTime || '-'}ms`
+  private getMessagePrefix() {
+    return `${new Date().toISOString()} ${this.counter} id:${
+      this.probeConfig.id
+    }`
   }
 }
 
-function printLogMessage(isSuccess: boolean, ...message: string[]) {
-  if (isSuccess) {
-    log.info(
-      `${new Date().toISOString()} ${message.filter(Boolean).join(', ')}`
-    )
-    return
+function getProbeResultMessage({
+  request,
+  response,
+}: ProbeResultMessageParams): string {
+  // TODO: make this more generic not probe dependent
+  if (request?.ping) {
+    return response?.body
   }
 
-  log.warn(`${new Date().toISOString()} ${message.filter(Boolean).join(', ')}`)
+  if (getContext().flags.verbose) {
+    return `${response?.status || '-'} ${request?.method} ${request?.url} ${
+      response?.responseTime || '-'
+    }ms
+    Request Headers: ${JSON.stringify(request?.headers) || '-'}
+    Request Body: ${JSON.stringify(request?.body) || '-'}
+    Response Body: ${JSON.stringify(response?.body) || '-'}`
+  }
+
+  return `${response?.status || '-'} ${request?.method} ${request?.url} ${
+    response?.responseTime || '-'
+  }ms`
 }
 
 function getErrorMessage(message: string): string {

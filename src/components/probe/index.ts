@@ -68,11 +68,9 @@ export async function doProbe({
       probeConfig: probe,
     })
 
-    const retryPolicy = retry(handleAll, {
-      backoff: new ExponentialBackoff({ maxDelay: probe.interval }),
-    })
-
-    await retryPolicy.execute(() =>
+    await retry(handleAll, {
+      backoff: new ExponentialBackoff(),
+    }).execute(() =>
       Promise.all(
         probers.map(async (prober) => {
           await prober.probe()
