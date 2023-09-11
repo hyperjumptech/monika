@@ -72,7 +72,7 @@ export function sanitizeProbe(isSymonMode: boolean, probe: Probe): Probe {
   const isAlertsEmpty = alerts === undefined || alerts.length === 0
   if (!isSymonMode && isHTTPProbe && isAlertsEmpty) {
     log.warn(
-      `Warning: Probe ${id} has no Alerts configuration defined. Using the default response.status != 200 and response.time > 20000`
+      `Warning: Probe ${id} has no Alerts configuration defined. Using the default response.status != 200 and response.time > 2000`
     )
   }
 
