@@ -34,9 +34,10 @@ let localPouchDB: PouchDB.Database
  * live = true, means the replication is immediate when there is a put process
  * @returns <void>
  */
+/* eslint-disable camelcase */
 export async function openLogPouch(): Promise<void> {
   try {
-    localPouchDB = new PouchDB('symon')
+    localPouchDB = new PouchDB('symon', { auto_compaction: true })
 
     // to symon couchdb replication setting
     const { flags } = getContext()
@@ -45,7 +46,6 @@ export async function openLogPouch(): Promise<void> {
       .to(symonCouchDB, {
         live: true,
         retry: true,
-        // eslint-disable-next-line camelcase
         back_off_function: (delay: number) => (delay === 0 ? 1000 : delay * 3),
         filter: (doc: PouchDB.Core.ExistingDocument<any>) => {
           return doc._deleted !== true
