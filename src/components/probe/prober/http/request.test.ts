@@ -104,6 +104,8 @@ describe('probingHTTP', () => {
       for (const result of results) {
         expect(result.sentToken).to.be.equals(result.expectedToken)
       }
+
+      expect(server.listening).to.be.eq(false)
     })
 
     it('should submit correct form', async () => {
@@ -142,6 +144,7 @@ describe('probingHTTP', () => {
       })
       server.close()
       expect(result.status).to.be.equals(200)
+      expect(server.listening).to.be.eq(false)
     })
 
     it('should send request with multipart/form-data content-type', async () => {
@@ -180,6 +183,7 @@ describe('probingHTTP', () => {
 
       // assert
       expect(res.status).to.eq(200)
+      expect(server.listening).to.be.eq(false)
     })
 
     it('should send request with text-plain content-type', async () => {
@@ -216,6 +220,7 @@ describe('probingHTTP', () => {
 
       // assert
       expect(res.status).to.eq(200)
+      expect(server.listening).to.be.eq(false)
     })
 
     it('should send request with text/yaml content-type', async () => {
@@ -252,6 +257,7 @@ describe('probingHTTP', () => {
 
       // assert
       expect(res.status).to.eq(200)
+      expect(server.listening).to.be.eq(false)
     })
 
     it('should send request with application/xml content-type', async () => {
