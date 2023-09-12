@@ -156,10 +156,6 @@ export class BaseProber implements Prober {
     notificationType,
     validation,
   }: SendNotificationParams): Promise<void> {
-    if (!this.hasNotification()) {
-      return
-    }
-
     const isRecoveryNotification = notificationType === NotificationType.Recover
     getEventEmitter().emit(events.probe.notification.willSend, {
       probeID: this.probeConfig.id,
@@ -168,6 +164,10 @@ export class BaseProber implements Prober {
       probeState: isRecoveryNotification ? ProbeState.Up : ProbeState.Down,
       validation,
     })
+
+    if (!this.hasNotification()) {
+      return
+    }
 
     await sendAlerts({
       probeID: this.probeConfig.id,
