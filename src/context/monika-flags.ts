@@ -77,7 +77,7 @@ export const monikaFlagsDefaultValue: Pick<
   config: getDefaultConfig(),
   'config-filename': 'monika.yml',
   'config-interval': 900,
-  'follow-redirects': 1,
+  'follow-redirects': 21, // axios default https://github.com/axios/axios
   'max-start-delay': 1 * Number(minutes),
   // default is 20s interval lookup
   stun: 20,

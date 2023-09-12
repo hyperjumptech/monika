@@ -259,4 +259,25 @@ describe('processThresholds', () => {
     // should not send notification again since state does not change
     expect(result[0].shouldSendNotification).to.equals(false)
   })
+
+  it('should accept socket probe', () => {
+    // arrange
+    const probe = {
+      id: '_uwBu',
+      socket: {
+        host: 'localhost',
+        port: '5432',
+      },
+    } as unknown as Probe
+
+    // act
+    const result = processThresholds({
+      probe,
+      requestIndex: 1,
+      validatedResponse: failureResponse,
+    })
+
+    // assert
+    expect(result[0].state).eq('UP')
+  })
 })

@@ -1,5 +1,6 @@
 import * as mongodbURI from 'mongodb-uri'
 import { BaseProber, type ProbeResult } from '..'
+import { probeRequestResult } from '../../../../interfaces/request'
 import type { Mongo } from '../../../../interfaces/probe'
 import { mongoRequest } from './request'
 
@@ -18,6 +19,40 @@ export class MongoProber extends BaseProber {
     })
 
     this.processProbeResults(result)
+  }
+
+  generateVerboseStartupMessage(): string {
+    const { description, id, interval, name } = this.probeConfig
+
+    let result = `- Probe ID: ${id}
+  Name: ${name}
+  Description: ${description || '-'}
+  Interval: ${interval}
+`
+    result += '  Connection Details:'
+    result += this.getConnectionDetails()
+
+    return result
+  }
+
+  private getConnectionDetails(): string {
+    return (
+      this.probeConfig.mongo
+        ?.map((db) => {
+          if (db.uri) {
+            return `
+    URI: ${db.uri}
+`
+          }
+
+          return `
+    Host: ${db.host}
+    Port: ${db.port}
+    Username: ${db.username}
+`
+        })
+        .join('\n') || ''
+    )
   }
 }
 
@@ -44,8 +79,8 @@ export async function probeMongo({
       username,
       password,
     })
-    const { body, responseTime, status } = requestResponse
-    const isAlertTriggered = status !== 200
+    const { body, responseTime, result } = requestResponse
+    const isAlertTriggered = result !== probeRequestResult.success
     const timeNow = new Date().toISOString()
     const logMessage = `${timeNow} ${checkOrder} id:${id} mongo:${host}:${port} ${responseTime}ms msg:${body}`
 

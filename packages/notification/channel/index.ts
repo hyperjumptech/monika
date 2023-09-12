@@ -94,7 +94,7 @@ type NotificationChannel<T = any> = {
   send: (notificationData: T, message: NotificationMessage) => Promise<void>
   sendWithCustomContent?: (
     notificationData: T,
-    customContent: teams.Content // TODO: add other Content type from other channel
+    customContent: T
   ) => Promise<void>
   additionalStartupMessage?: (notificationData: T) => string
 }

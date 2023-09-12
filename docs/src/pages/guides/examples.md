@@ -5,7 +5,7 @@ title: Examples
 
 ## Minimal Configuration
 
-Here is a probe example with GET request to hit github.com:
+At minimum, you only need to specify the `url` you want to monitor. For example to monitor `github.com`:
 
 ```yaml
 probes:
@@ -17,7 +17,7 @@ If you didn't define the http method, it will use the GET method by default. Ple
 
 ## Enabling Notification
 
-Here is a probe example to monitor Monika landing page:
+Probes are more useful with notifications enabled to alert when something is amiss. The following is an example configuration to get notification via e-mail when an incident occurs:
 
 ```yaml
 notifications:
@@ -51,7 +51,7 @@ Using the above configuration, Monika will check the landing page every 10 secon
 
 ## HTML Form Submission Example
 
-Here is probe example with POST request to simulate HTML form submission
+You can also send POST requests using Monika. The following is an example of sending a POST request to simulate HTML form submission.
 
 ```yaml
 probes:
@@ -61,7 +61,7 @@ probes:
     interval: 10 # in seconds
     requests:
       - method: POST
-        url: http://www.foo.com/login.php
+        url: http://www.example.com/login.php
         timeout: 7000 # in milliseconds
         headers:
           Content-Type: application/x-www-form-urlencoded
@@ -70,11 +70,11 @@ probes:
           password: somepassword
 ```
 
-Using the configuration above, Monika will send a POST request to `http://www.foo.com/login.php` with the defined request's body.
+Using the configuration above, Monika will send a POST request to `http://www.example.com/login.php` with the defined request's body.
 
-## Multiple request
+## Multiple requests
 
-Here is an example configuration with multiple requests:
+Monika supports sending multiple requests **one after another** in a single probe. Below is one such configuration:
 
 ```yaml
 probes:
@@ -267,3 +267,43 @@ notifications:
 ```
 
 Note: Please do not forget the single quotes before and after the opening and closing double braces to explicitly indicate a string value. YAML parsers will generate warnings without it.
+
+### Errors in Request Chaining
+
+In a request chaining mode, if one request fails, Monika **does not** continue with the next request in the probe. The reasoning is that, if an earlier request, say a GET /token fails, it would be pointless to continue and fetch /userdata.
+
+If you want to continue the next request even when the first one fails, we recommend putting your requests in multiple probes, something like this:
+
+```yaml
+probes:
+  - id: get-user
+    name: 'get-user'
+    description: login and check user app data
+    interval: 30
+    requests:
+      - url: https://example.com/token
+        body: {user: 'xxxx', password: 'yyyy'}
+        method: POST
+      - url: https://example.com/userdata
+        method: GET
+        headers:
+          Authorization: Bearer {{ responses.[0].body.accessToken }}
+
+  - id: get-mail
+    name: 'get-mail'
+    description: fetching user emails
+    interval: 30
+    requests:
+      - url: https://example.com/token
+        body: {user: 'xxxx', password: 'yyyy'}
+        method: POST
+        timeout: 10000
+        method: POST
+      - url: https://example.com/usermail
+        method: GET
+        headers:
+          Authorization: Bearer {{ responses.[0].body.accessToken }}
+
+```
+
+In the example above, the get-email will run even if get-user has failed.

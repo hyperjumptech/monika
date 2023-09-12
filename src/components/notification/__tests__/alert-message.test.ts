@@ -22,10 +22,11 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { expect } from 'chai'
+import { expect } from '@oclif/test'
 import { format, subDays } from 'date-fns'
 import { resetContext, setContext } from '../../../context'
 import { getMessageForAlert } from '../alert-message'
+import { probeRequestResult } from '../../../interfaces/request'
 
 afterEach(() => {
   resetContext()
@@ -43,7 +44,7 @@ describe('Alert message', () => {
       const alertMessage = await getMessageForAlert({
         probeID: 'f76fef86-7331-4bfd-a7e9-f4ba105127ac',
         url: '',
-        alert: { assertion: '' },
+        alert: { assertion: '', message: '' },
         ipAddress: '',
         isRecovery: false,
         response: {
@@ -52,6 +53,7 @@ describe('Alert message', () => {
           status: 404,
           headers: '',
           responseTime: 1000,
+          result: probeRequestResult.success,
           isProbeResponsive: true,
         },
       })
@@ -72,7 +74,7 @@ describe('Alert message', () => {
       const alertMessage = await getMessageForAlert({
         probeID: 'f76fef86-7331-4bfd-a7e9-f4ba105127ac',
         url: '',
-        alert: { assertion: '' },
+        alert: { assertion: '', message: '' },
         ipAddress: '',
         isRecovery: false,
         response: {
@@ -81,6 +83,7 @@ describe('Alert message', () => {
           status: 404,
           headers: '',
           responseTime: 1000,
+          result: probeRequestResult.success,
           isProbeResponsive: true,
         },
       })
@@ -108,7 +111,7 @@ describe('Alert message', () => {
       const alertMessage = await getMessageForAlert({
         probeID: 'f76fef86-7331-4bfd-a7e9-f4ba105127ac',
         url: '',
-        alert: { assertion: '' },
+        alert: { assertion: '', message: '' },
         ipAddress: '',
         isRecovery: true,
         response: {
@@ -117,6 +120,7 @@ describe('Alert message', () => {
           status: 404,
           headers: '',
           responseTime: 1000,
+          result: probeRequestResult.success,
           isProbeResponsive: true,
         },
       })
@@ -159,7 +163,7 @@ describe('Alert message', () => {
       const alertMessage = await getMessageForAlert({
         probeID: 'f76fef86-7331-4bfd-a7e9-f4ba105127aa',
         url: '',
-        alert: { assertion: '' },
+        alert: { assertion: '', message: '' },
         ipAddress: '',
         isRecovery: true,
         response: {
@@ -168,6 +172,7 @@ describe('Alert message', () => {
           status: 404,
           headers: '',
           responseTime: 1000,
+          result: probeRequestResult.success,
           isProbeResponsive: true,
         },
       })

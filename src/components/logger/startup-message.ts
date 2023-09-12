@@ -30,10 +30,10 @@ import type { MonikaFlags } from '../../context/monika-flags'
 import type { Config } from '../../interfaces/config'
 import type { Notification } from '@hyperjumptech/monika-notification'
 import { channels } from '@hyperjumptech/monika-notification'
-import type { Probe, ProbeAlert } from '../../interfaces/probe'
-import type { RequestConfig } from '../../interfaces/request'
+import type { Probe } from '../../interfaces/probe'
 import { log } from '../../utils/pino'
 import { isSymonModeFrom } from '../config'
+import { createProber } from '../probe/prober/factory'
 
 type LogStartupMessage = {
   config: Config
@@ -135,44 +135,16 @@ function generateProbeMessage(probes: Probe[]): string {
   let startupMessage = 'Probes:\n'
 
   for (const probe of probes) {
-    const { alerts, description, id, interval, name, requests } = probe
+    const prober = createProber({
+      probeConfig: probe,
+      counter: 0,
+      notifications: [],
+    })
 
-    startupMessage += `- Probe ID: ${id}
-Name: ${name}
-Description: ${description || '-'}
-Interval: ${interval}
-`
-    startupMessage += `    Requests:\n`
-    startupMessage += generateProbeRequestMessage(requests)
-    startupMessage += generateAlertMessage(alerts)
+    startupMessage += prober.generateVerboseStartupMessage()
   }
 
   return startupMessage
-}
-
-function generateProbeRequestMessage(requests: RequestConfig[]): string {
-  let startupMessage = ''
-
-  for (const request of requests) {
-    const { body, headers, method, url } = request
-
-    startupMessage += `      - Request Method: ${method || `GET`}
-  Request URL: ${url}
-  Request Headers: ${JSON.stringify(headers) || `-`}
-  Request Body: ${JSON.stringify(body) || `-`}
-`
-  }
-
-  return startupMessage
-}
-
-function generateAlertMessage(alerts: ProbeAlert[]): string {
-  const hasAlert = alerts.length > 0
-  const defaultAlertsInString =
-    '[{ "assertion": "response.status < 200 or response.status > 299", "message": "HTTP Status is not 200"}, { "assertion": "response.time > 2000", "message": "Response time is more than 2000ms" }]'
-  const alertsInString = JSON.stringify(alerts)
-
-  return `    Alerts: ${hasAlert ? alertsInString : defaultAlertsInString}\n`
 }
 
 function generateNotificationMessage(notifications: Notification[]): string {

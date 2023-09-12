@@ -39,7 +39,6 @@ import {
 } from '../../utils/probe-state'
 import { RequestLog } from '../logger'
 import { sendAlerts } from '../notification'
-import { probeHTTP } from './prober'
 import { createProbers } from './prober/factory'
 
 interface ProbeStatusProcessed {
@@ -112,6 +111,11 @@ export function checkThresholdsAndSendAlert(
   for (const [index, probeState] of probeStatesWithValidAlert.entries()) {
     const { alertQuery, state } = probeState
 
+    // send only notifications that we have messages for (if it was truncated)
+    if (index === validatedResponseStatuses.length) {
+      break
+    }
+
     probeSendNotification({
       index,
       probe,
@@ -171,8 +175,17 @@ export async function doProbe({
       return
     }
 
-    await probeNonHTTP(probe, probeCtx.cycle, notifications)
-    await probeHTTP(probe, probeCtx.cycle, notifications)
+    const probers = createProbers({
+      counter: probeCtx.cycle,
+      notifications,
+      probeConfig: probe,
+    })
+
+    await Promise.all(
+      probers.map(async (prober) => {
+        await prober.probe()
+      })
+    )
 
     setProbeFinish(probe.id)
   }, getRandomTimeoutMilliseconds())
@@ -206,22 +219,4 @@ function getRandomTimeoutMilliseconds(): number {
   return [1000, 2000, 3000].sort(() => {
     return Math.random() - 0.5
   })[0]
-}
-
-async function probeNonHTTP(
-  probe: Probe,
-  checkOrder: number,
-  notifications: Notification[]
-) {
-  const probers = createProbers({
-    counter: checkOrder,
-    notifications,
-    probeConfig: probe,
-  })
-
-  await Promise.all(
-    probers.map(async (prober) => {
-      await prober.probe()
-    })
-  )
 }

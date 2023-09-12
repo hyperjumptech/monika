@@ -22,36 +22,71 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import { HTTPProber } from './http'
 import { MongoProber } from './mongo'
 import { MariaDBProber } from './mariadb'
 import { PostgresProber } from './postgres'
 import { RedisProber } from './redis'
 import { SocketProber } from './socket'
-import type { Prober, ProberMetadata } from '.'
+import { BaseProber, type Prober, type ProberMetadata } from '.'
 
 export function createProbers(probeMetadata: ProberMetadata): Prober[] {
   const { probeConfig } = probeMetadata
   const result: Prober[] = []
 
+  if (probeConfig?.requests) {
+    result.push(createProber(probeMetadata))
+  }
+
   if (probeConfig?.mongo) {
-    result.push(new MongoProber(probeMetadata))
+    result.push(createProber(probeMetadata))
   }
 
   if (probeConfig?.mariadb || probeConfig?.mysql) {
-    result.push(new MariaDBProber(probeMetadata))
+    result.push(createProber(probeMetadata))
   }
 
   if (probeConfig?.postgres) {
-    result.push(new PostgresProber(probeMetadata))
+    result.push(createProber(probeMetadata))
   }
 
   if (probeConfig?.redis) {
-    result.push(new RedisProber(probeMetadata))
+    result.push(createProber(probeMetadata))
   }
 
   if (probeConfig?.socket) {
-    result.push(new SocketProber(probeMetadata))
+    result.push(createProber(probeMetadata))
   }
 
   return result
+}
+
+export function createProber(probeMetadata: ProberMetadata): Prober {
+  const { probeConfig } = probeMetadata
+
+  if (probeConfig?.requests) {
+    return new HTTPProber(probeMetadata)
+  }
+
+  if (probeConfig?.mariadb || probeConfig?.mysql) {
+    return new MariaDBProber(probeMetadata)
+  }
+
+  if (probeConfig?.mongo) {
+    return new MongoProber(probeMetadata)
+  }
+
+  if (probeConfig?.postgres) {
+    return new PostgresProber(probeMetadata)
+  }
+
+  if (probeConfig?.redis) {
+    return new RedisProber(probeMetadata)
+  }
+
+  if (probeConfig?.socket) {
+    return new SocketProber(probeMetadata)
+  }
+
+  return new BaseProber(probeMetadata)
 }

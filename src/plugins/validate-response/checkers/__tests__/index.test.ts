@@ -22,9 +22,10 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { expect } from 'chai'
+import { expect } from '@oclif/test'
 import responseChecker from '..'
-import { ProbeRequestResponse } from '../../../../interfaces/request'
+import type { ProbeRequestResponse } from '../../../../interfaces/request'
+import type { ProbeAlert } from '../../../../interfaces/probe'
 
 describe('responseChecker', () => {
   describe('status-not-2xx', () => {
@@ -135,6 +136,22 @@ describe('responseChecker', () => {
       )
 
       expect(data).to.equals(true)
+    })
+
+    it('should handle query field', () => {
+      const res = generateMockedResponse({
+        status: 200,
+        isProbeResponsive: true,
+      })
+      const data = responseChecker(
+        {
+          query: 'response.status < 200 or response.status > 299',
+          message: '',
+        } as ProbeAlert,
+        res
+      )
+
+      expect(data).to.equals(false)
     })
   })
 

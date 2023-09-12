@@ -22,9 +22,12 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { expect } from 'chai'
+import { expect } from '@oclif/test'
 import validateResponse from '..'
-import { ProbeRequestResponse } from '../../../interfaces/request'
+import {
+  type ProbeRequestResponse,
+  probeRequestResult,
+} from '../../../interfaces/request'
 
 describe('validateResponse', () => {
   const mockedAlerts = [
@@ -52,6 +55,7 @@ describe('validateResponse', () => {
           responseTime: 20,
           headers: {},
           status: 300,
+          result: 1,
           isProbeResponsive: true,
         },
       },
@@ -66,6 +70,7 @@ describe('validateResponse', () => {
           responseTime: 20,
           headers: {},
           status: 300,
+          result: 1,
           isProbeResponsive: true,
         },
         isAlertTriggered: true,
@@ -89,6 +94,7 @@ describe('validateResponse', () => {
           responseTime: 20,
           headers: {},
           status: 200,
+          result: 1,
           isProbeResponsive: true,
         },
         isAlertTriggered: false,
@@ -104,6 +110,7 @@ describe('validateResponse', () => {
           responseTime: 20,
           headers: {},
           status: 200,
+          result: 1,
           isProbeResponsive: true,
         },
         isAlertTriggered: true,
@@ -127,6 +134,7 @@ describe('validateResponse', () => {
           responseTime: 10,
           headers: {},
           status: 300,
+          result: 1,
           isProbeResponsive: true,
         },
         isAlertTriggered: true,
@@ -142,6 +150,7 @@ describe('validateResponse', () => {
           responseTime: 10,
           headers: {},
           status: 300,
+          result: 1,
           isProbeResponsive: true,
         },
         isAlertTriggered: false,
@@ -165,6 +174,7 @@ describe('validateResponse', () => {
           responseTime: 10,
           headers: {},
           status: 200,
+          result: 1,
           isProbeResponsive: true,
         },
         isAlertTriggered: false,
@@ -180,6 +190,7 @@ describe('validateResponse', () => {
           responseTime: 10,
           headers: {},
           status: 200,
+          result: 1,
           isProbeResponsive: true,
         },
         isAlertTriggered: false,
@@ -199,6 +210,9 @@ function generateMockedResponse(
     status,
     responseTime,
     headers: {},
+    result: isProbeResponsive
+      ? probeRequestResult.success
+      : probeRequestResult.failed,
     isProbeResponsive,
   }
 }

@@ -67,10 +67,12 @@ const getExpectedMessage = (
 ): string | number => {
   const { status, data, headers, responseTime } = response
 
-  if (!alert.message) {
-    if (isRecovery)
-      return `The request is back to normal and passed the assertion: ${alert.query}`
-    return `The request failed because the response did not pass the query: ${alert.query}. The actual response status is ${status} and the response time is ${responseTime}.`
+  if (alert.message === '') {
+    if (isRecovery) {
+      return `The request is back to normal and passed the assertion: ${alert.assertion}`
+    }
+
+    return `The request failed because the response did not pass the query: ${alert.assertion}. The actual response status is ${status} and the response time is ${responseTime}.`
   }
 
   return Handlebars.compile(alert.message)({

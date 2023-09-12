@@ -40,9 +40,15 @@ import { afterEach, beforeEach } from 'mocha'
 import { getContext, resetContext, setContext } from '../../context'
 
 let urlRequestTotal = 0
+let notificationAlert: Record<string, any> = {}
 const server = setupServer(
   rest.get('https://example.com', (_, res, ctx) => {
     urlRequestTotal += 1
+    return res(ctx.status(200))
+  }),
+  rest.post('https://example.com/webhook', (req, res, ctx) => {
+    notificationAlert = req.body as Record<string, string>
+
     return res(ctx.status(200))
   })
 )
@@ -67,6 +73,7 @@ const probes: Probe[] = [
 beforeEach(() => server.listen())
 afterEach(() => {
   urlRequestTotal = 0
+  notificationAlert = {}
   server.close()
 })
 
@@ -213,6 +220,92 @@ describe('Probe processing', () => {
       // assert
       expect(urlRequestTotal).eq(5)
     })
+
+    it('should send incident notification', async () => {
+      // arrange
+      const probe = {
+        ...probes[0],
+        id: '2md9o',
+        alerts: [
+          {
+            assertion: 'response.status == 200',
+            message: 'The request failed.',
+          },
+        ],
+      }
+      initializeProbeStates([probe])
+      // wait until the interval passed
+      const seconds = 1000
+      await sleep(seconds)
+
+      // act
+      await doProbe({
+        probe,
+        notifications: [
+          {
+            id: 'jFQBd',
+            data: { url: 'https://example.com/webhook' },
+            type: 'webhook',
+          },
+        ],
+      })
+      // wait for random timeout
+      await sleep(3 * seconds)
+      // wait for send notification function to resolve
+      await sleep(2 * seconds)
+
+      // assert
+      expect(notificationAlert.body.url).eq('https://example.com')
+      expect(notificationAlert.body.alert).eq('response.status == 200')
+    }).timeout(10_000)
+
+    it('should send recovery notification', async () => {
+      // arrange
+      server.use(
+        rest.get('https://example.com', (_, res, ctx) => {
+          urlRequestTotal += 1
+          return res(ctx.status(404))
+        })
+      )
+      const probe = {
+        ...probes[0],
+        id: 'fj43l',
+        requests: [{ url: 'https://example.com', body: '', timeout: 30 }],
+        alerts: [{ assertion: 'response.status != 200', message: '' }],
+      }
+      const notifications = [
+        {
+          id: 'jFQBd',
+          data: { url: 'https://example.com/webhook' },
+          type: 'webhook',
+        },
+      ]
+      initializeProbeStates([probe])
+      // wait until the interval passed
+      const seconds = 1000
+      await sleep(seconds)
+
+      // act
+      await doProbe({
+        probe,
+        notifications,
+      })
+      // wait for random timeout
+      await sleep(3 * seconds)
+      server.resetHandlers()
+      await doProbe({
+        probe,
+        notifications,
+      })
+      // wait for random timeout
+      await sleep(3 * seconds)
+      // wait for send notification function to resolve
+      await sleep(2 * seconds)
+
+      // assert
+      expect(notificationAlert.body.url).eq('https://example.com')
+      expect(notificationAlert.body.alert).eq('response.status != 200')
+    }).timeout(10_000)
   })
 
   describe('Non HTTP Probe', () => {

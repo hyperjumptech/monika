@@ -277,7 +277,7 @@ monika --max-start-delay 300000 # this will set max-start-delay to 5 minutes.
 
 ## Follow Redirects
 
-By default Monika will follow redirects once. You can set the value of `--follow-redirects` flag to tell Monika to follow redirects as many as you want. If you don't want to follow redirects, set the value to zero.
+By default Monika will follow redirects 21 times. You can set the value of `--follow-redirects` flag to tell Monika to follow redirects as many as you want. If you don't want to follow redirects, set the value to zero.
 
 ```bash
 monika --follow-redirects 0 # disable following redirects

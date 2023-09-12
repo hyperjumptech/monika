@@ -15,33 +15,9 @@ on:
 permissions:
   issues: read
   pull-requests: read
-  
+
 jobs:
   build:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - node-version: 16.x
-            targets: node16
-    steps:
-      - uses: actions/checkout@v3
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-      - run: npm ci
-      - run: npm run build -w packages/notification
-      - run: npm test && npx codecov
-      - run: npm pack
-      - run: npm install -g ./hyperjumptech-monika-*.tgz
-      - run: npm run prod_test
-      - run: npm run pkg -- -t ${{ matrix.targets }}-linux-x64
-        name: Pack the binary using vercel/pkg
-      - run: ./dist/monika -v
-        name: Test if printing the version is not error
-
-  build-on-node-js-18:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -51,13 +27,11 @@ jobs:
           node-version: 18.x
       - run: npm ci
       - run: npm run build -w packages/notification
-      - run: NODE_OPTIONS='--no-experimental-fetch' npm test && npx codecov
+      - run: npm test && npx codecov
       - run: npm pack
       - run: npm install -g ./hyperjumptech-monika-*.tgz
       - run: npm run prod_test
-      - run: |
-          echo "No node18 target supported yet, using node16..."
-          npm run pkg -- -t node16-linux-x64
+      - run: npm run pkg -- -t node18-linux-x64
         name: Pack the binary using vercel/pkg
       - run: ./dist/monika -v
         name: Test if printing the version is not error

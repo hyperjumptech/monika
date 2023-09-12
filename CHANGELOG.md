@@ -5,6 +5,59 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.15.8 2023-09-05
+
+## Fixed
+
+- Monika Install (#1116)
+
+## 1.15.7 2023-09-04
+
+## Fixed
+
+- Remove change empty array fallback for requests (#1113)
+- Mailgun notification handle node 18 (#1105)
+
+## Changed
+
+- Make the Probe Result a Mandatory Type (#1111)
+- Remove node_options environment variable when running test (#1112)
+- Adding sendWithCustomContent in sendgrid (#1109)
+
+## 1.15.6 2023-08-28
+
+## Fixed
+
+- Undefined Notification Message (#1103)
+- Webhook Notification is Not Working (#1102)
+- Make Probe Requests Property Optional (#1096)
+
+## Changed
+
+- Make HTTP Prober a Subclass (#1107)
+- Test the Packages Directory (#1106)
+- Update chaining request docs (#1101)
+- Improve Disconnect Notification (#1095)
+- Add simple success/fail result to each probe and new prometheus metric (#1061)
+
+## 1.15.5 2023-08-14
+
+## Fixed
+
+- Fix permision for docs deployment (#1085)
+- Fixed: Broken Docker Release Pipeline (#1086)
+- Fix binary upload workflow (#1087)
+- Fixed: Broken Publish Snapcraft Pipeline (#1088)
+- Fixed: Empty Request Info for Non HTTP Probe (#1091)
+- Fix doc build workflow (#1097)
+- Fix default maxRedirect too shallow (#1070)
+- Fix: Prevent Non-HTTP Probe to Create Prometheus Metrics (#1093)
+
+## Changed
+
+- Refactor: Add Base Class for Non HTTP Prober (#0174)
+- Chore: Upgrade Node.js Version to 18 (#986)
+
 ## [1.15.4] - 2023-07-24
 
 ## Added
