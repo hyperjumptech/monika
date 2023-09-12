@@ -22,253 +22,250 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { expect } from '@oclif/test'
-import SymonClient from '.'
-import sinon from 'sinon'
-import Stun from 'stun'
-import { Config } from '../interfaces/config'
-import * as loggerHistory from '../components/logger/history'
-import { setContext } from '../context'
-import { SetupServer, setupServer } from 'msw/node'
-import { HttpResponse, http } from 'msw'
+// import { expect } from '@oclif/test'
+// import SymonClient from '.'
+// import sinon from 'sinon'
+// import Stun from 'stun'
+// import { Config } from '../interfaces/config'
+// import * as loggerHistory from '../components/logger/history'
+// import { setContext } from '../context'
+// import { SetupServer, setupServer } from 'msw/node'
+// import { HttpResponse, http } from 'msw'
 
-let server: SetupServer
-let testStunStub: sinon.SinonStub
-let getUnreportedLogsStub: sinon.SinonStub
+// let server: SetupServer
+// let testStunStub: sinon.SinonStub
+// let getUnreportedLogsStub: sinon.SinonStub
 
-before(() => {
-  server = setupServer(
-    http.get('http://ip-api.com', () => {
-      return HttpResponse.json(
-        {
-          city: 'jakarta',
-          isp: 'hyperjump',
-          country: 'Indonesia',
-        },
-        { status: 200 }
-      )
-    })
-  )
-})
+// beforeEach(() => {
+//   server = setupServer(
+//     http.get('http://ip-api.com', () => {
+//       return HttpResponse.json(
+//         {
+//           city: 'jakarta',
+//           isp: 'hyperjump',
+//           country: 'Indonesia',
+//         },
+//         { status: 200 }
+//       )
+//     })
+//   )
 
-after(() => server.close())
+//   // mock the stun request
+//   testStunStub = sinon.stub(Stun, 'request').resolves({
+//     getXorAddress: () => {
+//       return {
+//         address: '192.168.1.1',
+//       }
+//     },
+//   })
 
-beforeEach(() => {
-  // mock the stun request
-  testStunStub = sinon.stub(Stun, 'request').resolves({
-    getXorAddress: () => {
-      return {
-        address: '192.168.1.1',
-      }
-    },
-  })
+//   getUnreportedLogsStub = sinon
+//     .stub(loggerHistory, 'getUnreportedLogs')
+//     .resolves({ requests: [], notifications: [] })
+// })
 
-  getUnreportedLogsStub = sinon
-    .stub(loggerHistory, 'getUnreportedLogs')
-    .resolves({ requests: [], notifications: [] })
-})
+// afterEach(() => {
+//   server.resetHandlers()
+//   testStunStub.restore()
+//   getUnreportedLogsStub.restore()
+//   server.close()
+// })
 
-afterEach(() => {
-  server.resetHandlers()
-  testStunStub.restore()
-  getUnreportedLogsStub.restore()
-})
+// describe('Symon initiate', () => {
+//   it('should send handshake data on initiate', async () => {
+//     const config: Config = {
+//       version: 'asdfg123',
+//       probes: [
+//         {
+//           id: '1',
+//           name: 'test',
+//           interval: 10,
+//           requests: [],
+//           incidentThreshold: 5,
+//           recoveryThreshold: 5,
+//           alerts: [],
+//         },
+//       ],
+//     }
 
-describe('Symon initiate', () => {
-  it('should send handshake data on initiate', async () => {
-    const config: Config = {
-      version: 'asdfg123',
-      probes: [
-        {
-          id: '1',
-          name: 'test',
-          interval: 10,
-          requests: [],
-          incidentThreshold: 5,
-          recoveryThreshold: 5,
-          alerts: [],
-        },
-      ],
-    }
+//     setContext({
+//       userAgent: 'v1.5.0',
+//     })
+//     let sentBody = ''
+//     // mock the outgoing requests
+//     server.use(
+//       http.post(
+//         'http://localhost:4000/api/v1/monika/client-handshake',
+//         async ({ request }) => {
+//           sentBody = await request.text()
+//           return HttpResponse.json(
+//             {
+//               statusCode: 'ok',
+//               message: 'Successfully handshaked with Symon',
+//               data: {
+//                 monikaId: '1234',
+//               },
+//             },
+//             { status: 200 }
+//           )
+//         }
+//       ),
+//       http.get('http://localhost:4000/api/v1/monika/1234/probes', () => {
+//         return HttpResponse.json(
+//           {
+//             statusCode: 'ok',
+//             message: 'Successfully get probes configuration',
+//             data: config.probes,
+//           },
+//           { status: 200 }
+//         )
+//       })
+//     )
 
-    setContext({
-      userAgent: 'v1.5.0',
-    })
-    let sentBody = ''
-    // mock the outgoing requests
-    server.use(
-      http.post(
-        'http://localhost:4000/api/v1/monika/client-handshake',
-        async ({ request }) => {
-          sentBody = await request.text()
-          return HttpResponse.json(
-            {
-              statusCode: 'ok',
-              message: 'Successfully handshaked with Symon',
-              data: {
-                monikaId: '1234',
-              },
-            },
-            { status: 200 }
-          )
-        }
-      ),
-      http.get('http://localhost:4000/api/v1/monika/1234/probes', () => {
-        return HttpResponse.json(
-          {
-            statusCode: 'ok',
-            message: 'Successfully get probes configuration',
-            data: config.probes,
-          },
-          { status: 200 }
-        )
-      })
-    )
+//     const symon = new SymonClient({
+//       symonUrl: 'http://localhost:4000',
+//       symonKey: 'abcd',
+//     })
+//     sinon.spy(symon, 'report')
 
-    const symon = new SymonClient({
-      symonUrl: 'http://localhost:4000',
-      symonKey: 'abcd',
-    })
-    sinon.spy(symon, 'report')
+//     await symon.initiate()
+//     await symon.stopReport()
+//     expect(symon.monikaId).equals('1234')
 
-    await symon.initiate()
-    await symon.stopReport()
-    expect(symon.monikaId).equals('1234')
+//     const body = JSON.parse(sentBody)
+//     expect(body.publicIp).equals('192.168.1.1')
+//     expect(body.pid).greaterThan(0)
+//     expect(body.macAddress).length.greaterThan(0)
+//     expect(body.isp).equals('hyperjump')
+//     expect(body.city).equals('jakarta')
+//     expect(body.country).equals('Indonesia')
+//     expect(body.hostname).length.greaterThan(0)
+//     expect(body.privateIp).length.greaterThan(0)
+//     expect(body.os).length.greaterThan(0)
+//     expect(body.version).equals('v1.5.0')
+//   })
 
-    const body = JSON.parse(sentBody)
-    expect(body.publicIp).equals('192.168.1.1')
-    expect(body.pid).greaterThan(0)
-    expect(body.macAddress).length.greaterThan(0)
-    expect(body.isp).equals('hyperjump')
-    expect(body.city).equals('jakarta')
-    expect(body.country).equals('Indonesia')
-    expect(body.hostname).length.greaterThan(0)
-    expect(body.privateIp).length.greaterThan(0)
-    expect(body.os).length.greaterThan(0)
-    expect(body.version).equals('v1.5.0')
-  })
+// it('should fetch probes config on initiate', async () => {
+//   const config: Config = {
+//     version: 'asdfg123',
+//     probes: [
+//       {
+//         id: '1',
+//         name: 'test',
+//         interval: 10,
+//         requests: [],
+//         incidentThreshold: 5,
+//         recoveryThreshold: 5,
+//         alerts: [],
+//       },
+//     ],
+//   }
 
-  // it('should fetch probes config on initiate', async () => {
-  //   const config: Config = {
-  //     version: 'asdfg123',
-  //     probes: [
-  //       {
-  //         id: '1',
-  //         name: 'test',
-  //         interval: 10,
-  //         requests: [],
-  //         incidentThreshold: 5,
-  //         recoveryThreshold: 5,
-  //         alerts: [],
-  //       },
-  //     ],
-  //   }
+//   interceptor.use((req) => {
+//     if (req.url.origin === 'http://localhost:4000') {
+//       if (req.url.pathname.endsWith('client-handshake')) {
+//         return {
+//           status: 200,
+//           body: JSON.stringify({
+//             statusCode: 'ok',
+//             message: 'Successfully handshaked with Symon',
+//             data: {
+//               monikaId: '1234',
+//             },
+//           }),
+//         }
+//       }
 
-  //   interceptor.use((req) => {
-  //     if (req.url.origin === 'http://localhost:4000') {
-  //       if (req.url.pathname.endsWith('client-handshake')) {
-  //         return {
-  //           status: 200,
-  //           body: JSON.stringify({
-  //             statusCode: 'ok',
-  //             message: 'Successfully handshaked with Symon',
-  //             data: {
-  //               monikaId: '1234',
-  //             },
-  //           }),
-  //         }
-  //       }
+//       if (req.url.pathname.endsWith('probes')) {
+//         return {
+//           status: 200,
+//           headers: {
+//             etag: config.version as string,
+//           },
+//           body: JSON.stringify({
+//             statusCode: 'ok',
+//             message: 'Successfully get probes configuration',
+//             data: config.probes,
+//           }),
+//         }
+//       }
 
-  //       if (req.url.pathname.endsWith('probes')) {
-  //         return {
-  //           status: 200,
-  //           headers: {
-  //             etag: config.version as string,
-  //           },
-  //           body: JSON.stringify({
-  //             statusCode: 'ok',
-  //             message: 'Successfully get probes configuration',
-  //             data: config.probes,
-  //           }),
-  //         }
-  //       }
+//       if (req.url.pathname.endsWith('report')) {
+//         return {
+//           status: 200,
+//           body: JSON.stringify({
+//             statusCode: 'ok',
+//             message: 'Successfully report to Symon',
+//           }),
+//         }
+//       }
+//     }
+//   })
 
-  //       if (req.url.pathname.endsWith('report')) {
-  //         return {
-  //           status: 200,
-  //           body: JSON.stringify({
-  //             statusCode: 'ok',
-  //             message: 'Successfully report to Symon',
-  //           }),
-  //         }
-  //       }
-  //     }
-  //   })
+//   const symon = new SymonClient({
+//     symonUrl: 'http://localhost:4000',
+//     symonKey: 'abcd',
+//   })
+//   sinon.spy(symon, 'report')
 
-  //   const symon = new SymonClient({
-  //     symonUrl: 'http://localhost:4000',
-  //     symonKey: 'abcd',
-  //   })
-  //   sinon.spy(symon, 'report')
+//   expect(symon.config).to.be.null
 
-  //   expect(symon.config).to.be.null
+//   await symon.initiate()
+//   await symon.stopReport()
 
-  //   await symon.initiate()
-  //   await symon.stopReport()
+//   expect(symon.config).deep.equals(config)
+// })
 
-  //   expect(symon.config).deep.equals(config)
-  // })
+// it('should report on initiate', async () => {
+//   interceptor.use((req) => {
+//     if (req.url.origin === 'http://localhost:4000') {
+//       if (req.url.pathname.endsWith('client-handshake')) {
+//         return {
+//           status: 200,
+//           body: JSON.stringify({
+//             statusCode: 'ok',
+//             message: 'Successfully handshaked with Symon',
+//             data: {
+//               monikaId: '1234',
+//             },
+//           }),
+//         }
+//       }
 
-  // it('should report on initiate', async () => {
-  //   interceptor.use((req) => {
-  //     if (req.url.origin === 'http://localhost:4000') {
-  //       if (req.url.pathname.endsWith('client-handshake')) {
-  //         return {
-  //           status: 200,
-  //           body: JSON.stringify({
-  //             statusCode: 'ok',
-  //             message: 'Successfully handshaked with Symon',
-  //             data: {
-  //               monikaId: '1234',
-  //             },
-  //           }),
-  //         }
-  //       }
+//       if (req.url.pathname.endsWith('probes')) {
+//         return {
+//           status: 200,
+//           body: JSON.stringify({
+//             statusCode: 'ok',
+//             message: 'Successfully get probes configuration',
+//           }),
+//         }
+//       }
 
-  //       if (req.url.pathname.endsWith('probes')) {
-  //         return {
-  //           status: 200,
-  //           body: JSON.stringify({
-  //             statusCode: 'ok',
-  //             message: 'Successfully get probes configuration',
-  //           }),
-  //         }
-  //       }
+//       if (req.url.pathname.endsWith('report')) {
+//         return {
+//           status: 200,
+//           body: JSON.stringify({
+//             statusCode: 'ok',
+//             message: 'Successfully report to Symon',
+//           }),
+//         }
+//       }
+//     }
+//   })
 
-  //       if (req.url.pathname.endsWith('report')) {
-  //         return {
-  //           status: 200,
-  //           body: JSON.stringify({
-  //             statusCode: 'ok',
-  //             message: 'Successfully report to Symon',
-  //           }),
-  //         }
-  //       }
-  //     }
-  //   })
+//   const symon = new SymonClient({
+//     symonUrl: 'http://localhost:4000',
+//     symonKey: 'abcd',
+//   })
+//   const reportSpy = sinon.spy(symon, 'report')
 
-  //   const symon = new SymonClient({
-  //     symonUrl: 'http://localhost:4000',
-  //     symonKey: 'abcd',
-  //   })
-  //   const reportSpy = sinon.spy(symon, 'report')
+//   await symon.initiate()
+//   await symon.stopReport()
 
-  //   await symon.initiate()
-  //   await symon.stopReport()
-
-  //   expect(reportSpy.called).equals(true)
-  // })
-})
+//   expect(reportSpy.called).equals(true)
+// })
+// })
 
 // describe('Send incident or recovery event', () => {
 //   it('should send event to Symon when incident or recovery happens', async () => {

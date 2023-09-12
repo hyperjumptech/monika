@@ -37,6 +37,7 @@ import { icmpRequest } from '../icmp/request'
 import registerFakes from '../../../../utils/fakes'
 import { sendHttpRequest } from '../../../../utils/http'
 import { XMLBuilder } from 'fast-xml-parser'
+import { URL } from 'url'
 
 // Register Handlebars helpers
 registerFakes(Handlebars)
@@ -56,9 +57,16 @@ export async function httpRequest({
   responses,
 }: probingParams): Promise<ProbeRequestResponse> {
   // Compile URL using handlebars to render URLs that uses previous responses data
-  const { method, url, headers, timeout, body, ping, allowUnauthorized } =
-    requestConfig
-  const newReq = { method, headers, timeout, body, ping }
+  const {
+    method,
+    url,
+    headers: reqHeaders,
+    timeout,
+    body,
+    ping,
+    allowUnauthorized,
+  } = requestConfig
+  const newReq = { method, headers: reqHeaders, timeout, body, ping }
   const renderURL = Handlebars.compile(url)
   const renderedURL = renderURL({ responses })
 
@@ -67,9 +75,9 @@ export async function httpRequest({
   // Compile headers using handlebars to render URLs that uses previous responses data.
   // In some case such as value is not string, it will be returned as is without being compiled.
   // If the request does not have any headers, then it should skip this process.
-  if (headers) {
-    for (const header of Object.keys(headers)) {
-      const rawHeader = headers[header]
+  if (reqHeaders) {
+    for (const header of Object.keys(reqHeaders)) {
+      const rawHeader = reqHeaders[header]
       const renderHeader = Handlebars.compile(rawHeader)
       const renderedHeader = renderHeader({ responses })
       newReq.headers = {
@@ -102,14 +110,14 @@ export async function httpRequest({
     newReq.body = generateRequestChainingBody(body, responses)
 
     if (newReq.headers) {
-      const contentTypeKey = Object.keys(headers || {}).find(
+      const contentTypeKey = Object.keys(reqHeaders || {}).find(
         (hk) => hk.toLocaleLowerCase() === 'content-type'
       )
 
       if (contentTypeKey) {
         const { content, contentType } = transformContentByType(
           newReq.body,
-          (headers || {})[contentTypeKey]
+          (reqHeaders || {})[contentTypeKey]
         )
 
         delete newReq.headers[contentTypeKey]
@@ -148,24 +156,21 @@ export async function httpRequest({
     })
 
     const responseTime = Date.now() - requestStartedAt
-    const { headers, status } = resp
-    const data =
-      headers.get('content-type') === 'application/json'
-        ? await resp.json()
-        : await resp.text()
+    const { headers: resHeaders, status } = resp
+    const data = resHeaders.get('content-type')?.includes('application/json')
+      ? await resp.json()
+      : await resp.text()
 
     return {
       requestType: 'HTTP',
       data,
       body: data,
       status,
-      headers,
+      headers: resHeaders,
       responseTime,
       isProbeResponsive: true,
     }
   } catch (error: any) {
-    console.log('DEBUG ERROR HTTP REQ')
-    console.log(JSON.stringify(error))
     const responseTime = Date.now() - requestStartedAt
 
     // The request was made and the server responded with a status code
