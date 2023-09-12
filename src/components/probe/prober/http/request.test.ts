@@ -196,11 +196,47 @@ describe('probingHTTP', () => {
           res.status(400).send()
         }
       })
+      const server = appExpress.listen(4000, 'localhost')
       const request: RequestConfig = {
         url: 'http://localhost:4000',
         method: 'POST',
         headers: { 'content-type': 'text/plain' },
         body: 'multiline string\nexample' as any,
+        timeout: 10_000,
+      }
+
+      // act
+      const flag = { followRedirects: 0 } as unknown as MonikaFlags
+      setContext({ flags: flag })
+      const res = await httpRequest({
+        requestConfig: request,
+        responses: [],
+      })
+      server.close()
+
+      // assert
+      expect(res.status).to.eq(200)
+    })
+
+    it('should send request with text/yaml content-type', async () => {
+      // arrange
+      const appExpress = express()
+      appExpress.use(bodyParser.text({ type: 'text/yaml' }))
+      appExpress.post('/', (req, res) => {
+        if (
+          req.header('content-type')?.includes('text/yaml') &&
+          req.body === 'username: john@example.com\npassword: secret\n'
+        ) {
+          res.status(200).send()
+        } else {
+          res.status(400).send()
+        }
+      })
+      const request: RequestConfig = {
+        url: 'http://localhost:4000',
+        method: 'POST',
+        headers: { 'content-type': 'text/yaml' },
+        body: { username: 'john@example.com', password: 'secret' } as any,
         timeout: 10_000,
       }
       const server = appExpress.listen(4000, 'localhost')
@@ -217,46 +253,6 @@ describe('probingHTTP', () => {
       // assert
       expect(res.status).to.eq(200)
     })
-
-    // it('should send request with text/yaml content-type', async () => {
-    //   // arrange
-    //   server.use(
-    //     http.post('https://example.com', async ({ request }) => {
-    //       const { headers } = request
-    //       const body = await request.text()
-
-    //       if (
-    //         headers.get('content-type') !== 'text/yaml' ||
-    //         body !== 'username: john@example.com\npassword: secret\n'
-    //       ) {
-    //         console.error(headers.get('content-type'))
-    //         console.error(body)
-
-    //         return HttpResponse.text(undefined, { status: 400 })
-    //       }
-
-    //       return HttpResponse.text(undefined, { status: 200 })
-    //     })
-    //   )
-    //   const request: RequestConfig = {
-    //     url: 'https://example.com',
-    //     method: 'POST',
-    //     headers: { 'content-type': 'text/yaml' },
-    //     body: { username: 'john@example.com', password: 'secret' } as any,
-    //     timeout: 10_000,
-    //   }
-
-    //   // act
-    //   const flag = { followRedirects: 0 } as unknown as MonikaFlags
-    //   setContext({ flags: flag })
-    //   const res = await httpRequest({
-    //     requestConfig: request,
-    //     responses: [],
-    //   })
-
-    //   // assert
-    //   expect(res.status).to.eq(200)
-    // })
 
     it('should send request with application/xml content-type', async () => {
       // arrange
@@ -298,46 +294,28 @@ describe('probingHTTP', () => {
       expect(server.listening).to.eq(false)
     })
 
-    // it('should send request with text-plain content-type even with allowUnauthorized option', async () => {
-    //   // arrange
-    //   server.use(
-    //     http.post('https://example.com', async ({ request }) => {
-    //       const { headers } = request
-    //       const body = await request.text()
+    it('should send request with text-plain content-type even with allowUnauthorized option', async () => {
+      // arrange
+      const request: RequestConfig = {
+        url: 'https://example.com',
+        method: 'POST',
+        headers: { 'content-type': 'text/plain' },
+        body: 'multiline string\nexample' as any,
+        timeout: 10_000,
+        allowUnauthorized: true,
+      }
 
-    //       if (
-    //         headers.get('content-type') !== 'text/plain' ||
-    //         body !== 'multiline string\nexample'
-    //       ) {
-    //         console.error(headers.get('content-type'))
-    //         console.error(body)
+      // act
+      const flag = { followRedirects: 0 } as unknown as MonikaFlags
+      setContext({ flags: flag })
+      const res = await httpRequest({
+        requestConfig: request,
+        responses: [],
+      })
 
-    //         return HttpResponse.text(undefined, { status: 400 })
-    //       }
-
-    //       return HttpResponse.text(undefined, { status: 200 })
-    //     })
-    //   )
-    //   const request: RequestConfig = {
-    //     url: 'https://example.com',
-    //     method: 'POST',
-    //     headers: { 'content-type': 'text/plain' },
-    //     body: 'multiline string\nexample' as any,
-    //     timeout: 10_000,
-    //     allowUnauthorized: true,
-    //   }
-
-    //   // act
-    //   const flag = { followRedirects: 0 } as unknown as MonikaFlags
-    //   setContext({ flags: flag })
-    //   const res = await httpRequest({
-    //     requestConfig: request,
-    //     responses: [],
-    //   })
-
-    //   // assert
-    //   expect(res.status).to.eq(200)
-    // })
+      // assert
+      expect(res.status).to.eq(200)
+    })
   })
 
   describe('Unit test', () => {
