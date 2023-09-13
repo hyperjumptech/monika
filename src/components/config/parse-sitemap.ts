@@ -22,13 +22,12 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { nanoid } from 'nanoid'
 import type { Config } from '../../interfaces/config'
 import { DEFAULT_THRESHOLD } from '../../looper'
 import { XMLParser } from 'fast-xml-parser'
 import { monikaFlagsDefaultValue } from '../../context/monika-flags'
 import type { MonikaFlags } from '../../context/monika-flags'
-import type { Probe } from '../../interfaces/probe'
+import type { Probe, ProbeAlert } from '../../interfaces/probe'
 
 const generateProbesFromXml = (config: any) => {
   const probes = config?.urlset?.url?.map((item: any) => {
@@ -100,16 +99,14 @@ const generateProbesFromXmlOneProbe = (config: any) => {
       recoveryThreshold: DEFAULT_THRESHOLD,
       alerts: [
         {
-          id: nanoid(),
           assertion: 'response.status < 200 or response.status > 299',
           message: 'HTTP Status is not 200',
         },
         {
-          id: nanoid(),
           assertion: 'response.time > 2000',
           message: 'Response time is more than 2000ms',
         },
-      ],
+      ] as ProbeAlert[],
     }
   }
 

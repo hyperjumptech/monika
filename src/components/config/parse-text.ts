@@ -49,9 +49,8 @@
 import type { Config } from '../../interfaces/config'
 import { monikaFlagsDefaultValue } from '../../context/monika-flags'
 import { DEFAULT_THRESHOLD } from '../../looper'
-import type { Probe } from '../../interfaces/probe'
+import type { Probe, ProbeAlert } from '../../interfaces/probe'
 import { isValidURL } from '../../utils/is-valid-url'
-import { nanoid } from 'nanoid'
 
 export const parseConfigFromText = (configString: string): Config => {
   let probes: Probe[] = []
@@ -76,16 +75,14 @@ export const parseConfigFromText = (configString: string): Config => {
           interval: monikaFlagsDefaultValue['config-interval'],
           alerts: [
             {
-              id: nanoid(),
               assertion: 'response.status < 200 or response.status > 299',
               message: 'HTTP Status is not 200',
             },
             {
-              id: nanoid(),
               assertion: 'response.time > 2000',
               message: 'Response time is more than 2000ms',
             },
-          ],
+          ] as ProbeAlert[],
         },
       ]
     }
