@@ -39,7 +39,7 @@
   ],
   "scripts": {
     "clean": "rm -rf coverage lib tsconfig.tsbuildinfo oclif.manifest.json",
-    "pretest": "npm run check-format",
+    "pretest": "npm run check-format && npm run type-check",
     "posttest": "eslint . --ext .ts --config .eslintrc",
     "prepack": "npm run clean && tsc -b && oclif manifest",
     "start": "npm run prepack && ./bin/dev",
@@ -52,6 +52,7 @@
     "version": "oclif readme && git add README.md",
     "format": "prettier --write .",
     "check-format": "prettier --check .",
+    "type-check": "tsc",
     "pkg": "npm run prepack && pkg . --compress brotli",
     "pack-tarballs": "oclif pack tarballs --targets=linux-x64 --no-xz"
   },
@@ -92,6 +93,7 @@
     "mariadb": "^3.0.2",
     "mongodb": "^4.10.0",
     "mongodb-uri": "^0.9.7",
+    "nanoid": "5.0.1",
     "node-cron": "3.0.0",
     "os-name": "4.0.1",
     "p-event": "^4.2.0",
