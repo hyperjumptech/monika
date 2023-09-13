@@ -293,7 +293,7 @@ describe('Startup message', () => {
         })
         // assert
         expect(consoleLogMessage).include(
-          '[{"assertion":"response.status = 500","message":"HTTP status is 500"}]'
+          '"assertion":"response.status = 500","message":"HTTP status is 500"}]'
         )
       })
     })

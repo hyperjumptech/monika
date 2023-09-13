@@ -160,6 +160,7 @@ describe('validateResponse', () => {
     expect(data).to.eql([
       {
         alert: {
+          id: 'jFQBd',
           assertion: 'response.status < 200 or response.status > 299',
           message: '',
         },
@@ -176,6 +177,7 @@ describe('validateResponse', () => {
       },
       {
         alert: {
+          id: 'dxNM8',
           assertion: 'response.time > 10',
           message: '',
         },
