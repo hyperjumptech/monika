@@ -39,7 +39,7 @@
   ],
   "scripts": {
     "clean": "rm -rf coverage lib tsconfig.tsbuildinfo oclif.manifest.json",
-    "pretest": "npm run check-format && npm run type-check",
+    "pretest": "npm run check-format",
     "posttest": "eslint . --ext .ts --config .eslintrc",
     "prepack": "npm run clean && tsc -b && oclif manifest",
     "start": "npm run prepack && ./bin/dev",
@@ -52,7 +52,6 @@
     "version": "oclif readme && git add README.md",
     "format": "prettier --write .",
     "check-format": "prettier --check .",
-    "type-check": "tsc",
     "pkg": "npm run prepack && pkg . --compress brotli",
     "pack-tarballs": "oclif pack tarballs --targets=linux-x64 --no-xz"
   },
