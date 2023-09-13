@@ -280,6 +280,7 @@ describe('Startup message', () => {
                 ...defaultConfig.probes[0],
                 alerts: [
                   {
+                    id: 'fKBzx',
                     assertion: 'response.status = 500',
                     message: 'HTTP status is 500',
                   },
