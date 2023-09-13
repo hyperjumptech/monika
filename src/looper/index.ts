@@ -22,7 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { nanoid } from 'nanoid'
+import { v4 as uuid } from 'uuid'
 import { doProbe } from '../components/probe'
 import { getContext } from '../context'
 import type { Notification } from '@hyperjumptech/monika-notification'
@@ -123,8 +123,8 @@ function getDefaultAlerts(isHTTPProbe: boolean): ProbeAlert[] {
   if (!isHTTPProbe) {
     return [
       {
-        id: nanoid(),
-        assertion: 'response.status < 200 or response.status > 299',
+        id: uuid(),
+        assertion: '',
         message: 'Probe is not accesible',
       },
     ]
@@ -132,12 +132,12 @@ function getDefaultAlerts(isHTTPProbe: boolean): ProbeAlert[] {
 
   return [
     {
-      id: nanoid(),
+      id: uuid(),
       assertion: 'response.status < 200 or response.status > 299',
       message: 'HTTP Status is {{ response.status }}, expecting 200',
     },
     {
-      id: nanoid(),
+      id: uuid(),
       assertion: 'response.time > 2000',
       message:
         'Response time is {{ response.time }}ms, expecting less than 2000ms',
