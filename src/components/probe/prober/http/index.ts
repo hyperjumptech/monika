@@ -22,6 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import { nanoid } from 'nanoid'
 import { isSymonModeFrom } from '../../../config'
 import { checkThresholdsAndSendAlert } from '../..'
 import { getContext } from '../../../../context'
@@ -166,6 +167,7 @@ async function probeHTTP(
           isConnectionDown.has(id) // if connection WAS down then send a custom recovery alert. Else use user's alert.
         ) {
           validatedResponse[0].alert = {
+            id: nanoid(),
             assertion: '',
             message: CONNECTION_RECOVERY_MESSAGE,
           }
@@ -174,6 +176,7 @@ async function probeHTTP(
         } else if (!isProbeResponsive) {
           // if connection has failed, then lets send out specific notification
           validatedResponse[0].alert = {
+            id: nanoid(),
             assertion: '',
             message: CONNECTION_INCIDENT_MESSAGE,
           }
