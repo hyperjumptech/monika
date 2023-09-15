@@ -31,7 +31,7 @@ import {
   BaseProber,
   NotificationType,
   ProbeMessage,
-  notConnectedRequestAssertion,
+  failedRequestAssertion,
 } from '..'
 import {
   type ProbeRequestResponse,
@@ -173,14 +173,14 @@ export class HTTPProber extends BaseProber {
       probe: this.probeConfig,
       requestIndex,
       probeRes: hasFailedRequest!,
-      alertQueries: [notConnectedRequestAssertion.assertion],
+      alertQueries: [failedRequestAssertion.assertion],
       error: hasFailedRequest!.errMessage,
     })
 
     const newIncident: Incident = {
       probeID: this.probeConfig.id,
       probeRequestURL: this.probeConfig?.requests?.[requestIndex].url || '',
-      alert: notConnectedRequestAssertion,
+      alert: failedRequestAssertion,
       createdAt: new Date(),
     }
     setContext({ incidents: [...getContext().incidents, newIncident] })
@@ -189,7 +189,7 @@ export class HTTPProber extends BaseProber {
       requestURL: this.probeConfig?.requests?.[requestIndex].url || '',
       notificationType: NotificationType.Incident,
       validation: {
-        alert: notConnectedRequestAssertion,
+        alert: failedRequestAssertion,
         isAlertTriggered: true,
         response: hasFailedRequest!,
       },

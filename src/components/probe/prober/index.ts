@@ -76,8 +76,8 @@ export enum ProbeMessage {
   ProbeAccessibleAgain = 'Probe accessible again',
 }
 
-export const notConnectedRequestAssertion: ProbeAlert = {
-  assertion: ProbeMessage.ProbeNotAccessible,
+export const failedRequestAssertion: ProbeAlert = {
+  assertion: '',
   message: ProbeMessage.ProbeNotAccessible,
 }
 
@@ -205,21 +205,21 @@ export class BaseProber implements Prober {
     getEventEmitter().emit(events.probe.alert.triggered, {
       probe: this.probeConfig,
       requestIndex,
-      alertQuery: notConnectedRequestAssertion,
+      alertQuery: failedRequestAssertion,
     })
 
     saveProbeRequestLog({
       probe: this.probeConfig,
       requestIndex,
       probeRes: requestResponse,
-      alertQueries: [notConnectedRequestAssertion.assertion],
+      alertQueries: [failedRequestAssertion.assertion],
       error: requestResponse.errMessage,
     })
 
     const newIncident: Incident = {
       probeID: this.probeConfig.id,
       probeRequestURL: this.probeConfig?.requests?.[requestIndex].url || '',
-      alert: notConnectedRequestAssertion,
+      alert: failedRequestAssertion,
       createdAt: new Date(),
     }
     setContext({ incidents: [...getContext().incidents, newIncident] })
@@ -228,7 +228,7 @@ export class BaseProber implements Prober {
       requestURL: this.probeConfig?.requests?.[requestIndex].url || '',
       notificationType: NotificationType.Incident,
       validation: {
-        alert: notConnectedRequestAssertion,
+        alert: failedRequestAssertion,
         isAlertTriggered: true,
         response: requestResponse,
       },
@@ -249,7 +249,7 @@ export class BaseProber implements Prober {
         requestURL: this.probeConfig?.requests?.[requestIndex].url || '',
         notificationType: NotificationType.Recover,
         validation: {
-          alert: notConnectedRequestAssertion,
+          alert: failedRequestAssertion,
           isAlertTriggered: false,
           response: probeResults[requestIndex].requestResponse,
         },
@@ -260,7 +260,7 @@ export class BaseProber implements Prober {
       probe: this.probeConfig,
       requestIndex,
       probeRes: probeResults[requestIndex].requestResponse,
-      alertQueries: [notConnectedRequestAssertion.assertion],
+      alertQueries: [failedRequestAssertion.assertion],
     })
 
     const newIncidents = getContext().incidents.filter(
