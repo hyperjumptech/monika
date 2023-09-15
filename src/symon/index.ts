@@ -179,8 +179,6 @@ class SymonClient {
     | 'symonReportInterval'
     | 'symonReportLimit'
   >) {
-    console.log('experimentalProbeSplitting', experimentalProbeSplitting)
-
     this.httpClient = axios.create({
       baseURL: experimentalProbeSplitting
         ? `${symonUrl}/api/v2/monika`
