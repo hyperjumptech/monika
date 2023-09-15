@@ -253,6 +253,12 @@ class Monika extends Command {
       description:
         'Monika will follow redirects as many times as the specified value here. By default, Monika will follow redirects once. To disable redirects following, set the value to zero.',
     }),
+
+    'experimental-probe-splitting': Flags.boolean({
+      description:
+        '[INTERNAL] Experimental feature to fairly assign probes at the same location.',
+      default: false,
+    }),
   }
 
   async run(): Promise<void> {

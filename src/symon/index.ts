@@ -168,8 +168,10 @@ class SymonClient {
     symonMonikaId,
     symonReportInterval,
     symonReportLimit,
+    'experimental-probe-splitting': experimentalProbeSplitting = false,
   }: Pick<
     MonikaFlags,
+    | 'experimental-probe-splitting'
     | 'symonUrl'
     | 'symonKey'
     | 'symonLocationId'
@@ -177,8 +179,12 @@ class SymonClient {
     | 'symonReportInterval'
     | 'symonReportLimit'
   >) {
+    console.log('experimentalProbeSplitting', experimentalProbeSplitting)
+
     this.httpClient = axios.create({
-      baseURL: `${symonUrl}/api/v1/monika`,
+      baseURL: experimentalProbeSplitting
+        ? `${symonUrl}/api/v2/monika`
+        : `${symonUrl}/api/v1/monika`,
       headers: {
         'x-api-key': symonKey,
       },
