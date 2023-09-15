@@ -57,10 +57,10 @@ export type MonikaFlags = {
   symonReportInterval?: number
   symonReportLimit?: number
   symonUrl?: string
+  'symon-api-version'?: string
   text?: string
   verbose: boolean
   version: void
-  'symon-experimental-probe-splitting'?: boolean
 }
 
 const seconds = 1000

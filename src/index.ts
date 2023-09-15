@@ -254,10 +254,11 @@ class Monika extends Command {
         'Monika will follow redirects as many times as the specified value here. By default, Monika will follow redirects once. To disable redirects following, set the value to zero.',
     }),
 
-    'symon-experimental-probe-splitting': Flags.boolean({
+    'symon-api-version': Flags.enum({
+      default: 'v1',
+      options: ['v1', 'v2'],
       description:
-        '[INTERNAL] Experimental feature to fairly assign probes at the same location.',
-      default: false,
+        'Symon API version to use. Available options: v1, v2. Default: v1',
     }),
   }
 
