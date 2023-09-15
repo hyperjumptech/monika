@@ -60,7 +60,7 @@ export type MonikaFlags = {
   text?: string
   verbose: boolean
   version: void
-  'experimental-probe-splitting'?: boolean
+  'symon-experimental-probe-splitting'?: boolean
 }
 
 const seconds = 1000

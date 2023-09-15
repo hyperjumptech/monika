@@ -168,10 +168,10 @@ class SymonClient {
     symonMonikaId,
     symonReportInterval,
     symonReportLimit,
-    'experimental-probe-splitting': experimentalProbeSplitting = false,
+    'symon-experimental-probe-splitting': experimentalProbeSplitting = false,
   }: Pick<
     MonikaFlags,
-    | 'experimental-probe-splitting'
+    | 'symon-experimental-probe-splitting'
     | 'symonUrl'
     | 'symonKey'
     | 'symonLocationId'
