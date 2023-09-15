@@ -48,10 +48,8 @@ const responseChecker = (
   alert: ProbeAlert,
   res: ProbeRequestResponse
 ): boolean => {
-  // If the probe did not succeed (ex: invalid address etc),
-  // then automatic alert-able event.
-  if (!res.isProbeResponsive) {
-    return true
+  if (!alert.query) {
+    return false
   }
 
   // Else we check for user assertion
