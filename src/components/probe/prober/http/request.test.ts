@@ -266,7 +266,6 @@ describe('probingHTTP', () => {
       appExpress.use(bodyParser.text({ type: 'application/xml' }))
       appExpress.post('/', (req, res) => {
         const parsedReqBody = new XMLParser().parse(req.body)
-        console.log('express given', req.body)
         if (
           req.header('content-type')?.includes('application/xml') &&
           parsedReqBody?.username === 'john@example.com' &&

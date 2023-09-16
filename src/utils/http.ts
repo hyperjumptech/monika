@@ -25,6 +25,7 @@
 import fetch, { RequestInit, Response } from 'node-fetch'
 import http, { RequestOptions } from 'http'
 import https from 'https'
+import { URL } from 'url'
 
 export const DEFAULT_TIMEOUT = 10_000
 
