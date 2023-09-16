@@ -105,10 +105,10 @@ describe('Symon initiate', () => {
         })
         .send()
     })
-    const server = appExpress.listen(4000, 'localhost')
+    const server = appExpress.listen(5001, 'localhost')
 
     const symon = new SymonClient({
-      symonUrl: 'http://localhost:4000',
+      symonUrl: 'http://localhost:5001',
       symonKey: 'abcd',
     })
     sinon.spy(symon, 'report')
@@ -182,10 +182,10 @@ describe('Symon initiate', () => {
         })
       }
     })
-    const server = appExpress.listen(4000, 'localhost')
+    const server = appExpress.listen(5002, 'localhost')
 
     const symon = new SymonClient({
-      symonUrl: 'http://localhost:4000',
+      symonUrl: 'http://localhost:5002',
       symonKey: 'abcd',
     })
     sinon.spy(symon, 'report')
@@ -230,10 +230,10 @@ describe('Symon initiate', () => {
         })
       }
     })
-    const server = appExpress.listen(4000, 'localhost')
+    const server = appExpress.listen(5003, 'localhost')
 
     const symon = new SymonClient({
-      symonUrl: 'http://localhost:4000',
+      symonUrl: 'http://localhost:5003',
       symonKey: 'abcd',
     })
     const reportSpy = sinon.spy(symon, 'report')
@@ -262,10 +262,10 @@ describe('Send incident or recovery event', () => {
         })
       }
     })
-    const server = appExpress.listen(4000, 'localhost')
+    const server = appExpress.listen(5004, 'localhost')
 
     const symon = new SymonClient({
-      symonUrl: 'http://localhost:4000',
+      symonUrl: 'http://localhost:5004',
       symonKey: 'abcd',
     })
     sinon.spy(symon, 'report')

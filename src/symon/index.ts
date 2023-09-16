@@ -208,8 +208,7 @@ class SymonClient {
       timeout: timeout || DEFAULT_TIMEOUT,
       redirect: redirect || 'follow',
     }).then((res) => {
-      if (res.status >= 400 || res.status < 200)
-        throw new Error(`Error fetching ${path}! Got ${res.status}.`)
+      if (!res.ok) throw new Error(`Error fetching ${path}! Got ${res.status}.`)
       return res
     })
   }

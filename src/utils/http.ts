@@ -51,6 +51,12 @@ export async function sendHttpRequest(
     body: body ? body : undefined,
     timeout: timeout ?? DEFAULT_TIMEOUT,
     agent: agent ?? defaultAgent,
+  }).then((res) => {
+    if (res.ok) {
+      return res
+    }
+
+    throw new Error(`Error HTTP status code ${res.status}`)
   })
 }
 
