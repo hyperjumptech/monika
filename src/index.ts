@@ -260,6 +260,13 @@ class Monika extends Command {
       hidden: false,
       description: 'URL of remote couchDB',
     }),
+
+    'symon-api-version': Flags.enum({
+      default: 'v1',
+      options: ['v1', 'v2'],
+      description:
+        'Symon API version to use. Available options: v1, v2. Default: v1',
+    }),
   }
 
   async run(): Promise<void> {
