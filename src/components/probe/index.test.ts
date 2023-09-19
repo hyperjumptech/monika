@@ -375,7 +375,7 @@ describe('Probe processing', () => {
     it('should send recovery notification for MariaDB probe', async () => {
       // arrange
       const probe = {
-        id: '1',
+        id: 'recovery-mariadb',
         interval: 1,
         mariadb: [
           {
@@ -419,7 +419,7 @@ describe('Probe processing', () => {
 
       // assert
       sinon.assert.called(requestStub)
-      expect(notificationAlert.body.url).eq('1')
+      expect(notificationAlert.body.url).eq('recovery-mariadb')
       expect(notificationAlert.body.alert).eq('')
     }).timeout(10_000)
 
