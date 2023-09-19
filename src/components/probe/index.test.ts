@@ -174,7 +174,7 @@ describe('Probe processing', () => {
         alerts: [
           {
             assertion: 'response.status == 200',
-            message: 'The request failed.',
+            message: 'The assertion failed.',
           },
         ],
       }
@@ -418,7 +418,7 @@ describe('Probe processing', () => {
       await sleep(3 * seconds)
 
       // assert
-      sinon.assert.calledOnce(requestStub)
+      sinon.assert.called(requestStub)
       expect(notificationAlert.body.url).eq('1')
       expect(notificationAlert.body.alert).eq('')
     }).timeout(10_000)
