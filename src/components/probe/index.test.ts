@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import { expect } from '@oclif/test'
-
+import { AxiosError } from 'axios'
 import { rest } from 'msw'
 import { setupServer } from 'msw/node'
 import sinon from 'sinon'
@@ -32,6 +32,7 @@ import { MongoClient, type Db } from 'mongodb'
 import net from 'net'
 import { Pool } from 'pg'
 import * as redis from 'redis'
+import * as httpRequest from '../../utils/http'
 import { doProbe } from '.'
 import { initializeProbeStates } from '../../utils/probe-state'
 import type { Probe } from '../../interfaces/probe'
@@ -74,6 +75,7 @@ afterEach(() => {
   urlRequestTotal = 0
   notificationAlert = {}
   server.close()
+  sinon.restore()
 })
 
 describe('Probe processing', () => {
@@ -156,13 +158,15 @@ describe('Probe processing', () => {
 
     it('should send incident notification if the request is failed', async () => {
       // arrange
-      const imaginaryURLToSimulateFailedRequest = 'https://zwclg.com/'
+      sinon.stub(httpRequest, 'sendHttpRequest').callsFake(async () => {
+        throw new AxiosError('ECONNABORTED', undefined, undefined, {})
+      })
       const probe = {
         ...probes[0],
         id: '2md9o',
         requests: [
           {
-            url: imaginaryURLToSimulateFailedRequest,
+            url: 'https://example.com',
             body: '',
             timeout: 30,
           },
@@ -196,7 +200,7 @@ describe('Probe processing', () => {
       await sleep(2 * seconds)
 
       // assert
-      expect(notificationAlert.body.url).eq(imaginaryURLToSimulateFailedRequest)
+      expect(notificationAlert.body.url).eq('https://example.com')
       expect(notificationAlert.body.alert).eq('')
     }).timeout(10_000)
 
