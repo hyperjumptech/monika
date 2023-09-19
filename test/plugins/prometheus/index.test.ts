@@ -50,9 +50,6 @@ describe('Prometheus plugin', () => {
         // assert
         expect(ctx.stdout).to.contain('Starting Monika.')
         expect(res.status).to.equal(200)
-
-        // eslint-disable-next-line unicorn/no-process-exit, no-process-exit
-        process.exit(0)
       })
   })
 
