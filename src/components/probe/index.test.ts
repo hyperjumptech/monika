@@ -38,6 +38,7 @@ import { initializeProbeStates } from '../../utils/probe-state'
 import type { Probe } from '../../interfaces/probe'
 import { afterEach, beforeEach } from 'mocha'
 import { getContext, resetContext, setContext } from '../../context'
+import type { MonikaFlags } from '../../context/monika-flags'
 
 let urlRequestTotal = 0
 let notificationAlert: Record<string, any> = {}
@@ -70,7 +71,10 @@ const probes: Probe[] = [
   },
 ]
 
-beforeEach(() => server.listen())
+beforeEach(() => {
+  server.listen()
+  setContext({ flags: { repeat: 1 } as MonikaFlags })
+})
 afterEach(() => {
   resetContext()
   urlRequestTotal = 0
@@ -207,12 +211,18 @@ describe('Probe processing', () => {
 
     it('should send incident notification', async () => {
       // arrange
+      server.use(
+        rest.get('https://example.com', (_, res, ctx) => {
+          urlRequestTotal += 1
+          return res(ctx.status(404))
+        })
+      )
       const probe = {
         ...probes[0],
         id: '2md9o',
         alerts: [
           {
-            assertion: 'response.status == 200',
+            assertion: 'response.status != 200',
             message: 'The assertion failed.',
           },
         ],
@@ -240,7 +250,7 @@ describe('Probe processing', () => {
 
       // assert
       expect(notificationAlert.body.url).eq('https://example.com')
-      expect(notificationAlert.body.alert).eq('response.status == 200')
+      expect(notificationAlert.body.alert).eq('response.status != 200')
     }).timeout(10_000)
 
     it('should send recovery notification', async () => {
@@ -278,7 +288,7 @@ describe('Probe processing', () => {
       await sleep(3 * seconds)
       server.resetHandlers()
       // wait for the send notification function to resolve
-      await sleep(seconds)
+      await sleep(3 * seconds)
 
       // assert
       expect(notificationAlert.body.url).eq('https://example.com')
@@ -369,7 +379,7 @@ describe('Probe processing', () => {
       await sleep(2 * seconds)
 
       // assert
-      expect(notificationAlert.body.url).eq('c8QrZ')
+      expect(notificationAlert.body.url).eq('1c8QrZ')
       expect(notificationAlert.body.alert).eq('')
     }).timeout(10_000)
 

@@ -39,6 +39,8 @@ describe('Prometheus plugin', () => {
           resolve('./monika.example.json'),
           '--prometheus',
           '4444',
+          '--repeat',
+          '1',
         ])
       )
       .it('runs Prometheus metric server', async (ctx) => {
@@ -69,6 +71,8 @@ describe('Prometheus plugin', () => {
           resolve('./monika.example.json'),
           '--prometheus',
           '4446',
+          '--repeat',
+          '1',
         ])
       )
       .it('runs Prometheus metric server but return 405', async () => {
