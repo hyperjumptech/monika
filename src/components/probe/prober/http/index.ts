@@ -22,7 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { type Incident, getContext, setContext } from '../../../../context'
+import { getContext } from '../../../../context'
 import events from '../../../../events'
 import { getEventEmitter } from '../../../../utils/events'
 import { log } from '../../../../utils/pino'
@@ -44,6 +44,10 @@ import { logResponseTime } from '../../../logger/response-time-log'
 import { saveProbeRequestLog } from '../../../logger/history'
 import type { ValidatedResponse } from '../../../../plugins/validate-response'
 import { isSymonModeFrom } from '../../../config'
+import {
+  startDowntimeCounter,
+  stopDowntimeCounter,
+} from '../../../downtime-counter'
 
 type ProbeResultMessageParams = {
   request: RequestConfig
@@ -169,6 +173,12 @@ export class HTTPProber extends BaseProber {
       alertQuery: '',
     })
 
+    startDowntimeCounter({
+      alert: failedRequestAssertion,
+      probeID: this.probeConfig.id,
+      url: this.probeConfig?.requests?.[requestIndex].url || '',
+    })
+
     saveProbeRequestLog({
       probe: this.probeConfig,
       requestIndex,
@@ -176,14 +186,6 @@ export class HTTPProber extends BaseProber {
       alertQueries: [failedRequestAssertion.assertion],
       error: hasFailedRequest!.errMessage,
     })
-
-    const newIncident: Incident = {
-      probeID: this.probeConfig.id,
-      probeRequestURL: this.probeConfig?.requests?.[requestIndex].url || '',
-      alert: failedRequestAssertion,
-      createdAt: new Date(),
-    }
-    setContext({ incidents: [...getContext().incidents, newIncident] })
 
     this.sendNotification({
       requestURL: this.probeConfig?.requests?.[requestIndex].url || '',
@@ -211,6 +213,11 @@ export class HTTPProber extends BaseProber {
         ({ url }) => url === recoveredIncident?.probeRequestURL
       ) || 0
     if (recoveredIncident) {
+      stopDowntimeCounter({
+        alert: recoveredIncident.alert,
+        probeID: this.probeConfig.id,
+        url: this.probeConfig?.requests?.[requestIndex].url || '',
+      })
       this.sendNotification({
         requestURL: this.probeConfig?.requests?.[requestIndex].url || '',
         notificationType: NotificationType.Recover,
@@ -230,11 +237,6 @@ export class HTTPProber extends BaseProber {
       probeRes: responses[requestIndex],
       alertQueries: [recoveredIncident?.alert.assertion || ''],
     })
-
-    const newIncidents = getContext().incidents.filter(
-      (incident) => incident.probeID !== this.probeConfig.id
-    )
-    setContext({ incidents: newIncidents })
   }
 
   private handleAssertionFailed(
@@ -248,13 +250,11 @@ export class HTTPProber extends BaseProber {
       alertQuery: '',
     })
 
-    const newIncident: Incident = {
-      probeID: this.probeConfig.id,
-      probeRequestURL: this.probeConfig?.requests?.[requestIndex].url || '',
+    startDowntimeCounter({
       alert: triggeredAlert,
-      createdAt: new Date(),
-    }
-    setContext({ incidents: [...getContext().incidents, newIncident] })
+      probeID: this.probeConfig.id,
+      url: this.probeConfig?.requests?.[requestIndex].url || '',
+    })
 
     this.sendNotification({
       requestURL: this.probeConfig?.requests?.[requestIndex].url || '',

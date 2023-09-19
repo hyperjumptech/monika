@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import type { Notification } from '@hyperjumptech/monika-notification'
-import { type Incident, getContext, setContext } from '../../../context'
+import { type Incident, getContext } from '../../../context'
 import events from '../../../events'
 import type { Probe, ProbeAlert } from '../../../interfaces/probe'
 import {
@@ -37,6 +37,10 @@ import { sendAlerts } from '../../notification'
 import { saveNotificationLog, saveProbeRequestLog } from '../../logger/history'
 import { logResponseTime } from '../../logger/response-time-log'
 import type { ValidatedResponse } from '../../../plugins/validate-response'
+import {
+  startDowntimeCounter,
+  stopDowntimeCounter,
+} from '../../downtime-counter'
 
 export type ProbeResult = {
   isAlertTriggered: boolean
@@ -208,6 +212,12 @@ export class BaseProber implements Prober {
       alertQuery: failedRequestAssertion,
     })
 
+    startDowntimeCounter({
+      alert: failedRequestAssertion,
+      probeID: this.probeConfig.id,
+      url: this.probeConfig?.requests?.[requestIndex].url || '',
+    })
+
     saveProbeRequestLog({
       probe: this.probeConfig,
       requestIndex,
@@ -215,14 +225,6 @@ export class BaseProber implements Prober {
       alertQueries: [failedRequestAssertion.assertion],
       error: requestResponse.errMessage,
     })
-
-    const newIncident: Incident = {
-      probeID: this.probeConfig.id,
-      probeRequestURL: this.probeConfig?.requests?.[requestIndex].url || '',
-      alert: failedRequestAssertion,
-      createdAt: new Date(),
-    }
-    setContext({ incidents: [...getContext().incidents, newIncident] })
 
     this.sendNotification({
       requestURL: this.probeConfig?.requests?.[requestIndex].url || '',
@@ -245,6 +247,12 @@ export class BaseProber implements Prober {
       ) || 0
 
     if (recoveredIncident) {
+      stopDowntimeCounter({
+        alert: recoveredIncident.alert,
+        probeID: this.probeConfig.id,
+        url: this.probeConfig?.requests?.[requestIndex].url || '',
+      })
+
       this.sendNotification({
         requestURL: this.probeConfig?.requests?.[requestIndex].url || '',
         notificationType: NotificationType.Recover,
@@ -262,11 +270,6 @@ export class BaseProber implements Prober {
       probeRes: probeResults[requestIndex].requestResponse,
       alertQueries: [failedRequestAssertion.assertion],
     })
-
-    const newIncidents = getContext().incidents.filter(
-      (incident) => incident.probeID !== this.probeConfig.id
-    )
-    setContext({ incidents: newIncidents })
   }
 
   private hasNotification() {

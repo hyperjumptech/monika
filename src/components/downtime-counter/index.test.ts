@@ -22,37 +22,69 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { ValidatedResponse } from '../../plugins/validate-response'
-import getIp from '../../utils/ip'
-import { getMessageForAlert } from './alert-message'
-import { sendNotifications } from '@hyperjumptech/monika-notification'
-import type { Notification } from '@hyperjumptech/monika-notification'
+import { expect } from '@oclif/test'
+import {
+  getDowntimeDuration,
+  startDowntimeCounter,
+  stopDowntimeCounter,
+} from '.'
 
-type SendAlertsProps = {
-  probeID: string
-  validation: ValidatedResponse
-  notifications: Notification[]
-  url: string
-  probeState: string
-}
+describe('Downtime counter', () => {
+  it('should start counter', () => {
+    // arrange
+    const probeConfig = {
+      alert: { assertion: '', message: '' },
+      probeID: 'APDpe',
+      url: 'https://example.com',
+    }
 
-export async function sendAlerts({
-  probeID,
-  validation,
-  notifications,
-  url,
-  probeState,
-}: SendAlertsProps): Promise<void> {
-  const ipAddress = getIp()
-  const isRecovery = probeState === 'UP'
-  const message = await getMessageForAlert({
-    probeID,
-    alert: validation.alert,
-    url,
-    ipAddress,
-    isRecovery,
-    response: validation.response,
+    // act
+    startDowntimeCounter(probeConfig)
+
+    // assert
+    expect(getDowntimeDuration(probeConfig)).not.eq('0 seconds')
   })
 
-  return sendNotifications(notifications, message)
-}
+  it('should stop counter', () => {
+    // arrange
+    const probeConfig = {
+      alert: { assertion: '', message: '' },
+      probeID: 'P1n9x',
+      url: 'https://example.com',
+    }
+
+    // act
+    startDowntimeCounter(probeConfig)
+    stopDowntimeCounter(probeConfig)
+
+    // assert
+    expect(getDowntimeDuration(probeConfig)).eq('0 seconds')
+  })
+
+  it('should stop inexistent counter', () => {
+    // arrange
+    const probeConfig = {
+      alert: { assertion: '', message: '' },
+      probeID: 'P1n9x',
+      url: 'https://example.com',
+    }
+
+    // act
+    stopDowntimeCounter(probeConfig)
+
+    // assert
+    expect(getDowntimeDuration(probeConfig)).eq('0 seconds')
+  })
+
+  it('should return 0 seconds if not started yet', () => {
+    // arrange
+    const probeConfig = {
+      alert: { assertion: '', message: '' },
+      probeID: 'rwrs8',
+      url: 'https://example.com',
+    }
+
+    // assert
+    expect(getDowntimeDuration(probeConfig)).eq('0 seconds')
+  })
+})

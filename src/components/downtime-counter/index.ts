@@ -22,37 +22,54 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { ValidatedResponse } from '../../plugins/validate-response'
-import getIp from '../../utils/ip'
-import { getMessageForAlert } from './alert-message'
-import { sendNotifications } from '@hyperjumptech/monika-notification'
-import type { Notification } from '@hyperjumptech/monika-notification'
+import { formatDistanceToNow } from 'date-fns'
+import { getContext, setContext } from '../../context'
+import type { ProbeAlert } from '../../interfaces/probe'
 
-type SendAlertsProps = {
+type DowntimeCounter = {
+  alert: ProbeAlert
   probeID: string
-  validation: ValidatedResponse
-  notifications: Notification[]
   url: string
-  probeState: string
 }
 
-export async function sendAlerts({
+export function startDowntimeCounter({
+  alert,
   probeID,
-  validation,
-  notifications,
   url,
-  probeState,
-}: SendAlertsProps): Promise<void> {
-  const ipAddress = getIp()
-  const isRecovery = probeState === 'UP'
-  const message = await getMessageForAlert({
+}: DowntimeCounter): void {
+  const newIncident = {
+    alert,
     probeID,
-    alert: validation.alert,
-    url,
-    ipAddress,
-    isRecovery,
-    response: validation.response,
-  })
+    probeRequestURL: url,
+    createdAt: new Date(),
+  }
 
-  return sendNotifications(notifications, message)
+  setContext({ incidents: [...getContext().incidents, newIncident] })
+}
+
+export function getDowntimeDuration({
+  probeID,
+  url,
+}: Omit<DowntimeCounter, 'alert'>): string {
+  const lastIncident = getContext().incidents.find(
+    (incident) =>
+      incident.probeID === probeID && incident.probeRequestURL === url
+  )
+
+  if (!lastIncident) {
+    return '0 seconds'
+  }
+
+  return formatDistanceToNow(lastIncident.createdAt, {
+    includeSeconds: true,
+  })
+}
+
+export function stopDowntimeCounter({ probeID, url }: DowntimeCounter): void {
+  const newIncidents = getContext().incidents.filter(
+    (incident) =>
+      incident.probeID !== probeID && incident.probeRequestURL !== url
+  )
+
+  setContext({ incidents: newIncidents })
 }
