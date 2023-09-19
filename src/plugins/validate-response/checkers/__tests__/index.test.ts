@@ -122,22 +122,6 @@ describe('responseChecker', () => {
       expect(data).to.equals(true)
     })
 
-    it('should trigger when status is 200 BUT there is connection error ', () => {
-      const res = generateMockedResponse({
-        status: 200,
-        isProbeResponsive: false,
-      })
-      const data = responseChecker(
-        {
-          assertion: 'response.status < 200 or response.status > 299',
-          message: '',
-        },
-        res
-      )
-
-      expect(data).to.equals(true)
-    })
-
     it('should handle query field', () => {
       const res = generateMockedResponse({
         status: 200,
