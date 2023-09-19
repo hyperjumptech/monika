@@ -163,7 +163,7 @@ describe('Probe processing', () => {
       })
       const probe = {
         ...probes[0],
-        id: '2md9o',
+        id: '2md9a',
         requests: [
           {
             url: 'https://example.com',
@@ -212,7 +212,7 @@ describe('Probe processing', () => {
         alerts: [
           {
             assertion: 'response.status == 200',
-            message: 'The request failed.',
+            message: 'The assertion failed.',
           },
         ],
       }
@@ -276,14 +276,8 @@ describe('Probe processing', () => {
       // wait for random timeout
       await sleep(3 * seconds)
       server.resetHandlers()
-      await doProbe({
-        probe,
-        notifications,
-      })
-      // wait for random timeout
-      await sleep(3 * seconds)
-      // wait for send notification function to resolve
-      await sleep(2 * seconds)
+      // wait for the send notification function to resolve
+      await sleep(seconds)
 
       // assert
       expect(notificationAlert.body.url).eq('https://example.com')
@@ -411,8 +405,6 @@ describe('Probe processing', () => {
       })
       // wait for random timeout
       await sleep(3 * seconds)
-      // wait for send notification function to resolve
-      await sleep(2 * seconds)
 
       const requestStub = sinon.stub(mariadb, 'createConnection').callsFake(
         async (_connectionUri) =>
@@ -423,7 +415,7 @@ describe('Probe processing', () => {
           } as mariadb.Connection)
       )
       // wait for send notification function to resolve
-      await sleep(2 * seconds)
+      await sleep(3 * seconds)
 
       // assert
       sinon.assert.calledOnce(requestStub)
