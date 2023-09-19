@@ -72,6 +72,7 @@ const probes: Probe[] = [
 
 beforeEach(() => server.listen())
 afterEach(() => {
+  resetContext()
   urlRequestTotal = 0
   notificationAlert = {}
   server.close()
@@ -334,7 +335,7 @@ describe('Probe processing', () => {
     it('should send incident notification for MariaDB probe', async () => {
       // arrange
       const probe = {
-        id: '1',
+        id: '1c8QrZ',
         interval: 1,
         mariadb: [
           {
@@ -368,14 +369,14 @@ describe('Probe processing', () => {
       await sleep(2 * seconds)
 
       // assert
-      expect(notificationAlert.body.url).eq('1')
+      expect(notificationAlert.body.url).eq('c8QrZ')
       expect(notificationAlert.body.alert).eq('')
     }).timeout(10_000)
 
     it('should send recovery notification for MariaDB probe', async () => {
       // arrange
       const probe = {
-        id: 'recovery-mariadb',
+        id: '3ngd4',
         interval: 1,
         mariadb: [
           {
@@ -419,7 +420,7 @@ describe('Probe processing', () => {
 
       // assert
       sinon.assert.called(requestStub)
-      expect(notificationAlert.body.url).eq('recovery-mariadb')
+      expect(notificationAlert.body.url).eq('3ngd4')
       expect(notificationAlert.body.alert).eq('')
     }).timeout(10_000)
 
@@ -438,7 +439,7 @@ describe('Probe processing', () => {
       sinon.stub(MongoClient.prototype, 'close').resolves()
       const probes = [
         {
-          id: '1',
+          id: 'FMqVc',
           interval: 1,
           mongo: [
             {
@@ -481,7 +482,7 @@ describe('Probe processing', () => {
       sinon.stub(MongoClient.prototype, 'close').resolves()
       const probes = [
         {
-          id: '1',
+          id: '3cYAU',
           interval: 1,
           mongo: [
             {
@@ -518,7 +519,7 @@ describe('Probe processing', () => {
       )
       const probes = [
         {
-          id: '1',
+          id: 'YFwQH',
           interval: 1,
           mysql: [
             {
@@ -557,7 +558,7 @@ describe('Probe processing', () => {
         }))
       const probes = [
         {
-          id: '1',
+          id: 'LxMkT',
           interval: 1,
           postgres: [
             {
@@ -596,7 +597,7 @@ describe('Probe processing', () => {
         }))
       const probes = [
         {
-          id: '1',
+          id: 'FAzEj',
           interval: 1,
           postgres: [
             {
@@ -633,7 +634,7 @@ describe('Probe processing', () => {
       )
       const probes = [
         {
-          id: '1',
+          id: 'npTJ4',
           interval: 1,
           redis: [
             {
@@ -731,7 +732,7 @@ describe('Probe processing', () => {
       })
       const probes = [
         {
-          id: '1',
+          id: '3Ua7L',
           interval: 1,
           socket: {
             host: 'localhost',
