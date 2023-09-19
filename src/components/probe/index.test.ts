@@ -154,56 +154,51 @@ describe('Probe processing', () => {
       expect(urlRequestTotal).eq(5)
     })
 
-    it.only(
-      'should send incident notification if the request is failed',
-      async () => {
-        // arrange
-        const imaginaryURLToSimulateFailedRequest = 'https://zwclg.com/'
-        const probe = {
-          ...probes[0],
-          id: '2md9o',
-          requests: [
-            {
-              url: imaginaryURLToSimulateFailedRequest,
-              body: '',
-              timeout: 30,
-            },
-          ],
-          alerts: [
-            {
-              assertion: 'response.status == 200',
-              message: 'The request failed.',
-            },
-          ],
-        }
-        initializeProbeStates([probe])
-        // wait until the interval passed
-        const seconds = 1000
-        await sleep(seconds)
-
-        // act
-        await doProbe({
-          probe,
-          notifications: [
-            {
-              id: 'jFQBd',
-              data: { url: 'https://example.com/webhook' },
-              type: 'webhook',
-            },
-          ],
-        })
-        // wait for random timeout
-        await sleep(3 * seconds)
-        // wait for send notification function to resolve
-        await sleep(2 * seconds)
-
-        // assert
-        expect(notificationAlert.body.url).eq(
-          imaginaryURLToSimulateFailedRequest
-        )
-        expect(notificationAlert.body.alert).eq('')
+    it('should send incident notification if the request is failed', async () => {
+      // arrange
+      const imaginaryURLToSimulateFailedRequest = 'https://zwclg.com/'
+      const probe = {
+        ...probes[0],
+        id: '2md9o',
+        requests: [
+          {
+            url: imaginaryURLToSimulateFailedRequest,
+            body: '',
+            timeout: 30,
+          },
+        ],
+        alerts: [
+          {
+            assertion: 'response.status == 200',
+            message: 'The request failed.',
+          },
+        ],
       }
-    ).timeout(10_000)
+      initializeProbeStates([probe])
+      // wait until the interval passed
+      const seconds = 1000
+      await sleep(seconds)
+
+      // act
+      await doProbe({
+        probe,
+        notifications: [
+          {
+            id: 'jFQBd',
+            data: { url: 'https://example.com/webhook' },
+            type: 'webhook',
+          },
+        ],
+      })
+      // wait for random timeout
+      await sleep(3 * seconds)
+      // wait for send notification function to resolve
+      await sleep(2 * seconds)
+
+      // assert
+      expect(notificationAlert.body.url).eq(imaginaryURLToSimulateFailedRequest)
+      expect(notificationAlert.body.alert).eq('')
+    }).timeout(10_000)
 
     it('should send incident notification', async () => {
       // arrange
