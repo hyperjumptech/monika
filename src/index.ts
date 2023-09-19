@@ -253,6 +253,13 @@ class Monika extends Command {
       description:
         'Monika will follow redirects as many times as the specified value here. By default, Monika will follow redirects once. To disable redirects following, set the value to zero.',
     }),
+
+    'symon-api-version': Flags.enum({
+      default: 'v1',
+      options: ['v1', 'v2'],
+      description:
+        'Symon API version to use. Available options: v1, v2. Default: v1',
+    }),
   }
 
   async run(): Promise<void> {
