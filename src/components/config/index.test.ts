@@ -29,6 +29,7 @@ import type { Config } from '../../interfaces/config'
 import events from '../../events'
 import { md5Hash } from '../../utils/hash'
 import { getEventEmitter } from '../../utils/events'
+import type { MonikaFlags } from '../../context/monika-flags'
 
 describe('getConfig', () => {
   afterEach(() => {
@@ -39,6 +40,19 @@ describe('getConfig', () => {
     expect(() => getConfig()).to.throw(
       'Configuration setup has not been run yet'
     )
+  })
+
+  it('should return empty array when config is empty in Symon mode', () => {
+    // arrange
+    setContext({
+      flags: {
+        symonKey: 'bDF8j',
+        symonUrl: 'https://example.com',
+      } as MonikaFlags,
+    })
+
+    // act and assert
+    expect(getConfig()).deep.eq({ probes: [] })
   })
 
   it('should return config', () => {
