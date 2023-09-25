@@ -80,6 +80,11 @@ export type Postgres = {
   alerts?: ProbeAlert[]
 }
 
+export type Ping = {
+  uri: string
+  interval: number
+}
+
 export interface Probe {
   id: string
   name: string
@@ -92,6 +97,7 @@ export interface Probe {
   mariadb?: MariaDB[]
   mysql?: MariaDB[]
   postgres?: Postgres[]
+  ping?: Ping[]
   incidentThreshold: number
   recoveryThreshold: number
   alerts: ProbeAlert[]

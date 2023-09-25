@@ -22,80 +22,69 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { HTTPProber } from './http'
-import { MongoProber } from './mongo'
-import { MariaDBProber } from './mariadb'
-import { PingProber } from './icmp'
-import { PostgresProber } from './postgres'
-import { RedisProber } from './redis'
-import { SocketProber } from './socket'
-import { BaseProber, type Prober, type ProberMetadata } from '.'
+import type { Ping } from '../../../../interfaces/probe'
+import { BaseProber, type ProbeResult } from '..'
+import { icmpRequest } from './request'
 
-export function createProbers(probeMetadata: ProberMetadata): Prober[] {
-  const { probeConfig } = probeMetadata
-  const result: Prober[] = []
+export class PingProber extends BaseProber {
+  async probe(): Promise<void> {
+    const result = await probePing({
+      id: this.probeConfig.id,
+      checkOrder: this.counter,
+      pings: this.probeConfig.ping,
+    })
 
-  if (probeConfig?.requests) {
-    result.push(createProber(probeMetadata))
+    this.processProbeResults(result)
   }
 
-  if (probeConfig?.mongo) {
-    result.push(createProber(probeMetadata))
+  generateVerboseStartupMessage(): string {
+    const { description, id, interval, name } = this.probeConfig
+
+    let result = `- Probe ID: ${id} 
+        Name: ${name || '-'}
+        Description: ${description || '-'}
+        Interval: ${interval}
+        `
+
+    result += '  Connection Details:'
+    result += this.getConnectionDetails()
+
+    return result
   }
 
-  if (probeConfig?.mariadb || probeConfig?.mysql) {
-    result.push(createProber(probeMetadata))
+  private getConnectionDetails(): string {
+    return ``
   }
-
-  if (probeConfig?.postgres) {
-    result.push(createProber(probeMetadata))
-  }
-
-  if (probeConfig?.redis) {
-    result.push(createProber(probeMetadata))
-  }
-
-  if (probeConfig?.socket) {
-    result.push(createProber(probeMetadata))
-  }
-
-  if (probeConfig?.ping) {
-    result.push(createProber(probeMetadata))
-  }
-
-  return result
 }
 
-export function createProber(probeMetadata: ProberMetadata): Prober {
-  const { probeConfig } = probeMetadata
+type ProbePingParams = {
+  id: string
+  checkOrder: number
+  pings?: Ping[]
+}
 
-  if (probeConfig?.requests) {
-    return new HTTPProber(probeMetadata)
+async function probePing({
+  id,
+  checkOrder,
+  pings,
+}: ProbePingParams): Promise<ProbeResult[]> {
+  const probeResults: ProbeResult[] = []
+
+  if (!pings) {
+    // pings defined or length == 0?
+    return probeResults
   }
 
-  if (probeConfig?.mariadb || probeConfig?.mysql) {
-    return new MariaDBProber(probeMetadata)
+  for await (const { uri } of pings) {
+    const requestResponse = await icmpRequest({ host: uri })
+    const { isProbeResponsive, responseTime, body } = requestResponse
+
+    const isAlertTriggered = isProbeResponsive
+    const timeNow = new Date().toISOString()
+    const logMessage = `${timeNow} ${checkOrder} id:${id} ${body} responseTime:${responseTime}`
+
+    probeResults.push({ isAlertTriggered, logMessage, requestResponse })
   }
 
-  if (probeConfig?.mongo) {
-    return new MongoProber(probeMetadata)
-  }
-
-  if (probeConfig?.postgres) {
-    return new PostgresProber(probeMetadata)
-  }
-
-  if (probeConfig?.redis) {
-    return new RedisProber(probeMetadata)
-  }
-
-  if (probeConfig?.socket) {
-    return new SocketProber(probeMetadata)
-  }
-
-  if (probeConfig?.ping) {
-    return new PingProber(probeMetadata)
-  }
-
-  return new BaseProber(probeMetadata)
+  return probeResults
 }
