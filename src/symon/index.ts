@@ -169,8 +169,10 @@ class SymonClient {
     symonMonikaId,
     symonReportInterval,
     symonReportLimit,
+    'symon-api-version': apiVersion,
   }: Pick<
     MonikaFlags,
+    | 'symon-api-version'
     | 'symonUrl'
     | 'symonKey'
     | 'symonLocationId'
@@ -179,7 +181,7 @@ class SymonClient {
     | 'symonReportLimit'
   >) {
     this.httpClient = axios.create({
-      baseURL: `${symonUrl}/api/v1/monika`,
+      baseURL: `${symonUrl}/api/${apiVersion}/monika`,
       headers: {
         'x-api-key': symonKey,
       },
