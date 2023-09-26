@@ -32,10 +32,11 @@ import {
 describe('validateResponse', () => {
   const mockedAlerts = [
     {
+      id: 'jFQBd',
       assertion: 'response.status < 200 or response.status > 299',
       message: '',
     },
-    { assertion: 'response.time > 10', message: '' },
+    { id: 'dxNM8', assertion: 'response.time > 10', message: '' },
   ]
 
   it('status-not-2xx = true && response-time-greater-than-10-ms = true', () => {
@@ -45,6 +46,7 @@ describe('validateResponse', () => {
     expect(data).to.eql([
       {
         alert: {
+          id: 'jFQBd',
           assertion: 'response.status < 200 or response.status > 299',
           message: '',
         },
@@ -60,10 +62,7 @@ describe('validateResponse', () => {
         },
       },
       {
-        alert: {
-          assertion: 'response.time > 10',
-          message: '',
-        },
+        alert: { id: 'dxNM8', assertion: 'response.time > 10', message: '' },
         response: {
           data: '',
           body: '',
@@ -85,6 +84,7 @@ describe('validateResponse', () => {
     expect(data).to.eql([
       {
         alert: {
+          id: 'jFQBd',
           assertion: 'response.status < 200 or response.status > 299',
           message: '',
         },
@@ -100,10 +100,7 @@ describe('validateResponse', () => {
         isAlertTriggered: false,
       },
       {
-        alert: {
-          assertion: 'response.time > 10',
-          message: '',
-        },
+        alert: { id: 'dxNM8', assertion: 'response.time > 10', message: '' },
         response: {
           data: '',
           body: '',
@@ -125,6 +122,7 @@ describe('validateResponse', () => {
     expect(data).to.eql([
       {
         alert: {
+          id: 'jFQBd',
           assertion: 'response.status < 200 or response.status > 299',
           message: '',
         },
@@ -140,10 +138,7 @@ describe('validateResponse', () => {
         isAlertTriggered: true,
       },
       {
-        alert: {
-          assertion: 'response.time > 10',
-          message: '',
-        },
+        alert: { id: 'dxNM8', assertion: 'response.time > 10', message: '' },
         response: {
           data: '',
           body: '',
@@ -165,6 +160,7 @@ describe('validateResponse', () => {
     expect(data).to.eql([
       {
         alert: {
+          id: 'jFQBd',
           assertion: 'response.status < 200 or response.status > 299',
           message: '',
         },
@@ -181,6 +177,7 @@ describe('validateResponse', () => {
       },
       {
         alert: {
+          id: 'dxNM8',
           assertion: 'response.time > 10',
           message: '',
         },

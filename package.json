@@ -112,18 +112,17 @@
     "unzip-stream": "^0.3.1",
     "unzipper": "^0.10.11",
     "url-parse": "^1.5.10",
+    "uuid": "9.0.1",
     "xstate": "^4.35.0",
     "yaml": "1.10.2"
   },
   "devDependencies": {
     "@gmrchk/cli-testing-library": "^0.1.2",
     "@oclif/test": "^2.1.0",
-    "@types/boxen": "^3.0.1",
     "@types/chai": "^4.2.15",
     "@types/express": "^4.17.12",
     "@types/fs-extra": "^9.0.13",
     "@types/getos": "^3.0.1",
-    "@types/hasha": "^3.0.1",
     "@types/is-url": "^1.2.29",
     "@types/js-yaml": "^4.0.2",
     "@types/mocha": "^5.2.7",
@@ -135,6 +134,7 @@
     "@types/sqlite3": "^3.1.7",
     "@types/unzipper": "^0.10.5",
     "@types/url-parse": "^1.4.8",
+    "@types/uuid": "^9.0.3",
     "bats": "^1.5.0",
     "bats-assert": "^2.0.0",
     "chai": "^4.3.4",
@@ -154,7 +154,7 @@
     "pkg": "^5.8.1",
     "prettier": "2.5.1",
     "ts-node": "^10.4.0",
-    "typescript": "^5.1.6"
+    "typescript": "5.1.6"
   },
   "prettier": {
     "semi": false,

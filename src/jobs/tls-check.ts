@@ -22,6 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import { v4 as uuid } from 'uuid'
 import { getConfig } from '../components/config'
 import { saveNotificationLog } from '../components/logger/history'
 import { sendAlerts } from '../components/notification'
@@ -94,7 +95,11 @@ function sendTLSErrorNotification({
     // TODO: Remove validation below
     // validation is used because it is needed to send alert
     const validation: ValidatedResponse = {
-      alert: { assertion: '', message: errorMessage },
+      alert: {
+        id: uuid(),
+        assertion: '',
+        message: errorMessage,
+      },
       isAlertTriggered: true,
       response: {
         status: 500,
