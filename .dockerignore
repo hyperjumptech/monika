@@ -1,6 +1,8 @@
 node_modules
 .nyc_output
 .github
+.vscode
+dev
 docs
 dist
 lib

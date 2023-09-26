@@ -22,14 +22,6 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { validateConfigWithSchema } from './validator/config-file'
-import { validateNotification } from './validator/notification'
-import { validateProbes } from './validator/probe'
-import { validateSymonConfig } from './validator/symon-config'
-
-export default {
-  validateConfigWithSchema,
-  validateNotification,
-  validateProbes,
-  validateSymonConfig,
-}
+export { validateConfigWithSchema } from './validator/config-file'
+export { validateProbes } from './validator/probe'
+export { validateSymonConfig } from './validator/symon-config'

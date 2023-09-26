@@ -23,11 +23,9 @@
  **********************************************************************************/
 
 import events from '../../events'
-import type { Notification } from '../../interfaces/notification'
+import type { Notification } from '@hyperjumptech/monika-notification'
 import type { StatuspageNotification } from '../../plugins/visualization/atlassian-status-page'
 import { AtlassianStatusPageAPI } from '../../plugins/visualization/atlassian-status-page'
-import type { InstatusPageNotification } from '../../plugins/visualization/instatus'
-import { InstatusPageAPI } from '../../plugins/visualization/instatus'
 import { getEventEmitter } from '../../utils/events'
 import { log } from '../../utils/pino'
 
@@ -63,36 +61,6 @@ eventEmitter.on(
       } catch (error: any) {
         log.error(
           `Atlassian status page (Error). probeID: ${probeID}, url: ${url}, probeState: ${probeState} error: ${error}`
-        )
-      }
-    }
-
-    const isInstatuspageEnable: InstatusPageNotification | undefined =
-      notifications.find(
-        (notification: Notification) => notification.type === 'instatus'
-      )
-
-    if (!isNotificationEmpty && isInstatuspageEnable) {
-      const { apiKey, pageID } = isInstatuspageEnable.data
-      const instatusPageAPI = new InstatusPageAPI(apiKey, pageID)
-      const type = getNotificationType(probeState)
-
-      try {
-        if (!type) {
-          throw new Error(`probeState ${probeState} is unknown`)
-        }
-
-        const incidentID = await instatusPageAPI.notify({
-          probeID,
-          type,
-          url,
-        })
-        log.info(
-          `Instatus page (${type}). id: ${incidentID}, probeID: ${probeID}, url: ${url}`
-        )
-      } catch (error: any) {
-        log.error(
-          `Instatus page (Error). probeID: ${probeID}, url: ${url}, probeState: ${probeState} error: ${error}`
         )
       }
     }

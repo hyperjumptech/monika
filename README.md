@@ -13,13 +13,14 @@ You can find many ways to install Monika and how to start monitoring from the [Q
 ## Contributing
 
 Monika is a Node.js application written in TypeScript using the [oclif framework](https://oclif.io/).  
-It was developed on **node v14 (LTS)**, and **npm v6**.
+It was developed on **node v18 (LTS)**, and **npm v9**.
 
 To start developing, clone this repository, then install the dependencies:
 
 ```bash
 git clone git@github.com:hyperjumptech/monika.git
 npm ci
+npm run build -w packages/notification
 ```
 
 Then, to run Monika from the source,
@@ -33,7 +34,7 @@ npm start
 - on Windows
 
 ```bash
-.\bin\run.cmd
+.\bin\dev.cmd
 ```
 
 To keep the formatting consistent, run the following command to format the source code:
@@ -47,6 +48,81 @@ Finally you can also run `npm run test` to prevent regression.
 Once you have made the changes, open a Pull Request and explain the issue your change will fix or the feature your change will add.
 
 For contribution details on how to add custom notifications [see the New Notifications guide here](https://monika.hyperjump.tech/guides/new-notifications).
+
+### Applying changes in monorepo workspaces folder (`packages/notification`)
+
+If you are developing feature/fix related to notification by making changes inside the `packages/notification` folder, it's easier to temporarily change the dependency source in `package.json` to be like this
+
+```
+"@hyperjumptech/monika-notification": "*"
+```
+
+it will sync `@hyperjumptech/monika-notification` package `node_modules` to any changes in the `packages/notification` folder without running build on every code change.
+
+See this [docs](https://turbo.build/repo/docs/handbook/workspaces#workspaces-which-depend-on-each-other) for further detail
+
+### How to Test Probe Locally
+
+If you need to test a probe locally, there are predefined services in /dev/docker-compose.yaml. You are **encouraged** to add other services that can be probed by Monika. Run `cd dev && docker compose up` to run those services.
+
+#### Available Services
+
+Use the following Monika config to probe the service.
+
+##### MariaDB
+
+```yaml
+probes:
+  - id: mariadb
+    mariadb:
+      - host: localhost
+        port: 3306
+        username: mariadb_user
+        password: mariadb_password
+        database:
+```
+
+##### MySQL
+
+```yaml
+probes:
+  - id: mysql
+    mysql:
+      - host: localhost
+        port: 3307
+        username: mysql_user
+        password: mysql_password
+        database:
+```
+
+##### MongoDB
+
+```yaml
+probes:
+  - id: mongo
+    mongo:
+      - uri: mongodb://mongo_user:mongo_password@localhost:27017
+```
+
+##### PostgreSQL
+
+Use the following Monika config to probe the service.
+
+```yaml
+probes:
+  - id: postgres
+    postgres:
+      - uri: postgres://postgres_user:postgres_password@localhost:5432/postgres_db
+```
+
+##### Redis
+
+```yaml
+probes:
+  - id: redis
+    redis:
+      - uri: redis://:redis_password@localhost:6379
+```
 
 ## Development References
 

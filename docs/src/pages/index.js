@@ -627,28 +627,53 @@ export default function IndexPage() {
           />
           <div className="container20">
             <div className="container21">
-              <h2 className="text-white md:text-left lg:text-44 text-3xl text-center font-bold">
+              <h2 className="text-white md:text-left lg:text-32 text-2xl mt-auto text-center font-bold">
                 Get Started with Monika Now!
               </h2>
-              <p className="text-white font-medium lg:text-2xl lg:w-3/4 w-full md:my-0 my-4 md:text-left text-center">
+              <p className="text-white font-medium lg:text-lg lg:w-11/12 w-full my-5 md:text-left text-center">
                 Monika is an open source synthetic monitoring command line
-                application. It is actively developed and completely free!
+                application. it is actively developed and completely free!
               </p>
+              <div className="buttonFooter">
+                <Link href="/quick-start">
+                  <a
+                    className="link25 button"
+                    onClick={() =>
+                      event({
+                        action: 'cta_button_footer',
+                        category: 'cta_button',
+                      })
+                    }
+                  >
+                    Start Now
+                  </a>
+                </Link>
+              </div>
             </div>
             <div className="container22">
-              <Link href="/quick-start">
-                <a
-                  className="link15 button"
-                  onClick={() =>
-                    event({
-                      action: 'cta_button_footer',
-                      category: 'cta_button',
-                    })
-                  }
-                >
-                  Start Now
-                </a>
-              </Link>
+              <h2 className="text-white md:text-left lg:text-32 text-2xl mt-auto text-center font-bold">
+                Looking for a Low-Code Version Monitoring Solution? Try Neo
+                Sense!
+              </h2>
+              <p className="text-white font-medium lg:w-11/12 w-full lg:text-lg my-5 md:text-left text-center">
+                Elevate your Monika experience with Neo Sense, featuring an
+                intuitive interface and dashboard.
+              </p>
+              <div className="buttonFooter2">
+                <Link href="https://neosense.bgnlab.id/login">
+                  <a
+                    className="link15 button"
+                    onClick={() =>
+                      event({
+                        action: 'cta_button_footer',
+                        category: 'cta_button',
+                      })
+                    }
+                  >
+                    Try Neo Sense Now!
+                  </a>
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -1396,29 +1421,22 @@ export default function IndexPage() {
             justify-content: center;
           }
           .container20 {
-            flex: 0 0 auto;
-            width: 100%;
-            display: flex;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
             z-index: 100;
             max-width: 1110px;
-            background: linear-gradient(350deg, #2fdcdc, rgba(255, 0, 0, 0) 20%),
-              linear-gradient(45deg, #2fdcdc, rgba(0, 255, 0, 0) 30.71%),
-              linear-gradient(336deg, #987ce8, #987ce8 80.71%);
-            align-items: center;
-            padding-top: var(--dl-space-space-doubleunit);
-            padding-left: var(--dl-space-space-doubleunit);
-            padding-right: var(--dl-space-space-tripleunit);
-            flex-direction: row;
-            padding-bottom: var(--dl-space-space-doubleunit);
-            justify-content: space-between;
-            border-radius: 10px;
+            margin-bottom: var(--dl-space-space-doubleunit);
           }
           .container21 {
-            flex: 2;
+            flex: 1;
             display: flex;
             padding: var(--dl-space-space-doubleunit);
             flex-direction: column;
             justify-content: flex-start;
+            background-color: #1b1b1b;
+            border-radius: 12px;
+            margin: var(--dl-space-space-unit);
           }
           .text23 {
             color: var(--dl-color-gray-white);
@@ -1437,6 +1455,29 @@ export default function IndexPage() {
             white-space: pre-wrap;
           }
           .container22 {
+            flex: 1;
+            display: flex;
+            padding: var(--dl-space-space-doubleunit);
+            flex-direction: column;
+            justify-content: flex-start;
+            background: linear-gradient(350deg, #2fdcdc, rgba(255, 0, 0, 0) 20%),
+              linear-gradient(45deg, #2fdcdc, rgba(0, 255, 0, 0) 30.71%),
+              linear-gradient(336deg, #987ce8, #987ce8 80.71%);
+            border-radius: 12px;
+            margin: var(--dl-space-space-unit);
+          }
+          .buttonFooter {
+            flex: 0 0 auto;
+            display: flex;
+            width: 250px;
+            align-items: center;
+            border-radius: 20px;
+            flex-direction: column;
+            justify-content: center;
+            background: linear-gradient(310deg, #2fdcdc, #987ce8);
+            margin-top: auto;
+          }
+          .buttonFooter2 {
             flex: 0 0 auto;
             display: flex;
             width: 250px;
@@ -1445,15 +1486,27 @@ export default function IndexPage() {
             flex-direction: column;
             justify-content: center;
             background-color: var(--dl-color-gray-white);
+            margin-top: auto;
           }
           .link15 {
-            font-size: 20px;
+            font-size: 16px;
             font-style: normal;
             font-weight: 600;
             border-width: 0px;
             border-radius: var(--dl-radius-radius-radius6);
             text-decoration: none;
             background-image: linear-gradient(310deg, #2fdcdc, #987ce8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+          }
+          .link25 {
+            font-size: 16px;
+            font-style: normal;
+            font-weight: 600;
+            border-width: 0px;
+            border-radius: var(--dl-radius-radius-radius6);
+            text-decoration: none;
+            background-color: var(--dl-color-gray-white);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
           }
@@ -1586,6 +1639,25 @@ export default function IndexPage() {
             color: var(--dl-color-gray-300);
             margin-top: var(--dl-space-space-unit);
           }
+          .imageFooter {
+            display: relative;
+          }
+          .imageFooter2 {
+            // display: flex;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            // background-position: right bottom;
+            width: 300px;
+            // position: absolute;
+            // right: 500px;
+            // bottom: 100px;
+            position: absolute;
+            bottom: 300px;
+            right: 600px;
+            z-index: 100;
+            // object-fit: cover;
+            display: block;
+          }
           @media (max-width: 991px) {
             .hero {
               height: auto;
@@ -1631,7 +1703,11 @@ export default function IndexPage() {
               border-radius: 0;
             }
             .container21 {
-              padding: var(--dl-space-space-singleunit);
+              align-items: center;
+            }
+
+            .container22 {
+              align-items: center;
             }
             .c-t-a {
               width: 100%;

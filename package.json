@@ -1,7 +1,7 @@
 {
   "name": "@hyperjumptech/monika",
   "description": "Synthetic monitoring made easy",
-  "version": "1.15.1",
+  "version": "1.15.8",
   "license": "MIT",
   "author": "@hyperjumptech",
   "main": "lib/index.js",
@@ -43,9 +43,8 @@
     "posttest": "eslint . --ext .ts --config .eslintrc",
     "prepack": "npm run clean && tsc -b && oclif manifest",
     "start": "npm run prepack && ./bin/dev",
-    "start:windows": "npm run prepack && /bin/dev",
     "start:prod": "npm run prepack && ./bin/run",
-    "test": "npm run clean && cross-env NODE_ENV=test nyc --reporter=lcov --extension .ts mocha --config .mocharc.json --forbid-only \"{src,test}/**/*.test.ts\" --exclude test/cli.test.ts",
+    "test": "npm run clean && cross-env NODE_ENV=test nyc --reporter=lcov --extension .ts mocha --config .mocharc.json --forbid-only \"{packages,src,test}/**/*.test.ts\" --exclude test/cli.test.ts",
     "cli-test": "npx bats test/bats/cli.bats",
     "prod_test": "npm run prod_test:bats && npm run prod_test:cli",
     "prod_test:bats": "npx bats prod_test/test.bats",
@@ -53,20 +52,22 @@
     "version": "oclif readme && git add README.md",
     "format": "prettier --write .",
     "check-format": "prettier --check .",
-    "pkg": "npm run prepack && pkg . --compress brotli"
+    "pkg": "npm run prepack && pkg . --compress brotli",
+    "pack-tarballs": "oclif pack tarballs --targets=linux-x64 --no-xz"
   },
   "dependencies": {
     "@alicloud/dingtalk": "^1.3.53",
     "@breejs/ts-worker": "^2.0.0",
     "@faker-js/faker": "^7.4.0",
     "@hyperjumptech/db-connection-checker": "^0.0.1",
+    "@hyperjumptech/monika-notification": "1.15.7",
     "@oclif/core": "^1.9.0",
     "@oclif/plugin-help": "^5.1.11",
     "@oclif/plugin-version": "^1",
     "@sendgrid/mail": "^7.4.2",
     "@types/chai-spies": "^1.0.3",
     "ajv": "^8.11.0",
-    "axios": "^1.3.4",
+    "axios": "^0.27.2",
     "boxen": "^5.0.0",
     "bree": "^9.1.3",
     "chalk": "^4.1.2",
@@ -88,21 +89,17 @@
     "lodash": "^4.17.21",
     "macaddress": "^0.5.2",
     "mailgen": "^2.0.15",
-    "mailgun.js": "^3.5.4",
     "mariadb": "^3.0.2",
     "mongodb": "^4.10.0",
     "mongodb-uri": "^0.9.7",
     "node-cron": "3.0.0",
-    "nodemailer": "^6.5.0",
     "os-name": "4.0.1",
     "p-event": "^4.2.0",
-    "pako": "^2.0.3",
     "pg": "^8.8.0",
     "pg-connection-string": "^2.5.0",
     "ping": "^0.4.1",
-    "pino": "6.11.2",
-    "pino-pretty": "4.7.1",
-    "pkg": "^5.6.0",
+    "pino": "8.14.1",
+    "pino-pretty": "10.0.1",
     "prom-client": "13.1.0",
     "redis": "^4.3.0",
     "sinon": "^15.0.1",
@@ -114,6 +111,7 @@
     "tslib": "^1.14.1",
     "unzip-stream": "^0.3.1",
     "unzipper": "^0.10.11",
+    "url-parse": "^1.5.10",
     "xstate": "^4.35.0",
     "yaml": "1.10.2"
   },
@@ -132,13 +130,11 @@
     "@types/mongodb-uri": "^0.9.1",
     "@types/node": "^12.12.6",
     "@types/node-cron": "^2.0.4",
-    "@types/nodemailer": "^6.4.1",
-    "@types/pako": "^1.0.1",
-    "@types/pino": "^6.3.6",
     "@types/sinon": "^10.0.2",
     "@types/smtp-server": "^3.5.6",
     "@types/sqlite3": "^3.1.7",
     "@types/unzipper": "^0.10.5",
+    "@types/url-parse": "^1.4.8",
     "bats": "^1.5.0",
     "bats-assert": "^2.0.0",
     "chai": "^4.3.4",
@@ -153,19 +149,19 @@
     "mocha": "^9.1.2",
     "msw": "^0.36.4",
     "node-request-interceptor": "^0.6.3",
-    "nodemailer-mock": "^1.5.4",
     "nyc": "^15.1.0",
     "oclif": "^3.0.1",
+    "pkg": "^5.8.1",
     "prettier": "2.5.1",
     "ts-node": "^10.4.0",
-    "typescript": "4.9.5"
+    "typescript": "^5.1.6"
   },
   "prettier": {
     "semi": false,
     "singleQuote": true
   },
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=18.0.0"
   },
   "files": [
     "/bin",
@@ -192,21 +188,35 @@
   },
   "pkg": {
     "scripts": [
-      "./lib/**/*.js"
+      "./lib/**/*.js",
+      "./node_modules/thread-stream/lib/worker.js",
+      "./node_modules/pino/lib/worker.js"
     ],
     "assets": [
       "db/migrations/*.sql",
       "node_modules/sqlite3/lib/binding/**/*"
     ],
     "targets": [
-      "node16-linux-x64",
-      "node16-macos-x64",
-      "node16-win-x64"
+      "node18-linux-x64",
+      "node18-macos-x64",
+      "node18-win-x64"
     ],
+    "patches": {
+      "./node_modules/thread-stream/lib/worker.js": [
+        "fn = (await realImport(workerData.filename)).default",
+        "fn = realRequire(workerData.filename.replace('file://', ''))"
+      ],
+      "./node_modules/pino/lib/worker.js": [
+        "fn = (await realImport(toLoad)).default",
+        "fn = realRequire(t.target)"
+      ]
+    },
     "outputPath": "dist"
   },
   "volta": {
-    "node": "16.16.0",
-    "npm": "8.19.0"
-  }
+    "node": "18.14.0"
+  },
+  "workspaces": [
+    "packages/*"
+  ]
 }

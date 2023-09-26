@@ -129,12 +129,13 @@ describe('Symon initiate', () => {
     })
 
     const symon = new SymonClient({
-      url: 'http://localhost:4000',
-      apiKey: 'abcd',
+      symonUrl: 'http://localhost:4000',
+      symonKey: 'abcd',
     })
     sinon.spy(symon, 'report')
 
     await symon.initiate()
+    await symon.stopReport()
     expect(symon.monikaId).equals('1234')
 
     const body = JSON.parse(sentBody)
@@ -208,14 +209,15 @@ describe('Symon initiate', () => {
     })
 
     const symon = new SymonClient({
-      url: 'http://localhost:4000',
-      apiKey: 'abcd',
+      symonUrl: 'http://localhost:4000',
+      symonKey: 'abcd',
     })
     sinon.spy(symon, 'report')
 
     expect(symon.config).to.be.null
 
     await symon.initiate()
+    await symon.stopReport()
 
     expect(symon.config).deep.equals(config)
   })
@@ -259,12 +261,13 @@ describe('Symon initiate', () => {
     })
 
     const symon = new SymonClient({
-      url: 'http://localhost:4000',
-      apiKey: 'abcd',
+      symonUrl: 'http://localhost:4000',
+      symonKey: 'abcd',
     })
     const reportSpy = sinon.spy(symon, 'report')
 
     await symon.initiate()
+    await symon.stopReport()
 
     expect(reportSpy.called).equals(true)
   })
@@ -290,8 +293,9 @@ describe('Send incident or recovery event', () => {
     })
 
     const symon = new SymonClient({
-      url: 'http://localhost:4000',
-      apiKey: 'abcd',
+      symonUrl: 'http://localhost:4000',
+      symonKey: 'abcd',
+      'symon-api-version': 'v1',
     })
     sinon.spy(symon, 'report')
     symon.monikaId = '1234'

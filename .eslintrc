@@ -12,5 +12,6 @@
             }
         }
     ],
-    "env": {"node": true}
+    "env": {"node": true},
+    "ignorePatterns": ["*.d.ts"]
 }

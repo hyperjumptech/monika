@@ -26,67 +26,52 @@ import path from 'path'
 import isUrl from 'is-url'
 import boxen from 'boxen'
 import chalk from 'chalk'
+import type { MonikaFlags } from '../../context/monika-flags'
 import type { Config } from '../../interfaces/config'
-import type { Notification } from '../../interfaces/notification'
-import type { Probe, ProbeAlert } from '../../interfaces/probe'
-import type { RequestConfig } from '../../interfaces/request'
+import type { Notification } from '@hyperjumptech/monika-notification'
+import { channels } from '@hyperjumptech/monika-notification'
+import type { Probe } from '../../interfaces/probe'
 import { log } from '../../utils/pino'
+import { isSymonModeFrom } from '../config'
+import { createProber } from '../probe/prober/factory'
 
 type LogStartupMessage = {
   config: Config
-  configFlag: string[]
+  flags: Pick<MonikaFlags, 'config' | 'symonKey' | 'symonUrl' | 'verbose'>
   isFirstRun: boolean
-  isSymonMode: boolean
-  isVerbose: boolean
 }
 
 export function logStartupMessage({
   config,
-  configFlag,
+  flags,
   isFirstRun,
-  isSymonMode,
-  isVerbose,
 }: LogStartupMessage): void {
-  const startupMessage = generateStartupMessage({
-    config,
-    isFirstRun,
-    isSymonMode,
-    isVerbose,
-  })
-
-  if (isSymonMode) {
-    log.info(startupMessage)
+  if (isSymonModeFrom(flags)) {
+    log.info('Running in Symon mode')
     return
   }
 
-  for (const x in configFlag) {
-    if (isUrl(configFlag[x])) {
-      log.info('Using remote config:', configFlag[x])
-    } else if (configFlag[x].length > 0) {
-      log.info(`Using config file: ${path.resolve(configFlag[x])}`)
+  for (const configSource of flags.config) {
+    if (isUrl(configSource)) {
+      log.info(`Using remote config: ${configSource}`)
+    } else if (configSource.length > 0) {
+      log.info(`Using config file: ${path.resolve(configSource)}`)
     }
   }
 
+  const startupMessage = generateStartupMessage({
+    config,
+    flags,
+    isFirstRun,
+  })
   console.log(startupMessage)
-}
-
-type GenerateStartupMessageParams = {
-  config: Config
-  isFirstRun: boolean
-  isVerbose: boolean
-  isSymonMode: boolean
 }
 
 function generateStartupMessage({
   config,
+  flags,
   isFirstRun,
-  isVerbose,
-  isSymonMode,
-}: GenerateStartupMessageParams): string {
-  if (isSymonMode) {
-    return 'Running in Symon mode'
-  }
-
+}: LogStartupMessage): string {
   const { notifications = [], probes } = config
   const notificationTotal = notifications.length
   const probeTotal = probes.length
@@ -105,7 +90,7 @@ function generateStartupMessage({
     probeTotal,
   })
 
-  if (isVerbose) {
+  if (flags.verbose) {
     startupMessage += generateProbeMessage(probes)
     startupMessage += generateNotificationMessage(notifications || [])
   }
@@ -150,44 +135,16 @@ function generateProbeMessage(probes: Probe[]): string {
   let startupMessage = 'Probes:\n'
 
   for (const probe of probes) {
-    const { alerts, description, id, interval, name, requests } = probe
+    const prober = createProber({
+      probeConfig: probe,
+      counter: 0,
+      notifications: [],
+    })
 
-    startupMessage += `- Probe ID: ${id}
-Name: ${name}
-Description: ${description || '-'}
-Interval: ${interval}
-`
-    startupMessage += `    Requests:\n`
-    startupMessage += generateProbeRequestMessage(requests)
-    startupMessage += generateAlertMessage(alerts)
+    startupMessage += prober.generateVerboseStartupMessage()
   }
 
   return startupMessage
-}
-
-function generateProbeRequestMessage(requests: RequestConfig[]): string {
-  let startupMessage = ''
-
-  for (const request of requests) {
-    const { body, headers, method, url } = request
-
-    startupMessage += `      - Request Method: ${method || `GET`}
-  Request URL: ${url}
-  Request Headers: ${JSON.stringify(headers) || `-`}
-  Request Body: ${JSON.stringify(body) || `-`}
-`
-  }
-
-  return startupMessage
-}
-
-function generateAlertMessage(alerts: ProbeAlert[]): string {
-  const hasAlert = alerts.length > 0
-  const defaultAlertsInString =
-    '[{ "assertion": "response.status < 200 or response.status > 299", "message": "HTTP Status is not 200"}, { "assertion": "response.time > 2000", "message": "Response time is more than 2000ms" }]'
-  const alertsInString = JSON.stringify(alerts)
-
-  return `    Alerts: ${hasAlert ? alertsInString : defaultAlertsInString}\n`
 }
 
 function generateNotificationMessage(notifications: Notification[]): string {
@@ -197,40 +154,29 @@ function generateNotificationMessage(notifications: Notification[]): string {
     return ''
   }
 
-  let startupMessage = `\nNotifications:\n`
+  let result = '`\nNotifications:\n`'
 
   for (const notification of notifications) {
-    const { data, id, type } = notification
-
-    startupMessage += `- Notification ID: ${id}
-Type: ${type}
-`
-    // Only show recipients if type is mailgun, smtp, or sendgrid
-    // check one-by-one instead of using indexOf to avoid using type assertion
-    if (type === 'mailgun' || type === 'smtp' || type === 'sendgrid') {
-      startupMessage += `    Recipients: ${data.recipients.join(', ')}\n`
-    }
-
-    switch (type) {
-      case 'smtp':
-        startupMessage += `    Hostname: ${data.hostname}
-Port: ${data.port}
-Username: ${data.username}
-`
-        break
-      case 'mailgun':
-        startupMessage += `    Domain: ${data.domain}\n`
-        break
-      case 'sendgrid':
-        break
-      case 'webhook':
-      case 'slack':
-      case 'lark':
-      case 'google-chat':
-        startupMessage += `    URL: ${data.url}\n`
-        break
-    }
+    result += getIDMessage(notification)
+    result += getAdditionalMessage(notification)
   }
 
-  return startupMessage
+  return result
+}
+
+function getIDMessage({ id, type }: Notification) {
+  return `- Notification ID: ${id}
+Type: ${type}
+`
+}
+
+function getAdditionalMessage(notification: Notification) {
+  const { data, type } = notification
+  const channel = channels[type]
+
+  if (!channel?.additionalStartupMessage) {
+    return ''
+  }
+
+  return channel.additionalStartupMessage(data)
 }

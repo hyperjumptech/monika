@@ -4,46 +4,34 @@
 name: Node.js CI
 
 on:
-    workflow_dispatch:
-    push:
-        branches: [main]
-    pull_request:
-        branches: [main]
+  workflow_dispatch: null
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  issues: read
+  pull-requests: read
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
-
-        strategy:
-            matrix:
-                node-version: [14.x, 16.x]
-                # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
-
-        steps:
-            - uses: actions/checkout@v3
-            - name: Use Node.js ${{ matrix.node-version }}
-              uses: actions/setup-node@v3
-              with:
-                  node-version: ${{ matrix.node-version }}
-            - run: npm ci
-            - run: npm run build --if-present
-            - run: npm test && npx codecov
-            - run: npm pack
-            - run: npm install -g ./hyperjumptech-monika-*.tgz
-            - run: npm run prod_test
-
-    build-on-node-js-18:
-        runs-on: ubuntu-latest
-
-        steps:
-            - uses: actions/checkout@v3
-            - name: Use Node.js 18.x
-              uses: actions/setup-node@v3
-              with:
-                  node-version: 18.x
-            - run: npm ci
-            - run: npm run build --if-present
-            - run: NODE_OPTIONS='--no-experimental-fetch' npm test && npx codecov
-            - run: npm pack
-            - run: npm install -g ./hyperjumptech-monika-*.tgz
-            - run: npm run prod_test
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js 18.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+      - run: npm ci
+      - run: npm run build -w packages/notification
+      - run: npm test && npx codecov
+      - run: npm pack
+      - run: npm install -g ./hyperjumptech-monika-*.tgz
+      - run: npm run prod_test
+      - run: npm run pkg -- -t node18-linux-x64
+        name: Pack the binary using vercel/pkg
+      - run: ./dist/monika -v
+        name: Test if printing the version is not error

@@ -7,6 +7,10 @@ on:
   release:
     types: [published]
 
+permissions:
+  issues: read
+  pull-requests: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -14,9 +18,10 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
-          node-version: 16
+          node-version: 18
       - run: npm ci
         name: Install dependencies
+      - run: npm run build -w packages/notification
       - run: npm test
         name: Run tests
       - run: npm pack
@@ -32,12 +37,16 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
-          node-version: 16
+          node-version: 18
+      - run: npm ci --workspaces --if-present
+        name: Install workspaces dependencies
+      - run: npm run build --workspaces --if-present
+        name: Build workspaces
       - run: npm ci
         name: Install dependencies
-      - run: npm install -g oclif
-        name: Install Oclif
-      - run: oclif pack tarballs --targets=linux-x64 --no-xz
+      - run: sed -i 's#packages/notification/hyperjumptech-monika-notification#../../packages/notification/hyperjumptech-monika-notification#g' package.json
+        name: Change monika notification package path
+      - run: npm run pack-tarballs
         name: Pack as tarball
       - run: mv dist/monika*.tar.gz .
         name: Move the tarball from dist folder to root

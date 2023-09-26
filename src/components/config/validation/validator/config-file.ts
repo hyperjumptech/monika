@@ -30,25 +30,24 @@ import { Config } from '../../../../interfaces/config'
 const ajv = new Ajv()
 
 // validate the config file  loaded by monika against a JSON Schema
-export function validateConfigWithSchema(config: Config): Validation {
+export function validateConfigWithSchema(config: Partial<Config>): Validation {
   const result: Validation = {
     valid: false,
-    message: `Errors detected in config file ${config}`,
+    message: `Errors detected in config file ${JSON.stringify(
+      config,
+      null,
+      2
+    )}`,
   }
 
   const validate = ajv.compile(mySchema)
 
-  try {
-    const isValid = validate(config)
+  const isValid = validate(config)
 
-    if (isValid) {
-      result.valid = true
-      result.message = `config: ${config} is ok`
-      return result
-    }
-  } catch (error: any) {
-    console.error('error:', error)
-    result.message = error
+  if (isValid) {
+    result.valid = true
+    result.message = `config: ${config} is ok`
+    return result
   }
 
   return result

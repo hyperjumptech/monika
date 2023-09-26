@@ -8,6 +8,10 @@ on:
   release:
     types: [published]
 
+permissions:
+  issues: read
+  pull-requests: read    
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -15,9 +19,10 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
-          node-version: 16
+          node-version: 18
       - run: npm ci
         name: Install dependencies
+      - run: npm run build -w packages/notification
       - run: npm test
         name: Run tests
       - run: npm pack
@@ -31,6 +36,8 @@ jobs:
     needs: test
     name: Publish for ${{ matrix.os }}
     runs-on: ${{ matrix.runs_on }}
+    permissions:
+      contents: write
     strategy:
       matrix:
         include:
@@ -51,7 +58,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
-          node-version: 16
+          node-version: 18
 
       - run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
         name: Get version
@@ -60,8 +67,9 @@ jobs:
 
       - run: npm ci
         name: Install dependencies
+      - run: npm run build -w packages/notification
 
-      - run: npm run pkg -- -t node16-${{ matrix.platform }}
+      - run: npm run pkg -- -t node18-${{ matrix.platform }}
         name: Pack the binary using vercel/pkg
 
       - run: file ./dist/*

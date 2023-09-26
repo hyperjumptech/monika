@@ -33,14 +33,15 @@ export const validateRedisConfig = (
   }
 
   const schema = Joi.object({
-    host: Joi.alternatives()
-      .try(Joi.string().hostname(), Joi.string().ip())
-      .required(),
-    port: Joi.number().min(0).max(65_536).required(),
+    host: Joi.alternatives().try(Joi.string().hostname(), Joi.string().ip()),
+    port: Joi.number().min(0).max(65_536),
     password: Joi.string(),
     username: Joi.string(),
     command: Joi.string(),
+    uri: Joi.string(),
   })
+    .xor('host', 'uri')
+    .and('host', 'port')
 
   for (const redis of redisConfig) {
     const validationError = schema.validate(redis)

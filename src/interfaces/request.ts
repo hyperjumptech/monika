@@ -22,7 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { AxiosRequestConfig } from 'axios'
+import { AxiosRequestConfig, AxiosRequestHeaders } from 'axios'
 import { ProbeAlert } from './probe'
 
 // RequestTypes are used to define the type of request that is being made.
@@ -37,6 +37,13 @@ export type RequestTypes =
   | 'mongo'
   | 'postgres'
 
+// The success/failure result of a probe
+export enum probeRequestResult {
+  failed = 0,
+  success = 1,
+  unknown = 2,
+}
+
 // ProbeRequestResponse is used to define the response from a probe requests.
 export interface ProbeRequestResponse<T = any> {
   requestType?: RequestTypes // is this for http (default) or icmp  or others
@@ -49,6 +56,8 @@ export interface ProbeRequestResponse<T = any> {
 
   isProbeResponsive: boolean // did the command/request response to requests/queries?
   errMessage?: string // any error message from drivers
+
+  result: probeRequestResult // did the probe succeed or fail?
 }
 
 // ProbeRequest is used to define the requests that is being made.
@@ -59,6 +68,7 @@ export interface RequestConfig extends Omit<AxiosRequestConfig, 'data'> {
   body: JSON | string
   timeout: number // request timeout
   alerts?: ProbeAlert[]
+  headers?: AxiosRequestHeaders
   ping?: boolean // is this request for a ping?
   allowUnauthorized?: boolean // ignore ssl cert?
 }

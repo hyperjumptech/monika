@@ -1,0 +1,47 @@
+{
+  "name": "@hyperjumptech/monika-notification",
+  "version": "1.15.7",
+  "description": "notification package for monika",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "prepack": "npm run clean && tsc -b",
+    "clean": "rm -rf lib tsconfig.tsbuildinfo",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npm run prepack && npm pack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hyperjumptech/monika"
+  },
+  "author": "@hyperjumptech",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/raosan/monika/issues"
+  },
+  "homepage": "https://github.com/raosan/monika#readme",
+  "dependencies": {
+    "@sendgrid/mail": "^7.4.2",
+    "axios": "^0.27.2",
+    "chai": "^4.3.4",
+    "chai-as-promised": "^7.1.1",
+    "chai-spies": "^1.0.0",
+    "date-fns": "^2.23.0",
+    "form-data": "^4.0.0",
+    "joi": "^17.4.0",
+    "mailgen": "^2.0.15",
+    "msw": "^0.36.4",
+    "nodemailer": "6.9.4",
+    "pino": "8.14.1",
+    "sqlite": "4.2.1",
+    "sqlite3": "5.1.6"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.3.5",
+    "@types/chai-as-promised": "^7.1.5",
+    "@types/chai-spies": "^1.0.3",
+    "@types/nodemailer": "^6.4.9",
+    "tslib": "^2.6.1",
+    "typescript": "^5.1.6"
+  }
+}

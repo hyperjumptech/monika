@@ -11,72 +11,56 @@ Out of the box, Monika support a multitude of notification channels, from chat a
 
 There are few requirements to start adding a new notification to Monika:
 
-1. Some basic Typescript may be helpful.
+1. Some basic TypeScript may be helpful.
 2. Some familiarity with git is required to clone and create pull requests.
-3. A Github account to fork and clone the [Monika open source repository](https://github.com/hyperjumptech/monika).
-4. An environment already set up for development in Javascript/Typescript. See the project [README](https://github.com/hyperjumptech/monika/blob/main/README.md) for an overview.
-5. A code editor such as vim or visual code is recommended.
+3. A GitHub account to fork and clone the [Monika open source repository](https://github.com/hyperjumptech/monika).
+4. An environment already set up for development in JavaScript/TypeScript. See the project [README](https://github.com/hyperjumptech/monika/blob/main/README.md) for an overview.
+5. A code editor such as [Vim](https://www.vim.org/) or [Visual Studio Code](https://code.visualstudio.com/) is recommended.
 
-## Extending
+## Add a New Notification
 
-The first step in adding custom notification is to extend the existing BaseNotification.
-
-1. Extend your new interface in `src/interfaces/notification.ts`
-
-Inside `notification.ts` define a new type, something to identify your new app/channel externally. In the example below, the google chat app is defined as `"google-chat"` with a `GoogleChatData` data type.
+1. Create a new file in the `packages/notification/channel` directory that satisfies the `NotificationChannel` type from the `packages/notification/channel/index.ts` file and implement the new notification.
 
 ```typescript
-interface GoogleChatNotification extends BaseNotification {
-  type: 'google-chat'
-  data: GoogleChatData
+type NotificationChannel<T = any> = {
+  validator: Joi.AnySchema
+  send: (notificationData: T, message: NotificationMessage) => Promise<void>
+  sendWithCustomContent?: (
+    notificationData: T,
+    customContent: T
+  ) => Promise<void>
+  additionalStartupMessage?: (notificationData: T) => string
 }
 ```
 
-2. Add your app specific data to `src/interfaces/data.ts`
+| Property                 | Description                                                                                                                                               | Example                                                     |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| validator                | To validate the `notificationData` field by using [Joi](https://github.com/hapijs/joi)                                                                    | `Joi.object().keys({ url: Joi.string().uri().required() })` |
+| send                     | It will be invoked if the application needs to send a message through the channel                                                                         | -                                                           |
+| sendWithCustomContent    | Optional to implement. It will be invoked by other apps that use package `@hyperjumptech/monika-notification` and need custom content in the notification | -                                                           |
+| additionalStartupMessage | To display additional message on the startup when using `verbose` flag                                                                                    | -                                                           |
 
-Most of the time, your notification channel may require some data such as API key, Namespace key etc. You can define all your requirements in `data.ts`. If your data is a bit complex, you can create a separate module such as `whatsapp.ts`. For our example, google chat only requires a url as input data.
+2. Import the implemented notification file to the `packages/notification/channel/index.ts` file.
 
-```javascript
-export interface GoogleChatData {
-  url: string;
+```typescript
+import * as whatsapp from './whatsapp'
+```
+
+3. Register it to the `channels` variable in the same file. The key in the channels variable will be used in the Monika configuration to identify the notification type.
+
+```typescript
+export const channels: Record<string, NotificationChannel> = {
+  desktop,
+  'google-chat': googlechat,
+  // ...
+  whatsapp,
+  workplace,
 }
 ```
 
-The WhatsApp application however, requires more data to be passed to it such as the following:
+## Events
 
-```javascript
-export interface WhatsappData extends MailData {
-  url: string
-  username: string
-  password: string
-}
-```
-
-## Linking
-
-After defining your interfaces and data types, we'll head over to `src/components/notification/index.ts` to link your notifications API. Find a function called `sendNotifications`, then add your app's type you've defined in step 1 above. This is where we also map the data from Monika, an array called `Notification[]` and an object called `NotificationMessage` to your app.
-
-```typescript
-export async function sendNotifications(
-  notifications: Notification[],
-  message: NotificationMessage
-): Promise<void>
-```
-
-Going back to our example for google-chat, we linked `sendNotifications` to our API `sendGoogleChat()` as follows:
-
-```typescript
-    case 'google-chat': {
-          await sendGoogleChat(notification.data, message)
-          break
-        }
-```
-
-## Implementation
-
-We now head over to `src/components/notification/channel/`. Create a new module specific for your application, something like `src/components/notification/channel/myChatApp.ts`. This is where all the notification implementations for each Monika event are coded. The events and messages you need to handle are embedded in the `NotificationMessage` object passed over from `sendNotifications()` above.
-
-Some of the events you need to handle are:
+You can access different type of events from the `message` argument from the `send` function. It available on the `meta.type` property. Some of the events you need to handle are:
 
 - `start`: This is a "start-of-monitoring" message when monika is first fired up.
 - `termination`: A termination message occurs as Monika is shutting down.
@@ -84,18 +68,14 @@ Some of the events you need to handle are:
 - `recovery`: Recovery alert indicates the probe has recovered from the previous incident.
 - `status-update`: Status update is a daily summary message of the probe events.
 
-Back to our google-chat example, this is how we use `message.meta.type` to handle the different events.
+This is the example how we handle the different events.
 
 ```typescript
-export const sendGoogleChat = async (
-  data: GoogleChatData,
-  message: NotificationMessage
-): Promise<any> => {
-
-  const notifType =
-    message.meta.type[0].toUpperCase() + message.meta.type.substring(1)
-
-  switch (message.meta.type) {
+function getContent(
+  { body, meta, summary }: NotificationMessage,
+  notificationType: string
+): Content {
+  switch (notificationType) {
     case 'start':
       ... code to send start notifications
     case 'termination':
@@ -108,13 +88,13 @@ export const sendGoogleChat = async (
 This is where you can get creative and really customize the look and feel of the notifications. You can use icons, widgets, fonts and colors of your choice. In the example `googlechat.ts` below, you can see how headers, text coloring are used to create the incident notifications. Your choices and available options will vary depending on your application. Refer to the app's development/integration documentation for more information.
 
 ```typescript
-case 'incident':
-      chatMessage = {
+    case 'incident':
+      return {
         cards: [
           {
             header: {
               title: 'Monika Notification',
-              subtitle: `New ${notifType} from Monika`,
+              subtitle: `New ${notificationType} from Monika`,
               imageUrl: 'https://bit.ly/3kckaGO',
             },
             sections: [
@@ -122,22 +102,22 @@ case 'incident':
                 widgets: [
                   {
                     textParagraph: {
-                      text: `<b>Message: <font color=#ff0000>Alert!</font></b> ${message.summary}`,
+                      text: `<b>Message: <font color=#ff0000>Alert!</font></b> ${summary}`,
                     },
                   },
                   {
                     textParagraph: {
-                      text: `<b>URL:</b> <a href>${message.meta.url}</a>`,
+                      text: `<b>URL:</b> <a href>${url}</a>`,
                     },
                   },
                   {
                     textParagraph: {
-                      text: `<b>Time:</b> ${message.meta.time}`,
+                      text: `<b>Time:</b> ${time}`,
                     },
                   },
                   {
                     textParagraph: {
-                      text: `<b>From:</b> ${message.meta.monikaInstance}`,
+                      text: `<b>From:</b> ${monikaInstance}`,
                     },
                   },
                 ],
@@ -146,23 +126,11 @@ case 'incident':
           },
         ],
       }
-      break
 ```
 
 ## Validating
 
-Finally, head over to `src/components/config/validate.ts` and look for the `validateNotification()` function. We'd like to make sure Monika is configured properly before each run and `validate.ts` handles the checking. This function is called at the beginning to verify that the user's configuration contains no error.
-
-```typescript
-    case 'google-chat': {
-        if (!notification.data.url) return WEBHOOK_NO_URL
-        break
-      }
-```
-
-In the example above, we made sure that the user provided the `url` when using the notification type `google-chat`. Otherwise a standardized "no-url-found" message is displayed.
-
-In addition the the in-code-validations above, Monika users have the option to use JSON schema validation from their favorite editors. This is super convenient and provide useful real time feedback. Therefore it is mandatory to add a new schema to reflect your changes, otherwise, your new notification type will not be recognized and flagged as an unknown type.
+Monika users have the option to use JSON schema validation from their favorite editors. This is super convenient and provide useful real time feedback. Therefore it is mandatory to add a new schema to reflect your changes, otherwise, your new notification type will not be recognized and flagged as an unknown type.
 
 Update the json schema in `src/monika-config-schema.json` to be able to validate your new notification.
 

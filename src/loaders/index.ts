@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import type { Config as IConfig } from '@oclif/core'
-import { setupConfig } from '../components/config'
+import { isSymonModeFrom, setupConfig } from '../components/config'
 import { setContext } from '../context'
 import events from '../events'
 import type { MonikaFlags } from '../context/monika-flags'
@@ -49,7 +49,7 @@ export default async function init(
 ): Promise<void> {
   const eventEmitter = getEventEmitter()
   const isTestEnvironment = process.env.CI || process.env.NODE_ENV === 'test'
-  const isSymonMode = Boolean(flags.symonUrl) && Boolean(flags.symonKey)
+  const isSymonMode = isSymonModeFrom(flags)
 
   setContext({ userAgent: cliConfig.userAgent })
 

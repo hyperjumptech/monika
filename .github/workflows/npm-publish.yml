@@ -8,6 +8,10 @@ on:
   release:
     types: [created]
 
+permissions:
+  issues: read
+  pull-requests: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -15,8 +19,9 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
-          node-version: 16
+          node-version: 18
       - run: npm ci
+      - run: npm run build -w packages/notification
       - run: npm test
 
   test:
@@ -26,8 +31,9 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
-          node-version: 16
+          node-version: 18
       - run: npm ci
+      - run: npm run build -w packages/notification
       - run: npm pack
       - run: npm install -g ./hyperjumptech-monika-*.tgz
       - run: npm run prod_test
@@ -39,9 +45,10 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
-          node-version: 16
+          node-version: 18
           registry-url: https://registry.npmjs.org/
       - run: npm ci
+      - run: npm run build -w packages/notification
       - run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}

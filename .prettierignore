@@ -9,3 +9,4 @@ docs/out
 docs/.next
 docs/.cache
 docs/node_modules
+oclif.manifest.json

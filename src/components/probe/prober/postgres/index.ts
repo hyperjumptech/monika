@@ -1,7 +1,61 @@
 import { parse } from 'pg-connection-string'
-import type { ProbeResult } from '..'
+import { BaseProber, type ProbeResult } from '..'
 import type { Postgres } from '../../../../interfaces/probe'
+import { probeRequestResult } from '../../../../interfaces/request'
 import { postgresRequest } from './request'
+
+export class PostgresProber extends BaseProber {
+  async probe(): Promise<void> {
+    if (!this.probeConfig.postgres) {
+      throw new Error(
+        `Postgres configuration is empty. Probe ID: ${this.probeConfig.id}`
+      )
+    }
+
+    const result = await probePostgres({
+      id: this.probeConfig.id,
+      checkOrder: this.counter,
+      postgres: this.probeConfig.postgres,
+    })
+
+    this.processProbeResults(result)
+  }
+
+  generateVerboseStartupMessage(): string {
+    const { description, id, interval, name } = this.probeConfig
+
+    let result = `- Probe ID: ${id}
+  Name: ${name || '-'}
+  Description: ${description || '-'}
+  Interval: ${interval}
+`
+    result += '  Connection Details:'
+    result += this.getConnectionDetails()
+
+    return result
+  }
+
+  private getConnectionDetails(): string {
+    return (
+      this.probeConfig.postgres
+        ?.map((db) => {
+          if (db.uri) {
+            return `
+    URI: ${db.uri}
+`
+          }
+
+          return `
+    Host: ${db.host}
+    Port: ${db.port}
+    Username: ${db.username}
+    Database: ${db.database}
+`
+        })
+        .join('\n') || ''
+    )
+  }
+}
 
 type ProbePostgresParams = {
   id: string
@@ -20,8 +74,8 @@ export async function probePostgres({
     const postgresConnectionDetails = getPostgresConnectionDetails(pg)
     const { host, port } = postgresConnectionDetails
     const requestResponse = await postgresRequest(postgresConnectionDetails)
-    const { body, responseTime, status } = requestResponse
-    const isAlertTriggered = status !== 200
+    const { body, responseTime, result } = requestResponse
+    const isAlertTriggered = result !== probeRequestResult.success
     const timeNow = new Date().toISOString()
     const logMessage = `${timeNow} ${checkOrder} id:${id} postgres:${host}:${port} ${responseTime}ms msg:${body}`
 

@@ -3,7 +3,126 @@
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).##
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## 1.15.8 2023-09-05
+
+## Fixed
+
+- Monika Install (#1116)
+
+## 1.15.7 2023-09-04
+
+## Fixed
+
+- Remove change empty array fallback for requests (#1113)
+- Mailgun notification handle node 18 (#1105)
+
+## Changed
+
+- Make the Probe Result a Mandatory Type (#1111)
+- Remove node_options environment variable when running test (#1112)
+- Adding sendWithCustomContent in sendgrid (#1109)
+
+## 1.15.6 2023-08-28
+
+## Fixed
+
+- Undefined Notification Message (#1103)
+- Webhook Notification is Not Working (#1102)
+- Make Probe Requests Property Optional (#1096)
+
+## Changed
+
+- Make HTTP Prober a Subclass (#1107)
+- Test the Packages Directory (#1106)
+- Update chaining request docs (#1101)
+- Improve Disconnect Notification (#1095)
+- Add simple success/fail result to each probe and new prometheus metric (#1061)
+
+## 1.15.5 2023-08-14
+
+## Fixed
+
+- Fix permision for docs deployment (#1085)
+- Fixed: Broken Docker Release Pipeline (#1086)
+- Fix binary upload workflow (#1087)
+- Fixed: Broken Publish Snapcraft Pipeline (#1088)
+- Fixed: Empty Request Info for Non HTTP Probe (#1091)
+- Fix doc build workflow (#1097)
+- Fix default maxRedirect too shallow (#1070)
+- Fix: Prevent Non-HTTP Probe to Create Prometheus Metrics (#1093)
+
+## Changed
+
+- Refactor: Add Base Class for Non HTTP Prober (#0174)
+- Chore: Upgrade Node.js Version to 18 (#986)
+
+## [1.15.4] - 2023-07-24
+
+## Added
+
+Feat: Improve Error Message When Request URL is not Using Protocol (#1063)
+update readme to import exported notification package (#1054)
+Doc/1050 update whatsapps docs (#1051)
+update guides doc on payload (#1048)
+
+## Fixed
+
+chore: bump typescript and clean up (#1082)
+tweak teams notification (#1080)
+Fix broken Nightly Workflow (#1076)
+Fixed: Confusing Notification Message for Non-HTTP Probe (#1072)
+Clean error msg when failed to load config file (#1057)
+Fix: crashes when some of the probe is removed from the configuration (#1067)
+fix: move instatus to notification workspace and register it as a notification channel (#1056)
+Fix: Probe Doesn't Run After Change Config (#1059)
+
+## Changed
+
+Chore: Upgrade Pino Version (#1079)
+update workflows (#1073)
+Limit workflow permissions and use environment vars to prevent injection. (#1071)
+(origin/main, origin/HEAD) Refactor: Add Test for doProbe Function (#1064)
+refactor: add abort controller to cancel running probe (#1058)
+update workflows to build the notification package (#1055)
+Chore: extract notification to workspace package (#1028)
+
+## [1.15.3] - 2023-05-22
+
+## Added
+
+- Add redis url support (#1039)
+- Allow unauthenticated SMTP (#1017)
+
+## Fixed
+
+- prometheus collector reassign on config change (#1021)
+
+## Changed
+
+- Docs: content footer (#1038)
+- Remove Pako as it is no longer needed (#1044)
+- Separate Initialize and Update Config (#1037)
+- Drop node.js 14 support (#1041)
+- Split the sanitize flag, get config, and update config phase and extract the get config function (#1035)
+- Test out the built binaries from PKG in CI (#1033)
+
+## [1.15.2] - 2023-04-13
+
+## Fixed
+
+- Update warning messages (#1022)
+- Fix: Downgrade Axios to be able to build binary using PKG (#1029)
+
+## Changed
+
+- Refactor: Simplify Send Notification Interface (#1019)
+
+## Docs
+
+- Docs: update pagerduty notification and json schema (#1020)
+- Docs: Update Deploy to Fly.io documentation (#1024)
 
 ## [1.15.1] - 2023-03-24
 

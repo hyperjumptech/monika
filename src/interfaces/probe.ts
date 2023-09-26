@@ -27,7 +27,7 @@ import { RequestConfig } from './request'
 export interface ProbeAlert {
   query?: string
   assertion: string
-  message?: string
+  message: string
   id?: string
 }
 
@@ -39,13 +39,14 @@ export type Socket = {
 }
 
 export type Redis = {
-  host: string
-  port: number
+  host?: string
+  port?: number
   username?: string
   password?: string
   command?: string
   data?: string | Uint8Array
   alerts?: ProbeAlert[]
+  uri?: string
 }
 
 export type MariaDB = {
@@ -84,7 +85,7 @@ export interface Probe {
   name: string
   description?: string
   interval: number
-  requests: RequestConfig[]
+  requests?: RequestConfig[]
   socket?: Socket
   redis?: Redis[]
   mongo?: Mongo[]

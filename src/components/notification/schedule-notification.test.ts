@@ -2,10 +2,7 @@ import cron from 'node-cron'
 import sinon from 'sinon'
 import chai, { expect } from 'chai'
 import spies from 'chai-spies'
-import {
-  resetScheduledTasks,
-  scheduleSummaryNotification,
-} from './schedule-notification'
+import { scheduleSummaryNotification } from './schedule-notification'
 
 chai.use(spies)
 
@@ -31,14 +28,16 @@ describe('Schedule notification', () => {
   afterEach(() => {
     sinon.restore()
     cronExpression = ''
-    resetScheduledTasks()
     taskStopCalledTotal = 0
   })
 
   describe('Schedule summary notification', () => {
     it('should not schedule notification on Symon mode', () => {
       // act
-      scheduleSummaryNotification({ isSymonMode: true })
+      scheduleSummaryNotification({
+        config: {},
+        flags: { symonKey: 'secret-key', symonUrl: 'https://example.com' },
+      })
 
       // assert
       sinon.assert.notCalled(cronScheduleStub)
@@ -47,8 +46,8 @@ describe('Schedule notification', () => {
     it('should not schedule notification if status notification flag is false', () => {
       // act
       scheduleSummaryNotification({
-        isSymonMode: false,
-        statusNotificationFlag: 'false',
+        config: {},
+        flags: { 'status-notification': 'false' },
       })
 
       // assert
@@ -58,9 +57,10 @@ describe('Schedule notification', () => {
     it('should schedule notification based on notification flag value', () => {
       // act
       scheduleSummaryNotification({
-        isSymonMode: false,
-        statusNotificationFlag: '* * * * *',
-        statusNotificationConfig: '0 0 0 0 0',
+        config: { 'status-notification': '0 0 0 0 0' },
+        flags: {
+          'status-notification': '* * * * *',
+        },
       })
 
       // assert
@@ -71,8 +71,8 @@ describe('Schedule notification', () => {
     it('should schedule notification based on notification config value', () => {
       // act
       scheduleSummaryNotification({
-        isSymonMode: false,
-        statusNotificationConfig: '0 0 0 0 0',
+        config: { 'status-notification': '0 0 0 0 0' },
+        flags: {},
       })
 
       // assert
@@ -82,9 +82,7 @@ describe('Schedule notification', () => {
 
     it('should schedule notification use default schedule', () => {
       // act
-      scheduleSummaryNotification({
-        isSymonMode: false,
-      })
+      scheduleSummaryNotification({ config: {}, flags: {} })
 
       // assert
       sinon.assert.calledOnce(cronScheduleStub)
@@ -94,16 +92,9 @@ describe('Schedule notification', () => {
 
   describe('Reset schedule notification', () => {
     it('should stop all running scheduled notification', () => {
-      // arrange
-      scheduleSummaryNotification({
-        isSymonMode: false,
-      })
-      scheduleSummaryNotification({
-        isSymonMode: false,
-      })
-
       // act
-      resetScheduledTasks()
+      scheduleSummaryNotification({ config: {}, flags: {} })
+      scheduleSummaryNotification({ config: {}, flags: {} })
 
       // arrange
       expect(taskStopCalledTotal).eq(2)

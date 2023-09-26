@@ -26,8 +26,9 @@ import * as Handlebars from 'handlebars'
 import FormData from 'form-data'
 import YAML from 'yaml'
 import {
-  ProbeRequestResponse,
-  RequestConfig,
+  type ProbeRequestResponse,
+  type RequestConfig,
+  probeRequestResult,
 } from '../../../../interfaces/request'
 import * as qs from 'querystring'
 
@@ -165,7 +166,7 @@ export async function httpRequest({
       status,
       headers,
       responseTime,
-
+      result: probeRequestResult.success,
       isProbeResponsive: true,
     }
   } catch (error: any) {
@@ -180,7 +181,7 @@ export async function httpRequest({
         status: error?.response?.status,
         headers: error?.response?.headers,
         responseTime,
-
+        result: probeRequestResult.success,
         isProbeResponsive: true, // http status received, so connection ok
       }
     }
@@ -196,7 +197,7 @@ export async function httpRequest({
         status,
         headers: '',
         responseTime,
-
+        result: probeRequestResult.failed,
         isProbeResponsive: false,
         errMessage: error?.code,
       }
@@ -209,7 +210,7 @@ export async function httpRequest({
       status: error.code || 'Unknown error',
       headers: '',
       responseTime,
-
+      result: probeRequestResult.failed,
       isProbeResponsive: false,
       errMessage: error.code || 'Unknown error',
     }
@@ -227,7 +228,10 @@ export function generateRequestChainingBody(
   return isString ? renderedBody : JSON.parse(renderedBody)
 }
 
-function transformContentByType(content: any, contentType?: string) {
+function transformContentByType(
+  content: any,
+  contentType?: string | number | boolean
+) {
   switch (contentType) {
     case 'application/x-www-form-urlencoded':
       return {
@@ -268,16 +272,38 @@ function errorRequestCodeToNumber(
       // not found, the abyss never returned a statusCode
       // assign some unique errResponseCode for decoding later.
       return 0
-
     case 'ECONNRESET':
       // connection reset from target, assign some unique number responsecCode
       return 1
-
     case 'ECONNREFUSED':
       // got rejected, again
       return 2
+    case 'ERR_FR_TOO_MANY_REDIRECTS':
+      // redirect higher than set in maxRedirects
+      return 3
+    // cover all possible axios connection issues
+    case 'ERR_BAD_OPTION_VALUE':
+      return 4
+    case 'ERR_BAD_OPTION':
+      return 5
+    case 'ETIMEDOUT':
+      return 6
+    case 'ERR_NETWORK':
+      return 7
+    case 'ERR_DEPRECATED':
+      return 8
+    case 'ERR_BAD_RESPONSE':
+      return 9
+    case 'ERR_BAD_REQUEST':
+      return 11
+    case 'ERR_CANCELED':
+      return 12
+    case 'ERR_NOT_SUPPORT':
+      return 13
+    case 'ERR_INVALID_URL':
+      return 14
 
     default:
-      return 3
+      return 99 // in the event an unlikely unknown error, send here
   }
 }

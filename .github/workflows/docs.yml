@@ -13,8 +13,14 @@ env:
   ALGOLIA_ADMIN_API_KEY: ${{secrets.ALGOLIA_ADMIN_API_KEY}}
   NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY: ${{secrets.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY}}
 
+permissions:
+  issues: read
+  pull-requests: read
+  
 jobs:
   build:
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     defaults:
       run:

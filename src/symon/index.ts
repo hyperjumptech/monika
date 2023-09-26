@@ -33,6 +33,7 @@ import path from 'path'
 import { updateConfig } from '../components/config'
 import { getOSName } from '../components/notification/alert-message'
 import { getContext } from '../context'
+import type { MonikaFlags } from '../context/monika-flags'
 import events from '../events'
 import { Config } from '../interfaces/config'
 import { Probe } from '../interfaces/probe'
@@ -161,44 +162,47 @@ class SymonClient {
   })
 
   constructor({
-    url,
-    apiKey,
-    locationId,
-    monikaId,
-    reportInterval,
-    reportLimit,
-  }: {
-    url: string
-    apiKey: string
-    locationId?: string | undefined
-    monikaId?: string | undefined
-    reportInterval?: number | undefined
-    reportLimit?: number | undefined
-  }) {
+    symonUrl = '',
+    symonKey = '',
+    symonLocationId,
+    symonMonikaId,
+    symonReportInterval,
+    symonReportLimit,
+    'symon-api-version': apiVersion,
+  }: Pick<
+    MonikaFlags,
+    | 'symon-api-version'
+    | 'symonUrl'
+    | 'symonKey'
+    | 'symonLocationId'
+    | 'symonMonikaId'
+    | 'symonReportInterval'
+    | 'symonReportLimit'
+  >) {
     this.httpClient = axios.create({
-      baseURL: `${url}/api/v1/monika`,
+      baseURL: `${symonUrl}/api/${apiVersion}/monika`,
       headers: {
-        'x-api-key': apiKey,
+        'x-api-key': symonKey,
       },
       timeout: DEFAULT_TIMEOUT,
     })
 
-    this.url = url
+    this.url = symonUrl
 
-    this.apiKey = apiKey
+    this.apiKey = symonKey
 
-    this.locationId = locationId || ''
+    this.locationId = symonLocationId || ''
 
-    this.monikaId = monikaId || ''
+    this.monikaId = symonMonikaId || ''
 
     this.fetchProbesInterval = Number.parseInt(
       process.env.FETCH_PROBES_INTERVAL ?? '60000',
       10
     )
 
-    this.reportProbesInterval = reportInterval ?? 10_000
+    this.reportProbesInterval = symonReportInterval ?? 10_000
 
-    this.reportProbesLimit = reportLimit ?? 100
+    this.reportProbesLimit = symonReportLimit ?? 100
   }
 
   async initiate(): Promise<void> {
@@ -436,6 +440,10 @@ class SymonClient {
     } catch (error: any) {
       log.warn(`Warning: Can't send status to Symon. ${error?.message}`)
     }
+  }
+
+  async stopReport(): Promise<void> {
+    await this.bree.stop()
   }
 }
 

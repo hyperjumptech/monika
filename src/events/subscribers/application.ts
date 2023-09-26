@@ -24,7 +24,7 @@
 
 import { hostname } from 'os'
 import { getConfig } from '../../components/config'
-import { sendNotifications } from '../../components/notification'
+import { sendNotifications } from '@hyperjumptech/monika-notification'
 import { getMessageForTerminate } from '../../components/notification/alert-message'
 import events from '../../events'
 import { getEventEmitter } from '../../utils/events'

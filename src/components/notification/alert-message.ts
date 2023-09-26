@@ -29,7 +29,7 @@ import * as Handlebars from 'handlebars'
 import getos from 'getos'
 import osName from 'os-name'
 import { getContext } from '../../context'
-import { NotificationMessage } from '../../interfaces/notification'
+import type { NotificationMessage } from '@hyperjumptech/monika-notification'
 import { ProbeRequestResponse } from '../../interfaces/request'
 import { ProbeAlert } from '../../interfaces/probe'
 import { publicIpAddress, publicNetworkInfo } from '../../utils/public-ip'
@@ -67,10 +67,12 @@ const getExpectedMessage = (
 ): string | number => {
   const { status, data, headers, responseTime } = response
 
-  if (!alert.message) {
-    if (isRecovery)
-      return `The request is back to normal and passed the assertion: ${alert.query}`
-    return `The request failed because the response did not pass the query: ${alert.query}. The actual response status is ${status} and the response time is ${responseTime}.`
+  if (alert.message === '') {
+    if (isRecovery) {
+      return `The request is back to normal and passed the assertion: ${alert.assertion}`
+    }
+
+    return `The request failed because the response did not pass the query: ${alert.assertion}. The actual response status is ${status} and the response time is ${responseTime}.`
   }
 
   return Handlebars.compile(alert.message)({
@@ -122,7 +124,7 @@ export async function getMessageForAlert({
   const expectedMessage = getExpectedMessage(alert, response, isRecovery)
   const bodyString = `Message: ${recoveryMessage}${expectedMessage}
 
-URL: ${meta.url}
+${meta.url ? `URL: ${meta.url}` : `Probe ID: ${probeID}`}
 
 Time: ${meta.time}
 

@@ -3,4 +3,3 @@ notifications:
     type: webhook
     data:
       url: http://www.example.com
-      method: GET

@@ -167,7 +167,7 @@ describe('monika', () => {
     )
     .catch((error) => {
       expect(error.message).to.contain(
-        'Probe request URL should start with http:// or https://'
+        'Probe request URL (something/something) should start with http:// or https://'
       )
     })
     .it('runs with config with invalid probe request URL')
@@ -263,9 +263,7 @@ describe('monika', () => {
       ])
     )
     .catch((error) => {
-      expect(error.message).to.contain(
-        'Recipients does not exists or has length lower than 1!'
-      )
+      expect(error.message).to.contain('"Mailgun Recipients" is required')
     })
     .it('runs with mailgun config but without recipients')
 
@@ -292,9 +290,7 @@ describe('monika', () => {
       ])
     )
     .catch((error) => {
-      expect(error.message).to.contain(
-        'Recipients does not exists or has length lower than 1!'
-      )
+      expect(error.message).to.contain('"SendGrid recipients" is required')
     })
     .it('runs with sendgrid config but without recipients')
 
@@ -324,9 +320,7 @@ describe('monika', () => {
       ])
     )
     .catch((error) => {
-      expect(error.message).to.contain(
-        'Recipients does not exists or has length lower than 1!'
-      )
+      expect(error.message).to.contain('"Email Recipients" is required')
     })
     .it('runs with SMTP config but without recipients')
 
@@ -383,7 +377,7 @@ describe('monika', () => {
       ])
     )
     .catch((error) => {
-      expect(error.message).to.contain('Teams Webhook URL not found')
+      expect(error.message).to.contain('"Teams URL" is required')
     })
     .it('runs with teams config but without webhook url')
 
@@ -431,11 +425,11 @@ describe('monika', () => {
       cmd.run([
         '-c',
         resolve('./test/testConfigs/manyNotif.yml'),
-        resolve('./test/testConfigs/noProbes.yml'),
+        resolve('./test/testConfigs/simple-1p-1n.yaml'),
       ])
     )
     .it(
-      'run wth multiple config override: no probes on the second config',
+      'run with multiple config override: no probes on the second config',
       (ctx) => {
         expect(ctx.stdout)
           .to.contain('Notifications: 1')

@@ -6,6 +6,7 @@
     "module": "commonjs",
     "outDir": "lib",
     "rootDir": "src",
+    "lib": ["ES2021.String", "DOM"],
     "strict": true,
     "target": "es2017",
     "skipLibCheck": true,
@@ -13,5 +14,5 @@
     "resolveJsonModule": true,
     "typeRoots": ["node_modules/@types", "custom_types"]
   },
-  "include": ["src/**/*", "src/**/*.json"]
+  "include": ["src/**/*", "src/**/*.json", "../packages/notification/**/*"]
 }

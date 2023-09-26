@@ -3,6 +3,7 @@ notifications:
     type: sendgrid
     data:
       apiKey: adfsafdsadfdsafsafds
+      sender: name@example.com
 probes:
   - id: '1'
     name: Example
