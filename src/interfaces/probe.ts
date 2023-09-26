@@ -82,7 +82,6 @@ export type Postgres = {
 
 export type Ping = {
   uri: string
-  interval: number
 }
 
 export interface Probe {

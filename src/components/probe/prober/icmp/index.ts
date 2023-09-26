@@ -63,7 +63,7 @@ type ProbePingParams = {
   pings?: Ping[]
 }
 
-async function probePing({
+export async function probePing({
   id,
   checkOrder,
   pings,

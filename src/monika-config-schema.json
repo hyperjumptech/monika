@@ -220,7 +220,7 @@
       }
     },
     "ping": {
-      "title": "Requests",
+      "title": "Ping",
       "type": "array",
       "description": "The ICMP ping probe",
       "items": {
