@@ -108,7 +108,7 @@ export async function saveProbeRequestToPouchDB({
     id: probeDataId,
     probeId: probe.id,
     probeName: probe.name,
-    requestBody: JSON.stringify(requestConfig?.body),
+    // requestBody: JSON.stringify(requestConfig?.body),
     requestHeader: JSON.stringify(requestConfig?.headers),
     requestMethod: requestConfig?.method,
     requestType: probe.socket ? 'tcp' : 'http',
@@ -117,8 +117,8 @@ export async function saveProbeRequestToPouchDB({
     responseSize: probeRes.headers['content-length'],
     responseStatus: probeRes.status,
     responseTime: probeRes?.responseTime ?? 0,
-    socketHost: probe.socket?.host || '',
-    socketPort: probe.socket?.port || '',
+    // socketHost: probe.socket?.host || '',
+    // socketPort: probe.socket?.port || '',
     timestamp: now,
   }
 
