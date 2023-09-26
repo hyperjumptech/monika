@@ -170,8 +170,8 @@ If you have a connection URI, you can pass it to the `uri` field like below:
 
 ### PING Request
 
-You can send an ICMP echo request to a specific url by enabling the `ping: true` field.
-In this mode the http method is ignored and a PING echo request is sent to the specified url.
+You can send an ICMP echo request to a specific url by specifying a `ping` probe.
+In this mode the a PING echo request is sent to the specified url.
 
 ```yaml
 probes:
@@ -179,9 +179,8 @@ probes:
     name: ping_test
     description: requesting icmp ping
     interval: 10 # in seconds
-    requests:
-      - url: http://google.com
-        ping: true
+    ping:
+      - uri: http://google.com
 ```
 
 ### Postgres Request
