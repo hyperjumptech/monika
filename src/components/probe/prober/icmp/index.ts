@@ -45,15 +45,21 @@ export class PingProber extends BaseProber {
         Description: ${description || '-'}
         Interval: ${interval}
         `
-
-    result += '  Connection Details:'
+    result += '  ping:'
     result += this.getConnectionDetails()
 
     return result
   }
 
   private getConnectionDetails(): string {
-    return ``
+    return (
+      this.probeConfig.ping
+        ?.map((probe) => {
+          return `
+            uri: ${probe.uri}`
+        })
+        .join(``) || `\n`
+    )
   }
 }
 
