@@ -28,7 +28,7 @@ export interface ProbeAlert {
   query?: string
   assertion: string
   message: string
-  id?: string
+  id: string
 }
 
 export type Socket = {

@@ -228,6 +228,7 @@ describe('Probe processing', () => {
         id: '2md9o',
         alerts: [
           {
+            id: 'fKBzx',
             assertion: 'response.status == 200',
             message: 'The request failed.',
           },
@@ -271,7 +272,9 @@ describe('Probe processing', () => {
         ...probes[0],
         id: 'fj43l',
         requests: [{ url: 'https://example.com', body: '', timeout: 30 }],
-        alerts: [{ assertion: 'response.status != 200', message: '' }],
+        alerts: [
+          { id: 'jFQBd', assertion: 'response.status != 200', message: '' },
+        ],
       }
       const notifications = [
         {

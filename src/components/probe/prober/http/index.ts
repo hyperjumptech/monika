@@ -27,7 +27,7 @@ import { checkThresholdsAndSendAlert } from '../..'
 import { getContext } from '../../../../context'
 import events from '../../../../events'
 import type { Notification } from '@hyperjumptech/monika-notification'
-import type { Probe } from '../../../../interfaces/probe'
+import type { Probe, ProbeAlert } from '../../../../interfaces/probe'
 import type { ProbeRequestResponse } from '../../../../interfaces/request'
 import { probeRequestResult } from '../../../../interfaces/request'
 import validateResponse from '../../../../plugins/validate-response'
@@ -168,7 +168,7 @@ async function probeHTTP(
           validatedResponse[0].alert = {
             assertion: '',
             message: CONNECTION_RECOVERY_MESSAGE,
-          }
+          } as ProbeAlert
           isConnectionDown.delete(id) // connection is up, so remove from entry
           validatedResponse.splice(1, validatedResponse.length) // truncate and use custom message
         } else if (!isProbeResponsive) {
@@ -176,7 +176,7 @@ async function probeHTTP(
           validatedResponse[0].alert = {
             assertion: '',
             message: CONNECTION_INCIDENT_MESSAGE,
-          }
+          } as ProbeAlert
           isConnectionDown.set(id, true) // connection is down, so add to map
           validatedResponse.splice(1, validatedResponse.length) // truncate and use custom message
         }

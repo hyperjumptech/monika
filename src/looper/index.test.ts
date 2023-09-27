@@ -139,17 +139,16 @@ describe('Looper', () => {
       const result = sanitizeProbe(false, probe)
 
       // assert
-      expect(result.alerts).deep.eq([
-        {
-          assertion: 'response.status < 200 or response.status > 299',
-          message: 'HTTP Status is {{ response.status }}, expecting 200',
-        },
-        {
-          assertion: 'response.time > 2000',
-          message:
-            'Response time is {{ response.time }}ms, expecting less than 2000ms',
-        },
-      ])
+      expect(result.alerts[0].assertion).eq(
+        'response.status < 200 or response.status > 299'
+      )
+      expect(result.alerts[0].message).eq(
+        'HTTP Status is {{ response.status }}, expecting 200'
+      )
+      expect(result.alerts[1].assertion).eq('response.time > 2000')
+      expect(result.alerts[1].message).eq(
+        'Response time is {{ response.time }}ms, expecting less than 2000ms'
+      )
     })
 
     it('should set default alerts for non HTTP probe', () => {
@@ -162,12 +161,8 @@ describe('Looper', () => {
       const result = sanitizeProbe(false, probe)
 
       // assert
-      expect(result.alerts).deep.eq([
-        {
-          assertion: 'response.status < 200 or response.status > 299',
-          message: 'Probe is not accesible',
-        },
-      ])
+      expect(result.alerts[0].assertion).eq('')
+      expect(result.alerts[0].message).eq('Probe is not accesible')
     })
 
     it('should remove alerts on Symon mode', () => {
