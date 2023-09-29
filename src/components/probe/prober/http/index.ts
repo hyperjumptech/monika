@@ -22,6 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import { v4 as uuid } from 'uuid'
 import { getContext } from '../../../../context'
 import events from '../../../../events'
 import { getEventEmitter } from '../../../../utils/events'
@@ -373,10 +374,12 @@ function getNotificationMessage({
 function getDefaultAlerts(): ProbeAlert[] {
   return [
     {
+      id: uuid(),
       assertion: 'response.status < 200 or response.status > 299',
       message: 'HTTP Status is {{ response.status }}, expecting 200',
     },
     {
+      id: uuid(),
       assertion: 'response.time > 2000',
       message:
         'Response time is {{ response.time }}ms, expecting less than 2000ms',

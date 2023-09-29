@@ -44,7 +44,7 @@ describe('Alert message', () => {
       const alertMessage = await getMessageForAlert({
         probeID: 'f76fef86-7331-4bfd-a7e9-f4ba105127ac',
         url: '',
-        alert: { assertion: '', message: '' },
+        alert: { id: 'fKBzx', assertion: '', message: '' },
         ipAddress: '',
         isRecovery: false,
         response: {
@@ -74,7 +74,7 @@ describe('Alert message', () => {
       const alertMessage = await getMessageForAlert({
         probeID: 'f76fef86-7331-4bfd-a7e9-f4ba105127ac',
         url: '',
-        alert: { assertion: '', message: '' },
+        alert: { id: 'fKBzx', assertion: '', message: '' },
         ipAddress: '',
         isRecovery: false,
         response: {
@@ -102,7 +102,7 @@ describe('Alert message', () => {
           {
             probeID: 'f76fef86-7331-4bfd-a7e9-f4ba105127ac',
             probeRequestURL: '',
-            alert: { assertion: '', message: '' },
+            alert: { id: 'Eya6D', assertion: '', message: '' },
             createdAt: new Date(),
           },
         ],
@@ -112,7 +112,7 @@ describe('Alert message', () => {
       const alertMessage = await getMessageForAlert({
         probeID: 'f76fef86-7331-4bfd-a7e9-f4ba105127ac',
         url: '',
-        alert: { assertion: '', message: '' },
+        alert: { id: 'fKBzx', assertion: '', message: '' },
         ipAddress: '',
         isRecovery: true,
         response: {
@@ -140,25 +140,25 @@ describe('Alert message', () => {
           {
             probeID: 'f76fef86-7331-4bfd-a7e9-f4ba105127aa',
             probeRequestURL: '',
-            alert: { assertion: '', message: '' },
+            alert: { id: 'CJaQk', assertion: '', message: '' },
             createdAt: incidentDateTime,
           },
           {
             probeID: 'f76fef86-7331-4bfd-a7e9-f4ba105127aa',
             probeRequestURL: 'https://example.com',
-            alert: { assertion: '', message: '' },
+            alert: { id: 'CJaQk', assertion: '', message: '' },
             createdAt: incidentDateTime,
           },
           {
             probeID: 'f76fef86-7331-4bfd-a7e9-f4ba105127ab',
             probeRequestURL: '',
-            alert: { assertion: '', message: '' },
+            alert: { id: 'CJaQk', assertion: '', message: '' },
             createdAt: incidentDateTime,
           },
           {
             probeID: 'f76fef86-7331-4bfd-a7e9-f4ba105127ac',
             probeRequestURL: 'https://example.com',
-            alert: { assertion: '', message: '' },
+            alert: { id: 'CJaQk', assertion: '', message: '' },
             createdAt: incidentDateTime,
           },
         ],
@@ -168,7 +168,7 @@ describe('Alert message', () => {
       const alertMessage = await getMessageForAlert({
         probeID: 'f76fef86-7331-4bfd-a7e9-f4ba105127aa',
         url: '',
-        alert: { assertion: '', message: '' },
+        alert: { id: 'fKBzx', assertion: '', message: '' },
         ipAddress: '',
         isRecovery: true,
         response: {

@@ -33,7 +33,7 @@ describe('Downtime counter', () => {
   it('should start counter', () => {
     // arrange
     const probeConfig = {
-      alert: { assertion: '', message: '' },
+      alert: { id: 'PHbCL', assertion: '', message: '' },
       probeID: 'APDpe',
       url: 'https://example.com',
     }
@@ -48,7 +48,7 @@ describe('Downtime counter', () => {
   it('should stop counter', () => {
     // arrange
     const probeConfig = {
-      alert: { assertion: '', message: '' },
+      alert: { id: 'VyYwG', assertion: '', message: '' },
       probeID: 'P1n9x',
       url: 'https://example.com',
     }
@@ -64,7 +64,7 @@ describe('Downtime counter', () => {
   it('should stop inexistent counter', () => {
     // arrange
     const probeConfig = {
-      alert: { assertion: '', message: '' },
+      alert: { id: 'knUA4', assertion: '', message: '' },
       probeID: 'P1n9x',
       url: 'https://example.com',
     }
@@ -79,7 +79,7 @@ describe('Downtime counter', () => {
   it('should return 0 seconds if not started yet', () => {
     // arrange
     const probeConfig = {
-      alert: { assertion: '', message: '' },
+      alert: { id: '9c92j', assertion: '', message: '' },
       probeID: 'rwrs8',
       url: 'https://example.com',
     }

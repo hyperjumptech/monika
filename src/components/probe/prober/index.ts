@@ -23,6 +23,7 @@
  **********************************************************************************/
 
 import type { Notification } from '@hyperjumptech/monika-notification'
+import { v4 as uuid } from 'uuid'
 import { type Incident, getContext } from '../../../context'
 import events from '../../../events'
 import type { Probe, ProbeAlert } from '../../../interfaces/probe'
@@ -81,6 +82,7 @@ export enum ProbeMessage {
 }
 
 export const failedRequestAssertion: ProbeAlert = {
+  id: uuid(),
   assertion: '',
   message: ProbeMessage.ProbeNotAccessible,
 }
