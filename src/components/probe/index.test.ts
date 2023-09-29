@@ -56,10 +56,6 @@ const server = setupServer(
       >
     }
 
-    console.log(requestBody)
-
-    console.log(notificationAlert)
-
     return res(ctx.status(200))
   })
 )
@@ -269,6 +265,9 @@ describe('Probe processing', () => {
       expect(
         notificationAlert?.[probe?.requests?.[0]?.url || 0]?.body?.alert
       ).eq('response.status != 200')
+
+      // restore
+      server.resetHandlers()
     }).timeout(10_000)
 
     it('should send recovery notification', async () => {
@@ -321,10 +320,6 @@ describe('Probe processing', () => {
   })
 
   describe('Non HTTP Probe', () => {
-    afterEach(() => {
-      sinon.restore()
-    })
-
     it('should probe MariaDB', async () => {
       // arrange
       const requestStub = sinon.stub(mariadb, 'createConnection').callsFake(
@@ -405,6 +400,16 @@ describe('Probe processing', () => {
       // assert
       expect(notificationAlert?.[probe.id]?.body?.url).eq('1c8QrZ')
       expect(notificationAlert?.[probe.id]?.body?.alert).eq('')
+
+      // restore
+      sinon.stub(mariadb, 'createConnection').callsFake(
+        async (_connectionUri) =>
+          ({
+            end: async () => {
+              Promise.resolve()
+            },
+          } as mariadb.Connection)
+      )
     }).timeout(10_000)
 
     it('should send recovery notification for MariaDB probe', async () => {
