@@ -41,14 +41,24 @@ import { getContext, resetContext, setContext } from '../../context'
 import type { MonikaFlags } from '../../context/monika-flags'
 
 let urlRequestTotal = 0
-let notificationAlert: Record<string, any> = {}
+let notificationAlert: Record<string, Record<string, any>> = {}
 const server = setupServer(
   rest.get('https://example.com', (_, res, ctx) => {
     urlRequestTotal += 1
     return res(ctx.status(200))
   }),
   rest.post('https://example.com/webhook', (req, res, ctx) => {
-    notificationAlert = req.body as Record<string, string>
+    const requestBody = req?.body as Record<string, any>
+    if (requestBody?.body?.url) {
+      notificationAlert[requestBody.body.url] = requestBody as Record<
+        string,
+        string
+      >
+    }
+
+    console.log(requestBody)
+
+    console.log(notificationAlert)
 
     return res(ctx.status(200))
   })
@@ -206,8 +216,10 @@ describe('Probe processing', () => {
       await sleep(2 * seconds)
 
       // assert
-      expect(notificationAlert.body.url).eq('https://example.com')
-      expect(notificationAlert.body.alert).eq('')
+      expect(notificationAlert?.[probe.requests[0].url]?.body?.url).eq(
+        'https://example.com'
+      )
+      expect(notificationAlert?.[probe.requests[0].url]?.body.alert).eq('')
     }).timeout(10_000)
 
     it('should send incident notification', async () => {
@@ -251,8 +263,12 @@ describe('Probe processing', () => {
       await sleep(2 * seconds)
 
       // assert
-      expect(notificationAlert.body.url).eq('https://example.com')
-      expect(notificationAlert.body.alert).eq('response.status != 200')
+      expect(notificationAlert?.[probe?.requests?.[0]?.url || 0]?.body?.url).eq(
+        'https://example.com'
+      )
+      expect(
+        notificationAlert?.[probe?.requests?.[0]?.url || 0]?.body?.alert
+      ).eq('response.status != 200')
     }).timeout(10_000)
 
     it('should send recovery notification', async () => {
@@ -295,8 +311,12 @@ describe('Probe processing', () => {
       await sleep(3 * seconds)
 
       // assert
-      expect(notificationAlert.body.url).eq('https://example.com')
-      expect(notificationAlert.body.alert).eq('response.status != 200')
+      expect(notificationAlert?.[probe.requests[0].url]?.body?.url).eq(
+        'https://example.com'
+      )
+      expect(notificationAlert?.[probe.requests[0].url]?.body?.alert).eq(
+        'response.status != 200'
+      )
     }).timeout(10_000)
   })
 
@@ -383,8 +403,8 @@ describe('Probe processing', () => {
       await sleep(2 * seconds)
 
       // assert
-      expect(notificationAlert.body.url).eq('1c8QrZ')
-      expect(notificationAlert.body.alert).eq('')
+      expect(notificationAlert?.[probe.id]?.body?.url).eq('1c8QrZ')
+      expect(notificationAlert?.[probe.id]?.body?.alert).eq('')
     }).timeout(10_000)
 
     it('should send recovery notification for MariaDB probe', async () => {
@@ -434,8 +454,8 @@ describe('Probe processing', () => {
 
       // assert
       sinon.assert.called(requestStub)
-      expect(notificationAlert.body.url).eq('3ngd4')
-      expect(notificationAlert.body.alert).eq('')
+      expect(notificationAlert?.[probe.id]?.body?.url).eq('3ngd4')
+      expect(notificationAlert?.[probe.id]?.body?.alert).eq('')
     }).timeout(10_000)
 
     it('should probe MongoDB', async () => {
