@@ -166,25 +166,10 @@ export class RequestLog {
       probe: this.probe,
       requestIndex: this.requestIndex,
       probeRes: this.response!,
-      alertQueries: this.triggeredAlerts.map((alert) => alert.assertion),
       monikaId: monikaID,
     }
 
-    if (this.sentNotifications.length === 0) {
-      await saveProbeRequestToPouchDB(commonData)
-      return
-    }
-
-    await Promise.all(
-      this.sentNotifications.map((sent) =>
-        saveProbeRequestToPouchDB({
-          ...commonData,
-          notifAlert: sent.alertQuery,
-          notification: sent.notification,
-          type: sent.type,
-        })
-      )
-    )
+    await saveProbeRequestToPouchDB(commonData)
   }
 
   async saveToSQLite(): Promise<void> {

@@ -21,13 +21,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  *
  * SOFTWARE.                                                                      *
  **********************************************************************************/
-import type { Notification } from '@hyperjumptech/monika-notification'
+import { getISOWeek, getISOWeekYear } from 'date-fns'
 import PouchDB from 'pouchdb'
 import { getContext } from '../../context'
 import { Probe } from '../../interfaces/probe'
 import { ProbeRequestResponse } from '../../interfaces/request'
 import { log } from '../../utils/pino'
 let localPouchDB: PouchDB.Database
+
+interface Probes {
+  [probeId: string]: {
+    timeQuery: any
+    responseTime: number
+    count: number
+  }
+}
 
 /**
  * openLogPouch will create a pouchDB connection and sets a replication to the CouchDB
@@ -84,19 +92,11 @@ export async function saveProbeRequestToPouchDB({
   probe,
   requestIndex,
   probeRes,
-  alertQueries,
-  notifAlert,
-  notification,
-  type,
   monikaId,
 }: {
   probe: Probe
   requestIndex: number
   probeRes: ProbeRequestResponse
-  alertQueries?: string[]
-  notifAlert?: string
-  notification?: Notification
-  type?: 'NOTIFY-INCIDENT' | 'NOTIFY-RECOVER' | 'NOTIFY-TLS'
   monikaId?: string
 }): Promise<void> {
   const now = Math.round(Date.now() / 1000)
@@ -104,11 +104,9 @@ export async function saveProbeRequestToPouchDB({
 
   const probeDataId = Date.now().toString()
   const reqData = {
-    alerts: '',
     id: probeDataId,
     probeId: probe.id,
     probeName: probe.name,
-    // requestBody: JSON.stringify(requestConfig?.body),
     requestHeader: JSON.stringify(requestConfig?.headers),
     requestMethod: requestConfig?.method,
     requestType: probe.socket ? 'tcp' : 'http',
@@ -117,34 +115,75 @@ export async function saveProbeRequestToPouchDB({
     responseSize: probeRes.headers['content-length'],
     responseStatus: probeRes.status,
     responseTime: probeRes?.responseTime ?? 0,
-    // socketHost: probe.socket?.host || '',
-    // socketPort: probe.socket?.port || '',
     timestamp: now,
   }
 
-  const notifData = {
-    alertType: notifAlert,
-    channel: notification?.type,
-    id: probeDataId,
-    notificationId: notification?.id,
-    probeId: probe.id,
-    probeName: probe.name,
-    timestamp: now,
-    type: type,
-  }
+  const responseStatus = Number.isNaN(reqData.responseStatus)
+    ? 0
+    : reqData.responseStatus
+  const responseTime = responseStatus < 200 ? 0 : reqData.responseTime
+
+  const requestData = [
+    {
+      ...reqData,
+      responseStatus,
+      responseTime,
+    },
+  ]
+
+  const probes = convertRequestsToProbes(monikaId || '', requestData)
 
   const reportData = {
     _id: probe.name + '-' + probeDataId,
     monikaId: monikaId,
-    data: {
-      requests: [reqData],
-      notifications: [notifData],
-    },
-  }
-
-  if (alertQueries && alertQueries.length > 0) {
-    reportData.data.requests[0].alerts = alertQueries.toString()
+    probes: probes,
   }
 
   await localPouchDB.put(reportData)
+}
+
+function convertRequestsToProbes(monikaId: string, requests: any) {
+  const probes: Probes = {}
+
+  // group all the requests identified by probeId.
+  // here we calculate the total response time for each probes
+  for (const request of requests) {
+    const parsedTime = new Date(request.timestamp * 1000)
+    const hour = parsedTime.getUTCHours()
+    const date = parsedTime.getUTCDate()
+    const week = getISOWeek(parsedTime)
+    const weekYear = getISOWeekYear(parsedTime)
+    const month = parsedTime.getUTCMonth()
+    const year = parsedTime.getUTCFullYear()
+
+    // create queries for all the timeframes
+    const timeQuery = {
+      monikaId: monikaId,
+      probeId: request.probeId,
+      year,
+      month,
+      week,
+      weekYear,
+      date,
+      hour,
+    }
+
+    let probeData = probes[timeQuery.probeId]
+
+    probeData = probeData
+      ? {
+          ...probeData,
+          responseTime: probeData.responseTime + request.responseTime,
+          count: probeData.count + 1,
+        }
+      : {
+          timeQuery,
+          responseTime: request.responseTime,
+          count: 1,
+        }
+
+    probes[timeQuery.probeId] = probeData
+  }
+
+  return probes
 }
