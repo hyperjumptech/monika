@@ -22,12 +22,12 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Config } from '../../interfaces/config'
+import type { Config } from '../../interfaces/config'
 import { DEFAULT_THRESHOLD } from '../../looper'
 import { XMLParser } from 'fast-xml-parser'
 import { monikaFlagsDefaultValue } from '../../context/monika-flags'
 import type { MonikaFlags } from '../../context/monika-flags'
-import { Probe } from '../../interfaces/probe'
+import type { Probe, ProbeAlert } from '../../interfaces/probe'
 
 const generateProbesFromXml = (config: any) => {
   const probes = config?.urlset?.url?.map((item: any) => {
@@ -106,7 +106,7 @@ const generateProbesFromXmlOneProbe = (config: any) => {
           assertion: 'response.time > 2000',
           message: 'Response time is more than 2000ms',
         },
-      ],
+      ] as ProbeAlert[],
     }
   }
 
