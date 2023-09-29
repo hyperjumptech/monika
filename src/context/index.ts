@@ -23,12 +23,14 @@
  **********************************************************************************/
 
 import type { Config } from '../interfaces/config'
+import type { ProbeAlert } from '../interfaces/probe'
 import { monikaFlagsDefaultValue } from './monika-flags'
 import type { MonikaFlags } from './monika-flags'
 
-type Incident = {
+export type Incident = {
   probeID: string
   probeRequestURL: string
+  alert: ProbeAlert
   createdAt: Date
 }
 
