@@ -98,10 +98,9 @@ describe('Probe processing', () => {
       // act
       doProbe({ probe: getProbes(4000)[0], notifications: [] })
       await doProbe({ probe: getProbes(4000)[0], notifications: [] })
-      // wait for random timeout
-      await sleep(4000)
-
       server.close()
+      // wait for random timeout
+      await sleep(3 * seconds)
       // assert
       expect(urlRequestTotal).eq(1)
     }).timeout(10_000)

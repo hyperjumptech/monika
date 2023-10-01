@@ -34,7 +34,6 @@ import {
   setProbeRunning,
 } from '../../utils/probe-state'
 import { createProbers } from './prober/factory'
-// import { stopDowntimeCounter, startDowntimeCounter } from '../downtime-counter'
 
 type doProbeParams = {
   probe: Probe // probe contains all the probes

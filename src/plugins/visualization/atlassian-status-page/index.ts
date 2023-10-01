@@ -22,7 +22,6 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios from 'axios'
 import http from 'http'
 import https from 'https'
 import Joi from 'joi'
@@ -31,6 +30,7 @@ import {
   insertIncident as insertIncidentToDatabase,
   updateIncident as updateIncidentToDatabase,
 } from './database'
+import { sendHttpRequest } from '../../../utils/http'
 
 type NotifyIncident = {
   probeID: string
@@ -63,11 +63,11 @@ export function validateConfig(statusPageConfig: StatuspageConfig): string {
 export class AtlassianStatusPageAPI {
   private statusPageBaseURL = 'https://api.statuspage.io'
   private pageID = ''
-  private axiosConfig = {}
+  private fetchConfig = {}
 
   constructor(apiKey: string, pageID: string) {
     this.pageID = pageID
-    this.axiosConfig = {
+    this.fetchConfig = {
       // 10 sec timeout
       timeout: 10_000,
       // keepAlive pools and reuses TCP connections, so it's faster
@@ -122,13 +122,14 @@ export class AtlassianStatusPageAPI {
     }
 
     try {
-      const resp = await axios.post(
-        `${this.statusPageBaseURL}/v1/pages/${this.pageID}/incidents`,
-        data,
-        this.axiosConfig
-      )
+      const resp = await sendHttpRequest({
+        ...this.fetchConfig,
+        method: 'POST',
+        url: `${this.statusPageBaseURL}/v1/pages/${this.pageID}/incidents`,
+        body: JSON.stringify(data),
+      })
 
-      const incidentID = resp?.data?.id
+      const incidentID = await resp?.json().then((res) => res.id)
       await insertIncidentToDatabase({ incidentID, probeID, status, url })
 
       return incidentID
@@ -163,11 +164,12 @@ export class AtlassianStatusPageAPI {
     const { incident_id: incidentID } = incident
 
     try {
-      await axios.patch(
-        `${this.statusPageBaseURL}/v1/pages/${this.pageID}/incidents/${incidentID}`,
-        data,
-        this.axiosConfig
-      )
+      await sendHttpRequest({
+        ...this.fetchConfig,
+        url: `${this.statusPageBaseURL}/v1/pages/${this.pageID}/incidents/${incidentID}`,
+        body: JSON.stringify(data),
+        method: 'PATCH',
+      })
     } catch (error: any) {
       throw new Error(
         `${error?.message}${

@@ -354,10 +354,6 @@ class SymonClient {
         return { probes: body.data, hash: res.headers.get('etag') || undefined }
       })
       .catch((error) => {
-        if (error.isAxiosError) {
-          return Promise.reject(new Error(error.response.data.message))
-        }
-
         return Promise.reject(error)
       })
   }

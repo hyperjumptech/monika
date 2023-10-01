@@ -312,7 +312,7 @@ function errorRequestCodeToNumber(
     case 'ERR_FR_TOO_MANY_REDIRECTS':
       // redirect higher than set in maxRedirects
       return 3
-    // cover all possible axios connection issues
+    // cover all possible connection issues
     case 'ERR_BAD_OPTION_VALUE':
       return 4
     case 'ERR_BAD_OPTION':

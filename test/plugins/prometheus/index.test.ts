@@ -25,7 +25,7 @@
 import { expect, test } from '@oclif/test'
 import path from 'path'
 import cmd from '../../../src'
-import axios from 'axios'
+import { sendHttpRequest } from '../../../src/utils/http'
 
 const { resolve } = path
 
@@ -45,7 +45,9 @@ describe('Prometheus plugin', () => {
       )
       .it('runs Prometheus metric server', async (ctx) => {
         // act
-        const res = await axios.get('http://localhost:4444/metrics')
+        const res = await sendHttpRequest({
+          url: 'http://localhost:4444/metrics',
+        })
 
         // assert
         expect(ctx.stdout).to.contain('Starting Monika.')
@@ -75,7 +77,10 @@ describe('Prometheus plugin', () => {
       .it('runs Prometheus metric server but return 405', async () => {
         try {
           // act
-          await axios.post('http://localhost:4446/metrics')
+          await sendHttpRequest({
+            url: 'http://localhost:4446/metrics',
+            method: 'POST',
+          })
         } catch (error: any) {
           // assert
           expect(error.response.status).to.equal(405)
