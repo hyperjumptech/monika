@@ -103,6 +103,7 @@ export async function probeHTTP(
         }
       }
 
+      console.log('probeHTTP going to checkThresholdsAndSendAlert')
       // Done processing results, check if need to send out alerts
       checkThresholdsAndSendAlert(
         {

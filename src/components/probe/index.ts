@@ -83,6 +83,7 @@ const probeSendNotification = async (data: ProbeSendNotification) => {
     validation,
   })
 
+  console.log('probeSendNotification', JSON.stringify(notifications))
   if ((notifications?.length ?? 0) > 0) {
     await sendAlerts({
       probeID: probe.id,
@@ -109,9 +110,14 @@ export function checkThresholdsAndSendAlert(
 
   const probeStatesWithValidAlert = getProbeStatesWithValidAlert(statuses || [])
 
+  console.log(
+    'checkThresholdsAndSendAlert',
+    JSON.stringify(probeStatesWithValidAlert)
+  )
   for (const [index, probeState] of probeStatesWithValidAlert.entries()) {
     const { alertQuery, state } = probeState
 
+    console.log('checkThresholdsAndSendAlert GOING TO probeSendNotification')
     probeSendNotification({
       index,
       probe,

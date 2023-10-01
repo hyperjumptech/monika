@@ -57,6 +57,8 @@ export async function sendAlerts({
 
   updateLastIncidentData(isRecovery, probeID, url)
 
+  console.log('sendAlerts', JSON.stringify(notifications))
+  console.log('sendAlerts', JSON.stringify(message))
   return sendNotifications(notifications, message)
 }
 

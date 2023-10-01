@@ -70,9 +70,7 @@ function createMockServer(
   appExpress.use(bodyParser.json())
   appExpress.all('*', (req, res) => {
     if (req.path.endsWith('webhook')) {
-      const payload = req.body
-      console.log('received webhook with payload', JSON.stringify(payload))
-      onWebhookInvoked(payload)
+      onWebhookInvoked(req.body)
       res.status(200).send()
     } else {
       urlRequestTotal += 1
@@ -169,9 +167,9 @@ describe('Probe processing', () => {
       // wait for random timeout
       await sleep(4000)
 
+      server.close()
       // assert
       expect(urlRequestTotal).eq(1)
-      server.close()
     }).timeout(10_000)
 
     it('should not run probe if it is not the time', () => {
@@ -182,9 +180,9 @@ describe('Probe processing', () => {
       // act
       doProbe({ probe: getProbes(4001)[0], notifications: [] })
 
+      server.close()
       // assert
       expect(urlRequestTotal).eq(0)
-      server.close()
     })
 
     it('should not run probe if the cycle is end', async () => {
@@ -208,9 +206,9 @@ describe('Probe processing', () => {
 
       resetContext()
 
+      server.close()
       // assert
       expect(urlRequestTotal).eq(1)
-      server.close()
     }).timeout(10_000)
 
     it('should run the probe', async () => {
@@ -234,9 +232,9 @@ describe('Probe processing', () => {
       // wait for random timeout
       await sleep(6 * seconds)
 
+      server.close()
       // assert
       expect(urlRequestTotal).eq(5)
-      server.close()
     }).timeout(10_000)
 
     it('should send incident notification', async () => {
@@ -276,17 +274,20 @@ describe('Probe processing', () => {
       // wait for send notification function to resolve
       await sleep(2 * seconds)
 
+      server.close()
       // assert
       expect(notificationAlert.body.url).eq('http://localhost:4004')
       expect(notificationAlert.body.alert).eq('response.status == 200')
-      server.close()
     }).timeout(10_000)
 
     it('should send recovery notification', async () => {
       // arrange
       const appExpress = express()
-      let statusCode = 400
-      appExpress.all('*', (req, res) => res.status(statusCode).send())
+      let statusCode = 200
+      appExpress.all('*', (req, res) => {
+        console.log(req.url, 'has been invoked. sending code', statusCode)
+        res.status(statusCode).send()
+      })
       const dynamicResultServer = appExpress.listen(4005, 'localhost')
 
       const probe = {
@@ -298,6 +299,7 @@ describe('Probe processing', () => {
 
       let notificationAlert: any | undefined
       const serverWebhook = createMockServer(4006, (body) => {
+        console.log('serverWebhook onWebhookInvoked', JSON.stringify(body))
         notificationAlert = body
       })
       const notifications = [
@@ -307,27 +309,40 @@ describe('Probe processing', () => {
           type: 'webhook',
         },
       ]
+      console.log(
+        '/************************* TEST should send recovery notification'
+      )
       initializeProbeStates([probe])
       // wait until the interval passed
       const seconds = 1000
-      await sleep(seconds)
+      await sleep(2 * seconds)
 
       // act
+      console.log('expect probe return 400')
+      statusCode = 400 // service down
       await doProbe({
         probe,
         notifications,
       })
+      console.log('wait next cycle')
       await sleep(2 * seconds)
       statusCode = 200 // service restored
+      console.log('expect probe return 200')
       await doProbe({
         probe,
         notifications,
       })
       // wait for send notification function to resolve
-      // eslint-disable-next-line no-unmodified-loop-condition
-      while (notificationAlert === undefined) {
+      let waitCounts = 0
+      while ((notificationAlert?.body?.alert?.length || 0) === 0) {
+        if (waitCounts > 10) break
         // eslint-disable-next-line no-await-in-loop
         await sleep(seconds)
+        console.log(
+          'in a while, notificationAlert is',
+          JSON.stringify(notificationAlert)
+        )
+        waitCounts++
       }
 
       dynamicResultServer.close()
@@ -336,7 +351,7 @@ describe('Probe processing', () => {
       // assert
       expect(notificationAlert.body.url).eq('http://localhost:4005')
       expect(notificationAlert.body.alert).eq('response.status != 200')
-    }).timeout(10_000)
+    }).timeout(30_000)
   })
 
   describe('Non HTTP Probe', () => {

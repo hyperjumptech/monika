@@ -56,7 +56,9 @@ export async function sendHttpRequest(
       return res
     }
 
-    throw new Error(`Error HTTP status code ${res.status}`)
+    throw new Error(
+      `sendHttpRequest: Failed with HTTP status code ${res.status}.`
+    )
   })
 }
 

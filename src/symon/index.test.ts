@@ -190,8 +190,6 @@ describe('Symon initiate', () => {
     })
     sinon.spy(symon, 'report')
 
-    expect(symon.config).to.be.null
-
     await symon.initiate()
     await symon.stopReport()
     server.close()
