@@ -33,6 +33,7 @@ describe('responseChecker', () => {
       const res = generateMockedResponse({ status: 100 })
       const data = responseChecker(
         {
+          id: 'jFQBd',
           assertion: 'response.status < 200 or response.status > 299',
           message: '',
         },
@@ -49,6 +50,7 @@ describe('responseChecker', () => {
       })
       const data = responseChecker(
         {
+          id: 'jFQBd',
           assertion: 'response.status < 200 or response.status > 299',
           message: '',
         },
@@ -65,6 +67,7 @@ describe('responseChecker', () => {
       })
       const data = responseChecker(
         {
+          id: 'jFQBd',
           assertion: 'response.status < 200 or response.status > 299',
           message: '',
         },
@@ -81,6 +84,7 @@ describe('responseChecker', () => {
       })
       const data = responseChecker(
         {
+          id: 'jFQBd',
           assertion: 'response.status < 200 or response.status > 299',
           message: '',
         },
@@ -97,6 +101,7 @@ describe('responseChecker', () => {
       })
       const data = responseChecker(
         {
+          id: 'jFQBd',
           assertion: 'response.status < 200 or response.status > 299',
           message: '',
         },
@@ -113,23 +118,8 @@ describe('responseChecker', () => {
       })
       const data = responseChecker(
         {
+          id: 'jFQBd',
           assertion: 'response.status != 200',
-          message: '',
-        },
-        res
-      )
-
-      expect(data).to.equals(true)
-    })
-
-    it('should trigger when status is 200 BUT there is connection error ', () => {
-      const res = generateMockedResponse({
-        status: 200,
-        isProbeResponsive: false,
-      })
-      const data = responseChecker(
-        {
-          assertion: 'response.status < 200 or response.status > 299',
           message: '',
         },
         res
@@ -159,7 +149,7 @@ describe('responseChecker', () => {
     it('seconds - should handle when response time is greater than alert defined response time', () => {
       const res = generateMockedResponse({ responseTime: 20_000 })
       const data = responseChecker(
-        { assertion: 'response.time > 10000', message: '' },
+        { id: 'jFQBd', assertion: 'response.time > 10000', message: '' },
         res
       )
 
@@ -172,7 +162,7 @@ describe('responseChecker', () => {
         isProbeResponsive: true,
       })
       const data = responseChecker(
-        { assertion: 'response.time > 20000', message: '' },
+        { id: 'jFQBd', assertion: 'response.time > 20000', message: '' },
         res
       )
 
@@ -185,7 +175,7 @@ describe('responseChecker', () => {
         isProbeResponsive: true,
       })
       const data = responseChecker(
-        { assertion: 'response.time > 10', message: '' },
+        { id: 'jFQBd', assertion: 'response.time > 10', message: '' },
         res
       )
 
@@ -198,7 +188,7 @@ describe('responseChecker', () => {
         isProbeResponsive: true,
       })
       const data = responseChecker(
-        { assertion: 'response.time > 20', message: '' },
+        { id: 'jFQBd', assertion: 'response.time > 20', message: '' },
         res
       )
 

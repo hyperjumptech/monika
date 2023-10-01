@@ -24,7 +24,10 @@
 
 import { expect } from '@oclif/test'
 import type { Probe } from '../../../interfaces/probe'
-import type { ProbeRequestResponse } from '../../../interfaces/request'
+import {
+  probeRequestResult,
+  type ProbeRequestResponse,
+} from '../../../interfaces/request'
 import { PrometheusCollector } from './collector'
 
 type ProbeResult = {
@@ -63,6 +66,7 @@ describe('Prometheus collector', () => {
           recoveryThreshold: 0,
           alerts: [
             {
+              id: 'fKBzx',
               assertion: '',
               message: '',
             },
@@ -75,6 +79,7 @@ describe('Prometheus collector', () => {
           status: 0,
           headers: '',
           responseTime: 0,
+          result: probeRequestResult.failed,
           isProbeResponsive: false,
         },
       }
@@ -98,12 +103,7 @@ describe('Prometheus collector', () => {
           requests: [],
           incidentThreshold: 0,
           recoveryThreshold: 0,
-          alerts: [
-            {
-              assertion: '',
-              message: '',
-            },
-          ],
+          alerts: [{ id: 'fKBzx', assertion: '', message: '' }],
         },
         requestIndex: 0,
         response: {
@@ -112,6 +112,7 @@ describe('Prometheus collector', () => {
           status: 0,
           headers: '',
           responseTime: 0,
+          result: probeRequestResult.failed,
           isProbeResponsive: false,
         },
       }
@@ -180,12 +181,7 @@ describe('Prometheus collector', () => {
           ],
           incidentThreshold: 0,
           recoveryThreshold: 0,
-          alerts: [
-            {
-              assertion: '',
-              message: '',
-            },
-          ],
+          alerts: [{ id: 'fKBzx', assertion: '', message: '' }],
         },
         requestIndex: 0,
         alertQuery: '',
@@ -212,12 +208,7 @@ describe('Prometheus collector', () => {
           requests: [],
           incidentThreshold: 0,
           recoveryThreshold: 0,
-          alerts: [
-            {
-              assertion: '',
-              message: '',
-            },
-          ],
+          alerts: [{ id: 'fKBzx', assertion: '', message: '' }],
         },
         requestIndex: 0,
         alertQuery: '',

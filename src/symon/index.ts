@@ -167,8 +167,10 @@ class SymonClient {
     symonMonikaId,
     symonReportInterval,
     symonReportLimit,
+    'symon-api-version': apiVersion,
   }: Pick<
     MonikaFlags,
+    | 'symon-api-version'
     | 'symonUrl'
     | 'symonKey'
     | 'symonLocationId'
@@ -176,7 +178,7 @@ class SymonClient {
     | 'symonReportInterval'
     | 'symonReportLimit'
   >) {
-    this.apiBaseUrl = `${symonUrl}/api/v1/monika`
+    this.apiBaseUrl = `${symonUrl}/api/${apiVersion}/monika`
 
     this.url = symonUrl
 
@@ -222,16 +224,39 @@ class SymonClient {
     this.eventEmitter = getEventEmitter()
     this.eventEmitter.on(
       events.probe.notification.willSend,
-      (args: NotificationEvent) => {
+      ({ probeID, probeState, url, validation }: NotificationEvent) => {
+        const getAlertID = ({
+          url,
+          validation,
+        }: Pick<NotificationEvent, 'url' | 'validation'>): string => {
+          if (validation.alert.id) {
+            return validation.alert.id
+          }
+
+          const probe = getContext().config?.probes.find(
+            ({ id }) => id === probeID
+          )
+          if (!probe) {
+            return ''
+          }
+
+          const request = probe.requests?.find((request) => request.url === url)
+          if (!request) {
+            return ''
+          }
+
+          return request.alerts?.find((alert) => alert.query === '')?.id || ''
+        }
+
         this.notifyEvent({
-          event: args.probeState === 'DOWN' ? 'incident' : 'recovery',
-          alertId: args.validation.alert.id ?? '',
+          event: probeState === 'DOWN' ? 'incident' : 'recovery',
+          alertId: getAlertID({ url, validation }),
           response: {
-            status: args.validation.response.status, // status is http status code
-            time: args.validation.response.responseTime,
-            size: args.validation.response.headers['content-length'],
-            headers: args.validation.response.headers ?? {},
-            body: args.validation.response.data,
+            status: validation.response.status, // status is http status code
+            time: validation.response.responseTime,
+            size: validation.response.headers['content-length'],
+            headers: validation.response.headers || {},
+            body: validation.response.data,
           },
         }).catch((error: any) => {
           log.error(error)

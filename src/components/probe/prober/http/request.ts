@@ -26,8 +26,9 @@ import * as Handlebars from 'handlebars'
 import FormData from 'form-data'
 import YAML from 'yaml'
 import {
-  ProbeRequestResponse,
-  RequestConfig,
+  type ProbeRequestResponse,
+  type RequestConfig,
+  probeRequestResult,
 } from '../../../../interfaces/request'
 
 import http, { RequestOptions } from 'http'
@@ -168,6 +169,7 @@ export async function httpRequest({
       status,
       headers: resHeaders,
       responseTime,
+      result: probeRequestResult.success,
       isProbeResponsive: true,
     }
   } catch (error: any) {
@@ -182,7 +184,7 @@ export async function httpRequest({
         status: error?.response?.status,
         headers: error?.response?.headers,
         responseTime,
-
+        result: probeRequestResult.success,
         isProbeResponsive: true, // http status received, so connection ok
       }
     }
@@ -198,7 +200,7 @@ export async function httpRequest({
         status,
         headers: '',
         responseTime,
-
+        result: probeRequestResult.failed,
         isProbeResponsive: false,
         errMessage: error?.code,
       }
@@ -211,7 +213,7 @@ export async function httpRequest({
       status: error.code || 'Unknown error',
       headers: '',
       responseTime,
-
+      result: probeRequestResult.failed,
       isProbeResponsive: false,
       errMessage: error.code || 'Unknown error',
     }

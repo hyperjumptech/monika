@@ -22,17 +22,24 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import Mailgun from 'mailgun.js'
-import formData from 'form-data'
+import FormData from 'form-data'
 import Joi from 'joi'
 import type { NotificationMessage } from '.'
 import Mailgen from 'mailgen'
+import { sendHttpRequest } from '../utils/http'
 
-type NotificationData = {
+export type NotificationData = {
   apiKey: string
   domain: string
   recipients: string[]
-  username?: string
+}
+
+export type Content = {
+  from: string
+  subject: string
+  html: string
+  text: string
+  headers?: { References: string }
 }
 
 export const validator = Joi.object().keys({
@@ -42,17 +49,70 @@ export const validator = Joi.object().keys({
     .label('Mailgun Recipients'),
   apiKey: Joi.string().required().label('Mailgun API Key'),
   domain: Joi.string().required().label('Mailgun Domain'),
-  username: Joi.string().label('Mailgun Username'),
 })
 
-export const send = async (
-  { apiKey: key, domain, recipients, username = 'api' }: NotificationData,
-  { body, subject }: NotificationMessage
+const isContent = (data: NotificationMessage | Content): data is Content => {
+  const keys: Array<keyof Content> = ['from', 'subject', 'html', 'text']
+
+  return keys.every((k) => Object.prototype.hasOwnProperty.call(data, k))
+}
+
+const _send = async (
+  { apiKey, domain, recipients }: NotificationData,
+  data: NotificationMessage | Content
 ): Promise<void> => {
+  const url = `https://api.mailgun.net/v3/${domain}/messages`
+  const auth = Buffer.from('api:' + apiKey).toString('base64')
+  const theData = isContent(data)
+    ? data
+    : getContent({ body: data.body, subject: data.subject, domain })
+
+  const formData = new FormData()
+  formData.append('from', theData.from)
+  formData.append('subject', theData.subject)
+  formData.append('html', theData.html)
+  formData.append('text', theData.text)
+  for (const email of recipients) formData.append('to', email)
+  if (theData.headers?.References)
+    formData.append('h:References', theData.headers?.References)
+
+  await sendHttpRequest({
+    method: 'POST',
+    url,
+    headers: {
+      Authorization: 'Basic ' + auth,
+    },
+    data: formData,
+  })
+}
+
+export const send = async (
+  notificationData: NotificationData,
+  notificationMessage: NotificationMessage
+): Promise<void> => {
+  await _send(notificationData, notificationMessage)
+}
+
+export const sendWithCustomContent = async (
+  notificationData: NotificationData,
+  content: Content
+): Promise<void> => {
+  await _send(notificationData, content)
+}
+
+function getContent({
+  body,
+  subject,
+  domain,
+}: {
+  body: string
+  subject: string
+  domain: string
+}): Content {
   // TODO: Read from ENV Variables
-  const DEFAULT_EMAIL = 'monika@hyperjump.tech'
   const DEFAULT_SENDER_NAME = 'Monika'
-  const to = recipients?.join(',')
+  const from = `${DEFAULT_SENDER_NAME} <mailgun@${domain}>`
+
   const mailGenerator = new Mailgen({
     theme: 'default',
     product: {
@@ -68,17 +128,13 @@ export const send = async (
   }
   const html = mailGenerator.generate(email)
   const text = mailGenerator.generatePlaintext(email)
-  const mailgun = new Mailgun(formData)
-  const mg = mailgun.client({ username, key })
-  const data = {
-    from: `${DEFAULT_SENDER_NAME} <${DEFAULT_EMAIL}>`,
-    to,
+
+  return {
+    from,
     subject,
     html,
     text,
   }
-
-  await mg.messages.create(domain, data)
 }
 
 export function additionalStartupMessage({

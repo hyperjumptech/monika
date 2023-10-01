@@ -27,6 +27,7 @@ import spies from 'chai-spies'
 import { sendAlerts } from '../../src/components/notification'
 import { channels } from '@hyperjumptech/monika-notification'
 import type { NotificationMessage } from '@hyperjumptech/monika-notification'
+import { probeRequestResult } from '../../src/interfaces/request'
 
 const { discord, mailgun, slack, smtp, telegram, webhook, whatsapp, lark } =
   channels
@@ -43,7 +44,7 @@ describe('send alerts', () => {
     await sendAlerts({
       probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
       validation: {
-        alert: { assertion: 'status-not-2xx', message: '' },
+        alert: { id: 'fKBzx', assertion: 'status-not-2xx', message: '' },
         isAlertTriggered: false,
         response: {
           data: '',
@@ -51,6 +52,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          result: probeRequestResult.success,
           isProbeResponsive: true,
         },
       },
@@ -76,7 +78,7 @@ describe('send alerts', () => {
     await sendAlerts({
       probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
       validation: {
-        alert: { assertion: 'status-not-2xx', message: '' },
+        alert: { id: 'fKBzx', assertion: 'status-not-2xx', message: '' },
         isAlertTriggered: true,
         response: {
           data: '',
@@ -84,6 +86,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          result: probeRequestResult.success,
           isProbeResponsive: true,
         },
       },
@@ -109,7 +112,7 @@ describe('send alerts', () => {
     await sendAlerts({
       probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
       validation: {
-        alert: { assertion: 'status-not-2xx', message: '' },
+        alert: { id: 'fKBzx', assertion: 'status-not-2xx', message: '' },
         isAlertTriggered: true,
         response: {
           data: '',
@@ -117,6 +120,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          result: probeRequestResult.success,
           isProbeResponsive: true,
         },
       },
@@ -143,7 +147,7 @@ describe('send alerts', () => {
     await sendAlerts({
       probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
       validation: {
-        alert: { assertion: 'status-not-2xx', message: '' },
+        alert: { id: 'fKBzx', assertion: 'status-not-2xx', message: '' },
         isAlertTriggered: true,
         response: {
           data: '',
@@ -151,6 +155,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          result: probeRequestResult.success,
           isProbeResponsive: true,
         },
       },
@@ -178,7 +183,7 @@ describe('send alerts', () => {
     await sendAlerts({
       probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
       validation: {
-        alert: { assertion: 'status-not-2xx', message: '' },
+        alert: { id: 'fKBzx', assertion: 'status-not-2xx', message: '' },
         isAlertTriggered: true,
         response: {
           data: '',
@@ -186,6 +191,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          result: probeRequestResult.success,
           isProbeResponsive: true,
         },
       },
@@ -218,7 +224,7 @@ describe('send alerts', () => {
     await sendAlerts({
       probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
       validation: {
-        alert: { assertion: 'status-not-2xx', message: '' },
+        alert: { id: 'fKBzx', assertion: 'status-not-2xx', message: '' },
         isAlertTriggered: true,
         response: {
           data: '',
@@ -226,6 +232,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          result: probeRequestResult.success,
           isProbeResponsive: true,
         },
       },
@@ -254,7 +261,7 @@ describe('send alerts', () => {
     await sendAlerts({
       probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
       validation: {
-        alert: { assertion: 'status-not-2xx', message: '' },
+        alert: { id: 'fKBzx', assertion: 'status-not-2xx', message: '' },
         isAlertTriggered: true,
         response: {
           data: '',
@@ -262,6 +269,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          result: probeRequestResult.success,
           isProbeResponsive: true,
         },
       },
@@ -307,7 +315,7 @@ describe('send alerts', () => {
     await sendAlerts({
       probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
       validation: {
-        alert: { assertion: 'status-not-2xx', message: '' },
+        alert: { id: 'fKBzx', assertion: 'status-not-2xx', message: '' },
         isAlertTriggered: true,
         response: {
           data: '',
@@ -315,6 +323,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          result: probeRequestResult.success,
           isProbeResponsive: true,
         },
       },
@@ -343,7 +352,7 @@ describe('send alerts', () => {
     await sendAlerts({
       probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
       validation: {
-        alert: { assertion: 'status-not-2xx', message: '' },
+        alert: { id: 'fKBzx', assertion: 'status-not-2xx', message: '' },
         isAlertTriggered: true,
         response: {
           data: '',
@@ -351,6 +360,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          result: probeRequestResult.success,
           isProbeResponsive: true,
         },
       },
@@ -376,7 +386,7 @@ describe('send alerts', () => {
     await sendAlerts({
       probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
       validation: {
-        alert: { assertion: 'status-not-2xx', message: '' },
+        alert: { id: 'fKBzx', assertion: 'status-not-2xx', message: '' },
         isAlertTriggered: true,
         response: {
           data: '',
@@ -384,6 +394,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          result: probeRequestResult.success,
           isProbeResponsive: true,
         },
       },
@@ -409,7 +420,7 @@ describe('send alerts', () => {
     await sendAlerts({
       probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
       validation: {
-        alert: { assertion: 'status-not-2xx', message: '' },
+        alert: { id: 'fKBzx', assertion: 'status-not-2xx', message: '' },
         isAlertTriggered: true,
         response: {
           data: '',
@@ -417,6 +428,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          result: probeRequestResult.success,
           isProbeResponsive: true,
         },
       },
@@ -442,7 +454,7 @@ describe('send alerts', () => {
     await sendAlerts({
       probeID: 'c0ff807f-b326-49b7-9b47-7d15f07a90a0',
       validation: {
-        alert: { assertion: 'status-not-2xx', message: '' },
+        alert: { id: 'fKBzx', assertion: 'status-not-2xx', message: '' },
         isAlertTriggered: true,
         response: {
           data: '',
@@ -450,6 +462,7 @@ describe('send alerts', () => {
           status: 500,
           responseTime: 0,
           headers: {},
+          result: probeRequestResult.success,
           isProbeResponsive: true,
         },
       },

@@ -67,9 +67,17 @@ const defaultConfigs: Partial<Config>[] = []
 let nonDefaultConfig: Partial<Config>
 
 export const getConfig = (): Config => {
-  const { config } = getContext()
+  const { config, flags } = getContext()
 
-  if (!config) throw new Error('Configuration setup has not been run yet')
+  if (!config) {
+    if (!isSymonModeFrom(flags)) {
+      throw new Error('Configuration setup has not been run yet')
+    }
+
+    return {
+      probes: [],
+    }
+  }
 
   return config
 }

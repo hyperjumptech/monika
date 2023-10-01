@@ -1,5 +1,6 @@
 import * as mongodbURI from 'mongodb-uri'
 import { BaseProber, type ProbeResult } from '..'
+import { probeRequestResult } from '../../../../interfaces/request'
 import type { Mongo } from '../../../../interfaces/probe'
 import { mongoRequest } from './request'
 
@@ -78,8 +79,8 @@ export async function probeMongo({
       username,
       password,
     })
-    const { body, responseTime, status } = requestResponse
-    const isAlertTriggered = status !== 200
+    const { body, responseTime, result } = requestResponse
+    const isAlertTriggered = result !== probeRequestResult.success
     const timeNow = new Date().toISOString()
     const logMessage = `${timeNow} ${checkOrder} id:${id} mongo:${host}:${port} ${responseTime}ms msg:${body}`
 

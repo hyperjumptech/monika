@@ -30,12 +30,18 @@ import {
   Counter,
 } from 'prom-client'
 import type { Probe } from '../../../interfaces/probe'
+import { probeRequestResult } from '../../../interfaces/request'
 import type { ProbeRequestResponse } from '../../../interfaces/request'
 
 type PrometheusCustomCollector = {
   statusCode: Gauge<'id' | 'name' | 'url' | 'method'>
-  responseTime: Histogram<'id' | 'name' | 'url' | 'method' | 'statusCode'>
-  responseSize: Gauge<'id' | 'name' | 'url' | 'method' | 'statusCode'>
+  probeResult: Gauge<'id' | 'name' | 'url' | 'method'>
+  responseTime: Histogram<
+    'id' | 'name' | 'url' | 'method' | 'statusCode' | 'result'
+  >
+  responseSize: Gauge<
+    'id' | 'name' | 'url' | 'method' | 'statusCode' | 'result'
+  >
   alertTriggeredTotal: Counter<'id' | 'name' | 'url' | 'method' | 'alertQuery'>
   probesTotal: Gauge<string>
 }
@@ -59,15 +65,34 @@ export class PrometheusCollector {
       help: 'HTTP status code',
       labelNames: ['id', 'name', 'url', 'method'] as const,
     })
+    const probeResult = new Gauge({
+      name: 'monika_probe_result',
+      help: 'Probe result: -1=unknown, 0=failed, 1=success',
+      labelNames: ['id', 'name', 'url', 'method'] as const,
+    })
     const responseTime = new Histogram({
       name: 'monika_request_response_time_seconds',
       help: 'Duration of probe request in seconds',
-      labelNames: ['id', 'name', 'url', 'method', 'statusCode'] as const,
+      labelNames: [
+        'id',
+        'name',
+        'url',
+        'method',
+        'statusCode',
+        'result',
+      ] as const,
     })
     const responseSize = new Gauge({
       name: 'monika_request_response_size_bytes',
       help: 'Size of response size in bytes',
-      labelNames: ['id', 'name', 'url', 'method', 'statusCode'] as const,
+      labelNames: [
+        'id',
+        'name',
+        'url',
+        'method',
+        'statusCode',
+        'result',
+      ] as const,
     })
     const alertTriggeredTotal = new Counter({
       name: 'monika_alert_total',
@@ -84,6 +109,7 @@ export class PrometheusCollector {
 
     prometheusCustomCollector = {
       statusCode,
+      probeResult,
       responseTime,
       responseSize,
       alertTriggeredTotal,
@@ -114,6 +140,7 @@ export class PrometheusCollector {
     const request = requests[requestIndex]
     const { method, url } = request
     const { headers, responseTime, status } = response
+    const result = response.result ?? probeRequestResult.unknown
     const milliSecond = 1000
     const responseTimeInSecond = responseTime / milliSecond ?? 0
     const responseSizeBytes = Number(headers['content-length'])
@@ -121,11 +148,13 @@ export class PrometheusCollector {
       id,
       name,
       url,
+      result,
       method: method ?? 'GET',
       statusCode: status,
     }
     const {
       statusCode,
+      probeResult: probeResultCollector,
       responseTime: resposeTimeCollector,
       responseSize,
     } = prometheusCustomCollector
@@ -139,6 +168,14 @@ export class PrometheusCollector {
         method: method ?? 'GET',
       })
       .set(status)
+    probeResultCollector
+      ?.labels({
+        id,
+        name,
+        url,
+        method: method ?? 'GET',
+      })
+      .set(result)
     resposeTimeCollector?.labels(labels).observe(responseTimeInSecond)
     responseSize
       ?.labels(labels)

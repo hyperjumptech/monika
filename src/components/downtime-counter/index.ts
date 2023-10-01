@@ -22,9 +22,54 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-export interface ServerAlertState {
-  isFirstTime: boolean
-  alertQuery: string
-  state: 'UP' | 'DOWN'
-  shouldSendNotification: boolean
+import { formatDistanceToNow } from 'date-fns'
+import { getContext, setContext } from '../../context'
+import type { ProbeAlert } from '../../interfaces/probe'
+
+type DowntimeCounter = {
+  alert: ProbeAlert
+  probeID: string
+  url: string
+}
+
+export function startDowntimeCounter({
+  alert,
+  probeID,
+  url,
+}: DowntimeCounter): void {
+  const newIncident = {
+    alert,
+    probeID,
+    probeRequestURL: url,
+    createdAt: new Date(),
+  }
+
+  setContext({ incidents: [...getContext().incidents, newIncident] })
+}
+
+export function getDowntimeDuration({
+  probeID,
+  url,
+}: Omit<DowntimeCounter, 'alert'>): string {
+  const lastIncident = getContext().incidents.find(
+    (incident) =>
+      incident.probeID === probeID && incident.probeRequestURL === url
+  )
+
+  if (!lastIncident) {
+    return '0 seconds'
+  }
+
+  return formatDistanceToNow(lastIncident.createdAt, {
+    includeSeconds: true,
+  })
+}
+
+export function stopDowntimeCounter({ probeID, url }: DowntimeCounter): void {
+  const newIncidents = getContext().incidents.filter(
+    (incident) =>
+      incident.probeID !== probeID && incident.probeRequestURL !== url
+  )
+
+  setContext({ incidents: newIncidents })
 }

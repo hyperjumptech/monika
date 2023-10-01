@@ -1,6 +1,6 @@
 {
   "name": "@hyperjumptech/monika-notification",
-  "version": "1.15.4",
+  "version": "1.15.7",
   "description": "notification package for monika",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -30,7 +30,6 @@
     "form-data": "^4.0.0",
     "joi": "^17.4.0",
     "mailgen": "^2.0.15",
-    "mailgun.js": "^3.5.4",
     "msw": "^0.36.4",
     "nodemailer": "6.9.4",
     "pino": "8.14.1",

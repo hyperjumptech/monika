@@ -1,6 +1,7 @@
 import parse from 'url-parse'
 import { BaseProber, type ProbeResult } from '..'
 import type { Redis } from '../../../../interfaces/probe'
+import { probeRequestResult } from '../../../../interfaces/request'
 import { redisRequest } from './request'
 
 export class RedisProber extends BaseProber {
@@ -78,8 +79,8 @@ export async function probeRedis({
       password,
       uri,
     })
-    const { body, responseTime, status } = requestResponse
-    const isAlertTriggered = status !== 200
+    const { body, responseTime, result } = requestResponse
+    const isAlertTriggered = result !== probeRequestResult.success
     const timeNow = new Date().toISOString()
 
     // parse uri for logMessage(host:port)

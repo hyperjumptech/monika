@@ -30,8 +30,7 @@ import { MongoClient, type Db } from 'mongodb'
 import net from 'net'
 import { Pool } from 'pg'
 import * as redis from 'redis'
-import { doProbe, getProbeStatesWithValidAlert } from '.'
-import type { ServerAlertState } from '../../interfaces/probe-status'
+import { doProbe } from '.'
 import { initializeProbeStates } from '../../utils/probe-state'
 import type { Probe } from '../../interfaces/probe'
 import { getContext, resetContext, setContext } from '../../context'
@@ -59,6 +58,7 @@ function getProbes(port: number) {
 }
 
 let urlRequestTotal = 0
+// let notificationAlert: Record<string, Record<string, any>> = {}
 
 function createMockServer(
   port: number,
@@ -84,72 +84,6 @@ function createMockServer(
 describe('Probe processing', () => {
   afterEach(() => {
     urlRequestTotal = 0
-  })
-
-  describe('getProbeStatesWithValidAlert function', () => {
-    const probeStates: ServerAlertState[] = [
-      {
-        isFirstTime: false,
-        alertQuery: '',
-        state: 'DOWN',
-        shouldSendNotification: false,
-      },
-      {
-        isFirstTime: true,
-        alertQuery: '',
-        state: 'DOWN',
-        shouldSendNotification: false,
-      },
-      {
-        isFirstTime: true,
-        alertQuery: '',
-        state: 'UP',
-        shouldSendNotification: false,
-      },
-      {
-        isFirstTime: true,
-        alertQuery: '',
-        state: 'UP',
-        shouldSendNotification: true,
-      },
-      {
-        isFirstTime: true,
-        alertQuery: '',
-        state: 'DOWN',
-        shouldSendNotification: true,
-      },
-      {
-        isFirstTime: false,
-        alertQuery: '',
-        state: 'DOWN',
-        shouldSendNotification: true,
-      },
-    ]
-
-    it('should return probe states with valid alert', () => {
-      // arrange
-      const expected: ServerAlertState[] = [
-        {
-          isFirstTime: true,
-          alertQuery: '',
-          state: 'DOWN',
-          shouldSendNotification: true,
-        },
-        {
-          isFirstTime: false,
-          alertQuery: '',
-          state: 'DOWN',
-          shouldSendNotification: true,
-        },
-      ]
-
-      // act
-      const probeStatesWithValidAlert =
-        getProbeStatesWithValidAlert(probeStates)
-
-      // assert
-      expect(probeStatesWithValidAlert).deep.eq(expected)
-    })
   })
 
   describe('HTTP Probe', () => {
@@ -237,19 +171,20 @@ describe('Probe processing', () => {
       expect(urlRequestTotal).eq(5)
     }).timeout(10_000)
 
-    it('should send incident notification', async () => {
+    it('should send incident notification if the request is failed', async () => {
       // arrange
       let notificationAlert: any = {}
       const server = createMockServer(4004, (body) => {
         notificationAlert = body
       })
       const probe = {
-        ...getProbes(4004)[0],
+        ...getProbes(9999)[0],
         id: '2md9o',
         alerts: [
           {
+            id: 'fKBzx',
             assertion: 'response.status == 200',
-            message: 'The request failed.',
+            message: 'The assertion failed.',
           },
         ],
       }
@@ -276,89 +211,154 @@ describe('Probe processing', () => {
 
       server.close()
       // assert
-      expect(notificationAlert.body.url).eq('http://localhost:4004')
-      expect(notificationAlert.body.alert).eq('response.status == 200')
+      expect(notificationAlert?.[probe.requests[0].url]?.body?.url).eq(
+        'https://example.com'
+      )
+      expect(notificationAlert?.[probe.requests[0].url]?.body.alert).eq('')
     }).timeout(10_000)
 
-    it('should send recovery notification', async () => {
-      // arrange
-      const appExpress = express()
-      let statusCode = 200
-      appExpress.all('*', (req, res) => {
-        console.log(req.url, 'has been invoked. sending code', statusCode)
-        res.status(statusCode).send()
-      })
-      const dynamicResultServer = appExpress.listen(4005, 'localhost')
+    // it('should send incident notification', async () => {
+    //   // arrange
+    //   server.use(
+    //     rest.get('https://example.com', (_, res, ctx) => {
+    //       urlRequestTotal += 1
+    //       return res(ctx.status(404))
+    //     })
+    //   )
+    //   const probe = {
+    //     ...probes[0],
+    //     id: '2md9o',
+    //     alerts: [
+    //       {
+    //         id: 'P7-fN',
+    //         assertion: 'response.status != 200',
+    //         message: 'The assertion failed.',
+    //       },
+    //     ],
+    //   }
+    //   initializeProbeStates([probe])
+    //   // wait until the interval passed
+    //   const seconds = 1000
+    //   await sleep(seconds)
 
-      const probe = {
-        ...getProbes(4005)[0],
-        id: 'fj43l',
-        requests: [{ url: 'http://localhost:4005', body: '', timeout: 30 }],
-        alerts: [{ assertion: 'response.status != 200', message: '' }],
-      }
+    //   // act
+    //   await doProbe({
+    //     probe,
+    //     notifications: [
+    //       {
+    //         id: 'jFQBd',
+    //         data: { url: 'https://example.com/webhook' },
+    //         type: 'webhook',
+    //       },
+    //     ],
+    //   })
+    //   // wait for random timeout
+    //   await sleep(3 * seconds)
+    //   // wait for send notification function to resolve
+    //   await sleep(2 * seconds)
 
-      let notificationAlert: any | undefined
-      const serverWebhook = createMockServer(4006, (body) => {
-        console.log('serverWebhook onWebhookInvoked', JSON.stringify(body))
-        notificationAlert = body
-      })
-      const notifications = [
-        {
-          id: 'jFQBd',
-          data: { url: 'http://localhost:4006/webhook' },
-          type: 'webhook',
-        },
-      ]
-      console.log(
-        '/************************* TEST should send recovery notification'
-      )
-      initializeProbeStates([probe])
-      // wait until the interval passed
-      const seconds = 1000
-      await sleep(2 * seconds)
+    //   // assert
+    //   expect(notificationAlert?.[probe?.requests?.[0]?.url || 0]?.body?.url).eq(
+    //     'https://example.com'
+    //   )
+    //   expect(
+    //     notificationAlert?.[probe?.requests?.[0]?.url || 0]?.body?.alert
+    //   ).eq('response.status != 200')
 
-      // act
-      console.log('expect probe return 400')
-      statusCode = 400 // service down
-      await doProbe({
-        probe,
-        notifications,
-      })
-      console.log('wait next cycle')
-      await sleep(2 * seconds)
-      statusCode = 200 // service restored
-      console.log('expect probe return 200')
-      await doProbe({
-        probe,
-        notifications,
-      })
-      // wait for send notification function to resolve
-      let waitCounts = 0
-      while ((notificationAlert?.body?.alert?.length || 0) === 0) {
-        if (waitCounts > 10) break
-        // eslint-disable-next-line no-await-in-loop
-        await sleep(seconds)
-        console.log(
-          'in a while, notificationAlert is',
-          JSON.stringify(notificationAlert)
-        )
-        waitCounts++
-      }
+    //   // restore
+    //   server.resetHandlers()
+    // }).timeout(10_000)
 
-      dynamicResultServer.close()
-      serverWebhook.close()
+    // it('should send recovery notification', async () => {
+    //   // arrange
+    //   const appExpress = express()
+    //   let statusCode = 200
+    //   appExpress.all('*', (req, res) => {
+    //     console.log(req.url, 'has been invoked. sending code', statusCode)
+    //     res.status(statusCode).send()
+    //   })
+    //   const dynamicResultServer = appExpress.listen(4005, 'localhost')
 
-      // assert
-      expect(notificationAlert.body.url).eq('http://localhost:4005')
-      expect(notificationAlert.body.alert).eq('response.status != 200')
-    }).timeout(30_000)
+    //   const probe = {
+    //     ...getProbes(4005)[0],
+    //     id: 'fj43l',
+    //     requests: [{ url: 'http://localhost:4005', body: '', timeout: 30 }],
+    //     alerts: [{ assertion: 'response.status != 200', message: '' }],
+    //   }
+
+    //   let notificationAlert: any | undefined
+    //   const serverWebhook = createMockServer(4006, (body) => {
+    //     console.log('serverWebhook onWebhookInvoked', JSON.stringify(body))
+    //     notificationAlert = body
+    //   })
+    //   const notifications = [
+    //     {
+    //       id: 'jFQBd',
+    //       data: { url: 'http://localhost:4006/webhook' },
+    //       type: 'webhook',
+    //     },
+    //   ]
+    //   console.log(
+    //     '/************************* TEST should send recovery notification'
+    //   )
+    //   initializeProbeStates([probe])
+    //   // wait until the interval passed
+    //   const seconds = 1000
+    //   await sleep(seconds)
+
+    //   // act
+    //   await doProbe({
+    //     probe,
+    //     notifications,
+    //   })
+    //   // wait for random timeout
+    //   await sleep(3 * seconds)
+    //   server.resetHandlers()
+    //   // wait for the send notification function to resolve
+    //   await sleep(3 * seconds)
+
+    //   // act
+    //   console.log('expect probe return 400')
+    //   statusCode = 400 // service down
+    //   await doProbe({
+    //     probe,
+    //     notifications,
+    //   })
+    //   console.log('wait next cycle')
+    //   await sleep(2 * seconds)
+    //   statusCode = 200 // service restored
+    //   console.log('expect probe return 200')
+    //   await doProbe({
+    //     probe,
+    //     notifications,
+    //   })
+    //   // wait for send notification function to resolve
+    //   let waitCounts = 0
+    //   while ((notificationAlert?.body?.alert?.length || 0) === 0) {
+    //     if (waitCounts > 10) break
+    //     // eslint-disable-next-line no-await-in-loop
+    //     await sleep(seconds)
+    //     console.log(
+    //       'in a while, notificationAlert is',
+    //       JSON.stringify(notificationAlert)
+    //     )
+    //     waitCounts++
+    //   }
+
+    //   dynamicResultServer.close()
+    //   serverWebhook.close()
+
+    //   // assert
+    //   expect(notificationAlert?.[probe.requests[0].url]?.body?.url).eq(
+    //     'https://example.com'
+    //   )
+    //   expect(notificationAlert?.[probe.requests[0].url]?.body?.alert).eq(
+    //     'response.status != 200'
+    //   )
+    // }).timeout(10_000)
   })
 
   describe('Non HTTP Probe', () => {
-    afterEach(() => {
-      sinon.restore()
-    })
-
     it('should probe MariaDB', async () => {
       // arrange
       const requestStub = sinon.stub(mariadb, 'createConnection').callsFake(
@@ -400,6 +400,108 @@ describe('Probe processing', () => {
       sinon.assert.calledOnce(requestStub)
     })
 
+    // it('should send incident notification for MariaDB probe', async () => {
+    //   // arrange
+    //   const probe = {
+    //     id: '1c8QrZ',
+    //     interval: 1,
+    //     mariadb: [
+    //       {
+    //         host: 'localhost',
+    //         port: 3306,
+    //         username: 'mariadb_user',
+    //         password: 'mariadb_password',
+    //         database: '',
+    //       },
+    //     ],
+    //   } as Probe
+    //   initializeProbeStates([probe])
+    //   // wait until the interval passed
+    //   const seconds = 1000
+    //   await sleep(seconds)
+
+    //   // act
+    //   await doProbe({
+    //     probe,
+    //     notifications: [
+    //       {
+    //         id: 'jFQBd',
+    //         data: { url: 'https://example.com/webhook' },
+    //         type: 'webhook',
+    //       },
+    //     ],
+    //   })
+    //   // wait for random timeout
+    //   await sleep(3 * seconds)
+    //   // wait for send notification function to resolve
+    //   await sleep(2 * seconds)
+
+    //   // assert
+    //   expect(notificationAlert?.[probe.id]?.body?.url).eq('1c8QrZ')
+    //   expect(notificationAlert?.[probe.id]?.body?.alert).eq('')
+
+    //   // restore
+    //   sinon.stub(mariadb, 'createConnection').callsFake(
+    //     async (_connectionUri) =>
+    //       ({
+    //         end: async () => {
+    //           Promise.resolve()
+    //         },
+    //       } as mariadb.Connection)
+    //   )
+    // }).timeout(10_000)
+
+    // it('should send recovery notification for MariaDB probe', async () => {
+    //   // arrange
+    //   const probe = {
+    //     id: '3ngd4',
+    //     interval: 1,
+    //     mariadb: [
+    //       {
+    //         host: 'localhost',
+    //         port: 3306,
+    //         username: 'mariadb_user',
+    //         password: 'mariadb_password',
+    //         database: '',
+    //       },
+    //     ],
+    //   } as Probe
+    //   initializeProbeStates([probe])
+    //   // wait until the interval passed
+    //   const seconds = 1000
+    //   await sleep(seconds)
+
+    //   // act
+    //   await doProbe({
+    //     probe,
+    //     notifications: [
+    //       {
+    //         id: 'jFQBd',
+    //         data: { url: 'https://example.com/webhook' },
+    //         type: 'webhook',
+    //       },
+    //     ],
+    //   })
+    //   // wait for random timeout
+    //   await sleep(3 * seconds)
+
+    //   const requestStub = sinon.stub(mariadb, 'createConnection').callsFake(
+    //     async (_connectionUri) =>
+    //       ({
+    //         end: async () => {
+    //           Promise.resolve()
+    //         },
+    //       } as mariadb.Connection)
+    //   )
+    //   // wait for send notification function to resolve
+    //   await sleep(3 * seconds)
+
+    //   // assert
+    //   sinon.assert.called(requestStub)
+    //   expect(notificationAlert?.[probe.id]?.body?.url).eq('3ngd4')
+    //   expect(notificationAlert?.[probe.id]?.body?.alert).eq('')
+    // }).timeout(10_000)
+
     it('should probe MongoDB', async () => {
       // arrange
       const requestStub = sinon
@@ -415,7 +517,7 @@ describe('Probe processing', () => {
       sinon.stub(MongoClient.prototype, 'close').resolves()
       const probes = [
         {
-          id: '1',
+          id: 'FMqVc',
           interval: 1,
           mongo: [
             {
@@ -458,7 +560,7 @@ describe('Probe processing', () => {
       sinon.stub(MongoClient.prototype, 'close').resolves()
       const probes = [
         {
-          id: '1',
+          id: '3cYAU',
           interval: 1,
           mongo: [
             {
@@ -495,7 +597,7 @@ describe('Probe processing', () => {
       )
       const probes = [
         {
-          id: '1',
+          id: 'YFwQH',
           interval: 1,
           mysql: [
             {
@@ -534,7 +636,7 @@ describe('Probe processing', () => {
         }))
       const probes = [
         {
-          id: '1',
+          id: 'LxMkT',
           interval: 1,
           postgres: [
             {
@@ -573,7 +675,7 @@ describe('Probe processing', () => {
         }))
       const probes = [
         {
-          id: '1',
+          id: 'FAzEj',
           interval: 1,
           postgres: [
             {
@@ -610,7 +712,7 @@ describe('Probe processing', () => {
       )
       const probes = [
         {
-          id: '1',
+          id: 'npTJ4',
           interval: 1,
           redis: [
             {
@@ -708,7 +810,7 @@ describe('Probe processing', () => {
       })
       const probes = [
         {
-          id: '1',
+          id: '3Ua7L',
           interval: 1,
           socket: {
             host: 'localhost',

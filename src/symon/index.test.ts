@@ -265,6 +265,7 @@ describe('Send incident or recovery event', () => {
     const symon = new SymonClient({
       symonUrl: 'http://localhost:5004',
       symonKey: 'abcd',
+      'symon-api-version': 'v1',
     })
     sinon.spy(symon, 'report')
     symon.monikaId = '1234'
