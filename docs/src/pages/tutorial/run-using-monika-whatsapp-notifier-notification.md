@@ -38,8 +38,6 @@ probes:
             message: Github response time is {{ response.time }} ms, expecting less than 500ms
           - query: response.status != 200
             message: Github status code is not 200. Please check the service status!
-    incidentThreshold: 1
-    recoveryThreshold: 1
 ```
 
 Let me explain a little bit about this configuration:

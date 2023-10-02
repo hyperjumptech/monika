@@ -91,8 +91,6 @@ probes:
         url: https://github.com/hyperjumptech
         timeout: 7000 # in milliseconds
         saveBody: true
-    incidentThreshold: 3
-    recoveryThreshold: 3
     alerts:
       - assertion: response.status > 299
         message: Target is not healthy. It has not been returning status code 2xx.
@@ -141,8 +139,6 @@ probes:
       - method: GET
         url: https://reqres.in/api/users/{{ responses.[0].body.data.[0].id }}
         timeout: 7000 # in milliseconds
-    incidentThreshold: 3
-    recoveryThreshold: 3
     alerts:
       - assertion: response.status > 299
         message: Target is not healthy. It has not been returning status code 2xx.
@@ -202,8 +198,6 @@ probes:
           job: leader
         headers:
           Authorization: Bearer {{ responses.[0].body.token }}
-    incidentThreshold: 3
-    recoveryThreshold: 3
     alerts:
       - assertion: response.status > 299
         message: Target is not healthy. It has not been returning status code 2xx.
