@@ -32,8 +32,6 @@ probes:
     name: Localhost
     description: Check status
     interval: 3
-    incidentThreshold: 3
-    recoveryThreshold: 3
     requests:
       - method: GET
         url: https://httpbin.org/delay/2500
@@ -49,7 +47,6 @@ Let’s take a look at the configuration above:
 - The Pushover notification channel will use the API Token and User Key you created from the previous step.
 - It will probe [https://httpbin.org/delay/2500](https://httpbin.org/delay/2500)[,](https://www.google.com%2C/) with the method GET
 - It will alert you if the response status code is not 200, or the response time is longer than two seconds
-- The incident/recovery threshold count is 3, meaning Monika will only send notifications when the probed URL returns non-2xx status 3 times in a row. After sending the notifications, Monika will not send notifications anymore until the alert status changes.
 
 Once that’s done, run Monika with the configuration above with the command `monika -c monika.yml`
 
