@@ -25,7 +25,7 @@ Now some of you may think, “what if I don’t know what to type in a blank fil
 
 ![](https://miro.medium.com/max/1400/1*GB73EpEOXKl4UpBqaDP3Mw.png)
 
-Also, it includes auto-complete when you select an option. For example, press CTRL+Space and select probes. It will automatically set a probe with an empty ID, ten seconds interval, and 5 times incidents/recoveries threshold.
+Also, it includes auto-complete when you select an option. For example, press CTRL+Space and select probes. It will automatically set a probe with an empty ID, and ten seconds interval.
 
 ![](https://miro.medium.com/max/854/1*98EBPAbUlDm0mQ-0xVArOw.png)
 
@@ -36,7 +36,7 @@ If you have used Monika, you may notice that some keys are not there yet such as
 Now you can create your own Monika configuration using the methods above. For now, let’s try to create a Monika configuration based on the points below:
 
 - I want to use the Desktop notification channel
-- I want to create a single probe with the name “Google”, with any ID, has ten seconds interval, 10 times incidents/recoveries threshold
+- I want to create a single probe with the name “Google”, with any ID, has ten seconds interval
 - Inside the probe “Google”, I want to have a request that will hit [https://www.google.com](https://www.google.com) with the method GET
 
 Try to do it yourself first and see if you can create the configuration from the points above similar to the configuration below:
@@ -53,8 +53,6 @@ probes:
         timeout: 10
         method: GET
     interval: 10
-    incidentThreshold: 5
-    recoveryThreshold: 5
 ```
 
 If the configuration is similar to the one you created, then congratulations! All that’s left to do is to run it using Monika.
