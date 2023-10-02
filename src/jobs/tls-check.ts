@@ -108,7 +108,6 @@ function sendTLSErrorNotification({
         body: {},
         headers: {},
         result: probeRequestResult.success,
-        isProbeResponsive: true,
       },
     }
 

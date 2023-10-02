@@ -53,7 +53,6 @@ export async function postgresRequest(
     headers: '',
     responseTime: 0,
     result: probeRequestResult.unknown,
-    isProbeResponsive: false,
   }
   const startTime = new Date()
   const result = await sendPsqlRequest(params)
@@ -65,7 +64,6 @@ export async function postgresRequest(
     baseResponse.body = result.message
     baseResponse.status = 200
     baseResponse.result = probeRequestResult.success
-    baseResponse.isProbeResponsive = result.isAlive
   } else {
     baseResponse.result = probeRequestResult.failed
     baseResponse.body = result.message

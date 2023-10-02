@@ -54,7 +54,6 @@ describe('Alert message', () => {
           headers: '',
           responseTime: 1000,
           result: probeRequestResult.success,
-          isProbeResponsive: true,
         },
       })
 
@@ -84,7 +83,6 @@ describe('Alert message', () => {
           headers: '',
           responseTime: 1000,
           result: probeRequestResult.success,
-          isProbeResponsive: true,
         },
       })
 
@@ -122,7 +120,6 @@ describe('Alert message', () => {
           headers: '',
           responseTime: 1000,
           result: probeRequestResult.success,
-          isProbeResponsive: true,
         },
       })
 
@@ -178,7 +175,6 @@ describe('Alert message', () => {
           headers: '',
           responseTime: 1000,
           result: probeRequestResult.success,
-          isProbeResponsive: true,
         },
       })
 

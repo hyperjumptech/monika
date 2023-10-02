@@ -80,7 +80,6 @@ describe('Prometheus collector', () => {
           headers: '',
           responseTime: 0,
           result: probeRequestResult.failed,
-          isProbeResponsive: false,
         },
       }
 
@@ -113,7 +112,6 @@ describe('Prometheus collector', () => {
           headers: '',
           responseTime: 0,
           result: probeRequestResult.failed,
-          isProbeResponsive: false,
         },
       }
 
@@ -148,7 +146,6 @@ describe('Prometheus collector', () => {
           status: 0,
           headers: '',
           responseTime: 0,
-          isProbeResponsive: false,
         },
       } as ProbeResult
 
