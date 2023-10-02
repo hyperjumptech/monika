@@ -39,6 +39,8 @@ describe('Prometheus plugin', () => {
           resolve('./monika.example.json'),
           '--prometheus',
           '4444',
+          '--repeat',
+          '1',
         ])
       )
       .it('runs Prometheus metric server', async (ctx) => {
@@ -48,9 +50,6 @@ describe('Prometheus plugin', () => {
         // assert
         expect(ctx.stdout).to.contain('Starting Monika.')
         expect(res.status).to.equal(200)
-
-        // eslint-disable-next-line unicorn/no-process-exit, no-process-exit
-        process.exit(0)
       })
   })
 
@@ -69,6 +68,8 @@ describe('Prometheus plugin', () => {
           resolve('./monika.example.json'),
           '--prometheus',
           '4446',
+          '--repeat',
+          '1',
         ])
       )
       .it('runs Prometheus metric server but return 405', async () => {

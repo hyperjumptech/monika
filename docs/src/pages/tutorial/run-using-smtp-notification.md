@@ -80,8 +80,6 @@ probes:
     alerts:
       - query: response.time > 10000
         message: Please check your internet connection
-    incidentThreshold: 1
-    recoveryThreshold: 1
 ```
 
 Save the configuration file as `monika.yml` and run the configuration. When an alert is triggered, it should send a recovery or incident email to the recipients you have configured.

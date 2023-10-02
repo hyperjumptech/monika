@@ -26,8 +26,6 @@ import chalk from 'chalk'
 import { getAllLogs } from './history'
 import { log } from '../../utils/pino'
 
-export { RequestLog } from './request-log'
-
 /**
  * getStatusColor colorizes different statusCode
  * @param {any} responseCode is the httpStatus to colorize
