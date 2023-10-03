@@ -107,34 +107,30 @@ function sanitizeAlerts({
   }
 
   if (alerts === undefined || alerts.length === 0) {
-    return getDefaultAlerts(isHTTPProbe)
+    return addFailedRequestAssertions(getDefaultAlerts(isHTTPProbe))
   }
 
-  return alerts.map((alert) => {
-    if (alert.query) {
-      return { ...alert, assertion: alert.query }
-    }
+  return addFailedRequestAssertions(
+    alerts.map((alert) => {
+      if (alert.query !== undefined) {
+        return { ...alert, assertion: alert.query }
+      }
 
-    return alert
-  })
+      return alert
+    })
+  )
 }
 
 function getDefaultAlerts(isHTTPProbe: boolean): ProbeAlert[] {
   if (!isHTTPProbe) {
-    return [
-      {
-        id: uuid(),
-        assertion: '',
-        message: 'Probe is not accesible',
-      },
-    ]
+    return []
   }
 
   return [
     {
       id: uuid(),
       assertion: 'response.status < 200 or response.status > 299',
-      message: 'HTTP Status is {{ response.status }}, expecting 200',
+      message: 'HTTP Status is {{ response.status }}, expecting 2xx',
     },
     {
       id: uuid(),
@@ -145,12 +141,23 @@ function getDefaultAlerts(isHTTPProbe: boolean): ProbeAlert[] {
   ]
 }
 
+function addFailedRequestAssertions(assertions: ProbeAlert[]) {
+  return [
+    {
+      id: uuid(),
+      assertion: '',
+      message: 'Probe not accessible',
+    },
+    ...assertions,
+  ]
+}
+
 function sanitizeRequests(requests?: RequestConfig[]) {
   return requests?.map((request) => ({
     ...request,
     method: request.method || 'GET',
     alerts: request.alerts?.map((alert) => {
-      if (alert.query) {
+      if (alert.query !== undefined) {
         return { ...alert, assertion: alert.query }
       }
 

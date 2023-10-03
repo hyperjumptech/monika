@@ -22,18 +22,12 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { v4 as uuid } from 'uuid'
 import { getContext } from '../../../../context'
 import events from '../../../../events'
 import { getEventEmitter } from '../../../../utils/events'
 import { log } from '../../../../utils/pino'
 import { httpRequest } from './request'
-import {
-  BaseProber,
-  NotificationType,
-  ProbeMessage,
-  failedRequestAssertion,
-} from '..'
+import { BaseProber, NotificationType } from '..'
 import {
   type ProbeRequestResponse,
   probeRequestResult,
@@ -80,11 +74,11 @@ export class HTTPProber extends BaseProber {
           false,
           getErrorMessage(hasFailedRequest.errMessage || 'Unknown error.')
         )
-        throw new Error(ProbeMessage.ProbeNotAccessible)
+        throw new Error('There is an ongoing incident.')
       }
 
       this.handleFailedRequest(responses)
-      throw new Error(ProbeMessage.ProbeNotAccessible)
+      throw new Error('Probe request is failed.')
     }
 
     for (const requestIndex of responses.keys()) {
@@ -167,12 +161,24 @@ export class HTTPProber extends BaseProber {
     const requestIndex = responses.findIndex(
       ({ result }) => result !== probeRequestResult.success
     )
+    const failedRequestAssertion = this.getFailedRequestAssertion(requestIndex)
 
     getEventEmitter().emit(events.probe.alert.triggered, {
       probe: this.probeConfig,
       requestIndex,
       alertQuery: '',
     })
+
+    this.printLogMessage(
+      false,
+      getErrorMessage(hasFailedRequest!.errMessage || 'Unknown error.'),
+      getNotificationMessage({ isIncident: true })
+    )
+
+    if (!failedRequestAssertion) {
+      log.error('Failed request assertion is not found')
+      return
+    }
 
     startDowntimeCounter({
       alert: failedRequestAssertion,
@@ -197,12 +203,6 @@ export class HTTPProber extends BaseProber {
         response: hasFailedRequest!,
       },
     })
-
-    this.printLogMessage(
-      false,
-      getErrorMessage(hasFailedRequest!.errMessage || 'Unknown error.'),
-      getNotificationMessage({ isIncident: true })
-    )
   }
 
   private handleIncidentRecovery(responses: ProbeRequestResponse[]) {
@@ -291,11 +291,9 @@ export class HTTPProber extends BaseProber {
   }
 
   private generateAlertMessage(): string {
-    const hasAlert = this.probeConfig.alerts.length > 0
-    const defaultAlertsInString = JSON.stringify(getDefaultAlerts())
     const alertsInString = JSON.stringify(this.probeConfig.alerts)
 
-    return `    Alerts: ${hasAlert ? alertsInString : defaultAlertsInString}\n`
+    return `    Alerts: ${alertsInString}\n`
   }
 
   private validateResponse(
@@ -303,7 +301,7 @@ export class HTTPProber extends BaseProber {
     additionalAssertions?: ProbeAlert[]
   ): ValidatedResponse[] {
     const assertions: ProbeAlert[] = [
-      ...(this.probeConfig.alerts || getDefaultAlerts()),
+      ...this.probeConfig.alerts,
       ...(additionalAssertions || []),
     ]
 
@@ -369,20 +367,4 @@ function getNotificationMessage({
   isIncident: boolean
 }): string {
   return `NOTIF: ${isIncident ? 'Service probably down' : 'Service is back up'}`
-}
-
-function getDefaultAlerts(): ProbeAlert[] {
-  return [
-    {
-      id: uuid(),
-      assertion: 'response.status < 200 or response.status > 299',
-      message: 'HTTP Status is {{ response.status }}, expecting 200',
-    },
-    {
-      id: uuid(),
-      assertion: 'response.time > 2000',
-      message:
-        'Response time is {{ response.time }}ms, expecting less than 2000ms',
-    },
-  ]
 }

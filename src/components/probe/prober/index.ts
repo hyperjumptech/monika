@@ -23,7 +23,6 @@
  **********************************************************************************/
 
 import type { Notification } from '@hyperjumptech/monika-notification'
-import { v4 as uuid } from 'uuid'
 import { type Incident, getContext } from '../../../context'
 import events from '../../../events'
 import type { Probe, ProbeAlert } from '../../../interfaces/probe'
@@ -76,17 +75,6 @@ enum ProbeState {
   Down = 'DOWN',
 }
 
-export enum ProbeMessage {
-  ProbeNotAccessible = 'Probe not accessible',
-  ProbeAccessibleAgain = 'Probe accessible again',
-}
-
-export const failedRequestAssertion: ProbeAlert = {
-  id: uuid(),
-  assertion: '',
-  message: ProbeMessage.ProbeNotAccessible,
-}
-
 export class BaseProber implements Prober {
   protected readonly counter: number
   protected readonly notifications: Notification[]
@@ -118,11 +106,11 @@ export class BaseProber implements Prober {
       )
     ) {
       if (this.hasIncident()) {
-        throw new Error(ProbeMessage.ProbeNotAccessible)
+        throw new Error('There is an ongoing incident.')
       }
 
       this.handleFailedProbe(probeResults)
-      throw new Error(ProbeMessage.ProbeNotAccessible)
+      throw new Error('Probe request is failed.')
     }
 
     if (this.hasIncident()) {
@@ -149,6 +137,36 @@ export class BaseProber implements Prober {
         })
       }
     }
+  }
+
+  protected getFailedRequestAssertion(
+    requestIndex?: number
+  ): ProbeAlert | undefined {
+    const getFailedRequestAssertionFromProbe = (): ProbeAlert | undefined =>
+      this.probeConfig.alerts.find(
+        ({ assertion, message }) =>
+          assertion === '' && message === 'Probe not accessible'
+      )
+    const getFailedRequestAssertionFromRequests = (
+      requestIndex?: number
+    ): ProbeAlert | undefined => {
+      if (
+        this.probeConfig.requests === undefined ||
+        requestIndex === undefined
+      ) {
+        return undefined
+      }
+
+      return (this.probeConfig.requests[requestIndex].alerts || []).find(
+        ({ assertion, message }) =>
+          assertion === '' && message === 'Probe not accessible'
+      )
+    }
+
+    return (
+      getFailedRequestAssertionFromProbe() ||
+      getFailedRequestAssertionFromRequests(requestIndex)
+    )
   }
 
   protected hasIncident(): Incident | undefined {
@@ -207,6 +225,12 @@ export class BaseProber implements Prober {
       ({ requestResponse }) =>
         requestResponse.result !== probeRequestResult.success
     )
+    const failedRequestAssertion = this.getFailedRequestAssertion(requestIndex)
+
+    if (!failedRequestAssertion) {
+      log.error('Failed request assertion is not found')
+      return
+    }
 
     getEventEmitter().emit(events.probe.alert.triggered, {
       probe: this.probeConfig,
@@ -247,6 +271,7 @@ export class BaseProber implements Prober {
       this.probeConfig?.requests?.findIndex(
         ({ url }) => url === recoveredIncident?.probeRequestURL
       ) || 0
+    const failedRequestAssertion = this.getFailedRequestAssertion(requestIndex)
 
     if (recoveredIncident) {
       stopDowntimeCounter({
@@ -254,6 +279,11 @@ export class BaseProber implements Prober {
         probeID: this.probeConfig.id,
         url: this.probeConfig?.requests?.[requestIndex].url || '',
       })
+
+      if (!failedRequestAssertion) {
+        log.error('Failed request assertion is not found')
+        return
+      }
 
       this.sendNotification({
         requestURL: this.probeConfig?.requests?.[requestIndex].url || '',
@@ -264,6 +294,11 @@ export class BaseProber implements Prober {
           response: probeResults[requestIndex].requestResponse,
         },
       }).catch((error) => log.error(error.mesage))
+    }
+
+    if (!failedRequestAssertion) {
+      log.error('Failed request assertion is not found')
+      return
     }
 
     saveProbeRequestLog({
