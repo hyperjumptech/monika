@@ -79,7 +79,6 @@ const main = async (data: Record<string, any>) => {
           },
         },
         headers: {
-          'Content-Encoding': 'gzip',
           'Content-Type': 'application/json',
           'x-api-key': apiKey,
         },
