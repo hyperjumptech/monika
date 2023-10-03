@@ -58,23 +58,20 @@ function getProbes(port: number) {
 }
 
 let urlRequestTotal = 0
-// let notificationAlert: Record<string, Record<string, any>> = {}
+const notificationAlert: Record<string, Record<string, any>> = {}
 
-function createMockServer(
-  port: number,
-  onWebhookInvoked: (body: any) => void = () => {
-    // do nothing
-  }
-) {
+function createMockServer(port: number) {
   const appExpress = express()
   appExpress.use(bodyParser.json())
   appExpress.all('*', (req, res) => {
     if (req.path.endsWith('webhook')) {
-      onWebhookInvoked(req.body)
-      console.log(
-        'createMockServer appExpress onWebhookInvoked',
-        JSON.stringify(req.body)
-      )
+      if (req?.body?.url) {
+        notificationAlert[req.body.body.url] = req.body.body as Record<
+          string,
+          string
+        >
+      }
+
       res.status(200).send()
     } else {
       urlRequestTotal += 1
@@ -176,10 +173,7 @@ describe('Probe processing', () => {
 
     it('should send incident notification if the request is failed', async () => {
       // arrange
-      let notificationAlert: any = {}
-      const server = createMockServer(4004, (body) => {
-        notificationAlert = body
-      })
+      const server = createMockServer(4004)
       const probe = {
         ...getProbes(9999)[0],
         id: '2md9o',
@@ -214,8 +208,10 @@ describe('Probe processing', () => {
 
       server.close()
       // assert
+      console.log('should send incident notification if the request is failed')
+      console.log(JSON.stringify(notificationAlert))
       expect(notificationAlert?.[probe.requests[0].url]?.body?.url).eq(
-        'http://localhost:'
+        'http://localhost:9999'
       )
       expect(notificationAlert?.[probe.requests[0].url]?.body.alert).eq('')
     }).timeout(10_000)
