@@ -44,7 +44,7 @@
     "prepack": "npm run clean && tsc -b && oclif manifest",
     "start": "npm run prepack && ./bin/dev",
     "start:prod": "npm run prepack && ./bin/run",
-    "test": "npm run clean && cross-env NODE_ENV=test NODE_OPTIONS='--no-experimental-fetch' nyc --reporter=lcov --extension .ts mocha --config .mocharc.json --forbid-only \"{packages,src,test}/**/*.test.ts\" --exclude test/cli.test.ts",
+    "test": "npm run clean && cross-env NODE_ENV=test NODE_OPTIONS='--no-experimental-fetch --dns-result-order=ipv4first' nyc --reporter=lcov --extension .ts mocha --config .mocharc.json --forbid-only \"{packages,src,test}/**/*.test.ts\" --exclude test/cli.test.ts",
     "cli-test": "npx bats test/bats/cli.bats",
     "prod_test": "npm run prod_test:bats && npm run prod_test:cli",
     "prod_test:bats": "npx bats prod_test/test.bats",

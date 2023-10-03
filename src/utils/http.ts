@@ -51,14 +51,6 @@ export async function sendHttpRequest(
     body: body ? body : undefined,
     timeout: timeout ?? DEFAULT_TIMEOUT,
     agent: agent ?? defaultAgent,
-  }).then((res) => {
-    if (res.type === 'basic' || res.type === 'cors') {
-      return res
-    }
-
-    throw new Error(
-      `sendHttpRequest: Failed with HTTP status code ${res.status}: "${res.type}".`
-    )
   })
 }
 

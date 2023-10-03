@@ -174,6 +174,7 @@ export async function httpRequest({
     }
   } catch (error: any) {
     const responseTime = Date.now() - requestStartedAt
+    console.log('httpRequest catch', JSON.stringify(error))
 
     // The request was made and the server responded with a status code
     // 400, 500 get here
@@ -191,7 +192,7 @@ export async function httpRequest({
 
     // The request was made but no response was received
     // timeout is here, ECONNABORTED, ENOTFOUND, ECONNRESET, ECONNREFUSED
-    if (error?.request) {
+    if (error?.code) {
       const status = errorRequestCodeToNumber(error?.code)
 
       return {
