@@ -141,14 +141,18 @@ function getDefaultAlerts(isHTTPProbe: boolean): ProbeAlert[] {
   ]
 }
 
+export const FAILED_REQUEST_ASSERTION = {
+  assertion: '',
+  message: 'Probe not accessible',
+}
+
 function addFailedRequestAssertions(assertions: ProbeAlert[]) {
   return [
+    ...assertions,
     {
       id: uuid(),
-      assertion: '',
-      message: 'Probe not accessible',
+      ...FAILED_REQUEST_ASSERTION,
     },
-    ...assertions,
   ]
 }
 

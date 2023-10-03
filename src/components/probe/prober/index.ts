@@ -41,6 +41,7 @@ import {
   startDowntimeCounter,
   stopDowntimeCounter,
 } from '../../downtime-counter'
+import { FAILED_REQUEST_ASSERTION } from '../../../looper'
 
 export type ProbeResult = {
   isAlertTriggered: boolean
@@ -95,8 +96,8 @@ export class BaseProber implements Prober {
   }
 
   protected processProbeResults(probeResults: ProbeResult[]): void {
-    for (const probeResult of probeResults) {
-      logMessage(probeResult)
+    for (const { isAlertTriggered, logMessage } of probeResults) {
+      this.logMessage(isAlertTriggered, logMessage)
     }
 
     if (
@@ -145,7 +146,8 @@ export class BaseProber implements Prober {
     const getFailedRequestAssertionFromProbe = (): ProbeAlert | undefined =>
       this.probeConfig.alerts.find(
         ({ assertion, message }) =>
-          assertion === '' && message === 'Probe not accessible'
+          assertion === FAILED_REQUEST_ASSERTION.assertion &&
+          message === FAILED_REQUEST_ASSERTION.message
       )
     const getFailedRequestAssertionFromRequests = (
       requestIndex?: number
@@ -159,7 +161,8 @@ export class BaseProber implements Prober {
 
       return (this.probeConfig.requests[requestIndex].alerts || []).find(
         ({ assertion, message }) =>
-          assertion === '' && message === 'Probe not accessible'
+          assertion === FAILED_REQUEST_ASSERTION.assertion &&
+          message === FAILED_REQUEST_ASSERTION.message
       )
     }
 
@@ -215,7 +218,9 @@ export class BaseProber implements Prober {
     )
   }
 
-  private handleFailedProbe(probeResults: ProbeResult[]) {
+  protected handleFailedProbe(
+    probeResults: Pick<ProbeResult, 'requestResponse'>[]
+  ): void {
     const hasfailedProbe = probeResults.find(
       ({ requestResponse }) =>
         requestResponse.result !== probeRequestResult.success
@@ -263,7 +268,9 @@ export class BaseProber implements Prober {
     }).catch((error) => log.error(error.mesage))
   }
 
-  private handleRecovery(probeResults: ProbeResult[]) {
+  protected handleRecovery(
+    probeResults: Pick<ProbeResult, 'requestResponse'>[]
+  ): void {
     const recoveredIncident = getContext().incidents.find(
       (incident) => incident.probeID === this.probeConfig.id
     )
@@ -271,7 +278,6 @@ export class BaseProber implements Prober {
       this.probeConfig?.requests?.findIndex(
         ({ url }) => url === recoveredIncident?.probeRequestURL
       ) || 0
-    const failedRequestAssertion = this.getFailedRequestAssertion(requestIndex)
 
     if (recoveredIncident) {
       stopDowntimeCounter({
@@ -280,45 +286,43 @@ export class BaseProber implements Prober {
         url: this.probeConfig?.requests?.[requestIndex].url || '',
       })
 
-      if (!failedRequestAssertion) {
-        log.error('Failed request assertion is not found')
-        return
-      }
-
       this.sendNotification({
         requestURL: this.probeConfig?.requests?.[requestIndex].url || '',
         notificationType: NotificationType.Recover,
         validation: {
-          alert: failedRequestAssertion,
+          alert: recoveredIncident.alert,
           isAlertTriggered: false,
           response: probeResults[requestIndex].requestResponse,
         },
       }).catch((error) => log.error(error.mesage))
     }
 
-    if (!failedRequestAssertion) {
-      log.error('Failed request assertion is not found')
-      return
-    }
-
     saveProbeRequestLog({
       probe: this.probeConfig,
       requestIndex,
       probeRes: probeResults[requestIndex].requestResponse,
-      alertQueries: [failedRequestAssertion.assertion],
+      alertQueries: [recoveredIncident?.alert.assertion || ''],
     })
+  }
+
+  protected logMessage(isSuccess: boolean, ...message: string[]): void {
+    if (isSuccess) {
+      log.info(
+        `${this.getMessagePrefix()} ${message.filter(Boolean).join(', ')}`
+      )
+      return
+    }
+
+    log.warn(`${this.getMessagePrefix()} ${message.filter(Boolean).join(', ')}`)
   }
 
   private hasNotification() {
     return this.notifications.length > 0
   }
-}
 
-function logMessage({ isAlertTriggered, logMessage }: ProbeResult): void {
-  if (isAlertTriggered) {
-    log.warn(logMessage)
-    return
+  private getMessagePrefix() {
+    return `${new Date().toISOString()} ${this.counter} id:${
+      this.probeConfig.id
+    }`
   }
-
-  log.info(logMessage)
 }
