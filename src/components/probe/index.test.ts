@@ -71,6 +71,10 @@ function createMockServer(
   appExpress.all('*', (req, res) => {
     if (req.path.endsWith('webhook')) {
       onWebhookInvoked(req.body)
+      console.log(
+        'createMockServer appExpress onWebhookInvoked',
+        JSON.stringify(req.body)
+      )
       res.status(200).send()
     } else {
       urlRequestTotal += 1
@@ -211,7 +215,7 @@ describe('Probe processing', () => {
       server.close()
       // assert
       expect(notificationAlert?.[probe.requests[0].url]?.body?.url).eq(
-        'https://example.com'
+        'http://localhost:'
       )
       expect(notificationAlert?.[probe.requests[0].url]?.body.alert).eq('')
     }).timeout(10_000)

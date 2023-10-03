@@ -174,7 +174,6 @@ export async function httpRequest({
     }
   } catch (error: any) {
     const responseTime = Date.now() - requestStartedAt
-    console.log('httpRequest catch', JSON.stringify(error))
 
     // The request was made and the server responded with a status code
     // 400, 500 get here
