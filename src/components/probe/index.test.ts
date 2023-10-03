@@ -39,6 +39,7 @@ import type { Probe } from '../../interfaces/probe'
 import { afterEach, beforeEach } from 'mocha'
 import { getContext, resetContext, setContext } from '../../context'
 import type { MonikaFlags } from '../../context/monika-flags'
+import { FAILED_REQUEST_ASSERTION } from '../../looper'
 
 let urlRequestTotal = 0
 let notificationAlert: Record<string, Record<string, any>> = {}
@@ -183,6 +184,10 @@ describe('Probe processing', () => {
           },
         ],
         alerts: [
+          {
+            id: 'Cqkjh',
+            ...FAILED_REQUEST_ASSERTION,
+          },
           {
             id: 'fKBzx',
             assertion: 'response.status == 200',
@@ -375,6 +380,12 @@ describe('Probe processing', () => {
             database: '',
           },
         ],
+        alerts: [
+          {
+            id: 'Cqkjh',
+            ...FAILED_REQUEST_ASSERTION,
+          },
+        ],
       } as Probe
       initializeProbeStates([probe])
       // wait until the interval passed
@@ -424,6 +435,12 @@ describe('Probe processing', () => {
             username: 'mariadb_user',
             password: 'mariadb_password',
             database: '',
+          },
+        ],
+        alerts: [
+          {
+            id: 'Cqkjh',
+            ...FAILED_REQUEST_ASSERTION,
           },
         ],
       } as Probe

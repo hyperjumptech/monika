@@ -41,7 +41,13 @@ const defaultConfig: Config = {
       ],
       incidentThreshold: 1,
       recoveryThreshold: 1,
-      alerts: [],
+      alerts: [
+        {
+          assertion: 'response.status < 200 or response.status > 299',
+          id: '0BGKU',
+          message: 'HTTP Status is {{ response.status }}, expecting 2xx',
+        },
+      ],
     },
   ],
   notifications: [{ id: 'UVIsL', type: 'desktop', data: undefined }],
