@@ -47,8 +47,6 @@ probes:
         message: HTTP Status is not 200
       - query: response.time > 2000
         message: Response time is more than 2000ms
-    incidentThreshold: 3
-    recoveryThreshold: 3
 ```
 
 Let’s take a look at the configuration above:
@@ -56,7 +54,6 @@ Let’s take a look at the configuration above:
 - The Pushover notification channel will use the API Token and User Key you created from the previous step.
 - It will probe [http://localhost:8080/health,](https://www.google.com%2C/) with the method GET
 - It will alert you if the response status code is not 200, or the response time is longer than two seconds
-- The incident/recovery threshold count is 3, meaning Monika will only send notifications when the probed URL returns non-2xx status 3 times in a row. After sending the notifications, Monika will not send notifications anymore until the alert status changes.
 
 Once that’s done, run Monika with the configuration above with the command `monika -c monika.yml`
 

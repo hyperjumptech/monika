@@ -85,8 +85,6 @@ probes:
     name: Hyperjump
     description: Landing page
     interval: 1
-    incidentThreshold: 1
-    recoveryThreshold: 1
     requests:
       - method: GET
         url: 'http://localhost:3000/api/demo/status'
@@ -98,7 +96,7 @@ probes:
 Let me explain the configuration a little bit:
 
 - Monika will use DingTalk as their notification channel, using the access token from the previous step
-- Monika will probe [http://localhost:3000/api/demo/status](http://localhost:3000/api/demo/status) with recovery and incident threshold set to 1 every one second
+- Monika will probe [http://localhost:3000/api/demo/status](http://localhost:3000/api/demo/status) every one second
 - Monika will alert you if the response status code is not 200
 
 Once that’s done, run the `monika.yml` with the configuration above.

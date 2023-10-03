@@ -46,8 +46,6 @@ probes:
       - url: https://github.com
         body: {}
         timeout: 10000
-    incidentThreshold: 5
-    recoveryThreshold: 5
     alerts: []
 ```
 
