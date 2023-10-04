@@ -25,6 +25,7 @@
 import { HTTPProber } from './http'
 import { MongoProber } from './mongo'
 import { MariaDBProber } from './mariadb'
+import { PingProber } from './icmp'
 import { PostgresProber } from './postgres'
 import { RedisProber } from './redis'
 import { SocketProber } from './socket'
@@ -58,6 +59,10 @@ export function createProbers(probeMetadata: ProberMetadata): Prober[] {
     result.push(createProber(probeMetadata))
   }
 
+  if (probeConfig?.ping) {
+    result.push(createProber(probeMetadata))
+  }
+
   return result
 }
 
@@ -86,6 +91,10 @@ export function createProber(probeMetadata: ProberMetadata): Prober {
 
   if (probeConfig?.socket) {
     return new SocketProber(probeMetadata)
+  }
+
+  if (probeConfig?.ping) {
+    return new PingProber(probeMetadata)
   }
 
   return new BaseProber(probeMetadata)
