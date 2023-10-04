@@ -33,8 +33,6 @@ probes:
         timeout: 10000
         body:
           message: Hello, world!
-    incidentThreshold: 5
-    recoveryThreshold: 5
     alerts: []
   - id: Group2
     name: Group2
@@ -70,8 +68,6 @@ probes:
         timeout: 10000
         body:
           message: Hello, world!
-    incidentThreshold: 5
-    recoveryThreshold: 5
     alerts: []
 notifications:
   - id: default

@@ -23,7 +23,6 @@
  **********************************************************************************/
 
 import type { Config } from '../../interfaces/config'
-import { DEFAULT_THRESHOLD } from '../../looper'
 import { XMLParser } from 'fast-xml-parser'
 import { monikaFlagsDefaultValue } from '../../context/monika-flags'
 import type { MonikaFlags } from '../../context/monika-flags'
@@ -52,8 +51,6 @@ const generateProbesFromXml = (config: any) => {
       id: item?.loc,
       name: item?.loc,
       requests: requests,
-      incidentThreshold: DEFAULT_THRESHOLD,
-      recoveryThreshold: DEFAULT_THRESHOLD,
       alerts: [],
     }
   })
@@ -95,8 +92,6 @@ const generateProbesFromXmlOneProbe = (config: any) => {
       name: url.host,
       requests: requests,
       interval: monikaFlagsDefaultValue['config-interval'],
-      incidentThreshold: DEFAULT_THRESHOLD,
-      recoveryThreshold: DEFAULT_THRESHOLD,
       alerts: [
         {
           assertion: 'response.status < 200 or response.status > 299',

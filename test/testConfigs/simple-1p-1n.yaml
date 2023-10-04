@@ -12,8 +12,6 @@ probes:
     interval: 10
     requests:
       - url: http://httpbin.org/status/200
-    incidentThreshold: 3
-    recoveryThreshold: 3
     alerts:
       - assertion: response.status != 200
         message: didn't get 200!

@@ -32,8 +32,6 @@ probes:
     alerts:
       - assertion: response.status != 200
         message: response status message
-    incidentThreshold: 1
-    recoveryThreshold: 1
 
 notifications:
   - id: my-desktop-notif

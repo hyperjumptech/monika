@@ -9,8 +9,6 @@ probes:
     description: Probe
     requests:
       - url: https://something/something
-    incidentThreshold: 2
-    recoveryThreshold: 2
     alerts:
       - assertion: response.status != 200
         message: Http Response status code is not 200!

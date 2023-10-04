@@ -62,8 +62,6 @@ describe('Prometheus collector', () => {
               timeout: 0,
             },
           ],
-          incidentThreshold: 0,
-          recoveryThreshold: 0,
           alerts: [
             {
               id: 'fKBzx',
@@ -100,8 +98,6 @@ describe('Prometheus collector', () => {
           name: '',
           interval: 0,
           requests: [],
-          incidentThreshold: 0,
-          recoveryThreshold: 0,
           alerts: [{ id: 'fKBzx', assertion: '', message: '' }],
         },
         requestIndex: 0,
@@ -131,8 +127,6 @@ describe('Prometheus collector', () => {
           id: '',
           name: '',
           interval: 0,
-          incidentThreshold: 0,
-          recoveryThreshold: 0,
           alerts: [
             {
               assertion: '',
@@ -176,8 +170,6 @@ describe('Prometheus collector', () => {
               timeout: 0,
             },
           ],
-          incidentThreshold: 0,
-          recoveryThreshold: 0,
           alerts: [{ id: 'fKBzx', assertion: '', message: '' }],
         },
         requestIndex: 0,
@@ -203,8 +195,6 @@ describe('Prometheus collector', () => {
           name: '',
           interval: 0,
           requests: [],
-          incidentThreshold: 0,
-          recoveryThreshold: 0,
           alerts: [{ id: 'fKBzx', assertion: '', message: '' }],
         },
         requestIndex: 0,
@@ -227,8 +217,6 @@ describe('Prometheus collector', () => {
           id: '',
           name: '',
           interval: 0,
-          incidentThreshold: 0,
-          recoveryThreshold: 0,
           alerts: [
             {
               assertion: '',

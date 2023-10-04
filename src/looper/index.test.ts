@@ -22,8 +22,8 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { expect } from 'chai'
-import { DEFAULT_THRESHOLD, sanitizeProbe } from '.'
+import { expect } from '@oclif/test'
+import { sanitizeProbe } from '.'
 import type { Probe } from '../interfaces/probe'
 
 describe('Looper', () => {
@@ -92,38 +92,6 @@ describe('Looper', () => {
 
       // assert
       expect(result.name).eq('monika_Example')
-    })
-
-    it('should set default incidentThreshold', () => {
-      // arrange
-      const probe = {
-        id: 'Example',
-        requests: [
-          { method: 'GET', alerts: [{ query: 'response.status < 200' }] },
-        ],
-      } as Probe
-
-      // act
-      const result = sanitizeProbe(false, probe)
-
-      // assert
-      expect(result.incidentThreshold).eq(DEFAULT_THRESHOLD)
-    })
-
-    it('should set default recoveryThreshold', () => {
-      // arrange
-      const probe = {
-        id: 'Example',
-        requests: [
-          { method: 'GET', alerts: [{ query: 'response.status < 200' }] },
-        ],
-      } as Probe
-
-      // act
-      const result = sanitizeProbe(false, probe)
-
-      // assert
-      expect(result.recoveryThreshold).eq(DEFAULT_THRESHOLD)
     })
 
     it('should set default alerts for HTTP probe', () => {

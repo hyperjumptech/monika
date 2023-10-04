@@ -22,12 +22,11 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Config } from '../../interfaces/config'
+import type { Config } from '../../interfaces/config'
 import yml from 'js-yaml'
-import { Probe } from '../../interfaces/probe'
-import { DEFAULT_THRESHOLD } from '../../looper'
+import type { Probe } from '../../interfaces/probe'
 import { compile } from 'handlebars'
-import { AxiosRequestHeaders, Method } from 'axios'
+import type { AxiosRequestHeaders, Method } from 'axios'
 
 interface InsomniaResource {
   _id: string
@@ -132,8 +131,6 @@ function mapInsomniaRequestToConfig(res: InsomniaResource): Probe {
       },
     ],
     interval: 30,
-    incidentThreshold: DEFAULT_THRESHOLD,
-    recoveryThreshold: DEFAULT_THRESHOLD,
     alerts: [],
   }
 }

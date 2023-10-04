@@ -97,8 +97,8 @@ export interface Probe {
   mysql?: MariaDB[]
   postgres?: Postgres[]
   ping?: Ping[]
-  incidentThreshold: number
-  recoveryThreshold: number
+  incidentThreshold?: number
+  recoveryThreshold?: number
   alerts: ProbeAlert[]
   lastEvent?: {
     createdAt?: Date

@@ -34,8 +34,6 @@ const probes: Probe[] = [
     name: 'Example',
     interval: 3000,
     requests: [],
-    incidentThreshold: 0,
-    recoveryThreshold: 0,
     alerts: [],
   },
   {
@@ -43,8 +41,6 @@ const probes: Probe[] = [
     name: 'Example 2',
     interval: 3000,
     requests: [],
-    incidentThreshold: 0,
-    recoveryThreshold: 0,
     alerts: [],
   },
 ]
