@@ -9,8 +9,6 @@ probes:
         timeout: 10000
         headers: {}
     interval: 30
-    incidentThreshold: 5
-    recoveryThreshold: 5
     alerts: []
   - id: req_wrk_a255aeabb44240f5885e3360f9a6ee656d74493f
     name: Update user
@@ -31,8 +29,6 @@ probes:
         headers:
           Content-Type: application/json
     interval: 30
-    incidentThreshold: 5
-    recoveryThreshold: 5
     alerts: []
   - id: req_wrk_a255aeabb44240f5885e3360f9a6ee6574f1d1d1
     name: Get user by user name
@@ -44,8 +40,6 @@ probes:
         timeout: 10000
         headers: {}
     interval: 30
-    incidentThreshold: 5
-    recoveryThreshold: 5
     alerts: []
   - id: req_wrk_a255aeabb44240f5885e3360f9a6ee65740025cb
     name: Logs out current logged in user session
@@ -57,8 +51,6 @@ probes:
         timeout: 10000
         headers: {}
     interval: 30
-    incidentThreshold: 5
-    recoveryThreshold: 5
     alerts: []
   - id: req_wrk_a255aeabb44240f5885e3360f9a6ee6500ac9da2
     name: Logs user into the system
@@ -70,8 +62,6 @@ probes:
         timeout: 10000
         headers: {}
     interval: 30
-    incidentThreshold: 5
-    recoveryThreshold: 5
     alerts: []
   - id: req_wrk_a255aeabb44240f5885e3360f9a6ee65e94a615f
     name: Creates list of users with given input array
@@ -92,8 +82,6 @@ probes:
         headers:
           Content-Type: application/json
     interval: 30
-    incidentThreshold: 5
-    recoveryThreshold: 5
     alerts: []
   - id: req_wrk_a255aeabb44240f5885e3360f9a6ee65fe3d55d0
     name: Create user
@@ -114,8 +102,6 @@ probes:
         headers:
           Content-Type: application/json
     interval: 30
-    incidentThreshold: 5
-    recoveryThreshold: 5
     alerts: []
   - id: req_wrk_a255aeabb44240f5885e3360f9a6ee6515e47538
     name: Delete purchase order by ID
@@ -127,8 +113,6 @@ probes:
         timeout: 10000
         headers: {}
     interval: 30
-    incidentThreshold: 5
-    recoveryThreshold: 5
     alerts: []
   - id: req_wrk_a255aeabb44240f5885e3360f9a6ee65f021bcd3
     name: Find purchase order by ID
@@ -140,8 +124,6 @@ probes:
         timeout: 10000
         headers: {}
     interval: 30
-    incidentThreshold: 5
-    recoveryThreshold: 5
     alerts: []
   - id: req_wrk_a255aeabb44240f5885e3360f9a6ee65e24a4f9e
     name: Place an order for a pet
@@ -160,8 +142,6 @@ probes:
         headers:
           Content-Type: application/json
     interval: 30
-    incidentThreshold: 5
-    recoveryThreshold: 5
     alerts: []
   - id: req_wrk_a255aeabb44240f5885e3360f9a6ee65443ac9e7
     name: Returns pet inventories by status
@@ -174,8 +154,6 @@ probes:
         headers:
           api_key: '{{ apiKey }}'
     interval: 30
-    incidentThreshold: 5
-    recoveryThreshold: 5
     alerts: []
   - id: req_wrk_a255aeabb44240f5885e3360f9a6ee65e804bd05
     name: Deletes a pet
@@ -188,8 +166,6 @@ probes:
         headers:
           api_key: string
     interval: 30
-    incidentThreshold: 5
-    recoveryThreshold: 5
     alerts: []
   - id: req_wrk_a255aeabb44240f5885e3360f9a6ee65a4608701
     name: Updates a pet in the store with form data
@@ -201,8 +177,6 @@ probes:
         timeout: 10000
         headers: {}
     interval: 30
-    incidentThreshold: 5
-    recoveryThreshold: 5
     alerts: []
   - id: req_wrk_a255aeabb44240f5885e3360f9a6ee653d1a51d3
     name: Find pet by ID
@@ -215,8 +189,6 @@ probes:
         headers:
           api_key: '{{ apiKey }}'
     interval: 30
-    incidentThreshold: 5
-    recoveryThreshold: 5
     alerts: []
   - id: req_wrk_a255aeabb44240f5885e3360f9a6ee6542a17980
     name: Finds Pets by tags
@@ -228,8 +200,6 @@ probes:
         timeout: 10000
         headers: {}
     interval: 30
-    incidentThreshold: 5
-    recoveryThreshold: 5
     alerts: []
   - id: req_wrk_a255aeabb44240f5885e3360f9a6ee6580ab0d08
     name: Finds Pets by status
@@ -241,8 +211,6 @@ probes:
         timeout: 10000
         headers: {}
     interval: 30
-    incidentThreshold: 5
-    recoveryThreshold: 5
     alerts: []
   - id: req_wrk_a255aeabb44240f5885e3360f9a6ee6574a7a059
     name: Update an existing pet
@@ -266,8 +234,6 @@ probes:
         headers:
           Content-Type: application/json
     interval: 30
-    incidentThreshold: 5
-    recoveryThreshold: 5
     alerts: []
   - id: req_wrk_a255aeabb44240f5885e3360f9a6ee6523acbe44
     name: Add a new pet to the store
@@ -291,8 +257,6 @@ probes:
         headers:
           Content-Type: application/json
     interval: 30
-    incidentThreshold: 5
-    recoveryThreshold: 5
     alerts: []
 notifications:
   - id: default

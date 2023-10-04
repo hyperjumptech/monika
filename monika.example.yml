@@ -39,8 +39,6 @@ probes:
 #   alerts:
 #     - assertion: response.status == 500
 #       message: response status message
-#   incidentThreshold: 3
-#   recoveryThreshold: 3
 
 # Configuration example for sending Multiple requests
 # Requests could be define in array to run for multiple requests
@@ -88,8 +86,6 @@ probes:
 #         message: response status message
 #       - assertion: response.time > 150
 #         message: response time message
-#     incidentThreshold: 3
-#     recoveryThreshold: 3
 
 # Configuration example for enabling notification
 # Using this configuration Monika will check the page every 10 seconds
@@ -108,8 +104,6 @@ probes:
 #     alerts:
 #       - assertion: response.status == 500
 #         message: response status message
-#     incidentThreshold: 3
-#     recoveryThreshold: 3
 # notifications:
 #   - id: unique-id-smtp,
 #     type: smtp,

@@ -27,9 +27,7 @@
           "assertion": "response.time > 150",
           "message": "response time message"
         }
-      ],
-      "incidentThreshold": 3,
-      "recoveryThreshold": 3
+      ]
     }
   ]
 }

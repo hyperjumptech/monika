@@ -6,8 +6,6 @@ probes:
         method: GET
         headers: {}
         timeout: 10000
-    incidentThreshold: 5
-    recoveryThreshold: 5
     alerts: []
   - id: '[BODY-FORMDATA] Hyperjump GitHub'
     name: '[BODY-FORMDATA] Hyperjump GitHub'
@@ -19,8 +17,6 @@ probes:
         timeout: 10000
         body:
           message: Hello, world!
-    incidentThreshold: 5
-    recoveryThreshold: 5
     alerts: []
   - id: '[BODY-URLENCODED] Hyperjump GitHub'
     name: '[BODY-URLENCODED] Hyperjump GitHub'
@@ -32,8 +28,6 @@ probes:
         timeout: 10000
         body:
           message: Hello, world!
-    incidentThreshold: 5
-    recoveryThreshold: 5
     alerts: []
   - id: '[BODY-RAW-TEXT] Hyperjump GitHub'
     name: '[BODY-RAW-TEXT] Hyperjump GitHub'
@@ -44,8 +38,6 @@ probes:
           Content-Type: text/plain
         timeout: 10000
         body: Hello, world!
-    incidentThreshold: 5
-    recoveryThreshold: 5
     alerts: []
   - id: '[BODY-RAW-JSON] Hyperjump GitHub'
     name: '[BODY-RAW-JSON] Hyperjump GitHub'
@@ -57,8 +49,6 @@ probes:
         timeout: 10000
         body:
           message: Hello, world!
-    incidentThreshold: 5
-    recoveryThreshold: 5
     alerts: []
 notifications:
   - id: default

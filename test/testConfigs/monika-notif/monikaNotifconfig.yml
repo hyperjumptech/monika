@@ -16,8 +16,6 @@ probes:
         body:
           username: someusername
           password: somepassword
-    incidentThreshold: 2
-    recoveryThreshold: 2
     alerts:
       - assertion: response.status != 200
         message: Http Response status code is not 200!
