@@ -383,35 +383,66 @@ class Monika extends Command {
   }
 
   deprecationHandler(config: Config): Config {
-    let showDeprecateMsg = false
+    const showDeprecateMsg: Record<
+      'query' | 'incidentThreshold' | 'recoveryThreshold',
+      boolean
+    > = {
+      query: false,
+      incidentThreshold: false,
+      recoveryThreshold: false,
+    }
 
     const checkedConfig = {
       ...config,
-      probes: config.probes?.map((probe) => ({
-        ...probe,
-        requests: probe.requests?.map((request) => ({
-          ...request,
-          alert: request.alerts?.map((alert) => {
+      probes: config.probes?.map((probe) => {
+        if (probe?.incidentThreshold) {
+          showDeprecateMsg.incidentThreshold = true
+        }
+
+        if (probe?.recoveryThreshold) {
+          showDeprecateMsg.recoveryThreshold = true
+        }
+
+        return {
+          ...probe,
+          requests: probe.requests?.map((request) => {
+            return {
+              ...request,
+              alert: request.alerts?.map((alert) => {
+                if (alert.query) {
+                  showDeprecateMsg.query = true
+                  return { ...alert, assertion: alert.query }
+                }
+
+                return alert
+              }),
+            }
+          }),
+          alerts: probe.alerts?.map((alert) => {
             if (alert.query) {
-              showDeprecateMsg = true
+              showDeprecateMsg.query = true
               return { ...alert, assertion: alert.query }
             }
 
             return alert
           }),
-        })),
-        alerts: probe.alerts?.map((alert) => {
-          if (alert.query) {
-            showDeprecateMsg = true
-            return { ...alert, assertion: alert.query }
-          }
-
-          return alert
-        }),
-      })),
+        }
+      }),
     }
 
-    if (showDeprecateMsg) {
+    if (showDeprecateMsg.incidentThreshold) {
+      log.warn(
+        'incidentThreshold is deprecated. It will be managed internally by Monika.'
+      )
+    }
+
+    if (showDeprecateMsg.recoveryThreshold) {
+      log.warn(
+        'recoveryThreshold is deprecated. It will be managed internally by Monika.'
+      )
+    }
+
+    if (showDeprecateMsg.query) {
       log.warn('"alerts.query" is deprecated. Please use "alerts.assertion"')
     }
 

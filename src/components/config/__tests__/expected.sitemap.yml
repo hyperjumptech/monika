@@ -14,8 +14,6 @@ probes:
       - url: https://en.wiktionary.org/wiki/hyperjump
         method: GET
         timeout: 10000
-    incidentThreshold: 5
-    recoveryThreshold: 5
     alerts: []
   - id: https://monika.hyperjump.tech/index
     name: https://monika.hyperjump.tech/index
@@ -23,8 +21,6 @@ probes:
       - url: https://monika.hyperjump.tech/index
         method: GET
         timeout: 10000
-    incidentThreshold: 5
-    recoveryThreshold: 5
     alerts: []
 notifications:
   - id: default

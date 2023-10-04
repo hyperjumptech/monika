@@ -10,8 +10,6 @@ probes:
       - method: GET
         url: https://github.com/hyperjumptech
         timeout: 1000
-    incidentThreshold: 3
-    recoveryThreshold: 3
     alerts:
       - assertion: response.status != 200
         message: Http Response status code is not 200!

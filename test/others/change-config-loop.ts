@@ -43,8 +43,6 @@ probes:
       - assertion: response.status == 500
         subject: response status
         message: response status message
-    incidentThreshold: 3
-    recoveryThreshold: 3
 
 notifications:
   - id: my-desktop
@@ -65,8 +63,6 @@ probes:
       - assertion: response.status == 500
         subject: response status
         message: response status message
-    incidentThreshold: 3
-    recoveryThreshold: 3
 
 notifications:
   - id: my-desktop

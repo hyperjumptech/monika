@@ -13,8 +13,6 @@ probes:
       - method: GET
         url: https://reqres.in/api/users/{{ responses.[0].data.data.[1].id }}
         timeout: 1000
-    incidentThreshold: 3
-    recoveryThreshold: 3
     alerts:
       - assertion: response.status != 200
         message: Http Response status code is not 200!
