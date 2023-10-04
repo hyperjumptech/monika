@@ -57,7 +57,7 @@ export async function icmpRequest(
     data: '',
     body: '',
     status: 0,
-    result: probeRequestResult.failed,
+    result: probeRequestResult.unknown,
     headers: '',
     responseTime: 0,
     isProbeResponsive: false,

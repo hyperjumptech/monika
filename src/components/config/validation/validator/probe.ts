@@ -32,7 +32,8 @@ const PROBE_NO_REQUESTS =
   'Probe requests does not exists or has length lower than 1!'
 
 const checkTotalProbes = (probe: Probe): string | undefined => {
-  const { requests, socket, redis, mongo, postgres, mariadb, mysql } = probe
+  const { requests, socket, redis, mongo, postgres, mariadb, mysql, ping } =
+    probe
 
   const totalProbes =
     (socket ? 1 : 0) +
@@ -41,6 +42,7 @@ const checkTotalProbes = (probe: Probe): string | undefined => {
     (postgres ? 1 : 0) +
     (mariadb ? 1 : 0) +
     (mysql ? 1 : 0) +
+    (ping ? 1 : 0) +
     (requests?.length ?? 0)
   if (totalProbes === 0) return PROBE_NO_REQUESTS
 }
