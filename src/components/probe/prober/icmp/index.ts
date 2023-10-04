@@ -22,86 +22,75 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { RequestConfig } from './request'
+import type { Ping } from '../../../../interfaces/probe'
+import { BaseProber, type ProbeResult } from '..'
+import { icmpRequest } from './request'
 
-export interface ProbeAlert {
-  query?: string
-  assertion: string
-  message: string
-  id: string
-}
+export class PingProber extends BaseProber {
+  async probe(): Promise<void> {
+    const result = await probePing({
+      id: this.probeConfig.id,
+      checkOrder: this.counter,
+      pings: this.probeConfig.ping,
+    })
 
-export type Socket = {
-  host: string
-  port: number
-  data: string | Uint8Array
-  alerts?: ProbeAlert[]
-}
-
-export type Redis = {
-  host?: string
-  port?: number
-  username?: string
-  password?: string
-  command?: string
-  data?: string | Uint8Array
-  alerts?: ProbeAlert[]
-  uri?: string
-}
-
-export type MariaDB = {
-  host: string
-  port: number
-  database: string
-  username: string
-  password: string
-  command?: string
-  data?: string | Uint8Array
-  alerts?: ProbeAlert[]
-}
-
-export type Mongo = {
-  uri?: string
-  host?: string
-  port?: number
-  username?: string
-  password?: string
-}
-
-export type Postgres = {
-  uri: string
-  host: string
-  port: number
-  database: string
-  username: string
-  password: string
-  command?: string
-  data?: string | Uint8Array
-  alerts?: ProbeAlert[]
-}
-
-export type Ping = {
-  uri: string
-}
-
-export interface Probe {
-  id: string
-  name: string
-  description?: string
-  interval: number
-  requests?: RequestConfig[]
-  socket?: Socket
-  redis?: Redis[]
-  mongo?: Mongo[]
-  mariadb?: MariaDB[]
-  mysql?: MariaDB[]
-  postgres?: Postgres[]
-  ping?: Ping[]
-  incidentThreshold: number
-  recoveryThreshold: number
-  alerts: ProbeAlert[]
-  lastEvent?: {
-    createdAt?: Date
-    recoveredAt?: Date
+    this.processProbeResults(result)
   }
+
+  generateVerboseStartupMessage(): string {
+    const { description, id, interval, name } = this.probeConfig
+
+    let result = `- Probe ID: ${id} 
+        Name: ${name || '-'}
+        Description: ${description || '-'}
+        Interval: ${interval}
+        `
+    result += '  ping:'
+    result += this.getConnectionDetails()
+
+    return result
+  }
+
+  private getConnectionDetails(): string {
+    return (
+      this.probeConfig.ping
+        ?.map((probe) => {
+          return `
+            uri: ${probe.uri}`
+        })
+        .join(``) || `\n`
+    )
+  }
+}
+
+type ProbePingParams = {
+  id: string
+  checkOrder: number
+  pings?: Ping[]
+}
+
+export async function probePing({
+  id,
+  checkOrder,
+  pings,
+}: ProbePingParams): Promise<ProbeResult[]> {
+  const probeResults: ProbeResult[] = []
+
+  if (!pings) {
+    // pings defined or length == 0?
+    return probeResults
+  }
+
+  for await (const { uri } of pings) {
+    const requestResponse = await icmpRequest({ host: uri })
+    const { isProbeResponsive, responseTime, body } = requestResponse
+
+    const isAlertTriggered = isProbeResponsive
+    const timeNow = new Date().toISOString()
+    const logMessage = `${timeNow} ${checkOrder} id:${id} ${body} responseTime:${responseTime}`
+
+    probeResults.push({ isAlertTriggered, logMessage, requestResponse })
+  }
+
+  return probeResults
 }
