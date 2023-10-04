@@ -301,6 +301,29 @@ Details of the fields are shown in the table below.
 
 Probe response data could be used for [Request Chaining](https://hyperjumptech.github.io/monika/guides/examples#requests-chaining).
 
+## Custom HTTP Responses
+
+To make it easier to troubleshoot HTTP requests, we have mapped low-level errors returned by the HTTP library to numbers between 0 and 99. These custom errors are returned as the HTTP status code and can be used to trigger alerts in the same way as regular HTTP status codes.
+
+| Code | Error                |
+| :--- | -------------------- |
+| 0    | Connection not found |
+| 1    | Connection reset     |
+| 2    | Connection refused   |
+| 3    | Too many redirects   |
+| 4    | Bad option value     |
+| 5    | Bad option           |
+| 6    | Timed out            |
+| 7    | Network error        |
+| 8    | Deprecated           |
+| 9    | Bad response         |
+| 11   | Bad request          |
+| 12   | Canceled             |
+| 13   | Not Supported        |
+| 14   | Invalid URL          |
+| 99   | Others               |
+| 599  | Connection aborted   |
+
 ## Execution order
 
 In a configuration with multiple probes, `Monika` will load the requests in the order that they are entered, one after another. However, probes may be performed out of sequence depending on their interval setting, network latency and response times. By default Monika loops through all the probe configurations in the order they are entered, but you can use the `--id` or the `--repeat` flags to specify or repeat a particular sequence. See the [cli options here](https://monika.hyperjump.tech/guides/cli-options) for more information.
