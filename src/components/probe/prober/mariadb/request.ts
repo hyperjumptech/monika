@@ -47,7 +47,6 @@ export async function mariaRequest(
     result: probeRequestResult.unknown,
     headers: '',
     responseTime: 0,
-    isProbeResponsive: false,
   }
 
   const startTime = new Date()
@@ -75,7 +74,6 @@ export async function mariaRequest(
     baseResponse.body = 'database ok'
     baseResponse.status = 200
     baseResponse.result = probeRequestResult.success
-    baseResponse.isProbeResponsive = true
   }
 
   return baseResponse

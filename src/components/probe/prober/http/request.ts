@@ -167,7 +167,6 @@ export async function httpRequest({
       headers,
       responseTime,
       result: probeRequestResult.success,
-      isProbeResponsive: true,
     }
   } catch (error: any) {
     const responseTime = Date.now() - requestStartedAt
@@ -182,7 +181,6 @@ export async function httpRequest({
         headers: error?.response?.headers,
         responseTime,
         result: probeRequestResult.success,
-        isProbeResponsive: true, // http status received, so connection ok
       }
     }
 
@@ -198,7 +196,6 @@ export async function httpRequest({
         headers: '',
         responseTime,
         result: probeRequestResult.failed,
-        isProbeResponsive: false,
         errMessage: error?.code,
       }
     }
@@ -211,7 +208,6 @@ export async function httpRequest({
       headers: '',
       responseTime,
       result: probeRequestResult.failed,
-      isProbeResponsive: false,
       errMessage: error.code || 'Unknown error',
     }
   }
