@@ -31,9 +31,18 @@ import { sendHttpRequest } from './http'
 import { getContext } from '../context'
 import { isSymonModeFrom } from '../components/config'
 
-export let publicIpAddress = '0.0.0.0'
+type PublicNetwork = {
+  country: string
+  city: string
+  hostname: string
+  isp: string
+  privateIp: string
+  publicIp: string
+}
+
+export let publicIpAddress = ''
 export let isConnectedToSTUNServer = true
-export let publicNetworkInfo: { country: string; city: string; isp: string }
+export let publicNetworkInfo: PublicNetwork | undefined
 
 const isTestEnvironment = process.env.CI || process.env.NODE_ENV === 'test'
 
@@ -57,37 +66,33 @@ async function pokeStun(): Promise<string> {
   return Promise.reject(new Error('stun inaccessible')) // could not connect to STUN server
 }
 
-export async function getPublicNetworkInfo(): Promise<any> {
+export async function getPublicNetworkInfo(): Promise<PublicNetwork> {
   const { flags } = getContext()
   const isSymonMode = isSymonModeFrom(flags)
+  
+  const publicIp = await pokeStun()
+  const response = await sendHttpRequest({
+    url: `http://ip-api.com/json/${publicIp}`,
+  })
+  const { country, city, isp } = response.data
 
-  try {
-    let ip = await pokeStun()
-    const response = await sendHttpRequest({
-      url: `http://ip-api.com/json/${ip}`,
-    })
-    const { country, city, isp } = response.data
+  publicNetworkInfo = flags.verbose || isSymonMode ? {
+      country,
+      city,
+      hostname: hostname(),
+      isp,
+      privateIp: getIp(),
+      publicIp,
+    } : {
+      country: 'Earth',
+      city: 'City X',
+      hostname: hostname(),
+      isp: 'isp',
+      privateIp: 'x.x.x.x',
+      publicIp: 'y.y.y.y',
+    };
 
-    // do we reveal ip and location details?
-    if (flags.verbose || isSymonMode) {
-      publicNetworkInfo = { country, city, isp }
-      publicIpAddress = ip // store public ip
-      log.info(
-        `Monika is running from: ${publicNetworkInfo.city} - ${
-          publicNetworkInfo.isp
-        } (${ip}) - ${hostname()} (${getIp()})`
-      )
-    } else {
-      log.info(
-        `Monika is running from: CityX - ispX (x.x.x.x) - hostnameX (x.x.x.x)`
-      )
-    }
-  } catch (error) {
-    log.warn(`Network connectivity issues. Got: ${error}`)
-    return Promise.resolve() // couldn't resolve publicNetworkInfo, fail gracefully and continue
-  }
-
-  return null
+  return publicNetworkInfo
 }
 
 /**
@@ -111,8 +116,8 @@ export async function getPublicIp(): Promise<any> {
         )
       } else {
         log.info(
-        `${time} - Connected to STUN Server. Monika is running from: x.x.x.x`
-      )
+          `${time} - Connected to STUN Server. Monika is running from: x.x.x.x`
+        )
       }
     }
   } catch {

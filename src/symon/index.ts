@@ -24,6 +24,7 @@
 
 /* eslint-disable unicorn/prefer-module */
 import axios, { AxiosInstance } from 'axios'
+import { ExponentialBackoff, handleAll, retry } from 'cockatiel'
 import { EventEmitter } from 'events'
 import mac from 'macaddress'
 import { hostname } from 'os'
@@ -92,8 +93,20 @@ const isTestEnvironment = process.env.NODE_ENV === 'test' || process.env.CI
 let hasConnectionToSymon = false
 
 const getHandshakeData = async (): Promise<SymonHandshakeData> => {
-  // trigger network/ip scan so exported variables are initialized
-  await getPublicNetworkInfo()
+  await retry(handleAll, {
+    backoff: new ExponentialBackoff(),
+  }).execute(async () => {
+    await getPublicNetworkInfo()
+      .then(({ city, hostname, isp, privateIp, publicIp }) => {
+        log.info(
+          `Monika is running from: ${city} - ${isp} (${publicIp}) - ${hostname} (${privateIp})`
+        )
+      })
+      .catch((error) => {
+        log.error(`${error}. Retrying...`)
+        throw error
+      })
+  })
   await getPublicIp()
 
   const os = await getOSName()
@@ -101,9 +114,7 @@ const getHandshakeData = async (): Promise<SymonHandshakeData> => {
   const host = hostname()
   const publicIp = publicIpAddress
   const privateIp = getIp()
-  const isp = publicNetworkInfo.isp
-  const city = publicNetworkInfo.city
-  const country = publicNetworkInfo.country
+  const { city, country, isp } = publicNetworkInfo!
   const pid = process.pid
   const { userAgent: version } = getContext()
 
