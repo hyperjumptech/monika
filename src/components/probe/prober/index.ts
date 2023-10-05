@@ -23,7 +23,6 @@
  **********************************************************************************/
 
 import type { Notification } from '@hyperjumptech/monika-notification'
-import { v4 as uuid } from 'uuid'
 import { type Incident, getContext } from '../../../context'
 import events from '../../../events'
 import type { Probe, ProbeAlert } from '../../../interfaces/probe'
@@ -42,6 +41,7 @@ import {
   startDowntimeCounter,
   stopDowntimeCounter,
 } from '../../downtime-counter'
+import { FAILED_REQUEST_ASSERTION } from '../../../looper'
 
 export type ProbeResult = {
   isAlertTriggered: boolean
@@ -76,17 +76,6 @@ enum ProbeState {
   Down = 'DOWN',
 }
 
-export enum ProbeMessage {
-  ProbeNotAccessible = 'Probe not accessible',
-  ProbeAccessibleAgain = 'Probe accessible again',
-}
-
-export const failedRequestAssertion: ProbeAlert = {
-  id: uuid(),
-  assertion: '',
-  message: ProbeMessage.ProbeNotAccessible,
-}
-
 export class BaseProber implements Prober {
   protected readonly counter: number
   protected readonly notifications: Notification[]
@@ -107,8 +96,8 @@ export class BaseProber implements Prober {
   }
 
   protected processProbeResults(probeResults: ProbeResult[]): void {
-    for (const probeResult of probeResults) {
-      logMessage(probeResult)
+    for (const { isAlertTriggered, logMessage } of probeResults) {
+      this.logMessage(isAlertTriggered, logMessage)
     }
 
     if (
@@ -118,11 +107,11 @@ export class BaseProber implements Prober {
       )
     ) {
       if (this.hasIncident()) {
-        throw new Error(ProbeMessage.ProbeNotAccessible)
+        throw new Error('There is an ongoing incident.')
       }
 
       this.handleFailedProbe(probeResults)
-      throw new Error(ProbeMessage.ProbeNotAccessible)
+      throw new Error('Probe request is failed.')
     }
 
     if (this.hasIncident()) {
@@ -149,6 +138,38 @@ export class BaseProber implements Prober {
         })
       }
     }
+  }
+
+  protected getFailedRequestAssertion(
+    requestIndex?: number
+  ): ProbeAlert | undefined {
+    const getFailedRequestAssertionFromProbe = (): ProbeAlert | undefined =>
+      this.probeConfig.alerts.find(
+        ({ assertion, message }) =>
+          assertion === FAILED_REQUEST_ASSERTION.assertion &&
+          message === FAILED_REQUEST_ASSERTION.message
+      )
+    const getFailedRequestAssertionFromRequests = (
+      requestIndex?: number
+    ): ProbeAlert | undefined => {
+      if (
+        this.probeConfig.requests === undefined ||
+        requestIndex === undefined
+      ) {
+        return undefined
+      }
+
+      return (this.probeConfig.requests[requestIndex].alerts || []).find(
+        ({ assertion, message }) =>
+          assertion === FAILED_REQUEST_ASSERTION.assertion &&
+          message === FAILED_REQUEST_ASSERTION.message
+      )
+    }
+
+    return (
+      getFailedRequestAssertionFromProbe() ||
+      getFailedRequestAssertionFromRequests(requestIndex)
+    )
   }
 
   protected hasIncident(): Incident | undefined {
@@ -197,7 +218,9 @@ export class BaseProber implements Prober {
     )
   }
 
-  private handleFailedProbe(probeResults: ProbeResult[]) {
+  protected handleFailedProbe(
+    probeResults: Pick<ProbeResult, 'requestResponse'>[]
+  ): void {
     const hasfailedProbe = probeResults.find(
       ({ requestResponse }) =>
         requestResponse.result !== probeRequestResult.success
@@ -207,6 +230,12 @@ export class BaseProber implements Prober {
       ({ requestResponse }) =>
         requestResponse.result !== probeRequestResult.success
     )
+    const failedRequestAssertion = this.getFailedRequestAssertion(requestIndex)
+
+    if (!failedRequestAssertion) {
+      log.error('Failed request assertion is not found')
+      return
+    }
 
     getEventEmitter().emit(events.probe.alert.triggered, {
       probe: this.probeConfig,
@@ -239,7 +268,9 @@ export class BaseProber implements Prober {
     }).catch((error) => log.error(error.mesage))
   }
 
-  private handleRecovery(probeResults: ProbeResult[]) {
+  protected handleRecovery(
+    probeResults: Pick<ProbeResult, 'requestResponse'>[]
+  ): void {
     const recoveredIncident = getContext().incidents.find(
       (incident) => incident.probeID === this.probeConfig.id
     )
@@ -259,7 +290,7 @@ export class BaseProber implements Prober {
         requestURL: this.probeConfig?.requests?.[requestIndex].url || '',
         notificationType: NotificationType.Recover,
         validation: {
-          alert: failedRequestAssertion,
+          alert: recoveredIncident.alert,
           isAlertTriggered: false,
           response: probeResults[requestIndex].requestResponse,
         },
@@ -270,20 +301,28 @@ export class BaseProber implements Prober {
       probe: this.probeConfig,
       requestIndex,
       probeRes: probeResults[requestIndex].requestResponse,
-      alertQueries: [failedRequestAssertion.assertion],
+      alertQueries: [recoveredIncident?.alert.assertion || ''],
     })
+  }
+
+  protected logMessage(isSuccess: boolean, ...message: string[]): void {
+    if (isSuccess) {
+      log.info(
+        `${this.getMessagePrefix()} ${message.filter(Boolean).join(', ')}`
+      )
+      return
+    }
+
+    log.warn(`${this.getMessagePrefix()} ${message.filter(Boolean).join(', ')}`)
   }
 
   private hasNotification() {
     return this.notifications.length > 0
   }
-}
 
-function logMessage({ isAlertTriggered, logMessage }: ProbeResult): void {
-  if (isAlertTriggered) {
-    log.warn(logMessage)
-    return
+  private getMessagePrefix() {
+    return `${new Date().toISOString()} ${this.counter} id:${
+      this.probeConfig.id
+    }`
   }
-
-  log.info(logMessage)
 }
