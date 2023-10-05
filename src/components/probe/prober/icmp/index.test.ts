@@ -45,7 +45,6 @@ describe('Ping/ICMP Prober', () => {
           result: probeRequestResult.failed,
           headers: '',
           responseTime: 0,
-          isProbeResponsive: false,
         }
       })
   })
@@ -119,7 +118,6 @@ describe('Ping/ICMP Prober', () => {
           headers: '',
           responseTime: 0,
           result: probeRequestResult.failed,
-          isProbeResponsive: true,
         }
       })
     const pingParams = {
