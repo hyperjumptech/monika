@@ -39,7 +39,13 @@ const defaultConfig: Config = {
       requests: [
         { url: 'https://example.com', headers: {}, body: '', timeout: 0 },
       ],
-      alerts: [],
+      alerts: [
+        {
+          assertion: 'response.status < 200 or response.status > 299',
+          id: '0BGKU',
+          message: 'HTTP Status is {{ response.status }}, expecting 2xx',
+        },
+      ],
     },
   ],
   notifications: [{ id: 'UVIsL', type: 'desktop', data: undefined }],
