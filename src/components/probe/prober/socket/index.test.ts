@@ -22,7 +22,6 @@ describe('TCP Prober', () => {
           headers: '',
           responseTime: 0,
           result: probeRequestResult.failed,
-          isProbeResponsive: false,
         }
       })
   })
@@ -66,7 +65,6 @@ describe('TCP Prober', () => {
           headers: '',
           responseTime: 0,
           result: probeRequestResult.failed,
-          isProbeResponsive: false,
         }
       })
     const probeParams = {

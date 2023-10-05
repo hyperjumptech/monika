@@ -22,7 +22,6 @@ describe('MongoDB Prober', () => {
           headers: '',
           responseTime: 0,
           result: probeRequestResult.failed,
-          isProbeResponsive: false,
         }
       })
   })
@@ -100,7 +99,6 @@ describe('MongoDB Prober', () => {
           headers: '',
           responseTime: 0,
           result: probeRequestResult.failed,
-          isProbeResponsive: false,
         }
       })
     const probeParams = {
@@ -138,7 +136,6 @@ describe('MongoDB Prober', () => {
           headers: '',
           responseTime: 0,
           result: probeRequestResult.failed,
-          isProbeResponsive: false,
         }
       })
     const probeParams = {

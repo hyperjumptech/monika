@@ -22,7 +22,6 @@ describe('Redis Prober', () => {
           headers: '',
           responseTime: 0,
           result: probeRequestResult.failed,
-          isProbeResponsive: false,
         }
       })
   })
@@ -113,7 +112,6 @@ describe('Redis Prober', () => {
           headers: '',
           responseTime: 0,
           result: probeRequestResult.failed,
-          isProbeResponsive: false,
         }
       })
     const probeParams = {

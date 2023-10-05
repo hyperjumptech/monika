@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import { expect } from '@oclif/test'
-import { sanitizeProbe } from '.'
+import { FAILED_REQUEST_ASSERTION, sanitizeProbe } from '.'
 import type { Probe } from '../interfaces/probe'
 
 describe('Looper', () => {
@@ -111,7 +111,7 @@ describe('Looper', () => {
         'response.status < 200 or response.status > 299'
       )
       expect(result.alerts[0].message).eq(
-        'HTTP Status is {{ response.status }}, expecting 200'
+        'HTTP Status is {{ response.status }}, expecting 2xx'
       )
       expect(result.alerts[1].assertion).eq('response.time > 2000')
       expect(result.alerts[1].message).eq(
@@ -130,7 +130,7 @@ describe('Looper', () => {
 
       // assert
       expect(result.alerts[0].assertion).eq('')
-      expect(result.alerts[0].message).eq('Probe is not accesible')
+      expect(result.alerts[0].message).eq(FAILED_REQUEST_ASSERTION.message)
     })
 
     it('should remove alerts on Symon mode', () => {
