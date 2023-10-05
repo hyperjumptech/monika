@@ -38,6 +38,7 @@ import { getEventEmitter } from '../utils/events'
 import { getPublicNetworkInfo } from '../utils/public-ip'
 import { jobsLoader } from './jobs'
 import { enableAutoUpdate } from '../plugins/updater'
+import { log } from '../utils/pino'
 
 // import the subscriber file to activate the event emitter subscribers
 import '../events/subscribers/application'
@@ -54,7 +55,15 @@ export default async function init(
   setContext({ userAgent: cliConfig.userAgent })
 
   // cache location & ISP info
-  await getPublicNetworkInfo()
+  getPublicNetworkInfo()
+    .then(({ city, hostname, isp, privateIp, publicIp }) => {
+      log.info(
+        `Monika is running from: ${city} - ${isp} (${publicIp}) - ${hostname} (${privateIp})`
+      )
+    })
+    .catch((error) =>
+      log.warn(`Failed to obtain location/ISP info. Got: ${error}`)
+    )
   // check if connected to STUN Server and getting the public IP in the same time
   loopCheckSTUNServer(flags.stun)
   // run auto-updater

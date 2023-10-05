@@ -39,10 +39,16 @@ describe('monika', () => {
   let getPublicNetworkInfoStub: any
   beforeEach(() => {
     getPublicIPStub = sinon.stub(IpUtil, 'getPublicIp' as never)
-    getPublicNetworkInfoStub = sinon.stub(
-      IpUtil,
-      'getPublicNetworkInfo' as never
-    )
+    getPublicNetworkInfoStub = sinon
+      .stub(IpUtil, 'getPublicNetworkInfo' as never)
+      .callsFake(async () => ({
+        country: '',
+        city: '',
+        hostname: '',
+        isp: '',
+        privateIp: '',
+        publicIp: '',
+      }))
   })
   afterEach(() => {
     getPublicIPStub.restore()
