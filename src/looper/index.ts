@@ -36,7 +36,6 @@ import {
 import { getPublicIp, isConnectedToSTUNServer } from '../utils/public-ip'
 import type { RequestConfig } from '../interfaces/request'
 
-export const DEFAULT_THRESHOLD = 5
 let checkSTUNinterval: NodeJS.Timeout
 
 const DISABLE_STUN = -1 // -1 is disable stun checking
@@ -48,24 +47,11 @@ const DISABLE_STUN = -1 // -1 is disable stun checking
  * @returns {object} as probe
  */
 export function sanitizeProbe(isSymonMode: boolean, probe: Probe): Probe {
-  const { id, name, requests, incidentThreshold, recoveryThreshold, alerts } =
-    probe
+  const { id, name, requests, alerts } = probe
 
   if (!name) {
     log.warn(
       `Warning: Probe ${id} has no name defined. Using the default name started by monika`
-    )
-  }
-
-  if (!incidentThreshold) {
-    log.warn(
-      `Warning: Probe ${id} has no incidentThreshold configuration defined. Using the default threshold: 5`
-    )
-  }
-
-  if (!recoveryThreshold) {
-    log.warn(
-      `Warning: Probe ${id} has no recoveryThreshold configuration defined. Using the default threshold: 5`
     )
   }
 
@@ -85,8 +71,6 @@ export function sanitizeProbe(isSymonMode: boolean, probe: Probe): Probe {
       isSymonMode,
     }),
     name: name || `monika_${id}`,
-    incidentThreshold: incidentThreshold || DEFAULT_THRESHOLD,
-    recoveryThreshold: recoveryThreshold || DEFAULT_THRESHOLD,
     requests: sanitizeRequests(requests),
   }
 }

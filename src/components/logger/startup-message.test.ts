@@ -39,8 +39,6 @@ const defaultConfig: Config = {
       requests: [
         { url: 'https://example.com', headers: {}, body: '', timeout: 0 },
       ],
-      incidentThreshold: 1,
-      recoveryThreshold: 1,
       alerts: [
         {
           assertion: 'response.status < 200 or response.status > 299',
@@ -197,8 +195,6 @@ describe('Startup message', () => {
                 name: 'Acme Inc.',
                 interval: 3000,
                 requests: [],
-                incidentThreshold: 1,
-                recoveryThreshold: 1,
                 alerts: [],
               },
             ],
@@ -247,8 +243,6 @@ describe('Startup message', () => {
                     timeout: 0,
                   },
                 ],
-                incidentThreshold: 1,
-                recoveryThreshold: 1,
                 alerts: [],
               },
             ],

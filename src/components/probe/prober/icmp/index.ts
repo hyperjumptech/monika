@@ -22,49 +22,76 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { AxiosRequestConfig, AxiosRequestHeaders } from 'axios'
-import { ProbeAlert } from './probe'
+import type { Ping } from '../../../../interfaces/probe'
+import { BaseProber, type ProbeResult } from '..'
+import { icmpRequest } from './request'
+import { probeRequestResult } from '../../../../interfaces/request'
 
-// RequestTypes are used to define the type of request that is being made.
-export type RequestTypes =
-  | 'http'
-  | 'HTTP'
-  | 'icmp'
-  | 'ICMP'
-  | 'tcp'
-  | 'redis'
-  | 'mariadb'
-  | 'mongo'
-  | 'postgres'
+export class PingProber extends BaseProber {
+  async probe(): Promise<void> {
+    const result = await probePing({
+      id: this.probeConfig.id,
+      checkOrder: this.counter,
+      pings: this.probeConfig.ping,
+    })
 
-// The success/failure result of a probe
-export enum probeRequestResult {
-  failed = 0,
-  success = 1,
-  unknown = 2,
+    this.processProbeResults(result)
+  }
+
+  generateVerboseStartupMessage(): string {
+    const { description, id, interval, name } = this.probeConfig
+
+    let result = `- Probe ID: ${id} 
+        Name: ${name || '-'}
+        Description: ${description || '-'}
+        Interval: ${interval}
+        `
+    result += '  ping:'
+    result += this.getConnectionDetails()
+
+    return result
+  }
+
+  private getConnectionDetails(): string {
+    return (
+      this.probeConfig.ping
+        ?.map((probe) => {
+          return `
+            uri: ${probe.uri}`
+        })
+        .join(``) || `\n`
+    )
+  }
 }
 
-// ProbeRequestResponse is used to define the response from a probe requests.
-export interface ProbeRequestResponse<T = any> {
-  requestType?: RequestTypes // is this for http (default) or icmp  or others
-  data: T
-  body: T
-  status: number
-  headers: any
-  responseTime: number
-  errMessage?: string // any error message from drivers
-  result: probeRequestResult // did the probe succeed or fail?
+type ProbePingParams = {
+  id: string
+  checkOrder: number
+  pings?: Ping[]
 }
 
-// ProbeRequest is used to define the requests that is being made.
-export interface RequestConfig extends Omit<AxiosRequestConfig, 'data'> {
-  id?: string
-  saveBody?: boolean // save response body to db?
-  url: string
-  body: JSON | string
-  timeout: number // request timeout
-  alerts?: ProbeAlert[]
-  headers?: AxiosRequestHeaders
-  ping?: boolean // is this request for a ping?
-  allowUnauthorized?: boolean // ignore ssl cert?
+export async function probePing({
+  id,
+  checkOrder,
+  pings,
+}: ProbePingParams): Promise<ProbeResult[]> {
+  const probeResults: ProbeResult[] = []
+
+  if (!pings) {
+    // pings defined or length == 0?
+    return probeResults
+  }
+
+  for await (const { uri } of pings) {
+    const requestResponse = await icmpRequest({ host: uri })
+    const { responseTime, result, body } = requestResponse
+
+    const isAlertTriggered = result !== probeRequestResult.success
+    const timeNow = new Date().toISOString()
+    const logMessage = `${timeNow} ${checkOrder} id:${id} ${body} responseTime:${responseTime}`
+
+    probeResults.push({ isAlertTriggered, logMessage, requestResponse })
+  }
+
+  return probeResults
 }

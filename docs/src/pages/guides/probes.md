@@ -166,8 +166,8 @@ If you have a connection URI, you can pass it to the `uri` field like below:
 
 ### PING Request
 
-You can send an ICMP echo request to a specific url by enabling the `ping: true` field.
-In this mode the http method is ignored and a PING echo request is sent to the specified url.
+You can send an ICMP echo request to a specific url by specifying a `ping` probe.
+In this mode the a PING echo request is sent to the specified url.
 
 ```yaml
 probes:
@@ -175,9 +175,8 @@ probes:
     name: ping_test
     description: requesting icmp ping
     interval: 10 # in seconds
-    requests:
-      - url: http://google.com
-        ping: true
+    ping:
+      - uri: http://google.com
 ```
 
 ### Postgres Request
@@ -301,6 +300,29 @@ Details of the fields are shown in the table below.
 | data       | Response payload from the fetched request (e.g token, results, data).   |
 
 Probe response data could be used for [Request Chaining](https://hyperjumptech.github.io/monika/guides/examples#requests-chaining).
+
+## Custom HTTP Responses
+
+To make it easier to troubleshoot HTTP requests, we have mapped low-level errors returned by the HTTP library to numbers between 0 and 99. These custom errors are returned as the HTTP status code and can be used to trigger alerts in the same way as regular HTTP status codes.
+
+| Code | Error                |
+| :--- | -------------------- |
+| 0    | Connection not found |
+| 1    | Connection reset     |
+| 2    | Connection refused   |
+| 3    | Too many redirects   |
+| 4    | Bad option value     |
+| 5    | Bad option           |
+| 6    | Timed out            |
+| 7    | Network error        |
+| 8    | Deprecated           |
+| 9    | Bad response         |
+| 11   | Bad request          |
+| 12   | Canceled             |
+| 13   | Not Supported        |
+| 14   | Invalid URL          |
+| 99   | Others               |
+| 599  | Connection aborted   |
 
 ## Execution order
 

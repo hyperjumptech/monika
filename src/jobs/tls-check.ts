@@ -85,8 +85,6 @@ function sendTLSErrorNotification({
     name: '',
     requests: [],
     interval: 10,
-    incidentThreshold: 0,
-    recoveryThreshold: 0,
     alerts: [],
   }
 
@@ -107,7 +105,6 @@ function sendTLSErrorNotification({
         body: {},
         headers: {},
         result: probeRequestResult.success,
-        isProbeResponsive: true,
       },
     }
 

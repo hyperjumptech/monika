@@ -52,10 +52,8 @@ describe('probe-state', () => {
         {
           alerts: [],
           id: '1',
-          incidentThreshold: 1,
           interval: 1,
           name: 'Example',
-          recoveryThreshold: 1,
           requests: [{ url: 'https://example.com', body: '', timeout: 2 }],
         },
       ]
@@ -79,10 +77,8 @@ describe('probe-state', () => {
         {
           alerts: [],
           id: '1',
-          incidentThreshold: 1,
           interval: 1,
           name: 'Example',
-          recoveryThreshold: 1,
           requests: [{ url: 'https://example.com', body: '', timeout: 2 }],
           lastEvent: {
             createdAt: lastEventCreatedAt,
@@ -111,10 +107,8 @@ describe('probe-state', () => {
         {
           alerts: [],
           id: '1',
-          incidentThreshold: 1,
           interval: 1,
           name: 'Example',
-          recoveryThreshold: 1,
           requests: [{ url: 'https://example.com', body: '', timeout: 2 }],
           lastEvent: {
             recoveredAt: lastEventCreatedAt,
@@ -141,10 +135,8 @@ describe('probe-state', () => {
         {
           alerts: [],
           id: '1',
-          incidentThreshold: 1,
           interval: 1,
           name: 'Example',
-          recoveryThreshold: 1,
           requests: [{ url: 'https://example.com', body: '', timeout: 2 }],
           lastEvent: {
             createdAt: lastEventCreatedAt,
@@ -173,10 +165,8 @@ describe('probe-state', () => {
         {
           alerts: [],
           id: '1',
-          incidentThreshold: 1,
           interval: 1,
           name: 'Example',
-          recoveryThreshold: 1,
           requests: [{ url: 'https://example.com', body: '', timeout: 2 }],
         },
       ]
@@ -195,10 +185,8 @@ describe('probe-state', () => {
         {
           alerts: [],
           id: '1',
-          incidentThreshold: 1,
           interval: 1,
           name: 'Example',
-          recoveryThreshold: 1,
           requests: [{ url: 'https://example.com', body: '', timeout: 2 }],
         },
       ]
@@ -218,10 +206,8 @@ describe('probe-state', () => {
         {
           alerts: [],
           id: '1',
-          incidentThreshold: 1,
           interval: 1,
           name: 'Example',
-          recoveryThreshold: 1,
           requests: [{ url: 'https://example.com', body: '', timeout: 2 }],
         },
       ]
@@ -240,10 +226,8 @@ describe('probe-state', () => {
         {
           alerts: [],
           id: '1',
-          incidentThreshold: 1,
           interval: 1,
           name: 'Example',
-          recoveryThreshold: 1,
           requests: [{ url: 'https://example.com', body: '', timeout: 2 }],
         },
       ]
@@ -262,10 +246,8 @@ describe('probe-state', () => {
         {
           alerts: [],
           id: '1',
-          incidentThreshold: 1,
           interval: 1,
           name: 'Example',
-          recoveryThreshold: 1,
           requests: [{ url: 'https://example.com', body: '', timeout: 2 }],
         },
       ]
@@ -285,10 +267,8 @@ describe('probe-state', () => {
         {
           alerts: [],
           id: '1',
-          incidentThreshold: 1,
           interval: 1,
           name: 'Example',
-          recoveryThreshold: 1,
           requests: [{ url: 'https://example.com', body: '', timeout: 2 }],
         },
       ]
@@ -310,10 +290,8 @@ describe('probe-state', () => {
         {
           alerts: [],
           id: '1',
-          incidentThreshold: 1,
           interval: 1,
           name: 'Example',
-          recoveryThreshold: 1,
           requests: [{ url: 'https://example.com', body: '', timeout: 2 }],
         },
       ]
@@ -334,10 +312,8 @@ describe('probe-state', () => {
         {
           alerts: [],
           id: '1',
-          incidentThreshold: 1,
           interval: 1,
           name: 'Example',
-          recoveryThreshold: 1,
           requests: [{ url: 'https://example.com', body: '', timeout: 2 }],
         },
       ]
@@ -358,10 +334,8 @@ describe('probe-state', () => {
         {
           alerts: [],
           id: '1',
-          incidentThreshold: 1,
           interval: 1,
           name: 'Example',
-          recoveryThreshold: 1,
           requests: [{ url: 'https://example.com', body: '', timeout: 2 }],
         },
       ]

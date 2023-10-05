@@ -58,7 +58,6 @@ export async function mongoRequest(
     result: probeRequestResult.unknown,
     headers: '',
     responseTime: 0,
-    isProbeResponsive: false,
   }
   const startTime = new Date()
   const result = await sendMongoRequest(params)
@@ -70,7 +69,6 @@ export async function mongoRequest(
     baseResponse.body = result.message
     baseResponse.status = 200
     baseResponse.result = probeRequestResult.success
-    baseResponse.isProbeResponsive = true
   } else {
     baseResponse.result = probeRequestResult.failed
     baseResponse.body = result.message

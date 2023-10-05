@@ -15,8 +15,6 @@ probes:
         body:
           username: someusername
           password: somepassword
-    incidentThreshold: 2
-    recoveryThreshold: 2
     alerts:
       - status-not-2xx
       - response-time-greater-than-200-ms

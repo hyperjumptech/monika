@@ -22,7 +22,6 @@ describe('Maria DB/MySQL Prober', () => {
           headers: '',
           responseTime: 0,
           result: probeRequestResult.failed,
-          isProbeResponsive: false,
         }
       })
   })
@@ -169,7 +168,6 @@ describe('Maria DB/MySQL Prober', () => {
           headers: '',
           responseTime: 0,
           result: probeRequestResult.failed,
-          isProbeResponsive: false,
         }
       })
     const probeParams = {

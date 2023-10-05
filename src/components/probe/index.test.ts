@@ -72,8 +72,6 @@ const probes: Probe[] = [
         timeout: 30,
       },
     ],
-    incidentThreshold: 1,
-    recoveryThreshold: 1,
     alerts: [],
   },
 ]

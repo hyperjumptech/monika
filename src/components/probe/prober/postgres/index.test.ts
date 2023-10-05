@@ -22,7 +22,6 @@ describe('PostgreSQL Prober', () => {
           headers: '',
           responseTime: 0,
           result: probeRequestResult.failed,
-          isProbeResponsive: false,
         }
       })
   })
@@ -104,7 +103,6 @@ describe('PostgreSQL Prober', () => {
           headers: '',
           responseTime: 0,
           result: probeRequestResult.failed,
-          isProbeResponsive: false,
         }
       })
     const probeParams = {
@@ -144,7 +142,6 @@ describe('PostgreSQL Prober', () => {
           headers: '',
           responseTime: 0,
           result: probeRequestResult.failed,
-          isProbeResponsive: false,
         }
       })
     const probeParams = {
