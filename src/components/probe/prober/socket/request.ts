@@ -61,8 +61,6 @@ export async function tcpRequest(
         : probeRequestResult.success,
     headers: {},
     responseTime: tcpResp.duration,
-
-    isProbeResponsive: tcpResp.status === 'UP', // map success flag
     errMessage: tcpResp.message, // map message if any
   }
 

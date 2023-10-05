@@ -53,7 +53,6 @@ describe('send alerts', () => {
           responseTime: 0,
           headers: {},
           result: probeRequestResult.success,
-          isProbeResponsive: true,
         },
       },
       notifications: [
@@ -87,7 +86,6 @@ describe('send alerts', () => {
           responseTime: 0,
           headers: {},
           result: probeRequestResult.success,
-          isProbeResponsive: true,
         },
       },
       notifications: [
@@ -121,7 +119,6 @@ describe('send alerts', () => {
           responseTime: 0,
           headers: {},
           result: probeRequestResult.success,
-          isProbeResponsive: true,
         },
       },
       notifications: [
@@ -156,7 +153,6 @@ describe('send alerts', () => {
           responseTime: 0,
           headers: {},
           result: probeRequestResult.success,
-          isProbeResponsive: true,
         },
       },
       notifications: [
@@ -192,7 +188,6 @@ describe('send alerts', () => {
           responseTime: 0,
           headers: {},
           result: probeRequestResult.success,
-          isProbeResponsive: true,
         },
       },
       notifications: [
@@ -233,7 +228,6 @@ describe('send alerts', () => {
           responseTime: 0,
           headers: {},
           result: probeRequestResult.success,
-          isProbeResponsive: true,
         },
       },
       notifications: [
@@ -270,7 +264,6 @@ describe('send alerts', () => {
           responseTime: 0,
           headers: {},
           result: probeRequestResult.success,
-          isProbeResponsive: true,
         },
       },
       notifications: [
@@ -324,7 +317,6 @@ describe('send alerts', () => {
           responseTime: 0,
           headers: {},
           result: probeRequestResult.success,
-          isProbeResponsive: true,
         },
       },
       notifications: [
@@ -361,7 +353,6 @@ describe('send alerts', () => {
           responseTime: 0,
           headers: {},
           result: probeRequestResult.success,
-          isProbeResponsive: true,
         },
       },
       notifications: [
@@ -395,7 +386,6 @@ describe('send alerts', () => {
           responseTime: 0,
           headers: {},
           result: probeRequestResult.success,
-          isProbeResponsive: true,
         },
       },
       notifications: [
@@ -429,7 +419,6 @@ describe('send alerts', () => {
           responseTime: 0,
           headers: {},
           result: probeRequestResult.success,
-          isProbeResponsive: true,
         },
       },
       notifications: [
@@ -463,7 +452,6 @@ describe('send alerts', () => {
           responseTime: 0,
           headers: {},
           result: probeRequestResult.success,
-          isProbeResponsive: true,
         },
       },
       notifications: [

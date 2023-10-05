@@ -25,6 +25,7 @@
 import type { Ping } from '../../../../interfaces/probe'
 import { BaseProber, type ProbeResult } from '..'
 import { icmpRequest } from './request'
+import { probeRequestResult } from '../../../../interfaces/request'
 
 export class PingProber extends BaseProber {
   async probe(): Promise<void> {
@@ -83,9 +84,9 @@ export async function probePing({
 
   for await (const { uri } of pings) {
     const requestResponse = await icmpRequest({ host: uri })
-    const { isProbeResponsive, responseTime, body } = requestResponse
+    const { responseTime, result, body } = requestResponse
 
-    const isAlertTriggered = isProbeResponsive
+    const isAlertTriggered = result !== probeRequestResult.success
     const timeNow = new Date().toISOString()
     const logMessage = `${timeNow} ${checkOrder} id:${id} ${body} responseTime:${responseTime}`
 
