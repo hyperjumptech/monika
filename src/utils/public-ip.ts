@@ -110,7 +110,9 @@ export async function getPublicIp(): Promise<any> {
           `${time} - Connected to STUN Server. Monika is running from: ${address}`
         )
       } else {
-        log.info(`${time} - Connected to STUN Server.`)
+        log.info(
+        `${time} - Connected to STUN Server. Monika is running from: x.x.x.x`
+      )
       }
     }
   } catch {
