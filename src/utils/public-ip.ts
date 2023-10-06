@@ -78,7 +78,9 @@ export async function getPublicNetworkInfo(): Promise<any> {
         } (${ip}) - ${hostname()} (${getIp()})`
       )
     } else {
-      log.info('network connectivity ok')
+      log.info(
+        `Monika is running from: CityX - ispX (x.x.x.x) - hostnameX (x.x.x.x)`
+      )
     }
   } catch (error) {
     log.warn(`Network connectivity issues. Got: ${error}`)
