@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.15.9 2023-10-06
+
+## Fixed
+
+- Fix: Monika Handshake to Symon Crashes If There is No Internet Connection (#1135)
+- Fix: Monika Can not Send Alert to Symon (#1130)
+- Fix: Monika exits when connected to Symon with an empty probe (#1123)
+- Fix: change 20000 to 2000 for response time default alert log (#1120)
+
+## Changed
+
+- Add: custom http response from axios in docs (#1133)
+- Deprecate: Incident and Recovery Threshold (#1129)
+- Removed: isProbeResponsive Field (#1128)
+- Docs: Remove incident and recovery threshold (#1127)
+- Test: Set repeat flag to 1 for Monika command test (#1126)
+- Restructure: PING request (#1125)
+- Add: A new flag to use the Symon API version (#1124)
+- Refactor: Set the Probe Alert ID as a Mandatory Type (#1122)
+- Feat: Replace Incident and Recovery Threshold Mechanism with Backoff (#1119)
+
 ## 1.15.8 2023-09-05
 
 ## Fixed
