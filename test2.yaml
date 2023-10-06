@@ -1,0 +1,167 @@
+probes:
+  # - id: 'http-1'
+  #   name: 'status-200-test'
+  #   requests:
+  #     # - url: http://0.0.0.0:7001/v1/hello
+  #     - url: https://httpbin.org/status/200
+  #     # - url: https://www.spotify.com
+  #   alerts:
+  #     - assertion: response.status < 200 or response.status > 308
+  #       message: HTTP Status is not 200
+  #     - assertion: response.ime > 2000
+  #       message: Too sloow
+  #   incidentThreshold: 3
+  #   recoveryThreshold: 3
+
+  # - id: 'mock-1'
+  #   name: 'local-test'
+  #   requests:
+  #     - url: http://0.0.0.0:7001/v1/hello
+  #   alerts:
+  #     - assertion: response.status != 200
+  #       message: message 11
+  #     - assertion: response.status != 200 and response.status != 201
+  #       message: message 22
+  #     - assertion: response.status != 200 and response.status != 202
+  #       message: message 33
+  #     - assertion: response.status != 200 and response.status != 203
+  #       message: message 44
+  #     - assertion: response.status != 200 and response.status != 204
+  #       message: message 55
+  #   incidentThreshold: 3
+  #   recoveryThreshold: 3
+
+  # - id: 'mock-2'
+  #   name: 'local-test-no-alert'
+  #   requests:
+  #     - url: http://0.0.0.0:7001/v1/hello
+
+  # - id: 'new-ping'
+  #   name: 'ping test'
+  #   ping:
+  #     - uri: https://www.hyperjump.tech
+  #       # interval: 10
+
+  - id: 'old-ping'
+    name: 'status-200-test'
+    requests:
+      - url: https://www.hyperjump.tech
+        ping: true
+
+  # - id: 'mock-3'
+  #   name: 'local-test-one-alert'
+  #   requests:
+  #     - url: http://0.0.0.0:7001/v1/hello
+  #   alerts:
+  #     - assertion: response.status != 200
+  #       message: message 11
+  #   #     - assertion: response.time > 2000
+  #   #       message: time assertion failed
+  #   incidentThreshold: 3
+  #   recoveryThreshold: 3
+
+  # - id: 'http-2'
+  #   name: 'status-401-test'
+  #   requests:
+  #     - url: https://httpbin.org/status/401
+  #   alerts:
+  #     - assertion: response.status != 401
+  #       message: HTTP Status is not 200
+  #   incidentThreshold: 3
+  #   recoveryThreshold: 3
+
+  # - id: check-version01
+  #   name: 'check-version'
+  #   description: check version of the app
+  #   interval: 30
+  #   requests:
+  #     - url: https://application.com/gettoken
+  #       body: {}
+  #       saveBody: true
+  #       timeout: 10000
+  #       method: POST
+  #     - url: https://application.com/search_1/version
+  #       saveBody: true
+  #       headers:
+  #         Authorization: Bearer {{ responses.[0].body.accessToken }}
+
+  # - id: get-data
+  #   name: 'get-data'
+  #   description: get-data
+  #   interval: 30
+  #   requests:
+  #     - url: https://application.com/gettoken
+  #       body: {}
+  #       saveBody: true
+  #       timeout: 10000
+  #       method: POST
+  #     - url: https://application.com/my_data/
+  #       saveBody: true
+  #       headers:
+  #         Authorization: Bearer {{ responses.[0].body.accessToken }}
+
+  # - id: 'redis-1'
+  #   name: 'redis-test'
+  #   redis:
+  #     # - uri: 'redis://172.17.0.1:6379'
+  #     - host: 172.17.0.1
+  #       port: 6379
+  #   alerts:
+  #     - assertion: response.status < 200 or response.status > 299
+  #       message: HTTP Status is not 200
+  #   incidentThreshold: 3
+  #   recoveryThreshold: 3
+
+  # - id: 'psql-1'
+  #   name: 'psql-test'
+  #   postgres:
+  #     - uri: 'postgresql://ticket:db_password@172.17.0.2:5432'
+  #   alerts:
+  #     - assertion: response.status < 200 or response.status > 299
+  #       message: HTTP Status is not 200
+  #     - assertion: response.time > 2000
+  #       message: Response time is more than 2000ms
+  #   incidentThreshold: 3
+  #   recoveryThreshold: 3
+
+  # - id: postgres-111
+  #   interval: 3
+  #   incidentThreshold: 1
+  #   recoveryThreshold: 1
+  #   postgres:
+  #     - uri: postgres://ticket:db_password@172.17.0.2:5432/ticket
+  #   alerts:
+  #     - assertion: response.status < 200 or response.status > 299
+  #       message: HTTP Status is not 200
+
+notifications:
+  - id: desktop
+    type: desktop
+
+  # - id: unique-monika-notif-id
+  #   type: monika-notif
+  #   data:
+  #     url: https://whatsapp.hyperjump.tech/api/notify?token=4f6be320-409a-4751-aabd-9fa88d52ba25
+
+  # - id: smtp-mailcatcher
+  #   type: smtp
+  #   data:
+  #     recipients: ['nobody@hyperjump.tech']
+  #     hostname: 0.0.0.0
+  #     port: 1025
+  # password: "123123"
+  # username: "123123"
+
+  # - id: smtp-id
+  #   type: smtp
+  #   data:
+  #     recipients: ['test@example.com']
+  #     hostname: smtp.mailtrap.io
+  #     port: 2525
+  #     username: '1a76ad1ad2b5e3'
+  #     password: '4d80f4121ce552'
+
+  # - id: teams-001
+  #   type: teams
+  #   data:
+  #     url: https://hyperjump.webhook.office.com/webhookb2/006c847c-21b9-4ac2-85d4-454a722471d9@9def1f60-dd5b-4bb2-ba50-ecbd7a895ce2/IncomingWebhook/751e1056e0904257804c1b38b8903dd7/748ef655-7fd5-4525-9b26-7cdcf4fab8d8
