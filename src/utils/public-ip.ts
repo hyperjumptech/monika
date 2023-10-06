@@ -79,8 +79,6 @@ export async function getPublicNetworkInfo(): Promise<any> {
       )
     } else {
       log.info('network connectivity ok')
-      publicNetworkInfo = { country: '', city: 'Earth', isp: 'localhost' } // Hide specifics
-      ip = '0.0.0.0'
     }
   } catch (error) {
     log.warn(`Network connectivity issues. Got: ${error}`)
