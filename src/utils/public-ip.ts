@@ -40,7 +40,6 @@ type PublicNetwork = {
   publicIp: string
 }
 
-
 export let publicIpAddress = 'x.x.x.x'
 export let isConnectedToSTUNServer = true
 export let publicNetworkInfo: PublicNetwork | undefined
@@ -70,28 +69,31 @@ async function pokeStun(): Promise<string> {
 export async function getPublicNetworkInfo(): Promise<PublicNetwork> {
   const { flags } = getContext()
   const isSymonMode = isSymonModeFrom(flags)
-  
+
   const publicIp = await pokeStun()
   const response = await sendHttpRequest({
     url: `http://ip-api.com/json/${publicIp}`,
   })
   const { country, city, isp } = response.data
 
-  publicNetworkInfo = flags.verbose || isSymonMode ? {
-      country,
-      city,
-      hostname: hostname(),
-      isp,
-      privateIp: getIp(),
-      publicIp,
-    } : {
-      country: 'Earth',
-      city: 'City X',
-      hostname: hostname(),
-      isp: 'isp',
-      privateIp: 'x.x.x.x',
-      publicIp: 'y.y.y.y',
-    };
+  publicNetworkInfo =
+    flags.verbose || isSymonMode
+      ? {
+          country,
+          city,
+          hostname: hostname(),
+          isp,
+          privateIp: getIp(),
+          publicIp,
+        }
+      : {
+          country: 'Earth',
+          city: 'City X',
+          hostname: hostname(),
+          isp: 'isp',
+          privateIp: 'x.x.x.x',
+          publicIp: 'y.y.y.y',
+        }
 
   return publicNetworkInfo
 }
