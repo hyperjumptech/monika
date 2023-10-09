@@ -23,18 +23,25 @@
  **********************************************************************************/
 
 import { networkInterfaces } from 'os'
+import { getContext } from '../context'
+import { isSymonModeFrom } from '../components/config'
 
 export default function getIp(): string {
-  let address = ''
+  let address = 'y.y.y.y'
 
-  const ifaces = networkInterfaces()
-  for (const dev in ifaces) {
-    if (dev) {
-      const iface = ifaces[dev].filter(function (details) {
-        return details.family === 'IPv4' && details.internal === false
-      })
+  const { flags } = getContext()
+  const isSymonMode = isSymonModeFrom(flags)
 
-      if (iface.length > 0) address = iface[0].address
+  if (flags.verbose || isSymonMode) {
+    const ifaces = networkInterfaces()
+    for (const dev in ifaces) {
+      if (dev) {
+        const iface = ifaces[dev].filter(function (details) {
+          return details.family === 'IPv4' && details.internal === false
+        })
+
+        if (iface.length > 0) address = iface[0].address
+      }
     }
   }
 
