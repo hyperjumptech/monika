@@ -24,6 +24,7 @@
 
 import fs from 'fs'
 import path from 'path'
+import { SYMON_API_VERSION } from '../flag'
 
 export type MonikaFlags = {
   'auto-update'?: string
@@ -57,7 +58,7 @@ export type MonikaFlags = {
   symonReportInterval?: number
   symonReportLimit?: number
   symonUrl?: string
-  'symon-api-version'?: string
+  'symon-api-version'?: SYMON_API_VERSION
   text?: string
   verbose: boolean
   version: void

@@ -45,6 +45,7 @@ import SymonClient from './symon'
 import { getEventEmitter } from './utils/events'
 import { log } from './utils/pino'
 import { sortProbes } from './components/config/sort'
+import { symonAPIVersion } from './flag'
 
 type GetProbesParams = {
   config: Config
@@ -254,12 +255,7 @@ class Monika extends Command {
         'Monika will follow redirects as many times as the specified value here. By default, Monika will follow redirects once. To disable redirects following, set the value to zero.',
     }),
 
-    'symon-api-version': Flags.string({
-      default: 'v1',
-      options: ['v1', 'v2'],
-      description:
-        'Symon API version to use. Available options: v1, v2. Default: v1',
-    }),
+    'symon-api-version': symonAPIVersion(),
   }
 
   async run(): Promise<void> {
