@@ -36,7 +36,6 @@ export type MonikaFlags = {
   'follow-redirects': number
   force: boolean
   har?: string
-  help: boolean
   id?: string
   insomnia?: string
   json?: boolean

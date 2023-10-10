@@ -55,7 +55,6 @@ const initialContext: Context = {
     flush: false,
     'follow-redirects': monikaFlagsDefaultValue['follow-redirects'],
     force: false,
-    help: false,
     'keep-verbose-logs': false,
     logs: false,
     'max-start-delay': monikaFlagsDefaultValue['max-start-delay'],

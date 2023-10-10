@@ -26,7 +26,7 @@ import sinon from 'sinon'
 import { ux } from '@oclif/core'
 import { test } from '@oclif/test'
 import * as history from '../components/logger/history'
-import cmd from '../'
+import cmd from './monika'
 import { flush } from './flush'
 
 let flushAllLogsStub: sinon.SinonStub

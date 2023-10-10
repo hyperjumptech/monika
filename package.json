@@ -19,6 +19,7 @@
     "bin": "monika",
     "default": "monika",
     "dirname": "monika",
+    "commands": "./lib/commands",
     "plugins": [
       "@oclif/plugin-version",
       "@oclif/plugin-help"
