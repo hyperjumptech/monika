@@ -22,7 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Command, Errors, Flags, Interfaces } from '@oclif/core'
+import { Command, Errors, Flags } from '@oclif/core'
 import pEvent from 'p-event'
 
 import { flush, help } from './commands'
@@ -254,7 +254,7 @@ class Monika extends Command {
         'Monika will follow redirects as many times as the specified value here. By default, Monika will follow redirects once. To disable redirects following, set the value to zero.',
     }),
 
-    'symon-api-version': Flags.enum({
+    'symon-api-version': Flags.string({
       default: 'v1',
       options: ['v1', 'v2'],
       description:
@@ -269,10 +269,7 @@ class Monika extends Command {
 
     try {
       if (_flags.help) {
-        await help(
-          this.config,
-          this.ctor as unknown as Interfaces.Command.Class
-        )
+        await help(this.config, this.ctor as unknown as Command.Class)
         return
       }
 
