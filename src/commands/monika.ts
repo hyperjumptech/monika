@@ -25,7 +25,7 @@
 import { Command, Errors, Flags } from '@oclif/core'
 import pEvent from 'p-event'
 
-import { flush } from './flush'
+import { flush } from '../components/logger/flush'
 import { createConfig, getConfig, isSymonModeFrom } from '../components/config'
 import { sortProbes } from '../components/config/sort'
 import { printAllLogs } from '../components/logger'
