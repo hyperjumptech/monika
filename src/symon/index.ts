@@ -377,19 +377,15 @@ class SymonClient {
   }
 
   private async fetchProbesAndUpdateConfig() {
-    try {
-      // Fetch the probes
-      const { probes, hash } = await this.fetchProbes()
-      const newConfig: Config = { probes, version: hash }
-      this.updateConfig(newConfig)
+    // Fetch the probes
+    const { probes, hash } = await this.fetchProbes()
+    const newConfig: Config = { probes, version: hash }
+    this.updateConfig(newConfig)
 
-      // If it has no connection to Symon, set as true
-      // Because it could fetch the probes
-      if (!hasConnectionToSymon) {
-        hasConnectionToSymon = true
-      }
-    } catch (error) {
-      log.warn((error as any).message)
+    // If it has no connection to Symon, set as true
+    // Because it could fetch the probes
+    if (!hasConnectionToSymon) {
+      hasConnectionToSymon = true
     }
   }
 
