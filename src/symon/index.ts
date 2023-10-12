@@ -325,8 +325,11 @@ class SymonClient {
 
   private async fetchProbes() {
     log.debug('Getting probes from symon')
+    const TIMEOUT = 30_000
+
     return this.httpClient
       .get<{ data: Probe[] }>(`/${this.monikaId}/probes`, {
+        timeout: TIMEOUT,
         headers: {
           ...(this.configHash ? { 'If-None-Match': this.configHash } : {}),
         },
@@ -347,10 +350,16 @@ class SymonClient {
       })
       .catch((error) => {
         if (error.isAxiosError) {
-          return Promise.reject(new Error(error.response.data.message))
+          if (error.response) {
+            throw new Error(error.response.data.message)
+          }
+
+          if (error.request) {
+            throw new Error('Failed to get probes from Symon')
+          }
         }
 
-        return Promise.reject(error)
+        throw error
       })
   }
 
