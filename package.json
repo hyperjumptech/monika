@@ -7,7 +7,7 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "bin": {
-    "monika": "./bin/run"
+    "monika": "./bin/run.js"
   },
   "oclif": {
     "additionalVersionFlags": [
@@ -44,7 +44,7 @@
     "posttest": "eslint . --ext .ts --config .eslintrc",
     "prepack": "npm run clean && tsc -b && oclif manifest",
     "start": "npm run prepack && ./bin/dev.js",
-    "start:prod": "npm run prepack && ./bin/run",
+    "start:prod": "npm run prepack && ./bin/run.js",
     "test": "npm run clean && cross-env NODE_ENV=test nyc --reporter=lcov --extension .ts mocha --config .mocharc.json --forbid-only \"{packages,src,test}/**/*.test.ts\" --exclude test/cli.test.ts",
     "cli-test": "bats test/bats/cli.bats",
     "prod_test": "npm run prod_test:bats && npm run prod_test:cli",
@@ -136,10 +136,11 @@
     "chai": "^4.3.4",
     "chai-spies": "^1.0.0",
     "cross-env": "^7.0.3",
-    "eslint": "^7.32.0",
+    "eslint": "^8.51.0",
     "eslint-config-oclif": "^5.0.0",
     "eslint-config-oclif-typescript": "^3.0.5",
-    "eslint-config-prettier": "^8.3.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-perfectionist": "^2.1.0",
     "husky": "^4.3.8",
     "lint-staged": "^10.5.4",
     "mocha": "^9.1.2",
