@@ -97,7 +97,7 @@ export class BaseProber implements Prober {
 
   protected processProbeResults(probeResults: ProbeResult[]): void {
     for (const { isAlertTriggered, logMessage } of probeResults) {
-      this.logMessage(isAlertTriggered, logMessage)
+      this.logMessage(!isAlertTriggered, logMessage)
     }
 
     if (
