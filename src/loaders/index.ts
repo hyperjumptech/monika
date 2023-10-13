@@ -54,16 +54,22 @@ export default async function init(
 
   setContext({ userAgent: cliConfig.userAgent })
 
-  // cache location & ISP info
-  getPublicNetworkInfo()
-    .then(({ city, hostname, isp, privateIp, publicIp }) => {
-      log.info(
-        `Monika is running from: ${city} - ${isp} (${publicIp}) - ${hostname} (${privateIp})`
+  if (flags.verbose || isSymonMode) {
+    // cache location & ISP info
+    getPublicNetworkInfo()
+      .then(({ city, hostname, isp, privateIp, publicIp }) => {
+        log.info(
+          `Monika is running from: ${city} - ${isp} (${publicIp}) - ${hostname} (${privateIp})`
+        )
+      })
+      .catch((error) =>
+        log.warn(`Failed to obtain location/ISP info. Got: ${error}`)
       )
-    })
-    .catch((error) =>
-      log.warn(`Failed to obtain location/ISP info. Got: ${error}`)
-    )
+  } else {
+    // if note verbose, remove location details
+    ;`Monika is running from: City - isp (y.y.y.y) - localhost (x.x.x.x)`
+  }
+
   // check if connected to STUN Server and getting the public IP in the same time
   loopCheckSTUNServer(flags.stun)
   // run auto-updater

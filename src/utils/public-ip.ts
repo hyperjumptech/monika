@@ -67,33 +67,20 @@ async function pokeStun(): Promise<string> {
 }
 
 export async function getPublicNetworkInfo(): Promise<PublicNetwork> {
-  const { flags } = getContext()
-  const isSymonMode = isSymonModeFrom(flags)
-
   const publicIp = await pokeStun()
   const response = await sendHttpRequest({
     url: `http://ip-api.com/json/${publicIp}`,
   })
   const { country, city, isp } = response.data
 
-  publicNetworkInfo =
-    flags.verbose || isSymonMode
-      ? {
-          country,
-          city,
-          hostname: hostname(),
-          isp,
-          privateIp: getIp(),
-          publicIp,
-        }
-      : {
-          country: 'Earth',
-          city: 'City X',
-          hostname: hostname(),
-          isp: 'isp',
-          privateIp: 'x.x.x.x',
-          publicIp: 'y.y.y.y',
-        }
+  publicNetworkInfo = {
+    country,
+    city,
+    hostname: hostname(),
+    isp,
+    privateIp: getIp(),
+    publicIp,
+  }
 
   return publicNetworkInfo
 }
@@ -118,9 +105,7 @@ export async function getPublicIp(): Promise<any> {
           `${time} - Connected to STUN Server. Monika is running from: ${address}`
         )
       } else {
-        log.info(
-          `${time} - Connected to STUN Server. Monika is running from: x.x.x.x`
-        )
+        log.info(`${time} - Connected to STUN Server. Monika is running.`)
       }
     }
   } catch {
