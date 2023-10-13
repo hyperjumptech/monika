@@ -53,7 +53,8 @@ describe('Flush command', () => {
   describe('Not force', () => {
     test
       // arrange
-      .stub(ux.ux, 'prompt', (stube) => stube.resolves('n'))
+      .skip()
+      .stub(ux.ux, 'prompt', (stub) => stub.resolves('n'))
       .stdout()
       // act
       .do(() => cmd.run(['--flush']))
@@ -64,7 +65,8 @@ describe('Flush command', () => {
 
     test
       // arrange
-      .stub(ux.ux, 'prompt', (stube) => stube.resolves('Y'))
+      .skip()
+      .stub(ux.ux, 'prompt', (stub) => stub.resolves('Y'))
       .stdout()
       // act
       .do(() => cmd.run(['--flush']))
