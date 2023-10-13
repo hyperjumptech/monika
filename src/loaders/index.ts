@@ -67,7 +67,7 @@ export default async function init(
       )
   } else {
     // if note verbose, remove location details
-    ;`Monika is running from: City - isp (y.y.y.y) - localhost (x.x.x.x)`
+    ;`Monika is running.`
   }
 
   // check if connected to STUN Server and getting the public IP in the same time
