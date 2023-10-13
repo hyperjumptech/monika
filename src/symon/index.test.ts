@@ -31,6 +31,7 @@ import Stun from 'stun'
 import { Config } from '../interfaces/config'
 import * as loggerHistory from '../components/logger/history'
 import { setContext } from '../context'
+import { SYMON_API_VERSION } from '../flag'
 
 let interceptor: RequestInterceptor
 let testStunStub: sinon.SinonStub
@@ -291,7 +292,7 @@ describe('Send incident or recovery event', () => {
     const symon = new SymonClient({
       symonUrl: 'http://localhost:4000',
       symonKey: 'abcd',
-      'symon-api-version': 'v1',
+      'symon-api-version': SYMON_API_VERSION.v1,
     })
     sinon.spy(symon, 'report')
     symon.monikaId = '1234'

@@ -23,10 +23,10 @@
  **********************************************************************************/
 
 import sinon from 'sinon'
-import { CliUx } from '@oclif/core'
+import { ux } from '@oclif/core'
 import { test } from '@oclif/test'
-import * as history from '../components/logger/history'
-import cmd from '../'
+import * as history from './history'
+import cmd from '../../commands/monika'
 import { flush } from './flush'
 
 let flushAllLogsStub: sinon.SinonStub
@@ -53,8 +53,7 @@ describe('Flush command', () => {
   describe('Not force', () => {
     test
       // arrange
-      // eslint-disable-next-line unicorn/consistent-function-scoping
-      .stub(CliUx.ux, 'prompt', () => async () => 'n')
+      .stub(ux.ux, 'prompt', (stube) => stube.resolves('n'))
       .stdout()
       // act
       .do(() => cmd.run(['--flush']))
@@ -65,8 +64,7 @@ describe('Flush command', () => {
 
     test
       // arrange
-      // eslint-disable-next-line unicorn/consistent-function-scoping
-      .stub(CliUx.ux, 'prompt', () => async () => 'Y')
+      .stub(ux.ux, 'prompt', (stube) => stube.resolves('Y'))
       .stdout()
       // act
       .do(() => cmd.run(['--flush']))
