@@ -27,7 +27,7 @@ import { getContext } from '../context'
 import { isSymonModeFrom } from '../components/config'
 
 export default function getIp(): string {
-  let address = 'y.y.y.y'
+  let address = ''
 
   const { flags } = getContext()
   const isSymonMode = isSymonModeFrom(flags)
