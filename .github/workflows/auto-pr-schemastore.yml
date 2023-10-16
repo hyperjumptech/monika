@@ -49,7 +49,6 @@ jobs:
         run : |
           cd src
           npm ci
-          npm run build -w packages/notification
           npm run build
 
       - name: Create Pull Request
