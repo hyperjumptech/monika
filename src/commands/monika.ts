@@ -345,7 +345,8 @@ export default class Monika extends Command {
       }
     } catch (error) {
       await closeLog()
-      this.error((error as any)?.message, { exit: 1 })
+      log.error((error as any)?.message)
+      this.exit(1)
     }
   }
 

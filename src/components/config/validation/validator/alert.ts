@@ -22,23 +22,11 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Probe, ProbeAlert } from '../../../../interfaces/probe'
-import { parseAlertStringTime } from '../../../../plugins/validate-response/checkers'
+import type { ProbeAlert } from '../../../../interfaces/probe'
 import { compileExpression } from '../../../../utils/expression-parser'
 
-const alertStatusMessage = 'status-not-2xx'
-const responseTimePrefix = 'response-time-greater-than-'
-
-const isValidProbeAlert = (alert: ProbeAlert | string): boolean => {
+const isValidProbeAlert = (alert: ProbeAlert): boolean => {
   try {
-    if (typeof alert === 'string') {
-      return (
-        alert === alertStatusMessage ||
-        (alert.startsWith(responseTimePrefix) &&
-          Boolean(parseAlertStringTime(alert)))
-      )
-    }
-
     return Boolean(
       compileExpression(alert.assertion || (alert.query as string))
     )
@@ -47,44 +35,14 @@ const isValidProbeAlert = (alert: ProbeAlert | string): boolean => {
   }
 }
 
-const convertOldAlertToNewFormat = (
-  probe: Probe,
-  allAlerts: ProbeAlert[]
-): void => {
-  probe.alerts = allAlerts.map((alert: any) => {
-    if (typeof alert === 'string') {
-      let query = ''
-      let message = ''
-      const subject = ''
-
-      if (alert === alertStatusMessage) {
-        query = 'response.status < 200 or response.status > 299'
-        message = 'HTTP Status is {{ response.status }}, expecting 200'
-      } else if (alert.startsWith(responseTimePrefix)) {
-        const expectedTime = parseAlertStringTime(alert)
-        query = `response.time > ${expectedTime}`
-        message = `Response time is {{ response.time }}ms, expecting less than ${expectedTime}ms`
-      }
-
-      return { query, subject, message }
-    }
-
-    return alert
-  })
-}
-
-export const validateAlerts = (probe: Probe): string | undefined => {
-  const { alerts = [], socket } = probe
-  const socketAlerts = socket?.alerts ?? []
-  const allAlerts = [...alerts, ...socketAlerts]
-
+export const validateAlerts = (
+  probeAlerts: ProbeAlert[]
+): string | undefined => {
   // Check probe alert properties
-  for (const alert of allAlerts) {
+  for (const alert of probeAlerts) {
     const check = isValidProbeAlert(alert)
     if (!check) {
       return `Probe alert format is invalid! (${alert})`
     }
   }
-
-  convertOldAlertToNewFormat(probe, allAlerts)
 }
