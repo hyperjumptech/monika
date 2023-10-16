@@ -49,6 +49,7 @@ import {
   publicIpAddress,
   publicNetworkInfo,
 } from '../utils/public-ip'
+import { validateProbes } from '../components/config/validation'
 
 Bree.extend(require('@breejs/ts-worker'))
 
@@ -340,16 +341,18 @@ class SymonClient {
           return [200, 304].includes(status)
         },
       })
-      .then((res) => {
-        if (res.data.data) {
-          this.probes = res.data.data
+      .then(async (res) => {
+        if (!res.data.data) {
+          log.info('No config changes from Symon')
 
-          log.debug(`Received ${res.data.data.length} probes`)
-        } else {
-          log.debug(`No new config from Symon`)
+          return { probes: this.probes, hash: res.headers.etag }
         }
 
-        return { probes: res.data.data, hash: res.headers.etag }
+        const validatedProbes = await validateProbes(res.data.data)
+        this.probes = validatedProbes
+        log.info(`Received ${validatedProbes.length} probes`)
+
+        return { probes: validatedProbes, hash: res.headers.etag }
       })
       .catch((error) => {
         if (error.isAxiosError) {

@@ -26,7 +26,7 @@ import joi from 'joi'
 import type { Probe } from '../../../../interfaces/probe'
 import { validateAlerts } from './alert'
 
-export async function validateProbes(probes: Probe[]): Promise<void> {
+export async function validateProbes(probes: Probe[]): Promise<Probe[]> {
   const alertSchema = joi.object({
     assertion: joi.string(),
     id: joi.string(),
@@ -170,6 +170,8 @@ export async function validateProbes(probes: Probe[]): Promise<void> {
         throw new Error(validateAlertError)
       }
     }
+
+    return validatedProbes
   } catch (error: any) {
     throw new Error(`Probe validation error: ${error?.message}`)
   }
