@@ -7,8 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## 1.15.10 2023-10-16
 
+## Fixed
+
+Fix: Fail to Connect to Symon (#1144)
+
 ## Changed
 
+Hide IP and Geolocation by default (#1090)
+CI: remove unneeded step (#1143)
 Refactor: Increase Request Timeout When Getting Probes from Symon (#1139)
 Refactor: Upgrade Oclif to Version 2 (#1138)
 
