@@ -161,7 +161,10 @@ class SymonClient {
 
   private bree = new Bree({
     root: false,
-    defaultExtension: process.env.NODE_ENV === 'test' ? 'ts' : 'js',
+    defaultExtension:
+      process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test'
+        ? 'ts'
+        : 'js',
     jobs: [],
     interval: this.reportProbesInterval,
     logger: log,
@@ -453,9 +456,7 @@ class SymonClient {
     } catch (error) {
       hasConnectionToSymon = false
       this.configHash = ''
-      log.error(
-        "Warning: Can't report history to Symon. " + (error as any).message
-      )
+      log.error("Can't report history to Symon. " + (error as any).message)
 
       await this.report()
     }
