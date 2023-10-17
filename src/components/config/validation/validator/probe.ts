@@ -45,137 +45,132 @@ export async function validateProbes(probes: Probe[]): Promise<Probe[]> {
     port: joi.number(),
     username: joi.string().allow(''),
   })
-  const schema = joi
-    .array<Probe[]>()
-    .min(1)
-    .items(
-      joi.object({
-        alerts: joi.array().items(alertSchema),
-        description: joi.string().allow(''),
-        id: joi.string().required(),
-        interval: joi.number().min(1),
-        lastEvent: joi.object({
-          createdAt: joi.string().allow(''),
-          recoveredAt: joi.string().allow('', null),
-        }),
-        name: joi.string().allow(''),
-        mariadb: joi.array().items(mysqlSchema),
-        mysql: joi.array().items(mysqlSchema),
-        mongo: joi.array().items(
-          joi.alternatives([
-            joi.object({
-              alerts: joi.array().items(alertSchema),
-              uri: joi.string().required(),
-            }),
-            joi.object({
-              alerts: joi.array().items(alertSchema),
-              host: joi
-                .alternatives()
-                .try(
-                  joi.string().allow('').hostname(),
-                  joi.string().allow('').ip()
-                )
-                .required(),
-              password: joi.string().allow(''),
-              port: joi.number().min(0).max(65_536),
-              username: joi.string().allow(''),
-            }),
-          ])
-        ),
-        ping: joi.array().items(
+  const schema = joi.array<Probe[]>().items(
+    joi.object({
+      alerts: joi.array().items(alertSchema),
+      description: joi.string().allow(''),
+      id: joi.string().required(),
+      interval: joi.number().min(1),
+      lastEvent: joi.object({
+        createdAt: joi.string().allow(''),
+        recoveredAt: joi.string().allow('', null),
+      }),
+      name: joi.string().allow(''),
+      mariadb: joi.array().items(mysqlSchema),
+      mysql: joi.array().items(mysqlSchema),
+      mongo: joi.array().items(
+        joi.alternatives([
           joi.object({
             alerts: joi.array().items(alertSchema),
             uri: joi.string().required(),
+          }),
+          joi.object({
+            alerts: joi.array().items(alertSchema),
+            host: joi
+              .alternatives()
+              .try(
+                joi.string().allow('').hostname(),
+                joi.string().allow('').ip()
+              )
+              .required(),
+            password: joi.string().allow(''),
+            port: joi.number().min(0).max(65_536),
+            username: joi.string().allow(''),
+          }),
+        ])
+      ),
+      ping: joi.array().items(
+        joi.object({
+          alerts: joi.array().items(alertSchema),
+          uri: joi.string().required(),
+        })
+      ),
+      postgres: joi.array().items(
+        joi.alternatives([
+          joi.object({
+            alerts: joi.array().items(alertSchema),
+            uri: joi.string().required(),
+          }),
+          joi.object({
+            alerts: joi.array().items(alertSchema),
+            command: joi.string().allow(''),
+            data: joi.alternatives().try(joi.string().allow(''), joi.number()),
+            database: joi.string().allow(''),
+            host: joi
+              .alternatives()
+              .try(
+                joi.string().allow('').hostname(),
+                joi.string().allow('').ip()
+              )
+              .required(),
+            password: joi.string().allow(''),
+            port: joi.number(),
+            username: joi.string().allow(''),
+          }),
+        ])
+      ),
+      redis: joi.array().items(
+        joi
+          .object({
+            alerts: joi.array().items(alertSchema),
+            command: joi.string().allow(''),
+            host: joi
+              .alternatives()
+              .try(
+                joi.string().allow('').hostname(),
+                joi.string().allow('').ip()
+              ),
+            password: joi.string().allow(''),
+            port: joi.number().min(0).max(65_536),
+            uri: joi.string().allow(''),
+            username: joi.string().allow(''),
+          })
+          .xor('host', 'uri')
+          .and('host', 'port')
+      ),
+      requests: joi
+        .array()
+        .min(1)
+        .items(
+          joi.object({
+            alerts: joi.array().items(alertSchema),
+            allowUnauthorized: joi.bool(),
+            body: joi
+              .alternatives()
+              .try(joi.string().allow('', null), joi.object()),
+            headers: joi.object().allow(null),
+            id: joi.string().allow(''),
+            interval: joi.number().min(1),
+            method: joi
+              .string()
+              .valid(
+                '',
+                'GET',
+                'POST',
+                'PUT',
+                'PATCH',
+                'DELETE',
+                'HEAD',
+                'OPTIONS',
+                'PURGE',
+                'LINK',
+                'UNLINK'
+              )
+              .insensitive(),
+            ping: joi.bool(),
+            saveBody: joi.bool(),
+            timeout: joi.number().min(1).allow(null),
+            url: joi.string().uri().required(),
           })
         ),
-        postgres: joi.array().items(
-          joi.alternatives([
-            joi.object({
-              alerts: joi.array().items(alertSchema),
-              uri: joi.string().required(),
-            }),
-            joi.object({
-              alerts: joi.array().items(alertSchema),
-              command: joi.string().allow(''),
-              data: joi
-                .alternatives()
-                .try(joi.string().allow(''), joi.number()),
-              database: joi.string().allow(''),
-              host: joi
-                .alternatives()
-                .try(
-                  joi.string().allow('').hostname(),
-                  joi.string().allow('').ip()
-                )
-                .required(),
-              password: joi.string().allow(''),
-              port: joi.number(),
-              username: joi.string().allow(''),
-            }),
-          ])
-        ),
-        redis: joi.array().items(
-          joi
-            .object({
-              alerts: joi.array().items(alertSchema),
-              command: joi.string().allow(''),
-              host: joi
-                .alternatives()
-                .try(
-                  joi.string().allow('').hostname(),
-                  joi.string().allow('').ip()
-                ),
-              password: joi.string().allow(''),
-              port: joi.number().min(0).max(65_536),
-              uri: joi.string().allow(''),
-              username: joi.string().allow(''),
-            })
-            .xor('host', 'uri')
-            .and('host', 'port')
-        ),
-        requests: joi
-          .array()
-          .min(1)
-          .items(
-            joi.object({
-              alerts: joi.array().items(alertSchema),
-              allowUnauthorized: joi.bool(),
-              body: joi
-                .alternatives()
-                .try(joi.string().allow('', null), joi.object()),
-              headers: joi.object().allow(null),
-              id: joi.string().allow(''),
-              interval: joi.number().min(1),
-              method: joi
-                .string()
-                .valid(
-                  '',
-                  'GET',
-                  'POST',
-                  'PUT',
-                  'PATCH',
-                  'DELETE',
-                  'HEAD',
-                  'OPTIONS',
-                  'PURGE',
-                  'LINK',
-                  'UNLINK'
-                )
-                .insensitive(),
-              ping: joi.bool(),
-              saveBody: joi.bool(),
-              timeout: joi.number().min(1).allow(null),
-              url: joi.string().uri().required(),
-            })
-          ),
-        socket: joi.object({
-          alerts: joi.array().items(alertSchema),
-          data: joi.string().allow('', null),
-          host: joi.string().required(),
-          port: joi.number().required(),
-        }),
-      })
-    )
+      socket: joi.object({
+        alerts: joi.array().items(alertSchema),
+        data: joi.string().allow('', null),
+        host: joi.string().required(),
+        port: joi.number().required(),
+      }),
+    })
+  )
 
   try {
     const validatedProbes = await schema.validateAsync(probes, {
