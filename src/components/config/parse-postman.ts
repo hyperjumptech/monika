@@ -22,8 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Config } from '../../interfaces/config'
-import { DEFAULT_THRESHOLD } from '../../looper'
+import type { Config } from '../../interfaces/config'
 
 type CollectionVersion = 'v2.0' | 'v2.1'
 
@@ -107,8 +106,6 @@ const generateProbesFromConfig = (config: any, version: CollectionVersion) => {
       id: item?.name,
       name: item?.name,
       requests: generateRequests(item, version),
-      incidentThreshold: DEFAULT_THRESHOLD,
-      recoveryThreshold: DEFAULT_THRESHOLD,
       alerts: [],
     }
   })

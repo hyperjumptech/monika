@@ -85,8 +85,6 @@ function sendTLSErrorNotification({
     name: '',
     requests: [],
     interval: 10,
-    incidentThreshold: 0,
-    recoveryThreshold: 0,
     alerts: [],
   }
 
@@ -94,7 +92,11 @@ function sendTLSErrorNotification({
     // TODO: Remove validation below
     // validation is used because it is needed to send alert
     const validation: ValidatedResponse = {
-      alert: { assertion: '', message: errorMessage },
+      alert: {
+        id: '',
+        assertion: '',
+        message: errorMessage,
+      },
       isAlertTriggered: true,
       response: {
         status: 500,
@@ -103,7 +105,6 @@ function sendTLSErrorNotification({
         body: {},
         headers: {},
         result: probeRequestResult.success,
-        isProbeResponsive: true,
       },
     }
 

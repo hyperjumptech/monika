@@ -46,10 +46,9 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Config } from '../../interfaces/config'
+import type { Config } from '../../interfaces/config'
 import { monikaFlagsDefaultValue } from '../../context/monika-flags'
-import { DEFAULT_THRESHOLD } from '../../looper'
-import { Probe } from '../../interfaces/probe'
+import type { Probe, ProbeAlert } from '../../interfaces/probe'
 import { isValidURL } from '../../utils/is-valid-url'
 
 export const parseConfigFromText = (configString: string): Config => {
@@ -70,8 +69,6 @@ export const parseConfigFromText = (configString: string): Config => {
               body: {} as JSON,
             },
           ],
-          incidentThreshold: DEFAULT_THRESHOLD,
-          recoveryThreshold: DEFAULT_THRESHOLD,
           interval: monikaFlagsDefaultValue['config-interval'],
           alerts: [
             {
@@ -82,7 +79,7 @@ export const parseConfigFromText = (configString: string): Config => {
               assertion: 'response.time > 2000',
               message: 'Response time is more than 2000ms',
             },
-          ],
+          ] as ProbeAlert[],
         },
       ]
     }

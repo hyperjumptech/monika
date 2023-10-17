@@ -26,7 +26,7 @@ import { expect, test } from '@oclif/test'
 import path from 'path'
 import chai from 'chai'
 import spies from 'chai-spies'
-import cmd from '../src'
+import cmd from '../src/commands/monika'
 import sinon from 'sinon'
 import * as IpUtil from '../src/utils/public-ip'
 
@@ -39,10 +39,16 @@ describe('monika', () => {
   let getPublicNetworkInfoStub: any
   beforeEach(() => {
     getPublicIPStub = sinon.stub(IpUtil, 'getPublicIp' as never)
-    getPublicNetworkInfoStub = sinon.stub(
-      IpUtil,
-      'getPublicNetworkInfo' as never
-    )
+    getPublicNetworkInfoStub = sinon
+      .stub(IpUtil, 'getPublicNetworkInfo' as never)
+      .callsFake(async () => ({
+        country: '',
+        city: '',
+        hostname: '',
+        isp: '',
+        privateIp: '',
+        publicIp: '',
+      }))
   })
   afterEach(() => {
     getPublicIPStub.restore()
@@ -65,6 +71,8 @@ describe('monika', () => {
       cmd.run([
         '--config',
         'https://raw.githubusercontent.com/hyperjumptech/monika/main/monika.example.yml',
+        '--repeat',
+        '1',
       ])
     )
     .it('detects valid remote config', (ctx) => {
@@ -109,6 +117,8 @@ describe('monika', () => {
       cmd.run([
         '--config',
         resolve('./test/testConfigs/probes/noProbeName.yml'),
+        '--repeat',
+        '1',
       ])
     )
     .it('runs with config without probe name', (ctx) => {
@@ -136,6 +146,8 @@ describe('monika', () => {
       cmd.run([
         '--config',
         resolve('./test/testConfigs/probes/noProbeAlerts.yml'),
+        '--repeat',
+        '1',
       ])
     )
     .it('runs with config without probe alerts', (ctx) => {
@@ -191,6 +203,8 @@ describe('monika', () => {
       cmd.run([
         '--config',
         resolve('./test/testConfigs/probes/stringProbeRequestAlert.yml'),
+        '--repeat',
+        '1',
       ])
     )
     .it(
@@ -206,6 +220,8 @@ describe('monika', () => {
       cmd.run([
         '--config',
         resolve('./test/testConfigs/probes/objectProbeRequestAlert.yml'),
+        '--repeat',
+        '1',
       ])
     )
     .it(
@@ -221,6 +237,8 @@ describe('monika', () => {
       cmd.run([
         '--config',
         resolve('./test/testConfigs/probes/multipleProbeRequests.yml'),
+        '--repeat',
+        '1',
       ])
     )
     .it('runs with multiple probe requests config', (ctx) => {
@@ -233,6 +251,8 @@ describe('monika', () => {
       cmd.run([
         '--config',
         resolve('./test/testConfigs/probes/chainingRequests.yml'),
+        '--repeat',
+        '1',
       ])
     )
     .it('runs with chaining probe requests config', (ctx) => {
@@ -247,6 +267,8 @@ describe('monika', () => {
         '--config',
         resolve('./test/testConfigs/mailgun/mailgunconfig.yml'),
         '--verbose',
+        '--repeat',
+        '1',
       ])
     )
     .it('runs with mailgun config', (ctx) => {
@@ -275,6 +297,8 @@ describe('monika', () => {
         '--config',
         resolve('./test/testConfigs/sendgrid/sendgridconfig.yml'),
         '--verbose',
+        '--repeat',
+        '1',
       ])
     )
     .it('runs with sendgrid config', (ctx) => {
@@ -302,6 +326,8 @@ describe('monika', () => {
         '--config',
         resolve('./test/testConfigs/smtp/smtpconfig.yml'),
         '--verbose',
+        '--repeat',
+        '1',
       ])
     )
     .it('runs with SMTP config', (ctx) => {
@@ -332,6 +358,8 @@ describe('monika', () => {
         '--config',
         resolve('./test/testConfigs/webhook/webhookconfig.yml'),
         '--verbose',
+        '--repeat',
+        '1',
       ])
     )
     .it('runs with Webhook config', (ctx) => {
@@ -347,6 +375,8 @@ describe('monika', () => {
         '--config',
         resolve('./test/testConfigs/discord/discordconfig.yml'),
         '--verbose',
+        '--repeat',
+        '1',
       ])
     )
     .it('runs with Discord config', (ctx) => {
@@ -361,6 +391,8 @@ describe('monika', () => {
         '--config',
         resolve('./test/testConfigs/teams/teamsconfig.yml'),
         '--verbose',
+        '--repeat',
+        '1',
       ])
     )
     .it('runs with Teams config', (ctx) => {
@@ -388,6 +420,8 @@ describe('monika', () => {
         '--config',
         resolve('./test/testConfigs/monika-notif/monikaNotifconfig.yml'),
         '--verbose',
+        '--repeat',
+        '1',
       ])
     )
     .it('runs with Monika-Notif config', (ctx) => {
@@ -399,7 +433,12 @@ describe('monika', () => {
   test
     .stdout()
     .do(() =>
-      cmd.run(['--config', resolve('./test/testConfigs/fullConfig.yml')])
+      cmd.run([
+        '--config',
+        resolve('./test/testConfigs/fullConfig.yml'),
+        '--repeat',
+        '1',
+      ])
     )
     .it('runs with full config', (ctx) => {
       expect(ctx.stdout).to.contain('Starting Monika.')
@@ -412,6 +451,8 @@ describe('monika', () => {
         '--config',
         resolve('./test/testConfigs/simple-1p-1n.yaml'),
         resolve('./test/testConfigs/simple-1p-2n.yaml'),
+        '--repeat',
+        '1',
       ])
     )
     .it('runs multiple config override', (ctx) => {
@@ -426,6 +467,8 @@ describe('monika', () => {
         '-c',
         resolve('./test/testConfigs/manyNotif.yml'),
         resolve('./test/testConfigs/simple-1p-1n.yaml'),
+        '--repeat',
+        '1',
       ])
     )
     .it(
@@ -444,6 +487,8 @@ describe('monika', () => {
         '--config',
         resolve('./test/testConfigs/fullConfig.yml'),
         resolve('./test/testConfigs/manyNotif.yml'),
+        '--repeat',
+        '1',
       ])
     )
     .it('runs multiple config override', (ctx) => {
@@ -453,7 +498,14 @@ describe('monika', () => {
 
   test
     .stdout()
-    .do(() => cmd.run(['--har', resolve('./test/testConfigs/harTest.har')]))
+    .do(() =>
+      cmd.run([
+        '--har',
+        resolve('./test/testConfigs/harTest.har'),
+        '--repeat',
+        '1',
+      ])
+    )
     .it('runs with har file config', (ctx) => {
       expect(ctx.stdout).to.contain('Starting Monika.')
     })
@@ -464,6 +516,8 @@ describe('monika', () => {
       cmd.run([
         '--insomnia',
         resolve('./src/components/config/__tests__/petstore.insomnia.yaml'),
+        '--repeat',
+        '1',
       ])
     )
     .it('runs with insomnia file config', (ctx) => {
@@ -476,6 +530,8 @@ describe('monika', () => {
       cmd.run([
         '--postman',
         resolve('./test/testConfigs/simple.postman_collection.json'),
+        '--repeat',
+        '1',
       ])
     )
     .it('runs with postman file', (ctx) => {
@@ -491,6 +547,8 @@ describe('monika', () => {
         resolve('./test/testConfigs/manyProbes.yml'),
         '--har',
         resolve('./test/testConfigs/harTest.har'),
+        '--repeat',
+        '1',
       ])
     )
     .it('merge har file with other config', (ctx) => {
@@ -506,6 +564,8 @@ describe('monika', () => {
         '-c',
         resolve('./test/testConfigs/manyNotif.yml'),
         resolve('./test/testConfigs/manyProbes.yml'),
+        '--repeat',
+        '1',
       ])
     )
     .it('probes from har file will override regardless flag order', (ctx) => {
@@ -521,6 +581,8 @@ describe('monika', () => {
         resolve('./test/testConfigs/manyProbes.yml'),
         '--postman',
         resolve('./test/testConfigs/simple.postman_collection.json'),
+        '--repeat',
+        '1',
       ])
     )
     .it('merge postman file with other config', (ctx) => {
@@ -536,6 +598,8 @@ describe('monika', () => {
         '-c',
         resolve('./test/testConfigs/manyNotif.yml'),
         resolve('./test/testConfigs/manyProbes.yml'),
+        '--repeat',
+        '1',
       ])
     )
     .it(

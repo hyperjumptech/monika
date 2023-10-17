@@ -22,57 +22,16 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import sinon from 'sinon'
-import { CliUx } from '@oclif/core'
-import { test } from '@oclif/test'
-import * as history from '../components/logger/history'
-import cmd from '../'
-import { flush } from './flush'
+import { Flags } from '@oclif/core'
 
-let flushAllLogsStub: sinon.SinonStub
+export enum SYMON_API_VERSION {
+  'v1' = 'v1',
+  'v2' = 'v2',
+}
 
-beforeEach(() => {
-  flushAllLogsStub = sinon.stub(history, 'flushAllLogs').resolves()
-})
-
-afterEach(() => {
-  flushAllLogsStub.restore()
-})
-
-describe('Flush command', () => {
-  describe('Force', () => {
-    it('should flush records without asking for confirmation', async () => {
-      // act
-      await flush(true)
-
-      // assert
-      sinon.assert.calledOnce(flushAllLogsStub)
-    })
-  })
-
-  describe('Not force', () => {
-    test
-      // arrange
-      // eslint-disable-next-line unicorn/consistent-function-scoping
-      .stub(CliUx.ux, 'prompt', () => async () => 'n')
-      .stdout()
-      // act
-      .do(() => cmd.run(['--flush']))
-      .it('should cancel flush', () => {
-        // assert
-        sinon.assert.notCalled(flushAllLogsStub)
-      })
-
-    test
-      // arrange
-      // eslint-disable-next-line unicorn/consistent-function-scoping
-      .stub(CliUx.ux, 'prompt', () => async () => 'Y')
-      .stdout()
-      // act
-      .do(() => cmd.run(['--flush']))
-      .it('should flush', () => {
-        // assert
-        sinon.assert.calledOnce(flushAllLogsStub)
-      })
-  })
+export const symonAPIVersion = Flags.custom<SYMON_API_VERSION>({
+  default: SYMON_API_VERSION.v1,
+  options: [SYMON_API_VERSION.v1, SYMON_API_VERSION.v2],
+  description:
+    'Symon API version to use. Available options: v1, v2. Default: v1',
 })

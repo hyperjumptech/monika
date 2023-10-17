@@ -31,6 +31,7 @@ import Stun from 'stun'
 import { Config } from '../interfaces/config'
 import * as loggerHistory from '../components/logger/history'
 import { setContext } from '../context'
+import { SYMON_API_VERSION } from '../flag'
 
 let interceptor: RequestInterceptor
 let testStunStub: sinon.SinonStub
@@ -83,8 +84,6 @@ describe('Symon initiate', () => {
           name: 'test',
           interval: 10,
           requests: [],
-          incidentThreshold: 5,
-          recoveryThreshold: 5,
           alerts: [],
         },
       ],
@@ -160,8 +159,6 @@ describe('Symon initiate', () => {
           name: 'test',
           interval: 10,
           requests: [],
-          incidentThreshold: 5,
-          recoveryThreshold: 5,
           alerts: [],
         },
       ],
@@ -220,6 +217,48 @@ describe('Symon initiate', () => {
     await symon.stopReport()
 
     expect(symon.config).deep.equals(config)
+  })
+
+  it('should throw an error if the request to get probes is failed', async () => {
+    // arrange
+    interceptor.use((req) => {
+      if (req.url.origin === 'http://localhost:4000') {
+        if (req.url.pathname.endsWith('client-handshake')) {
+          return {
+            status: 200,
+            body: JSON.stringify({
+              statusCode: 'ok',
+              message: 'Successfully handshaked with Symon',
+              data: {
+                monikaId: '1234',
+              },
+            }),
+          }
+        }
+
+        if (req.url.pathname.endsWith('status')) {
+          return {
+            status: 200,
+          }
+        }
+      }
+    })
+
+    const symon = new SymonClient({
+      symonUrl: 'http://localhost:4000',
+      symonKey: 'abcd',
+    })
+    let errorMessage = ''
+
+    try {
+      // act
+      await symon.initiate()
+    } catch (error: any) {
+      errorMessage = error?.message
+    }
+
+    // arrange
+    expect(errorMessage).eq('Failed to get probes from Symon')
   })
 
   it('should report on initiate', async () => {
@@ -295,7 +334,7 @@ describe('Send incident or recovery event', () => {
     const symon = new SymonClient({
       symonUrl: 'http://localhost:4000',
       symonKey: 'abcd',
-      'symon-api-version': 'v1',
+      'symon-api-version': SYMON_API_VERSION.v1,
     })
     sinon.spy(symon, 'report')
     symon.monikaId = '1234'

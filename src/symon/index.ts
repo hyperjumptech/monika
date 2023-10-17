@@ -24,6 +24,7 @@
 
 /* eslint-disable unicorn/prefer-module */
 import axios, { AxiosInstance } from 'axios'
+import { ExponentialBackoff, handleAll, retry } from 'cockatiel'
 import { EventEmitter } from 'events'
 import mac from 'macaddress'
 import { hostname } from 'os'
@@ -92,7 +93,20 @@ const isTestEnvironment = process.env.NODE_ENV === 'test' || process.env.CI
 let hasConnectionToSymon = false
 
 const getHandshakeData = async (): Promise<SymonHandshakeData> => {
-  await getPublicNetworkInfo()
+  await retry(handleAll, {
+    backoff: new ExponentialBackoff(),
+  }).execute(async () => {
+    await getPublicNetworkInfo()
+      .then(({ city, hostname, isp, privateIp, publicIp }) => {
+        log.info(
+          `Monika is running from: ${city} - ${isp} (${publicIp}) - ${hostname} (${privateIp})`
+        )
+      })
+      .catch((error) => {
+        log.error(`${error}. Retrying...`)
+        throw error
+      })
+  })
   await getPublicIp()
 
   const os = await getOSName()
@@ -100,9 +114,7 @@ const getHandshakeData = async (): Promise<SymonHandshakeData> => {
   const host = hostname()
   const publicIp = publicIpAddress
   const privateIp = getIp()
-  const isp = publicNetworkInfo.isp
-  const city = publicNetworkInfo.city
-  const country = publicNetworkInfo.country
+  const { city, country, isp } = publicNetworkInfo!
   const pid = process.pid
   const { userAgent: version } = getContext()
 
@@ -149,7 +161,10 @@ class SymonClient {
 
   private bree = new Bree({
     root: false,
-    defaultExtension: process.env.NODE_ENV === 'test' ? 'ts' : 'js',
+    defaultExtension:
+      process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test'
+        ? 'ts'
+        : 'js',
     jobs: [],
     interval: this.reportProbesInterval,
     logger: log,
@@ -214,16 +229,39 @@ class SymonClient {
     this.eventEmitter = getEventEmitter()
     this.eventEmitter.on(
       events.probe.notification.willSend,
-      (args: NotificationEvent) => {
+      ({ probeID, probeState, url, validation }: NotificationEvent) => {
+        const getAlertID = ({
+          url,
+          validation,
+        }: Pick<NotificationEvent, 'url' | 'validation'>): string => {
+          if (validation.alert.id) {
+            return validation.alert.id
+          }
+
+          const probe = getContext().config?.probes.find(
+            ({ id }) => id === probeID
+          )
+          if (!probe) {
+            return ''
+          }
+
+          const request = probe.requests?.find((request) => request.url === url)
+          if (!request) {
+            return ''
+          }
+
+          return request.alerts?.find((alert) => alert.query === '')?.id || ''
+        }
+
         this.notifyEvent({
-          event: args.probeState === 'DOWN' ? 'incident' : 'recovery',
-          alertId: args.validation.alert.id ?? '',
+          event: probeState === 'DOWN' ? 'incident' : 'recovery',
+          alertId: getAlertID({ url, validation }),
           response: {
-            status: args.validation.response.status, // status is http status code
-            time: args.validation.response.responseTime,
-            size: args.validation.response.headers['content-length'],
-            headers: args.validation.response.headers ?? {},
-            body: args.validation.response.data,
+            status: validation.response.status, // status is http status code
+            time: validation.response.responseTime,
+            size: validation.response.headers['content-length'],
+            headers: validation.response.headers || {},
+            body: validation.response.data,
           },
         }).catch((error: any) => {
           log.error(error)
@@ -290,8 +328,11 @@ class SymonClient {
 
   private async fetchProbes() {
     log.debug('Getting probes from symon')
+    const TIMEOUT = 30_000
+
     return this.httpClient
       .get<{ data: Probe[] }>(`/${this.monikaId}/probes`, {
+        timeout: TIMEOUT,
         headers: {
           ...(this.configHash ? { 'If-None-Match': this.configHash } : {}),
         },
@@ -312,10 +353,16 @@ class SymonClient {
       })
       .catch((error) => {
         if (error.isAxiosError) {
-          return Promise.reject(new Error(error.response.data.message))
+          if (error.response) {
+            throw new Error(error.response.data.message)
+          }
+
+          if (error.request) {
+            throw new Error('Failed to get probes from Symon')
+          }
         }
 
-        return Promise.reject(error)
+        throw error
       })
   }
 
@@ -333,19 +380,15 @@ class SymonClient {
   }
 
   private async fetchProbesAndUpdateConfig() {
-    try {
-      // Fetch the probes
-      const { probes, hash } = await this.fetchProbes()
-      const newConfig: Config = { probes, version: hash }
-      this.updateConfig(newConfig)
+    // Fetch the probes
+    const { probes, hash } = await this.fetchProbes()
+    const newConfig: Config = { probes, version: hash }
+    this.updateConfig(newConfig)
 
-      // If it has no connection to Symon, set as true
-      // Because it could fetch the probes
-      if (!hasConnectionToSymon) {
-        hasConnectionToSymon = true
-      }
-    } catch (error) {
-      log.warn((error as any).message)
+    // If it has no connection to Symon, set as true
+    // Because it could fetch the probes
+    if (!hasConnectionToSymon) {
+      hasConnectionToSymon = true
     }
   }
 
@@ -413,9 +456,7 @@ class SymonClient {
     } catch (error) {
       hasConnectionToSymon = false
       this.configHash = ''
-      log.error(
-        "Warning: Can't report history to Symon. " + (error as any).message
-      )
+      log.error("Can't report history to Symon. " + (error as any).message)
 
       await this.report()
     }

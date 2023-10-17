@@ -28,10 +28,21 @@ import { hostname } from 'os'
 import getIp from './ip'
 import { sendPing } from './ping'
 import { sendHttpRequest } from './http'
+import { getContext } from '../context'
+import { isSymonModeFrom } from '../components/config'
+
+type PublicNetwork = {
+  country: string
+  city: string
+  hostname: string
+  isp: string
+  privateIp: string
+  publicIp: string
+}
 
 export let publicIpAddress = ''
 export let isConnectedToSTUNServer = true
-export let publicNetworkInfo: { country: string; city: string; isp: string }
+export let publicNetworkInfo: PublicNetwork | undefined
 
 const isTestEnvironment = process.env.CI || process.env.NODE_ENV === 'test'
 
@@ -55,25 +66,23 @@ async function pokeStun(): Promise<string> {
   return Promise.reject(new Error('stun inaccessible')) // could not connect to STUN server
 }
 
-export async function getPublicNetworkInfo(): Promise<any> {
-  try {
-    const ip = await pokeStun()
-    const response = await sendHttpRequest({
-      url: `http://ip-api.com/json/${ip}`,
-    })
-    const { country, city, isp } = response.data
-    publicNetworkInfo = { country, city, isp }
-    log.info(
-      `Monika is running from: ${publicNetworkInfo.city} - ${
-        publicNetworkInfo.isp
-      } (${ip}) - ${hostname()} (${getIp()})`
-    )
-  } catch (error) {
-    log.warn(`Failed to obtain location/ISP info. Got: ${error}`)
-    return Promise.resolve() // couldn't resolve publicNetworkInfo, fail gracefully and continue
+export async function getPublicNetworkInfo(): Promise<PublicNetwork> {
+  const publicIp = await pokeStun()
+  const response = await sendHttpRequest({
+    url: `http://ip-api.com/json/${publicIp}`,
+  })
+  const { country, city, isp } = response.data
+
+  publicNetworkInfo = {
+    country,
+    city,
+    hostname: hostname(),
+    isp,
+    privateIp: getIp(),
+    publicIp,
   }
 
-  return null
+  return publicNetworkInfo
 }
 
 /**
@@ -81,16 +90,23 @@ export async function getPublicNetworkInfo(): Promise<any> {
  * @returns Promise<any>
  */
 export async function getPublicIp(): Promise<any> {
+  const { flags } = getContext()
   const time = new Date().toISOString()
+  const isSymonMode = isSymonModeFrom(flags)
 
   try {
     const address = await pokeStun()
     if (address) {
-      publicIpAddress = address
       isConnectedToSTUNServer = true
-      log.info(
-        `${time} - Connected to STUN Server. Monika is running from: ${address}`
-      )
+      if (flags.verbose || isSymonMode) {
+        // reveal address info?
+        publicIpAddress = address
+        log.info(
+          `${time} - Connected to STUN Server. Monika is running from: ${address}`
+        )
+      } else {
+        log.info(`${time} - Connected to STUN Server. Monika is running.`)
+      }
     }
   } catch {
     isConnectedToSTUNServer = false

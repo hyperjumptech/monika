@@ -57,10 +57,9 @@ export async function icmpRequest(
     data: '',
     body: '',
     status: 0,
-    result: probeRequestResult.failed,
+    result: probeRequestResult.unknown,
     headers: '',
     responseTime: 0,
-    isProbeResponsive: false,
   }
 
   try {
@@ -102,7 +101,5 @@ export function processICMPRequestResult(
     body: msg,
     headers: {},
     responseTime: params.average || 0,
-
-    isProbeResponsive: true,
   }
 }

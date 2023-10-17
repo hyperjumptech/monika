@@ -39,9 +39,13 @@ const defaultConfig: Config = {
       requests: [
         { url: 'https://example.com', headers: {}, body: '', timeout: 0 },
       ],
-      incidentThreshold: 1,
-      recoveryThreshold: 1,
-      alerts: [],
+      alerts: [
+        {
+          assertion: 'response.status < 200 or response.status > 299',
+          id: '0BGKU',
+          message: 'HTTP Status is {{ response.status }}, expecting 2xx',
+        },
+      ],
     },
   ],
   notifications: [{ id: 'UVIsL', type: 'desktop', data: undefined }],
@@ -191,8 +195,6 @@ describe('Startup message', () => {
                 name: 'Acme Inc.',
                 interval: 3000,
                 requests: [],
-                incidentThreshold: 1,
-                recoveryThreshold: 1,
                 alerts: [],
               },
             ],
@@ -241,8 +243,6 @@ describe('Startup message', () => {
                     timeout: 0,
                   },
                 ],
-                incidentThreshold: 1,
-                recoveryThreshold: 1,
                 alerts: [],
               },
             ],
@@ -280,6 +280,7 @@ describe('Startup message', () => {
                 ...defaultConfig.probes[0],
                 alerts: [
                   {
+                    id: 'fKBzx',
                     assertion: 'response.status = 500',
                     message: 'HTTP status is 500',
                   },
@@ -292,7 +293,7 @@ describe('Startup message', () => {
         })
         // assert
         expect(consoleLogMessage).include(
-          '[{"assertion":"response.status = 500","message":"HTTP status is 500"}]'
+          '"assertion":"response.status = 500","message":"HTTP status is 500"}]'
         )
       })
     })

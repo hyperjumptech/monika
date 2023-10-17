@@ -22,6 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import { v4 as uuid } from 'uuid'
 import { doProbe } from '../components/probe'
 import { getContext } from '../context'
 import type { Notification } from '@hyperjumptech/monika-notification'
@@ -35,7 +36,6 @@ import {
 import { getPublicIp, isConnectedToSTUNServer } from '../utils/public-ip'
 import type { RequestConfig } from '../interfaces/request'
 
-export const DEFAULT_THRESHOLD = 5
 let checkSTUNinterval: NodeJS.Timeout
 
 const DISABLE_STUN = -1 // -1 is disable stun checking
@@ -47,24 +47,11 @@ const DISABLE_STUN = -1 // -1 is disable stun checking
  * @returns {object} as probe
  */
 export function sanitizeProbe(isSymonMode: boolean, probe: Probe): Probe {
-  const { id, name, requests, incidentThreshold, recoveryThreshold, alerts } =
-    probe
+  const { id, name, requests, alerts } = probe
 
   if (!name) {
     log.warn(
       `Warning: Probe ${id} has no name defined. Using the default name started by monika`
-    )
-  }
-
-  if (!incidentThreshold) {
-    log.warn(
-      `Warning: Probe ${id} has no incidentThreshold configuration defined. Using the default threshold: 5`
-    )
-  }
-
-  if (!recoveryThreshold) {
-    log.warn(
-      `Warning: Probe ${id} has no recoveryThreshold configuration defined. Using the default threshold: 5`
     )
   }
 
@@ -84,8 +71,6 @@ export function sanitizeProbe(isSymonMode: boolean, probe: Probe): Probe {
       isSymonMode,
     }),
     name: name || `monika_${id}`,
-    incidentThreshold: incidentThreshold || DEFAULT_THRESHOLD,
-    recoveryThreshold: recoveryThreshold || DEFAULT_THRESHOLD,
     requests: sanitizeRequests(requests),
   }
 }
@@ -106,37 +91,51 @@ function sanitizeAlerts({
   }
 
   if (alerts === undefined || alerts.length === 0) {
-    return getDefaultAlerts(isHTTPProbe)
+    return addFailedRequestAssertions(getDefaultAlerts(isHTTPProbe))
   }
 
-  return alerts.map((alert) => {
-    if (alert.query) {
-      return { ...alert, assertion: alert.query }
-    }
+  return addFailedRequestAssertions(
+    alerts.map((alert) => {
+      if (alert.query !== undefined) {
+        return { ...alert, assertion: alert.query }
+      }
 
-    return alert
-  })
+      return alert
+    })
+  )
 }
 
-function getDefaultAlerts(isHTTPProbe: boolean) {
+function getDefaultAlerts(isHTTPProbe: boolean): ProbeAlert[] {
   if (!isHTTPProbe) {
-    return [
-      {
-        assertion: 'response.status < 200 or response.status > 299',
-        message: 'Probe is not accesible',
-      },
-    ]
+    return []
   }
 
   return [
     {
+      id: uuid(),
       assertion: 'response.status < 200 or response.status > 299',
-      message: 'HTTP Status is {{ response.status }}, expecting 200',
+      message: 'HTTP Status is {{ response.status }}, expecting 2xx',
     },
     {
+      id: uuid(),
       assertion: 'response.time > 2000',
       message:
         'Response time is {{ response.time }}ms, expecting less than 2000ms',
+    },
+  ]
+}
+
+export const FAILED_REQUEST_ASSERTION = {
+  assertion: '',
+  message: 'Probe not accessible',
+}
+
+function addFailedRequestAssertions(assertions: ProbeAlert[]) {
+  return [
+    ...assertions,
+    {
+      id: uuid(),
+      ...FAILED_REQUEST_ASSERTION,
     },
   ]
 }
@@ -146,7 +145,7 @@ function sanitizeRequests(requests?: RequestConfig[]) {
     ...request,
     method: request.method || 'GET',
     alerts: request.alerts?.map((alert) => {
-      if (alert.query) {
+      if (alert.query !== undefined) {
         return { ...alert, assertion: alert.query }
       }
 

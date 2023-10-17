@@ -34,8 +34,6 @@ probes:
         message: Status code is not 200
       - query: response.time > 2000
         message: Request took more than 2 seconds
-    incidentThreshold: 1
-    recoveryThreshold: 1
 ```
 
 Let me explain this configuration a little bit:
@@ -43,7 +41,6 @@ Let me explain this configuration a little bit:
 - This configuration uses Desktop notifications
 - This probe configuration will do two requests: **Hit google.com using PING**. After PING success, it will **hit** [**https://reqres.in/api/users**](https://reqres.in/api/users) **using the GET method**. If by chance the first request fails, it will not proceed to the next request.
 - This probe configuration will alert you if the status code is not 200, or the request took longer than two seconds
-- This probe configuration will alert you about incidents/recoveries if it happens once, so if there is an incident you will be notified immediately. The same goes if there is a recovery.
 
 Save the configuration above as `monika.yaml` in your local machine and run `monika -c monika.yaml` command in your terminal inside the directory where you saved the configuration file.
 
