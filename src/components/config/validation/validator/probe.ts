@@ -28,22 +28,22 @@ import { validateAlerts } from './alert'
 
 export async function validateProbes(probes: Probe[]): Promise<Probe[]> {
   const alertSchema = joi.object({
-    assertion: joi.string(),
-    id: joi.string(),
-    message: joi.string(),
-    query: joi.string(),
+    assertion: joi.string().allow(''),
+    id: joi.string().allow(''),
+    message: joi.string().allow(''),
+    query: joi.string().allow(''),
   })
   const mysqlSchema = joi.object({
-    command: joi.string(),
-    data: joi.alternatives().try(joi.string(), joi.number()),
-    database: joi.string(),
+    command: joi.string().allow(''),
+    data: joi.alternatives().try(joi.string().allow(''), joi.number()),
+    database: joi.string().allow(''),
     host: joi
       .alternatives()
-      .try(joi.string().hostname(), joi.string().ip())
+      .try(joi.string().allow('').hostname(), joi.string().allow('').ip())
       .required(),
-    password: joi.string(),
+    password: joi.string().allow(''),
     port: joi.number(),
-    username: joi.string(),
+    username: joi.string().allow(''),
   })
   const schema = joi
     .array<Probe[]>()
@@ -51,10 +51,14 @@ export async function validateProbes(probes: Probe[]): Promise<Probe[]> {
     .items(
       joi.object({
         alerts: joi.array().items(alertSchema),
-        description: joi.string(),
+        description: joi.string().allow(''),
         id: joi.string().required(),
         interval: joi.number().min(1),
-        name: joi.string(),
+        lastEvent: joi.object({
+          createdAt: joi.string().allow(''),
+          recoveredAt: joi.string().allow('', null),
+        }),
+        name: joi.string().allow(''),
         mariadb: joi.array().items(mysqlSchema),
         mysql: joi.array().items(mysqlSchema),
         mongo: joi.array().items(
@@ -67,11 +71,14 @@ export async function validateProbes(probes: Probe[]): Promise<Probe[]> {
               alerts: joi.array().items(alertSchema),
               host: joi
                 .alternatives()
-                .try(joi.string().hostname(), joi.string().ip())
+                .try(
+                  joi.string().allow('').hostname(),
+                  joi.string().allow('').ip()
+                )
                 .required(),
-              password: joi.string(),
+              password: joi.string().allow(''),
               port: joi.number().min(0).max(65_536),
-              username: joi.string(),
+              username: joi.string().allow(''),
             }),
           ])
         ),
@@ -89,16 +96,21 @@ export async function validateProbes(probes: Probe[]): Promise<Probe[]> {
             }),
             joi.object({
               alerts: joi.array().items(alertSchema),
-              command: joi.string(),
-              data: joi.alternatives().try(joi.string(), joi.number()),
-              database: joi.string(),
+              command: joi.string().allow(''),
+              data: joi
+                .alternatives()
+                .try(joi.string().allow(''), joi.number()),
+              database: joi.string().allow(''),
               host: joi
                 .alternatives()
-                .try(joi.string().hostname(), joi.string().ip())
+                .try(
+                  joi.string().allow('').hostname(),
+                  joi.string().allow('').ip()
+                )
                 .required(),
-              password: joi.string(),
+              password: joi.string().allow(''),
               port: joi.number(),
-              username: joi.string(),
+              username: joi.string().allow(''),
             }),
           ])
         ),
@@ -106,14 +118,17 @@ export async function validateProbes(probes: Probe[]): Promise<Probe[]> {
           joi
             .object({
               alerts: joi.array().items(alertSchema),
-              command: joi.string(),
+              command: joi.string().allow(''),
               host: joi
                 .alternatives()
-                .try(joi.string().hostname(), joi.string().ip()),
-              password: joi.string(),
+                .try(
+                  joi.string().allow('').hostname(),
+                  joi.string().allow('').ip()
+                ),
+              password: joi.string().allow(''),
               port: joi.number().min(0).max(65_536),
-              uri: joi.string(),
-              username: joi.string(),
+              uri: joi.string().allow(''),
+              username: joi.string().allow(''),
             })
             .xor('host', 'uri')
             .and('host', 'port')
@@ -125,13 +140,16 @@ export async function validateProbes(probes: Probe[]): Promise<Probe[]> {
             joi.object({
               alerts: joi.array().items(alertSchema),
               allowUnauthorized: joi.bool(),
-              body: joi.alternatives().try(joi.string(), joi.object()),
-              headers: joi.object(),
-              id: joi.string(),
+              body: joi
+                .alternatives()
+                .try(joi.string().allow('', null), joi.object()),
+              headers: joi.object().allow(null),
+              id: joi.string().allow(''),
               interval: joi.number().min(1),
               method: joi
                 .string()
                 .valid(
+                  '',
                   'GET',
                   'POST',
                   'PUT',
@@ -146,13 +164,13 @@ export async function validateProbes(probes: Probe[]): Promise<Probe[]> {
                 .insensitive(),
               ping: joi.bool(),
               saveBody: joi.bool(),
-              timeout: joi.number().min(1),
+              timeout: joi.number().min(1).allow(null),
               url: joi.string().uri().required(),
             })
           ),
         socket: joi.object({
           alerts: joi.array().items(alertSchema),
-          data: joi.string(),
+          data: joi.string().allow('', null),
           host: joi.string().required(),
           port: joi.number().required(),
         }),
@@ -165,7 +183,7 @@ export async function validateProbes(probes: Probe[]): Promise<Probe[]> {
     })
 
     for (const probe of validatedProbes) {
-      const validateAlertError = validateAlerts(getAllAlerts(probe))
+      const validateAlertError = validateAlerts(combineAlerts(probe))
       if (validateAlertError) {
         throw new Error(validateAlertError)
       }
@@ -177,7 +195,7 @@ export async function validateProbes(probes: Probe[]): Promise<Probe[]> {
   }
 }
 
-function getAllAlerts(probe: Probe) {
+function combineAlerts(probe: Probe) {
   const httpAlerts =
     probe?.requests?.map(({ alerts }) => alerts).find(Boolean) || []
   const mariadbAlerts =
@@ -195,7 +213,7 @@ function getAllAlerts(probe: Probe) {
   const socketAlerts = probe?.socket?.alerts || []
 
   return [
-    ...probe.alerts,
+    ...(probe?.alerts || []),
     ...httpAlerts,
     ...mariadbAlerts,
     ...mongoAlerts,
