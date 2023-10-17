@@ -161,7 +161,10 @@ class SymonClient {
 
   private bree = new Bree({
     root: false,
-    defaultExtension: process.env.NODE_ENV === 'test' ? 'ts' : 'js',
+    defaultExtension:
+      process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test'
+        ? 'ts'
+        : 'js',
     jobs: [],
     interval: this.reportProbesInterval,
     logger: log,
@@ -325,8 +328,11 @@ class SymonClient {
 
   private async fetchProbes() {
     log.debug('Getting probes from symon')
+    const TIMEOUT = 30_000
+
     return this.httpClient
       .get<{ data: Probe[] }>(`/${this.monikaId}/probes`, {
+        timeout: TIMEOUT,
         headers: {
           ...(this.configHash ? { 'If-None-Match': this.configHash } : {}),
         },
@@ -347,10 +353,16 @@ class SymonClient {
       })
       .catch((error) => {
         if (error.isAxiosError) {
-          return Promise.reject(new Error(error.response.data.message))
+          if (error.response) {
+            throw new Error(error.response.data.message)
+          }
+
+          if (error.request) {
+            throw new Error('Failed to get probes from Symon')
+          }
         }
 
-        return Promise.reject(error)
+        throw error
       })
   }
 
@@ -368,19 +380,15 @@ class SymonClient {
   }
 
   private async fetchProbesAndUpdateConfig() {
-    try {
-      // Fetch the probes
-      const { probes, hash } = await this.fetchProbes()
-      const newConfig: Config = { probes, version: hash }
-      this.updateConfig(newConfig)
+    // Fetch the probes
+    const { probes, hash } = await this.fetchProbes()
+    const newConfig: Config = { probes, version: hash }
+    this.updateConfig(newConfig)
 
-      // If it has no connection to Symon, set as true
-      // Because it could fetch the probes
-      if (!hasConnectionToSymon) {
-        hasConnectionToSymon = true
-      }
-    } catch (error) {
-      log.warn((error as any).message)
+    // If it has no connection to Symon, set as true
+    // Because it could fetch the probes
+    if (!hasConnectionToSymon) {
+      hasConnectionToSymon = true
     }
   }
 
@@ -448,9 +456,7 @@ class SymonClient {
     } catch (error) {
       hasConnectionToSymon = false
       this.configHash = ''
-      log.error(
-        "Warning: Can't report history to Symon. " + (error as any).message
-      )
+      log.error("Can't report history to Symon. " + (error as any).message)
 
       await this.report()
     }
