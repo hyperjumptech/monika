@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.15.10 2023-10-17
+
+## Fixed
+
+Fix: Fail to Connect to Symon (#1144)
+
+## Changed
+
+Hide IP and Geolocation by default (#1090)
+CI: remove unneeded step (#1143)
+Refactor: Increase Request Timeout When Getting Probes from Symon (#1139)
+Refactor: Upgrade Oclif to Version 2 (#1138)
+
 ## 1.15.9 2023-10-06
 
 ## Fixed
