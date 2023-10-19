@@ -152,7 +152,13 @@ export async function validateProbes(probes: Probe[]): Promise<Probe[]> {
               allowUnauthorized: joi.bool(),
               body: joi
                 .alternatives()
-                .try(joi.string().allow('', null), joi.object()),
+                .try(
+                  joi.string().allow('', null),
+                  joi.object(),
+                  joi.array(),
+                  joi.number(),
+                  joi.bool()
+                ),
               headers: joi.object().allow(null),
               id: joi.string().allow(''),
               interval: joi.number().min(1),
@@ -202,7 +208,6 @@ export async function validateProbes(probes: Probe[]): Promise<Probe[]> {
     )
 
   try {
-    console.log(JSON.stringify(probes, null, 1))
     const validatedProbes = await schema.validateAsync(probes, {
       stripUnknown: true,
     })
