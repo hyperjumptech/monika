@@ -27,17 +27,22 @@ import { RequestInterceptor } from 'node-request-interceptor'
 import withDefaultInterceptors from 'node-request-interceptor/lib/presets/default'
 import SymonClient from '.'
 import sinon from 'sinon'
-import Stun from 'stun'
 import { Config } from '../interfaces/config'
 import * as loggerHistory from '../components/logger/history'
 import { setContext } from '../context'
 import { SYMON_API_VERSION } from '../flag'
+import type { MonikaFlags } from '../context/monika-flags'
 
 let interceptor: RequestInterceptor
-let testStunStub: sinon.SinonStub
 let getUnreportedLogsStub: sinon.SinonStub
 
 beforeEach(() => {
+  setContext({
+    flags: {
+      symonUrl: 'https://example.com',
+      symonKey: 'random-key',
+    } as MonikaFlags,
+  })
   interceptor = new RequestInterceptor(withDefaultInterceptors)
 
   interceptor.use((req) => {
@@ -54,15 +59,6 @@ beforeEach(() => {
     }
   })
 
-  // mock the stun request
-  testStunStub = sinon.stub(Stun, 'request').resolves({
-    getXorAddress: () => {
-      return {
-        address: '192.168.1.1',
-      }
-    },
-  })
-
   getUnreportedLogsStub = sinon
     .stub(loggerHistory, 'getUnreportedLogs')
     .resolves({ requests: [], notifications: [] })
@@ -70,7 +66,6 @@ beforeEach(() => {
 
 afterEach(() => {
   interceptor.restore()
-  testStunStub.restore()
   getUnreportedLogsStub.restore()
 })
 
@@ -283,6 +278,7 @@ describe('Symon initiate', () => {
             body: JSON.stringify({
               statusCode: 'ok',
               message: 'Successfully get probes configuration',
+              probes: [],
             }),
           }
         }

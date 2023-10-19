@@ -28,7 +28,7 @@ import { validateNotification } from '@hyperjumptech/monika-notification'
 
 export const validateConfig = async (
   configuration: Partial<Config>
-): Promise<void> => {
+): Promise<Config> => {
   const { notifications = [], probes = [], symon } = configuration
   const symonConfigError = validateSymonConfig(symon)
 
@@ -36,6 +36,10 @@ export const validateConfig = async (
     throw new Error(`Monika configuration: symon ${symonConfigError}`)
   }
 
-  await validateProbes(probes)
-  await validateNotification(notifications)
+  const [validatedProbes] = await Promise.all([
+    validateProbes(probes),
+    validateNotification(notifications),
+  ])
+
+  return { ...configuration, probes: validatedProbes }
 }

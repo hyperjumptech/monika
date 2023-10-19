@@ -87,9 +87,10 @@ export const updateConfig = async (
   validate = true
 ): Promise<void> => {
   log.info('Updating config')
+  let validatedConfig = config
   if (validate) {
     try {
-      await validateConfig(config)
+      validatedConfig = await validateConfig(config)
     } catch (error: any) {
       if (isTestEnvironment) {
         // return error during tests
@@ -101,11 +102,11 @@ export const updateConfig = async (
     }
   }
 
-  const version = md5Hash(config)
+  const version = md5Hash(validatedConfig)
   const hasChangeConfig = getContext()?.config?.version !== version
 
   if (hasChangeConfig) {
-    const newConfig = addConfigVersion(config)
+    const newConfig = addConfigVersion(validatedConfig)
 
     setContext({ config: newConfig })
     emitter.emit(events.config.updated, newConfig)
@@ -116,9 +117,9 @@ export const updateConfig = async (
 export const setupConfig = async (flags: MonikaFlags): Promise<void> => {
   const validFlag = await createConfigIfEmpty(flags)
   const config = await getConfigFrom(validFlag)
-  await validateConfig(config)
+  const validatedConfig = await validateConfig(config)
 
-  setContext({ config: addConfigVersion(config) })
+  setContext({ config: addConfigVersion(validatedConfig) })
 
   watchConfigsChange(validFlag)
 }

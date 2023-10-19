@@ -1,5 +1,6 @@
 probes:
-  - requests:
+  - id: https://namb.ch/api/admin/login
+    requests:
       - method: POST
         url: https://namb.ch/api/admin/login
         headers:

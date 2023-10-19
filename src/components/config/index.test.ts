@@ -32,7 +32,7 @@ import { getEventEmitter } from '../../utils/events'
 import type { MonikaFlags } from '../../context/monika-flags'
 
 describe('getConfig', () => {
-  afterEach(() => {
+  beforeEach(() => {
     resetContext()
   })
 
@@ -40,6 +40,19 @@ describe('getConfig', () => {
     expect(() => getConfig()).to.throw(
       'Configuration setup has not been run yet'
     )
+  })
+
+  it('should not throw error when config is empty in symon mode', () => {
+    // arrange
+    setContext({
+      flags: {
+        symonKey: 'bDF8j',
+        symonUrl: 'https://example.com',
+      } as MonikaFlags,
+    })
+
+    // act & assert
+    expect(getConfig()).deep.eq({ probes: [] })
   })
 
   it('should return empty array when config is empty in Symon mode', () => {
@@ -122,7 +135,7 @@ describe('isSymonModeFrom', () => {
 })
 
 describe('updateConfig', () => {
-  afterEach(() => {
+  beforeEach(() => {
     resetContext()
   })
 
@@ -138,7 +151,7 @@ describe('updateConfig', () => {
     }
 
     // assert
-    expect(errorMessage).eq(
+    expect(errorMessage).contain(
       'Probes object does not exists or has length lower than 1!'
     )
   })
