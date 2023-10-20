@@ -32,6 +32,9 @@ jobs:
       - name: 📥 Install Dependencies
         run: npm ci
 
+      - name: Build notifications
+        run: npm run build -w packages/notification
+
       - name: 🧪 Run Unit Tests
         run: npm test
 
