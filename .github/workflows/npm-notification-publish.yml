@@ -1,0 +1,49 @@
+# This workflow will run tests using node and then publish a package to GitHub Packages when a release is created
+# For more information see: https://help.github.com/actions/language-and-framework-guides/publishing-nodejs-packages
+
+name: Notification Package Release
+
+on:
+  workflow_dispatch:
+  release:
+    types: [created]
+
+permissions:
+  issues: read
+  pull-requests: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 18
+      - run: cd packages/notification
+      - run: npm ci
+      - run: npm run build      
+
+  publish-npm:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 18
+          registry-url: https://registry.npmjs.org/
+      - run: cd packages/notification
+      - run: npm ci
+      - run: npm run build 
+      - run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+      - name: Get Package Version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@master
+      - name: Notify Teams
+        uses: joelwmale/webhook-action@fd99bb3b8272237103e349e9bb4d9b0ead9a217c
+        with:
+          url: ${{secrets.HYPERJUMP_TEAMS_SYMON_WEBHOOK}}
+          body: '{"title": "Monika-Notification NPM Release", "Text": "Version: ${{steps.package-version.outputs.current-version}}"}'

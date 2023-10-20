@@ -17,9 +17,9 @@
   "author": "@hyperjumptech",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/raosan/monika/issues"
+    "url": "https://github.com/hyperjumptech/monika/issues"
   },
-  "homepage": "https://github.com/raosan/monika#readme",
+  "homepage": "https://github.com/hyperjumptech/monika#readme",
   "dependencies": {
     "@sendgrid/mail": "^7.4.2",
     "axios": "^0.27.2",
