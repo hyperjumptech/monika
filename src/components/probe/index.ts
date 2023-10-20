@@ -70,7 +70,10 @@ export async function doProbe({
     })
 
     await retry(handleAll, {
-      backoff: new ExponentialBackoff({ initialDelay: 15_000 }),
+      backoff: new ExponentialBackoff({
+        initialDelay: 30_000,
+        maxDelay: 300_000,
+      }),
     }).execute(() =>
       Promise.all(
         probers.map(async (prober) => {
