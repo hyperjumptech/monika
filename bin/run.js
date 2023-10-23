@@ -1,7 +1,3 @@
 #!/usr/bin/env node
 
-// eslint-disable-next-line unicorn/prefer-top-level-await
-(async () => {
-  const oclif = await import('@oclif/core')
-  await oclif.execute({development: true, dir: __dirname})
-})()
+require('../lib').run().catch(require('@oclif/core/handle'))
