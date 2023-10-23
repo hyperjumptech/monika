@@ -36,7 +36,6 @@ import * as httpRequest from '../../utils/http'
 import { doProbe } from '.'
 import { initializeProbeStates } from '../../utils/probe-state'
 import type { Probe } from '../../interfaces/probe'
-import { afterEach, beforeEach } from 'mocha'
 import { getContext, resetContext, setContext } from '../../context'
 import type { MonikaFlags } from '../../context/monika-flags'
 import { FAILED_REQUEST_ASSERTION } from '../../looper'
@@ -77,7 +76,7 @@ const probes: Probe[] = [
 ]
 
 beforeEach(() => {
-  server.listen()
+  server.listen({ onUnhandledRequest: 'bypass' })
   setContext({ flags: { repeat: 1 } as MonikaFlags })
 })
 afterEach(() => {
@@ -135,8 +134,6 @@ describe('Probe processing', () => {
       await doProbe({ probe: probes[0], notifications: [] })
       // wait for random timeout
       await sleep(3 * seconds)
-
-      resetContext()
 
       // assert
       expect(urlRequestTotal).eq(1)
@@ -372,7 +369,7 @@ describe('Probe processing', () => {
         mariadb: [
           {
             host: 'localhost',
-            port: 3306,
+            port: 3307,
             username: 'mariadb_user',
             password: 'mariadb_password',
             database: '',
@@ -429,7 +426,7 @@ describe('Probe processing', () => {
         mariadb: [
           {
             host: 'localhost',
-            port: 3306,
+            port: 3308,
             username: 'mariadb_user',
             password: 'mariadb_password',
             database: '',
