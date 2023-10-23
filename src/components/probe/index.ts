@@ -34,7 +34,6 @@ import {
   setProbeRunning,
 } from '../../utils/probe-state'
 import { createProbers } from './prober/factory'
-// import { stopDowntimeCounter, startDowntimeCounter } from '../downtime-counter'
 
 type doProbeParams = {
   probe: Probe // probe contains all the probes
@@ -71,7 +70,10 @@ export async function doProbe({
 
     await retry(handleAll, {
       backoff: new ExponentialBackoff({
-        initialDelay: 30_000,
+        initialDelay:
+          process.env.CI || process.env.NODE_ENV === 'test'
+            ? undefined
+            : 30_000,
         maxDelay: 300_000,
       }),
     }).execute(() =>
