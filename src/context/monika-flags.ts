@@ -41,12 +41,13 @@ export type MonikaFlags = {
   json?: boolean
   'keep-verbose-logs': boolean
   logs: boolean
-  'max-start-delay': number
   'one-probe': boolean
   output?: string
   postman?: string
   prometheus?: number
   repeat: number
+  retryInitialDelayMs: number
+  retryMaxDelayMs: number
   sitemap?: string
   'status-notification'?: string
   stun: number
@@ -63,22 +64,23 @@ export type MonikaFlags = {
   version: void
 }
 
-const seconds = 1000
-const minutes = 60 * seconds
 export const monikaFlagsDefaultValue: Pick<
   MonikaFlags,
   | 'config'
   | 'config-filename'
   | 'config-interval'
   | 'follow-redirects'
-  | 'max-start-delay'
+  | 'retryInitialDelayMs'
+  | 'retryMaxDelayMs'
   | 'stun'
+  | 'symon-api-version'
 > = {
   config: getDefaultConfig(),
   'config-filename': 'monika.yml',
   'config-interval': 900,
   'follow-redirects': 21, // axios default https://github.com/axios/axios
-  'max-start-delay': 1 * Number(minutes),
+  retryInitialDelayMs: 128,
+  retryMaxDelayMs: 30_000,
   // default is 20s interval lookup
   stun: 20,
 }

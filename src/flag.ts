@@ -35,3 +35,14 @@ export const symonAPIVersion = Flags.custom<SYMON_API_VERSION>({
   description:
     'Symon API version to use. Available options: v1, v2. Default: v1',
 })
+
+export const retryInitialDelayMs = Flags.integer({
+  default: 128,
+  description:
+    'The initial, first delay of the backoff retry when probe request is failed, in milliseconds. Defaults to 128ms.',
+})
+
+export const retryMaxDelayMs = Flags.integer({
+  default: 30_000,
+  description: 'Maximum backoff retry delay, in milliseconds. Defaults to 30s.',
+})
