@@ -267,6 +267,22 @@ You can combine this flag with the `--id` flag to repeat custom sequences.
 monika -r 3 -i 1,3,1
 ```
 
+## Retry Initial Delay
+
+If Monika failed to probe, it will retry the request with and increase the interval exponentially. To set the first delay, you can use the `--retryInitialDelayMs` flag. Default to 128ms.
+
+```sh
+monika --retryInitialDelayMs 128
+```
+
+## Retry Maximum Delay
+
+You can also set the maximum of delay by using the `--retryMaxDelayMs` flag. Default to 30,000ms or 30 seconds.
+
+```sh
+monika --retryMaxDelayMs 30000
+```
+
 ## Follow Redirects
 
 By default Monika will follow redirects 21 times. You can set the value of `--follow-redirects` flag to tell Monika to follow redirects as many as you want. If you don't want to follow redirects, set the value to zero.
