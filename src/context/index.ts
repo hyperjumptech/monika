@@ -24,8 +24,8 @@
 
 import type { Config } from '../interfaces/config'
 import type { ProbeAlert } from '../interfaces/probe'
-import { monikaFlagsDefaultValue } from './monika-flags'
-import type { MonikaFlags } from './monika-flags'
+
+import { type MonikaFlags, monikaFlagsDefaultValue } from '../flag'
 
 export type Incident = {
   probeID: string
@@ -47,25 +47,7 @@ type NewContext = Partial<Context>
 const initialContext: Context = {
   userAgent: '',
   incidents: [],
-  flags: {
-    config: monikaFlagsDefaultValue.config,
-    'config-filename': monikaFlagsDefaultValue['config-filename'],
-    'config-interval': monikaFlagsDefaultValue['config-interval'],
-    'create-config': false,
-    flush: false,
-    'follow-redirects': monikaFlagsDefaultValue['follow-redirects'],
-    force: false,
-    'keep-verbose-logs': false,
-    logs: false,
-    'one-probe': false,
-    repeat: 0,
-    retryMaxDelayMs: monikaFlagsDefaultValue.retryMaxDelayMs,
-    retryInitialDelayMs: monikaFlagsDefaultValue.retryInitialDelayMs,
-    stun: monikaFlagsDefaultValue.stun,
-    summary: false,
-    verbose: false,
-    version: undefined,
-  },
+  flags: monikaFlagsDefaultValue,
 }
 
 let context: Context = initialContext
