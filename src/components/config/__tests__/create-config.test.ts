@@ -26,7 +26,7 @@ import { expect } from 'chai'
 import fs from 'fs'
 import _ from 'lodash'
 
-import type { MonikaFlags } from '../../../context/monika-flags'
+import type { MonikaFlags } from '../../../flag'
 import { createConfig } from '../'
 
 beforeEach(() => {
