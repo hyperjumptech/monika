@@ -77,7 +77,7 @@ const probes: Probe[] = [
 ]
 
 beforeEach(() => {
-  server.listen()
+  server.listen({ onUnhandledRequest: 'bypass' })
   setContext({ flags: { repeat: 1 } as MonikaFlags })
 })
 afterEach(() => {

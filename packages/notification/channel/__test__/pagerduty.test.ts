@@ -121,7 +121,7 @@ describe('PagerDuty notification', () => {
       )
 
       // act
-      server.listen()
+      server.listen({ onUnhandledRequest: 'bypass' })
       await send(
         [{ key: routingKey, probeID: '65DDKmmB9mSaeE-8bMXRN' }],
         message
@@ -178,7 +178,7 @@ describe('PagerDuty notification', () => {
       )
 
       // act
-      server.listen()
+      server.listen({ onUnhandledRequest: 'bypass' })
       await send(
         [{ key: routingKey, probeID: '65DDKmmB9mSaeE-8bMXRN' }],
         message

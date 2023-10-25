@@ -91,7 +91,7 @@ describe('Webhook Notification', () => {
       })
     )
 
-    beforeEach(() => server.listen())
+    beforeEach(() => server.listen({ onUnhandledRequest: 'bypass' }))
     afterEach(() => {
       body = {}
       server.close()
