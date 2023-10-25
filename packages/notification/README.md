@@ -16,7 +16,9 @@ The notification package is released to npm. When creating a PR for the package,
 
 1. Linter is run
 2. The changes work with the main Monika app
-3. The versions in package.json are updated
+3. The command `npm run build` from packages/notification ran and builds.
+4. The versions in package.json are updated
+5. Create a PR to merge to `main`.
 
 ## References
 
