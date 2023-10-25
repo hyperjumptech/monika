@@ -319,14 +319,14 @@ function installationType(commands: string[]): 'npm' | 'oclif-pack' | 'binary' {
   }
 
   // vercel/pkg
-  if (commands[1] === '/snapshot/monika/bin/run') {
+  if (commands[1] === '/snapshot/monika/bin/run.js') {
     return 'binary'
   }
 
   // npx oclif pack
   if (
     commands[0].match('node$') !== null &&
-    commands[1].match('bin/run$') !== null
+    commands[1].match('bin/run.js$') !== null
   ) {
     return 'oclif-pack'
   }
