@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import fs from 'fs'
-import type { MonikaFlags } from '../../context/monika-flags'
+import type { MonikaFlags } from '../../flag'
 import { log } from '../../utils/pino'
 import { sendHttpRequest } from '../../utils/http'
 

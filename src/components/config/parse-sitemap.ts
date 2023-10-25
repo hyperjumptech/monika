@@ -24,8 +24,8 @@
 
 import type { Config } from '../../interfaces/config'
 import { XMLParser } from 'fast-xml-parser'
-import { monikaFlagsDefaultValue } from '../../context/monika-flags'
-import type { MonikaFlags } from '../../context/monika-flags'
+import { monikaFlagsDefaultValue } from '../../flag'
+import type { MonikaFlags } from '../../flag'
 import type { Probe, ProbeAlert } from '../../interfaces/probe'
 
 const generateProbesFromXml = (config: any) => {
