@@ -5,8 +5,11 @@ name: Notification Package Release
 
 on:
   workflow_dispatch:
-  release:
-    types: [created]
+  push:
+      paths: 
+        - 'package/notification'
+      branches:
+        - 'main'
 
 permissions:
   issues: read
