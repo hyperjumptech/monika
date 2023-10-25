@@ -12,7 +12,7 @@ base: core20
 
 apps:
   monika:
-    command: bin/run
+    command: bin/run.js
     plugs:
       - desktop
       - desktop-legacy

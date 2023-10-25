@@ -1,6 +1,6 @@
 import cron from 'node-cron'
 import type { ScheduledTask } from 'node-cron'
-import type { MonikaFlags } from '../../context/monika-flags'
+import type { MonikaFlags } from '../../flag'
 import type { Config } from '../../interfaces/config'
 import { getSummaryAndSendNotif } from '../../jobs/summary-notification'
 import { isSymonModeFrom } from '../config'

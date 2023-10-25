@@ -25,7 +25,7 @@
 import { prepareEnvironment } from '@gmrchk/cli-testing-library'
 import { expect } from 'chai'
 
-const monika = './bin/run'
+const monika = './bin/run.js'
 
 describe('CLI Testing', () => {
   it('shows version', async () => {

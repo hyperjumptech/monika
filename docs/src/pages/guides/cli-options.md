@@ -267,12 +267,20 @@ You can combine this flag with the `--id` flag to repeat custom sequences.
 monika -r 3 -i 1,3,1
 ```
 
-## Maximum start delay
+## Retry Initial Delay
 
-When there are many probes, Monika by default will not start the probing all at the same time. It will delay the start of the probing by dividing the value of `--max-start-delay` flag with the number of the probes plus a random value between 0 to 1 seconds. This is to prevent connection timeout due to probing too many probes at the same time. The default value of `--max-start-delay` is 60000 (milliseconds) which corresponds to 1 minutes.
+If Monika failed to probe, it will retry the request with and increase the interval exponentially. To set the first delay, you can use the `--retryInitialDelayMs` flag. Default to 128ms.
 
-```bash
-monika --max-start-delay 300000 # this will set max-start-delay to 5 minutes.
+```sh
+monika --retryInitialDelayMs 128
+```
+
+## Retry Maximum Delay
+
+You can also set the maximum of delay by using the `--retryMaxDelayMs` flag. Default to 30,000ms or 30 seconds.
+
+```sh
+monika --retryMaxDelayMs 30000
 ```
 
 ## Follow Redirects
