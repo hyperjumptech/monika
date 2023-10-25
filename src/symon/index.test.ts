@@ -31,7 +31,7 @@ import Stun from 'stun'
 import { Config } from '../interfaces/config'
 import * as loggerHistory from '../components/logger/history'
 import { setContext } from '../context'
-import { SYMON_API_VERSION } from '../flag'
+import { type MonikaFlags, SYMON_API_VERSION } from '../flag'
 
 let interceptor: RequestInterceptor
 let testStunStub: sinon.SinonStub
@@ -91,6 +91,10 @@ describe('Symon initiate', () => {
 
     setContext({
       userAgent: 'v1.5.0',
+      flags: {
+        symonUrl: 'http://localhost:4000',
+        symonKey: 'random-key',
+      } as MonikaFlags,
     })
     let sentBody = ''
     // mock the outgoing requests
