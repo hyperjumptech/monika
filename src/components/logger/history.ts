@@ -142,6 +142,16 @@ type UnreportedNotificationDB = {
 
 export let db: Database<SQLite3.Database, SQLite3.Statement>
 
+export function getDatabase() {
+  return db
+}
+
+export function setDatabase(
+  database: Database<SQLite3.Database, SQLite3.Statement>
+) {
+  db = database
+}
+
 async function migrate() {
   await db.migrate({
     migrationsPath: path.join(__dirname, '../../../db/migrations'),
