@@ -40,6 +40,7 @@ import { afterEach, beforeEach } from 'mocha'
 import { getContext, resetContext, setContext } from '../../context'
 import type { MonikaFlags } from '../../flag'
 import { FAILED_REQUEST_ASSERTION } from '../../looper'
+import { closeLog, openLogfile } from '../logger/history'
 
 let urlRequestTotal = 0
 let notificationAlert: Record<string, Record<string, any>> = {}
@@ -76,6 +77,9 @@ const probes: Probe[] = [
   },
 ]
 
+before(async () => {
+  await openLogfile()
+})
 beforeEach(() => {
   server.listen()
   setContext({ flags: { repeat: 1 } as MonikaFlags })
@@ -86,6 +90,9 @@ afterEach(() => {
   notificationAlert = {}
   server.close()
   sinon.restore()
+})
+after(async () => {
+  await closeLog()
 })
 
 describe('Probe processing', () => {
