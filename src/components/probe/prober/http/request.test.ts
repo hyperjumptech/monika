@@ -28,7 +28,7 @@ import { setupServer } from 'msw/node'
 import { RequestInterceptor } from 'node-request-interceptor'
 import withDefaultInterceptors from 'node-request-interceptor/lib/presets/default'
 import { setContext } from '../../../../context'
-import type { MonikaFlags } from '../../../../context/monika-flags'
+import type { MonikaFlags } from '../../../../flag'
 import type {
   ProbeRequestResponse,
   RequestConfig,

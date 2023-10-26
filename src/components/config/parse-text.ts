@@ -47,7 +47,7 @@
  **********************************************************************************/
 
 import type { Config } from '../../interfaces/config'
-import { monikaFlagsDefaultValue } from '../../context/monika-flags'
+import { monikaFlagsDefaultValue } from '../../flag'
 import type { Probe, ProbeAlert } from '../../interfaces/probe'
 import { isValidURL } from '../../utils/is-valid-url'
 

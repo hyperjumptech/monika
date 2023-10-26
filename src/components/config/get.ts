@@ -22,7 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import type { MonikaFlags } from '../../context/monika-flags'
+import type { MonikaFlags } from '../../flag'
 import type { Config } from '../../interfaces/config'
 import { log } from '../../utils/pino'
 import { parseConfig } from './parse'

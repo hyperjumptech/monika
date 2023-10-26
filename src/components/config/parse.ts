@@ -24,7 +24,7 @@
 
 import { Config } from '../../interfaces/config'
 import { readFileSync } from 'fs'
-import type { MonikaFlags } from '../../context/monika-flags'
+import type { MonikaFlags } from '../../flag'
 import { parseConfigFromPostman } from './parse-postman'
 import { parseConfigFromSitemap } from './parse-sitemap'
 import { parseConfigFromText } from './parse-text'

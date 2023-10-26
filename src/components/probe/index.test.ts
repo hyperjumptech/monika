@@ -37,7 +37,7 @@ import { doProbe } from '.'
 import { initializeProbeStates } from '../../utils/probe-state'
 import type { Probe } from '../../interfaces/probe'
 import { getContext, resetContext, setContext } from '../../context'
-import type { MonikaFlags } from '../../context/monika-flags'
+import type { MonikaFlags } from '../../flag'
 import { FAILED_REQUEST_ASSERTION } from '../../looper'
 
 let urlRequestTotal = 0

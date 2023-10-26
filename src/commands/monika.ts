@@ -35,14 +35,18 @@ import { sendMonikaStartMessage } from '../components/notification/start-message
 import { scheduleSummaryNotification } from '../components/notification/schedule-notification'
 import { setContext } from '../context'
 import events from '../events'
-import { symonAPIVersion } from '../flag'
+import {
+  type MonikaFlags,
+  monikaFlagsDefaultValue,
+  retryInitialDelayMs,
+  retryMaxDelayMs,
+  symonAPIVersion,
+} from '../flag'
 import type { Config } from '../interfaces/config'
 import type { Probe } from '../interfaces/probe'
 import { printSummary, savePidFile } from '../jobs/summary-notification'
 import initLoaders from '../loaders'
 import { sanitizeProbe, startProbing } from '../looper'
-import { monikaFlagsDefaultValue } from '../context/monika-flags'
-import type { MonikaFlags } from '../context/monika-flags'
 import SymonClient from '../symon'
 import { getEventEmitter } from '../utils/events'
 import { log } from '../utils/pino'
@@ -243,17 +247,15 @@ export default class Monika extends Command {
         'Enable auto-update for Monika. Available options: major, minor, patch. This will make Monika terminate itself on successful update but does not restart',
     }),
 
-    'max-start-delay': Flags.integer({
-      default: monikaFlagsDefaultValue['max-start-delay'],
-      description:
-        'The maximum delay (in milliseconds) to start probing when there are many probes. When this is set to value greater than zero, all of the probes will start at slightly different time but within the value set here.',
-    }),
-
     'follow-redirects': Flags.integer({
       default: monikaFlagsDefaultValue['follow-redirects'],
       description:
         'Monika will follow redirects as many times as the specified value here. By default, Monika will follow redirects once. To disable redirects following, set the value to zero.',
     }),
+
+    retryInitialDelayMs,
+
+    retryMaxDelayMs,
 
     'symon-api-version': symonAPIVersion(),
   }

@@ -29,7 +29,7 @@ import type { Config } from '../../interfaces/config'
 import events from '../../events'
 import { md5Hash } from '../../utils/hash'
 import { getEventEmitter } from '../../utils/events'
-import type { MonikaFlags } from '../../context/monika-flags'
+import type { MonikaFlags } from '../../flag'
 
 describe('getConfig', () => {
   beforeEach(() => {
