@@ -22,11 +22,16 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import type { Notification } from '@hyperjumptech/monika-notification'
+
+import { AbortSignal } from 'node-abort-controller'
 import { v4 as uuid } from 'uuid'
+
+import type { Probe, ProbeAlert } from '../interfaces/probe'
+import type { RequestConfig } from '../interfaces/request'
+
 import { doProbe } from '../components/probe'
 import { getContext } from '../context'
-import type { Notification } from '@hyperjumptech/monika-notification'
-import type { Probe, ProbeAlert } from '../interfaces/probe'
 import { log } from '../utils/pino'
 import {
   getProbeContext,
@@ -34,7 +39,6 @@ import {
   initializeProbeStates,
 } from '../utils/probe-state'
 import { getPublicIp, isConnectedToSTUNServer } from '../utils/public-ip'
-import type { RequestConfig } from '../interfaces/request'
 
 let checkSTUNinterval: NodeJS.Timeout
 
@@ -47,7 +51,7 @@ const DISABLE_STUN = -1 // -1 is disable stun checking
  * @returns {object} as probe
  */
 export function sanitizeProbe(isSymonMode: boolean, probe: Probe): Probe {
-  const { id, name, requests, alerts } = probe
+  const { alerts, id, name, requests } = probe
 
   if (!name) {
     log.warn(
@@ -112,13 +116,13 @@ function getDefaultAlerts(isHTTPProbe: boolean): ProbeAlert[] {
 
   return [
     {
-      id: uuid(),
       assertion: 'response.status < 200 or response.status > 299',
+      id: uuid(),
       message: 'HTTP Status is {{ response.status }}, expecting 2xx',
     },
     {
-      id: uuid(),
       assertion: 'response.time > 2000',
+      id: uuid(),
       message:
         'Response time is {{ response.time }}ms, expecting less than 2000ms',
     },
@@ -143,7 +147,6 @@ function addFailedRequestAssertions(assertions: ProbeAlert[]) {
 function sanitizeRequests(requests?: RequestConfig[]) {
   return requests?.map((request) => ({
     ...request,
-    method: request.method || 'GET',
     alerts: request.alerts?.map((alert) => {
       if (alert.query !== undefined) {
         return { ...alert, assertion: alert.query }
@@ -151,10 +154,11 @@ function sanitizeRequests(requests?: RequestConfig[]) {
 
       return alert
     }),
+    method: request.method || 'GET',
   }))
 }
 
-export async function loopCheckSTUNServer(interval: number): Promise<any> {
+export async function loopCheckSTUNServer(interval: number): Promise<unknown> {
   // if stun is disabled, no need to create interval
   if (interval === -1) return
 
@@ -172,15 +176,15 @@ export async function loopCheckSTUNServer(interval: number): Promise<any> {
 }
 
 type StartProbingArgs = {
-  signal: AbortSignal
-  probes: Probe[]
   notifications: Notification[]
+  probes: Probe[]
+  signal: AbortSignal
 }
 
 export function startProbing({
-  signal,
-  probes,
   notifications,
+  probes,
+  signal,
 }: StartProbingArgs): void {
   initializeProbeStates(probes)
 
@@ -201,17 +205,17 @@ export function startProbing({
 
     for (const probe of probes) {
       doProbe({
-        probe,
         notifications,
+        probe,
       })
     }
   }, 1000)
 }
 
 function isEndOfRepeat(probes: Probe[]) {
-  const isAllProbeFinished = probes.every(({ id }) => {
-    return isLastCycleOf(id) && getProbeState(id) !== 'running'
-  })
+  const isAllProbeFinished = probes.every(
+    ({ id }) => isLastCycleOf(id) && getProbeState(id) !== 'running'
+  )
 
   return getContext().flags.repeat && isAllProbeFinished
 }

@@ -1,18 +1,18 @@
 {
   "compilerOptions": {
-    "composite": true,
-    "declaration": true,
-    "importHelpers": true,
-    "module": "commonjs",
-    "outDir": "lib",
-    "rootDir": "src",
-    "lib": ["ES2021.String", "DOM"],
+    "target": "ES2020",
+    "module": "CommonJS",
+    "outDir": "./lib",
+    "rootDir": "./src",
     "strict": true,
-    "target": "es2017",
-    "skipLibCheck": true,
     "esModuleInterop": true,
+    "skipLibCheck": true,
     "resolveJsonModule": true,
+    "declaration": true,
+    "sourceMap": true,
+    "baseUrl": ".",
     "typeRoots": ["node_modules/@types", "custom_types"]
   },
-  "include": ["src/**/*", "src/**/*.json", "../packages/notification/**/*"]
+  "include": ["src/**/*", "src/**/*.json", "../packages/notification/**/*"],
+  "exclude": ["node_modules"]
 }
