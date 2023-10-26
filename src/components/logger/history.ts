@@ -140,7 +140,7 @@ type UnreportedNotificationDB = {
   /* eslint-enable camelcase */
 }
 
-export let db: Database<SQLite3.Database, SQLite3.Statement>
+let db: Database<SQLite3.Database, SQLite3.Statement>
 
 export function database() {
   return db
