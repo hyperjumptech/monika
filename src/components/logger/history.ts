@@ -164,11 +164,12 @@ async function migrate() {
  */
 export async function openLogfile(): Promise<void> {
   try {
-    db = await open({
+    const db = await open({
       filename: dbPath,
       mode: sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE,
       driver: sqlite3.Database,
     })
+    setDatabase(db)
 
     await migrate()
   } catch (error: any) {
