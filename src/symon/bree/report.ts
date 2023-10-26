@@ -23,25 +23,31 @@
  **********************************************************************************/
 
 import { parentPort, workerData } from 'worker_threads'
+import path from 'path'
+import { open } from 'sqlite'
 import axios from 'axios'
+import SQLite3 from 'sqlite3'
 import {
-  database,
   deleteNotificationLogs,
   deleteRequestLogs,
   getUnreportedLogs,
-  openLogfile,
   UnreportedNotificationsLog,
   UnreportedRequestsLog,
 } from '../../components/logger/history'
 import { log } from '../../utils/pino'
+const dbPath = path.resolve(process.cwd(), 'monika-logs.db')
 
 const main = async (data: Record<string, any>) => {
   try {
     const { url, apiKey, probeIds, reportProbesLimit, monikaId } = data
 
     // Open database
-    await openLogfile()
-    const db = database()
+    const sqlite3 = SQLite3.verbose()
+    const db = await open({
+      filename: dbPath,
+      mode: sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE,
+      driver: sqlite3.Database,
+    })
 
     // Updating requests and notifications to report
     const logs = await getUnreportedLogs(probeIds, reportProbesLimit, db)
