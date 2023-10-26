@@ -22,7 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { getDatabase } from '../../../components/logger/history'
+import { database } from '../../../components/logger/history'
 
 type Incident = {
   id: string
@@ -57,7 +57,7 @@ export async function insertIncident({
   ) VALUES (?, ?, ?, ?, ?, ?);`
   const sqlParams = [status, url, probeID, incidentID, dateNow, dateNow]
 
-  await getDatabase().run(sqlStatement, sqlParams)
+  await database().run(sqlStatement, sqlParams)
 }
 
 export async function updateIncident({
@@ -69,7 +69,7 @@ export async function updateIncident({
    WHERE incident_id = ?`
   const sqlParams = [status, dateNow, incidentID]
 
-  await getDatabase().run(sqlStatement, sqlParams)
+  await database().run(sqlStatement, sqlParams)
 }
 
 export async function findIncident({
@@ -80,7 +80,7 @@ export async function findIncident({
   const sqlStatement = `SELECT incident_id FROM atlassian_status_page_incidents 
     WHERE status = ? AND url = ? AND probe_id = ?`
   const sqlParams = [status, url, probeID]
-  const incident = await getDatabase().get<FindIncidentResponse>(
+  const incident = await database().get<FindIncidentResponse>(
     sqlStatement,
     sqlParams
   )
