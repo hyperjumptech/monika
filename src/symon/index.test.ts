@@ -30,8 +30,7 @@ import sinon from 'sinon'
 import { Config } from '../interfaces/config'
 import * as loggerHistory from '../components/logger/history'
 import { setContext } from '../context'
-import { SYMON_API_VERSION } from '../flag'
-import type { MonikaFlags } from '../context/monika-flags'
+import { type MonikaFlags, SYMON_API_VERSION } from '../flag'
 
 let interceptor: RequestInterceptor
 let getUnreportedLogsStub: sinon.SinonStub
