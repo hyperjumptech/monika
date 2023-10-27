@@ -16,23 +16,52 @@ permissions:
   pull-requests: read
 
 jobs:
-  build:
+  build-notif-package:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
           node-version: 18
       - run: cd packages/notification
       - run: npm ci
-      - run: npm run build      
+      - run: npm run build
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js 18.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+      - run: npm ci
+      - run: npm run build -w packages/notification
+      - run: npm test && npx codecov
+      - run: npm pack
+      - run: npm install -g ./hyperjumptech-monika-*.tgz
+      - run: npm run prod_test
+  
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - run: npm ci
+      - run: npm run build -w packages/notification
+      - run: npm pack
+      - run: npm install -g ./hyperjumptech-monika-*.tgz
+      - run: npm run prod_test
 
   publish-npm:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
           node-version: 18
           registry-url: https://registry.npmjs.org/
