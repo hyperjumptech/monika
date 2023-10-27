@@ -22,8 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import chai, { expect } from 'chai'
-import spies from 'chai-spies'
+import { expect } from 'chai'
 import { rest } from 'msw'
 import { setupServer } from 'msw/node'
 
@@ -31,13 +30,7 @@ import { validateNotification } from '../../validator/notification'
 import { send } from '../webhook'
 import type { NotificationMessage } from '..'
 
-chai.use(spies)
-
 describe('notificationChecker - webhookNotification', () => {
-  afterEach(() => {
-    chai.spy.restore()
-  })
-
   const notificationConfig = {
     id: 'webhook',
     type: 'webhook' as const,
@@ -82,18 +75,23 @@ describe('notificationChecker - webhookNotification', () => {
 
 describe('Webhook Notification', () => {
   describe('Send', () => {
-    let body: Record<string, any> = {}
+    let body = {}
     const server = setupServer(
-      rest.post('https://example.com', (req, res, ctx) => {
-        body = req.body as Record<string, any>
+      rest.post('https://example.com', async (req, res, ctx) => {
+        body = await req.json()
 
         return res(ctx.status(200))
       })
     )
 
-    beforeEach(() => server.listen({ onUnhandledRequest: 'bypass' }))
+    before(() => {
+      server.listen()
+    })
     afterEach(() => {
       body = {}
+      server.resetHandlers()
+    })
+    after(() => {
       server.close()
     })
 

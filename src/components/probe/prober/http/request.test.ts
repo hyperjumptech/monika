@@ -22,64 +22,54 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { expect } from 'chai'
+import { expect } from '@oclif/test'
 import { rest } from 'msw'
 import { setupServer } from 'msw/node'
-import { RequestInterceptor } from 'node-request-interceptor'
-import withDefaultInterceptors from 'node-request-interceptor/lib/presets/default'
-import { setContext } from '../../../../context'
-import type { MonikaFlags } from '../../../../flag'
+
 import type {
   ProbeRequestResponse,
   RequestConfig,
 } from '../../../../interfaces/request'
-
 import { generateRequestChainingBody, httpRequest } from './request'
 
-describe('probingHTTP', () => {
-  let interceptor: any
-  beforeEach(() => {
-    interceptor = new RequestInterceptor(withDefaultInterceptors)
-  })
-  afterEach(() => {
-    interceptor.restore()
-  })
-  describe('httpRequest function', () => {
-    it('should render correct headers', async () => {
-      let verifyHeader: any = {}
-      let tokens = ['1', '2']
-      let sentToken = ''
-      interceptor.use((req: any) => {
-        // mock login
-        if (['http://localhost:4000/get_key'].includes(req.url.href)) {
-          const token = tokens[tokens.length - 1]
-          tokens = tokens.slice(0, -1)
-          sentToken = token
-          return {
-            status: 200,
-            body: JSON.stringify({
-              token,
-            }),
-          }
-        }
+const server = setupServer()
 
-        // mock verify
-        if (['http://localhost:4000/verify'].includes(req.url.href)) {
-          verifyHeader = req.headers
-          return {
-            status: 200,
-            body: JSON.stringify({
-              verified: 'true',
-            }),
-          }
-        }
-      })
+describe('probingHTTP', () => {
+  describe('httpRequest function', () => {
+    before(() => {
+      server.listen()
+    })
+    afterEach(() => {
+      server.resetHandlers()
+    })
+    after(() => {
+      server.close()
+    })
+    it('should render correct headers', async () => {
+      // arrange
+      const tokens = ['1', '2']
+      let verifyHeader: Record<string, string> = {}
+      let sentToken = ''
+
+      server.use(
+        rest.get('http://localhost:4000/get_key', async (_, res, ctx) => {
+          const token = tokens.pop() as string
+          sentToken = token
+
+          return res(ctx.json({ token }))
+        }),
+        rest.post('http://localhost:4000/verify', async (req, res, ctx) => {
+          verifyHeader = req.headers.all()
+
+          return res(ctx.json({ verified: true }))
+        })
+      )
 
       // create the requests
-      const requests: any = [
+      const requests = [
         {
           url: 'http://localhost:4000/get_key',
-          body: JSON.parse('{}'),
+          body: '',
           timeout: 10_000,
         },
         {
@@ -88,16 +78,15 @@ describe('probingHTTP', () => {
           headers: {
             Authorization: '{{ responses.[0].data.token }}',
           },
-          body: JSON.parse('{}'),
+          body: '',
           timeout: 10_000,
         },
       ]
 
-      const results: any = []
-      const flag = { followRedirects: 0 } as unknown as MonikaFlags
-      setContext({ flags: flag })
+      // act
+      const results = []
       for (let i = 0; i < 2; i++) {
-        const responses: any = []
+        const responses = []
         for (const [j, request] of requests.entries()) {
           try {
             // eslint-disable-next-line no-await-in-loop
@@ -116,21 +105,24 @@ describe('probingHTTP', () => {
         }
       }
 
+      // assert
       for (const result of results) {
         expect(result.sentToken).to.be.equals(result.expectedToken)
       }
     })
 
     it('should submit correct form', async () => {
-      interceptor.use((req: any) => {
-        if (['http://localhost:4000/login'].includes(req.url.href)) {
-          if (req.body === 'username=example%40example.com&password=example')
-            return { status: 200 }
+      server.use(
+        rest.post('http://localhost:4000/login', async (req, res, ctx) => {
+          const reqBody = await req.text()
 
-          return { status: 400 }
-        }
-      })
+          if (reqBody !== 'username=example%40example.com&password=example') {
+            return res(ctx.status(400))
+          }
 
+          return res(ctx.status(200))
+        })
+      )
       const request: any = {
         url: 'http://localhost:4000/login',
         method: 'POST',
@@ -141,8 +133,6 @@ describe('probingHTTP', () => {
         timeout: 10_000,
       }
 
-      const flag = { followRedirects: 0 } as unknown as MonikaFlags
-      setContext({ flags: flag })
       const result = await httpRequest({
         requestConfig: request,
         responses: [],
@@ -152,15 +142,15 @@ describe('probingHTTP', () => {
 
     it('should send request with multipart/form-data content-type', async () => {
       // arrange
-      const server = setupServer(
-        rest.post('https://example.com', (req, res, ctx) => {
-          const { headers, body } = req
-          const reqBody = body as Record<string, any>
+      server.use(
+        rest.post('https://example.com', async (req, res, ctx) => {
+          const { headers } = req
+          const reqBody = await req.text()
 
           if (
             !headers.get('content-type')?.startsWith('multipart/form-data') ||
-            reqBody?.username !== 'john@example.com' ||
-            reqBody?.password !== 'drowssap'
+            !reqBody.includes('john@example.com') ||
+            !reqBody.includes('drowssap')
           ) {
             return res(ctx.status(400))
           }
@@ -176,15 +166,11 @@ describe('probingHTTP', () => {
         timeout: 10_000,
       }
 
-      const flags = { followRedirects: 0 } as unknown as MonikaFlags
-      setContext({ flags })
       // act
-      server.listen({ onUnhandledRequest: 'bypass' })
       const res = await httpRequest({
         requestConfig: request,
         responses: [],
       })
-      server.close()
 
       // assert
       expect(res.status).to.eq(200)
@@ -192,9 +178,10 @@ describe('probingHTTP', () => {
 
     it('should send request with text-plain content-type', async () => {
       // arrange
-      const server = setupServer(
-        rest.post('https://example.com', (req, res, ctx) => {
-          const { headers, body } = req
+      server.use(
+        rest.post('https://example.com', async (req, res, ctx) => {
+          const { headers } = req
+          const body = await req.text()
 
           if (
             headers.get('content-type') !== 'text/plain' ||
@@ -218,14 +205,10 @@ describe('probingHTTP', () => {
       }
 
       // act
-      server.listen({ onUnhandledRequest: 'bypass' })
-      const flag = { followRedirects: 0 } as unknown as MonikaFlags
-      setContext({ flags: flag })
       const res = await httpRequest({
         requestConfig: request,
         responses: [],
       })
-      server.close()
 
       // assert
       expect(res.status).to.eq(200)
@@ -233,9 +216,10 @@ describe('probingHTTP', () => {
 
     it('should send request with text/yaml content-type', async () => {
       // arrange
-      const server = setupServer(
-        rest.post('https://example.com', (req, res, ctx) => {
-          const { headers, body } = req
+      server.use(
+        rest.post('https://example.com', async (req, res, ctx) => {
+          const { headers } = req
+          const body = await req.text()
 
           if (
             headers.get('content-type') !== 'text/yaml' ||
@@ -259,14 +243,10 @@ describe('probingHTTP', () => {
       }
 
       // act
-      server.listen({ onUnhandledRequest: 'bypass' })
-      const flag = { followRedirects: 0 } as unknown as MonikaFlags
-      setContext({ flags: flag })
       const res = await httpRequest({
         requestConfig: request,
         responses: [],
       })
-      server.close()
 
       // assert
       expect(res.status).to.eq(200)
@@ -274,17 +254,17 @@ describe('probingHTTP', () => {
 
     it('should send request with application/xml content-type', async () => {
       // arrange
-      const server = setupServer(
-        rest.post('https://example.com', (req, res, ctx) => {
-          const { headers, body } = req
-          const reqBody = JSON.parse(body as string)
+      server.use(
+        rest.post('https://example.com', async (req, res, ctx) => {
+          const { headers } = req
+          const body = await req.text()
 
           if (
             headers.get('content-type') !== 'application/xml' ||
-            reqBody?.username !== 'john@example.com'
+            !body.includes('john@example.com')
           ) {
             console.error(headers.get('content-type'))
-            console.error(body)
+            console.error(JSON.stringify(body))
 
             return res(ctx.status(400))
           }
@@ -301,14 +281,10 @@ describe('probingHTTP', () => {
       }
 
       // act
-      server.listen({ onUnhandledRequest: 'bypass' })
-      const flag = { followRedirects: 0 } as unknown as MonikaFlags
-      setContext({ flags: flag })
       const res = await httpRequest({
         requestConfig: request,
         responses: [],
       })
-      server.close()
 
       // assert
       expect(res.status).to.eq(200)
@@ -316,9 +292,10 @@ describe('probingHTTP', () => {
 
     it('should send request with text-plain content-type even with allowUnauthorized option', async () => {
       // arrange
-      const server = setupServer(
-        rest.post('https://example.com', (req, res, ctx) => {
-          const { headers, body } = req
+      server.use(
+        rest.post('https://example.com', async (req, res, ctx) => {
+          const { headers } = req
+          const body = await req.text()
 
           if (
             headers.get('content-type') !== 'text/plain' ||
@@ -343,14 +320,10 @@ describe('probingHTTP', () => {
       }
 
       // act
-      server.listen({ onUnhandledRequest: 'bypass' })
-      const flag = { followRedirects: 0 } as unknown as MonikaFlags
-      setContext({ flags: flag })
       const res = await httpRequest({
         requestConfig: request,
         responses: [],
       })
-      server.close()
 
       // assert
       expect(res.status).to.eq(200)
