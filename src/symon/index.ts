@@ -22,11 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-/* eslint-disable unicorn/prefer-module */
-/* eslint-disable unicorn/prefer-node-protocol */
-
 import axios, { AxiosInstance } from 'axios'
-import Bree from 'bree'
 import { ExponentialBackoff, handleAll, retry } from 'cockatiel'
 import { EventEmitter } from 'events'
 import mac from 'macaddress'
@@ -152,15 +148,6 @@ class SymonClient {
 
   private locationId: string
 
-  private piscina = new Piscina.Piscina({
-    filename:
-      process.env.NODE_ENV === 'development'
-        ? `${__dirname}/worker.ts`
-        : `${__dirname}/worker.js`,
-
-    maxQueue: 1,
-  })
-
   private probes: Probe[] = []
 
   private reportProbesInterval = 10_000
@@ -169,21 +156,11 @@ class SymonClient {
 
   private url = ''
 
-  private workerBree = new Bree({
-    defaultExtension:
-      process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test'
-        ? 'ts'
-        : 'js',
-    doRootCheck: false,
-    errorHandler(error, workerMetadata) {
-      log.error(error)
-      log.debug(workerMetadata)
-    },
-    interval: this.reportProbesInterval,
-    jobs: [],
-    logger: log,
-    outputWorkerMetadata: true,
-    root: false,
+  private worker = new Piscina.Piscina({
+    concurrentTasksPerWorker: 1,
+    filename: `${process.cwd()}/lib/workers/report-to-symon.js`,
+    idleTimeout: this.reportProbesInterval,
+    maxQueue: 1,
   })
 
   constructor({
@@ -327,16 +304,14 @@ class SymonClient {
         url: this.url,
       }
 
-      console.log(probeIds.length)
-
       // Submit the task to Piscina
-      await this.piscina.run(taskData)
+      await this.worker.run(JSON.stringify(taskData))
     } catch (error) {
       hasConnectionToSymon = false
       this.configHash = ''
       log.error("Can't report history to Symon. " + (error as Error).message)
     } finally {
-      setInterval(async () => {
+      setTimeout(async () => {
         await this.report()
       }, this.reportProbesInterval)
     }
@@ -366,7 +341,7 @@ class SymonClient {
   }
 
   async stopReport(): Promise<void> {
-    await this.workerBree.stop()
+    await this.worker.destroy()
   }
 
   private async fetchProbes() {

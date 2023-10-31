@@ -13,6 +13,11 @@
     "baseUrl": ".",
     "typeRoots": ["node_modules/@types", "custom_types"]
   },
-  "include": ["src/**/*", "src/**/*.json", "../packages/notification/**/*"],
+  "include": [
+    "src/**/*",
+    "src/**/*.json",
+    "../packages/notification/**/*",
+    "src/symon/worker.ts"
+  ],
   "exclude": ["node_modules"]
 }

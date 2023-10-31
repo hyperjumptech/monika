@@ -461,6 +461,7 @@ process.on('SIGINT', async () => {
   }
 
   if (symonClient) {
+    await symonClient.stopReport()
     await symonClient.sendStatus({ isOnline: false })
   }
 
