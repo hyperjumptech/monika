@@ -30,6 +30,7 @@ import events from '../../events'
 import { md5Hash } from '../../utils/hash'
 import { getEventEmitter } from '../../utils/events'
 import type { MonikaFlags } from '../../flag'
+import { validateProbes } from './validation'
 
 describe('getConfig', () => {
   beforeEach(() => {
@@ -169,6 +170,10 @@ describe('updateConfig', () => {
         },
       ],
     }
+    const validatedProbes = {
+      ...config,
+      probes: await validateProbes(config.probes),
+    }
     let configFromEmitter = ''
     const eventEmitter = getEventEmitter()
     eventEmitter.once(events.config.updated, (data) => {
@@ -180,13 +185,13 @@ describe('updateConfig', () => {
 
     // assert
     expect(getContext().config).to.deep.eq({
-      ...config,
-      version: md5Hash(config),
+      ...validatedProbes,
+      version: md5Hash(validatedProbes),
     })
     expect(configFromEmitter).not.eq('')
   })
 
-  it('should should not update config', async () => {
+  it('should should not update config if there is no changes', async () => {
     // arrange
     const config: Config = {
       probes: [
@@ -199,16 +204,15 @@ describe('updateConfig', () => {
         },
       ],
     }
-    setContext({ config: { ...config, version: md5Hash(config) } })
     let configFromEmitter = ''
     const eventEmitter = getEventEmitter()
-    const eventListener = (data: any) => {
+    const eventListener = (data: string) => {
       configFromEmitter = data
     }
 
-    eventEmitter.once(events.config.updated, eventListener)
-
     // act
+    await updateConfig(config)
+    eventEmitter.once(events.config.updated, eventListener)
     await updateConfig(config)
 
     // assert
