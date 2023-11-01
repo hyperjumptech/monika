@@ -15,35 +15,8 @@ permissions:
   issues: read
   pull-requests: read
 
-jobs:
-  build-notif-package:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 18
-      - run: cd packages/notification
-      - run: npm ci
-      - run: npm run build
-
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Use Node.js 18.x
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18.x
-      - run: npm ci
-      - run: npm run build -w packages/notification
-      - run: npm test && npx codecov
-      - run: npm pack
-      - run: npm install -g ./hyperjumptech-monika-*.tgz
-      - run: npm run prod_test
-  
-  test:
-    needs: build
+jobs:  
+  build-test:    
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -57,7 +30,7 @@ jobs:
       - run: npm run prod_test
 
   publish-npm:
-    needs: build
+    needs: build-test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
