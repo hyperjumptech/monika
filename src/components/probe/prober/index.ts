@@ -61,7 +61,7 @@ type SendNotificationParams = {
 }
 
 export interface Prober {
-  probe: () => Promise<void>
+  probe: (incidentRetryAttempt: number) => Promise<void>
   generateVerboseStartupMessage: () => string
 }
 
@@ -76,6 +76,8 @@ enum ProbeState {
   Down = 'DOWN',
 }
 
+export const DEFAULT_INCIDENT_THRESHOLD = 5
+
 export class BaseProber implements Prober {
   protected readonly counter: number
   protected readonly notifications: Notification[]
@@ -87,15 +89,18 @@ export class BaseProber implements Prober {
     this.probeConfig = probeConfig
   }
 
-  async probe(): Promise<void> {
-    this.processProbeResults([])
+  async probe(incidentRetryAttempt: number): Promise<void> {
+    this.processProbeResults([], incidentRetryAttempt)
   }
 
   generateVerboseStartupMessage(): string {
     return ''
   }
 
-  protected processProbeResults(probeResults: ProbeResult[]): void {
+  protected processProbeResults(
+    probeResults: ProbeResult[],
+    incidentRetryAttempt: number
+  ): void {
     for (const { isAlertTriggered, logMessage } of probeResults) {
       this.logMessage(!isAlertTriggered, logMessage)
     }
@@ -108,6 +113,21 @@ export class BaseProber implements Prober {
     ) {
       if (this.hasIncident()) {
         throw new Error('There is an ongoing incident.')
+      }
+
+      const isIncidentThresholdMet =
+        incidentRetryAttempt ===
+        (this.probeConfig.incidentThreshold || DEFAULT_INCIDENT_THRESHOLD) - 1
+      if (!isIncidentThresholdMet) {
+        this.logMessage(
+          false,
+          `Probe request failed. Attempt (${
+            incidentRetryAttempt + 1
+          }) with incident threshold (${this.probeConfig.incidentThreshold}).`
+        )
+        throw new Error(
+          'Probe request is failed but incident threshold is not met.'
+        )
       }
 
       this.handleFailedProbe(probeResults)

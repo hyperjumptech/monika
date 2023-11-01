@@ -35,13 +35,16 @@ export async function validateProbes(probes: Probe[]): Promise<Probe[]> {
   const alertSchema = joi.alternatives().try(
     joi.string(),
     joi.object({
-      assertion: joi.string().default((parent) => {
-        if (!parent.query) {
-          return 'response.status < 200 or response.status > 299'
-        }
+      assertion: joi
+        .string()
+        .allow('')
+        .default((parent) => {
+          if (!parent.query) {
+            return 'response.status < 200 or response.status > 299'
+          }
 
-        return parent.query
-      }),
+          return parent.query
+        }),
       id: joi.string().allow(''),
       message: joi.string().allow(''),
       query: joi.string().allow(''),
