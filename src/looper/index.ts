@@ -65,7 +65,6 @@ export function sanitizeProbe(isSymonMode: boolean, probe: Probe): Probe {
   return {
     ...probe,
     alerts: isSymonMode ? [] : addFailedRequestAssertions(alerts),
-    requests,
   }
 }
 

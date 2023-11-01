@@ -385,29 +385,23 @@ export default class Monika extends Command {
     const checkedConfig = {
       ...config,
       probes: config.probes?.map((probe) => {
-        if (probe?.incidentThreshold) {
-          showDeprecateMsg.incidentThreshold = true
-        }
-
         if (probe?.recoveryThreshold) {
           showDeprecateMsg.recoveryThreshold = true
         }
 
         return {
           ...probe,
-          requests: probe.requests?.map((request) => {
-            return {
-              ...request,
-              alert: request.alerts?.map((alert) => {
-                if (alert.query) {
-                  showDeprecateMsg.query = true
-                  return { ...alert, assertion: alert.query }
-                }
+          requests: probe.requests?.map((request) => ({
+            ...request,
+            alert: request.alerts?.map((alert) => {
+              if (alert.query) {
+                showDeprecateMsg.query = true
+                return { ...alert, assertion: alert.query }
+              }
 
-                return alert
-              }),
-            }
-          }),
+              return alert
+            }),
+          })),
           alerts: probe.alerts?.map((alert) => {
             if (alert.query) {
               showDeprecateMsg.query = true
@@ -418,12 +412,6 @@ export default class Monika extends Command {
           }),
         }
       }),
-    }
-
-    if (showDeprecateMsg.incidentThreshold) {
-      log.warn(
-        'incidentThreshold is deprecated. It will be managed internally by Monika.'
-      )
     }
 
     if (showDeprecateMsg.recoveryThreshold) {
