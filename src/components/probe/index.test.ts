@@ -39,6 +39,7 @@ import type { Probe } from '../../interfaces/probe'
 import { getContext, resetContext, setContext } from '../../context'
 import type { MonikaFlags } from '../../flag'
 import { FAILED_REQUEST_ASSERTION } from '../../looper'
+import { closeLog, openLogfile } from '../logger/history'
 
 let urlRequestTotal = 0
 let notificationAlert: Record<string, Record<string, any>> = {}
@@ -73,8 +74,9 @@ const probes: Probe[] = [
 ]
 
 describe('Probe processing', () => {
-  before(() => {
+  before(async () => {
     server.listen()
+    await openLogfile()
   })
   beforeEach(() => {
     setContext({ flags: { repeat: 1 } as MonikaFlags })
@@ -86,8 +88,9 @@ describe('Probe processing', () => {
     server.resetHandlers()
     sinon.restore()
   })
-  after(() => {
+  after(async () => {
     server.close()
+    await closeLog()
   })
 
   describe('HTTP Probe', () => {
@@ -539,7 +542,7 @@ describe('Probe processing', () => {
           interval: 1,
           mongo: [
             {
-              uri: 'mongodb://mongo_user:mongo_password@localhost:27017',
+              uri: 'mongodb://mongo_user:mongo_password@localhost:27018',
             },
           ],
         } as Probe,
