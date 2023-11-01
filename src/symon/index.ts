@@ -34,7 +34,7 @@ import path from 'path'
 import { updateConfig } from '../components/config'
 import { getOSName } from '../components/notification/alert-message'
 import { getContext } from '../context'
-import type { MonikaFlags } from '../flag'
+import { SYMON_API_VERSION, type MonikaFlags } from '../flag'
 import events from '../events'
 import { Config } from '../interfaces/config'
 import { Probe } from '../interfaces/probe'
@@ -184,7 +184,7 @@ class SymonClient {
     symonMonikaId,
     symonReportInterval,
     symonReportLimit,
-    'symon-api-version': apiVersion,
+    'symon-api-version': apiVersion = SYMON_API_VERSION.v1,
   }: Pick<
     MonikaFlags,
     | 'symon-api-version'
