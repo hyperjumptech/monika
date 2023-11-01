@@ -36,10 +36,10 @@ import * as httpRequest from '../../utils/http'
 import { doProbe } from '.'
 import { initializeProbeStates } from '../../utils/probe-state'
 import type { Probe } from '../../interfaces/probe'
-import { afterEach, beforeEach } from 'mocha'
 import { getContext, resetContext, setContext } from '../../context'
 import type { MonikaFlags } from '../../flag'
 import { FAILED_REQUEST_ASSERTION } from '../../looper'
+import { closeLog, openLogfile } from '../logger/history'
 
 let urlRequestTotal = 0
 let notificationAlert: Record<string, Record<string, any>> = {}
@@ -48,13 +48,10 @@ const server = setupServer(
     urlRequestTotal += 1
     return res(ctx.status(200))
   }),
-  rest.post('https://example.com/webhook', (req, res, ctx) => {
-    const requestBody = req?.body as Record<string, any>
+  rest.post('https://example.com/webhook', async (req, res, ctx) => {
+    const requestBody = await req.json()
     if (requestBody?.body?.url) {
-      notificationAlert[requestBody.body.url] = requestBody as Record<
-        string,
-        string
-      >
+      notificationAlert[requestBody.body.url] = requestBody
     }
 
     return res(ctx.status(200))
@@ -76,19 +73,26 @@ const probes: Probe[] = [
   },
 ]
 
-beforeEach(() => {
-  server.listen()
-  setContext({ flags: { repeat: 1 } as MonikaFlags })
-})
-afterEach(() => {
-  resetContext()
-  urlRequestTotal = 0
-  notificationAlert = {}
-  server.close()
-  sinon.restore()
-})
-
 describe('Probe processing', () => {
+  before(async () => {
+    server.listen()
+    await openLogfile()
+  })
+  beforeEach(() => {
+    setContext({ flags: { repeat: 1 } as MonikaFlags })
+  })
+  afterEach(() => {
+    resetContext()
+    urlRequestTotal = 0
+    notificationAlert = {}
+    server.resetHandlers()
+    sinon.restore()
+  })
+  after(async () => {
+    server.close()
+    await closeLog()
+  })
+
   describe('HTTP Probe', () => {
     it('should not run probe if the probe is running', async () => {
       // arrange
@@ -112,7 +116,7 @@ describe('Probe processing', () => {
       initializeProbeStates(probes)
 
       // act
-      doProbe({ probe: probes[0], notifications: [] })
+      doProbe({ notifications: [], probe: { ...probes[0], interval: 10 } })
 
       // assert
       expect(urlRequestTotal).eq(0)
@@ -135,8 +139,6 @@ describe('Probe processing', () => {
       await doProbe({ probe: probes[0], notifications: [] })
       // wait for random timeout
       await sleep(3 * seconds)
-
-      resetContext()
 
       // assert
       expect(urlRequestTotal).eq(1)
@@ -372,7 +374,7 @@ describe('Probe processing', () => {
         mariadb: [
           {
             host: 'localhost',
-            port: 3306,
+            port: 3307,
             username: 'mariadb_user',
             password: 'mariadb_password',
             database: '',
@@ -429,7 +431,7 @@ describe('Probe processing', () => {
         mariadb: [
           {
             host: 'localhost',
-            port: 3306,
+            port: 3308,
             username: 'mariadb_user',
             password: 'mariadb_password',
             database: '',
@@ -540,7 +542,7 @@ describe('Probe processing', () => {
           interval: 1,
           mongo: [
             {
-              uri: 'mongodb://mongo_user:mongo_password@localhost:27017',
+              uri: 'mongodb://mongo_user:mongo_password@localhost:27018',
             },
           ],
         } as Probe,

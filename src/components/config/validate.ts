@@ -22,24 +22,24 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Config } from '../../interfaces/config'
+import type { Config } from '../../interfaces/config'
 import { validateProbes, validateSymonConfig } from './validation'
 import { validateNotification } from '@hyperjumptech/monika-notification'
 
 export const validateConfig = async (
   configuration: Partial<Config>
-): Promise<void> => {
+): Promise<Config> => {
   const { notifications = [], probes = [], symon } = configuration
   const symonConfigError = validateSymonConfig(symon)
-  const validateProbesError = validateProbes(probes)
-
-  await validateNotification(notifications)
-
-  if (validateProbesError) {
-    throw new Error(validateProbesError)
-  }
 
   if (symonConfigError) {
     throw new Error(`Monika configuration: symon ${symonConfigError}`)
   }
+
+  const [validatedProbes] = await Promise.all([
+    validateProbes(probes),
+    validateNotification(notifications),
+  ])
+
+  return { ...configuration, probes: validatedProbes }
 }
