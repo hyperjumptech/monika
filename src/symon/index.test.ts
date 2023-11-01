@@ -85,6 +85,10 @@ describe('Symon initiate', () => {
 
     setContext({
       userAgent: 'v1.5.0',
+      flags: {
+        symonUrl: 'http://localhost:4000',
+        symonKey: 'random-key',
+      } as MonikaFlags,
     })
     let sentBody = ''
     // mock the outgoing requests

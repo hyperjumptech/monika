@@ -47,13 +47,10 @@ const server = setupServer(
     urlRequestTotal += 1
     return res(ctx.status(200))
   }),
-  rest.post('https://example.com/webhook', (req, res, ctx) => {
-    const requestBody = req?.body as Record<string, any>
+  rest.post('https://example.com/webhook', async (req, res, ctx) => {
+    const requestBody = await req.json()
     if (requestBody?.body?.url) {
-      notificationAlert[requestBody.body.url] = requestBody as Record<
-        string,
-        string
-      >
+      notificationAlert[requestBody.body.url] = requestBody
     }
 
     return res(ctx.status(200))
@@ -75,19 +72,24 @@ const probes: Probe[] = [
   },
 ]
 
-beforeEach(() => {
-  server.listen({ onUnhandledRequest: 'bypass' })
-  setContext({ flags: { repeat: 1 } as MonikaFlags })
-})
-afterEach(() => {
-  resetContext()
-  urlRequestTotal = 0
-  notificationAlert = {}
-  server.close()
-  sinon.restore()
-})
-
 describe('Probe processing', () => {
+  before(() => {
+    server.listen()
+  })
+  beforeEach(() => {
+    setContext({ flags: { repeat: 1 } as MonikaFlags })
+  })
+  afterEach(() => {
+    resetContext()
+    urlRequestTotal = 0
+    notificationAlert = {}
+    server.resetHandlers()
+    sinon.restore()
+  })
+  after(() => {
+    server.close()
+  })
+
   describe('HTTP Probe', () => {
     it('should not run probe if the probe is running', async () => {
       // arrange
@@ -111,7 +113,7 @@ describe('Probe processing', () => {
       initializeProbeStates(probes)
 
       // act
-      doProbe({ probe: probes[0], notifications: [] })
+      doProbe({ notifications: [], probe: { ...probes[0], interval: 10 } })
 
       // assert
       expect(urlRequestTotal).eq(0)

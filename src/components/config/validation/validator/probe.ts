@@ -49,7 +49,7 @@ export async function validateProbes(probes: Probe[]): Promise<Probe[]> {
       .try(joi.string().allow('').hostname(), joi.string().allow('').ip())
       .required(),
     password: joi.string().allow(''),
-    port: joi.number(),
+    port: joi.number().default(3306),
     username: joi.string().allow(''),
   })
   const schema = joi
@@ -63,7 +63,8 @@ export async function validateProbes(probes: Probe[]): Promise<Probe[]> {
         alerts: joi.array().items(alertSchema),
         description: joi.string().allow(''),
         id: joi.string().required(),
-        interval: joi.number().min(1),
+        incidentThreshold: joi.number().default(5).min(1),
+        interval: joi.number().default(10).min(1),
         lastEvent: joi.object({
           createdAt: joi.string().allow(''),
           recoveredAt: joi.string().allow('', null),
@@ -86,7 +87,7 @@ export async function validateProbes(probes: Probe[]): Promise<Probe[]> {
                 )
                 .required(),
               password: joi.string().allow(''),
-              port: joi.number().min(0).max(65_536),
+              port: joi.number().default(27_017).min(0).max(65_536),
               username: joi.string().allow(''),
             }),
           ])
@@ -119,7 +120,7 @@ export async function validateProbes(probes: Probe[]): Promise<Probe[]> {
                 )
                 .required(),
               password: joi.string().allow(''),
-              port: joi.number(),
+              port: joi.number().default(5432),
               username: joi.string().allow(''),
             }),
           ])
@@ -136,7 +137,7 @@ export async function validateProbes(probes: Probe[]): Promise<Probe[]> {
                   joi.string().allow('').ip()
                 ),
               password: joi.string().allow(''),
-              port: joi.number().min(0).max(65_536),
+              port: joi.number().default(6379).min(0).max(65_536),
               uri: joi.string().allow(''),
               username: joi.string().allow(''),
             })
@@ -177,11 +178,12 @@ export async function validateProbes(probes: Probe[]): Promise<Probe[]> {
                   'UNLINK'
                 )
                 .allow('')
+                .default('GET')
                 .insensitive()
                 .label('Probe request method'),
               ping: joi.bool(),
-              saveBody: joi.bool(),
-              timeout: joi.number().min(1).allow(null),
+              saveBody: joi.bool().default(false),
+              timeout: joi.number().default(10_000).min(1).allow(null),
               url: joi
                 .string()
                 .custom((url) => {
