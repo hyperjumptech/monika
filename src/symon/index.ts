@@ -29,11 +29,10 @@ import mac from 'macaddress'
 import { hostname } from 'os'
 import Piscina from 'piscina'
 
-import type { MonikaFlags } from '../flag'
-
 import { updateConfig } from '../components/config'
 import { getOSName } from '../components/notification/alert-message'
 import { getContext } from '../context'
+import { SYMON_API_VERSION, type MonikaFlags } from '../flag'
 import events from '../events'
 import { Config } from '../interfaces/config'
 import { Probe } from '../interfaces/probe'
@@ -48,6 +47,7 @@ import {
   publicIpAddress,
   publicNetworkInfo,
 } from '../utils/public-ip'
+import { validateProbes } from '../components/config/validation'
 
 type SymonHandshakeData = {
   city: string
@@ -164,7 +164,7 @@ class SymonClient {
   })
 
   constructor({
-    'symon-api-version': apiVersion,
+    'symon-api-version': apiVersion = SYMON_API_VERSION.v1,
     symonKey = '',
     symonLocationId,
     symonMonikaId,
@@ -350,24 +350,26 @@ class SymonClient {
 
     return this.httpClient
       .get<{ data: Probe[] }>(`/${this.monikaId}/probes`, {
+        timeout: TIMEOUT,
         headers: {
           ...(this.configHash ? { 'If-None-Match': this.configHash } : {}),
         },
-        timeout: TIMEOUT,
         validateStatus(status) {
           return [200, 304].includes(status)
         },
       })
-      .then((res) => {
-        if (res.data.data) {
-          this.probes = res.data.data
+      .then(async (res) => {
+        if (!res.data.data) {
+          log.info('No config changes from Symon')
 
-          log.debug(`Received ${res.data.data.length} probes`)
-        } else {
-          log.debug(`No new config from Symon`)
+          return { probes: this.probes, hash: res.headers.etag }
         }
 
-        return { hash: res.headers.etag, probes: res.data.data }
+        const validatedProbes = await validateProbes(res.data.data)
+        this.probes = validatedProbes
+        log.info(`Received ${validatedProbes.length} probes`)
+
+        return { probes: validatedProbes, hash: res.headers.etag }
       })
       .catch((error) => {
         if (error.isAxiosError) {

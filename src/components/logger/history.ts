@@ -140,10 +140,20 @@ type UnreportedNotificationDB = {
   /* eslint-enable camelcase */
 }
 
-export let db: Database<SQLite3.Database, SQLite3.Statement>
+let db: Database<SQLite3.Database, SQLite3.Statement>
+
+export function database() {
+  return db
+}
+
+export function setDatabase(
+  database: Database<SQLite3.Database, SQLite3.Statement>
+) {
+  db = database
+}
 
 async function migrate() {
-  await db.migrate({
+  await database().migrate({
     migrationsPath: path.join(__dirname, '../../../db/migrations'),
   })
 }
@@ -154,11 +164,12 @@ async function migrate() {
  */
 export async function openLogfile(): Promise<void> {
   try {
-    db = await open({
+    const db = await open({
       filename: dbPath,
       mode: sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE,
       driver: sqlite3.Database,
     })
+    setDatabase(db)
 
     await migrate()
   } catch (error: any) {
@@ -170,7 +181,7 @@ export async function deleteFromProbeRequests(
   limit: number
 ): Promise<DeleteProbeRes> {
   const getIdsToBeDeleted = `SELECT id, probe_id, created_at FROM probe_requests order by created_at asc limit ${limit}`
-  const idsres = await db.all(getIdsToBeDeleted)
+  const idsres = await database().all(getIdsToBeDeleted)
   const ids = idsres.map((res) => ({ id: res.id, createdAt: res.createdAt }))
   const probeIds = idsres.map((res) => ({
     id: res.probe_id,
@@ -178,7 +189,7 @@ export async function deleteFromProbeRequests(
   }))
   if (idsres.length > 0) {
     const deleteFromProbeRequests = `DELETE FROM probe_requests WHERE id IN (${getIdsToBeDeleted})`
-    await db.run(deleteFromProbeRequests)
+    await database().run(deleteFromProbeRequests)
   }
 
   return {
@@ -194,7 +205,7 @@ export async function deleteFromAlerts(
     await Promise.all(
       probeReqIds.map(async (item) => {
         const deleteFromAlerts = `DELETE FROM alerts WHERE probe_request_id = ${item.id} and created_at = ${item.createdAt}`
-        await db.run(deleteFromAlerts)
+        await database().run(deleteFromAlerts)
       })
     )
   }
@@ -207,7 +218,7 @@ export async function deleteFromNotifications(
     await Promise.all(
       probeIds.map(async (item) => {
         const deleteFromNotifications = `DELETE FROM notifications WHERE probe_id = ${item.id} and created_at = ${item.createdAt}`
-        await db.run(deleteFromNotifications)
+        await database().run(deleteFromNotifications)
       })
     )
   }
@@ -220,7 +231,7 @@ export async function deleteFromNotifications(
 export async function getAllLogs(): Promise<RequestsLog[]> {
   const readRowsSQL =
     'SELECT id, probe_id, response_status, request_url, response_time FROM probe_requests'
-  const probeRequests = await db.all(readRowsSQL)
+  const probeRequests = await database().all(readRowsSQL)
   const dbVal = probeRequests.map((probeRequest: ProbeRequestDB) => {
     /* eslint-disable camelcase */
     const { id, probe_id, request_url, response_status, response_time } =
@@ -245,7 +256,7 @@ export async function getUnreportedLogsCount(): Promise<number> {
     FROM probe_requests
     WHERE reported = 0;`
 
-  const row = await db.get(readUnreportedRequestsCountSQL)
+  const row = await database().get(readUnreportedRequestsCountSQL)
 
   return row?.count || 0
 }
@@ -416,17 +427,17 @@ export async function flushAllLogs(): Promise<void> {
   const dropMigrationsTableSQL = 'DROP TABLE IF EXISTS migrations;'
 
   await Promise.all([
-    db.run(dropAtlassianStatusPageTableSQL),
-    db.run(dropProbeRequestsTableSQL),
-    db.run(dropAlertsTableSQL),
-    db.run(dropNotificationsTableSQL),
-    db.run(dropMigrationsTableSQL),
-    db.run(dropInstatusPageTableSQL),
+    database().run(dropAtlassianStatusPageTableSQL),
+    database().run(dropProbeRequestsTableSQL),
+    database().run(dropAlertsTableSQL),
+    database().run(dropNotificationsTableSQL),
+    database().run(dropMigrationsTableSQL),
+    database().run(dropInstatusPageTableSQL),
 
     // The VACUUM command cleans the main database by copying its contents to a temporary database file and reloading the original database file from the copy.
     // This eliminates free pages, aligns table data to be contiguous, and otherwise cleans up the database file structure.
     // When VACUUMing a database, as much as twice the size of the original database file is required in free disk space.
-    db.run('vacuum'),
+    database().run('vacuum'),
   ])
 
   await migrate()
@@ -491,28 +502,35 @@ export async function saveProbeRequestLog({
     : ''
 
   try {
-    const insertProbeRequestResult = await db.run(insertProbeRequestSQL, [
-      now,
-      probe.id,
-      probe.name,
-      requestConfig?.method || 'TCP', // if TCP, there's no method, so just set to TCP
-      requestConfig?.url || 'http://', // if TCP, there's no URL so just set to this http://
-      JSON.stringify(requestConfig?.headers),
-      JSON.stringify(requestConfig?.body),
-      probeRes.status,
-      JSON.stringify(probeRes.headers),
-      responseBody,
-      probeRes?.responseTime ?? 0,
-      probeRes.headers['content-length'],
-      errorResp,
-      probe.socket ? 'tcp' : 'http',
-      probe.socket?.host || '',
-      probe.socket?.port || '',
-    ])
+    const insertProbeRequestResult = await database().run(
+      insertProbeRequestSQL,
+      [
+        now,
+        probe.id,
+        probe.name,
+        requestConfig?.method || 'TCP', // if TCP, there's no method, so just set to TCP
+        requestConfig?.url || 'http://', // if TCP, there's no URL so just set to this http://
+        JSON.stringify(requestConfig?.headers),
+        JSON.stringify(requestConfig?.body),
+        probeRes.status,
+        JSON.stringify(probeRes.headers),
+        responseBody,
+        probeRes?.responseTime ?? 0,
+        probeRes.headers['content-length'],
+        errorResp,
+        probe.socket ? 'tcp' : 'http',
+        probe.socket?.host || '',
+        probe.socket?.port || '',
+      ]
+    )
 
     await Promise.all(
       (alertQueries ?? []).map((alert) =>
-        db.run(insertAlertSQL, [now, insertProbeRequestResult.lastID, alert])
+        database().run(insertAlertSQL, [
+          now,
+          insertProbeRequestResult.lastID,
+          alert,
+        ])
       )
     )
   } catch (error: any) {
@@ -550,7 +568,7 @@ export async function saveNotificationLog(
   const now = Math.round(Date.now() / 1000)
 
   try {
-    await db.run(insertNotificationSQL, [
+    await database().run(insertNotificationSQL, [
       now,
       probe.id,
       probe.name,
@@ -567,7 +585,7 @@ export async function saveNotificationLog(
 export async function getSummary(): Promise<Summary> {
   const getNotificationsSummaryByTypeSQL = `SELECT type, COUNT(*) as count FROM notifications WHERE created_at > strftime('%s', datetime('now', '-24 hours')) GROUP BY type;`
 
-  const notificationsSummaryByType = await db.all(
+  const notificationsSummaryByType = await database().all(
     getNotificationsSummaryByTypeSQL
   )
 

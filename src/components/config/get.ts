@@ -98,18 +98,18 @@ async function parseConfigType(
   const parsed = await parseConfig(source, configType, flags)
 
   // ensure that the parsed config meets our formatting
-  await validateConfig(parsed)
+  const validatedConfig = await validateConfig(parsed)
 
   if (configType !== 'har') {
-    const isValidConfig = validateConfigWithSchema(parsed)
+    const isValidConfig = validateConfigWithSchema(validatedConfig)
     if (!isValidConfig.valid) {
       throw new Error(isValidConfig.message)
     }
   }
 
   return {
-    ...parsed,
-    probes: parsed.probes?.map((probe) => {
+    ...validatedConfig,
+    probes: validatedConfig.probes?.map((probe) => {
       const requests: RequestConfig[] | undefined = probe?.requests?.map(
         (request) => ({
           ...request,

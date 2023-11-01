@@ -3,5 +3,6 @@ notifications:
     type: teams
     data: {}
 probes:
-  - requests:
+  - id: teams-probe-01
+    requests:
       - url: https://github.com
