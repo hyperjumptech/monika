@@ -165,8 +165,9 @@ export class BaseProber implements Prober {
   ): ProbeAlert | undefined {
     const getFailedRequestAssertionFromProbe = (): ProbeAlert | undefined =>
       this.probeConfig.alerts.find(
-        ({ assertion, message }) =>
-          assertion === FAILED_REQUEST_ASSERTION.assertion &&
+        ({ assertion, message, query }) =>
+          (assertion === FAILED_REQUEST_ASSERTION.assertion ||
+            query === FAILED_REQUEST_ASSERTION.assertion) &&
           message === FAILED_REQUEST_ASSERTION.message
       )
     const getFailedRequestAssertionFromRequests = (
@@ -180,8 +181,9 @@ export class BaseProber implements Prober {
       }
 
       return (this.probeConfig.requests[requestIndex].alerts || []).find(
-        ({ assertion, message }) =>
-          assertion === FAILED_REQUEST_ASSERTION.assertion &&
+        ({ assertion, message, query }) =>
+          (assertion === FAILED_REQUEST_ASSERTION.assertion ||
+            query === FAILED_REQUEST_ASSERTION.assertion) &&
           message === FAILED_REQUEST_ASSERTION.message
       )
     }
