@@ -66,6 +66,7 @@ export type Mongo = {
   port?: number
   username?: string
   password?: string
+  alerts?: ProbeAlert[]
 }
 
 export type Postgres = {
@@ -82,6 +83,7 @@ export type Postgres = {
 
 export type Ping = {
   uri: string
+  alerts?: ProbeAlert[]
 }
 
 export interface Probe {

@@ -1,5 +1,7 @@
 {
   "require": ["ts-node/register"],
+  "bail": true,
   "timeout": 5000,
+  "bail": true,
   "exit": true
 }
