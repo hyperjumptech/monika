@@ -55,7 +55,6 @@ describe('Flush command', () => {
       // TODO: Remove skip
       .skip()
       // arrange
-      .skip()
       .stub(ux.ux, 'prompt', (stub) => stub.resolves('n'))
       .stdout()
       // act
@@ -69,7 +68,6 @@ describe('Flush command', () => {
       // TODO: Remove skip
       .skip()
       // arrange
-      .skip()
       .stub(ux.ux, 'prompt', (stub) => stub.resolves('Y'))
       .stdout()
       // act
