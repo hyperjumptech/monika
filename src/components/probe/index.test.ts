@@ -286,6 +286,7 @@ describe('Probe processing', () => {
       const probe = {
         ...probes[0],
         id: 'fj43l',
+        incidentThreshold: 1,
         requests: [{ url: 'https://example.com', body: '', timeout: 30 }],
         alerts: [
           { id: 'jFQBd', assertion: 'response.status != 200', message: '' },
@@ -427,6 +428,7 @@ describe('Probe processing', () => {
       // arrange
       const probe = {
         id: '3ngd4',
+        incidentThreshold: 1,
         interval: 1,
         mariadb: [
           {
