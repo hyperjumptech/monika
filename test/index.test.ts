@@ -155,6 +155,18 @@ describe('monika', () => {
     })
 
   test
+    .stdout()
+    .do(() =>
+      cmd.run([
+        '--config',
+        resolve('./test/testConfigs/probes/valid-http-method.yaml'),
+      ])
+    )
+    .it('Runs with allowed HTTP method', (ctx) => {
+      expect(ctx.stdout).to.contain('Starting Monika.')
+    })
+
+  test
     .stderr()
     .do(() =>
       cmd.run([
@@ -164,7 +176,7 @@ describe('monika', () => {
     )
     .catch((error) => {
       expect(error.message).to.contain(
-        '"Probe request method" must be one of [GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS, PURGE, LINK, UNLINK]'
+        '"Probe request method" must be one of [CONNECT, GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS, PURGE, LINK, TRACE, UNLINK'
       )
     })
     .it('runs with config with invalid probe request method')
