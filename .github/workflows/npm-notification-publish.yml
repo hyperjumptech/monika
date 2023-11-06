@@ -37,7 +37,6 @@ jobs:
         with:
           node-version: 18
           registry-url: https://registry.npmjs.org/
-      - run: cd packages/notification
       - run: npm ci
       - run: npm run build 
       - run: npm publish --access public
