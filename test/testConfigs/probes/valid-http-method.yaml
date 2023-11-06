@@ -1,0 +1,52 @@
+probes:
+  - id: 'Not defined'
+    requests:
+      - url: http://example.com
+  - id: 'CONNECT'
+    requests:
+      - url: http://example.com
+        method: CONNECT
+  - id: 'DELETE'
+    requests:
+      - url: http://example.com
+        method: DELETE
+  - id: 'GET'
+    requests:
+      - url: http://example.com
+        method: GET
+  - id: 'HEAD'
+    requests:
+      - url: http://example.com
+        method: HEAD
+  - id: 'LINK'
+    requests:
+      - url: http://example.com
+        method: LINK
+  - id: 'OPTIONS'
+    requests:
+      - url: http://example.com
+        method: OPTIONS
+  - id: 'PATCH'
+    requests:
+      - url: http://example.com
+        method: PATCH
+  - id: 'POST'
+    requests:
+      - url: http://example.com
+        method: POST
+  - id: 'PURGE'
+    requests:
+      - url: http://example.com
+        method: PURGE
+  - id: 'PUT'
+    requests:
+      - url: http://example.com
+        method: PUT
+  - id: 'TRACE'
+    requests:
+      - url: http://example.com
+        method: TRACE
+  - id: 'UNLINK'
+    requests:
+      - url: http://example.com
+        method: UNLINK

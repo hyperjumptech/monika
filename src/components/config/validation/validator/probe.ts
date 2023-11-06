@@ -207,6 +207,7 @@ export async function validateProbes(probes: Probe[]): Promise<Probe[]> {
               method: joi
                 .string()
                 .valid(
+                  'CONNECT',
                   'GET',
                   'POST',
                   'PUT',
@@ -216,6 +217,7 @@ export async function validateProbes(probes: Probe[]): Promise<Probe[]> {
                   'OPTIONS',
                   'PURGE',
                   'LINK',
+                  'TRACE',
                   'UNLINK'
                 )
                 .default('GET')
