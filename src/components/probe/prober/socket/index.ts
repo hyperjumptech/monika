@@ -4,7 +4,7 @@ import type { Socket } from '../../../../interfaces/probe'
 import { tcpRequest } from './request'
 
 export class SocketProber extends BaseProber {
-  async probe(): Promise<void> {
+  async probe(incidentRetryAttempt: number): Promise<void> {
     if (!this.probeConfig.socket) {
       throw new Error(
         `Socket configuration is empty. Probe ID: ${this.probeConfig.id}`
@@ -17,7 +17,7 @@ export class SocketProber extends BaseProber {
       socket: this.probeConfig.socket,
     })
 
-    this.processProbeResults(result)
+    this.processProbeResults(result, incidentRetryAttempt)
   }
 
   generateVerboseStartupMessage(): string {
