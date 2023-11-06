@@ -40,6 +40,7 @@ jobs:
       - run: npm ci
       - run: npm run build -w packages/notification
       - run: npm publish --access public
+        working-directory: ./packages/notification
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
 
