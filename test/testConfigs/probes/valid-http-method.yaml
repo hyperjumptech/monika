@@ -1,52 +1,52 @@
 probes:
-  - id: "Not defined"
+  - id: 'Not defined'
     requests:
       - url: http://example.com
-  - id: "CONNECT"
+  - id: 'CONNECT'
     requests:
       - url: http://example.com
         method: CONNECT
-  - id: "DELETE"
+  - id: 'DELETE'
     requests:
       - url: http://example.com
         method: DELETE
-  - id: "GET"
+  - id: 'GET'
     requests:
       - url: http://example.com
         method: GET
-  - id: "HEAD"
+  - id: 'HEAD'
     requests:
       - url: http://example.com
         method: HEAD
-  - id: "LINK"
+  - id: 'LINK'
     requests:
       - url: http://example.com
         method: LINK
-  - id: "OPTIONS"
+  - id: 'OPTIONS'
     requests:
       - url: http://example.com
         method: OPTIONS
-  - id: "PATCH"
+  - id: 'PATCH'
     requests:
       - url: http://example.com
         method: PATCH
-  - id: "POST"
+  - id: 'POST'
     requests:
       - url: http://example.com
         method: POST
-  - id: "PURGE"
+  - id: 'PURGE'
     requests:
       - url: http://example.com
         method: PURGE
-  - id: "PUT"
+  - id: 'PUT'
     requests:
       - url: http://example.com
         method: PUT
-  - id: "TRACE"
+  - id: 'TRACE'
     requests:
       - url: http://example.com
         method: TRACE
-  - id: "UNLINK"
+  - id: 'UNLINK'
     requests:
       - url: http://example.com
         method: UNLINK
