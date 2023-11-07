@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.15.11 2023-11-06
+
+## Fixed
+
+Fix: Restore Incident Threshold (#1158)
+Fix: Docker Release from tag pipeline (#1149)
+
+## Changed
+
+Refactor: Encapsulate Database Global Variable (#1155)
+Refactor: Replace Manual Validation with Joi (#1145)
+Chore: Suppress CI Log (#1153)
+Chore: Preparation to Upgrade Oclif to Version 3 (#1140)
+
+## Added
+
+Feat: Make Retry Configurable (#1150)
+Feat: Add Initial Delay (#1147)
+
 ## 1.15.10 2023-10-17
 
 ## Fixed

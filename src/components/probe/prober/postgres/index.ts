@@ -5,7 +5,7 @@ import { probeRequestResult } from '../../../../interfaces/request'
 import { postgresRequest } from './request'
 
 export class PostgresProber extends BaseProber {
-  async probe(): Promise<void> {
+  async probe(incidentRetryAttempt: number): Promise<void> {
     if (!this.probeConfig.postgres) {
       throw new Error(
         `Postgres configuration is empty. Probe ID: ${this.probeConfig.id}`
@@ -18,7 +18,7 @@ export class PostgresProber extends BaseProber {
       postgres: this.probeConfig.postgres,
     })
 
-    this.processProbeResults(result)
+    this.processProbeResults(result, incidentRetryAttempt)
   }
 
   generateVerboseStartupMessage(): string {
