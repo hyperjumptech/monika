@@ -22,11 +22,15 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import type { Notification } from '@hyperjumptech/monika-notification'
+
+import { AbortSignal } from 'node-abort-controller'
 import { v4 as uuid } from 'uuid'
+
+import type { Probe, ProbeAlert } from '../interfaces/probe'
+
 import { doProbe } from '../components/probe'
 import { getContext } from '../context'
-import type { Notification } from '@hyperjumptech/monika-notification'
-import type { Probe, ProbeAlert } from '../interfaces/probe'
 import { log } from '../utils/pino'
 import {
   getProbeContext,
@@ -83,7 +87,7 @@ function addFailedRequestAssertions(assertions: ProbeAlert[]) {
   ]
 }
 
-export async function loopCheckSTUNServer(interval: number): Promise<any> {
+export async function loopCheckSTUNServer(interval: number): Promise<unknown> {
   // if stun is disabled, no need to create interval
   if (interval === -1) return
 
@@ -101,15 +105,15 @@ export async function loopCheckSTUNServer(interval: number): Promise<any> {
 }
 
 type StartProbingArgs = {
-  signal: AbortSignal
-  probes: Probe[]
   notifications: Notification[]
+  probes: Probe[]
+  signal: AbortSignal
 }
 
 export function startProbing({
-  signal,
-  probes,
   notifications,
+  probes,
+  signal,
 }: StartProbingArgs): void {
   initializeProbeStates(probes)
 
@@ -130,17 +134,17 @@ export function startProbing({
 
     for (const probe of probes) {
       doProbe({
-        probe,
         notifications,
+        probe,
       })
     }
   }, 1000)
 }
 
 function isEndOfRepeat(probes: Probe[]) {
-  const isAllProbeFinished = probes.every(({ id }) => {
-    return isLastCycleOf(id) && getProbeState(id) !== 'running'
-  })
+  const isAllProbeFinished = probes.every(
+    ({ id }) => isLastCycleOf(id) && getProbeState(id) !== 'running'
+  )
 
   return getContext().flags.repeat && isAllProbeFinished
 }

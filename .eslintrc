@@ -27,7 +27,7 @@
         "unicorn/prefer-event-target": "warn",
         "unicorn/prefer-export-from": "warn",
         "unicorn/prefer-logical-operator-over-ternary": "warn",
-        "unicorn/prefer-node-protocol": "warn",
+        "unicorn/prefer-node-protocol": "off",
         "unicorn/prefer-top-level-await": "warn",
         "unicorn/switch-case-braces": "warn",
         "unicorn/text-encoding-identifier-case": "warn"
