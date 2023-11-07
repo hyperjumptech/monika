@@ -23,16 +23,20 @@
  **********************************************************************************/
 
 import { Command, Errors, Flags } from '@oclif/core'
+import { AbortController } from 'node-abort-controller'
 import pEvent from 'p-event'
 
-import { flush } from '../components/logger/flush'
+import type { Config } from '../interfaces/config'
+import type { Probe } from '../interfaces/probe'
+
 import { createConfig, getConfig, isSymonModeFrom } from '../components/config'
 import { sortProbes } from '../components/config/sort'
 import { printAllLogs } from '../components/logger'
+import { flush } from '../components/logger/flush'
 import { closeLog, openLogfile } from '../components/logger/history'
 import { logStartupMessage } from '../components/logger/startup-message'
-import { sendMonikaStartMessage } from '../components/notification/start-message'
 import { scheduleSummaryNotification } from '../components/notification/schedule-notification'
+import { sendMonikaStartMessage } from '../components/notification/start-message'
 import { setContext } from '../context'
 import events from '../events'
 import {
@@ -42,8 +46,6 @@ import {
   retryMaxDelayMs,
   symonAPIVersion,
 } from '../flag'
-import type { Config } from '../interfaces/config'
-import type { Probe } from '../interfaces/probe'
 import { printSummary, savePidFile } from '../jobs/summary-notification'
 import initLoaders from '../loaders'
 import { sanitizeProbe, startProbing } from '../looper'
@@ -60,8 +62,6 @@ const em = getEventEmitter()
 let symonClient: SymonClient
 
 export default class Monika extends Command {
-  static id = 'monika'
-
   static description = 'Monika command line monitoring tool'
 
   static examples = [
@@ -73,51 +73,31 @@ export default class Monika extends Command {
   ]
 
   static flags = {
-    version: Flags.version({ char: 'v' }),
-    help: Flags.help({ char: 'h' }),
-
-    symonUrl: Flags.string({
-      hidden: false,
-      description: 'URL of Symon',
-      dependsOn: ['symonKey'],
+    'auto-update': Flags.string({
+      description:
+        'Enable auto-update for Monika. Available options: major, minor, patch. This will make Monika terminate itself on successful update but does not restart',
     }),
-
-    symonKey: Flags.string({
-      description: 'API Key for Symon',
-      dependsOn: ['symonUrl'],
-    }),
-
-    symonLocationId: Flags.string({
-      description: 'Location ID for Symon (optional)',
-      dependsOn: ['symonKey', 'symonUrl'],
-      required: false,
-    }),
-
-    symonMonikaId: Flags.string({
-      description: 'Monika ID for Symon (optional)',
-      dependsOn: ['symonKey', 'symonUrl'],
-      required: false,
-    }),
-
-    symonReportInterval: Flags.integer({
-      description: 'Interval for reporting to Symon in milliseconds (optional)',
-      dependsOn: ['symonKey', 'symonUrl'],
-      required: false,
-    }),
-
-    symonReportLimit: Flags.integer({
-      description: 'Data limit to be reported to Symon (optional)',
-      dependsOn: ['symonKey', 'symonUrl'],
-      required: false,
-    }),
-
     config: Flags.string({
       char: 'c',
+      default: monikaFlagsDefaultValue.config,
       description:
         'JSON configuration filename or URL. If none is supplied, will look for monika.yml in the current directory',
-      default: monikaFlagsDefaultValue.config,
       env: 'MONIKA_JSON_CONFIG',
       multiple: true,
+    }),
+
+    'config-filename': Flags.string({
+      default: monikaFlagsDefaultValue['config-filename'],
+      dependsOn: ['config'],
+      description:
+        'The configuration filename for config file created if there is no config file found ',
+    }),
+
+    'config-interval': Flags.integer({
+      default: monikaFlagsDefaultValue['config-interval'],
+      dependsOn: ['config'],
+      description:
+        'The interval (in seconds) for periodic config checking if url is used as config source',
     }),
 
     'create-config': Flags.boolean({
@@ -125,56 +105,46 @@ export default class Monika extends Command {
         'Create config from HAR (-H), postman (-p), insomnia (-I), sitemap (--sitemap), textfile (--text) export file, or open Monika Configuration Generator using default browser',
     }),
 
-    'config-interval': Flags.integer({
+    flush: Flags.boolean({
+      description: 'Flush logs',
+    }),
+
+    'follow-redirects': Flags.integer({
+      default: monikaFlagsDefaultValue['follow-redirects'],
       description:
-        'The interval (in seconds) for periodic config checking if url is used as config source',
-      default: monikaFlagsDefaultValue['config-interval'],
-      dependsOn: ['config'],
+        'Monika will follow redirects as many times as the specified value here. By default, Monika will follow redirects once. To disable redirects following, set the value to zero.',
     }),
 
-    'config-filename': Flags.string({
-      description:
-        'The configuration filename for config file created if there is no config file found ',
-      default: monikaFlagsDefaultValue['config-filename'],
-      dependsOn: ['config'],
-    }),
-
-    sitemap: Flags.string({
-      description: 'Run Monika using a Sitemap xml file.',
-      multiple: false,
-      exclusive: ['har', 'insomnia', 'postman', 'text'],
-    }),
-
-    'one-probe': Flags.boolean({
-      description: 'One Probe',
-      dependsOn: ['sitemap'],
-    }),
-
-    postman: Flags.string({
-      char: 'p', // (p)ostman
-      description: 'Run Monika using a Postman json file.',
-      multiple: false,
-      exclusive: ['har', 'insomnia', 'sitemap', 'text'],
+    force: Flags.boolean({
+      default: false,
+      description: 'Force commands with a yes whenever Y/n is prompted.',
     }),
 
     har: Flags.string({
       char: 'H', // (H)ar file to
       description: 'Run Monika using a HAR file',
-      multiple: false,
       exclusive: ['postman', 'insomnia', 'sitemap', 'text'],
+      multiple: false,
+    }),
+
+    help: Flags.help({ char: 'h' }),
+
+    id: Flags.string({
+      char: 'i', // (i)ds to run
+      description: 'Define specific probe ids to run',
+      multiple: false,
     }),
 
     insomnia: Flags.string({
       char: 'I', // (I)nsomnia file to
       description: 'Run Monika using an Insomnia json/yaml file',
-      multiple: false,
       exclusive: ['har', 'postman', 'sitemap', 'text'],
+      multiple: false,
     }),
 
-    text: Flags.string({
-      description: 'Run Monika using a Simple text file',
-      multiple: false,
-      exclusive: ['postman', 'insomnia', 'sitemap', 'har'],
+    'keep-verbose-logs': Flags.boolean({
+      default: false,
+      description: 'Store all requests logs to database',
     }),
 
     logs: Flags.boolean({
@@ -182,13 +152,22 @@ export default class Monika extends Command {
       description: 'Print all logs.',
     }),
 
-    flush: Flags.boolean({
-      description: 'Flush logs',
+    'one-probe': Flags.boolean({
+      dependsOn: ['sitemap'],
+      description: 'One Probe',
     }),
 
-    verbose: Flags.boolean({
-      description: 'Show verbose log messages',
-      default: false,
+    output: Flags.string({
+      char: 'o', // (o)utput file to write config to
+      description: 'Write monika config file to this file',
+      multiple: false,
+    }),
+
+    postman: Flags.string({
+      char: 'p', // (p)ostman
+      description: 'Run Monika using a Postman json file.',
+      exclusive: ['har', 'insomnia', 'sitemap', 'text'],
+      multiple: false,
     }),
 
     prometheus: Flags.integer({
@@ -199,159 +178,91 @@ export default class Monika extends Command {
 
     repeat: Flags.integer({
       char: 'r', // (r)epeat
+      default: 0,
       description: 'Repeats the test run n times',
       multiple: false,
-      default: 0,
-    }),
-
-    stun: Flags.integer({
-      char: 's', // (s)stun
-      description: 'Interval in seconds to check STUN server',
-      multiple: false,
-      default: monikaFlagsDefaultValue.stun,
-    }),
-
-    id: Flags.string({
-      char: 'i', // (i)ds to run
-      description: 'Define specific probe ids to run',
-      multiple: false,
-    }),
-
-    output: Flags.string({
-      char: 'o', // (o)utput file to write config to
-      description: 'Write monika config file to this file',
-      multiple: false,
-    }),
-
-    force: Flags.boolean({
-      description: 'Force commands with a yes whenever Y/n is prompted.',
-      default: false,
-    }),
-
-    summary: Flags.boolean({
-      description: 'Display a summary of monika running stats',
-      default: false,
-    }),
-
-    'status-notification': Flags.string({
-      description: 'Cron syntax for status notification schedule',
-    }),
-
-    'keep-verbose-logs': Flags.boolean({
-      description: 'Store all requests logs to database',
-      default: false,
-    }),
-
-    'auto-update': Flags.string({
-      description:
-        'Enable auto-update for Monika. Available options: major, minor, patch. This will make Monika terminate itself on successful update but does not restart',
-    }),
-
-    'follow-redirects': Flags.integer({
-      default: monikaFlagsDefaultValue['follow-redirects'],
-      description:
-        'Monika will follow redirects as many times as the specified value here. By default, Monika will follow redirects once. To disable redirects following, set the value to zero.',
     }),
 
     retryInitialDelayMs,
 
     retryMaxDelayMs,
 
+    sitemap: Flags.string({
+      description: 'Run Monika using a Sitemap xml file.',
+      exclusive: ['har', 'insomnia', 'postman', 'text'],
+      multiple: false,
+    }),
+
+    'status-notification': Flags.string({
+      description: 'Cron syntax for status notification schedule',
+    }),
+
+    stun: Flags.integer({
+      char: 's', // (s)stun
+      default: monikaFlagsDefaultValue.stun,
+      description: 'Interval in seconds to check STUN server',
+      multiple: false,
+    }),
+
+    summary: Flags.boolean({
+      default: false,
+      description: 'Display a summary of monika running stats',
+    }),
+
     'symon-api-version': symonAPIVersion(),
+
+    symonKey: Flags.string({
+      dependsOn: ['symonUrl'],
+      description: 'API Key for Symon',
+    }),
+
+    symonLocationId: Flags.string({
+      dependsOn: ['symonKey', 'symonUrl'],
+      description: 'Location ID for Symon (optional)',
+      required: false,
+    }),
+
+    symonMonikaId: Flags.string({
+      dependsOn: ['symonKey', 'symonUrl'],
+      description: 'Monika ID for Symon (optional)',
+      required: false,
+    }),
+
+    symonReportInterval: Flags.integer({
+      dependsOn: ['symonKey', 'symonUrl'],
+      description: 'Interval for reporting to Symon in milliseconds (optional)',
+      required: false,
+    }),
+
+    symonReportLimit: Flags.integer({
+      dependsOn: ['symonKey', 'symonUrl'],
+      description: 'Data limit to be reported to Symon (optional)',
+      required: false,
+    }),
+
+    symonUrl: Flags.string({
+      dependsOn: ['symonKey'],
+      description: 'URL of Symon',
+      hidden: false,
+    }),
+
+    text: Flags.string({
+      description: 'Run Monika using a Simple text file',
+      exclusive: ['postman', 'insomnia', 'sitemap', 'har'],
+      multiple: false,
+    }),
+
+    verbose: Flags.boolean({
+      default: false,
+      description: 'Show verbose log messages',
+    }),
+
+    version: Flags.version({ char: 'v' }),
   }
 
-  async run(): Promise<void> {
-    const monika = await this.parse(Monika)
-    const _flags: MonikaFlags = monika.flags
-    setContext({ flags: _flags })
+  static id = 'monika'
 
-    try {
-      if (_flags['create-config']) {
-        await createConfig(_flags)
-        return
-      }
-
-      await openLogfile()
-
-      if (_flags.logs) {
-        await printAllLogs()
-        await closeLog()
-        return
-      }
-
-      if (_flags.flush) {
-        await flush(_flags.force)
-        await closeLog()
-        return
-      }
-
-      if (_flags.summary) {
-        printSummary(this.config)
-        await closeLog()
-        return
-      }
-
-      await initLoaders(_flags, this.config)
-
-      if (isSymonModeFrom(_flags)) {
-        symonClient = new SymonClient(_flags)
-        await symonClient.initiate()
-      }
-
-      let isFirstRun = true
-
-      for (;;) {
-        const controller = new AbortController()
-        const { signal } = controller
-        const config = getConfig()
-        const notifications = config.notifications || []
-        const probes = this.getProbes({ config, flags: _flags })
-
-        // emit the sanitized probe
-        em.emit(events.config.sanitized, probes)
-
-        // save some data into files for later
-        savePidFile(_flags.config, config)
-
-        this.deprecationHandler(config)
-
-        logStartupMessage({
-          config,
-          flags: _flags,
-          isFirstRun,
-        })
-
-        startProbing({
-          signal,
-          probes,
-          notifications,
-        })
-
-        if (process.env.NODE_ENV === 'test') {
-          break
-        }
-
-        sendMonikaStartMessage(notifications).catch((error) =>
-          log.error(error.message)
-        )
-
-        // schedule status update notification
-        scheduleSummaryNotification({ config, flags: _flags })
-
-        isFirstRun = false
-
-        // block the loop until receives config updated event
-        // eslint-disable-next-line no-await-in-loop
-        await pEvent(em, events.config.updated)
-        controller.abort('Monika configuration updated')
-      }
-    } catch (error) {
-      await closeLog()
-      this.error((error as any)?.message, { exit: 1 })
-    }
-  }
-
-  async catch(error: Error): Promise<any> {
+  async catch(error: Error): Promise<unknown> {
     super.catch(error)
 
     if (symonClient) {
@@ -434,6 +345,97 @@ export default class Monika extends Command {
       sanitizeProbe(isSymonModeFrom(flags), probe)
     )
   }
+
+  async run(): Promise<void> {
+    const monika = await this.parse(Monika)
+    const _flags: MonikaFlags = monika.flags
+    setContext({ flags: _flags })
+
+    try {
+      if (_flags['create-config']) {
+        await createConfig(_flags)
+        return
+      }
+
+      await openLogfile()
+
+      if (_flags.logs) {
+        await printAllLogs()
+        await closeLog()
+        return
+      }
+
+      if (_flags.flush) {
+        await flush(_flags.force)
+        await closeLog()
+        return
+      }
+
+      if (_flags.summary) {
+        printSummary(this.config)
+        await closeLog()
+        return
+      }
+
+      await initLoaders(_flags, this.config)
+
+      if (isSymonModeFrom(_flags)) {
+        symonClient = new SymonClient(_flags)
+        await symonClient.initiate()
+      }
+
+      let isFirstRun = true
+
+      for (;;) {
+        const controller = new AbortController()
+        const { signal } = controller
+        const config = getConfig()
+        const notifications = config.notifications || []
+        const probes = this.getProbes({ config, flags: _flags })
+
+        // emit the sanitized probe
+        em.emit(events.config.sanitized, probes)
+
+        // save some data into files for later
+        savePidFile(_flags.config, config)
+
+        this.deprecationHandler(config)
+
+        logStartupMessage({
+          config,
+          flags: _flags,
+          isFirstRun,
+        })
+
+        startProbing({
+          notifications,
+          probes,
+          signal,
+        })
+
+        if (process.env.NODE_ENV === 'test') {
+          break
+        }
+
+        sendMonikaStartMessage(notifications).catch((error) =>
+          log.error(error.message)
+        )
+
+        // schedule status update notification
+        scheduleSummaryNotification({ config, flags: _flags })
+
+        isFirstRun = false
+
+        // block the loop until receives config updated event
+        // eslint-disable-next-line no-await-in-loop
+        await pEvent(em, events.config.updated)
+        controller.abort('Monika configuration updated')
+      }
+    } catch (error: unknown) {
+      await closeLog()
+      this.error((error as Error)?.message, { exit: 1 })
+    }
+  }
 }
 
 /**
@@ -449,6 +451,7 @@ process.on('SIGINT', async () => {
   }
 
   if (symonClient) {
+    await symonClient.stopReport()
     await symonClient.sendStatus({ isOnline: false })
   }
 
