@@ -40,8 +40,7 @@
   ],
   "scripts": {
     "clean": "rm -rf coverage lib tsconfig.tsbuildinfo oclif.manifest.json",
-    "pretest": "npm run check-format",
-    "posttest": "eslint . --ext .ts --config .eslintrc",
+    "lint": "eslint . --ext .ts --config .eslintrc",
     "prepack": "npm run clean && tsc -b && oclif manifest",
     "start": "npm run prepack && ./bin/dev.js",
     "start:prod": "npm run prepack && ./bin/run.js",
