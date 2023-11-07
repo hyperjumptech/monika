@@ -67,7 +67,7 @@ jobs:
         name: Pack the binary using vercel/pkg
       - run: ./dist/monika -v
         name: Test to make sure printing the version succeeds
-  build:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -78,5 +78,3 @@ jobs:
       - run: npm ci
       - run: npm run build -w packages/notification
       - run: npm test && npx codecov
-      - run: npm pack
-      - run: npm install -g ./hyperjumptech-monika-*.tgz
