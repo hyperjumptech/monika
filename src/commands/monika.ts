@@ -262,7 +262,7 @@ export default class Monika extends Command {
 
   static id = 'monika'
 
-  async catch(error: Error): Promise<any> {
+  async catch(error: Error): Promise<unknown> {
     super.catch(error)
 
     if (symonClient) {
