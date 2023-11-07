@@ -5,7 +5,7 @@ import { probeRequestResult } from '../../../../interfaces/request'
 import { redisRequest } from './request'
 
 export class RedisProber extends BaseProber {
-  async probe(): Promise<void> {
+  async probe(incidentRetryAttempt: number): Promise<void> {
     if (!this.probeConfig.redis) {
       throw new Error(
         `Redis configuration is empty. Probe ID: ${this.probeConfig.id}`
@@ -18,7 +18,7 @@ export class RedisProber extends BaseProber {
       redis: this.probeConfig.redis,
     })
 
-    this.processProbeResults(result)
+    this.processProbeResults(result, incidentRetryAttempt)
   }
 
   generateVerboseStartupMessage(): string {

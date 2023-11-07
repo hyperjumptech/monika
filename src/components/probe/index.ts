@@ -73,12 +73,8 @@ export async function doProbe({
         initialDelay: getContext().flags.retryInitialDelayMs,
         maxDelay: getContext().flags.retryMaxDelayMs,
       }),
-    }).execute(() =>
-      Promise.all(
-        probers.map(async (prober) => {
-          await prober.probe()
-        })
-      )
+    }).execute(({ attempt }) =>
+      Promise.all(probers.map(async (prober) => prober.probe(attempt)))
     )
 
     setProbeFinish(probe.id)

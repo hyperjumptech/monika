@@ -5,7 +5,7 @@ import type { Mongo } from '../../../../interfaces/probe'
 import { mongoRequest } from './request'
 
 export class MongoProber extends BaseProber {
-  async probe(): Promise<void> {
+  async probe(incidentRetryAttempt: number): Promise<void> {
     if (!this.probeConfig.mongo) {
       throw new Error(
         `Mongo configuration is empty. Probe ID: ${this.probeConfig.id}`
@@ -18,7 +18,7 @@ export class MongoProber extends BaseProber {
       mongo: this.probeConfig.mongo,
     })
 
-    this.processProbeResults(result)
+    this.processProbeResults(result, incidentRetryAttempt)
   }
 
   generateVerboseStartupMessage(): string {
