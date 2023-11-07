@@ -425,6 +425,27 @@ describe('Probe processing', () => {
     }).timeout(10_000)
 
     it('should send recovery notification for MariaDB probe', async () => {
+      // simulate the incindent first by throwing on first call
+      // then simulate recovery on second call
+      const requestStub = sinon.stub(mariadb, 'createConnection')
+      requestStub.onFirstCall().throws()
+      requestStub.onSecondCall().callsFake(
+        async (_connectionUri) =>
+          ({
+            end: async () => {
+              Promise.resolve()
+            },
+          } as mariadb.Connection)
+      )
+
+      // repeat needs to be 0 so that monika can probe twice
+      // where in the first time it will send incident notification
+      // then in the second time it will send recovery notification
+      setContext({
+        ...getContext(),
+        flags: { ...getContext().flags, repeat: 0 },
+      })
+
       // arrange
       const probe = {
         id: '3ngd4',
@@ -462,25 +483,14 @@ describe('Probe processing', () => {
           },
         ],
       })
-      // wait for random timeout
-      await sleep(3 * seconds)
-
-      const requestStub = sinon.stub(mariadb, 'createConnection').callsFake(
-        async (_connectionUri) =>
-          ({
-            end: async () => {
-              Promise.resolve()
-            },
-          } as mariadb.Connection)
-      )
-      // wait for send notification function to resolve
-      await sleep(3 * seconds)
+      // gonna need to wait for a while until monika does the probing twice
+      await sleep(7000)
 
       // assert
       sinon.assert.called(requestStub)
       expect(notificationAlert?.[probe.id]?.body?.url).eq('3ngd4')
       expect(notificationAlert?.[probe.id]?.body?.alert).eq('')
-    }).timeout(10_000)
+    }).timeout(15_000)
 
     it('should probe MongoDB', async () => {
       // arrange
