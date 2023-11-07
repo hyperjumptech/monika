@@ -262,7 +262,7 @@ export default class Monika extends Command {
 
   static id = 'monika'
 
-  async catch(error: Error): Promise<unknown> {
+  async catch(error: Error): Promise<any> {
     super.catch(error)
 
     if (symonClient) {
@@ -285,35 +285,23 @@ export default class Monika extends Command {
 
   deprecationHandler(config: Config): Config {
     const showDeprecateMsg: Record<
-      'incidentThreshold' | 'query' | 'recoveryThreshold',
+      'query' | 'incidentThreshold' | 'recoveryThreshold',
       boolean
     > = {
-      incidentThreshold: false,
       query: false,
+      incidentThreshold: false,
       recoveryThreshold: false,
     }
 
     const checkedConfig = {
       ...config,
       probes: config.probes?.map((probe) => {
-        if (probe?.incidentThreshold) {
-          showDeprecateMsg.incidentThreshold = true
-        }
-
         if (probe?.recoveryThreshold) {
           showDeprecateMsg.recoveryThreshold = true
         }
 
         return {
           ...probe,
-          alerts: probe.alerts?.map((alert) => {
-            if (alert.query) {
-              showDeprecateMsg.query = true
-              return { ...alert, assertion: alert.query }
-            }
-
-            return alert
-          }),
           requests: probe.requests?.map((request) => ({
             ...request,
             alert: request.alerts?.map((alert) => {
@@ -325,14 +313,16 @@ export default class Monika extends Command {
               return alert
             }),
           })),
+          alerts: probe.alerts?.map((alert) => {
+            if (alert.query) {
+              showDeprecateMsg.query = true
+              return { ...alert, assertion: alert.query }
+            }
+
+            return alert
+          }),
         }
       }),
-    }
-
-    if (showDeprecateMsg.incidentThreshold) {
-      log.warn(
-        'incidentThreshold is deprecated. It will be managed internally by Monika.'
-      )
     }
 
     if (showDeprecateMsg.recoveryThreshold) {

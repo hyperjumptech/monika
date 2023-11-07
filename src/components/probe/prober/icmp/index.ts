@@ -28,14 +28,14 @@ import { icmpRequest } from './request'
 import { probeRequestResult } from '../../../../interfaces/request'
 
 export class PingProber extends BaseProber {
-  async probe(): Promise<void> {
+  async probe(incidentRetryAttempt: number): Promise<void> {
     const result = await probePing({
       id: this.probeConfig.id,
       checkOrder: this.counter,
       pings: this.probeConfig.ping,
     })
 
-    this.processProbeResults(result)
+    this.processProbeResults(result, incidentRetryAttempt)
   }
 
   generateVerboseStartupMessage(): string {

@@ -26,7 +26,7 @@ import { getContext } from '../../../../context'
 import events from '../../../../events'
 import { getEventEmitter } from '../../../../utils/events'
 import { httpRequest } from './request'
-import { BaseProber, NotificationType } from '..'
+import { BaseProber, DEFAULT_INCIDENT_THRESHOLD, NotificationType } from '..'
 import {
   type ProbeRequestResponse,
   probeRequestResult,
@@ -46,10 +46,13 @@ type ProbeResultMessageParams = {
 }
 
 export class HTTPProber extends BaseProber {
-  async probe(): Promise<void> {
+  async probe(incidentRetryAttempt: number): Promise<void> {
     const requests = this.probeConfig.requests!
     // sending multiple http requests for request chaining
     const responses: ProbeRequestResponse[] = []
+    const isIncidentThresholdMet =
+      incidentRetryAttempt ===
+      (this.probeConfig.incidentThreshold || DEFAULT_INCIDENT_THRESHOLD) - 1
 
     for (const requestConfig of requests) {
       responses.push(
@@ -71,6 +74,18 @@ export class HTTPProber extends BaseProber {
           getErrorMessage(hasFailedRequest.errMessage || 'Unknown error.')
         )
         throw new Error('There is an ongoing incident.')
+      }
+
+      if (!isIncidentThresholdMet) {
+        this.logMessage(
+          false,
+          `Probe request failed. Attempt (${
+            incidentRetryAttempt + 1
+          }) with incident threshold (${this.probeConfig.incidentThreshold}).`
+        )
+        throw new Error(
+          'Probe request is failed but incident threshold is not met.'
+        )
       }
 
       this.logMessage(
@@ -101,6 +116,18 @@ export class HTTPProber extends BaseProber {
         if (this.hasIncident()) {
           this.logMessage(false, getAssertionMessage(alert.assertion))
           throw new Error(alert.message)
+        }
+
+        if (!isIncidentThresholdMet) {
+          this.logMessage(
+            false,
+            `Probe assertion failed. Attempt (${
+              incidentRetryAttempt + 1
+            }) with incident threshold (${this.probeConfig.incidentThreshold}).`
+          )
+          throw new Error(
+            'Probe assertion is failed but incident threshold is not met.'
+          )
         }
 
         this.handleAssertionFailed(response, requestIndex, alert)
@@ -184,7 +211,7 @@ export class HTTPProber extends BaseProber {
       validation: {
         alert: triggeredAlert,
         isAlertTriggered: true,
-        response: response,
+        response,
       },
     })
 

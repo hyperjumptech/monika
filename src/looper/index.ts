@@ -28,7 +28,6 @@ import { AbortSignal } from 'node-abort-controller'
 import { v4 as uuid } from 'uuid'
 
 import type { Probe, ProbeAlert } from '../interfaces/probe'
-import type { RequestConfig } from '../interfaces/request'
 
 import { doProbe } from '../components/probe'
 import { getContext } from '../context'
@@ -44,18 +43,18 @@ let checkSTUNinterval: NodeJS.Timeout
 
 const DISABLE_STUN = -1 // -1 is disable stun checking
 
-/**
- * sanitizeProbe sanitize currently mapped probe name, alerts, and threshold
- * @param {boolean} isSymonMode is running in Symon mode
- * @param {object} probe is the probe configuration
- * @returns {object} as probe
- */
 export function sanitizeProbe(isSymonMode: boolean, probe: Probe): Probe {
-  const { alerts, id, name, requests } = probe
+  const { id, name, requests, incidentThreshold, alerts } = probe
 
   if (!name) {
     log.warn(
-      `Warning: Probe ${id} has no name defined. Using the default name started by monika`
+      `Warning: Probe ${id} has no name defined. Using the default name started by Monika`
+    )
+  }
+
+  if (!incidentThreshold) {
+    log.warn(
+      `Warning: Probe ${id} has no incidentThreshold configuration defined. Using the default threshold: 5`
     )
   }
 
@@ -69,64 +68,8 @@ export function sanitizeProbe(isSymonMode: boolean, probe: Probe): Probe {
 
   return {
     ...probe,
-    alerts: sanitizeAlerts({
-      alerts,
-      isHTTPProbe,
-      isSymonMode,
-    }),
-    name: name || `monika_${id}`,
-    requests: sanitizeRequests(requests),
+    alerts: isSymonMode ? [] : addFailedRequestAssertions(alerts),
   }
-}
-
-type SanitizeAlertsParams = {
-  alerts: ProbeAlert[]
-  isHTTPProbe: boolean
-  isSymonMode: boolean
-}
-
-function sanitizeAlerts({
-  alerts,
-  isHTTPProbe,
-  isSymonMode,
-}: SanitizeAlertsParams) {
-  if (isSymonMode) {
-    return []
-  }
-
-  if (alerts === undefined || alerts.length === 0) {
-    return addFailedRequestAssertions(getDefaultAlerts(isHTTPProbe))
-  }
-
-  return addFailedRequestAssertions(
-    alerts.map((alert) => {
-      if (alert.query !== undefined) {
-        return { ...alert, assertion: alert.query }
-      }
-
-      return alert
-    })
-  )
-}
-
-function getDefaultAlerts(isHTTPProbe: boolean): ProbeAlert[] {
-  if (!isHTTPProbe) {
-    return []
-  }
-
-  return [
-    {
-      assertion: 'response.status < 200 or response.status > 299',
-      id: uuid(),
-      message: 'HTTP Status is {{ response.status }}, expecting 2xx',
-    },
-    {
-      assertion: 'response.time > 2000',
-      id: uuid(),
-      message:
-        'Response time is {{ response.time }}ms, expecting less than 2000ms',
-    },
-  ]
 }
 
 export const FAILED_REQUEST_ASSERTION = {
@@ -142,20 +85,6 @@ function addFailedRequestAssertions(assertions: ProbeAlert[]) {
       ...FAILED_REQUEST_ASSERTION,
     },
   ]
-}
-
-function sanitizeRequests(requests?: RequestConfig[]) {
-  return requests?.map((request) => ({
-    ...request,
-    alerts: request.alerts?.map((alert) => {
-      if (alert.query !== undefined) {
-        return { ...alert, assertion: alert.query }
-      }
-
-      return alert
-    }),
-    method: request.method || 'GET',
-  }))
 }
 
 export async function loopCheckSTUNServer(interval: number): Promise<unknown> {
