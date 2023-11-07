@@ -69,6 +69,10 @@ export async function doProbe({
     })
 
     await retry(handleAll, {
+      maxAttempts:
+        getContext().flags.repeat > 0
+          ? getContext().flags.repeat - 1
+          : undefined,
       backoff: new ExponentialBackoff({
         initialDelay: getContext().flags.retryInitialDelayMs,
         maxDelay: getContext().flags.retryMaxDelayMs,
