@@ -26,7 +26,7 @@ import { getContext } from '../../../../context'
 import events from '../../../../events'
 import { getEventEmitter } from '../../../../utils/events'
 import { httpRequest } from './request'
-import { BaseProber, DEFAULT_INCIDENT_THRESHOLD, NotificationType } from '..'
+import { BaseProber, NotificationType } from '..'
 import {
   type ProbeRequestResponse,
   probeRequestResult,
@@ -39,6 +39,10 @@ import { saveProbeRequestLog } from '../../../logger/history'
 import type { ValidatedResponse } from '../../../../plugins/validate-response'
 import { isSymonModeFrom } from '../../../config'
 import { startDowntimeCounter } from '../../../downtime-counter'
+import {
+  DEFAULT_INCIDENT_THRESHOLD,
+  DEFAULT_RECOVERY_THRESHOLD,
+} from '../../../config/validation/validator/default-values'
 
 type ProbeResultMessageParams = {
   request: RequestConfig
@@ -71,22 +75,25 @@ export class HTTPProber extends BaseProber {
     )
     if (hasFailedRequest) {
       if (this.hasIncident()) {
+        // this probe is currently 'incident' state so no need to continue
         this.logMessage(
           false,
           getErrorMessage(hasFailedRequest.errMessage || 'Unknown error.')
         )
-        throw new Error('There is an ongoing incident.')
+        return
       }
 
       if (!isIncidentThresholdMet) {
         this.logMessage(
           false,
-          `Probe request failed. Attempt (${
+          `Probing failed. Will try again. Attempt (${
             incidentRetryAttempt + 1
           }) with incident threshold (${this.probeConfig.incidentThreshold}).`
         )
+
+        // throw here so that the retry function in src/components/probe/index.ts can retry again
         throw new Error(
-          'Probe request is failed but incident threshold is not met.'
+          'Probe request failed but incident threshold is not met.'
         )
       }
 
@@ -96,12 +103,14 @@ export class HTTPProber extends BaseProber {
         getNotificationMessage({ isIncident: true })
       )
 
+      // this probe is definitely in incident state, so send notification, etc.
       this.handleFailedProbe(
         responses.map((requestResponse) => ({ requestResponse }))
       )
-      throw new Error('Probe request is failed.')
+      return
     }
 
+    // from here on, the probe can be accessed but might still trigger the assertion
     for (const requestIndex of responses.keys()) {
       const response = responses[requestIndex]
       const validatedResponse = this.validateResponse(
@@ -116,35 +125,57 @@ export class HTTPProber extends BaseProber {
         const { alert } = triggeredAlertResponse
 
         if (this.hasIncident()) {
+          // this probe is still in incident state
           this.logMessage(false, getAssertionMessage(alert.assertion))
-          throw new Error(alert.message)
+          return
         }
 
         if (!isIncidentThresholdMet) {
           this.logMessage(
             false,
-            `Probe assertion failed. Attempt (${
+            `Probe assertion failed. Will retry. Attempt (${
               incidentRetryAttempt + 1
             }) with incident threshold (${this.probeConfig.incidentThreshold}).`
           )
+          // throw here so that the retry function in src/components/probe/index.ts can retry again
           throw new Error(
-            'Probe assertion is failed but incident threshold is not met.'
+            'Probe assertion failed but incident threshold is not met.'
           )
         }
 
+        // this probe is definitely in incident state because of fail assertion, so send notification, etc.
         this.handleAssertionFailed(response, requestIndex, alert)
-        throw new Error(alert.message)
+        return
       }
     }
 
+    // from here on, the probe is definitely healthy, but if it was incident, we don't want to immediately send notification
+    const isRecoveryThresholdMet =
+      incidentRetryAttempt ===
+      (this.probeConfig.recoveryThreshold || DEFAULT_RECOVERY_THRESHOLD) - 1
     const isRecovery = this.hasIncident()
     if (isRecovery) {
+      if (!isRecoveryThresholdMet) {
+        this.logMessage(
+          false,
+          `Probing succeeds but previously incident. Will retry. Attempt (${
+            incidentRetryAttempt + 1
+          }) with recovery threshold (${
+            this.probeConfig.recoveryThreshold || DEFAULT_RECOVERY_THRESHOLD
+          }).`
+        )
+        throw new Error('Probing succeeds but recovery threshold is not met.')
+      }
+
       this.logMessage(true, getNotificationMessage({ isIncident: false }))
+
+      // at this state, the probe has definitely recovered, so send notifications, etc.
       this.handleRecovery(
         responses.map((requestResponse) => ({ requestResponse }))
       )
     }
 
+    // the probe is healthy and not recovery
     for (const requestIndex of responses.keys()) {
       const response = responses[requestIndex]
       getEventEmitter().emit(events.probe.response.received, {

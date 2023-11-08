@@ -34,6 +34,10 @@ import {
   setProbeRunning,
 } from '../../utils/probe-state'
 import { createProbers } from './prober/factory'
+import {
+  DEFAULT_INCIDENT_THRESHOLD,
+  DEFAULT_RECOVERY_THRESHOLD,
+} from '../config/validation/validator/default-values'
 
 type doProbeParams = {
   probe: Probe // probe contains all the probes
@@ -48,13 +52,12 @@ export async function doProbe({
   probe,
   notifications,
 }: doProbeParams): Promise<void> {
-  if (
-    !isTimeToProbe(probe) ||
-    isCycleEnd(probe.id) ||
-    !setProbeRunning(probe.id)
-  ) {
+  if (!isTimeToProbe(probe) || isCycleEnd(probe.id)) {
     return
   }
+
+  const randomTimeoutMilliseconds = getRandomTimeoutMilliseconds()
+  setProbeRunning(probe.id)
 
   setTimeout(async () => {
     const probeCtx = getProbeContext(probe.id)
@@ -68,11 +71,14 @@ export async function doProbe({
       probeConfig: probe,
     })
 
+    const maxAttempts = Math.max(
+      // since we will retry for both incident and recovery, let's just get the biggest threshold
+      probe.incidentThreshold || DEFAULT_INCIDENT_THRESHOLD,
+      probe.recoveryThreshold || DEFAULT_RECOVERY_THRESHOLD
+    )
+
     await retry(handleAll, {
-      maxAttempts:
-        getContext().flags.repeat > 0
-          ? getContext().flags.repeat - 1
-          : undefined,
+      maxAttempts,
       backoff: new ExponentialBackoff({
         initialDelay: getContext().flags.retryInitialDelayMs,
         maxDelay: getContext().flags.retryMaxDelayMs,
@@ -82,7 +88,7 @@ export async function doProbe({
     )
 
     setProbeFinish(probe.id)
-  }, getRandomTimeoutMilliseconds())
+  }, randomTimeoutMilliseconds)
 }
 
 function isTimeToProbe({ id, interval }: Probe) {
