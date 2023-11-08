@@ -215,7 +215,7 @@ describe('HTTP Probe processing', () => {
     expect(notificationAlert?.[probe.requests[0].url]?.body.alert).eq('')
   }).timeout(10_000)
 
-  it('should send incident notification', async () => {
+  it('should send incident notification when assertion fails', async () => {
     // arrange
     server.use(
       rest.get('https://example.com', (_, res, ctx) => {
