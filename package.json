@@ -166,6 +166,7 @@
   "files": [
     "/bin",
     "/lib",
+    "/lib/workers",
     "/npm-shrinkwrap.json",
     "/oclif.manifest.json",
     "/scripts",
