@@ -27,6 +27,7 @@ import { ExponentialBackoff, handleAll, retry } from 'cockatiel'
 import { EventEmitter } from 'events'
 import mac from 'macaddress'
 import { hostname } from 'os'
+import path from 'path'
 import Piscina from 'piscina'
 
 import { updateConfig } from '../components/config'
@@ -158,7 +159,8 @@ class SymonClient {
 
   private worker = new Piscina.Piscina({
     concurrentTasksPerWorker: 1,
-    filename: `${process.cwd()}/lib/workers/report-to-symon.js`,
+    // eslint-disable-next-line unicorn/prefer-module
+    filename: path.join(__dirname, '../../lib/workers/report-to-symon.js'),
     idleTimeout: this.reportProbesInterval,
     maxQueue: 1,
   })
