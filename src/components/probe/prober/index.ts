@@ -118,14 +118,9 @@ export class BaseProber implements Prober {
         return
       }
 
-      // when the repeat flag is set to greater than 0, we want monika to send incident notification after
-      // the repeat value, then terminate.
       const isIncidentThresholdMet =
-        getContext().flags.repeat > 0
-          ? incidentRetryAttempt === getContext().flags.repeat - 1
-          : incidentRetryAttempt ===
-            (this.probeConfig.incidentThreshold || DEFAULT_INCIDENT_THRESHOLD) -
-              1
+        incidentRetryAttempt ===
+        (this.probeConfig.incidentThreshold || DEFAULT_INCIDENT_THRESHOLD) - 1
 
       if (!isIncidentThresholdMet) {
         this.logMessage(

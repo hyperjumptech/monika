@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 /**********************************************************************************
  * MIT License                                                                    *
  *                                                                                *
@@ -55,10 +56,8 @@ export class HTTPProber extends BaseProber {
     // sending multiple http requests for request chaining
     const responses: ProbeRequestResponse[] = []
     const isIncidentThresholdMet =
-      getContext().flags.repeat > 0
-        ? incidentRetryAttempt === getContext().flags.repeat - 1
-        : incidentRetryAttempt ===
-          (this.probeConfig.incidentThreshold || DEFAULT_INCIDENT_THRESHOLD) - 1
+      incidentRetryAttempt ===
+      (this.probeConfig.incidentThreshold || DEFAULT_INCIDENT_THRESHOLD) - 1
 
     for (const requestConfig of requests) {
       responses.push(
