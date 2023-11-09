@@ -6,17 +6,17 @@ name: Notification Package Release
 on:
   workflow_dispatch:
   push:
-      paths: 
-        - 'package/notification'
-      branches:
-        - 'main'
+    paths:
+      - 'package/notification'
+    branches:
+      - 'main'
 
 permissions:
   issues: read
   pull-requests: read
 
-jobs:  
-  build-test:    
+jobs:
+  build-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -43,4 +43,3 @@ jobs:
         working-directory: ./packages/notification
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
-
