@@ -203,7 +203,7 @@ export class BaseProber implements Prober {
    * @param probeResults The probe results
    * @returns void
    */
-  protected async sendRecoveryNotificationIfNeeded(
+  protected sendRecoveryNotificationIfNeeded(
     incidentRetryAttempt: number,
     probeResults: Pick<ProbeResult, 'requestResponse'>[]
   ) {
@@ -217,7 +217,7 @@ export class BaseProber implements Prober {
           false,
           `Probing succeeds but previously incident. Will retry. Attempt (${
             incidentRetryAttempt + 1
-          }) with recover threshold (${this.probeConfig.recoveryThreshold}).`
+          }) with recovery threshold (${this.probeConfig.recoveryThreshold}).`
         )
         // throw here so that the retry function in src/components/probe/index.ts can retry again
         throw new Error('Probing succeeds but recovery threshold is not met.')
