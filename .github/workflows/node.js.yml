@@ -27,7 +27,7 @@ jobs:
         with:
           node-version: 18.x
       - run: npm ci
-      - run: npm run build -w packages/notificationnn
+      - run: npm run build -w packages/notification
       - run: npm run lint
       - name: Cancel workflow on failure
         if: 'failure()'
@@ -42,7 +42,7 @@ jobs:
           node-version: 18.x
       - run: npm ci
       - run: npm run build -w packages/notification
-      - run: npm run format
+      - run: npm run formattt
       - name: Cancel workflow on failure
         if: 'failure()'
         uses: 'andymckay/cancel-action@0.3'
