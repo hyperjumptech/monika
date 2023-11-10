@@ -39,7 +39,7 @@ import { icmpRequest } from '../icmp/request'
 import registerFakes from '../../../../utils/fakes'
 import { sendHttpRequest } from '../../../../utils/http'
 import { AxiosError } from 'axios'
-import { log } from 'src/utils/pino'
+import { log } from '../../../../utils/pino'
 
 // Register Handlebars helpers
 registerFakes(Handlebars)
