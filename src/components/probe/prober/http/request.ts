@@ -189,7 +189,6 @@ export async function httpRequest({
     // The request was made but no response was received
     // timeout is here, ECONNABORTED, ENOTFOUND, ECONNRESET, ECONNREFUSED
     if (error?.request) {
-      console.error(error)
       const status = getErrorStatusCode(error)
 
       return {
