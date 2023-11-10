@@ -27,13 +27,13 @@ import { rest } from 'msw'
 import { setupServer } from 'msw/node'
 import sinon from 'sinon'
 
-import type { Config } from '../interfaces/config'
 import type { MonikaFlags } from '../flag'
+import type { Config } from '../interfaces/config'
 
-import * as loggerHistory from '../components/logger/history'
-import { setContext } from '../context'
 import SymonClient from '.'
 import { validateProbes } from '../components/config/validation'
+import * as loggerHistory from '../components/logger/history'
+import { setContext } from '../context'
 
 let getUnreportedLogsStub: sinon.SinonStub
 

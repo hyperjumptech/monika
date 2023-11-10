@@ -31,10 +31,11 @@ import path from 'path'
 import Piscina from 'piscina'
 
 import { updateConfig } from '../components/config'
+import { validateProbes } from '../components/config/validation'
 import { getOSName } from '../components/notification/alert-message'
 import { getContext } from '../context'
-import { SYMON_API_VERSION, type MonikaFlags } from '../flag'
 import events from '../events'
+import { SYMON_API_VERSION, type MonikaFlags } from '../flag'
 import { Config } from '../interfaces/config'
 import { Probe } from '../interfaces/probe'
 import { ValidatedResponse } from '../plugins/validate-response'
@@ -48,7 +49,6 @@ import {
   publicIpAddress,
   publicNetworkInfo,
 } from '../utils/public-ip'
-import { validateProbes } from '../components/config/validation'
 
 type SymonHandshakeData = {
   city: string
@@ -82,6 +82,7 @@ type NotificationEvent = {
   probeState: string
   url: string
   validation: ValidatedResponse
+  alertId: string
 }
 
 type ConfigListener = (config: Config) => void
@@ -218,32 +219,9 @@ class SymonClient {
     this.eventEmitter = getEventEmitter()
     this.eventEmitter.on(
       events.probe.notification.willSend,
-      ({ probeID, probeState, url, validation }: NotificationEvent) => {
-        const getAlertID = ({
-          url,
-          validation,
-        }: Pick<NotificationEvent, 'url' | 'validation'>): string => {
-          if (validation.alert.id) {
-            return validation.alert.id
-          }
-
-          const probe = getContext().config?.probes.find(
-            ({ id }) => id === probeID
-          )
-          if (!probe) {
-            return ''
-          }
-
-          const request = probe.requests?.find((request) => request.url === url)
-          if (!request) {
-            return ''
-          }
-
-          return request.alerts?.find((alert) => alert.query === '')?.id || ''
-        }
-
+      ({ probeState, validation, alertId }: NotificationEvent) => {
         this.notifyEvent({
-          alertId: getAlertID({ url, validation }),
+          alertId,
           event: probeState === 'DOWN' ? 'incident' : 'recovery',
           response: {
             body: validation.response.data,
@@ -268,6 +246,26 @@ class SymonClient {
 
     await this.report()
     this.onConfig((config) => updateConfig(config, false))
+  }
+
+  async willSendNotification(
+    probeState: string,
+    validation: ValidatedResponse,
+    alertId: string
+  ) {
+    this.notifyEvent({
+      alertId: alertId,
+      event: probeState === 'DOWN' ? 'incident' : 'recovery',
+      response: {
+        body: validation.response.data,
+        headers: validation.response.headers || {},
+        size: validation.response.headers['content-length'],
+        status: validation.response.status, // status is http status code
+        time: validation.response.responseTime,
+      },
+    }).catch((error: unknown) => {
+      log.error(error)
+    })
   }
 
   async notifyEvent(event: SymonClientEvent): Promise<void> {
