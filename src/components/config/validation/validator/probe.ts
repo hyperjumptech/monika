@@ -30,6 +30,11 @@ import { getContext } from '../../../../context'
 import { FAILED_REQUEST_ASSERTION } from '../../../../looper'
 import { compileExpression } from '../../../../utils/expression-parser'
 import { isValidURL } from '../../../../utils/is-valid-url'
+import {
+  DEFAULT_INCIDENT_THRESHOLD,
+  DEFAULT_INTERVAL,
+  DEFAULT_RECOVERY_THRESHOLD,
+} from './default-values'
 
 export async function validateProbes(probes: Probe[]): Promise<Probe[]> {
   const alertSchema = joi.alternatives().try(
@@ -101,8 +106,15 @@ export async function validateProbes(probes: Probe[]): Promise<Probe[]> {
           }),
         description: joi.string().allow(''),
         id: joi.string().required(),
-        incidentThreshold: joi.number().default(5).min(1),
-        interval: joi.number().default(10).min(1),
+        incidentThreshold: joi
+          .number()
+          .default(DEFAULT_INCIDENT_THRESHOLD)
+          .min(1),
+        recoveryThreshold: joi
+          .number()
+          .default(DEFAULT_RECOVERY_THRESHOLD)
+          .min(1),
+        interval: joi.number().default(DEFAULT_INTERVAL).min(1),
         lastEvent: joi.object({
           createdAt: joi.string().allow(''),
           recoveredAt: joi.string().allow('', null),
