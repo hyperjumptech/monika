@@ -42,7 +42,7 @@ jobs:
           node-version: 18.x
       - run: npm ci
       - run: npm run build -w packages/notification
-      - run: npm run formattt
+      - run: npm run format
       - name: Cancel workflow on failure
         if: 'failure()'
         uses: 'andymckay/cancel-action@0.3'
