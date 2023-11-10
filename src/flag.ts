@@ -81,7 +81,7 @@ export const monikaFlagsDefaultValue: MonikaFlags = {
   logs: false,
   'one-probe': false,
   repeat: 0,
-  retryInitialDelayMs: 128,
+  retryInitialDelayMs: 2000,
   retryMaxDelayMs: 30_000,
   // default is 20s interval lookup
   stun: 20,
@@ -98,12 +98,11 @@ export const symonAPIVersion = Flags.custom<SYMON_API_VERSION>({
 })
 
 export const retryInitialDelayMs = Flags.integer({
-  default: 128,
-  description:
-    'The initial, first delay of the backoff retry when probe request is failed, in milliseconds. Defaults to 128ms.',
+  default: monikaFlagsDefaultValue.retryInitialDelayMs,
+  description: `The initial, first delay of the backoff retry when probe request is failed, in milliseconds. Defaults to ${monikaFlagsDefaultValue.retryInitialDelayMs}ms`,
 })
 
 export const retryMaxDelayMs = Flags.integer({
-  default: 30_000,
-  description: 'Maximum backoff retry delay, in milliseconds. Defaults to 30s.',
+  default: monikaFlagsDefaultValue.retryMaxDelayMs,
+  description: `Maximum backoff retry delay, in milliseconds. Defaults to ${monikaFlagsDefaultValue.retryMaxDelayMs}ms.`,
 })
