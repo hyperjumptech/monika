@@ -39,7 +39,6 @@ import { icmpRequest } from '../icmp/request'
 import registerFakes from '../../../../utils/fakes'
 import { sendHttpRequest } from '../../../../utils/http'
 import { AxiosError } from 'axios'
-import { log } from '../../../../utils/pino'
 
 // Register Handlebars helpers
 registerFakes(Handlebars)
@@ -300,7 +299,16 @@ function getErrorStatusCode(error: unknown): number {
       return 14
 
     default:
-      log.error('Unhandled error, got', error)
+      if (error instanceof AxiosError) {
+        console.error(
+          `Unhandled error, got ${(error as AxiosError).code} ${
+            (error as AxiosError).stack
+          } `
+        )
+      }
+
+      console.error(`Unhandled error, got ${(error as AxiosError).stack}`)
+
       return 99 // in the event an unlikely unknown error, send here
   }
 }
