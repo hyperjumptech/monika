@@ -284,36 +284,17 @@ export default class Monika extends Command {
   }
 
   deprecationHandler(config: Config): Config {
-    const showDeprecateMsg: Record<
-      'query' | 'incidentThreshold' | 'recoveryThreshold',
-      boolean
-    > = {
+    const showDeprecateMsg: Record<'query', boolean> = {
       query: false,
-      incidentThreshold: false,
-      recoveryThreshold: false,
     }
 
     const checkedConfig = {
       ...config,
-      probes: config.probes?.map((probe) => {
-        if (probe?.recoveryThreshold) {
-          showDeprecateMsg.recoveryThreshold = true
-        }
-
-        return {
-          ...probe,
-          requests: probe.requests?.map((request) => ({
-            ...request,
-            alert: request.alerts?.map((alert) => {
-              if (alert.query) {
-                showDeprecateMsg.query = true
-                return { ...alert, assertion: alert.query }
-              }
-
-              return alert
-            }),
-          })),
-          alerts: probe.alerts?.map((alert) => {
+      probes: config.probes?.map((probe) => ({
+        ...probe,
+        requests: probe.requests?.map((request) => ({
+          ...request,
+          alert: request.alerts?.map((alert) => {
             if (alert.query) {
               showDeprecateMsg.query = true
               return { ...alert, assertion: alert.query }
@@ -321,14 +302,16 @@ export default class Monika extends Command {
 
             return alert
           }),
-        }
-      }),
-    }
+        })),
+        alerts: probe.alerts?.map((alert) => {
+          if (alert.query) {
+            showDeprecateMsg.query = true
+            return { ...alert, assertion: alert.query }
+          }
 
-    if (showDeprecateMsg.recoveryThreshold) {
-      log.warn(
-        'recoveryThreshold is deprecated. It will be managed internally by Monika.'
-      )
+          return alert
+        }),
+      })),
     }
 
     if (showDeprecateMsg.query) {

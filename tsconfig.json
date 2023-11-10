@@ -12,7 +12,8 @@
     "sourceMap": true,
     "baseUrl": ".",
     "typeRoots": ["node_modules/@types", "custom_types"],
-    "lib": ["ES2021.String"]
+    "lib": ["ES2021.String"],
+    "composite": true
   },
   "include": [
     "src/**/*",
