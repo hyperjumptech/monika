@@ -144,7 +144,12 @@ describe('Fake data', () => {
 
   it('should returns a timestamp', () => {
     const case1 = Handlebars.compile('{{ timestamp }}')
-    expect(case1({})).to.be.equals(Date.now().toString())
+    // sometimes the rendered timestamp and current date differs by 1 ms which causes the test to fail intermittently.
+    // so it's better to check the diff with lessThanOrEqual.
+    const now = Date.now()
+    const rendered = Number.parseInt(case1({}), 10)
+    const diff = Math.abs(now - rendered)
+    expect(diff).to.be.lessThanOrEqual(1)
   })
 
   it('should returns a isodate string', () => {

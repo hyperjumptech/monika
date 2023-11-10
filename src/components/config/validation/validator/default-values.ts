@@ -1,7 +1,7 @@
 /**********************************************************************************
  * MIT License                                                                    *
  *                                                                                *
- * Copyright (c) 2021 Hyperjump Technology                                        *
+ * Copyright (c) 2023 Hyperjump Technology                                        *
  *                                                                                *
  * Permission is hereby granted, free of charge, to any person obtaining a copy   *
  * of this software and associated documentation files (the "Software"), to deal  *
@@ -22,36 +22,6 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { expect } from '@oclif/test'
-
-import type { MonikaFlags } from '../flag'
-import type { Probe } from '../interfaces/probe'
-
-import { resetContext, setContext } from '../context'
-import { sanitizeProbe } from '.'
-
-describe('Sanitize probe', () => {
-  it('should remove alerts on Symon mode', () => {
-    // arrange
-    setContext({
-      flags: {
-        symonKey: 'secret-key',
-        symonUrl: 'https://example.com',
-      } as MonikaFlags,
-    })
-    const probe = {
-      id: 'Example',
-      requests: [{}],
-      alerts: [
-        { assertion: 'response.time > 30000', message: 'Run out of bandwidth' },
-      ],
-    } as Probe
-
-    // act
-    const result = sanitizeProbe(true, probe)
-    resetContext()
-
-    // assert
-    expect(result.alerts).deep.eq([])
-  })
-})
+export const DEFAULT_INCIDENT_THRESHOLD = 5
+export const DEFAULT_RECOVERY_THRESHOLD = 5
+export const DEFAULT_INTERVAL = 10

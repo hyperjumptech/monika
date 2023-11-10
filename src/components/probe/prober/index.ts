@@ -42,6 +42,10 @@ import {
   stopDowntimeCounter,
 } from '../../downtime-counter'
 import { FAILED_REQUEST_ASSERTION } from '../../../looper'
+import {
+  DEFAULT_INCIDENT_THRESHOLD,
+  DEFAULT_RECOVERY_THRESHOLD,
+} from '../../config/validation/validator/default-values'
 
 export type ProbeResult = {
   isAlertTriggered: boolean
@@ -61,7 +65,7 @@ type SendNotificationParams = {
 }
 
 export interface Prober {
-  probe: () => Promise<void>
+  probe: (incidentRetryAttempt: number) => Promise<void>
   generateVerboseStartupMessage: () => string
 }
 
@@ -87,15 +91,18 @@ export class BaseProber implements Prober {
     this.probeConfig = probeConfig
   }
 
-  async probe(): Promise<void> {
-    this.processProbeResults([])
+  async probe(incidentRetryAttempt: number): Promise<void> {
+    this.processProbeResults([], incidentRetryAttempt)
   }
 
   generateVerboseStartupMessage(): string {
     return ''
   }
 
-  protected processProbeResults(probeResults: ProbeResult[]): void {
+  protected processProbeResults(
+    probeResults: ProbeResult[],
+    incidentRetryAttempt: number
+  ): void {
     for (const { isAlertTriggered, logMessage } of probeResults) {
       this.logMessage(!isAlertTriggered, logMessage)
     }
@@ -107,17 +114,25 @@ export class BaseProber implements Prober {
       )
     ) {
       if (this.hasIncident()) {
-        throw new Error('There is an ongoing incident.')
+        // this probe is still in incident state
+        return
       }
 
+      // if the incident threshold is not yet met, this will throw and return the execution to `retry` function in src/components/probe/index.ts
+      this.throwIncidentIfNeeded(
+        incidentRetryAttempt,
+        this.probeConfig.incidentThreshold
+      )
+
+      // this probe is definitely in incident state because of fail assertion, so send notification, etc.
       this.handleFailedProbe(probeResults)
-      throw new Error('Probe request is failed.')
+      return
     }
 
-    if (this.hasIncident()) {
-      this.handleRecovery(probeResults)
-    }
+    // from here on, the probe is definitely healthy, but if it was incident, we don't want to immediately send notification
+    this.sendRecoveryNotificationIfNeeded(incidentRetryAttempt, probeResults)
 
+    // the probe is healthy and not recovery
     for (const index of probeResults.keys()) {
       const { requestResponse } = probeResults[index]
       getEventEmitter().emit(events.probe.response.received, {
@@ -145,8 +160,9 @@ export class BaseProber implements Prober {
   ): ProbeAlert | undefined {
     const getFailedRequestAssertionFromProbe = (): ProbeAlert | undefined =>
       this.probeConfig.alerts.find(
-        ({ assertion, message }) =>
-          assertion === FAILED_REQUEST_ASSERTION.assertion &&
+        ({ assertion, message, query }) =>
+          (assertion === FAILED_REQUEST_ASSERTION.assertion ||
+            query === FAILED_REQUEST_ASSERTION.assertion) &&
           message === FAILED_REQUEST_ASSERTION.message
       )
     const getFailedRequestAssertionFromRequests = (
@@ -160,8 +176,9 @@ export class BaseProber implements Prober {
       }
 
       return (this.probeConfig.requests[requestIndex].alerts || []).find(
-        ({ assertion, message }) =>
-          assertion === FAILED_REQUEST_ASSERTION.assertion &&
+        ({ assertion, message, query }) =>
+          (assertion === FAILED_REQUEST_ASSERTION.assertion ||
+            query === FAILED_REQUEST_ASSERTION.assertion) &&
           message === FAILED_REQUEST_ASSERTION.message
       )
     }
@@ -176,6 +193,69 @@ export class BaseProber implements Prober {
     return getContext().incidents.find(
       (incident) => incident.probeID === this.probeConfig.id
     )
+  }
+
+  /**
+   * If the probe is healthy and previously not (so it's a recovery), this function will call the function to send recovery notification only when the retry attempts equals to the recovery threshold - 1.
+   * Otherwise, it will throw and return the execution to the retry function in src/components/probe/index.ts.
+   * If the probe is healthy just like before, nothing to do in this function.
+   * @param incidentRetryAttempt The number of retry attempts
+   * @param probeResults The probe results
+   * @returns void
+   */
+  protected sendRecoveryNotificationIfNeeded(
+    incidentRetryAttempt: number,
+    probeResults: Pick<ProbeResult, 'requestResponse'>[]
+  ) {
+    const isRecoveryThresholdMet =
+      incidentRetryAttempt ===
+      (this.probeConfig.recoveryThreshold || DEFAULT_RECOVERY_THRESHOLD) - 1
+    const isRecovery = this.hasIncident()
+    if (isRecovery) {
+      if (!isRecoveryThresholdMet) {
+        this.logMessage(
+          false,
+          `Probing succeeds but previously incident. Will retry. Attempt (${
+            incidentRetryAttempt + 1
+          }) with recovery threshold (${this.probeConfig.recoveryThreshold}).`
+        )
+        // throw here so that the retry function in src/components/probe/index.ts can retry again
+        throw new Error('Probing succeeds but recovery threshold is not met.')
+      }
+
+      // at this state, the probe has definitely recovered, so send notifications, etc.
+      this.handleRecovery(probeResults)
+    }
+  }
+
+  /**
+   * If the number of attempts is equal to the incidentThreshold - 1, this function will throw which will return execution to  the retry function in src/components/probe/index.ts.
+   * Otherwise, it will not do anything.
+   * @param incidentRetryAttempt How many times have monika retry probing
+   * @param incidentThreshold The incident threshold of the probe
+   * @param message Message to display to stdout
+   * @throws
+   * @returns void
+   */
+  protected throwIncidentIfNeeded(
+    incidentRetryAttempt: number,
+    incidentThreshold: number = DEFAULT_INCIDENT_THRESHOLD,
+    message: string = 'Probing failed'
+  ) {
+    const isIncidentThresholdMet =
+      incidentRetryAttempt === incidentThreshold - 1
+
+    if (!isIncidentThresholdMet) {
+      this.logMessage(
+        false,
+        `${message}. Will try again. Attempt (${
+          incidentRetryAttempt + 1
+        }) with incident threshold (${incidentThreshold}).`
+      )
+
+      // throw here so that the retry function in src/components/probe/index.ts can retry again
+      throw new Error(`${message} but incident threshold is not met.`)
+    }
   }
 
   protected async sendNotification({

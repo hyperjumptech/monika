@@ -27,14 +27,29 @@ import { v4 as uuid } from 'uuid'
 import type { Probe, ProbeAlert } from '../../../../interfaces/probe'
 import { isSymonModeFrom } from '../..'
 import { getContext } from '../../../../context'
+import { FAILED_REQUEST_ASSERTION } from '../../../../looper'
 import { compileExpression } from '../../../../utils/expression-parser'
 import { isValidURL } from '../../../../utils/is-valid-url'
+import {
+  DEFAULT_INCIDENT_THRESHOLD,
+  DEFAULT_INTERVAL,
+  DEFAULT_RECOVERY_THRESHOLD,
+} from './default-values'
 
 export async function validateProbes(probes: Probe[]): Promise<Probe[]> {
   const alertSchema = joi.alternatives().try(
     joi.string(),
     joi.object({
-      assertion: joi.string().allow(''),
+      assertion: joi
+        .string()
+        .allow('')
+        .default((parent) => {
+          if (!parent.query) {
+            return 'response.status < 200 or response.status > 299'
+          }
+
+          return parent.query
+        }),
       id: joi.string().allow(''),
       message: joi.string().allow(''),
       query: joi.string().allow(''),
@@ -60,16 +75,54 @@ export async function validateProbes(probes: Probe[]): Promise<Probe[]> {
     })
     .items(
       joi.object({
-        alerts: joi.array().items(alertSchema),
+        alerts: joi
+          .array()
+          .items(alertSchema)
+          .default((parent) => {
+            if (isSymonModeFrom(getContext().flags)) {
+              return []
+            }
+
+            const isHTTPProbe = Boolean(parent.requests)
+
+            if (!isHTTPProbe) {
+              return [{ id: uuid(), ...FAILED_REQUEST_ASSERTION }]
+            }
+
+            return [
+              {
+                id: uuid(),
+                assertion: 'response.status < 200 or response.status > 299',
+                message: 'HTTP Status is {{ response.status }}, expecting 2xx',
+              },
+              {
+                id: uuid(),
+                assertion: 'response.time > 2000',
+                message:
+                  'Response time is {{ response.time }}ms, expecting less than 2000ms',
+              },
+              { id: uuid(), ...FAILED_REQUEST_ASSERTION },
+            ]
+          }),
         description: joi.string().allow(''),
         id: joi.string().required(),
-        incidentThreshold: joi.number().default(5).min(1),
-        interval: joi.number().default(10).min(1),
+        incidentThreshold: joi
+          .number()
+          .default(DEFAULT_INCIDENT_THRESHOLD)
+          .min(1),
+        recoveryThreshold: joi
+          .number()
+          .default(DEFAULT_RECOVERY_THRESHOLD)
+          .min(1),
+        interval: joi.number().default(DEFAULT_INTERVAL).min(1),
         lastEvent: joi.object({
           createdAt: joi.string().allow(''),
           recoveredAt: joi.string().allow('', null),
         }),
-        name: joi.string().allow(''),
+        name: joi
+          .string()
+          .allow('')
+          .default((parent) => `monika_${parent.id}`),
         mariadb: joi.array().items(mysqlSchema),
         mongo: joi.array().items(
           joi.alternatives([
@@ -137,7 +190,7 @@ export async function validateProbes(probes: Probe[]): Promise<Probe[]> {
                   joi.string().allow('').ip()
                 ),
               password: joi.string().allow(''),
-              port: joi.number().default(6379).min(0).max(65_536),
+              port: joi.number().min(0).max(65_536),
               uri: joi.string().allow(''),
               username: joi.string().allow(''),
             })
@@ -166,6 +219,7 @@ export async function validateProbes(probes: Probe[]): Promise<Probe[]> {
               method: joi
                 .string()
                 .valid(
+                  'CONNECT',
                   'GET',
                   'POST',
                   'PUT',
@@ -175,9 +229,9 @@ export async function validateProbes(probes: Probe[]): Promise<Probe[]> {
                   'OPTIONS',
                   'PURGE',
                   'LINK',
+                  'TRACE',
                   'UNLINK'
                 )
-                .allow('')
                 .default('GET')
                 .insensitive()
                 .label('Probe request method'),

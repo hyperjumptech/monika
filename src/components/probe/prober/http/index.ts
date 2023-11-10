@@ -1,3 +1,4 @@
+/* eslint-disable complexity */
 /**********************************************************************************
  * MIT License                                                                    *
  *                                                                                *
@@ -46,7 +47,7 @@ type ProbeResultMessageParams = {
 }
 
 export class HTTPProber extends BaseProber {
-  async probe(): Promise<void> {
+  async probe(incidentRetryAttempt: number): Promise<void> {
     const requests = this.probeConfig.requests!
     // sending multiple http requests for request chaining
     const responses: ProbeRequestResponse[] = []
@@ -66,25 +67,35 @@ export class HTTPProber extends BaseProber {
     )
     if (hasFailedRequest) {
       if (this.hasIncident()) {
+        // this probe is currently 'incident' state so no need to continue
         this.logMessage(
           false,
           getErrorMessage(hasFailedRequest.errMessage || 'Unknown error.')
         )
-        throw new Error('There is an ongoing incident.')
+        return
       }
 
+      // if the incident threshold is not yet met, this will throw and return the execution to `retry` function in src/components/probe/index.ts
+      this.throwIncidentIfNeeded(
+        incidentRetryAttempt,
+        this.probeConfig.incidentThreshold
+      )
+
+      // the threshold has been met, so let's log the message
       this.logMessage(
         false,
         getErrorMessage(hasFailedRequest.errMessage || 'Unknown error.'),
         getNotificationMessage({ isIncident: true })
       )
 
+      // this probe is definitely in incident state, so send notification, etc.
       this.handleFailedProbe(
         responses.map((requestResponse) => ({ requestResponse }))
       )
-      throw new Error('Probe request is failed.')
+      return
     }
 
+    // from here on, the probe can be accessed but might still trigger the assertion
     for (const requestIndex of responses.keys()) {
       const response = responses[requestIndex]
       const validatedResponse = this.validateResponse(
@@ -99,23 +110,31 @@ export class HTTPProber extends BaseProber {
         const { alert } = triggeredAlertResponse
 
         if (this.hasIncident()) {
+          // this probe is still in incident state
           this.logMessage(false, getAssertionMessage(alert.assertion))
-          throw new Error(alert.message)
+          return
         }
 
+        // if the incident threshold is not yet met, this will throw and return the execution to `retry` function in src/components/probe/index.ts
+        this.throwIncidentIfNeeded(
+          incidentRetryAttempt,
+          this.probeConfig.incidentThreshold,
+          'Probe assertion failed'
+        )
+
+        // this probe is definitely in incident state because of fail assertion, so send notification, etc.
         this.handleAssertionFailed(response, requestIndex, alert)
-        throw new Error(alert.message)
+        return
       }
     }
 
-    const isRecovery = this.hasIncident()
-    if (isRecovery) {
-      this.logMessage(true, getNotificationMessage({ isIncident: false }))
-      this.handleRecovery(
-        responses.map((requestResponse) => ({ requestResponse }))
-      )
-    }
+    // from here on, the probe is definitely healthy, but if it was incident, we don't want to immediately send notification
+    this.sendRecoveryNotificationIfNeeded(
+      incidentRetryAttempt,
+      responses.map((requestResponse) => ({ requestResponse }))
+    )
 
+    // the probe is healthy and not recovery
     for (const requestIndex of responses.keys()) {
       const response = responses[requestIndex]
       getEventEmitter().emit(events.probe.response.received, {
@@ -184,7 +203,7 @@ export class HTTPProber extends BaseProber {
       validation: {
         alert: triggeredAlert,
         isAlertTriggered: true,
-        response: response,
+        response,
       },
     })
 
