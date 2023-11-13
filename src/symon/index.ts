@@ -254,7 +254,7 @@ class SymonClient {
     alertId: string
   ) {
     this.notifyEvent({
-      alertId: alertId,
+      alertId,
       event: probeState === 'DOWN' ? 'incident' : 'recovery',
       response: {
         body: validation.response.data,
