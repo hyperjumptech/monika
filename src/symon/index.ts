@@ -220,19 +220,7 @@ class SymonClient {
     this.eventEmitter.on(
       events.probe.notification.willSend,
       ({ probeState, validation, alertId }: NotificationEvent) => {
-        this.notifyEvent({
-          alertId,
-          event: probeState === 'DOWN' ? 'incident' : 'recovery',
-          response: {
-            body: validation.response.data,
-            headers: validation.response.headers || {},
-            size: validation.response.headers['content-length'],
-            status: validation.response.status, // status is http status code
-            time: validation.response.responseTime,
-          },
-        }).catch((error: unknown) => {
-          log.error(error)
-        })
+        this.willSendNotification(probeState, validation, alertId)
       }
     )
 
@@ -248,11 +236,11 @@ class SymonClient {
     this.onConfig((config) => updateConfig(config, false))
   }
 
-  async willSendNotification(
+  willSendNotification(
     probeState: string,
     validation: ValidatedResponse,
     alertId: string
-  ) {
+  ): void {
     this.notifyEvent({
       alertId,
       event: probeState === 'DOWN' ? 'incident' : 'recovery',
