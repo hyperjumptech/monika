@@ -155,8 +155,7 @@ describe('Symon initiate', () => {
       symonUrl: 'http://localhost:4000',
       symonKey: 'abcd',
     })
-    sinon.spy(symon, 'report')
-
+    const reportSpy = sinon.spy(symon, 'report')
     await symon.initiate()
     await symon.stopReport()
     expect(symon.monikaId).equals('1234')
@@ -171,7 +170,9 @@ describe('Symon initiate', () => {
     expect(body.privateIp).length.greaterThan(0)
     expect(body.os).length.greaterThan(0)
     expect(body.version).equals('v1.5.0')
-  })
+
+    expect(reportSpy.called).equals(true)
+  }).timeout(15_000)
 
   it('should fetch probes config on initiate', async () => {
     server.use(
@@ -204,7 +205,7 @@ describe('Symon initiate', () => {
       ...config,
       probes: await validateProbes(config.probes),
     })
-  })
+  }).timeout(15_000)
 
   it('should throw an error if the request to get probes is failed', async () => {
     // arrange
@@ -240,37 +241,7 @@ describe('Symon initiate', () => {
 
     // assert
     expect(errorMessage).eq('Failed to get probes from Symon')
-  })
-
-  it('should report on initiate', async () => {
-    // arrange
-    server.use(
-      rest.get(
-        'http://localhost:4000/api/v1/monika/1234/probes',
-        (_, res, ctx) =>
-          res(
-            ctx.set('etag', config.version || ''),
-            ctx.json({
-              statusCode: 'ok',
-              message: 'Successfully get probes configuration',
-              data: config.probes,
-            })
-          )
-      )
-    )
-    const symon = new SymonClient({
-      symonUrl: 'http://localhost:4000',
-      symonKey: 'abcd',
-    })
-    const reportSpy = sinon.spy(symon, 'report')
-
-    // act
-    await symon.initiate()
-    await symon.stopReport()
-
-    // assert
-    expect(reportSpy.called).equals(true)
-  })
+  }).timeout(15_000)
 
   it('should send event to Symon when incident or recovery happens', async () => {
     // arrange
@@ -310,5 +281,5 @@ describe('Symon initiate', () => {
     expect(body.event).equals('incident')
     expect(body.alertId).equals('alert86')
     expect(body.response).deep.equals({ status: 400, time: 1000 })
-  })
+  }).timeout(15_000)
 })

@@ -38,6 +38,7 @@ import { getContext } from '../../../../context'
 import { icmpRequest } from '../icmp/request'
 import registerFakes from '../../../../utils/fakes'
 import { sendHttpRequest } from '../../../../utils/http'
+import { AxiosError } from 'axios'
 
 // Register Handlebars helpers
 registerFakes(Handlebars)
@@ -187,7 +188,7 @@ export async function httpRequest({
     // The request was made but no response was received
     // timeout is here, ECONNABORTED, ENOTFOUND, ECONNRESET, ECONNREFUSED
     if (error?.request) {
-      const status = errorRequestCodeToNumber(error?.code)
+      const status = getErrorStatusCode(error)
 
       return {
         data: '',
@@ -257,10 +258,8 @@ function transformContentByType(
   }
 }
 
-function errorRequestCodeToNumber(
-  errorRequestCode: string | undefined
-): number {
-  switch (errorRequestCode) {
+function getErrorStatusCode(error: unknown): number {
+  switch ((error as AxiosError).code) {
     case 'ECONNABORTED':
       return 599 // https://httpstatuses.com/599
 
@@ -300,6 +299,16 @@ function errorRequestCodeToNumber(
       return 14
 
     default:
+      if (error instanceof AxiosError) {
+        console.error(
+          `Unhandled error, got ${(error as AxiosError).code} ${
+            (error as AxiosError).stack
+          } `
+        )
+      }
+
+      console.error(`Unhandled error, got ${(error as AxiosError).stack}`)
+
       return 99 // in the event an unlikely unknown error, send here
   }
 }
