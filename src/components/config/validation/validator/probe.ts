@@ -61,7 +61,7 @@ export async function validateProbes(probes: Probe[]): Promise<Probe[]> {
           isValidProbeAlert(alert)
         } catch (error: unknown) {
           if (isSymonModeFrom(getContext().flags)) {
-            log.error((error as Error).message)
+            log.error((error as Error)?.message)
             return ''
           }
 
@@ -338,7 +338,11 @@ function parseAlertStringTime(str: string): number {
 
 function isValidProbeAlert(alert: ProbeAlert | string) {
   if (typeof alert !== 'string') {
-    const expression = alert.assertion || alert.query || ''
+    const expression = alert.assertion || alert.query
+    if (!expression) {
+      return
+    }
+
     const data = {
       response: {
         size: 0,
