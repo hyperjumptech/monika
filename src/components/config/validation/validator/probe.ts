@@ -352,14 +352,28 @@ function validateAlerts(alerts: (ProbeAlert | string)[]) {
     try {
       isValidProbeAlert(alert)
     } catch {
-      throw new Error(`Probe alert format is invalid! (${alert})`)
+      throw new Error(
+        `Probe alert format is invalid! (${JSON.stringify(alert, null, 1)})`
+      )
     }
   }
 }
 
 function isValidProbeAlert(alert: ProbeAlert | string) {
   if (typeof alert !== 'string') {
-    compileExpression(alert.assertion || alert.query || '')
+    const expression = alert.assertion || alert.query || ''
+    const data = {
+      response: {
+        size: 0,
+        status: 200,
+        time: 0,
+        body: '',
+        headers: {},
+      },
+    }
+    const filter = compileExpression(expression, Object.keys(data))
+
+    filter(data)
     return
   }
 
