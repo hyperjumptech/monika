@@ -171,7 +171,7 @@ describe('Probe validation', () => {
       expect(validateProbes([probe])).to.eventually.throw()
     })
 
-    it.only('should skips the probe if alert assertion is invalid', async () => {
+    it('should set the alerts empty if the probe if alert assertion is invalid in Symon mode', async () => {
       // arrange
       setContext({
         flags: {
@@ -198,10 +198,18 @@ describe('Probe validation', () => {
       ] as unknown as Probe[]
 
       // act
-      const validatedProbe = await validateProbes(probes)
+      const validatedProbes = await validateProbes(probes)
 
       // assert
-      expect(validatedProbe).to.deep.eq(probes.filter((_, index) => index > 0))
+      expect(
+        validatedProbes.find(({ id }) => id === 'Example')?.alerts
+      ).deep.eq([])
+      expect(
+        validatedProbes.find(({ id }) => id === 'Example 2')?.alerts
+      ).deep.eq([{ assertion: 'response.time > 1000' }])
+      expect(
+        validatedProbes.find(({ id }) => id === 'Example 3')?.alerts
+      ).deep.eq([{ assertion: 'response.status == 200' }])
 
       resetContext()
     })

@@ -30,6 +30,7 @@ import { getContext } from '../../../../context'
 import { FAILED_REQUEST_ASSERTION } from '../../../../looper'
 import { compileExpression } from '../../../../utils/expression-parser'
 import { isValidURL } from '../../../../utils/is-valid-url'
+import { log } from '../../../../utils/pino'
 import {
   DEFAULT_INCIDENT_THRESHOLD,
   DEFAULT_INTERVAL,
@@ -58,9 +59,10 @@ export async function validateProbes(probes: Probe[]): Promise<Probe[]> {
       .custom((alert) => {
         try {
           isValidProbeAlert(alert)
-        } catch {
+        } catch (error: unknown) {
           if (isSymonModeFrom(getContext().flags)) {
-            return
+            log.error((error as Error).message)
+            return ''
           }
 
           throw new Error(
