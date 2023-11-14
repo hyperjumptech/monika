@@ -21,7 +21,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  *
  * SOFTWARE.                                                                      *
  **********************************************************************************/
-import { getISOWeek, getISOWeekYear } from 'date-fns'
 import PouchDB from 'pouchdb'
 import { getContext } from '../../context'
 import { Probe } from '../../interfaces/probe'
@@ -148,24 +147,13 @@ function convertRequestsToProbes(monikaId: string, requests: any) {
   // group all the requests identified by probeId.
   // here we calculate the total response time for each probes
   for (const request of requests) {
-    const parsedTime = new Date(request.timestamp * 1000)
-    const hour = parsedTime.getUTCHours()
-    const date = parsedTime.getUTCDate()
-    const week = getISOWeek(parsedTime)
-    const weekYear = getISOWeekYear(parsedTime)
-    const month = parsedTime.getUTCMonth()
-    const year = parsedTime.getUTCFullYear()
+    const probeTimestamp = new Date(request.timestamp * 1000)
 
     // create queries for all the timeframes
     const timeQuery = {
-      monikaId: monikaId,
+      monikaId,
       probeId: request.probeId,
-      year,
-      month,
-      week,
-      weekYear,
-      date,
-      hour,
+      probeTimestamp,
     }
 
     let probeData = probes[timeQuery.probeId]
