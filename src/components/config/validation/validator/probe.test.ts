@@ -28,6 +28,8 @@ import type { Probe } from '../../../../interfaces/probe'
 
 import { FAILED_REQUEST_ASSERTION } from '../../../../looper'
 import { validateProbes } from './probe'
+import { resetContext, setContext } from '../../../../../src/context'
+import type { MonikaFlags } from '../../../../../src/flag'
 
 describe('Probe validation', () => {
   describe('Probe sanitization', () => {
@@ -155,6 +157,53 @@ describe('Probe validation', () => {
       // assert
       expect(result[0].alerts[0].assertion).eq('')
       expect(result[0].alerts[0].message).eq(FAILED_REQUEST_ASSERTION.message)
+    })
+
+    it('should throws an error if alert assertion is invalid', () => {
+      // arrange
+      const probe = {
+        id: 'Example',
+        requests: [{ url: 'https://example.com' }],
+        alerts: [{ assertion: 'response.time > 1000 ms' }],
+      } as unknown as Probe
+
+      // act & assert
+      expect(validateProbes([probe])).to.eventually.throw()
+    })
+
+    it.only('should skips the probe if alert assertion is invalid', async () => {
+      // arrange
+      setContext({
+        flags: {
+          symonKey: 'bDF8j',
+          symonUrl: 'https://example.com',
+        } as MonikaFlags,
+      })
+      const probes = [
+        {
+          id: 'Example',
+          requests: [{ url: 'https://example.com' }],
+          alerts: [{ assertion: 'response.time > 1000 ms' }],
+        },
+        {
+          id: 'Example 2',
+          requests: [{ url: 'https://example.com' }],
+          alerts: [{ assertion: 'response.time > 1000' }],
+        },
+        {
+          id: 'Example 3',
+          requests: [{ url: 'https://example.com' }],
+          alerts: [{ assertion: 'response.status == 200' }],
+        },
+      ] as unknown as Probe[]
+
+      // act
+      const validatedProbe = await validateProbes(probes)
+
+      // assert
+      expect(validatedProbe).to.deep.eq(probes.filter((_, index) => index > 0))
+
+      resetContext()
     })
   })
 })
