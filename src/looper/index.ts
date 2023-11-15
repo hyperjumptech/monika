@@ -29,7 +29,6 @@ import { v4 as uuid } from 'uuid'
 
 import type { Probe, ProbeAlert } from '../interfaces/probe'
 
-import { doProbe } from '../components/probe'
 import { getContext } from '../context'
 import { log } from '../utils/pino'
 import {
@@ -42,8 +41,16 @@ import {
   DEFAULT_INCIDENT_THRESHOLD,
   DEFAULT_RECOVERY_THRESHOLD,
 } from '../components/config/validation/validator/default-values'
+import Queue from 'queue'
+import { doProbe } from '../components/probe'
 
 let checkSTUNinterval: NodeJS.Timeout
+
+const queue = new Queue({
+  concurrency: 1,
+  autostart: true,
+  timeout: 10_000,
+})
 
 const DISABLE_STUN = -1 // -1 is disable stun checking
 
@@ -134,10 +141,12 @@ export function startProbing({
     }
 
     for (const probe of probes) {
-      doProbe({
-        notifications,
-        probe,
-      })
+      queue.push(() =>
+        doProbe({
+          notifications,
+          probe,
+        })
+      )
     }
   }, 1000)
 }
