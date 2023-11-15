@@ -15,6 +15,7 @@ on:
 permissions:
   issues: read
   pull-requests: read
+  actions: write
 
 jobs:
   lint:
@@ -27,7 +28,10 @@ jobs:
           node-version: 18.x
       - run: npm ci
       - run: npm run build -w packages/notification
-      - run: npm run lint  
+      - run: npm run lint
+      - name: Cancel workflow on failure
+        if: 'failure()'
+        uses: 'andymckay/cancel-action@0.3'
   format:
     runs-on: ubuntu-latest
     steps:
@@ -38,7 +42,10 @@ jobs:
           node-version: 18.x
       - run: npm ci
       - run: npm run build -w packages/notification
-      - run: npm run format  
+      - run: npm run format
+      - name: Cancel workflow on failure
+        if: 'failure()'
+        uses: 'andymckay/cancel-action@0.3'
   prod_test_npm:
     runs-on: ubuntu-latest
     steps:
@@ -52,6 +59,9 @@ jobs:
       - run: npm pack
       - run: npm install -g ./hyperjumptech-monika-*.tgz
       - run: npm run prod_test
+      - name: Cancel workflow on failure
+        if: 'failure()'
+        uses: 'andymckay/cancel-action@0.3'
   prod_test_binary:
     runs-on: ubuntu-latest
     steps:
@@ -67,6 +77,9 @@ jobs:
         name: Pack the binary using vercel/pkg
       - run: ./dist/monika -v
         name: Test to make sure printing the version succeeds
+      - name: Cancel workflow on failure
+        if: 'failure()'
+        uses: 'andymckay/cancel-action@0.3'
   test:
     runs-on: ubuntu-latest
     steps:
@@ -78,3 +91,6 @@ jobs:
       - run: npm ci
       - run: npm run build -w packages/notification
       - run: npm test && npx codecov
+      - name: Cancel workflow on failure
+        if: 'failure()'
+        uses: 'andymckay/cancel-action@0.3'
