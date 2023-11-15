@@ -37,9 +37,24 @@ import {
   DEFAULT_RECOVERY_THRESHOLD,
 } from './default-values'
 
+const ALERT_QUERY = 'status-not-2xx'
+const RESPONSE_TIME_PREFIX = 'response-time-greater-than-'
+
 export async function validateProbes(probes: Probe[]): Promise<Probe[]> {
   const alertSchema = joi.alternatives().try(
-    joi.string(),
+    // Legacy alerts
+    joi.string().custom((alert) => {
+      if (alert === ALERT_QUERY) {
+        return alert
+      }
+
+      if (alert.startsWith(RESPONSE_TIME_PREFIX)) {
+        parseAlertStringTime(alert)
+        return alert
+      }
+
+      throw new Error(`Probe alert format is invalid! (${alert})`)
+    }),
     joi
       .object({
         assertion: joi
@@ -316,9 +331,6 @@ function isProbeRequestExists(probe: Probe) {
   )
 }
 
-const ALERT_QUERY = 'status-not-2xx'
-const RESPONSE_TIME_PREFIX = 'response-time-greater-than-'
-
 // parse string like "response-time-greater-than-200-ms" and return the time in ms
 function parseAlertStringTime(str: string): number {
   // match any string that ends with digits followed by unit 's' or 'ms'
@@ -336,39 +348,24 @@ function parseAlertStringTime(str: string): number {
   return number
 }
 
-function isValidProbeAlert(alert: ProbeAlert | string) {
-  if (typeof alert !== 'string') {
-    const expression = alert.assertion || alert.query
-    if (!expression) {
-      return
-    }
-
-    const data = {
-      response: {
-        size: 0,
-        status: 200,
-        time: 0,
-        body: '',
-        headers: {},
-      },
-    }
-    const filter = compileExpression(expression, Object.keys(data))
-
-    filter(data)
+function isValidProbeAlert(alert: ProbeAlert) {
+  const expression = alert.assertion || alert.query
+  if (!expression) {
     return
   }
 
-  // Legacy alerts
-  if (alert === ALERT_QUERY) {
-    return
+  const data = {
+    response: {
+      size: 0,
+      status: 200,
+      time: 0,
+      body: '',
+      headers: {},
+    },
   }
+  const filter = compileExpression(expression, Object.keys(data))
 
-  if (alert.startsWith(RESPONSE_TIME_PREFIX)) {
-    parseAlertStringTime(alert)
-    return
-  }
-
-  throw new Error('Unknown alert')
+  filter(data)
 }
 
 function transformDeprecatedAlerts(probes: Probe[]) {
