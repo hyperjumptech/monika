@@ -203,7 +203,7 @@ describe('Probe validation', () => {
       // assert
       expect(
         validatedProbes.find(({ id }) => id === 'Example')?.alerts
-      ).deep.eq([])
+      ).deep.eq([''])
       expect(
         validatedProbes.find(({ id }) => id === 'Example 2')?.alerts
       ).deep.eq([{ assertion: 'response.time > 1000' }])

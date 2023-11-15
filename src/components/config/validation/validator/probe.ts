@@ -45,12 +45,21 @@ export async function validateProbes(probes: Probe[]): Promise<Probe[]> {
     // Legacy alerts
     joi.string().custom((alert) => {
       if (alert === ALERT_QUERY) {
-        return alert
+        return {
+          id: uuid(),
+          assertion: 'response.status < 200 or response.status > 299',
+          message: 'HTTP status is {{ response.status }}, expecting 2xx',
+        }
       }
 
       if (alert.startsWith(RESPONSE_TIME_PREFIX)) {
-        parseAlertStringTime(alert)
-        return alert
+        const expectedTime = parseAlertStringTime(alert)
+
+        return {
+          id: uuid(),
+          assertion: `response.time > ${expectedTime}`,
+          message: `Response time is {{ response.time }}ms, expecting less than ${expectedTime}ms`,
+        }
       }
 
       throw new Error(`Probe alert format is invalid! (${alert})`)
@@ -308,11 +317,9 @@ export async function validateProbes(probes: Probe[]): Promise<Probe[]> {
     )
 
   try {
-    const validatedProbes = await schema.validateAsync(probes, {
+    return await schema.validateAsync(probes, {
       stripUnknown: true,
     })
-
-    return transformDeprecatedAlerts(validatedProbes)
   } catch (error: any) {
     throw new Error(`Monika configuration is invalid. Probe: ${error?.message}`)
   }
@@ -366,42 +373,4 @@ function isValidProbeAlert(alert: ProbeAlert) {
   const filter = compileExpression(expression, Object.keys(data))
 
   filter(data)
-}
-
-function transformDeprecatedAlerts(probes: Probe[]) {
-  return probes.map((probe) => {
-    const newAlerts = []
-
-    if (!probe?.alerts) {
-      return probe
-    }
-
-    for (const alert of probe.alerts) {
-      if (typeof alert !== 'string') {
-        newAlerts.push(alert)
-        continue
-      }
-
-      if (alert === ALERT_QUERY) {
-        newAlerts.push({
-          id: uuid(),
-          assertion: 'response.status < 200 or response.status > 299',
-          message: 'HTTP status is {{ response.status }}, expecting 2xx',
-        })
-        continue
-      }
-
-      if ((alert as string).startsWith(RESPONSE_TIME_PREFIX)) {
-        const expectedTime = parseAlertStringTime(alert)
-
-        newAlerts.push({
-          id: uuid(),
-          assertion: `response.time > ${expectedTime}`,
-          message: `Response time is {{ response.time }}ms, expecting less than ${expectedTime}ms`,
-        })
-      }
-    }
-
-    return { ...probe, alerts: newAlerts }
-  })
 }
