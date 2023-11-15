@@ -22,52 +22,27 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { compileExpression as _compileExpression } from 'filtrex'
-import {
-  endsWith,
-  get,
-  has,
-  includes,
-  isEmpty,
-  lowerCase,
-  size,
-  startsWith,
-  upperCase,
-} from 'lodash'
+import { getContext } from '../context'
+import type { ValidatedResponse } from '../plugins/validate-response'
 
-// wrap substrings that are object accessor with double quote
-// then wrap again with __getValueByPath function call
-// eg: 'response.body.title' becomes '__getValueByPath("response.body.title")'
-export const sanitizeExpression = (
-  query: string,
-  objectKeys: string[]
-): string => {
-  let sanitizedQuery = query
-
-  for (const key of objectKeys) {
-    const pattern = new RegExp(`(^| |\\()(${key}(\\.|\\[)\\S*[^\\s),])`, 'g')
-    sanitizedQuery = sanitizedQuery.replace(pattern, '$1__getValueByPath("$2")')
+export function getAlertID(
+  url: string,
+  validation: ValidatedResponse,
+  probeID: string
+): string {
+  if (validation.alert.id) {
+    return validation.alert.id
   }
 
-  return sanitizedQuery
+  const probe = getContext().config?.probes.find(({ id }) => id === probeID)
+  if (!probe) {
+    return ''
+  }
+
+  const request = probe.requests?.find((request) => request.url === url)
+  if (!request) {
+    return ''
+  }
+
+  return request.alerts?.find((alert) => alert.query === '')?.id || ''
 }
-
-export const compileExpression =
-  (expression: string, objectKeys: string[] = []): any =>
-  (obj: any): any => {
-    const sanitizedExpression = sanitizeExpression(expression, objectKeys)
-
-    return _compileExpression(sanitizedExpression, {
-      extraFunctions: {
-        __getValueByPath: (path: string) => get(obj, path), //  for internal use, not to be exposed to user
-        has,
-        lowerCase,
-        upperCase,
-        startsWith,
-        endsWith,
-        includes,
-        size,
-        isEmpty,
-      },
-    })(obj)
-  }
