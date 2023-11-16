@@ -322,7 +322,7 @@ The '--summary' flag also will not work when no other monika process is running.
 
 ## TLS Reject Unauthorized
 
-If there is a probe with request(s) that uses HTTPS, Monika will show an error if the target's TLS certificate is invalid. You can configure whether HTTPS requests should ignore invalid certificates using the `--ignoreInvalidTLS` flag.
+If there is a probe with request(s) that uses HTTPS, Monika will show an error if the target's TLS certificate is invalid (such as self-signed certificates, hostname/IP does not match certificate's altnames, and many other [OpenSSL error codes](https://github.com/nodejs/node/blob/main/doc/api/errors.md#nodejs-error-codes)). You can configure whether HTTPS requests should ignore invalid certificates using the `--ignoreInvalidTLS` flag.
 
 ```bash
 monika --ignoreInvalidTLS
