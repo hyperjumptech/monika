@@ -320,6 +320,14 @@ monika --summary
 Please note that you need to run the above command from the same working directory as the running monika you want to see/check.
 The '--summary' flag also will not work when no other monika process is running.
 
+## TLS Reject Unauthorized
+
+If there is a probe with request(s) that uses HTTPS, Monika will show an error if the target's TLS certificate is invalid. You can configure whether HTTPS requests should ignore invalid certificates using the `--ignoreInvalidTLS` flag.
+
+```bash
+monika --ignoreInvalidTLS
+```
+
 ## Verbose
 
 Like your app to be more chatty and honest revealing all its internal details? Use the `--verbose` flag.

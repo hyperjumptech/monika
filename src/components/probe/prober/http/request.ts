@@ -48,7 +48,10 @@ registerFakes(Handlebars)
 // Keep the agents alive to reduce the overhead of DNS queries and creating TCP connection.
 // More information here: https://rakshanshetty.in/nodejs-http-keep-alive/
 const httpAgent = new http.Agent({ keepAlive: true })
-const httpsAgent = new https.Agent({ keepAlive: true })
+const httpsAgent = new https.Agent({
+  keepAlive: true,
+  rejectUnauthorized: getContext().flags.ignoreInvalidTLS,
+})
 
 type probingParams = {
   requestConfig: Omit<RequestConfig, 'saveBody' | 'alert'> // is a config object
@@ -136,11 +139,20 @@ export async function httpRequest({
 
   // check if this request must ignore ssl cert
   // if it is, then create new https agent solely for this request
-  let optHttpsAgent = httpsAgent
+  // allowUnauthorized in a request takes higher priority than the global ignoreInvalidTLS flag
+  let optHttpsAgent
   if (allowUnauthorized) {
+    // Use the agent with the rejectUnauthorized value from the config
     optHttpsAgent = new https.Agent({
-      rejectUnauthorized: !allowUnauthorized || false,
+      rejectUnauthorized: !allowUnauthorized,
     })
+  } else {
+    const ignoringInvalidTLS = getContext().flags.ignoreInvalidTLS
+    httpsAgent.options = {
+      ...httpsAgent.options,
+      rejectUnauthorized: !ignoringInvalidTLS,
+    }
+    optHttpsAgent = httpsAgent
   }
 
   const requestStartedAt = Date.now()
