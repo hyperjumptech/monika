@@ -26,6 +26,9 @@ import type { Notification } from '@hyperjumptech/monika-notification'
 
 import { AbortSignal } from 'node-abort-controller'
 import { v4 as uuid } from 'uuid'
+import path from 'path'
+// import Queue from 'queue'
+import Piscina from 'piscina'
 
 import type { Probe, ProbeAlert } from '../interfaces/probe'
 
@@ -41,15 +44,23 @@ import {
   DEFAULT_INCIDENT_THRESHOLD,
   DEFAULT_RECOVERY_THRESHOLD,
 } from '../components/config/validation/validator/default-values'
-import Queue from 'queue'
-import { doProbe } from '../components/probe'
+// import { doProbe } from '../components/probe'
 
 let checkSTUNinterval: NodeJS.Timeout
 
-const queue = new Queue({
-  concurrency: 1,
-  autostart: true,
-  timeout: 10_000,
+// const queue = new Queue({
+//   concurrency: 1,
+//   autostart: true,
+//   timeout: 10_000,
+// })
+
+const worker = new Piscina.Piscina({
+  concurrentTasksPerWorker: 1,
+  // eslint-disable-next-line unicorn/prefer-module
+  filename: path.join(__dirname, '../../lib/workers/probing.js'),
+  idleTimeout: 1000,
+  maxQueue: 1,
+  maxThreads: 1,
 })
 
 const DISABLE_STUN = -1 // -1 is disable stun checking
@@ -140,14 +151,23 @@ export function startProbing({
       return
     }
 
-    for (const probe of probes) {
-      queue.push(() =>
-        doProbe({
-          notifications,
-          probe,
-        })
-      )
-    }
+    // This uses node queue
+    // This is working
+    // for (const probe of probes) {
+    //   queue.push(() =>
+    //     doProbe({
+    //       notifications,
+    //       probe,
+    //     })
+    //   )
+    // }
+
+    // This uses Piscina
+    // Does not working yet
+    worker.run({
+      notifications,
+      probes,
+    })
   }, 1000)
 }
 
