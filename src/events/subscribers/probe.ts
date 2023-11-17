@@ -22,8 +22,8 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import events from '../../events'
 import type { Notification } from '@hyperjumptech/monika-notification'
+import events from '../../events'
 import type { StatuspageNotification } from '../../plugins/visualization/atlassian-status-page'
 import { AtlassianStatusPageAPI } from '../../plugins/visualization/atlassian-status-page'
 import { getEventEmitter } from '../../utils/events'

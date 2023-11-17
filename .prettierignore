@@ -3,8 +3,7 @@ coverage
 .nyc_output
 lib
 package-lock.json
-.eslintrc 
-.github
+.eslintrc
 docs/out
 docs/.next
 docs/.cache
