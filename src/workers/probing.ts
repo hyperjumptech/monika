@@ -38,20 +38,25 @@ import {
   DEFAULT_INCIDENT_THRESHOLD,
   DEFAULT_RECOVERY_THRESHOLD,
 } from '../components/config/validation/validator/default-values'
+import Queue from 'queue'
 
-type doProbeParams = {
-  probe: Probe // probe contains all the probes
+type WorkerProps = {
+  probes: Probe[] // probe contains all the probes
   notifications: Notification[] // notifications contains all the notifications
 }
-/**
- * doProbe sends out the http request
- * @param {string} stringifiedData stringified parameter
- * @returns {Promise<void>} void
- */
-export default async (stringifiedData: string) => {
-  const parsedData = JSON.parse(stringifiedData)
-  const { probe, notifications }: doProbeParams = parsedData
 
+type DoProbeParams = {
+  probe: Probe
+  notifications: Notification[]
+}
+
+const queue = new Queue({
+  concurrency: 1,
+  autostart: true,
+  timeout: 10_000,
+})
+
+const doProbe = ({ notifications, probe }: DoProbeParams) => {
   if (!isTimeToProbe(probe) || isCycleEnd(probe.id)) {
     return
   }
@@ -117,4 +122,15 @@ function isCycleEnd(probeID: string) {
 
 function getRandomTimeoutMilliseconds(): number {
   return [1000, 2000, 3000].sort(() => Math.random() - 0.5)[0]
+}
+
+export default ({ probes, notifications }: WorkerProps) => {
+  for (const probe of probes) {
+    queue.push(() =>
+      doProbe({
+        notifications,
+        probe,
+      })
+    )
+  }
 }
