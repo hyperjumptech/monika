@@ -76,8 +76,9 @@ export const send = async (
       return
     }
 
-    default:
+    default: {
       throw new Error('Unknown operating system')
+    }
   }
 }
 

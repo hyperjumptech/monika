@@ -157,7 +157,7 @@ describe('PagerDuty notification', () => {
         event_action: 'trigger',
         /* eslint-enable camelcase */
         payload: {
-          summary: summary,
+          summary,
           source: publicIpAddress,
           severity: 'error',
           group: probeID,

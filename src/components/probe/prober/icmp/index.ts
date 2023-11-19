@@ -55,10 +55,10 @@ export class PingProber extends BaseProber {
   private getConnectionDetails(): string {
     return (
       this.probeConfig.ping
-        ?.map((probe) => {
-          return `
+        ?.map(
+          (probe) => `
             uri: ${probe.uri}`
-        })
+        )
         .join(``) || `\n`
     )
   }

@@ -36,6 +36,6 @@ export interface Config {
   'status-notification'?: string
   symon?: SymonConfig
   version?: string
-  // eslint-disable-next-line camelcase
+
   db_limit?: DBLimit
 }

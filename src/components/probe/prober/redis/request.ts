@@ -90,12 +90,12 @@ async function sendRedisRequest(params: Redis): Promise<RedisResult> {
       host && port
         ? createClient({
             socket: {
-              host: host,
-              port: port,
+              host,
+              port,
               connectTimeout: CONNECTTIMEOUTMS,
             },
-            password: password,
-            username: username,
+            password,
+            username,
           })
         : createClient({ url: uri })
 
