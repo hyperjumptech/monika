@@ -41,9 +41,7 @@ import { closeLog, openLogfile } from '../logger/history'
 
 let notificationAlert: Record<string, Record<string, any>> = {}
 const server = setupServer(
-  rest.get('https://example.com', (_, res, ctx) => {
-    return res(ctx.status(200))
-  }),
+  rest.get('https://example.com', (_, res, ctx) => res(ctx.status(200))),
   rest.post('https://example.com/webhook', async (req, res, ctx) => {
     const requestBody = await req.json()
     if (requestBody?.body?.url) {
@@ -79,7 +77,7 @@ describe('Base Probe processing', () => {
       const requestStub = sinon.stub(mariadb, 'createConnection').callsFake(
         async (_connectionUri) =>
           ({
-            end: async () => {
+            async end() {
               Promise.resolve()
             },
           } as mariadb.Connection)
@@ -165,7 +163,7 @@ describe('Base Probe processing', () => {
       sinon.stub(mariadb, 'createConnection').callsFake(
         async (_connectionUri) =>
           ({
-            end: async () => {
+            async end() {
               Promise.resolve()
             },
           } as mariadb.Connection)
@@ -180,7 +178,7 @@ describe('Base Probe processing', () => {
       requestStub.onSecondCall().callsFake(
         async (_connectionUri) =>
           ({
-            end: async () => {
+            async end() {
               Promise.resolve()
             },
           } as mariadb.Connection)
@@ -328,7 +326,7 @@ describe('Base Probe processing', () => {
       const requestStub = sinon.stub(mariadb, 'createConnection').callsFake(
         async (_connectionUri) =>
           ({
-            end: async () => {
+            async end() {
               Promise.resolve()
             },
           } as mariadb.Connection)
@@ -369,8 +367,8 @@ describe('Base Probe processing', () => {
       const requestStub = sinon
         .stub(Pool.prototype, 'connect')
         .callsFake(() => ({
-          query: async () => Promise.resolve(),
-          release: async () => Promise.resolve(),
+          async query() {},
+          async release() {},
         }))
       const probes = [
         {
@@ -408,8 +406,8 @@ describe('Base Probe processing', () => {
       const requestStub = sinon
         .stub(Pool.prototype, 'connect')
         .callsFake(() => ({
-          query: async () => Promise.resolve(),
-          release: async () => Promise.resolve(),
+          async query() {},
+          async release() {},
         }))
       const probes = [
         {
@@ -443,7 +441,7 @@ describe('Base Probe processing', () => {
       const requestStub = sinon.stub(redis, 'createClient').callsFake(
         () =>
           ({
-            connect: async () => Promise.resolve(),
+            async connect() {},
             on: () => '',
             ping: async () => 'PONG',
           } as any)
@@ -482,7 +480,7 @@ describe('Base Probe processing', () => {
       const requestStub = sinon.stub(redis, 'createClient').callsFake(
         () =>
           ({
-            connect: async () => Promise.resolve(),
+            async connect() {},
             on: () => '',
             ping: async () => 'PONG',
           } as any)
@@ -519,29 +517,37 @@ describe('Base Probe processing', () => {
         let data = ''
 
         return {
-          write: (d: any) => {
+          write(d: any) {
             data = d
           },
-          setTimeout: (timeoutMs: number) => {
+          setTimeout(timeoutMs: number) {
             return timeoutMs
           },
-          on: (type: string, callback: (data?: any) => void) => {
+          on(type: string, callback: (data?: any) => void) {
             switch (type) {
-              case 'data':
+              case 'data': {
                 callback(data)
                 break
-              case 'close':
+              }
+
+              case 'close': {
                 callback()
                 break
-              case 'timeout':
+              }
+
+              case 'timeout': {
                 callback()
                 break
-              case 'error':
+              }
+
+              case 'error': {
                 callback('error')
                 break
+              }
 
-              default:
+              default: {
                 break
+              }
             }
           },
         } as unknown as net.Socket

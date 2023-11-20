@@ -33,7 +33,7 @@ export const createConfigFile = async (flags: MonikaFlags): Promise<string> => {
   try {
     const url =
       'https://raw.githubusercontent.com/hyperjumptech/monika/main/monika.example.yml'
-    await sendHttpRequest({ url: url }).then((resp) => {
+    await sendHttpRequest({ url }).then((resp) => {
       fs.writeFileSync(filename, resp.data, 'utf-8')
     })
     log.info(
