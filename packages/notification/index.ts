@@ -38,7 +38,7 @@ async function sendNotifications(
         }
 
         await channel.send(data, message)
-      } catch (error: any) {
+      } catch (error) {
         throw new Error(
           `Failed to send message using ${type}, please check your ${type} notification config.\nMessage: ${error?.message}`
         )

@@ -7,6 +7,7 @@
     "outDir": "lib",
     "lib": ["ES2021", "DOM"],
     "strict": true,
+    "useUnknownInCatchVariables": false,
     "target": "es2017",
     "skipLibCheck": true,
     "esModuleInterop": true,
