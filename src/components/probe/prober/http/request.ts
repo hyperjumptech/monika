@@ -30,6 +30,8 @@ import {
   type RequestConfig,
   probeRequestResult,
 } from '../../../../interfaces/request'
+
+// eslint-disable-next-line no-restricted-imports
 import * as qs from 'querystring'
 
 import http from 'http'
@@ -46,7 +48,10 @@ registerFakes(Handlebars)
 // Keep the agents alive to reduce the overhead of DNS queries and creating TCP connection.
 // More information here: https://rakshanshetty.in/nodejs-http-keep-alive/
 const httpAgent = new http.Agent({ keepAlive: true })
-const httpsAgent = new https.Agent({ keepAlive: true })
+const httpsAgent = new https.Agent({
+  keepAlive: true,
+  rejectUnauthorized: getContext().flags.ignoreInvalidTLS,
+})
 
 type probingParams = {
   requestConfig: Omit<RequestConfig, 'saveBody' | 'alert'> // is a config object
@@ -69,7 +74,7 @@ export async function httpRequest({
   const renderURL = Handlebars.compile(url)
   const renderedURL = renderURL({ responses })
 
-  const flags = getContext().flags
+  const { flags } = getContext()
 
   // Compile headers using handlebars to render URLs that uses previous responses data.
   // In some case such as value is not string, it will be returned as is without being compiled.
@@ -111,9 +116,9 @@ export async function httpRequest({
     newReq.body = generateRequestChainingBody(body, responses)
 
     if (newReq.headers) {
-      const contentTypeKey = Object.keys(headers || {}).find((hk) => {
-        return hk.toLocaleLowerCase() === 'content-type'
-      })
+      const contentTypeKey = Object.keys(headers || {}).find(
+        (hk) => hk.toLocaleLowerCase() === 'content-type'
+      )
 
       if (contentTypeKey) {
         const { content, contentType } = transformContentByType(
@@ -134,9 +139,20 @@ export async function httpRequest({
 
   // check if this request must ignore ssl cert
   // if it is, then create new https agent solely for this request
-  let optHttpsAgent = httpsAgent
+  // allowUnauthorized in a request takes higher priority than the global ignoreInvalidTLS flag
+  let optHttpsAgent
   if (allowUnauthorized) {
-    optHttpsAgent = new https.Agent({ rejectUnauthorized: !allowUnauthorized })
+    // Use the agent with the rejectUnauthorized value from the config
+    optHttpsAgent = new https.Agent({
+      rejectUnauthorized: !allowUnauthorized,
+    })
+  } else {
+    const ignoringInvalidTLS = getContext().flags.ignoreInvalidTLS
+    httpsAgent.options = {
+      ...httpsAgent.options,
+      rejectUnauthorized: !ignoringInvalidTLS,
+    }
+    optHttpsAgent = httpsAgent
   }
 
   const requestStartedAt = Date.now()
@@ -169,47 +185,49 @@ export async function httpRequest({
       responseTime,
       result: probeRequestResult.success,
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     const responseTime = Date.now() - requestStartedAt
 
-    // The request was made and the server responded with a status code
-    // 400, 500 get here
-    if (error?.response) {
-      return {
-        data: error?.response?.data,
-        body: error?.response?.data,
-        status: error?.response?.status,
-        headers: error?.response?.headers,
-        responseTime,
-        result: probeRequestResult.success,
+    if (error instanceof AxiosError) {
+      // The request was made and the server responded with a status code
+      // 400, 500 get here
+      if (error?.response) {
+        return {
+          data: error?.response?.data,
+          body: error?.response?.data,
+          status: error?.response?.status as number,
+          headers: error?.response?.headers,
+          responseTime,
+          result: probeRequestResult.success,
+        }
       }
-    }
 
-    // The request was made but no response was received
-    // timeout is here, ECONNABORTED, ENOTFOUND, ECONNRESET, ECONNREFUSED
-    if (error?.request) {
-      const status = getErrorStatusCode(error)
+      // The request was made but no response was received
+      // timeout is here, ECONNABORTED, ENOTFOUND, ECONNRESET, ECONNREFUSED
+      if (error?.request) {
+        const { status, description } = getErrorStatusWithExplanation(error)
 
-      return {
-        data: '',
-        body: '',
-        status,
-        headers: '',
-        responseTime,
-        result: probeRequestResult.failed,
-        errMessage: error?.code,
+        return {
+          data: description,
+          body: '',
+          status,
+          headers: '',
+          responseTime,
+          result: probeRequestResult.failed,
+          errMessage: (error as AxiosError).code,
+        }
       }
     }
 
     // other errors
     return {
       data: '',
-      body: '',
-      status: error.code || 'Unknown error',
+      body: (error as Error).message,
+      status: 99,
       headers: '',
       responseTime,
       result: probeRequestResult.failed,
-      errMessage: error.code || 'Unknown error',
+      errMessage: (error as Error).message,
     }
   }
 }
@@ -230,11 +248,12 @@ function transformContentByType(
   contentType?: string | number | boolean
 ) {
   switch (contentType) {
-    case 'application/x-www-form-urlencoded':
+    case 'application/x-www-form-urlencoded': {
       return {
         content: qs.stringify(content),
         contentType,
       }
+    }
 
     case 'multipart/form-data': {
       const form = new FormData()
@@ -253,62 +272,164 @@ function transformContentByType(
       return { content: yamlDoc.toString(), contentType }
     }
 
-    default:
+    default: {
       return { content, contentType }
+    }
   }
 }
 
-function getErrorStatusCode(error: unknown): number {
+function getErrorStatusWithExplanation(error: unknown): {
+  status: number
+  description: string
+} {
   switch ((error as AxiosError).code) {
-    case 'ECONNABORTED':
-      return 599 // https://httpstatuses.com/599
+    case 'ECONNABORTED': {
+      return {
+        status: 599,
+        description:
+          'ECONNABORTED: The connection was unexpectedly terminated, often due to server issues, network problems, or timeouts.',
+      }
+    } // https://httpstatuses.com/599
 
-    case 'ENOTFOUND':
+    case 'ENOTFOUND': {
       // not found, the abyss never returned a statusCode
       // assign some unique errResponseCode for decoding later.
-      return 0
-    case 'ECONNRESET':
-      // connection reset from target, assign some unique number responsecCode
-      return 1
-    case 'ECONNREFUSED':
-      // got rejected, again
-      return 2
-    case 'ERR_FR_TOO_MANY_REDIRECTS':
-      // redirect higher than set in maxRedirects
-      return 3
-    // cover all possible axios connection issues
-    case 'ERR_BAD_OPTION_VALUE':
-      return 4
-    case 'ERR_BAD_OPTION':
-      return 5
-    case 'ETIMEDOUT':
-      return 6
-    case 'ERR_NETWORK':
-      return 7
-    case 'ERR_DEPRECATED':
-      return 8
-    case 'ERR_BAD_RESPONSE':
-      return 9
-    case 'ERR_BAD_REQUEST':
-      return 11
-    case 'ERR_CANCELED':
-      return 12
-    case 'ERR_NOT_SUPPORT':
-      return 13
-    case 'ERR_INVALID_URL':
-      return 14
+      return {
+        status: 0,
+        description:
+          "ENOTFOUND: The monitored website or server couldn't be found, similar to entering an incorrect web address or encountering a temporary network/server issue.",
+      }
+    }
 
-    default:
+    case 'ECONNRESET': {
+      // connection reset from target, assign some unique number responsecCode
+      return {
+        status: 1,
+        description:
+          'ECONNRESET: The connection to a server was unexpectedly reset, often pointing to issues on the server side or network interruptions.',
+      }
+    }
+
+    case 'ECONNREFUSED': {
+      // got rejected, again
+      return {
+        status: 2,
+        description:
+          'ECONNREFUSED: Attempted to connect to a server, but the server declined the connection.',
+      }
+    }
+
+    case 'ERR_FR_TOO_MANY_REDIRECTS': {
+      // redirect higher than set in maxRedirects
+      return {
+        status: 3,
+        description:
+          'ERR_FR_TOO_MANY_REDIRECTS: Webpage is stuck in a loop of continuously redirecting.',
+      }
+    }
+
+    // cover all possible axios connection issues
+    case 'ERR_BAD_OPTION_VALUE': {
+      return {
+        status: 4,
+        description:
+          'ERR_BAD_OPTION_VALUE: Invalid or inappropriate value is provided for an option.',
+      }
+    }
+
+    case 'ERR_BAD_OPTION': {
+      return {
+        status: 5,
+        description: 'ERR_BAD_OPTION: Invalid or inappropriate option is used.',
+      }
+    }
+
+    case 'ETIMEDOUT': {
+      return {
+        status: 6,
+        description: 'ETIMEDOUT: Connection attempt has timed out.',
+      }
+    }
+
+    case 'ERR_NETWORK': {
+      return {
+        status: 7,
+        description:
+          'ERR_NETWORK: Signals a general network-related issue such as poor connectivity, DNS issues, or firewall restrictions.',
+      }
+    }
+
+    case 'ERR_DEPRECATED': {
+      return {
+        status: 8,
+        description:
+          'ERR_DEPRECATED: Feature, method, or functionality used in the code is outdated or no longer supported.',
+      }
+    }
+
+    case 'ERR_BAD_RESPONSE': {
+      return {
+        status: 9,
+        description:
+          'ERR_BAD_RESPONSE: Server provides a response that cannot be understood or is considered invalid.',
+      }
+    }
+
+    case 'ERR_BAD_REQUEST': {
+      return {
+        status: 11,
+        description:
+          "ERR_BAD_REQUEST:  Client's request to the server is malformed or invalid.",
+      }
+    }
+
+    case 'ERR_CANCELED': {
+      return {
+        status: 12,
+        description:
+          'ERR_CANCELED: Request or operation is canceled before it completes.',
+      }
+    }
+
+    case 'ERR_NOT_SUPPORT': {
+      return {
+        status: 13,
+        description: 'ERR_NOT_SUPPORT: Feature or operation is not supported.',
+      }
+    }
+
+    case 'ERR_INVALID_URL': {
+      return {
+        status: 14,
+        description:
+          'ERR_INVALID_URL: URL is not formatted correctly or is not a valid web address.',
+      }
+    }
+
+    case 'EAI_AGAIN': {
+      return {
+        status: 15,
+        description: 'EAI_AGAIN: Temporary failure in resolving a domain name.',
+      }
+    }
+
+    case 'EHOSTUNREACHED': {
+      return {
+        status: 16,
+        description: 'EHOSTUNREACHED: The host is unreachable.',
+      }
+    }
+
+    default: {
       if (error instanceof AxiosError) {
         console.error(
-          `Unhandled error, got ${(error as AxiosError).code} ${
-            (error as AxiosError).stack
-          } `
+          `Unhandled error while probing ${error.request.url}, got ${error.code} ${error.stack} `
         )
+      } else {
+        console.error(`Unhandled error, got ${(error as AxiosError).stack}`)
       }
 
-      console.error(`Unhandled error, got ${(error as AxiosError).stack}`)
-
-      return 99 // in the event an unlikely unknown error, send here
+      return { status: 99, description: '' }
+    } // in the event an unlikely unknown error, send here
   }
 }

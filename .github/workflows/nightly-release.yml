@@ -3,12 +3,12 @@ name: 🌒 Nightly Release
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 7 * * *" # every day at 12AM PST
+    - cron: '0 7 * * *' # every day at 12AM PST
 
 permissions:
   issues: read
   pull-requests: read
-  
+
 jobs:
   nightly:
     permissions:
