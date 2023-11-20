@@ -30,10 +30,12 @@ type DowntimeCounter = {
   alert: ProbeAlert
   probeID: string
   url: string
+  createdAt?: Date
 }
 
 export function startDowntimeCounter({
   alert,
+  createdAt,
   probeID,
   url,
 }: DowntimeCounter): void {
@@ -41,7 +43,7 @@ export function startDowntimeCounter({
     alert,
     probeID,
     probeRequestURL: url,
-    createdAt: new Date(),
+    createdAt: createdAt || new Date(),
   }
 
   setContext({ incidents: [...getContext().incidents, newIncident] })

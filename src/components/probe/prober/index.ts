@@ -29,6 +29,7 @@ import type { Probe, ProbeAlert } from '../../../interfaces/probe'
 import {
   probeRequestResult,
   type ProbeRequestResponse,
+  type RequestConfig,
 } from '../../../interfaces/request'
 import { FAILED_REQUEST_ASSERTION } from '../../../looper'
 import type { ValidatedResponse } from '../../../plugins/validate-response'
@@ -91,6 +92,8 @@ export class BaseProber implements Prober {
     this.counter = counter
     this.notifications = notifications
     this.probeConfig = probeConfig
+
+    this.initializeProbeState()
   }
 
   async probe(incidentRetryAttempt: number): Promise<void> {
@@ -412,6 +415,95 @@ export class BaseProber implements Prober {
     }
 
     log.warn(`${this.getMessagePrefix()} ${message.filter(Boolean).join(', ')}`)
+  }
+
+  private initializeProbeState() {
+    if (
+      !this.probeConfig?.lastEvent ||
+      this.probeConfig.lastEvent?.recoveredAt !== null
+    ) {
+      return
+    }
+
+    if (!this.probeConfig.lastEvent?.alertId) {
+      log.error(`Last event ID in probe ${this.probeConfig.id} is required`)
+      return
+    }
+
+    const { alertId, createdAt } = this.probeConfig.lastEvent
+    const alert = this.getAlerts().find(({ id }) => id === alertId)
+
+    if (!alert) {
+      log.error(
+        `Alert ID: ${alertId} is not found in probe ${this.probeConfig.id}`
+      )
+      return
+    }
+
+    const request = this.getRequestByAlertId(alertId)
+    if (!request) {
+      log.error(
+        `Request for alert ID: ${alertId} is not found in probe ${this.probeConfig.id}`
+      )
+      return
+    }
+
+    startDowntimeCounter({
+      alert,
+      probeID: this.probeConfig.id,
+      url: request.url,
+      createdAt,
+    })
+  }
+
+  private getAlerts() {
+    const httpAlerts =
+      this.probeConfig?.requests?.map(({ alerts }) => alerts).find(Boolean) ||
+      []
+    const mariadbAlerts =
+      this.probeConfig?.mariadb?.map(({ alerts }) => alerts).find(Boolean) || []
+    const mongoAlerts =
+      this.probeConfig?.mongo?.map(({ alerts }) => alerts).find(Boolean) || []
+    const mysqlAlerts =
+      this.probeConfig?.mysql?.map(({ alerts }) => alerts).find(Boolean) || []
+    const pingAlerts =
+      this.probeConfig?.ping?.map(({ alerts }) => alerts).find(Boolean) || []
+    const postgresAlerts =
+      this.probeConfig?.postgres?.map(({ alerts }) => alerts).find(Boolean) ||
+      []
+    const redisAlerts =
+      this.probeConfig?.redis?.map(({ alerts }) => alerts).find(Boolean) || []
+    const socketAlerts = this.probeConfig?.socket?.alerts || []
+
+    return [
+      ...(this.probeConfig?.alerts || []),
+      ...httpAlerts,
+      ...mariadbAlerts,
+      ...mongoAlerts,
+      ...mysqlAlerts,
+      ...pingAlerts,
+      ...postgresAlerts,
+      ...redisAlerts,
+      ...socketAlerts,
+    ]
+  }
+
+  private getRequestByAlertId(alertId: string): RequestConfig | null {
+    if (!this.probeConfig.requests) {
+      return null
+    }
+
+    for (const request of this.probeConfig.requests) {
+      if (!request?.alerts) {
+        continue
+      }
+
+      if (request.alerts.some(({ id }) => id === alertId)) {
+        return request
+      }
+    }
+
+    return null
   }
 
   private hasNotification() {
