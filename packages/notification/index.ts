@@ -23,7 +23,6 @@
  **********************************************************************************/
 
 import { channels, Notification, NotificationMessage } from './channel'
-import { validateNotification } from './validator/notification'
 
 async function sendNotifications(
   notifications: Notification[],
@@ -48,10 +47,7 @@ async function sendNotifications(
   )
 }
 
-export {
-  sendNotifications,
-  channels,
-  validateNotification,
-  Notification,
-  NotificationMessage,
-}
+export { sendNotifications }
+
+export { channels, Notification, NotificationMessage } from './channel'
+export { validateNotification } from './validator/notification'

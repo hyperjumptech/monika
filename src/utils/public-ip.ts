@@ -54,7 +54,7 @@ async function pokeStun(): Promise<string> {
   // for testing, bypass ping/stun server... apparently ping cannot run in github actions
   // reference: https://github.com/actions/virtual-environments/issues/1519
   if (isTestEnvironment) {
-    return Promise.resolve('192.168.1.1') // adding for specific asserts in other tests
+    return '192.168.1.1' // adding for specific asserts in other tests
   }
 
   const connection = await sendPing('stun.l.google.com')
@@ -63,7 +63,7 @@ async function pokeStun(): Promise<string> {
     return response?.getXorAddress()?.address
   }
 
-  return Promise.reject(new Error('stun inaccessible')) // could not connect to STUN server
+  throw new Error('stun inaccessible') // could not connect to STUN server
 }
 
 export async function getPublicNetworkInfo(): Promise<PublicNetwork> {
@@ -111,7 +111,7 @@ export async function getPublicIp(): Promise<any> {
   } catch {
     isConnectedToSTUNServer = false
     log.warn(`${time} STUN Server is temporarily unreachable. Check network.`)
-    return Promise.resolve() // couldn't access public stun but resolve and retry
+    return // couldn't access public stun but resolve and retry
   }
 
   return null

@@ -95,7 +95,7 @@ function getContent(
 
   switch (meta.type) {
     case 'start':
-    case 'termination':
+    case 'termination': {
       return {
         msg_type: 'post',
         content: {
@@ -118,8 +118,10 @@ function getContent(
           },
         },
       }
+    }
+
     case 'incident':
-    case 'recovery':
+    case 'recovery': {
       return {
         msg_type: 'post',
         content: {
@@ -159,7 +161,9 @@ function getContent(
           },
         },
       }
-    case 'status-update':
+    }
+
+    case 'status-update': {
       return {
         msg_type: 'post',
         content: {
@@ -207,7 +211,9 @@ function getContent(
           },
         },
       }
-    default:
+    }
+
+    default: {
       return {
         msg_type: 'post',
         content: {
@@ -226,5 +232,6 @@ function getContent(
           },
         },
       }
+    }
   }
 }

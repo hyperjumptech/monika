@@ -40,32 +40,45 @@ const getCollectionVersion = (config: any) => {
 
 const generateHeaderContentType = (mode: string, rawType?: string) => {
   switch (mode) {
-    case 'formdata':
+    case 'formdata': {
       return { 'Content-Type': 'multipart/form-data' }
-    case 'urlencoded':
+    }
+
+    case 'urlencoded': {
       return { 'Content-Type': 'application/x-www-form-urlencoded' }
-    case 'raw':
+    }
+
+    case 'raw': {
       if (rawType === 'json') return { 'Content-Type': 'application/json' }
       return { 'Content-Type': 'text/plain' }
-    default:
+    }
+
+    default: {
       return {}
+    }
   }
 }
 
 const generateBody = (body: any, mode: string, rawType?: string) => {
   switch (mode) {
     case 'formdata':
-    case 'urlencoded':
+    case 'urlencoded': {
       return {
-        body: body?.reduce((obj: any, it: any) => {
-          return Object.assign(obj, { [it.key]: it.value })
-        }, {}),
+        body: body?.reduce(
+          (obj: any, it: any) => Object.assign(obj, { [it.key]: it.value }),
+          {}
+        ),
       }
-    case 'raw':
+    }
+
+    case 'raw': {
       if (rawType === 'json') return { body: JSON.parse(body) }
       return { body }
-    default:
+    }
+
+    default: {
       return {}
+    }
   }
 }
 
@@ -78,9 +91,10 @@ const generateEachRequest = (request: any, version: CollectionVersion) => {
     url: version === 'v2.0' ? request?.url : request?.url.raw,
     method: request?.method,
     headers: {
-      ...request?.header?.reduce((obj: any, it: any) => {
-        return Object.assign(obj, { [it.key]: it.value })
-      }, {}),
+      ...request?.header?.reduce(
+        (obj: any, it: any) => Object.assign(obj, { [it.key]: it.value }),
+        {}
+      ),
       ...generateHeaderContentType(mode, language),
     },
     timeout: 10_000,
@@ -92,23 +106,21 @@ const generateRequests = (item: any, version: CollectionVersion) => {
   const subitems = item?.item
 
   if (subitems?.length > 0) {
-    return subitems?.map((subitem: any) => {
-      return generateEachRequest(subitem?.request, version)
-    })
+    return subitems?.map((subitem: any) =>
+      generateEachRequest(subitem?.request, version)
+    )
   }
 
   return [generateEachRequest(item?.request, version)]
 }
 
 const generateProbesFromConfig = (config: any, version: CollectionVersion) => {
-  const probes = config?.item?.map((item: any) => {
-    return {
-      id: item?.name,
-      name: item?.name,
-      requests: generateRequests(item, version),
-      alerts: [],
-    }
-  })
+  const probes = config?.item?.map((item: any) => ({
+    id: item?.name,
+    name: item?.name,
+    requests: generateRequests(item, version),
+    alerts: [],
+  }))
 
   return probes ?? []
 }

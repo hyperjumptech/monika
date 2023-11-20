@@ -36,7 +36,7 @@ type MonikaAlertNotifDataBody = {
 
 type MonikaStartAndTerminationNotifDataBody = {
   type: 'start' | 'termination'
-  // eslint-disable-next-line camelcase
+
   ip_address: string
 }
 

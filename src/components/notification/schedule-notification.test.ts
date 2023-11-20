@@ -18,7 +18,7 @@ describe('Schedule notification', () => {
         cronExpression = ce
 
         return {
-          stop: () => {
+          stop() {
             taskStopCalledTotal++
           },
         } as cron.ScheduledTask

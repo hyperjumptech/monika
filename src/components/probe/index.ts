@@ -116,7 +116,5 @@ function isCycleEnd(probeID: string) {
 }
 
 function getRandomTimeoutMilliseconds(): number {
-  return [1000, 2000, 3000].sort(() => {
-    return Math.random() - 0.5
-  })[0]
+  return [1000, 2000, 3000].sort(() => Math.random() - 0.5)[0]
 }

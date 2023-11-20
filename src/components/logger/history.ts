@@ -98,7 +98,7 @@ type Summary = {
 
 type ProbeRequestDB = {
   id: number
-  /* eslint-disable camelcase */
+
   probe_id: string
   response_status: number
   request_url: string
@@ -109,7 +109,7 @@ type ProbeRequestDB = {
 type UnreportedProbeRequestDB = {
   alerts: string
   id: number
-  /* eslint-disable camelcase */
+
   probe_id: string
   probe_name?: string
   request_method: string
@@ -130,7 +130,7 @@ type UnreportedProbeRequestDB = {
 type UnreportedNotificationDB = {
   id: number
   timestamp: number
-  /* eslint-disable camelcase */
+
   probe_id: string
   probe_name: string
   alert_type: string
@@ -193,7 +193,7 @@ export async function deleteFromProbeRequests(
   }
 
   return {
-    probeIds: probeIds,
+    probeIds,
     probeRequestIds: ids,
   }
 }

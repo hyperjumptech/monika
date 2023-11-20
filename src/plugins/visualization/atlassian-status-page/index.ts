@@ -96,8 +96,9 @@ export class AtlassianStatusPageAPI {
         return incidentID
       }
 
-      default:
+      default: {
         throw new Error(`Statuspage notification: type ${type} is unknown`)
+      }
     }
   }
 

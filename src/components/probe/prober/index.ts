@@ -357,7 +357,7 @@ export class BaseProber implements Prober {
     this.sendNotification({
       requestURL: url,
       notificationType: NotificationType.Incident,
-      validation: validation,
+      validation,
       alertId,
     }).catch((error) => log.error(error.mesage))
   }
@@ -393,7 +393,7 @@ export class BaseProber implements Prober {
       this.sendNotification({
         requestURL: url,
         notificationType: NotificationType.Recover,
-        validation: validation,
+        validation,
         alertId,
       }).catch((error) => log.error(error.mesage))
     }
