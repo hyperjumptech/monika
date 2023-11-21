@@ -26,7 +26,7 @@ import { sendHttpRequest } from '../../utils/http'
 
 export const fetchConfig = async (url: string): Promise<string> => {
   try {
-    const { data } = await sendHttpRequest({ url: url })
+    const { data } = await sendHttpRequest({ url })
     return data
   } catch {
     throw new Error(`The configuration file in ${url} is unreachable. Please check the URL again or your internet connection. 

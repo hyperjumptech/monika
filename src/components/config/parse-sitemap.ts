@@ -50,7 +50,7 @@ const generateProbesFromXml = (config: any) => {
     return {
       id: item?.loc,
       name: item?.loc,
-      requests: requests,
+      requests,
       alerts: [],
     }
   })
@@ -90,7 +90,7 @@ const generateProbesFromXmlOneProbe = (config: any) => {
     probe = {
       id: url.host,
       name: url.host,
-      requests: requests,
+      requests,
       interval: monikaFlagsDefaultValue['config-interval'],
       alerts: [
         {

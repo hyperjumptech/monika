@@ -43,13 +43,13 @@ type NotificationData = {
 
 type User = {
   token: string
-  // eslint-disable-next-line camelcase
+
   expires_after: string
 }
 
 type Meta = {
   version: string
-  // eslint-disable-next-line camelcase
+
   api_status: string
 }
 
@@ -97,7 +97,7 @@ async function sendTextMessage({
 
     await sendHttpRequest({
       method: 'POST',
-      url: url,
+      url,
       headers: {
         'Content-Type': 'application/json',
         Authorization: auth,

@@ -28,17 +28,24 @@ import { type } from 'os'
 export const open = (url: string): void => {
   const operatingSystem = type()
   switch (operatingSystem) {
-    case 'Darwin':
+    case 'Darwin': {
       spawnSync('open', [url])
       break
-    case 'Linux':
+    }
+
+    case 'Linux': {
       spawnSync('xdg-open', [url])
       break
-    case 'Windows NT':
+    }
+
+    case 'Windows NT': {
       spawnSync('start', [url])
       break
-    default:
+    }
+
+    default: {
       // TODO: Handle new OS
       break
+    }
   }
 }

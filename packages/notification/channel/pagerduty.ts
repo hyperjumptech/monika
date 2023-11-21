@@ -119,7 +119,7 @@ function transformMessageToEventPayload(
       dedup_key: dedupKey,
       event_action: 'trigger',
       payload: {
-        summary: summary,
+        summary,
         source: publicIpAddress,
         severity: 'error',
         group: probeID,

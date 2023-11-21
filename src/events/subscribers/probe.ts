@@ -69,12 +69,16 @@ eventEmitter.on(
 
 function getNotificationType(probeState: string): 'incident' | 'recovery' | '' {
   switch (probeState) {
-    case 'UP':
+    case 'UP': {
       return 'recovery'
-    case 'DOWN':
-      return 'incident'
+    }
 
-    default:
+    case 'DOWN': {
+      return 'incident'
+    }
+
+    default: {
       return ''
+    }
   }
 }

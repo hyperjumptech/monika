@@ -160,6 +160,7 @@ export async function validateProbes(probes: Probe[]): Promise<Probe[]> {
             .min(1),
           interval: joi.number().default(DEFAULT_INTERVAL).min(1),
           lastEvent: joi.object({
+            alertId: joi.string(),
             createdAt: joi.string().allow(''),
             recoveredAt: joi.string().allow('', null),
           }),
