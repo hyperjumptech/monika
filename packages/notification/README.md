@@ -14,11 +14,21 @@ See the main `README.md` in the Monika repository for contributing details.
 
 The notification package is released to npm. When creating a PR for the package, please ensure that:
 
-1. Linter is run
-2. The changes work with the main Monika app
-3. The command `npm run build` from packages/notification ran and builds.
-4. The versions in package.json are updated
+1. Linter is run.
+2. The changes work with the main Monika application.
+3. The command `npm run build` from packages/notification ran and builds without error.
+4. The versions in ./package.json are properly incremented.
 5. Create a PR to merge to `main`.
+
+If releasing Monika application:
+
+1. Ensure that the notification dependency is updated:
+
+```yaml
+ "dependencies": {
+ "@hyperjumptech/monika-notification": x.y.z // enter the correct version here
+
+```
 
 ## References
 
