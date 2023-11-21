@@ -413,23 +413,36 @@ function getErrorStatusWithExplanation(error: unknown): {
       }
     }
 
-    case 'EHOSTUNREACHED': {
+    case 'EHOSTUNREACH': {
       return {
         status: 16,
-        description: 'EHOSTUNREACHED: The host is unreachable.',
+        description: 'EHOSTUNREACH: The host is unreachable.',
+      }
+    }
+
+    case 'EPROTO': {
+      return {
+        status: 17,
+        description:
+          "EPROTO: There are issues with the website's SSL/TLS certificates, incompatible protocols, or other SSL-related problems.",
       }
     }
 
     default: {
       if (error instanceof AxiosError) {
         console.error(
-          `Unhandled error while probing ${error.request.url}, got ${error.code} ${error.stack} `
+          `Error code 99: Unhandled error while probing ${error.request.url}, got ${error.code} ${error.stack} `
         )
       } else {
-        console.error(`Unhandled error, got ${(error as AxiosError).stack}`)
+        console.error(
+          `Error code 99: Unhandled error, got ${(error as AxiosError).stack}`
+        )
       }
 
-      return { status: 99, description: '' }
+      return {
+        status: 99,
+        description: `Error code 99: ${(error as AxiosError).stack}`,
+      }
     } // in the event an unlikely unknown error, send here
   }
 }
