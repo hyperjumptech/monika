@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - 'package/notification'
+      - 'package/notification/**'
     branches:
       - 'main'
 
