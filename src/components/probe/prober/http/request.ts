@@ -431,13 +431,18 @@ function getErrorStatusWithExplanation(error: unknown): {
     default: {
       if (error instanceof AxiosError) {
         console.error(
-          `Unhandled error while probing ${error.request.url}, got ${error.code} ${error.stack} `
+          `Error code 99: Unhandled error while probing ${error.request.url}, got ${error.code} ${error.stack} `
         )
       } else {
-        console.error(`Unhandled error, got ${(error as AxiosError).stack}`)
+        console.error(
+          `Error code 99: Unhandled error, got ${(error as AxiosError).stack}`
+        )
       }
 
-      return { status: 99, description: `${(error as AxiosError).stack}` }
+      return {
+        status: 99,
+        description: `Error code 99: ${(error as AxiosError).stack}`,
+      }
     } // in the event an unlikely unknown error, send here
   }
 }
