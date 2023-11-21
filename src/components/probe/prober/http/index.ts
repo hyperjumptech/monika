@@ -1,4 +1,3 @@
-/* eslint-disable complexity */
 /**********************************************************************************
  * MIT License                                                                    *
  *                                                                                *
@@ -23,23 +22,24 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import { BaseProber, NotificationType } from '..'
 import { getContext } from '../../../../context'
 import events from '../../../../events'
-import { getEventEmitter } from '../../../../utils/events'
-import { httpRequest } from './request'
-import { BaseProber, NotificationType } from '..'
+import type { ProbeAlert } from '../../../../interfaces/probe'
 import {
-  type ProbeRequestResponse,
   probeRequestResult,
+  type ProbeRequestResponse,
   type RequestConfig,
 } from '../../../../interfaces/request'
-import type { ProbeAlert } from '../../../../interfaces/probe'
-import responseChecker from '../../../../plugins/validate-response/checkers'
-import { logResponseTime } from '../../../logger/response-time-log'
-import { saveProbeRequestLog } from '../../../logger/history'
 import type { ValidatedResponse } from '../../../../plugins/validate-response'
+import responseChecker from '../../../../plugins/validate-response/checkers'
+import { getAlertID } from '../../../../utils/alert-id'
+import { getEventEmitter } from '../../../../utils/events'
 import { isSymonModeFrom } from '../../../config'
 import { startDowntimeCounter } from '../../../downtime-counter'
+import { saveProbeRequestLog } from '../../../logger/history'
+import { logResponseTime } from '../../../logger/response-time-log'
+import { httpRequest } from './request'
 
 type ProbeResultMessageParams = {
   request: RequestConfig
@@ -185,6 +185,15 @@ export class HTTPProber extends BaseProber {
     requestIndex: number,
     triggeredAlert: ProbeAlert
   ) {
+    const probeID = this.probeConfig.id
+    const url = this.probeConfig?.requests?.[requestIndex].url || ''
+    const validation = {
+      alert: triggeredAlert,
+      isAlertTriggered: true,
+      response,
+    }
+    const alertId = getAlertID(url, validation, probeID)
+
     getEventEmitter().emit(events.probe.alert.triggered, {
       probe: this.probeConfig,
       requestIndex,
@@ -193,18 +202,15 @@ export class HTTPProber extends BaseProber {
 
     startDowntimeCounter({
       alert: triggeredAlert,
-      probeID: this.probeConfig.id,
-      url: this.probeConfig?.requests?.[requestIndex].url || '',
+      probeID,
+      url,
     })
 
     this.sendNotification({
-      requestURL: this.probeConfig?.requests?.[requestIndex].url || '',
+      requestURL: url,
       notificationType: NotificationType.Incident,
-      validation: {
-        alert: triggeredAlert,
-        isAlertTriggered: true,
-        response,
-      },
+      validation,
+      alertId,
     })
 
     this.logMessage(

@@ -18,22 +18,22 @@ jobs:
   notify:
     runs-on: ubuntu-latest
     steps:
-    - name: Set variables
-      id: set_variables
-      env:
+      - name: Set variables
+        id: set_variables
+        env:
           ISSUE_TITLE: ${{ github.event.issue.title }}
           PR_TITLE: ${{ github.event.pull_request.title }}
           GITHUB_EVENT_NAME: ${{ github.event_name }}
-      run: |
-        if [ "$GITHUB_EVENT_NAME" = "issues" ]; then
-            echo "::set-output name=webhook_title::New issue opened: $ISSUE_TITLE" 
-            echo "::set-output name=webhook_text::${{ github.event.issue.html_url }}" 
-        else
-            echo "::set-output name=webhook_title::New PR opened: $PR_TITLE" 
-            echo "::set-output name=webhook_text::${{ github.event.pull_request.html_url }}"   
-        fi
-    - name: Notify Teams
-      uses: joelwmale/webhook-action@fd99bb3b8272237103e349e9bb4d9b0ead9a217c
-      with:
-        url: ${{secrets.HYPERJUMP_TEAMS_SYMON_WEBHOOK}}
-        body: '{"title": "${{ steps.set_variables.outputs.webhook_title }}", "text": "${{ steps.set_variables.outputs.webhook_text }}"}'
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = "issues" ]; then
+              echo "::set-output name=webhook_title::New issue opened: $ISSUE_TITLE" 
+              echo "::set-output name=webhook_text::${{ github.event.issue.html_url }}" 
+          else
+              echo "::set-output name=webhook_title::New PR opened: $PR_TITLE" 
+              echo "::set-output name=webhook_text::${{ github.event.pull_request.html_url }}"   
+          fi
+      - name: Notify Teams
+        uses: joelwmale/webhook-action@fd99bb3b8272237103e349e9bb4d9b0ead9a217c
+        with:
+          url: ${{secrets.HYPERJUMP_TEAMS_SYMON_WEBHOOK}}
+          body: '{"title": "${{ steps.set_variables.outputs.webhook_title }}", "text": "${{ steps.set_variables.outputs.webhook_text }}"}'

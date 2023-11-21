@@ -113,14 +113,19 @@ async function runUpdater(config: IConfig, updateMode: UpdateMode) {
   const predicate = (remoteVersion: string) => {
     let regexp = ''
     switch (updateMode) {
-      case 'patch':
+      case 'patch': {
         regexp = `(${currentMajor}\\.${currentMinor}\\.([0-9])+)`
         break
-      case 'minor':
+      }
+
+      case 'minor': {
         regexp = `(${currentMajor}\\.([0-9])+\\.([0-9])+)`
         break
-      default:
+      }
+
+      default: {
         return false
+      }
     }
 
     return remoteVersion.match(regexp) !== null
@@ -337,17 +342,18 @@ function installationType(commands: string[]): 'npm' | 'oclif-pack' | 'binary' {
 }
 
 function getPlatform(config: IConfig): string {
-  let platform: string = config.platform
+  const { platform } = config
   switch (platform) {
-    case 'darwin':
-      platform = 'macos'
-      break
-    case 'win32':
-      platform = 'windows'
-      break
-    default:
-      platform = 'linux'
-  }
+    case 'darwin': {
+      return 'macos'
+    }
 
-  return platform
+    case 'win32': {
+      return 'windows'
+    }
+
+    default: {
+      return 'linux'
+    }
+  }
 }

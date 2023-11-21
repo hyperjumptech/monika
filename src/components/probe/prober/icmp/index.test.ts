@@ -35,18 +35,16 @@ let pingRequestStub: sinon.SinonStub
 
 describe('Ping/ICMP Prober', () => {
   beforeEach(() => {
-    pingRequestStub = sinon
-      .stub(request, 'icmpRequest')
-      .callsFake(async (_options): Promise<ProbeRequestResponse> => {
-        return {
-          data: '',
-          body: '',
-          status: 0,
-          result: probeRequestResult.failed,
-          headers: '',
-          responseTime: 0,
-        }
+    pingRequestStub = sinon.stub(request, 'icmpRequest').callsFake(
+      async (_options): Promise<ProbeRequestResponse> => ({
+        data: '',
+        body: '',
+        status: 0,
+        result: probeRequestResult.failed,
+        headers: '',
+        responseTime: 0,
       })
+    )
   })
 
   afterEach(() => {
@@ -108,18 +106,16 @@ describe('Ping/ICMP Prober', () => {
   it('should result in an alert', async () => {
     // arrange
     sinon.restore()
-    pingRequestStub = sinon
-      .stub(request, 'icmpRequest')
-      .callsFake(async (_options): Promise<ProbeRequestResponse> => {
-        return {
-          data: '',
-          body: '',
-          status: 0,
-          headers: '',
-          responseTime: 0,
-          result: probeRequestResult.failed,
-        }
+    pingRequestStub = sinon.stub(request, 'icmpRequest').callsFake(
+      async (_options): Promise<ProbeRequestResponse> => ({
+        data: '',
+        body: '',
+        status: 0,
+        headers: '',
+        responseTime: 0,
+        result: probeRequestResult.failed,
       })
+    )
     const pingParams = {
       id: 'test-ping',
       checkOrder: 1,

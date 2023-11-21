@@ -33,13 +33,19 @@ import { log } from '../../utils/pino'
  */
 function getStatusColor(responseCode: number) {
   switch (Math.trunc(responseCode / 100)) {
-    case 2:
+    case 2: {
       return 'cyan'
-    case 4:
+    }
+
+    case 4: {
       return 'orange'
+    }
+
     case 5: // all 5xx errrors
-    case 0: // 0 is uri not found
+    case 0: {
+      // 0 is uri not found
       return 'red'
+    }
   }
 
   return 'white'

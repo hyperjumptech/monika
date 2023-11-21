@@ -22,20 +22,27 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Certificate } from './certificate'
-import type { Notification } from '@hyperjumptech/monika-notification'
-import { Probe } from './probe'
-import { SymonConfig } from '../components/reporter'
-import type { DBLimit } from './data'
+import { getContext } from '../context'
+import type { ValidatedResponse } from '../plugins/validate-response'
 
-export interface Config {
-  certificate?: Certificate
-  interval?: number
-  notifications?: Notification[]
-  probes: Probe[]
-  'status-notification'?: string
-  symon?: SymonConfig
-  version?: string
+export function getAlertID(
+  url: string,
+  validation: ValidatedResponse,
+  probeID: string
+): string {
+  if (validation.alert.id) {
+    return validation.alert.id
+  }
 
-  db_limit?: DBLimit
+  const probe = getContext().config?.probes.find(({ id }) => id === probeID)
+  if (!probe) {
+    return ''
+  }
+
+  const request = probe.requests?.find((request) => request.url === url)
+  if (!request) {
+    return ''
+  }
+
+  return request.alerts?.find((alert) => alert.query === '')?.id || ''
 }

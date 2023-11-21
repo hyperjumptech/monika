@@ -59,14 +59,15 @@ export function mergeConfigs(
   }
 
   // eslint-disable-next-line unicorn/no-array-reduce
-  const mergedConfig = defaultConfigs.reduce((prev, current) => {
-    return {
+  const mergedConfig = defaultConfigs.reduce(
+    (prev, current) => ({
       ...prev,
       ...current,
       notifications: current.notifications || prev.notifications,
       probes: current.probes || prev.probes,
-    }
-  }, nonDefaultConfig || {})
+    }),
+    nonDefaultConfig || {}
+  )
 
   return mergedConfig as Config
 }

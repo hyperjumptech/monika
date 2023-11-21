@@ -135,6 +135,12 @@ export default class Monika extends Command {
       multiple: false,
     }),
 
+    ignoreInvalidTLS: Flags.boolean({
+      description:
+        'Configures whether HTTPS requests should ignore invalid certificates',
+      default: false,
+    }),
+
     insomnia: Flags.string({
       char: 'I', // (I)nsomnia file to
       description: 'Run Monika using an Insomnia json/yaml file',

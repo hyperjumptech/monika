@@ -23,29 +23,31 @@
  **********************************************************************************/
 
 import type { Notification } from '@hyperjumptech/monika-notification'
-import { type Incident, getContext } from '../../../context'
+import { getContext, type Incident } from '../../../context'
 import events from '../../../events'
 import type { Probe, ProbeAlert } from '../../../interfaces/probe'
 import {
   probeRequestResult,
   type ProbeRequestResponse,
+  type RequestConfig,
 } from '../../../interfaces/request'
+import { FAILED_REQUEST_ASSERTION } from '../../../looper'
+import type { ValidatedResponse } from '../../../plugins/validate-response'
+import { getAlertID } from '../../../utils/alert-id'
 import { getEventEmitter } from '../../../utils/events'
 import { log } from '../../../utils/pino'
 import { isSymonModeFrom } from '../../config'
-import { sendAlerts } from '../../notification'
-import { saveNotificationLog, saveProbeRequestLog } from '../../logger/history'
-import { logResponseTime } from '../../logger/response-time-log'
-import type { ValidatedResponse } from '../../../plugins/validate-response'
-import {
-  startDowntimeCounter,
-  stopDowntimeCounter,
-} from '../../downtime-counter'
-import { FAILED_REQUEST_ASSERTION } from '../../../looper'
 import {
   DEFAULT_INCIDENT_THRESHOLD,
   DEFAULT_RECOVERY_THRESHOLD,
 } from '../../config/validation/validator/default-values'
+import {
+  startDowntimeCounter,
+  stopDowntimeCounter,
+} from '../../downtime-counter'
+import { saveNotificationLog, saveProbeRequestLog } from '../../logger/history'
+import { logResponseTime } from '../../logger/response-time-log'
+import { sendAlerts } from '../../notification'
 
 export type ProbeResult = {
   isAlertTriggered: boolean
@@ -62,6 +64,7 @@ type SendNotificationParams = {
   requestURL: string
   notificationType: NotificationType
   validation: ValidatedResponse
+  alertId: string
 }
 
 export interface Prober {
@@ -89,6 +92,8 @@ export class BaseProber implements Prober {
     this.counter = counter
     this.notifications = notifications
     this.probeConfig = probeConfig
+
+    this.initializeProbeState()
   }
 
   async probe(incidentRetryAttempt: number): Promise<void> {
@@ -240,8 +245,8 @@ export class BaseProber implements Prober {
   protected throwIncidentIfNeeded(
     incidentRetryAttempt: number,
     incidentThreshold: number = DEFAULT_INCIDENT_THRESHOLD,
-    message: string = 'Probing failed'
-  ) {
+    message = 'Probing failed'
+  ): void {
     const isIncidentThresholdMet =
       incidentRetryAttempt === incidentThreshold - 1
 
@@ -262,6 +267,7 @@ export class BaseProber implements Prober {
     requestURL,
     notificationType,
     validation,
+    alertId,
   }: SendNotificationParams): Promise<void> {
     const isRecoveryNotification = notificationType === NotificationType.Recover
     getEventEmitter().emit(events.probe.notification.willSend, {
@@ -270,6 +276,7 @@ export class BaseProber implements Prober {
       url: requestURL,
       probeState: isRecoveryNotification ? ProbeState.Up : ProbeState.Down,
       validation,
+      alertId,
     })
 
     if (!this.hasNotification()) {
@@ -337,14 +344,21 @@ export class BaseProber implements Prober {
       error: requestResponse.errMessage,
     })
 
+    const url = this.probeConfig?.requests?.[requestIndex].url || ''
+    const validation = {
+      alert: failedRequestAssertion,
+      isAlertTriggered: true,
+      response: requestResponse,
+    }
+    const probeID = this.probeConfig.id
+
+    const alertId = getAlertID(url, validation, probeID)
+
     this.sendNotification({
-      requestURL: this.probeConfig?.requests?.[requestIndex].url || '',
+      requestURL: url,
       notificationType: NotificationType.Incident,
-      validation: {
-        alert: failedRequestAssertion,
-        isAlertTriggered: true,
-        response: requestResponse,
-      },
+      validation,
+      alertId,
     }).catch((error) => log.error(error.mesage))
   }
 
@@ -366,14 +380,21 @@ export class BaseProber implements Prober {
         url: this.probeConfig?.requests?.[requestIndex].url || '',
       })
 
+      const url = this.probeConfig?.requests?.[requestIndex].url || ''
+      const validation = {
+        alert: recoveredIncident.alert,
+        isAlertTriggered: false,
+        response: probeResults[requestIndex].requestResponse,
+      }
+      const probeID = this.probeConfig.id
+
+      const alertId = getAlertID(url, validation, probeID)
+
       this.sendNotification({
-        requestURL: this.probeConfig?.requests?.[requestIndex].url || '',
+        requestURL: url,
         notificationType: NotificationType.Recover,
-        validation: {
-          alert: recoveredIncident.alert,
-          isAlertTriggered: false,
-          response: probeResults[requestIndex].requestResponse,
-        },
+        validation,
+        alertId,
       }).catch((error) => log.error(error.mesage))
     }
 
@@ -394,6 +415,95 @@ export class BaseProber implements Prober {
     }
 
     log.warn(`${this.getMessagePrefix()} ${message.filter(Boolean).join(', ')}`)
+  }
+
+  private initializeProbeState() {
+    if (
+      !this.probeConfig?.lastEvent ||
+      this.probeConfig.lastEvent?.recoveredAt !== null
+    ) {
+      return
+    }
+
+    if (!this.probeConfig.lastEvent?.alertId) {
+      log.error(`Last event ID in probe ${this.probeConfig.id} is required`)
+      return
+    }
+
+    const { alertId, createdAt } = this.probeConfig.lastEvent
+    const alert = this.getAlerts().find(({ id }) => id === alertId)
+
+    if (!alert) {
+      log.error(
+        `Alert ID: ${alertId} is not found in probe ${this.probeConfig.id}`
+      )
+      return
+    }
+
+    const request = this.getRequestByAlertId(alertId)
+    if (!request) {
+      log.error(
+        `Request for alert ID: ${alertId} is not found in probe ${this.probeConfig.id}`
+      )
+      return
+    }
+
+    startDowntimeCounter({
+      alert,
+      probeID: this.probeConfig.id,
+      url: request.url,
+      createdAt,
+    })
+  }
+
+  private getAlerts() {
+    const httpAlerts =
+      this.probeConfig?.requests?.map(({ alerts }) => alerts).find(Boolean) ||
+      []
+    const mariadbAlerts =
+      this.probeConfig?.mariadb?.map(({ alerts }) => alerts).find(Boolean) || []
+    const mongoAlerts =
+      this.probeConfig?.mongo?.map(({ alerts }) => alerts).find(Boolean) || []
+    const mysqlAlerts =
+      this.probeConfig?.mysql?.map(({ alerts }) => alerts).find(Boolean) || []
+    const pingAlerts =
+      this.probeConfig?.ping?.map(({ alerts }) => alerts).find(Boolean) || []
+    const postgresAlerts =
+      this.probeConfig?.postgres?.map(({ alerts }) => alerts).find(Boolean) ||
+      []
+    const redisAlerts =
+      this.probeConfig?.redis?.map(({ alerts }) => alerts).find(Boolean) || []
+    const socketAlerts = this.probeConfig?.socket?.alerts || []
+
+    return [
+      ...(this.probeConfig?.alerts || []),
+      ...httpAlerts,
+      ...mariadbAlerts,
+      ...mongoAlerts,
+      ...mysqlAlerts,
+      ...pingAlerts,
+      ...postgresAlerts,
+      ...redisAlerts,
+      ...socketAlerts,
+    ]
+  }
+
+  private getRequestByAlertId(alertId: string): RequestConfig | null {
+    if (!this.probeConfig.requests) {
+      return null
+    }
+
+    for (const request of this.probeConfig.requests) {
+      if (!request?.alerts) {
+        continue
+      }
+
+      if (request.alerts.some(({ id }) => id === alertId)) {
+        return request
+      }
+    }
+
+    return null
   }
 
   private hasNotification() {
