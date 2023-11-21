@@ -413,10 +413,18 @@ function getErrorStatusWithExplanation(error: unknown): {
       }
     }
 
-    case 'EHOSTUNREACHED': {
+    case 'EHOSTUNREACH': {
       return {
         status: 16,
-        description: 'EHOSTUNREACHED: The host is unreachable.',
+        description: 'EHOSTUNREACH: The host is unreachable.',
+      }
+    }
+
+    case 'EPROTO': {
+      return {
+        status: 17,
+        description:
+          "EPROTO: There are issues with the website's security certificate or compatibility problems.",
       }
     }
 
@@ -429,7 +437,7 @@ function getErrorStatusWithExplanation(error: unknown): {
         console.error(`Unhandled error, got ${(error as AxiosError).stack}`)
       }
 
-      return { status: 99, description: '' }
+      return { status: 99, description: `${(error as AxiosError).stack}` }
     } // in the event an unlikely unknown error, send here
   }
 }
