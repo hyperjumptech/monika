@@ -424,7 +424,7 @@ function getErrorStatusWithExplanation(error: unknown): {
       return {
         status: 17,
         description:
-          "EPROTO: There are issues with the website's security certificate or compatibility problems.",
+          "EPROTO: There are issues with the website's SSL/TLS certificates, incompatible protocols, or other SSL-related problems.",
       }
     }
 
