@@ -16,6 +16,7 @@ Fix: [SymonClient] Report worker path (#1168)
 Fix repeat flag doesn't terminate monika on fail probe (#1165)
 Fix: Validation on Alert Assertion (#1179)
 Fix: Send Recovery Notification from Previous Incident Before Monika Restart in Symon Mode (#1184)
+Fix: Add EHOSTUNREACH and EPROTO error handler (#1190)
 
 ## Changed
 
