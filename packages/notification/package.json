@@ -1,6 +1,6 @@
 {
   "name": "@hyperjumptech/monika-notification",
-  "version": "1.15.11",
+  "version": "1.15.12",
   "description": "notification package for monika",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
