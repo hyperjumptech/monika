@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.16.0 2023-11-21
+
+## Fixed
+
+Fix: Feat/Publish notification package (#1151)
+Fix: Add handled stopsignal to Dockerfile (#1159)
+Fix: Include the workers when npm pack (#1167)
+Fix: [SymonClient] Report worker path (#1168)
+Fix repeat flag doesn't terminate monika on fail probe (#1165)
+Fix: Validation on Alert Assertion (#1179)
+Fix: Send Recovery Notification from Previous Incident Before Monika Restart in Symon Mode (#1184)
+Fix: Add EHOSTUNREACH and EPROTO error handler (#1190)
+
+## Changed
+
+Update: Log the unhandled error status code in HTTP probing (#1172)
+Update: Use console.error for unhandled request code (#1173)
+Feat: [SymonClient] Use Piscina for reporting (#1157)
+Split the Node.js workflow jobs (#1162)
+Chore: Add cancel workflow and format .github files (#1170)
+Refactor symonClient initiate function (#1175)
+Chore: Auto fix lint (#1187)
+
+## Added
+
+Feat: Allow "CONNECT" and "TRACE" HTTP method (#1161)
+Feat: [SymonClient] User friendly errors (#1183)
+Feat: Add --ignoreInvalidTLS flag (#1185)
+
 ## 1.15.11 2023-11-06
 
 ## Fixed
