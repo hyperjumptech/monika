@@ -92,12 +92,12 @@ export type NotificationMessage = {
 type NotificationChannel<T = object> = {
   validator: ArraySchema | ObjectSchema
   send: (
-    notificationData: T | undefined,
+    notificationData: T | T[] | undefined,
     message: NotificationMessage
   ) => Promise<void>
   sendWithCustomContent?: (
-    notificationData: T,
-    customContent: T
+    notificationData: T | T[],
+    customContent: T | T[]
   ) => Promise<void>
   additionalStartupMessage?: (notificationData: T) => string
 }
