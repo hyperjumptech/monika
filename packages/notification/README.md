@@ -36,3 +36,4 @@ For further details see:
 
 1. [Turborepo](https://turbo.build/repo/docs/handbook/workspaces#workspaces-which-depend-on-each-other)
 2. [Monika docs](https://monika.hyperjump.tech/overview)
+3. [Notification documentations](https://monika.hyperjump.tech/guides/notifications)
