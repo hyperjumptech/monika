@@ -321,7 +321,7 @@ export async function validateProbes(probes: Probe[]): Promise<Probe[]> {
     return await schema.validateAsync(probes, {
       stripUnknown: true,
     })
-  } catch (error: any) {
+  } catch (error) {
     throw new Error(`Monika configuration is invalid. Probe: ${error?.message}`)
   }
 }

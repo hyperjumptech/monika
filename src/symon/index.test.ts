@@ -235,7 +235,7 @@ describe('Symon initiate', () => {
     try {
       // act
       await symon.initiate()
-    } catch (error: any) {
+    } catch (error) {
       errorMessage = error?.message
     }
 

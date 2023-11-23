@@ -73,7 +73,7 @@ export async function icmpRequest(
     icmpResp.output = resp.output
 
     return processICMPRequestResult(icmpResp)
-  } catch (error: any) {
+  } catch (error) {
     console.error('icmp got error:', error)
     baseResponse.data = error // map error to data
     baseResponse.errMessage = error

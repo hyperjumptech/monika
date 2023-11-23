@@ -138,7 +138,7 @@ async function createIncident(
       .then((res) => res?.data?.id)
 
     await insertIncidentToDatabase({ incidentID, probeID, status, url })
-  } catch (error: any) {
+  } catch (error) {
     throw new Error(
       `${error?.message}${
         error?.data ? `. ${error?.response?.data?.message}` : ''
@@ -187,7 +187,7 @@ async function updateIncident(
       data,
       getAxiosConfig(apiKey)
     )
-  } catch (error: any) {
+  } catch (error) {
     throw new Error(
       `${error?.message}${
         error?.data ? `. ${error?.response?.data?.message}` : ''

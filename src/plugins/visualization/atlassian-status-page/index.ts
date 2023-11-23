@@ -133,7 +133,7 @@ export class AtlassianStatusPageAPI {
       await insertIncidentToDatabase({ incidentID, probeID, status, url })
 
       return incidentID
-    } catch (error: any) {
+    } catch (error) {
       throw new Error(
         `${error?.message}${
           error?.data ? `. ${error?.response?.data?.message}` : ''
@@ -169,7 +169,7 @@ export class AtlassianStatusPageAPI {
         data,
         this.axiosConfig
       )
-    } catch (error: any) {
+    } catch (error) {
       throw new Error(
         `${error?.message}${
           error?.data ? `. ${error?.response?.data?.message}` : ''

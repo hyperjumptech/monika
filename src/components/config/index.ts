@@ -91,7 +91,7 @@ export const updateConfig = async (
   if (validate) {
     try {
       validatedConfig = await validateConfig(config)
-    } catch (error: any) {
+    } catch (error) {
       if (isTestEnvironment) {
         // return error during tests
         throw new Error(error.message)
@@ -216,7 +216,7 @@ function scheduleRemoteConfigFetcher({
       }
 
       await updateConfig(mergeConfigs(defaultConfigs, nonDefaultConfig))
-    } catch (error: any) {
+    } catch (error) {
       log.error(error?.message)
     }
   }, interval * 1000)

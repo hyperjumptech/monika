@@ -147,7 +147,7 @@ describe('updateConfig', () => {
     try {
       // act
       await updateConfig({ probes: [] })
-    } catch (error: any) {
+    } catch (error) {
       errorMessage = error.message
     }
 

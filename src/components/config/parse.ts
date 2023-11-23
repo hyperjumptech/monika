@@ -87,7 +87,7 @@ export const parseConfig = async (
     }
 
     return JSON.parse(configString)
-  } catch (error: any) {
+  } catch (error) {
     if (error.code === 'ENOENT' && error.path === source) {
       throw new Error(`Configuration file not found: ${source}.`)
     }

@@ -140,7 +140,7 @@ async function sendMongoRequest(params: MongoRequest): Promise<MongoResult> {
       result.isAlive = true
       result.message = `${host}:${port} PONGED`
     }
-  } catch (error: any) {
+  } catch (error) {
     result.message = error
   } finally {
     if (client) {

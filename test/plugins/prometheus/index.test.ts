@@ -76,7 +76,7 @@ describe('Prometheus plugin', () => {
         try {
           // act
           await axios.post('http://localhost:4446/metrics')
-        } catch (error: any) {
+        } catch (error) {
           // assert
           expect(error.response.status).to.equal(405)
         }

@@ -43,7 +43,7 @@ export const validateNotification = async (
         }
 
         await channel.validator.validateAsync(data)
-      } catch (error: any) {
+      } catch (error) {
         throw new Error(`${error?.message} (${type})`)
       }
     })

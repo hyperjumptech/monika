@@ -110,7 +110,7 @@ async function sendRedisRequest(params: Redis): Promise<RedisResult> {
       result.isAlive = true
       result.message = `redis PONGED`
     }
-  } catch (error: any) {
+  } catch (error) {
     result.message = error
   }
 

@@ -34,7 +34,7 @@ describe('TLS Checker', () => {
       try {
         // act
         await checkTLS(url)
-      } catch (error: any) {
+      } catch (error) {
         // assert
         expect(error.message).to.include(
           `${url} security certificate has expired at`
@@ -49,7 +49,7 @@ describe('TLS Checker', () => {
       try {
         // act
         await checkTLS(url)
-      } catch (error: any) {
+      } catch (error) {
         // assert
         expect(error.message).to.include(
           `${url} security certificate will expire at`
@@ -68,7 +68,7 @@ describe('TLS Checker', () => {
         const result = await checkTLS(url)
         // assert
         expect(result).to.equal(null)
-      } catch (error: any) {
+      } catch (error) {
         // assert when example.com certificate will expire
         // because nothing lasts forever
         expect(error.message).to.include(
@@ -91,7 +91,7 @@ describe('TLS Checker', () => {
         const result = await checkTLS(domainDef)
         // assert
         expect(result).to.equal(null)
-      } catch (error: any) {
+      } catch (error) {
         // assert when example.com certificate will expire
         // because nothing lasts forever
         expect(error.message).to.include(

@@ -59,7 +59,7 @@ export async function mariaRequest(
       password: params.password,
       database: params.database,
     })
-  } catch (error: any) {
+  } catch (error) {
     baseResponse.body = error.message
     baseResponse.errMessage = error
     baseResponse.result = probeRequestResult.failed
