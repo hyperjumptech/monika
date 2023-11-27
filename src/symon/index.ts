@@ -129,8 +129,6 @@ const getHandshakeData = async (): Promise<SymonHandshakeData> => {
 }
 
 class SymonClient {
-  configHash = ''
-
   eventEmitter: EventEmitter | null = null
 
   monikaId = ''
@@ -268,7 +266,6 @@ class SymonClient {
       await this.worker.run(JSON.stringify(taskData))
     } catch (error) {
       hasConnectionToSymon = false
-      this.configHash = ''
       log.error("Can't report history to Symon. " + (error as Error).message)
     } finally {
       setTimeout(async () => {
@@ -312,7 +309,9 @@ class SymonClient {
       .get<{ data: Probe[] }>(`/${this.monikaId}/probes`, {
         timeout: TIMEOUT,
         headers: {
-          ...(this.configHash ? { 'If-None-Match': this.configHash } : {}),
+          ...(getContext().config?.version
+            ? { 'If-None-Match': getContext().config?.version }
+            : {}),
         },
         validateStatus(status) {
           return [200, 304].includes(status)
@@ -386,13 +385,16 @@ class SymonClient {
   }
 
   private updateConfig(newConfig: Config): void {
-    if (newConfig.version && this.configHash !== newConfig.version) {
-      log.debug(`Received config changes. Reloading monika`)
-      this.configHash = newConfig.version
-      updateConfig(newConfig, false)
-    } else {
-      log.debug(`Received config does not change.`)
+    if (
+      !newConfig.version ||
+      getContext().config?.version === newConfig.version
+    ) {
+      log.debug('Received config does not change.')
+      return
     }
+
+    log.debug('Received config changes. Reloading Monika')
+    updateConfig(newConfig, false)
   }
 }
 
