@@ -31,7 +31,6 @@ import path from 'path'
 import Piscina from 'piscina'
 
 import { updateConfig } from '../components/config'
-import { validateProbes } from '../components/config/validation'
 import { getOSName } from '../components/notification/alert-message'
 import { getContext } from '../context'
 import events from '../events'
@@ -85,8 +84,6 @@ type NotificationEvent = {
   alertId: string
 }
 
-type ConfigListener = (config: Config) => void
-
 const isTestEnvironment = process.env.NODE_ENV === 'test' || process.env.CI
 
 let hasConnectionToSymon = false
@@ -132,8 +129,6 @@ const getHandshakeData = async (): Promise<SymonHandshakeData> => {
 }
 
 class SymonClient {
-  config: Config | null = null
-
   configHash = ''
 
   eventEmitter: EventEmitter | null = null
@@ -141,17 +136,11 @@ class SymonClient {
   monikaId = ''
 
   private apiKey = ''
-
-  private configListeners: ConfigListener[] = [] // (ms)
-
   private fetchProbesInterval: number
 
   private httpClient: AxiosInstance
 
   private locationId: string
-
-  private probes: Probe[] = []
-
   private reportProbesInterval = 10_000
 
   private reportProbesLimit: number
@@ -233,7 +222,6 @@ class SymonClient {
     }
 
     await this.report()
-    this.onConfig((config) => updateConfig(config, false))
   }
 
   willSendNotification(
@@ -261,25 +249,9 @@ class SymonClient {
     await this.httpClient.post('/events', { monikaId: this.monikaId, ...event })
   }
 
-  // monika subscribes to config update by providing listener callback
-  onConfig(listener: ConfigListener): unknown {
-    if (this.config) listener(this.config)
-
-    this.configListeners.push(listener)
-
-    // return unsubscribe function
-    return () => {
-      const index = this.configListeners.indexOf(listener)
-      this.configListeners.splice(index, 1)
-    }
-  }
-
   async report(): Promise<void> {
     try {
       log.debug('Reporting to Symon')
-
-      // Updating requests and notifications to report
-      const probeIds = this.probes.map((probe: Probe) => probe.id)
 
       // Create a task data object
       const taskData = {
@@ -287,7 +259,7 @@ class SymonClient {
         hasConnectionToSymon,
         httpClient: this.httpClient,
         monikaId: this.monikaId,
-        probeIds,
+        probeIds: getContext().config?.probes.map((probe: Probe) => probe.id),
         reportProbesLimit: this.reportProbesLimit,
         url: this.url,
       }
@@ -350,14 +322,13 @@ class SymonClient {
         if (!res.data.data) {
           log.info('No config changes from Symon')
 
-          return { probes: this.probes, hash: res.headers.etag }
+          return {
+            probes: getContext().config?.probes || [],
+            hash: res.headers.etag,
+          }
         }
 
-        const validatedProbes = await validateProbes(res.data.data)
-        this.probes = validatedProbes
-        log.info(`Received ${validatedProbes.length} probes`)
-
-        return { probes: validatedProbes, hash: res.headers.etag }
+        return { probes: res.data.data, hash: res.headers.etag }
       })
       .catch((error) => {
         if (error.isAxiosError) {
@@ -417,11 +388,8 @@ class SymonClient {
   private updateConfig(newConfig: Config): void {
     if (newConfig.version && this.configHash !== newConfig.version) {
       log.debug(`Received config changes. Reloading monika`)
-      this.config = newConfig
       this.configHash = newConfig.version
-      for (const listener of this.configListeners) {
-        listener(newConfig)
-      }
+      updateConfig(newConfig, false)
     } else {
       log.debug(`Received config does not change.`)
     }

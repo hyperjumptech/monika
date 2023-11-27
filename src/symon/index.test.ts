@@ -33,7 +33,7 @@ import type { Config } from '../interfaces/config'
 import SymonClient from '.'
 import { validateProbes } from '../components/config/validation'
 import * as loggerHistory from '../components/logger/history'
-import { setContext } from '../context'
+import { getContext, setContext } from '../context'
 
 let getUnreportedLogsStub: sinon.SinonStub
 
@@ -196,12 +196,12 @@ describe('Symon initiate', () => {
     })
     sinon.spy(symon, 'report')
 
-    expect(symon.config).to.be.null
+    expect(getContext().config).to.be.null
 
     await symon.initiate()
     await symon.stopReport()
 
-    expect(symon.config).deep.equals({
+    expect(getContext().config).deep.equals({
       ...config,
       probes: await validateProbes(config.probes),
     })
