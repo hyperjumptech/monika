@@ -42,6 +42,11 @@ const probe: Probe = {
 }
 
 describe('Probe cache', () => {
+  beforeEach(() => {
+    for (const { id } of getProbes()) {
+      deleteProbe(id)
+    }
+  })
   it('should add a probe', () => {
     // act
     const addedProbe = addProbe(probe)
@@ -52,6 +57,7 @@ describe('Probe cache', () => {
 
   it('should update a probe', () => {
     // arrange
+    addProbe(probe)
     const updatedName = 'Updated Probe'
 
     // act
@@ -75,6 +81,9 @@ describe('Probe cache', () => {
   })
 
   it('should get all probes', () => {
+    // arrange
+    addProbe(probe)
+
     // act
     const probes = getProbes()
 
@@ -88,10 +97,13 @@ describe('Probe cache', () => {
 
     // assert
     expect(isDeleted).eq(false)
-    expect(getProbes().length).eq(1)
+    expect(getProbes().length).eq(0)
   })
 
   it('should remove a probe', () => {
+    // arrange
+    addProbe(probe)
+
     // act
     const isDeleted = deleteProbe(probe.id)
 

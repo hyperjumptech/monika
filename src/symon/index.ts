@@ -30,6 +30,7 @@ import { hostname } from 'os'
 import path from 'path'
 import Piscina from 'piscina'
 
+import { getProbes } from '../components/config/probe'
 import { updateConfig } from '../components/config'
 import { getOSName } from '../components/notification/alert-message'
 import { getContext } from '../context'
@@ -257,7 +258,7 @@ class SymonClient {
         hasConnectionToSymon,
         httpClient: this.httpClient,
         monikaId: this.monikaId,
-        probeIds: getContext().config?.probes.map((probe: Probe) => probe.id),
+        probeIds: getProbes().map(({ id }) => id),
         reportProbesLimit: this.reportProbesLimit,
         url: this.url,
       }
@@ -322,7 +323,7 @@ class SymonClient {
           log.info('No config changes from Symon')
 
           return {
-            probes: getContext().config?.probes || [],
+            probes: getProbes(),
             hash: res.headers.etag,
           }
         }

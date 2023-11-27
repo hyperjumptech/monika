@@ -47,6 +47,7 @@ import {
   getConfigFrom,
   mergeConfigs,
 } from './get'
+import { addProbes, getProbes } from './probe'
 
 type ScheduleRemoteConfigFetcherParams = {
   configType: ConfigType
@@ -79,7 +80,7 @@ export const getConfig = (): Config => {
     }
   }
 
-  return config
+  return { ...config, probes: getProbes() }
 }
 
 export const updateConfig = async (
@@ -109,6 +110,7 @@ export const updateConfig = async (
     const newConfig = addConfigVersion(validatedConfig)
 
     setContext({ config: newConfig })
+    addProbes(newConfig.probes)
     emitter.emit(events.config.updated, newConfig)
     log.warn('config file update detected')
   }

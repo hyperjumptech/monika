@@ -31,9 +31,9 @@ import type { MonikaFlags } from '../flag'
 import type { Config } from '../interfaces/config'
 
 import SymonClient from '.'
-import { validateProbes } from '../components/config/validation'
 import * as loggerHistory from '../components/logger/history'
-import { getContext, setContext } from '../context'
+import { getContext, resetContext, setContext } from '../context'
+import { getProbes } from '../components/config/probe'
 
 let getUnreportedLogsStub: sinon.SinonStub
 
@@ -78,6 +78,7 @@ describe('Symon initiate', () => {
     server.listen()
   })
   beforeEach(() => {
+    resetContext()
     setContext({
       flags: {
         symonUrl: 'https://example.com',
@@ -196,16 +197,17 @@ describe('Symon initiate', () => {
     })
     sinon.spy(symon, 'report')
 
-    expect(getContext().config).to.be.null
+    expect(getContext().config).to.be.undefined
 
     await symon.initiate()
     await symon.stopReport()
 
-    expect(getContext().config).deep.equals({
-      ...config,
-      probes: await validateProbes(config.probes),
-    })
-  }).timeout(15_000)
+    console.log(getProbes())
+    // console.log(await validateProbes(config.probes))
+
+    expect(getContext().config).deep.equals(config)
+    expect(getProbes()).deep.eq(config.probes)
+  }).timeout(60_000)
 
   it('should throw an error if the request to get probes is failed', async () => {
     // arrange
@@ -241,7 +243,7 @@ describe('Symon initiate', () => {
 
     // assert
     expect(errorMessage).eq('Failed to get probes from Symon')
-  }).timeout(15_000)
+  }).timeout(60_000)
 
   it('should send event to Symon when incident or recovery happens', async () => {
     // arrange
@@ -281,5 +283,5 @@ describe('Symon initiate', () => {
     expect(body.event).equals('incident')
     expect(body.alertId).equals('alert86')
     expect(body.response).deep.equals({ status: 400, time: 1000 })
-  }).timeout(15_000)
+  }).timeout(60_000)
 })

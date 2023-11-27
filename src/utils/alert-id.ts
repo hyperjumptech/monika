@@ -22,8 +22,9 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { getContext } from '../context'
 import type { ValidatedResponse } from '../plugins/validate-response'
+
+import { getProbes } from '../components/config/probe'
 
 export function getAlertID(
   url: string,
@@ -34,7 +35,7 @@ export function getAlertID(
     return validation.alert.id
   }
 
-  const probe = getContext().config?.probes.find(({ id }) => id === probeID)
+  const probe = getProbes().find(({ id }) => id === probeID)
   if (!probe) {
     return ''
   }
