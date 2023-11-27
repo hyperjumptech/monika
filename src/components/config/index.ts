@@ -103,7 +103,7 @@ export const updateConfig = async (
   }
 
   const version = md5Hash(validatedConfig)
-  const hasChangeConfig = getContext()?.config?.version !== version
+  const hasChangeConfig = getContext().config?.version !== version
 
   if (hasChangeConfig) {
     const newConfig = addConfigVersion(validatedConfig)
@@ -117,9 +117,7 @@ export const updateConfig = async (
 export const setupConfig = async (flags: MonikaFlags): Promise<void> => {
   const validFlag = await createConfigIfEmpty(flags)
   const config = await getConfigFrom(validFlag)
-  const validatedConfig = await validateConfig(config)
-
-  setContext({ config: addConfigVersion(validatedConfig) })
+  await updateConfig(config)
 
   watchConfigsChange(validFlag)
 }
