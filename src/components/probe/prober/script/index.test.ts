@@ -26,6 +26,7 @@ import { expect } from 'chai'
 import sinon from 'sinon'
 import { probeScript } from '.'
 import { ProbeRequestResponse } from '../../../../interfaces/request'
+import { probeRequestResult } from '../../../../interfaces/request'
 import * as request from './request'
 
 let scriptRequestStub: sinon.SinonStub
@@ -67,19 +68,17 @@ describe('Script Prober', () => {
   })
 
   it('should return alert triggered', async () => {
-    scriptRequestStub = sinon
-      .stub(request, 'scriptRequest')
-      .callsFake(async (_options): Promise<ProbeRequestResponse> => {
-        return {
-          requestType: 'script',
-          data: '',
-          body: '',
-          status: 1,
-          headers: '',
-          responseTime: 0,
-          isProbeResponsive: false,
-        }
+    scriptRequestStub = sinon.stub(request, 'scriptRequest').callsFake(
+      async (_options): Promise<ProbeRequestResponse> => ({
+        requestType: 'script',
+        data: '',
+        body: '',
+        headers: '',
+        responseTime: 0,
+        status: 1,
+        result: probeRequestResult.success,
       })
+    )
 
     const probeParams = {
       id: 'wTBPV',

@@ -1,6 +1,7 @@
 import { exec } from 'child_process'
 import { differenceInMilliseconds } from 'date-fns'
 import type { ProbeRequestResponse } from '../../../../interfaces/request'
+import { probeRequestResult } from '../../../../interfaces/request'
 import type { Script } from '../../../../interfaces/probe'
 
 export async function scriptRequest(
@@ -16,7 +17,7 @@ export async function scriptRequest(
       body: '',
       status: 0,
       responseTime: 0,
-      isProbeResponsive: false,
+      result: probeRequestResult.unknown,
       data: '',
       headers: '',
     }
@@ -34,6 +35,10 @@ export async function scriptRequest(
             response.status = error?.code || 1
             response.body = errMessage
             response.errMessage = errMessage
+            response.result =
+              response.status === 0
+                ? probeRequestResult.success
+                : probeRequestResult.failed
           }
 
           resolve(response)
