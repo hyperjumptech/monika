@@ -47,7 +47,7 @@ import {
   getConfigFrom,
   mergeConfigs,
 } from './get'
-import { addProbes, getProbes } from './probe'
+import { getProbes, setProbes } from './probe'
 
 type ScheduleRemoteConfigFetcherParams = {
   configType: ConfigType
@@ -83,36 +83,31 @@ export const getConfig = (): Config => {
   return { ...config, probes: getProbes() }
 }
 
-export const updateConfig = async (
-  config: Config,
-  validate = true
-): Promise<void> => {
+export const updateConfig = async (config: Config): Promise<void> => {
   log.info('Updating config')
-  let validatedConfig = config
-  if (validate) {
-    try {
-      validatedConfig = await validateConfig(config)
-    } catch (error: any) {
-      if (isTestEnvironment) {
-        // return error during tests
-        throw new Error(error.message)
-      }
+  try {
+    const validatedConfig = await validateConfig(config)
+    const version = md5Hash(validatedConfig)
+    const hasChangeConfig = getContext().config?.version !== version
 
-      log.error(error?.message)
-      exit(1)
+    if (!hasChangeConfig) {
+      return
     }
-  }
 
-  const version = md5Hash(validatedConfig)
-  const hasChangeConfig = getContext().config?.version !== version
-
-  if (hasChangeConfig) {
     const newConfig = addConfigVersion(validatedConfig)
 
     setContext({ config: newConfig })
-    addProbes(newConfig.probes)
+    setProbes(newConfig.probes)
     emitter.emit(events.config.updated, newConfig)
     log.warn('config file update detected')
+  } catch (error: any) {
+    if (isTestEnvironment) {
+      // return error during tests
+      throw new Error(error.message)
+    }
+
+    log.error(error?.message)
+    exit(1)
   }
 }
 
