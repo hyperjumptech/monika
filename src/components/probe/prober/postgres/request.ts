@@ -66,8 +66,8 @@ export async function postgresRequest(
     baseResponse.result = probeRequestResult.success
   } else {
     baseResponse.result = probeRequestResult.failed
-    baseResponse.body = result.message
-    baseResponse.errMessage = result.message
+    baseResponse.body = ''
+    baseResponse.error = result.message
   }
 
   return baseResponse

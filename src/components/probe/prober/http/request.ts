@@ -214,7 +214,7 @@ export async function httpRequest({
           headers: '',
           responseTime,
           result: probeRequestResult.failed,
-          errMessage: (error as AxiosError).code,
+          error: (error as AxiosError).message,
         }
       }
     }
@@ -222,12 +222,12 @@ export async function httpRequest({
     // other errors
     return {
       data: '',
-      body: (error as Error).message,
+      body: '',
       status: 99,
       headers: '',
       responseTime,
       result: probeRequestResult.failed,
-      errMessage: (error as Error).message,
+      error: (error as Error).message,
     }
   }
 }
