@@ -37,18 +37,20 @@ export const authBasic = (cred: AxiosBasicCredentials): any => {
   return `Basic ${result}`
 }
 
-export const authBearer = (token: string): string => {
-  return `Bearer ${token}`
-}
+export const authBearer = (token: string): string => `Bearer ${token}`
 
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const authorize = (type: string, args: any): any => {
   switch (type) {
-    case 'basic':
+    case 'basic': {
       return authBasic(args)
-    case 'bearer':
+    }
+
+    case 'bearer': {
       return authBearer(args)
-    default:
+    }
+
+    default: {
       return undefined
+    }
   }
 }

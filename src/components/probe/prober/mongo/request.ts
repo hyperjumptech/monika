@@ -24,6 +24,7 @@
 
 import { MongoClient } from 'mongodb'
 import * as mongodbURI from 'mongodb-uri'
+import { probeRequestResult } from '../../../../interfaces/request'
 import type { ProbeRequestResponse } from '../../../../interfaces/request'
 import { differenceInMilliseconds } from 'date-fns'
 
@@ -54,9 +55,9 @@ export async function mongoRequest(
     data: '',
     body: '',
     status: 0,
+    result: probeRequestResult.unknown,
     headers: '',
     responseTime: 0,
-    isProbeResponsive: false,
   }
   const startTime = new Date()
   const result = await sendMongoRequest(params)
@@ -67,8 +68,9 @@ export async function mongoRequest(
     baseResponse.responseTime = duration
     baseResponse.body = result.message
     baseResponse.status = 200
-    baseResponse.isProbeResponsive = true
+    baseResponse.result = probeRequestResult.success
   } else {
+    baseResponse.result = probeRequestResult.failed
     baseResponse.body = result.message
     baseResponse.errMessage = result.message
   }

@@ -1,7 +1,7 @@
 /**********************************************************************************
  * MIT License                                                                    *
  *                                                                                *
- * Copyright (c) 2021 Hyperjump Technology                                        *
+ * Copyright (c) 2023 Hyperjump Technology                                        *
  *                                                                                *
  * Permission is hereby granted, free of charge, to any person obtaining a copy   *
  * of this software and associated documentation files (the "Software"), to deal  *
@@ -22,51 +22,6 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { RequestConfig } from '../../../../interfaces/request'
-import { HTTPMethods } from '../../../../utils/http'
-import { isValidURL } from '../../../../utils/is-valid-url'
-
-const PROBE_REQUEST_INVALID_METHOD =
-  'Probe request method is invalid! Valid methods are GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS, PURGE, LINK, and UNLINK'
-const PROBE_REQUEST_NO_URL = 'Probe request URL does not exists'
-
-const checkProbeRequestProperties = (
-  requests: RequestConfig[]
-): string | undefined => {
-  if (requests?.length > 0) {
-    for (const request of requests) {
-      const { method, ping, url } = request
-
-      if (!url) {
-        return PROBE_REQUEST_NO_URL
-      }
-
-      // if not a ping request and url not valid, return INVLID_URL error
-      if (ping !== true && !isValidURL(url)) {
-        return `Probe request URL (${url}) should start with http:// or https://`
-      }
-
-      if (!HTTPMethods.has(method?.toUpperCase() ?? 'GET'))
-        return PROBE_REQUEST_INVALID_METHOD
-    }
-  }
-}
-
-export const validateRequests = (
-  requests?: RequestConfig[]
-): string | undefined => {
-  if (requests === undefined) {
-    return
-  }
-
-  for (const req of requests) {
-    if (req.timeout <= 0) {
-      return `The timeout in the request with id "${req.id}" should be greater than 0.`
-    }
-  }
-
-  const probeRequestPropertyMessage = checkProbeRequestProperties(requests)
-  if (probeRequestPropertyMessage) {
-    return probeRequestPropertyMessage
-  }
-}
+export const DEFAULT_INCIDENT_THRESHOLD = 5
+export const DEFAULT_RECOVERY_THRESHOLD = 5
+export const DEFAULT_INTERVAL = 10

@@ -22,7 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { db } from '../../../components/logger/history'
+import { database } from '../../../components/logger/history'
 
 type Incident = {
   id: string
@@ -36,7 +36,6 @@ type UpdateIncident = Pick<Incident, 'incidentID' | 'status'>
 type FindIncident = Pick<Incident, 'probeID' | 'status' | 'url'>
 
 type FindIncidentResponse = {
-  // eslint-disable-next-line camelcase
   incident_id: string
 }
 
@@ -57,7 +56,7 @@ export async function insertIncident({
   ) VALUES (?, ?, ?, ?, ?, ?);`
   const sqlParams = [status, url, probeID, incidentID, dateNow, dateNow]
 
-  await db.run(sqlStatement, sqlParams)
+  await database().run(sqlStatement, sqlParams)
 }
 
 export async function updateIncident({
@@ -69,7 +68,7 @@ export async function updateIncident({
    WHERE incident_id = ?`
   const sqlParams = [status, dateNow, incidentID]
 
-  await db.run(sqlStatement, sqlParams)
+  await database().run(sqlStatement, sqlParams)
 }
 
 export async function findIncident({
@@ -80,7 +79,10 @@ export async function findIncident({
   const sqlStatement = `SELECT incident_id FROM atlassian_status_page_incidents 
     WHERE status = ? AND url = ? AND probe_id = ?`
   const sqlParams = [status, url, probeID]
-  const incident = await db.get<FindIncidentResponse>(sqlStatement, sqlParams)
+  const incident = await database().get<FindIncidentResponse>(
+    sqlStatement,
+    sqlParams
+  )
 
   return incident
 }

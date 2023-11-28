@@ -23,7 +23,10 @@
  **********************************************************************************/
 
 import { sendPing } from '../../../../utils/ping'
-import { ProbeRequestResponse } from '../../../../interfaces/request'
+import {
+  ProbeRequestResponse,
+  probeRequestResult,
+} from '../../../../interfaces/request'
 
 type icmpParams = {
   host: string // target to ping
@@ -54,9 +57,9 @@ export async function icmpRequest(
     data: '',
     body: '',
     status: 0,
+    result: probeRequestResult.unknown,
     headers: '',
     responseTime: 0,
-    isProbeResponsive: false,
   }
 
   try {
@@ -92,10 +95,11 @@ export function processICMPRequestResult(
     requestType: 'ICMP',
     data: params.output, // map output to response data
     status: params.isAlive ? 200 : 0, // TO IMPROVE: this is a monkey patch to map ping return status to http status. Should not need it!
+    result: params.isAlive
+      ? probeRequestResult.success
+      : probeRequestResult.failed,
     body: msg,
     headers: {},
     responseTime: params.average || 0,
-
-    isProbeResponsive: true,
   }
 }

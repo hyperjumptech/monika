@@ -29,6 +29,7 @@ import { checkTLS, getHostname } from '../components/tls-checker'
 import type { Notification } from '@hyperjumptech/monika-notification'
 import type { ValidatedResponse } from '../plugins/validate-response'
 import { log } from '../utils/pino'
+import { probeRequestResult } from '../interfaces/request'
 
 type SendTLSErrorNotificationProps = {
   hostname: string
@@ -84,8 +85,6 @@ function sendTLSErrorNotification({
     name: '',
     requests: [],
     interval: 10,
-    incidentThreshold: 0,
-    recoveryThreshold: 0,
     alerts: [],
   }
 
@@ -93,7 +92,11 @@ function sendTLSErrorNotification({
     // TODO: Remove validation below
     // validation is used because it is needed to send alert
     const validation: ValidatedResponse = {
-      alert: { assertion: '', message: errorMessage },
+      alert: {
+        id: '',
+        assertion: '',
+        message: errorMessage,
+      },
       isAlertTriggered: true,
       response: {
         status: 500,
@@ -101,7 +104,7 @@ function sendTLSErrorNotification({
         data: {},
         body: {},
         headers: {},
-        isProbeResponsive: true,
+        result: probeRequestResult.success,
       },
     }
 

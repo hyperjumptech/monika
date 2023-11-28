@@ -22,167 +22,36 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { expect } from 'chai'
-import { DEFAULT_THRESHOLD, sanitizeProbe } from '.'
+import { expect } from '@oclif/test'
+
+import type { MonikaFlags } from '../flag'
 import type { Probe } from '../interfaces/probe'
 
-describe('Looper', () => {
-  describe('sanitizeProbe', () => {
-    it('should change probe alert query to alert assertion', () => {
-      // arrange
-      const probe = {
-        id: 'Example',
-        alerts: [{ query: 'response.status < 200' }],
-      } as Probe
+import { resetContext, setContext } from '../context'
+import { sanitizeProbe } from '.'
 
-      // act
-      const result = sanitizeProbe(false, probe)
-
-      // assert
-      expect(result.alerts[0].assertion).eq(probe.alerts[0].query)
+describe('Sanitize probe', () => {
+  it('should remove alerts on Symon mode', () => {
+    // arrange
+    setContext({
+      flags: {
+        symonKey: 'secret-key',
+        symonUrl: 'https://example.com',
+      } as MonikaFlags,
     })
+    const probe = {
+      id: 'Example',
+      requests: [{}],
+      alerts: [
+        { assertion: 'response.time > 30000', message: 'Run out of bandwidth' },
+      ],
+    } as Probe
 
-    it('should set default request method', () => {
-      // arrange
-      const probe = {
-        id: 'Example',
-        requests: [{ url: 'https://example.com' }],
-      } as Probe
+    // act
+    const result = sanitizeProbe(true, probe)
+    resetContext()
 
-      // act
-      const result = sanitizeProbe(false, probe)
-
-      // assert
-      expect(result.requests[0].method).eq('GET')
-    })
-
-    it('should change request alert query to alert assertion', () => {
-      // arrange
-      const probe = {
-        id: 'Example',
-        requests: [
-          { method: 'GET', alerts: [{ query: 'response.status < 200' }] },
-          { alerts: [{ query: 'response.status < 200' }] },
-        ],
-      } as Probe
-
-      // act
-      const result = sanitizeProbe(false, probe)
-
-      // assert
-      expect(result.requests[0]?.alerts?.[0].assertion).eq(
-        probe.requests[0].alerts?.[0].query
-      )
-      expect(result.requests[1]?.alerts?.[0].assertion).eq(
-        probe.requests[1].alerts?.[0].query
-      )
-    })
-
-    it('should add probe name', () => {
-      // arrange
-      const probe = {
-        id: 'Example',
-        requests: [
-          { method: 'GET', alerts: [{ query: 'response.status < 200' }] },
-        ],
-      } as Probe
-
-      // act
-      const result = sanitizeProbe(false, probe)
-
-      // assert
-      expect(result.name).eq('monika_Example')
-    })
-
-    it('should set default incidentThreshold', () => {
-      // arrange
-      const probe = {
-        id: 'Example',
-        requests: [
-          { method: 'GET', alerts: [{ query: 'response.status < 200' }] },
-        ],
-      } as Probe
-
-      // act
-      const result = sanitizeProbe(false, probe)
-
-      // assert
-      expect(result.incidentThreshold).eq(DEFAULT_THRESHOLD)
-    })
-
-    it('should set default recoveryThreshold', () => {
-      // arrange
-      const probe = {
-        id: 'Example',
-        requests: [
-          { method: 'GET', alerts: [{ query: 'response.status < 200' }] },
-        ],
-      } as Probe
-
-      // act
-      const result = sanitizeProbe(false, probe)
-
-      // assert
-      expect(result.recoveryThreshold).eq(DEFAULT_THRESHOLD)
-    })
-
-    it('should set default alerts for HTTP probe', () => {
-      // arrange
-      const probe = {
-        id: 'Example',
-        requests: [
-          { method: 'GET', alerts: [{ query: 'response.status < 200' }] },
-        ],
-      } as Probe
-
-      // act
-      const result = sanitizeProbe(false, probe)
-
-      // assert
-      expect(result.alerts).deep.eq([
-        {
-          assertion: 'response.status < 200 or response.status > 299',
-          message: 'HTTP Status is {{ response.status }}, expecting 200',
-        },
-        {
-          assertion: 'response.time > 2000',
-          message:
-            'Response time is {{ response.time }}ms, expecting less than 2000ms',
-        },
-      ])
-    })
-
-    it('should set default alerts for non HTTP probe', () => {
-      // arrange
-      const probe = {
-        id: 'Example',
-        requests: [],
-      } as unknown as Probe
-
-      // act
-      const result = sanitizeProbe(false, probe)
-
-      // assert
-      expect(result.alerts).deep.eq([
-        {
-          assertion: 'response.status < 200 or response.status > 299',
-          message: 'Probe is not accesible',
-        },
-      ])
-    })
-
-    it('should remove alerts on Symon mode', () => {
-      // arrange
-      const probe = {
-        id: 'Example',
-        requests: [{}],
-      } as Probe
-
-      // act
-      const result = sanitizeProbe(true, probe)
-
-      // assert
-      expect(result.alerts).deep.eq([])
-    })
+    // assert
+    expect(result.alerts).deep.eq([])
   })
 })

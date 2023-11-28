@@ -1,4 +1,33 @@
 services:
+  mariadb:
+    image: mariadb:11
+    container_name: monika_mariadb
+    ports:
+      - 3306:3306
+    environment:
+      - MARIADB_USER=mariadb_user
+      - MARIADB_PASSWORD=mariadb_password
+      - MARIADB_ROOT_PASSWORD=mariadb_root_password
+    restart: unless-stopped
+  mongo:
+    image: mongo:6
+    container_name: monika-mongo
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongo_user
+      MONGO_INITDB_ROOT_PASSWORD: mongo_password
+    restart: unless-stopped
+  mysql:
+    image: mysql:8
+    container_name: monika_mysql
+    ports:
+      - 3307:3306
+    environment:
+      - MYSQL_USER=mysql_user
+      - MYSQL_PASSWORD=mysql_password
+      - MYSQL_ROOT_PASSWORD=mysql_root_password
+    restart: unless-stopped
   postgres:
     image: postgres:15-alpine
     container_name: monika-postgre
@@ -8,4 +37,13 @@ services:
       POSTGRES_PASSWORD: postgres_password
       POSTGRES_USER: postgres_user
       POSTGRES_DB: postgres_db
+    restart: unless-stopped
+  redis:
+    image: redis:7-alpine
+    container_name: monika-redis
+    ports:
+      - 6379:6379
+    environment:
+      - REDIS_PASSWORD=redis_password
+    command: /bin/sh -c 'redis-server --appendonly yes --requirepass $${REDIS_PASSWORD}'
     restart: unless-stopped

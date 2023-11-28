@@ -1,8 +1,36 @@
 {
     "extends": ["oclif", "oclif-typescript", "prettier"],
     "rules": {
+        "@typescript-eslint/no-explicit-any": "warn",
+        "arrow-body-style": "warn",
+        "no-bitwise": "warn",
+        "no-constant-binary-expression": "warn",
+        "no-restricted-imports": "warn",
         "no-use-before-define": ["warn", "nofunc"],
-        "unicorn/prefer-node-protocol": "off"
+        "object-shorthand": "warn",
+        "perfectionist/sort-classes": "off",
+        "perfectionist/sort-enums": "off",
+        "perfectionist/sort-imports": "off",
+        "perfectionist/sort-interfaces": "off",
+        "perfectionist/sort-named-exports": "off",
+        "perfectionist/sort-named-imports": "off",
+        "perfectionist/sort-object-types": "off",
+        "perfectionist/sort-objects": "off",
+        "perfectionist/sort-union-types": "off",
+        "prefer-arrow-callback": "warn",
+        "prefer-destructuring": "warn",
+        "unicorn/no-await-expression-member": "warn",
+        "unicorn/no-empty-file": "warn",
+        "unicorn/no-useless-promise-resolve-reject": "warn",
+        "unicorn/prefer-at": "warn",
+        "unicorn/prefer-code-point": "warn",
+        "unicorn/prefer-event-target": "warn",
+        "unicorn/prefer-export-from": "warn",
+        "unicorn/prefer-logical-operator-over-ternary": "warn",
+        "unicorn/prefer-node-protocol": "off",
+        "unicorn/prefer-top-level-await": "warn",
+        "unicorn/switch-case-braces": "warn",
+        "unicorn/text-encoding-identifier-case": "warn"
     },
     "overrides": [
         {

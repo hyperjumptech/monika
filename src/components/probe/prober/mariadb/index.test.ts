@@ -1,26 +1,27 @@
-import { expect } from 'chai'
+import { expect } from '@oclif/test'
 import sinon from 'sinon'
 import { probeMariaDB } from '.'
-import { ProbeRequestResponse } from '../../../../interfaces/request'
+import {
+  type ProbeRequestResponse,
+  probeRequestResult,
+} from '../../../../interfaces/request'
 import * as request from './request'
 
 let mariaDBRequestStub: sinon.SinonStub
 
 describe('Maria DB/MySQL Prober', () => {
   beforeEach(() => {
-    mariaDBRequestStub = sinon
-      .stub(request, 'mariaRequest')
-      .callsFake(async (_options): Promise<ProbeRequestResponse> => {
-        return {
-          requestType: 'mariadb',
-          data: '',
-          body: '',
-          status: 200,
-          headers: '',
-          responseTime: 0,
-          isProbeResponsive: false,
-        }
+    mariaDBRequestStub = sinon.stub(request, 'mariaRequest').callsFake(
+      async (_options): Promise<ProbeRequestResponse> => ({
+        requestType: 'mariadb',
+        data: '',
+        body: '',
+        status: 200,
+        headers: '',
+        responseTime: 0,
+        result: probeRequestResult.failed,
       })
+    )
   })
 
   afterEach(() => {
@@ -154,19 +155,17 @@ describe('Maria DB/MySQL Prober', () => {
   it('should return alert triggered', async () => {
     // arrange
     sinon.restore()
-    mariaDBRequestStub = sinon
-      .stub(request, 'mariaRequest')
-      .callsFake(async (_options): Promise<ProbeRequestResponse> => {
-        return {
-          requestType: 'mariadb',
-          data: '',
-          body: '',
-          status: 0,
-          headers: '',
-          responseTime: 0,
-          isProbeResponsive: false,
-        }
+    mariaDBRequestStub = sinon.stub(request, 'mariaRequest').callsFake(
+      async (_options): Promise<ProbeRequestResponse> => ({
+        requestType: 'mariadb',
+        data: '',
+        body: '',
+        status: 0,
+        headers: '',
+        responseTime: 0,
+        result: probeRequestResult.failed,
       })
+    )
     const probeParams = {
       id: 'wTBPV',
       checkOrder: 1,

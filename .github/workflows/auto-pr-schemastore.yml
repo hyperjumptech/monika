@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - "src/monika-config-schema.json" # only run the workflow if the schema file is changed
+      - 'src/monika-config-schema.json' # only run the workflow if the schema file is changed
     branches:
       - main
 env:
@@ -19,7 +19,7 @@ env:
 permissions:
   issues: read
   pull-requests: read
-  
+
 jobs:
   create-auto-PR:
     runs-on: ubuntu-latest
@@ -38,7 +38,7 @@ jobs:
           git config --global user.name "$USERNAME"
           git config --global user.email "$EMAIL"
           git add .
-          git commit -m "update json schema"      
+          git commit -m "update json schema"
 
       - name: ✍🏻 Setup node
         uses: actions/setup-node@v3
@@ -46,10 +46,9 @@ jobs:
           node-version: 18
 
       - name: Run Test on Schema
-        run : |
+        run: |
           cd src
           npm ci
-          npm run build -w packages/notification
           npm run build
 
       - name: Create Pull Request
@@ -63,7 +62,7 @@ jobs:
           base: master
           push-to-fork: hyperjumptech/schemastore
           branch: feat/Update-monika-schema
-          title: "[PR] Update monika config schema"
+          title: '[PR] Update monika config schema'
           body: |
             In this PR:
             - Update config json schema to improve suggestions
@@ -74,7 +73,7 @@ jobs:
 
       - name: Check outputs
         if: ${{ steps.cpr.outputs.pull-request-number }}
-        env: 
+        env:
           PR_NUMBER: ${{ steps.cpr.outputs.pull-request-number }}
           PR_URL: ${{ steps.cpr.outputs.pull-request-url }}
         run: |

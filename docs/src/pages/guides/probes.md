@@ -51,7 +51,6 @@ probes:
             message: Status not 2xx
         allowUnauthorized: true
     incidentThreshold: 3
-    recoveryThreshold: 3
     alerts:
       - assertion: response.status != 200
         message: HTTP response status is {{ response.status }}, expecting 200
@@ -59,21 +58,20 @@ probes:
 
 Details of the field are given in the table below.
 
-| Topic                        | Description                                                                                                                                                                                                                                                                                                                                               |
-| :--------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| method (optional)            | Http method such as GET, POST, PUT, DELETE.                                                                                                                                                                                                                                                                                                               |
-| url (required)               | This is the url endpoint to dispatch the request to.                                                                                                                                                                                                                                                                                                      |
-| timeout (optional)           | Request timeout in **milliseconds**, Default value is 10000 which corresponds to 10 seconds. If the request takes longer than `timeout`, the request will be aborted.                                                                                                                                                                                     |
-| headers (optional)           | Http headers you might need for your request.                                                                                                                                                                                                                                                                                                             |
-| body (optional)              | Any http body if your method requires it.                                                                                                                                                                                                                                                                                                                 |
-| interval (optional)          | Number of probe's interval (in seconds). Default value is 10 seconds.                                                                                                                                                                                                                                                                                     |
-| incidentThreshold (optional) | Number of times an alert should return true before Monika sends notifications. For example, when incidentThreshold is 3, Monika will only send notifications when the probed URL returns non-2xx status 3 times in a row. After sending the notifications, Monika will not send notifications anymore until the alert status changes. Default value is 5. |
-| recoveryThreshold (optional) | Number of times an alert should return false before Monika sends notifications. For example, when recoveryThreshold is 3, Monika will only send notifications when the probed URL returns status 2xx 3 times in a row. After sending the notifications, Monika will not send notifications anymore until the alert status changes. Default value is 5.    |
-| alerts                       | The condition which will trigger an alert, and the subsequent notification method to send out the alert. See below for further details on alerts and notifications.                                                                                                                                                                                       |
-| saveBody (optional)          | When set to true, the response body of the request is stored in the internal database. The default is off when not defined. This is to keep the log file size small as some responses can be sizable. The setting is for each probe request.                                                                                                              |
-| alerts (optional)            | See [alerts](./alerts) section for detailed information.                                                                                                                                                                                                                                                                                                  |
-| ping (optional)              | (boolean), If set true then send a PING to the specified url instead.                                                                                                                                                                                                                                                                                     |
-| allowUnauthorized (optional) | (boolean), If set to true, will make https agent to not check for ssl certificate validity                                                                                                                                                                                                                                                                |
+| Topic                        | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| :--------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| method (optional)            | Http method such as GET, POST, PUT, DELETE.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| url (required)               | This is the url endpoint to dispatch the request to.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| timeout (optional)           | Request timeout in **milliseconds**, Default value is 10000 which corresponds to 10 seconds. If the request takes longer than `timeout`, the request will be aborted.                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| headers (optional)           | Http headers you might need for your request.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| body (optional)              | Any http body if your method requires it.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| interval (optional)          | Number of probe's interval (in seconds). Default value is 10 seconds.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| incidentThreshold (optional) | Number of times an alert should return true before Monika sends notifications. For example, when incidentThreshold is 3, Monika will only send incident notifications when the probed URL returns non-2xx status 3 times in a row. After sending the notifications, Monika will not send notifications anymore until the alert status changes. Default value is 5. However, the actual number of retries will be the the greatest number between `incidentThreshold` and `recoveryThreshold`. So if you want to have 3 retries, you need to set both `incidentThreshold` and `recoveryThreshold`. |
+| recoveryThreshold (optional) | Number of retries before Monika sends recovery notifications. For example, when recoveryThreshold is 3 and when previously a probe is marked as incident, Monika will only send recovery notification when the probing succeeds 3 times in a row. Default value is 5. However, the actual number of retries will be the the greatest number between `incidentThreshold` and `recoveryThreshold`. So if you want to have 3 retries, you need to set both `incidentThreshold` and `recoveryThreshold`.                                                                                              |
+| saveBody (optional)          | When set to true, the response body of the request is stored in the internal database. The default is off when not defined. This is to keep the log file size small as some responses can be sizable. The setting is for each probe request.                                                                                                                                                                                                                                                                                                                                                      |
+| alerts (optional)            | The condition which will trigger an alert, and the subsequent notification method to send out the alert. See below for further details on alerts and notifications. See [alerts](./alerts) section for detailed information.                                                                                                                                                                                                                                                                                                                                                                      |
+| ping (optional)              | (boolean), If set true then send a PING to the specified url instead.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| allowUnauthorized (optional) | (boolean), If set to true, will make https agent to not check for ssl certificate validity                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 
 ## Request Body
 
@@ -170,8 +168,8 @@ If you have a connection URI, you can pass it to the `uri` field like below:
 
 ### PING Request
 
-You can send an ICMP echo request to a specific url by enabling the `ping: true` field.
-In this mode the http method is ignored and a PING echo request is sent to the specified url.
+You can send an ICMP echo request to a specific url by specifying a `ping` probe.
+In this mode the a PING echo request is sent to the specified url.
 
 ```yaml
 probes:
@@ -179,9 +177,8 @@ probes:
     name: ping_test
     description: requesting icmp ping
     interval: 10 # in seconds
-    requests:
-      - url: http://google.com
-        ping: true
+    ping:
+      - uri: http://google.com
 ```
 
 ### Postgres Request
@@ -327,6 +324,29 @@ Details of the fields are shown in the table below.
 | data       | Response payload from the fetched request (e.g token, results, data).   |
 
 Probe response data could be used for [Request Chaining](https://hyperjumptech.github.io/monika/guides/examples#requests-chaining).
+
+## Custom HTTP Responses
+
+To make it easier to troubleshoot HTTP requests, we have mapped low-level errors returned by the HTTP library to numbers between 0 and 99. These custom errors are returned as the HTTP status code and can be used to trigger alerts in the same way as regular HTTP status codes.
+
+| Code | Error                |
+| :--- | -------------------- |
+| 0    | Connection not found |
+| 1    | Connection reset     |
+| 2    | Connection refused   |
+| 3    | Too many redirects   |
+| 4    | Bad option value     |
+| 5    | Bad option           |
+| 6    | Timed out            |
+| 7    | Network error        |
+| 8    | Deprecated           |
+| 9    | Bad response         |
+| 11   | Bad request          |
+| 12   | Canceled             |
+| 13   | Not Supported        |
+| 14   | Invalid URL          |
+| 99   | Others               |
+| 599  | Connection aborted   |
 
 ## Execution order
 

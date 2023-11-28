@@ -22,10 +22,15 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import type { Notification } from '@hyperjumptech/monika-notification'
+
+import { AbortSignal } from 'node-abort-controller'
+import { v4 as uuid } from 'uuid'
+
+import type { Probe, ProbeAlert } from '../interfaces/probe'
+
 import { doProbe } from '../components/probe'
 import { getContext } from '../context'
-import type { Notification } from '@hyperjumptech/monika-notification'
-import type { Probe, ProbeAlert } from '../interfaces/probe'
 import { log } from '../utils/pino'
 import {
   getProbeContext,
@@ -33,129 +38,57 @@ import {
   initializeProbeStates,
 } from '../utils/probe-state'
 import { getPublicIp, isConnectedToSTUNServer } from '../utils/public-ip'
-import type { RequestConfig } from '../interfaces/request'
+import {
+  DEFAULT_INCIDENT_THRESHOLD,
+  DEFAULT_RECOVERY_THRESHOLD,
+} from '../components/config/validation/validator/default-values'
 
-export const DEFAULT_THRESHOLD = 5
 let checkSTUNinterval: NodeJS.Timeout
 
 const DISABLE_STUN = -1 // -1 is disable stun checking
 
-/**
- * sanitizeProbe sanitize currently mapped probe name, alerts, and threshold
- * @param {boolean} isSymonMode is running in Symon mode
- * @param {object} probe is the probe configuration
- * @returns {object} as probe
- */
 export function sanitizeProbe(isSymonMode: boolean, probe: Probe): Probe {
   const { id, name, requests, incidentThreshold, recoveryThreshold, alerts } =
     probe
 
   if (!name) {
     log.warn(
-      `Warning: Probe ${id} has no name defined. Using the default name started by monika`
+      `Warning: Probe ${id} has no name defined. Using the default name started by Monika`
     )
   }
 
-  if (!incidentThreshold) {
-    log.warn(
-      `Warning: Probe ${id} has no incidentThreshold configuration defined. Using the default threshold: 5`
-    )
-  }
-
-  if (!recoveryThreshold) {
-    log.warn(
-      `Warning: Probe ${id} has no recoveryThreshold configuration defined. Using the default threshold: 5`
-    )
-  }
-
-  const isHTTPProbe = requests?.length > 0
+  const isHTTPProbe = Boolean(requests)
   const isAlertsEmpty = alerts === undefined || alerts.length === 0
   if (!isSymonMode && isHTTPProbe && isAlertsEmpty) {
     log.warn(
-      `Warning: Probe ${id} has no Alerts configuration defined. Using the default response.status != 200 and response.time > 20000`
+      `Warning: Probe ${id} has no Alerts configuration defined. Using the default response.status != 200 and response.time > 2000`
     )
   }
 
   return {
     ...probe,
-    alerts: sanitizeAlerts({
-      alerts,
-      isHTTPProbe: requests?.length > 0,
-      isSymonMode,
-    }),
-    name: name || `monika_${id}`,
-    incidentThreshold: incidentThreshold || DEFAULT_THRESHOLD,
-    recoveryThreshold: recoveryThreshold || DEFAULT_THRESHOLD,
-    requests: sanitizeRequests(requests),
+    incidentThreshold: incidentThreshold || DEFAULT_INCIDENT_THRESHOLD,
+    recoveryThreshold: recoveryThreshold || DEFAULT_RECOVERY_THRESHOLD,
+    alerts: isSymonMode ? [] : addFailedRequestAssertions(alerts),
   }
 }
 
-type SanitizeAlertsParams = {
-  alerts: ProbeAlert[]
-  isHTTPProbe: boolean
-  isSymonMode: boolean
+export const FAILED_REQUEST_ASSERTION = {
+  assertion: '',
+  message: 'Probe not accessible',
 }
 
-function sanitizeAlerts({
-  alerts,
-  isHTTPProbe,
-  isSymonMode,
-}: SanitizeAlertsParams) {
-  if (isSymonMode) {
-    return []
-  }
-
-  if (alerts === undefined || alerts.length === 0) {
-    return getDefaultAlerts(isHTTPProbe)
-  }
-
-  return alerts.map((alert) => {
-    if (alert.query) {
-      return { ...alert, assertion: alert.query }
-    }
-
-    return alert
-  })
-}
-
-function getDefaultAlerts(isHTTPProbe: boolean) {
-  if (!isHTTPProbe) {
-    return [
-      {
-        assertion: 'response.status < 200 or response.status > 299',
-        message: 'Probe is not accesible',
-      },
-    ]
-  }
-
+function addFailedRequestAssertions(assertions: ProbeAlert[]) {
   return [
+    ...assertions,
     {
-      assertion: 'response.status < 200 or response.status > 299',
-      message: 'HTTP Status is {{ response.status }}, expecting 200',
-    },
-    {
-      assertion: 'response.time > 2000',
-      message:
-        'Response time is {{ response.time }}ms, expecting less than 2000ms',
+      id: uuid(),
+      ...FAILED_REQUEST_ASSERTION,
     },
   ]
 }
 
-function sanitizeRequests(requests: RequestConfig[]) {
-  return requests?.map((request) => ({
-    ...request,
-    method: request.method || 'GET',
-    alerts: request.alerts?.map((alert) => {
-      if (alert.query) {
-        return { ...alert, assertion: alert.query }
-      }
-
-      return alert
-    }),
-  }))
-}
-
-export async function loopCheckSTUNServer(interval: number): Promise<any> {
+export async function loopCheckSTUNServer(interval: number): Promise<unknown> {
   // if stun is disabled, no need to create interval
   if (interval === -1) return
 
@@ -173,15 +106,15 @@ export async function loopCheckSTUNServer(interval: number): Promise<any> {
 }
 
 type StartProbingArgs = {
-  signal: AbortSignal
-  probes: Probe[]
   notifications: Notification[]
+  probes: Probe[]
+  signal: AbortSignal
 }
 
 export function startProbing({
-  signal,
-  probes,
   notifications,
+  probes,
+  signal,
 }: StartProbingArgs): void {
   initializeProbeStates(probes)
 
@@ -202,17 +135,17 @@ export function startProbing({
 
     for (const probe of probes) {
       doProbe({
-        probe,
         notifications,
+        probe,
       })
     }
   }, 1000)
 }
 
 function isEndOfRepeat(probes: Probe[]) {
-  const isAllProbeFinished = probes.every(({ id }) => {
-    return isLastCycleOf(id) && getProbeState(id) !== 'running'
-  })
+  const isAllProbeFinished = probes.every(
+    ({ id }) => isLastCycleOf(id) && getProbeState(id) !== 'running'
+  )
 
   return getContext().flags.repeat && isAllProbeFinished
 }

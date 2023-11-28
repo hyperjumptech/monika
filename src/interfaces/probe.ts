@@ -27,8 +27,8 @@ import { RequestConfig } from './request'
 export interface ProbeAlert {
   query?: string
   assertion: string
-  message?: string
-  id?: string
+  message: string
+  id: string
 }
 
 export type Socket = {
@@ -66,6 +66,7 @@ export type Mongo = {
   port?: number
   username?: string
   password?: string
+  alerts?: ProbeAlert[]
 }
 
 export type Postgres = {
@@ -86,12 +87,17 @@ export type Script = {
   timeout?: number
 }
 
+export type Ping = {
+  uri: string
+  alerts?: ProbeAlert[]
+}
+
 export interface Probe {
   id: string
   name: string
   description?: string
   interval: number
-  requests: RequestConfig[]
+  requests?: RequestConfig[]
   socket?: Socket
   redis?: Redis[]
   mongo?: Mongo[]
@@ -99,11 +105,13 @@ export interface Probe {
   mysql?: MariaDB[]
   postgres?: Postgres[]
   script?: Script[]
-  incidentThreshold: number
-  recoveryThreshold: number
+  ping?: Ping[]
+  incidentThreshold?: number
+  recoveryThreshold?: number
   alerts: ProbeAlert[]
   lastEvent?: {
+    alertId?: string
     createdAt?: Date
-    recoveredAt?: Date
+    recoveredAt?: Date | null
   }
 }

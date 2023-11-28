@@ -26,7 +26,7 @@ import Joi from 'joi'
 import { sendHttpRequest } from '../utils/http'
 import type { NotificationMessage } from '.'
 
-type NotificationData = {
+export type NotificationData = {
   url: string
 }
 
@@ -104,6 +104,17 @@ export function getContent({
     case 'incident':
     case 'recovery': {
       const themeColor = meta.type === 'incident' ? 'DF202E' : '8CC152'
+      let probeSource = {}
+
+      probeSource = meta.url
+        ? {
+            name: 'URL',
+            value: `[${meta.url}](${meta.url})`,
+          }
+        : {
+            name: 'ProbeID',
+            value: `${meta.probeID}`,
+          }
 
       return {
         '@type': 'MessageCard',
@@ -117,10 +128,7 @@ export function getContent({
                 name: 'Message',
                 value: summary,
               },
-              {
-                name: 'URL',
-                value: `[${meta.url}](${meta.url})`,
-              },
+              probeSource,
               {
                 name: 'Time',
                 value: meta.time,
@@ -140,7 +148,7 @@ export function getContent({
     case 'status-update': {
       return {
         '@type': 'MessageCard',
-        summary: summary,
+        summary,
         sections: [
           {
             activityTitle: 'Monika Status',
@@ -184,10 +192,11 @@ export function getContent({
       }
     }
 
-    default:
+    default: {
       return {
         '@type': 'MessageCard',
         summary,
       }
+    }
   }
 }

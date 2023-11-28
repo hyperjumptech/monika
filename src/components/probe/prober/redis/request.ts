@@ -26,6 +26,7 @@ import { createClient } from 'redis'
 import type { ProbeRequestResponse } from '../../../../interfaces/request'
 import { differenceInMilliseconds } from 'date-fns'
 import type { Redis } from '../../../../interfaces/probe'
+import { probeRequestResult } from '../../../../interfaces/request'
 
 type RedisResult = {
   isAlive: boolean // If redis responds to PING/commands
@@ -48,7 +49,7 @@ export async function redisRequest(
     status: 0,
     headers: '',
     responseTime: 0,
-    isProbeResponsive: false,
+    result: probeRequestResult.unknown,
   }
   const startTime = new Date()
   const result = await sendRedisRequest(params)
@@ -59,9 +60,10 @@ export async function redisRequest(
     baseResponse.responseTime = duration
     baseResponse.body = result.message
     baseResponse.status = 200
-    baseResponse.isProbeResponsive = true
+    baseResponse.result = probeRequestResult.success
   } else {
     baseResponse.body = result.message
+    baseResponse.result = probeRequestResult.failed
     baseResponse.errMessage = result.message
   }
 
@@ -88,12 +90,12 @@ async function sendRedisRequest(params: Redis): Promise<RedisResult> {
       host && port
         ? createClient({
             socket: {
-              host: host,
-              port: port,
+              host,
+              port,
               connectTimeout: CONNECTTIMEOUTMS,
             },
-            password: password,
-            username: username,
+            password,
+            username,
           })
         : createClient({ url: uri })
 

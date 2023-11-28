@@ -22,30 +22,59 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import Joi from 'joi'
-import { Mongo } from '../../../../interfaces/probe'
+import sinon from 'sinon'
+import { ux } from '@oclif/core'
+import { test } from '@oclif/test'
+import * as history from './history'
+import cmd from '../../commands/monika'
+import { flush } from './flush'
 
-export const validateMongoConfig = (
-  mongoConfig?: Mongo[]
-): string | undefined => {
-  if (!mongoConfig) {
-    return ''
-  }
+let flushAllLogsStub: sinon.SinonStub
 
-  const schema = Joi.alternatives([
-    Joi.object({
-      uri: Joi.string(),
-    }),
-    Joi.object({
-      host: Joi.alternatives().try(Joi.string().hostname(), Joi.string().ip()),
-      port: Joi.number().min(0).max(65_536).required(),
-      password: Joi.string(),
-      username: Joi.string(),
-    }),
-  ])
+beforeEach(() => {
+  flushAllLogsStub = sinon.stub(history, 'flushAllLogs').resolves()
+})
 
-  for (const mongo of mongoConfig) {
-    const validationError = schema.validate(mongo)
-    if (validationError?.error?.message) return validationError?.error?.message
-  }
-}
+afterEach(() => {
+  flushAllLogsStub.restore()
+})
+
+describe('Flush command', () => {
+  describe('Force', () => {
+    it('should flush records without asking for confirmation', async () => {
+      // act
+      await flush(true)
+
+      // assert
+      sinon.assert.calledOnce(flushAllLogsStub)
+    })
+  })
+
+  describe('Not force', () => {
+    test
+      // TODO: Remove skip
+      .skip()
+      // arrange
+      .stub(ux.ux, 'prompt', (stub) => stub.resolves('n'))
+      .stdout()
+      // act
+      .do(() => cmd.run(['--flush']))
+      .it('should cancel flush', () => {
+        // assert
+        sinon.assert.notCalled(flushAllLogsStub)
+      })
+
+    test
+      // TODO: Remove skip
+      .skip()
+      // arrange
+      .stub(ux.ux, 'prompt', (stub) => stub.resolves('Y'))
+      .stdout()
+      // act
+      .do(() => cmd.run(['--flush']))
+      .it('should flush', () => {
+        // assert
+        sinon.assert.calledOnce(flushAllLogsStub)
+      })
+  })
+})

@@ -1,26 +1,27 @@
-import { expect } from 'chai'
+import { expect } from '@oclif/test'
 import sinon from 'sinon'
 import { probeSocket } from '.'
-import { ProbeRequestResponse } from '../../../../interfaces/request'
+import {
+  type ProbeRequestResponse,
+  probeRequestResult,
+} from '../../../../interfaces/request'
 import * as request from './request'
 
 let tcpRequestStub: sinon.SinonStub
 
 describe('TCP Prober', () => {
   beforeEach(() => {
-    tcpRequestStub = sinon
-      .stub(request, 'tcpRequest')
-      .callsFake(async (_options): Promise<ProbeRequestResponse> => {
-        return {
-          requestType: 'tcp',
-          data: '',
-          body: '',
-          status: 200,
-          headers: '',
-          responseTime: 0,
-          isProbeResponsive: false,
-        }
+    tcpRequestStub = sinon.stub(request, 'tcpRequest').callsFake(
+      async (_options): Promise<ProbeRequestResponse> => ({
+        requestType: 'tcp',
+        data: '',
+        body: '',
+        status: 200,
+        headers: '',
+        responseTime: 0,
+        result: probeRequestResult.failed,
       })
+    )
   })
 
   afterEach(() => {
@@ -51,19 +52,17 @@ describe('TCP Prober', () => {
   it('should return alert triggered', async () => {
     // arrange
     sinon.restore()
-    tcpRequestStub = sinon
-      .stub(request, 'tcpRequest')
-      .callsFake(async (_options): Promise<ProbeRequestResponse> => {
-        return {
-          requestType: 'tcp',
-          data: '',
-          body: '',
-          status: 0,
-          headers: '',
-          responseTime: 0,
-          isProbeResponsive: false,
-        }
+    tcpRequestStub = sinon.stub(request, 'tcpRequest').callsFake(
+      async (_options): Promise<ProbeRequestResponse> => ({
+        requestType: 'tcp',
+        data: '',
+        body: '',
+        status: 0,
+        headers: '',
+        responseTime: 0,
+        result: probeRequestResult.failed,
       })
+    )
     const probeParams = {
       id: 'wTBPV',
       checkOrder: 1,

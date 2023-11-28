@@ -22,57 +22,27 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import sinon from 'sinon'
-import { CliUx } from '@oclif/core'
-import { test } from '@oclif/test'
-import * as history from '../components/logger/history'
-import cmd from '../../src'
-import { flush } from './flush'
+import { getContext } from '../context'
+import type { ValidatedResponse } from '../plugins/validate-response'
 
-let flushAllLogsStub: sinon.SinonStub
+export function getAlertID(
+  url: string,
+  validation: ValidatedResponse,
+  probeID: string
+): string {
+  if (validation.alert.id) {
+    return validation.alert.id
+  }
 
-beforeEach(() => {
-  flushAllLogsStub = sinon.stub(history, 'flushAllLogs').resolves()
-})
+  const probe = getContext().config?.probes.find(({ id }) => id === probeID)
+  if (!probe) {
+    return ''
+  }
 
-afterEach(() => {
-  flushAllLogsStub.restore()
-})
+  const request = probe.requests?.find((request) => request.url === url)
+  if (!request) {
+    return ''
+  }
 
-describe('Flush command', () => {
-  describe('Force', () => {
-    it('should flush records without asking for confirmation', async () => {
-      // act
-      await flush(true)
-
-      // assert
-      sinon.assert.calledOnce(flushAllLogsStub)
-    })
-  })
-
-  describe('Not force', () => {
-    test
-      // arrange
-      // eslint-disable-next-line unicorn/consistent-function-scoping
-      .stub(CliUx.ux, 'prompt', () => async () => 'n')
-      .stdout()
-      // act
-      .do(() => cmd.run(['--flush']))
-      .it('should cancel flush', () => {
-        // assert
-        sinon.assert.notCalled(flushAllLogsStub)
-      })
-
-    test
-      // arrange
-      // eslint-disable-next-line unicorn/consistent-function-scoping
-      .stub(CliUx.ux, 'prompt', () => async () => 'Y')
-      .stdout()
-      // act
-      .do(() => cmd.run(['--flush']))
-      .it('should flush', () => {
-        // assert
-        sinon.assert.calledOnce(flushAllLogsStub)
-      })
-  })
-})
+  return request.alerts?.find((alert) => alert.query === '')?.id || ''
+}

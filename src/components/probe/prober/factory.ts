@@ -22,20 +22,85 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import Joi from 'joi'
-import { Socket } from '../../../../interfaces/probe'
+import { HTTPProber } from './http'
+import { MongoProber } from './mongo'
+import { MariaDBProber } from './mariadb'
+import { PingProber } from './icmp'
+import { PostgresProber } from './postgres'
+import { RedisProber } from './redis'
+import { SocketProber } from './socket'
+import { ScriptProber } from './script'
+import { BaseProber, type Prober, type ProberMetadata } from '.'
 
-export const validateTCPConfig = (tcpConfig?: Socket): string | undefined => {
-  if (!tcpConfig) {
-    return ''
+export function createProbers(probeMetadata: ProberMetadata): Prober[] {
+  const { probeConfig } = probeMetadata
+  const result: Prober[] = []
+
+  if (probeConfig?.requests) {
+    result.push(createProber(probeMetadata))
   }
 
-  const schema = Joi.object({
-    host: Joi.string().required(),
-    port: Joi.number().required(),
-    data: Joi.string(),
-  })
-  const validationError = schema.validate(tcpConfig)
+  if (probeConfig?.mongo) {
+    result.push(createProber(probeMetadata))
+  }
 
-  return validationError?.error?.message
+  if (probeConfig?.mariadb || probeConfig?.mysql) {
+    result.push(createProber(probeMetadata))
+  }
+
+  if (probeConfig?.postgres) {
+    result.push(createProber(probeMetadata))
+  }
+
+  if (probeConfig?.redis) {
+    result.push(createProber(probeMetadata))
+  }
+
+  if (probeConfig?.socket) {
+    result.push(createProber(probeMetadata))
+  }
+
+  if (probeConfig?.ping) {
+    result.push(createProber(probeMetadata))
+  }
+
+  return result
+}
+
+export function createProber(probeMetadata: ProberMetadata): Prober {
+  const { probeConfig } = probeMetadata
+
+  if (probeConfig?.requests) {
+    return new HTTPProber(probeMetadata)
+  }
+
+  if (probeConfig?.mariadb || probeConfig?.mysql) {
+    return new MariaDBProber(probeMetadata)
+  }
+
+  if (probeConfig?.mongo) {
+    return new MongoProber(probeMetadata)
+  }
+
+  if (probeConfig?.postgres) {
+    return new PostgresProber(probeMetadata)
+  }
+
+  if (probeConfig?.redis) {
+    return new RedisProber(probeMetadata)
+  }
+
+  if (probeConfig?.socket) {
+    return new SocketProber(probeMetadata)
+  }
+
+  if (probeConfig?.ping) {
+    return new PingProber(probeMetadata)
+  }
+
+  if (probeConfig?.script) {
+    return new ScriptProber(probeMetadata)
+  }
+
+  return new BaseProber(probeMetadata)
 }

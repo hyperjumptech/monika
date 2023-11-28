@@ -143,7 +143,7 @@ interface PidObject {
 function readPidFile(): PidObject {
   let data = ''
   try {
-    data = fs.readFileSync('monika.pid', 'utf-8')
+    data = fs.readFileSync('monika.pid', 'utf8')
   } catch (error: any) {
     if (error.code === 'ENOENT') {
       log.info(

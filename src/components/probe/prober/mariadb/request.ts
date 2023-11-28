@@ -23,6 +23,7 @@
  **********************************************************************************/
 
 import type { ProbeRequestResponse } from '../../../../interfaces/request'
+import { probeRequestResult } from '../../../../interfaces/request'
 import { differenceInMilliseconds } from 'date-fns'
 import { createConnection } from 'mariadb'
 
@@ -43,9 +44,9 @@ export async function mariaRequest(
     data: '',
     body: '',
     status: 0,
+    result: probeRequestResult.unknown,
     headers: '',
     responseTime: 0,
-    isProbeResponsive: false,
   }
 
   const startTime = new Date()
@@ -61,6 +62,7 @@ export async function mariaRequest(
   } catch (error: any) {
     baseResponse.body = error.message
     baseResponse.errMessage = error
+    baseResponse.result = probeRequestResult.failed
     isConnected = false
   }
 
@@ -71,7 +73,7 @@ export async function mariaRequest(
     baseResponse.responseTime = duration
     baseResponse.body = 'database ok'
     baseResponse.status = 200
-    baseResponse.isProbeResponsive = true
+    baseResponse.result = probeRequestResult.success
   }
 
   return baseResponse

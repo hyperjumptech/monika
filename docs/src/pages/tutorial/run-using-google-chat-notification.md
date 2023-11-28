@@ -42,15 +42,12 @@ probes:
         message: Status code is not 200
       - query: response.time > 500
         message: Request took more than half a second
-    incidentThreshold: 1
-    recoveryThreshold: 1
 ```
 
 Let me explain a little bit about this configuration:
 
 - You need to set the notification channel in the `notifications` object. There are 3 properties: `id`, `type`, and `data`. Set the `id` to any string values, as it is just an identifier. Then, set the `type` field to `google-chat` to set the notification channel to Google Chat. After that, put your Google Chat Webhook URL into the `data.url` field.
 - Monika will be probing [https://reqres.in/api/users](https://reqres.in/api/users) every ten seconds and will send you an alert if the response time is greater than half a second or the response status code is not 200.
-- The Incident and recovery threshold is set to one, which means when an incident/recovery happens at least once, it will send you an alert.
 
 Now that we have our configuration ready, it’s time to run it with Monika. Go to the directory where you saved the Monika configuration, and run Monika straight away using `monika -c monika.yml`
 

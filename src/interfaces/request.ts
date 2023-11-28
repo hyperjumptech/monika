@@ -38,18 +38,23 @@ export type RequestTypes =
   | 'postgres'
   | 'script'
 
+// The success/failure result of a probe
+export enum probeRequestResult {
+  failed = 0,
+  success = 1,
+  unknown = 2,
+}
+
 // ProbeRequestResponse is used to define the response from a probe requests.
 export interface ProbeRequestResponse<T = any> {
   requestType?: RequestTypes // is this for http (default) or icmp  or others
   data: T
   body: T
   status: number
-
   headers: any
   responseTime: number
-
-  isProbeResponsive: boolean // did the command/request response to requests/queries?
   errMessage?: string // any error message from drivers
+  result: probeRequestResult // did the probe succeed or fail?
 }
 
 // ProbeRequest is used to define the requests that is being made.

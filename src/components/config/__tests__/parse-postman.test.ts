@@ -66,7 +66,7 @@ describe('parseConfigFromPostman', () => {
       for (const [index, item] of basicCollectionV20.item.entries()) {
         expect(item.name).to.equals(config.probes[index].name)
 
-        for (const req of config.probes[index].requests) {
+        for (const req of config.probes[index].requests || []) {
           const mode = item.request.body?.mode
           const language = item.request.body?.options?.raw?.language
 
@@ -119,7 +119,7 @@ describe('parseConfigFromPostman', () => {
       for (const [index, item] of (basicCollectionV21 as any).item.entries()) {
         expect(item.name).to.equals(config.probes[index].name)
 
-        for (const req of config.probes[index].requests) {
+        for (const req of config.probes[index].requests || []) {
           const mode = item.request.body?.mode
           const language = item.request.body?.options?.raw?.language
 
@@ -174,7 +174,9 @@ describe('parseConfigFromPostman', () => {
       for (const [index, item] of groupedCollectionV20.item.entries()) {
         expect(item.name).to.equals(config.probes[index].name)
 
-        for (const [rIndex, req] of config.probes[index].requests.entries()) {
+        for (const [rIndex, req] of (
+          config.probes[index].requests || []
+        ).entries()) {
           const mode = item.item[rIndex].request.body?.mode
           const language =
             item.item[rIndex].request.body?.options?.raw?.language
@@ -230,7 +232,9 @@ describe('parseConfigFromPostman', () => {
       ).item.entries()) {
         expect(item.name).to.equals(config.probes[index].name)
 
-        for (const [rIndex, req] of config.probes[index].requests.entries()) {
+        for (const [rIndex, req] of (
+          config.probes[index].requests || []
+        ).entries()) {
           const mode = item.item[rIndex].request.body?.mode
           const language =
             item.item[rIndex].request.body?.options?.raw?.language

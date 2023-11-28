@@ -22,25 +22,76 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Probe } from '../../../../interfaces/probe'
-import { validateMongoConfig } from './mongo-config'
-import { validateRedisConfig } from './redis-config'
-import { validateTCPConfig } from './tcp-config'
+import type { Ping } from '../../../../interfaces/probe'
+import { BaseProber, type ProbeResult } from '..'
+import { icmpRequest } from './request'
+import { probeRequestResult } from '../../../../interfaces/request'
 
-export const validateSchemaConfig = (probe: Probe): string | undefined => {
-  const { socket, redis, mongo } = probe
-  const tcpConfigError = validateTCPConfig(socket)
-  if (tcpConfigError) {
-    return `Monika configuration: probes.socket ${tcpConfigError}`
+export class PingProber extends BaseProber {
+  async probe(incidentRetryAttempt: number): Promise<void> {
+    const result = await probePing({
+      id: this.probeConfig.id,
+      checkOrder: this.counter,
+      pings: this.probeConfig.ping,
+    })
+
+    this.processProbeResults(result, incidentRetryAttempt)
   }
 
-  const redisConfigError = validateRedisConfig(redis)
-  if (redisConfigError) {
-    return `Monika configuration: probes.redis ${redisConfigError}`
+  generateVerboseStartupMessage(): string {
+    const { description, id, interval, name } = this.probeConfig
+
+    let result = `- Probe ID: ${id} 
+        Name: ${name || '-'}
+        Description: ${description || '-'}
+        Interval: ${interval}
+        `
+    result += '  ping:'
+    result += this.getConnectionDetails()
+
+    return result
   }
 
-  const mongoConfigError = validateMongoConfig(mongo)
-  if (mongoConfigError) {
-    return `Monika configuration: probes.mongo ${mongoConfigError}`
+  private getConnectionDetails(): string {
+    return (
+      this.probeConfig.ping
+        ?.map(
+          (probe) => `
+            uri: ${probe.uri}`
+        )
+        .join(``) || `\n`
+    )
   }
+}
+
+type ProbePingParams = {
+  id: string
+  checkOrder: number
+  pings?: Ping[]
+}
+
+export async function probePing({
+  id,
+  checkOrder,
+  pings,
+}: ProbePingParams): Promise<ProbeResult[]> {
+  const probeResults: ProbeResult[] = []
+
+  if (!pings) {
+    // pings defined or length == 0?
+    return probeResults
+  }
+
+  for await (const { uri } of pings) {
+    const requestResponse = await icmpRequest({ host: uri })
+    const { responseTime, result, body } = requestResponse
+
+    const isAlertTriggered = result !== probeRequestResult.success
+    const timeNow = new Date().toISOString()
+    const logMessage = `${timeNow} ${checkOrder} id:${id} ${body} responseTime:${responseTime}`
+
+    probeResults.push({ isAlertTriggered, logMessage, requestResponse })
+  }
+
+  return probeResults
 }

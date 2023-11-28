@@ -5,7 +5,7 @@ on:
   release:
     types: [created]
   schedule:
-    - cron: "0 9 * * 3" # Every 9AM on Wednesday
+    - cron: '0 9 * * 3' # Every 9AM on Wednesday
 
 env:
   CI: true
@@ -16,9 +16,11 @@ env:
 permissions:
   issues: read
   pull-requests: read
-  
+
 jobs:
   build:
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     defaults:
       run:

@@ -22,8 +22,8 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import events from '../../events'
 import type { Notification } from '@hyperjumptech/monika-notification'
+import events from '../../events'
 import type { StatuspageNotification } from '../../plugins/visualization/atlassian-status-page'
 import { AtlassianStatusPageAPI } from '../../plugins/visualization/atlassian-status-page'
 import { getEventEmitter } from '../../utils/events'
@@ -69,12 +69,16 @@ eventEmitter.on(
 
 function getNotificationType(probeState: string): 'incident' | 'recovery' | '' {
   switch (probeState) {
-    case 'UP':
+    case 'UP': {
       return 'recovery'
-    case 'DOWN':
-      return 'incident'
+    }
 
-    default:
+    case 'DOWN': {
+      return 'incident'
+    }
+
+    default: {
       return ''
+    }
   }
 }

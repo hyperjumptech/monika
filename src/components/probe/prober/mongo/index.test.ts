@@ -1,26 +1,27 @@
-import { expect } from 'chai'
+import { expect } from '@oclif/test'
 import sinon from 'sinon'
 import { probeMongo } from '.'
-import { ProbeRequestResponse } from '../../../../interfaces/request'
+import {
+  type ProbeRequestResponse,
+  probeRequestResult,
+} from '../../../../interfaces/request'
 import * as request from './request'
 
 let mongoRequestStub: sinon.SinonStub
 
 describe('MongoDB Prober', () => {
   beforeEach(() => {
-    mongoRequestStub = sinon
-      .stub(request, 'mongoRequest')
-      .callsFake(async (_options): Promise<ProbeRequestResponse> => {
-        return {
-          requestType: 'mongo',
-          data: '',
-          body: '',
-          status: 200,
-          headers: '',
-          responseTime: 0,
-          isProbeResponsive: false,
-        }
+    mongoRequestStub = sinon.stub(request, 'mongoRequest').callsFake(
+      async (_options): Promise<ProbeRequestResponse> => ({
+        requestType: 'mongo',
+        data: '',
+        body: '',
+        status: 200,
+        headers: '',
+        responseTime: 0,
+        result: probeRequestResult.failed,
       })
+    )
   })
 
   afterEach(() => {
@@ -85,19 +86,17 @@ describe('MongoDB Prober', () => {
   it('should return alert triggered', async () => {
     // arrange
     sinon.restore()
-    mongoRequestStub = sinon
-      .stub(request, 'mongoRequest')
-      .callsFake(async (_options): Promise<ProbeRequestResponse> => {
-        return {
-          requestType: 'mongo',
-          data: '',
-          body: '',
-          status: 0,
-          headers: '',
-          responseTime: 0,
-          isProbeResponsive: false,
-        }
+    mongoRequestStub = sinon.stub(request, 'mongoRequest').callsFake(
+      async (_options): Promise<ProbeRequestResponse> => ({
+        requestType: 'mongo',
+        data: '',
+        body: '',
+        status: 0,
+        headers: '',
+        responseTime: 0,
+        result: probeRequestResult.failed,
       })
+    )
     const probeParams = {
       id: 'wTBPV',
       checkOrder: 1,
@@ -122,19 +121,17 @@ describe('MongoDB Prober', () => {
   it('should use mongoDB uri', async () => {
     // arrange
     sinon.restore()
-    mongoRequestStub = sinon
-      .stub(request, 'mongoRequest')
-      .callsFake(async (_options): Promise<ProbeRequestResponse> => {
-        return {
-          requestType: 'mongo',
-          data: '',
-          body: '',
-          status: 0,
-          headers: '',
-          responseTime: 0,
-          isProbeResponsive: false,
-        }
+    mongoRequestStub = sinon.stub(request, 'mongoRequest').callsFake(
+      async (_options): Promise<ProbeRequestResponse> => ({
+        requestType: 'mongo',
+        data: '',
+        body: '',
+        status: 0,
+        headers: '',
+        responseTime: 0,
+        result: probeRequestResult.failed,
       })
+    )
     const probeParams = {
       id: 'wTBPV',
       checkOrder: 1,

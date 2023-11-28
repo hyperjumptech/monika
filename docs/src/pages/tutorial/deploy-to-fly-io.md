@@ -41,14 +41,12 @@ probes:
     alerts:
       - assertion: response.time > 1000
         message: Website is slow
-    incidentThreshold: 2
-    recoveryThreshold: 2
 ```
 
 - The `Dockerfile` file will pull the latest `hyperjump/monika` image from the Docker Hub and will be running the `monika.yml` file.
 - The `monika.yml` file is the Monika configuration file.
 
-This Monika configuration sets up a probe for the website "reqres.in". The probe sends a request to the website's URL and triggers an alert if the response time exceeds 1000 milliseconds. An incident will be triggered if the alert condition is met twice in a row, and a recovery notification will be sent when the alert condition is not met twice in a row.
+This Monika configuration sets up a probe for the website "reqres.in". The probe sends a request to the website's URL and triggers an alert if the response time exceeds 1000 milliseconds. An incident will be triggered if the alert condition is met, and a recovery notification will be sent when the alert condition is not met.
 
 Save these two files inside the `flyio-monika` directory. Once that’s done, you can run `fly launch` in the `flyio-monika` directory. You will be prompted to enter a unique name and select a location for the app.
 

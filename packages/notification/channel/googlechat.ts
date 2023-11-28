@@ -100,7 +100,7 @@ function getContent(
   } = meta
 
   switch (type) {
-    case 'start':
+    case 'start': {
       return {
         cards: [
           {
@@ -133,8 +133,10 @@ function getContent(
           },
         ],
       }
+    }
+
     case 'termination':
-    case 'incident':
+    case 'incident': {
       return {
         cards: [
           {
@@ -172,7 +174,9 @@ function getContent(
           },
         ],
       }
-    case 'recovery':
+    }
+
+    case 'recovery': {
       return {
         cards: [
           {
@@ -210,7 +214,9 @@ function getContent(
           },
         ],
       }
-    case 'status-update':
+    }
+
+    case 'status-update': {
       return {
         cards: [
           {
@@ -268,7 +274,9 @@ function getContent(
           },
         ],
       }
-    default:
+    }
+
+    default: {
       return {
         cards: [
           {
@@ -291,5 +299,6 @@ function getContent(
           },
         ],
       }
+    }
   }
 }

@@ -22,9 +22,10 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { expect } from 'chai'
+import { expect } from '@oclif/test'
 import responseChecker from '..'
-import { ProbeRequestResponse } from '../../../../interfaces/request'
+import type { ProbeRequestResponse } from '../../../../interfaces/request'
+import type { ProbeAlert } from '../../../../interfaces/probe'
 
 describe('responseChecker', () => {
   describe('status-not-2xx', () => {
@@ -32,6 +33,7 @@ describe('responseChecker', () => {
       const res = generateMockedResponse({ status: 100 })
       const data = responseChecker(
         {
+          id: 'jFQBd',
           assertion: 'response.status < 200 or response.status > 299',
           message: '',
         },
@@ -44,10 +46,10 @@ describe('responseChecker', () => {
     it('should handle when response status is 200', () => {
       const res = generateMockedResponse({
         status: 200,
-        isProbeResponsive: true,
       })
       const data = responseChecker(
         {
+          id: 'jFQBd',
           assertion: 'response.status < 200 or response.status > 299',
           message: '',
         },
@@ -60,10 +62,10 @@ describe('responseChecker', () => {
     it('should handle when response status is 201', () => {
       const res = generateMockedResponse({
         status: 201,
-        isProbeResponsive: true,
       })
       const data = responseChecker(
         {
+          id: 'jFQBd',
           assertion: 'response.status < 200 or response.status > 299',
           message: '',
         },
@@ -76,10 +78,10 @@ describe('responseChecker', () => {
     it('should handle when response status is 300', () => {
       const res = generateMockedResponse({
         status: 300,
-        isProbeResponsive: true,
       })
       const data = responseChecker(
         {
+          id: 'jFQBd',
           assertion: 'response.status < 200 or response.status > 299',
           message: '',
         },
@@ -92,10 +94,10 @@ describe('responseChecker', () => {
     it('should handle when response status is 400', () => {
       const res = generateMockedResponse({
         status: 400,
-        isProbeResponsive: true,
       })
       const data = responseChecker(
         {
+          id: 'jFQBd',
           assertion: 'response.status < 200 or response.status > 299',
           message: '',
         },
@@ -108,10 +110,10 @@ describe('responseChecker', () => {
     it('should handle when response status is 500', () => {
       const res = generateMockedResponse({
         status: 500,
-        isProbeResponsive: true,
       })
       const data = responseChecker(
         {
+          id: 'jFQBd',
           assertion: 'response.status != 200',
           message: '',
         },
@@ -121,20 +123,19 @@ describe('responseChecker', () => {
       expect(data).to.equals(true)
     })
 
-    it('should trigger when status is 200 BUT there is connection error ', () => {
+    it('should handle query field', () => {
       const res = generateMockedResponse({
         status: 200,
-        isProbeResponsive: false,
       })
       const data = responseChecker(
         {
-          assertion: 'response.status < 200 or response.status > 299',
+          query: 'response.status < 200 or response.status > 299',
           message: '',
-        },
+        } as ProbeAlert,
         res
       )
 
-      expect(data).to.equals(true)
+      expect(data).to.equals(false)
     })
   })
 
@@ -142,7 +143,7 @@ describe('responseChecker', () => {
     it('seconds - should handle when response time is greater than alert defined response time', () => {
       const res = generateMockedResponse({ responseTime: 20_000 })
       const data = responseChecker(
-        { assertion: 'response.time > 10000', message: '' },
+        { id: 'jFQBd', assertion: 'response.time > 10000', message: '' },
         res
       )
 
@@ -152,10 +153,9 @@ describe('responseChecker', () => {
     it('seconds - should handle when response time is less than alert defined response time', () => {
       const res = generateMockedResponse({
         responseTime: 10_000,
-        isProbeResponsive: true,
       })
       const data = responseChecker(
-        { assertion: 'response.time > 20000', message: '' },
+        { id: 'jFQBd', assertion: 'response.time > 20000', message: '' },
         res
       )
 
@@ -165,10 +165,9 @@ describe('responseChecker', () => {
     it('milliseconds - should handle when response time is greater than alert defined response time', () => {
       const res = generateMockedResponse({
         responseTime: 20,
-        isProbeResponsive: true,
       })
       const data = responseChecker(
-        { assertion: 'response.time > 10', message: '' },
+        { id: 'jFQBd', assertion: 'response.time > 10', message: '' },
         res
       )
 
@@ -178,10 +177,9 @@ describe('responseChecker', () => {
     it('milliseconds - should handle when response time is less than alert defined response time', () => {
       const res = generateMockedResponse({
         responseTime: 10,
-        isProbeResponsive: true,
       })
       const data = responseChecker(
-        { assertion: 'response.time > 20', message: '' },
+        { id: 'jFQBd', assertion: 'response.time > 20', message: '' },
         res
       )
 

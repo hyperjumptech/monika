@@ -16,5 +16,3 @@ probes:
         message: HTTP Status is not 200
       - assertion: response.time > 2000
         message: Response time is more than 2000ms
-    incidentThreshold: 3
-    recoveryThreshold: 3

@@ -71,6 +71,7 @@ export const parseHarFile = (fileContents: string): Config => {
     const harConfig: any = {
       probes: [
         {
+          id: harRequest[0].url,
           requests: harRequest,
         },
       ],

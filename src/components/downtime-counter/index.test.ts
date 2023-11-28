@@ -22,9 +22,69 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-export interface ServerAlertState {
-  isFirstTime: boolean
-  alertQuery: string
-  state: 'UP' | 'DOWN'
-  shouldSendNotification: boolean
-}
+import { expect } from '@oclif/test'
+import {
+  getDowntimeDuration,
+  startDowntimeCounter,
+  stopDowntimeCounter,
+} from '.'
+
+describe('Downtime counter', () => {
+  it('should start counter', () => {
+    // arrange
+    const probeConfig = {
+      alert: { id: 'PHbCL', assertion: '', message: '' },
+      probeID: 'APDpe',
+      url: 'https://example.com',
+    }
+
+    // act
+    startDowntimeCounter(probeConfig)
+
+    // assert
+    expect(getDowntimeDuration(probeConfig)).not.eq('0 seconds')
+  })
+
+  it('should stop counter', () => {
+    // arrange
+    const probeConfig = {
+      alert: { id: 'VyYwG', assertion: '', message: '' },
+      probeID: 'P1n9x',
+      url: 'https://example.com',
+    }
+
+    // act
+    startDowntimeCounter(probeConfig)
+    stopDowntimeCounter(probeConfig)
+
+    // assert
+    expect(getDowntimeDuration(probeConfig)).eq('0 seconds')
+  })
+
+  it('should stop inexistent counter', () => {
+    // arrange
+    const probeConfig = {
+      alert: { id: 'knUA4', assertion: '', message: '' },
+      probeID: 'P1n9x',
+      url: 'https://example.com',
+    }
+
+    // act
+    stopDowntimeCounter(probeConfig)
+
+    // assert
+    expect(getDowntimeDuration(probeConfig)).eq('0 seconds')
+  })
+
+  it('should return 0 seconds if not started yet', () => {
+    // arrange
+    const probeConfig = {
+      alert: { id: '9c92j', assertion: '', message: '' },
+      probeID: 'rwrs8',
+      url: 'https://example.com',
+    }
+
+    // assert
+    expect(getDowntimeDuration(probeConfig)).eq('0 seconds')
+  })
+})

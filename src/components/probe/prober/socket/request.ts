@@ -24,6 +24,7 @@
 
 import net from 'net'
 import { differenceInMilliseconds } from 'date-fns'
+import { probeRequestResult } from '../../../../interfaces/request'
 import type { ProbeRequestResponse } from '../../../../interfaces/request'
 
 type TCPRequest = {
@@ -54,10 +55,12 @@ export async function tcpRequest(
     data: '',
     body: tcpResp.responseData || tcpResp.message || '-', // map tcp response data or any message into "http body" to be displayed
     status: tcpResp.status === 'DOWN' ? 0 : 200, // set to 0 if down, and 200 if ok
+    result:
+      tcpResp.status === 'DOWN'
+        ? probeRequestResult.failed
+        : probeRequestResult.success,
     headers: {},
     responseTime: tcpResp.duration,
-
-    isProbeResponsive: tcpResp.status === 'UP', // map success flag
     errMessage: tcpResp.message, // map message if any
   }
 

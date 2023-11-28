@@ -25,7 +25,7 @@
 import { prepareEnvironment } from '@gmrchk/cli-testing-library'
 import { expect } from 'chai'
 
-const monika = './bin/run'
+const monika = './bin/run.js'
 
 describe('CLI Testing', () => {
   it('shows version', async () => {
@@ -109,8 +109,6 @@ describe('CLI Testing', () => {
     - id: '1'
       name: Google
       interval: 1
-      incidentThreshold: 6
-      recoveryThreshold: 6
       requests:
         - url: https://google.com
   notifications:
@@ -122,15 +120,11 @@ describe('CLI Testing', () => {
     - id: '1'
       name: Google
       interval: 1
-      incidentThreshold: 6
-      recoveryThreshold: 6
       requests:
         - url: https://google.com
     - id: '2'
       name: Github
       interval: 1
-      incidentThreshold: 6
-      recoveryThreshold: 6
       requests:
         - url: https://github.com
   notifications:

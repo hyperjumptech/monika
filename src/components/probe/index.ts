@@ -22,212 +22,22 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import { ExponentialBackoff, retry, handleAll } from 'cockatiel'
 import { differenceInSeconds } from 'date-fns'
 import { getContext } from '../../context'
-import events from '../../events'
 import type { Notification } from '@hyperjumptech/monika-notification'
-import { Probe } from '../../interfaces/probe'
-import { ServerAlertState } from '../../interfaces/probe-status'
-import { ProbeRequestResponse } from '../../interfaces/request'
-import validateResponse, {
-  ValidatedResponse,
-} from '../../plugins/validate-response'
-import { getEventEmitter } from '../../utils/events'
-import { log } from '../../utils/pino'
+import type { Probe } from '../../interfaces/probe'
 import {
   getProbeContext,
   getProbeState,
   setProbeFinish,
   setProbeRunning,
 } from '../../utils/probe-state'
-import { isSymonModeFrom } from '../config'
-import { RequestLog } from '../logger'
-import { sendAlerts } from '../notification'
-import { processThresholds } from '../notification/process-server-status'
+import { createProbers } from './prober/factory'
 import {
-  type ProbeResult,
-  probeHTTP,
-  probeMariaDB,
-  probeMongo,
-  probePostgres,
-  probeRedis,
-  probeSocket,
-  probeScript,
-} from './prober'
-
-interface ProbeStatusProcessed {
-  probe: Probe
-  statuses?: ServerAlertState[]
-  notifications: Notification[]
-  validatedResponseStatuses: ValidatedResponse[]
-  requestIndex: number
-}
-
-interface ProbeSendNotification extends Omit<ProbeStatusProcessed, 'statuses'> {
-  index: number
-  probeState?: ServerAlertState
-}
-
-const probeSendNotification = async (data: ProbeSendNotification) => {
-  const eventEmitter = getEventEmitter()
-
-  const {
-    index,
-    probe,
-    probeState,
-    notifications,
-    requestIndex,
-    validatedResponseStatuses,
-  } = data
-
-  const statusString = probeState?.state ?? 'UP'
-  const url = probe.requests?.[requestIndex]?.url ?? ''
-  const validation =
-    validatedResponseStatuses.find(
-      (validateResponse: ValidatedResponse) =>
-        validateResponse.alert.assertion === probeState?.alertQuery
-    ) || validatedResponseStatuses[index]
-
-  eventEmitter.emit(events.probe.notification.willSend, {
-    probeID: probe.id,
-    notifications: notifications ?? [],
-    url: url,
-    probeState: statusString,
-    validation,
-  })
-
-  if ((notifications?.length ?? 0) > 0) {
-    await sendAlerts({
-      probeID: probe.id,
-      url,
-      probeState: statusString,
-      notifications: notifications ?? [],
-      validation,
-    })
-  }
-}
-
-// Probes Thresholds processed, Send out notifications/alerts.
-export function checkThresholdsAndSendAlert(
-  data: ProbeStatusProcessed,
-  requestLog: RequestLog
-): void {
-  const {
-    probe,
-    statuses,
-    notifications,
-    requestIndex,
-    validatedResponseStatuses,
-  } = data
-
-  const probeStatesWithValidAlert = getProbeStatesWithValidAlert(statuses || [])
-
-  for (const [index, probeState] of probeStatesWithValidAlert.entries()) {
-    const { alertQuery, state } = probeState
-
-    probeSendNotification({
-      index,
-      probe,
-      probeState,
-      notifications,
-      requestIndex,
-      validatedResponseStatuses,
-    }).catch((error: Error) => log.error(error.message))
-
-    requestLog.addNotifications(
-      (notifications ?? []).map((notification) => ({
-        notification,
-        type: state === 'DOWN' ? 'NOTIFY-INCIDENT' : 'NOTIFY-RECOVER',
-        alertQuery: alertQuery || '',
-      }))
-    )
-  }
-}
-
-export function getProbeStatesWithValidAlert(
-  probeStates: ServerAlertState[]
-): ServerAlertState[] {
-  return probeStates.filter(
-    ({ isFirstTime, shouldSendNotification, state }) => {
-      const isFirstUpEvent = isFirstTime && state === 'UP'
-      const isFirstUpEventForNonSymonMode = isFirstUpEvent
-
-      return shouldSendNotification && !isFirstUpEventForNonSymonMode
-    }
-  )
-}
-
-type respProsessingParams = {
-  probe: Probe // the actual probe that got this response
-  probeResult: ProbeRequestResponse // actual response from the probe
-  notifications: Notification[] // notifications contains all the notifications
-  logMessage: string // message from the probe to display
-  isAlertTriggered: boolean // flag, should alert be triggered?
-  index: number
-}
-/**
- * responseProcessing determines if the last probe response warrants an alert
- * creates the console log
- * @param {object} param is response Processing type
- * @returns void
- */
-function responseProcessing({
-  probe,
-  probeResult,
-  notifications,
-  logMessage,
-  isAlertTriggered,
-  index,
-}: respProsessingParams): void {
-  const { flags } = getContext()
-  const isSymonMode = isSymonModeFrom(flags)
-  const eventEmitter = getEventEmitter()
-  const isVerbose = isSymonMode || flags['keep-verbose-logs']
-  const { alerts } = probe
-  const validatedResponse = validateResponse(
-    alerts || [
-      {
-        assertion: 'response.status < 200 or response.status > 299',
-        message: 'probe cannot be accessed',
-      },
-    ],
-    probeResult
-  )
-  const requestLog = new RequestLog(probe, index, 0)
-  const statuses = processThresholds({
-    probe,
-    requestIndex: index,
-    validatedResponse,
-  })
-
-  eventEmitter.emit(events.probe.response.received, {
-    probe,
-    requestIndex: index,
-    response: probeResult,
-  })
-  isAlertTriggered ? log.warn(logMessage) : log.info(logMessage)
-  requestLog.addAlerts(
-    validatedResponse
-      .filter((item) => item.isAlertTriggered)
-      .map((item) => item.alert)
-  )
-  requestLog.setResponse(probeResult)
-  // Done processing results, check if need to send out alerts
-  checkThresholdsAndSendAlert(
-    {
-      probe,
-      statuses,
-      notifications,
-      requestIndex: index,
-      validatedResponseStatuses: validatedResponse,
-    },
-    requestLog
-  )
-
-  if (isVerbose || requestLog.hasIncidentOrRecovery) {
-    requestLog.saveToDatabase().catch((error) => log.error(error.message))
-  }
-}
+  DEFAULT_INCIDENT_THRESHOLD,
+  DEFAULT_RECOVERY_THRESHOLD,
+} from '../config/validation/validator/default-values'
 
 type doProbeParams = {
   probe: Probe // probe contains all the probes
@@ -242,13 +52,12 @@ export async function doProbe({
   probe,
   notifications,
 }: doProbeParams): Promise<void> {
-  if (
-    !isTimeToProbe(probe) ||
-    isCycleEnd(probe.id) ||
-    !setProbeRunning(probe.id)
-  ) {
+  if (!isTimeToProbe(probe) || isCycleEnd(probe.id)) {
     return
   }
+
+  const randomTimeoutMilliseconds = getRandomTimeoutMilliseconds()
+  setProbeRunning(probe.id)
 
   setTimeout(async () => {
     const probeCtx = getProbeContext(probe.id)
@@ -256,31 +65,30 @@ export async function doProbe({
       return
     }
 
-    await probeNonHTTP(probe, probeCtx.cycle, notifications)
-    await probeHTTP(probe, probeCtx.cycle, notifications)
+    const probers = createProbers({
+      counter: probeCtx.cycle,
+      notifications,
+      probeConfig: probe,
+    })
+
+    const maxAttempts = Math.max(
+      // since we will retry for both incident and recovery, let's just get the biggest threshold
+      probe.incidentThreshold || DEFAULT_INCIDENT_THRESHOLD,
+      probe.recoveryThreshold || DEFAULT_RECOVERY_THRESHOLD
+    )
+
+    await retry(handleAll, {
+      maxAttempts,
+      backoff: new ExponentialBackoff({
+        initialDelay: getContext().flags.retryInitialDelayMs,
+        maxDelay: getContext().flags.retryMaxDelayMs,
+      }),
+    }).execute(({ attempt }) =>
+      Promise.all(probers.map(async (prober) => prober.probe(attempt)))
+    )
 
     setProbeFinish(probe.id)
-  }, getRandomTimeoutMilliseconds())
-}
-
-function processProbeResults(
-  probeResults: ProbeResult[],
-  probe: Probe,
-  notifications: Notification[]
-): void {
-  for (const index of probeResults.keys()) {
-    const { isAlertTriggered, logMessage, requestResponse } =
-      probeResults[index]
-
-    responseProcessing({
-      probe,
-      probeResult: requestResponse,
-      notifications,
-      logMessage,
-      isAlertTriggered,
-      index,
-    })
-  }
+  }, randomTimeoutMilliseconds)
 }
 
 function isTimeToProbe({ id, interval }: Probe) {
@@ -308,74 +116,5 @@ function isCycleEnd(probeID: string) {
 }
 
 function getRandomTimeoutMilliseconds(): number {
-  return [1000, 2000, 3000].sort(() => {
-    return Math.random() - 0.5
-  })[0]
-}
-
-async function probeNonHTTP(
-  probe: Probe,
-  checkOrder: number,
-  notifications: Notification[]
-) {
-  if (probe?.mongo) {
-    const probeResults = await probeMongo({
-      id: probe.id,
-      checkOrder,
-      mongo: probe.mongo,
-    })
-
-    processProbeResults(probeResults, probe, notifications)
-  }
-
-  if (probe?.mariadb || probe?.mysql) {
-    const probeResults = await probeMariaDB({
-      id: probe.id,
-      checkOrder,
-      mysql: probe?.mysql,
-      mariaDB: probe?.mariadb,
-    })
-
-    processProbeResults(probeResults, probe, notifications)
-  }
-
-  if (probe?.postgres) {
-    const probeResults = await probePostgres({
-      id: probe.id,
-      checkOrder,
-      postgres: probe.postgres,
-    })
-
-    processProbeResults(probeResults, probe, notifications)
-  }
-
-  if (probe?.redis) {
-    const probeResults = await probeRedis({
-      id: probe.id,
-      checkOrder,
-      redis: probe.redis,
-    })
-
-    processProbeResults(probeResults, probe, notifications)
-  }
-
-  if (probe?.socket) {
-    const probeResults = await probeSocket({
-      id: probe.id,
-      checkOrder,
-      socket: probe.socket,
-    })
-
-    processProbeResults(probeResults, probe, notifications)
-  }
-
-  if (probe?.script) {
-    const probeResults = await probeScript({
-      id: probe.id,
-      checkOrder,
-      script: probe?.script,
-    })
-
-    processProbeResults(probeResults, probe, notifications)
-  }
+  return [1000, 2000, 3000].sort(() => Math.random() - 0.5)[0]
 }

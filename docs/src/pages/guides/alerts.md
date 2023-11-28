@@ -3,7 +3,7 @@ id: alerts
 title: Alerts
 ---
 
-Alerts are the types of conditions that will trigger Monika to send notification. It is an array defined in the config file `monika.yml` like so.
+Alerts are the types of conditions that will trigger Monika to send notifications. It is an array defined in the config file `monika.yml` like so.
 
 ```yaml
 probes:
@@ -196,6 +196,10 @@ alerts:
 This is the message that is used in the sent notification.
 
 Inside the message string, you can also get the response object similar to assertion by surrounding the expression with double curly braces like the example above.
+
+## Built-in Alerts
+
+Monika will automatically issue an alert when it detects a probe is inaccessible. An incident and recovery alert will be sent to all configured notification channels. Note that explicit connection assertion and customized message strings are not yet supported.
 
 ## Further reading
 

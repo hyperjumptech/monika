@@ -24,15 +24,15 @@
 
 import { compileExpression as _compileExpression } from 'filtrex'
 import {
+  endsWith,
   get,
   has,
-  endsWith,
-  startsWith,
-  lowerCase,
-  upperCase,
-  size,
   includes,
   isEmpty,
+  lowerCase,
+  size,
+  startsWith,
+  upperCase,
 } from 'lodash'
 
 // wrap substrings that are object accessor with double quote

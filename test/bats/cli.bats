@@ -40,8 +40,6 @@ function setup() {
 
     assert_success
     assert_output --partial 'Warning: Probe 1 has no name defined'
-    assert_output --partial 'Warning: Probe 1 has no incidentThreshold configuration defined'
-    assert_output --partial 'Warning: Probe 1 has no recoveryThreshold configuration defined'
     assert_output --partial 'Warning: Probe 1 has no Alerts configuration defined'
 }
 

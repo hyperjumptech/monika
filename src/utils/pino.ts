@@ -24,29 +24,35 @@
 
 import fs from 'fs'
 import path from 'path'
-import pino, { LoggerOptions } from 'pino'
+import pino, { transport } from 'pino'
 
-const project = path.join(__dirname, '../../tsconfig.json')
-const dev = fs.existsSync(project)
+export const log = pino(getOptions())
 
-const prettyPrint = {
-  translateTime: true,
-  ignore: 'hostname,pid,time',
-  hideObject: true,
-  sync: false, // async mode for better performance
+function getOptions() {
+  if (process.env.NODE_ENV === 'test') {
+    return {
+      base: undefined,
+      level: 'error',
+      timestamp: false,
+    }
+  }
+
+  const prettyPrint = {
+    translateTime: true,
+    ignore: 'hostname,pid,time',
+    hideObject: true,
+  }
+  const project = path.join(__dirname, '../../tsconfig.json')
+  const dev = fs.existsSync(project)
+
+  return transport({
+    target: 'pino-pretty',
+    options: dev
+      ? {
+          ...prettyPrint,
+          level: 'debug',
+          colorize: true,
+        }
+      : prettyPrint,
+  })
 }
-
-const transport: LoggerOptions = dev
-  ? {
-      prettyPrint: {
-        ...prettyPrint,
-        colorize: true,
-      },
-      level: 'debug',
-    }
-  : {
-      prettyPrint,
-      level: 'info',
-    }
-
-export const log = pino(transport)

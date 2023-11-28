@@ -60,15 +60,20 @@ describe('validate example configs', () => {
     for (const file of files) {
       switch (path.extname(file)) {
         case '.yml':
-        case '.yaml':
+        case '.yaml': {
           sampleFile = yaml.load(fs.readFileSync(file, 'utf8'))
           break
-        case '.json':
+        }
+
+        case '.json': {
           sampleFile = JSON.parse(fs.readFileSync(file, 'utf8'))
           break
-        default:
+        }
+
+        default: {
           sampleFile = null
-          continue // skip for other file.extension
+          continue
+        } // skip for other file.extension
       }
 
       const isValid = validate(sampleFile)

@@ -22,40 +22,21 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { ProbeAlert } from '../../../interfaces/probe'
-import { ProbeRequestResponse } from '../../../interfaces/request'
+import type { ProbeAlert } from '../../../interfaces/probe'
+import type { ProbeRequestResponse } from '../../../interfaces/request'
 import queryExpression from './query-expression'
-
-// parse string like "response-time-greater-than-200-ms" and return the time in ms
-export const parseAlertStringTime = (str: string): number => {
-  // match any string that ends with digits followed by unit 's' or 'ms'
-  const match = str.match(/(\d+)-(m?s)$/)
-
-  if (!match) {
-    throw new Error('Alert string does not contain valid time number')
-  }
-
-  const number = Number(match[1])
-  const unit = match[2]
-
-  if (unit === 's') return number * 1000
-
-  return number
-}
 
 // responseChecker checks some result and returns boolean if alert requered
 const responseChecker = (
   alert: ProbeAlert,
   res: ProbeRequestResponse
 ): boolean => {
-  // If the probe did not succeed (ex: invalid address etc),
-  // then automatic alert-able event.
-  if (!res.isProbeResponsive) {
-    return true
+  if (!alert.assertion) {
+    return false
   }
 
   // Else we check for user assertion
-  return queryExpression(res, alert.assertion || (alert.query as string))
+  return queryExpression(res, alert.assertion)
 }
 
 export default responseChecker

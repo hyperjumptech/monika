@@ -9,8 +9,6 @@ probes:
     description: Probe
     requests:
       - url: https://something/something
-    incidentThreshold: 2
-    recoveryThreshold: 2
     alerts:
       - assertion: size(response.body.data) > 0
         message: ''

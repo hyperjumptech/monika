@@ -22,69 +22,56 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Probe, ProbeAlert } from '../../../../interfaces/probe'
-import { parseAlertStringTime } from '../../../../plugins/validate-response/checkers'
-import { compileExpression } from '../../../../utils/expression-parser'
+import { formatDistanceToNow } from 'date-fns'
+import { getContext, setContext } from '../../context'
+import type { ProbeAlert } from '../../interfaces/probe'
 
-const alertStatusMessage = 'status-not-2xx'
-const responseTimePrefix = 'response-time-greater-than-'
-
-const isValidProbeAlert = (alert: ProbeAlert | string): boolean => {
-  try {
-    if (typeof alert === 'string') {
-      return (
-        alert === alertStatusMessage ||
-        (alert.startsWith(responseTimePrefix) &&
-          Boolean(parseAlertStringTime(alert)))
-      )
-    }
-
-    return Boolean(
-      compileExpression(alert.assertion || (alert.query as string))
-    )
-  } catch {
-    return false
-  }
+type DowntimeCounter = {
+  alert: ProbeAlert
+  probeID: string
+  url: string
+  createdAt?: Date
 }
 
-const convertOldAlertToNewFormat = (
-  probe: Probe,
-  allAlerts: ProbeAlert[]
-): void => {
-  probe.alerts = allAlerts.map((alert: any) => {
-    if (typeof alert === 'string') {
-      let query = ''
-      let message = ''
-      const subject = ''
+export function startDowntimeCounter({
+  alert,
+  createdAt,
+  probeID,
+  url,
+}: DowntimeCounter): void {
+  const newIncident = {
+    alert,
+    probeID,
+    probeRequestURL: url,
+    createdAt: createdAt || new Date(),
+  }
 
-      if (alert === alertStatusMessage) {
-        query = 'response.status < 200 or response.status > 299'
-        message = 'HTTP Status is {{ response.status }}, expecting 200'
-      } else if (alert.startsWith(responseTimePrefix)) {
-        const expectedTime = parseAlertStringTime(alert)
-        query = `response.time > ${expectedTime}`
-        message = `Response time is {{ response.time }}ms, expecting less than ${expectedTime}ms`
-      }
+  setContext({ incidents: [...getContext().incidents, newIncident] })
+}
 
-      return { query, subject, message }
-    }
+export function getDowntimeDuration({
+  probeID,
+  url,
+}: Omit<DowntimeCounter, 'alert'>): string {
+  const lastIncident = getContext().incidents.find(
+    (incident) =>
+      incident.probeID === probeID && incident.probeRequestURL === url
+  )
 
-    return alert
+  if (!lastIncident) {
+    return '0 seconds'
+  }
+
+  return formatDistanceToNow(lastIncident.createdAt, {
+    includeSeconds: true,
   })
 }
 
-export const validateAlerts = (probe: Probe): string | undefined => {
-  const { alerts = [], socket } = probe
-  const socketAlerts = socket?.alerts ?? []
-  const allAlerts = [...alerts, ...socketAlerts]
+export function stopDowntimeCounter({ probeID, url }: DowntimeCounter): void {
+  const newIncidents = getContext().incidents.filter(
+    (incident) =>
+      incident.probeID !== probeID && incident.probeRequestURL !== url
+  )
 
-  // Check probe alert properties
-  for (const alert of allAlerts) {
-    const check = isValidProbeAlert(alert)
-    if (!check) {
-      return `Probe alert format is invalid! (${alert})`
-    }
-  }
-
-  convertOldAlertToNewFormat(probe, allAlerts)
+  setContext({ incidents: newIncidents })
 }

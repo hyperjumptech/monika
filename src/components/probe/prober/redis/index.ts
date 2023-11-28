@@ -1,7 +1,60 @@
 import parse from 'url-parse'
-import type { ProbeResult } from '..'
+import { BaseProber, type ProbeResult } from '..'
 import type { Redis } from '../../../../interfaces/probe'
+import { probeRequestResult } from '../../../../interfaces/request'
 import { redisRequest } from './request'
+
+export class RedisProber extends BaseProber {
+  async probe(incidentRetryAttempt: number): Promise<void> {
+    if (!this.probeConfig.redis) {
+      throw new Error(
+        `Redis configuration is empty. Probe ID: ${this.probeConfig.id}`
+      )
+    }
+
+    const result = await probeRedis({
+      id: this.probeConfig.id,
+      checkOrder: this.counter,
+      redis: this.probeConfig.redis,
+    })
+
+    this.processProbeResults(result, incidentRetryAttempt)
+  }
+
+  generateVerboseStartupMessage(): string {
+    const { description, id, interval, name } = this.probeConfig
+
+    let result = `- Probe ID: ${id}
+  Name: ${name}
+  Description: ${description || '-'}
+  Interval: ${interval}
+`
+    result += '  Connection Details:'
+    result += this.getConnectionDetails()
+
+    return result
+  }
+
+  private getConnectionDetails(): string {
+    return (
+      this.probeConfig.redis
+        ?.map((db) => {
+          if (db.uri) {
+            return `
+    URI: ${db.uri}
+`
+          }
+
+          return `
+    Host: ${db.host}
+    Port: ${db.port}
+    Username: ${db.username}
+        `
+        })
+        .join('\n') || ''
+    )
+  }
+}
 
 type ProbeRedisParams = {
   id: string
@@ -26,8 +79,8 @@ export async function probeRedis({
       password,
       uri,
     })
-    const { body, responseTime, status } = requestResponse
-    const isAlertTriggered = status !== 200
+    const { body, responseTime, result } = requestResponse
+    const isAlertTriggered = result !== probeRequestResult.success
     const timeNow = new Date().toISOString()
 
     // parse uri for logMessage(host:port)

@@ -22,67 +22,59 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { parentPort, workerData } from 'worker_threads'
+import axios from 'axios'
 import path from 'path'
 import { open } from 'sqlite'
-import axios from 'axios'
-import SQLite3 from 'sqlite3'
+import { verbose } from 'sqlite3'
+
 import {
+  UnreportedNotificationsLog,
+  UnreportedRequestsLog,
   deleteNotificationLogs,
   deleteRequestLogs,
   getUnreportedLogs,
-  UnreportedNotificationsLog,
-  UnreportedRequestsLog,
-} from '../../components/logger/history'
-import { log } from '../../utils/pino'
+} from '../components/logger/history'
+import { log } from '../utils/pino'
 const dbPath = path.resolve(process.cwd(), 'monika-logs.db')
 
-const main = async (data: Record<string, any>) => {
+export default async (stringifiedData: string) => {
   try {
-    const { url, apiKey, probeIds, reportProbesLimit, monikaId } = data
+    const parsedData = JSON.parse(stringifiedData)
+    const { apiKey, monikaId, probeIds, reportProbesLimit, url } = parsedData
 
     // Open database
-    const sqlite3 = SQLite3.verbose()
+    const sqlite3 = verbose()
     const db = await open({
-      filename: dbPath,
-      mode: sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE,
       driver: sqlite3.Database,
+      filename: dbPath,
+      mode: sqlite3.OPEN_READWRITE || sqlite3.OPEN_CREATE,
     })
 
     // Updating requests and notifications to report
     const logs = await getUnreportedLogs(probeIds, reportProbesLimit, db)
-    const requests = logs.requests
-    const notifications = logs.notifications
+    const { requests } = logs
+    const { notifications } = logs
 
     if (requests.length === 0 && notifications.length === 0) {
       // No requests or notifications to report
-      log.debug('Nothing to report')
-
-      parentPort?.postMessage({
-        success: true,
-        data: {
-          requests,
-          notifications,
-        },
-      })
+      log.info('Nothing to report')
     } else {
       // Hit the Symon API for receiving Monika report
       // With the compressed requests and notifications data
       await axios({
-        url: `${url}/api/v1/monika/report`,
-        method: 'POST',
         data: {
-          monikaId: monikaId,
           data: {
-            requests,
             notifications,
+            requests,
           },
+          monikaId,
         },
         headers: {
-          'Content-Encoding': 'gzip',
           'Content-Type': 'application/json',
           'x-api-key': apiKey,
         },
+        method: 'POST',
+        url: `${url}/api/v1/monika/report`,
       })
 
       log.info(
@@ -91,42 +83,21 @@ const main = async (data: Record<string, any>) => {
 
       // Delete the reported requests
       await deleteRequestLogs(
-        requests.map((log: UnreportedRequestsLog) => log.probeId),
+        requests.map((l: UnreportedRequestsLog) => l.probeId),
         db
       )
-      log.debug(`Deleted ${requests.length} reported request`)
+      log.info(`Deleted ${requests.length} reported request`)
 
       // Delete the reported notifications
       await deleteNotificationLogs(
-        notifications.map((log: UnreportedNotificationsLog) => log.probeId),
+        notifications.map((l: UnreportedNotificationsLog) => l.probeId),
         db
       )
-      log.debug(`Deleted ${notifications.length} reported request`)
-
-      // Send message to parentPort so that
-      // the reported logs and notifications can be deleted
-      parentPort?.postMessage({
-        success: true,
-        data: {
-          requests,
-          notifications,
-        },
-      })
+      log.info(`Deleted ${notifications.length} reported request`)
     }
-  } catch (error) {
-    console.error(error)
+  } catch (error: unknown) {
     log.error(
-      "Warning: Can't report history to Symon. " + (error as any).message
+      "Warning: Can't report history to Symon. " + (error as Error).message
     )
-    parentPort?.postMessage({ success: false, error: error })
   }
 }
-
-;(async () => {
-  try {
-    const data = JSON.parse(workerData.data)
-    await main(data)
-  } catch (error) {
-    console.error(error)
-  }
-})()

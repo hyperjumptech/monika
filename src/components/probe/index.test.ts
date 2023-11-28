@@ -22,190 +22,561 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { expect } from 'chai'
-
+import { expect } from '@oclif/test'
 import { rest } from 'msw'
 import { setupServer } from 'msw/node'
-import { doProbe, getProbeStatesWithValidAlert } from '.'
-import type { ServerAlertState } from '../../interfaces/probe-status'
+import sinon from 'sinon'
+import mariadb from 'mariadb'
+import { MongoClient, type Db } from 'mongodb'
+import net from 'net'
+import { Pool } from 'pg'
+import * as redis from 'redis'
+import { doProbe } from '.'
 import { initializeProbeStates } from '../../utils/probe-state'
 import type { Probe } from '../../interfaces/probe'
-import { afterEach, beforeEach } from 'mocha'
 import { getContext, resetContext, setContext } from '../../context'
+import type { MonikaFlags } from '../../flag'
+import { FAILED_REQUEST_ASSERTION } from '../../looper'
+import { closeLog, openLogfile } from '../logger/history'
 
-let urlRequestTotal = 0
+let notificationAlert: Record<string, Record<string, any>> = {}
 const server = setupServer(
-  rest.get('https://example.com', (_, res, ctx) => {
-    urlRequestTotal += 1
+  rest.get('https://example.com', (_, res, ctx) => res(ctx.status(200))),
+  rest.post('https://example.com/webhook', async (req, res, ctx) => {
+    const requestBody = await req.json()
+    if (requestBody?.body?.url) {
+      notificationAlert[requestBody.body.url] = requestBody
+    }
+
     return res(ctx.status(200))
   })
 )
-const probes: Probe[] = [
-  {
-    id: '1',
-    name: 'Example',
-    interval: 1,
-    requests: [
-      {
-        url: 'https://example.com',
-        body: '',
-        timeout: 30,
-      },
-    ],
-    incidentThreshold: 1,
-    recoveryThreshold: 1,
-    alerts: [],
-  },
-]
 
-beforeEach(() => server.listen())
-afterEach(() => {
-  urlRequestTotal = 0
-  server.close()
-})
-
-describe('Probe processing', () => {
-  describe('getProbeStatesWithValidAlert function', () => {
-    const probeStates: ServerAlertState[] = [
-      {
-        isFirstTime: false,
-        alertQuery: '',
-        state: 'DOWN',
-        shouldSendNotification: false,
-      },
-      {
-        isFirstTime: true,
-        alertQuery: '',
-        state: 'DOWN',
-        shouldSendNotification: false,
-      },
-      {
-        isFirstTime: true,
-        alertQuery: '',
-        state: 'UP',
-        shouldSendNotification: false,
-      },
-      {
-        isFirstTime: true,
-        alertQuery: '',
-        state: 'UP',
-        shouldSendNotification: true,
-      },
-      {
-        isFirstTime: true,
-        alertQuery: '',
-        state: 'DOWN',
-        shouldSendNotification: true,
-      },
-      {
-        isFirstTime: false,
-        alertQuery: '',
-        state: 'DOWN',
-        shouldSendNotification: true,
-      },
-    ]
-
-    it('should return probe states with valid alert', () => {
-      // arrange
-      const expected: ServerAlertState[] = [
-        {
-          isFirstTime: true,
-          alertQuery: '',
-          state: 'DOWN',
-          shouldSendNotification: true,
-        },
-        {
-          isFirstTime: false,
-          alertQuery: '',
-          state: 'DOWN',
-          shouldSendNotification: true,
-        },
-      ]
-
-      // act
-      const probeStatesWithValidAlert =
-        getProbeStatesWithValidAlert(probeStates)
-
-      // assert
-      expect(probeStatesWithValidAlert).deep.eq(expected)
-    })
+describe('Base Probe processing', () => {
+  before(async () => {
+    server.listen()
+    await openLogfile()
+  })
+  beforeEach(() => {
+    setContext({ flags: { repeat: 1 } as MonikaFlags })
+  })
+  afterEach(() => {
+    resetContext()
+    notificationAlert = {}
+    server.resetHandlers()
+    sinon.restore()
+  })
+  after(async () => {
+    server.close()
+    await closeLog()
   })
 
-  describe('HTTP Probe', () => {
-    it('should not run probe if the probe is running', async () => {
+  describe('Non HTTP Probe', () => {
+    it('should probe MariaDB', async () => {
       // arrange
-      initializeProbeStates(probes)
-      // wait until the interval passed
-      const seconds = 1000
-      await sleep(seconds)
-
-      // act
-      doProbe({ probe: probes[0], notifications: [] })
-      await doProbe({ probe: probes[0], notifications: [] })
-      // wait for random timeout
-      await sleep(3 * seconds)
-
-      // assert
-      expect(urlRequestTotal).eq(1)
-    })
-
-    it('should not run probe if it is not the time', () => {
-      // arrange
-      initializeProbeStates(probes)
-
-      // act
-      doProbe({ probe: probes[0], notifications: [] })
-
-      // assert
-      expect(urlRequestTotal).eq(0)
-    })
-
-    it('should not run probe if the cycle is end', async () => {
-      // arrange
-      initializeProbeStates(probes)
-      setContext({
-        ...getContext(),
-        flags: { ...getContext().flags, repeat: 1 },
-      })
-      // wait until the interval passed
-      const seconds = 1000
-      await sleep(seconds)
-
-      // act
-      await doProbe({ probe: probes[0], notifications: [] })
-      await doProbe({ probe: probes[0], notifications: [] })
-      await doProbe({ probe: probes[0], notifications: [] })
-      // wait for random timeout
-      await sleep(3 * seconds)
-
-      resetContext()
-
-      // assert
-      expect(urlRequestTotal).eq(1)
-    })
-
-    it('should run the probe', async () => {
-      // arrange
-      const uniqueProbes: Probe[] = Array.from({ length: 5 }).map(
-        (_, index) => ({
-          ...probes[0],
-          id: `${index}`,
-        })
+      const requestStub = sinon.stub(mariadb, 'createConnection').callsFake(
+        async (_connectionUri) =>
+          ({
+            async end() {
+              Promise.resolve()
+            },
+          } as mariadb.Connection)
       )
-      initializeProbeStates(uniqueProbes)
+      const probes = [
+        {
+          id: '1',
+          interval: 1,
+          mariadb: [
+            {
+              host: 'localhost',
+              port: 3306,
+              username: 'mariadb_user',
+              password: 'mariadb_password',
+              database: '',
+            },
+          ],
+        } as Probe,
+      ]
+      initializeProbeStates(probes)
       // wait until the interval passed
       const seconds = 1000
       await sleep(seconds)
 
       // act
       await Promise.all(
-        uniqueProbes.map((probe) => doProbe({ probe, notifications: [] }))
+        probes.map((probe) => doProbe({ probe, notifications: [] }))
       )
       // wait for random timeout
       await sleep(3 * seconds)
 
       // assert
-      expect(urlRequestTotal).eq(5)
+      sinon.assert.calledOnce(requestStub)
+    })
+
+    it('should send incident notification for MariaDB probe', async () => {
+      // arrange
+      const probe = {
+        id: '1c8QrZ',
+        interval: 1,
+        mariadb: [
+          {
+            host: 'localhost',
+            port: 3307,
+            username: 'mariadb_user',
+            password: 'mariadb_password',
+            database: '',
+          },
+        ],
+        alerts: [
+          {
+            id: 'Cqkjh',
+            ...FAILED_REQUEST_ASSERTION,
+          },
+        ],
+      } as Probe
+      initializeProbeStates([probe])
+      // wait until the interval passed
+      const seconds = 1000
+      await sleep(seconds)
+
+      // act
+      await doProbe({
+        probe,
+        notifications: [
+          {
+            id: 'jFQBd',
+            data: { url: 'https://example.com/webhook' },
+            type: 'webhook',
+          },
+        ],
+      })
+      // wait for random timeout
+      await sleep(3 * seconds)
+      // wait for send notification function to resolve
+      await sleep(2 * seconds)
+
+      // assert
+      expect(notificationAlert?.[probe.id]?.body?.url).eq('1c8QrZ')
+      expect(notificationAlert?.[probe.id]?.body?.alert).eq('')
+
+      // restore
+      sinon.stub(mariadb, 'createConnection').callsFake(
+        async (_connectionUri) =>
+          ({
+            async end() {
+              Promise.resolve()
+            },
+          } as mariadb.Connection)
+      )
+    }).timeout(10_000)
+
+    it('should send recovery notification for MariaDB probe', async () => {
+      // simulate the incindent first by throwing on first call
+      // then simulate recovery on second call
+      const requestStub = sinon.stub(mariadb, 'createConnection')
+      requestStub.onFirstCall().throws()
+      requestStub.onSecondCall().callsFake(
+        async (_connectionUri) =>
+          ({
+            async end() {
+              Promise.resolve()
+            },
+          } as mariadb.Connection)
+      )
+
+      // repeat needs to be 0 so that monika can probe twice
+      // where in the first time it will send incident notification
+      // then in the second time it will send recovery notification
+      setContext({
+        ...getContext(),
+        flags: { ...getContext().flags, repeat: 0 },
+      })
+
+      // arrange
+      const probe = {
+        id: '3ngd4',
+        incidentThreshold: 1,
+        interval: 1,
+        mariadb: [
+          {
+            host: 'localhost',
+            port: 3308,
+            username: 'mariadb_user',
+            password: 'mariadb_password',
+            database: '',
+          },
+        ],
+        alerts: [
+          {
+            id: 'Cqkjh',
+            ...FAILED_REQUEST_ASSERTION,
+          },
+        ],
+      } as Probe
+      initializeProbeStates([probe])
+      // wait until the interval passed
+      const seconds = 1000
+      await sleep(seconds)
+
+      // act
+      await doProbe({
+        probe,
+        notifications: [
+          {
+            id: 'jFQBd',
+            data: { url: 'https://example.com/webhook' },
+            type: 'webhook',
+          },
+        ],
+      })
+      // gonna need to wait for a while until monika does the probing twice
+      await sleep(7000)
+
+      // assert
+      sinon.assert.called(requestStub)
+      expect(notificationAlert?.[probe.id]?.body?.url).eq('3ngd4')
+      expect(notificationAlert?.[probe.id]?.body?.alert).eq('')
+    }).timeout(15_000)
+
+    it('should probe MongoDB', async () => {
+      // arrange
+      const requestStub = sinon
+        .stub(MongoClient.prototype, 'connect')
+        .resolves()
+      sinon.stub(MongoClient.prototype, 'on').resolves()
+      sinon.stub(MongoClient.prototype, 'db').callsFake(
+        () =>
+          ({
+            command: async () => ({ ok: 1 }),
+          } as unknown as Db)
+      )
+      sinon.stub(MongoClient.prototype, 'close').resolves()
+      const probes = [
+        {
+          id: 'FMqVc',
+          interval: 1,
+          mongo: [
+            {
+              host: 'localhost',
+              password: 'mongo_password',
+              port: '27017',
+              username: 'mongo_user',
+            },
+          ],
+        } as unknown as Probe,
+      ]
+      initializeProbeStates(probes)
+      // wait until the interval passed
+      const seconds = 1000
+      await sleep(seconds)
+
+      // act
+      await Promise.all(
+        probes.map((probe) => doProbe({ probe, notifications: [] }))
+      )
+      // wait for random timeout
+      await sleep(3 * seconds)
+
+      // assert
+      sinon.assert.calledOnce(requestStub)
+    })
+
+    it('should probe MongoDB with uri', async () => {
+      // arrange
+      const requestStub = sinon
+        .stub(MongoClient.prototype, 'connect')
+        .resolves()
+      sinon.stub(MongoClient.prototype, 'on').resolves()
+      sinon.stub(MongoClient.prototype, 'db').callsFake(
+        () =>
+          ({
+            command: async () => ({ ok: 1 }),
+          } as unknown as Db)
+      )
+      sinon.stub(MongoClient.prototype, 'close').resolves()
+      const probes = [
+        {
+          id: '3cYAU',
+          interval: 1,
+          mongo: [
+            {
+              uri: 'mongodb://mongo_user:mongo_password@localhost:27018',
+            },
+          ],
+        } as Probe,
+      ]
+      initializeProbeStates(probes)
+      // wait until the interval passed
+      const seconds = 1000
+      await sleep(seconds)
+
+      // act
+      await Promise.all(
+        probes.map((probe) => doProbe({ probe, notifications: [] }))
+      )
+      // wait for random timeout
+      await sleep(3 * seconds)
+
+      // assert
+      sinon.assert.calledOnce(requestStub)
+    })
+
+    it('should probe MySQL', async () => {
+      // arrange
+      const requestStub = sinon.stub(mariadb, 'createConnection').callsFake(
+        async (_connectionUri) =>
+          ({
+            async end() {
+              Promise.resolve()
+            },
+          } as mariadb.Connection)
+      )
+      const probes = [
+        {
+          id: 'YFwQH',
+          interval: 1,
+          mysql: [
+            {
+              host: 'localhost',
+              port: 3307,
+              username: 'mysql_user',
+              password: 'mysql_password',
+              database: '',
+            },
+          ],
+        } as Probe,
+      ]
+      initializeProbeStates(probes)
+      // wait until the interval passed
+      const seconds = 1000
+      await sleep(seconds)
+
+      // act
+      await Promise.all(
+        probes.map((probe) => doProbe({ probe, notifications: [] }))
+      )
+      // wait for random timeout
+      await sleep(3 * seconds)
+
+      // assert
+      sinon.assert.calledOnce(requestStub)
+    })
+
+    it('should probe PostgreSQL', async () => {
+      // arrange
+      const requestStub = sinon
+        .stub(Pool.prototype, 'connect')
+        .callsFake(() => ({
+          async query() {},
+          async release() {},
+        }))
+      const probes = [
+        {
+          id: 'LxMkT',
+          interval: 1,
+          postgres: [
+            {
+              database: 'postgres_db',
+              host: 'localhost',
+              password: 'postgres_password',
+              port: '5432',
+              username: 'postgres_user',
+            },
+          ],
+        } as unknown as Probe,
+      ]
+      initializeProbeStates(probes)
+      // wait until the interval passed
+      const seconds = 1000
+      await sleep(seconds)
+
+      // act
+      await Promise.all(
+        probes.map((probe) => doProbe({ probe, notifications: [] }))
+      )
+      // wait for random timeout
+      await sleep(3 * seconds)
+
+      // assert
+      sinon.assert.calledOnce(requestStub)
+    })
+
+    it('should probe PostgreSQL with uri', async () => {
+      // arrange
+      const requestStub = sinon
+        .stub(Pool.prototype, 'connect')
+        .callsFake(() => ({
+          async query() {},
+          async release() {},
+        }))
+      const probes = [
+        {
+          id: 'FAzEj',
+          interval: 1,
+          postgres: [
+            {
+              uri: 'postgres://postgres_user:postgres_password@localhost:5432/postgres_db',
+            },
+          ],
+        } as Probe,
+      ]
+      initializeProbeStates(probes)
+      // wait until the interval passed
+      const seconds = 1000
+      await sleep(seconds)
+
+      // act
+      await Promise.all(
+        probes.map((probe) => doProbe({ probe, notifications: [] }))
+      )
+      // wait for random timeout
+      await sleep(3 * seconds)
+
+      // assert
+      sinon.assert.calledOnce(requestStub)
+    })
+
+    it('should probe Redis', async () => {
+      // arrange
+      const requestStub = sinon.stub(redis, 'createClient').callsFake(
+        () =>
+          ({
+            async connect() {},
+            on: () => '',
+            ping: async () => 'PONG',
+          } as any)
+      )
+      const probes = [
+        {
+          id: 'npTJ4',
+          interval: 1,
+          redis: [
+            {
+              host: 'localhost',
+              password: 'redis_password',
+              port: '6379',
+            },
+          ],
+        } as unknown as Probe,
+      ]
+      initializeProbeStates(probes)
+      // wait until the interval passed
+      const seconds = 1000
+      await sleep(seconds)
+
+      // act
+      await Promise.all(
+        probes.map((probe) => doProbe({ probe, notifications: [] }))
+      )
+      // wait for random timeout
+      await sleep(3 * seconds)
+
+      // assert
+      sinon.assert.calledOnce(requestStub)
+    })
+
+    it('should probe Redis with uri', async () => {
+      // arrange
+      const requestStub = sinon.stub(redis, 'createClient').callsFake(
+        () =>
+          ({
+            async connect() {},
+            on: () => '',
+            ping: async () => 'PONG',
+          } as any)
+      )
+      const probes = [
+        {
+          id: '1',
+          interval: 1,
+          redis: [
+            {
+              uri: 'redis://:redis_password@localhost:6379',
+            },
+          ],
+        } as Probe,
+      ]
+      initializeProbeStates(probes)
+      // wait until the interval passed
+      const seconds = 1000
+      await sleep(seconds)
+
+      // act
+      await Promise.all(
+        probes.map((probe) => doProbe({ probe, notifications: [] }))
+      )
+      // wait for random timeout
+      await sleep(3 * seconds)
+
+      // assert
+      sinon.assert.calledOnce(requestStub)
+    })
+
+    it('should probe socket', async () => {
+      const requestStub = sinon.stub(net, 'createConnection').callsFake(() => {
+        let data = ''
+
+        return {
+          write(d: any) {
+            data = d
+          },
+          setTimeout(timeoutMs: number) {
+            return timeoutMs
+          },
+          on(type: string, callback: (data?: any) => void) {
+            switch (type) {
+              case 'data': {
+                callback(data)
+                break
+              }
+
+              case 'close': {
+                callback()
+                break
+              }
+
+              case 'timeout': {
+                callback()
+                break
+              }
+
+              case 'error': {
+                callback('error')
+                break
+              }
+
+              default: {
+                break
+              }
+            }
+          },
+        } as unknown as net.Socket
+      })
+      const probes = [
+        {
+          id: '3Ua7L',
+          interval: 1,
+          socket: {
+            host: 'localhost',
+            port: '8080',
+            data: 'some-data',
+          },
+        } as unknown as Probe,
+      ]
+      initializeProbeStates(probes)
+      // wait until the interval passed
+      const seconds = 1000
+      await sleep(seconds)
+
+      // act
+      await Promise.all(
+        probes.map((probe) => doProbe({ probe, notifications: [] }))
+      )
+      // wait for random timeout
+      await sleep(3 * seconds)
+
+      // assert
+      sinon.assert.calledOnce(requestStub)
     })
   })
 })

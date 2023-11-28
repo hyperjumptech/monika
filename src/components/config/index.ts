@@ -23,15 +23,15 @@
  **********************************************************************************/
 
 import chokidar from 'chokidar'
-import { CliUx } from '@oclif/core'
+import { ux } from '@oclif/core'
 import { existsSync, writeFileSync } from 'fs'
 import isUrl from 'is-url'
 
 import events from '../../events'
 import type { Config } from '../../interfaces/config'
 import { getContext, setContext } from '../../context'
-import { monikaFlagsDefaultValue } from '../../context/monika-flags'
-import type { MonikaFlags } from '../../context/monika-flags'
+import { monikaFlagsDefaultValue } from '../../flag'
+import type { MonikaFlags } from '../../flag'
 import { getEventEmitter } from '../../utils/events'
 import { md5Hash } from '../../utils/hash'
 import { open } from '../../utils/open-website'
@@ -67,9 +67,17 @@ const defaultConfigs: Partial<Config>[] = []
 let nonDefaultConfig: Partial<Config>
 
 export const getConfig = (): Config => {
-  const { config } = getContext()
+  const { config, flags } = getContext()
 
-  if (!config) throw new Error('Configuration setup has not been run yet')
+  if (!config) {
+    if (!isSymonModeFrom(flags)) {
+      throw new Error('Configuration setup has not been run yet')
+    }
+
+    return {
+      probes: [],
+    }
+  }
 
   return config
 }
@@ -79,9 +87,10 @@ export const updateConfig = async (
   validate = true
 ): Promise<void> => {
   log.info('Updating config')
+  let validatedConfig = config
   if (validate) {
     try {
-      await validateConfig(config)
+      validatedConfig = await validateConfig(config)
     } catch (error: any) {
       if (isTestEnvironment) {
         // return error during tests
@@ -93,11 +102,11 @@ export const updateConfig = async (
     }
   }
 
-  const version = md5Hash(config)
+  const version = md5Hash(validatedConfig)
   const hasChangeConfig = getContext()?.config?.version !== version
 
   if (hasChangeConfig) {
-    const newConfig = addConfigVersion(config)
+    const newConfig = addConfigVersion(validatedConfig)
 
     setContext({ config: newConfig })
     emitter.emit(events.config.updated, newConfig)
@@ -108,9 +117,9 @@ export const updateConfig = async (
 export const setupConfig = async (flags: MonikaFlags): Promise<void> => {
   const validFlag = await createConfigIfEmpty(flags)
   const config = await getConfigFrom(validFlag)
-  await validateConfig(config)
+  const validatedConfig = await validateConfig(config)
 
-  setContext({ config: addConfigVersion(config) })
+  setContext({ config: addConfigVersion(validatedConfig) })
 
   watchConfigsChange(validFlag)
 }
@@ -286,7 +295,7 @@ export const createConfig = async (flags: MonikaFlags): Promise<void> => {
     const file = flags.output || 'monika.yml'
 
     if (existsSync(file) && !flags.force) {
-      const ans = await CliUx.ux.prompt(
+      const ans = await ux.ux.prompt(
         `\n${file} file is already exists. Overwrite (Y/n)?`
       )
 

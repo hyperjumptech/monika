@@ -22,8 +22,9 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { expect } from 'chai'
+import { expect } from '@oclif/test'
 import queryExpression from '../query-expression'
+import { probeRequestResult } from '../../../../interfaces/request'
 
 describe('queryExpression', () => {
   it('should handle response time query', () => {
@@ -33,7 +34,7 @@ describe('queryExpression', () => {
       status: 200,
       headers: {},
       responseTime: 150,
-      isProbeResponsive: true,
+      result: probeRequestResult.success,
     }
 
     const result = queryExpression(res, 'response.time > 1000')
@@ -48,7 +49,7 @@ describe('queryExpression', () => {
       status: 200,
       headers: {},
       responseTime: 200,
-      isProbeResponsive: true,
+      result: probeRequestResult.success,
     }
 
     const result = queryExpression(res, 'response.status != 200')
@@ -63,7 +64,7 @@ describe('queryExpression', () => {
       status: 200,
       headers: { 'content-length': 2000 },
       responseTime: 200,
-      isProbeResponsive: true,
+      result: probeRequestResult.success,
     }
 
     const result = queryExpression(res, 'response.size < 1000')
@@ -78,7 +79,7 @@ describe('queryExpression', () => {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
       responseTime: 200,
-      isProbeResponsive: true,
+      result: probeRequestResult.success,
     }
 
     const result = queryExpression(
@@ -100,7 +101,7 @@ describe('queryExpression', () => {
       body: {
         message: 'Hello',
       },
-      isProbeResponsive: true,
+      result: probeRequestResult.success,
     }
 
     const result = queryExpression(

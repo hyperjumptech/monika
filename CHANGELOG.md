@@ -5,6 +5,171 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.16.0 2023-11-21
+
+## Fixed
+
+Fix: Feat/Publish notification package (#1151)
+Fix: Add handled stopsignal to Dockerfile (#1159)
+Fix: Include the workers when npm pack (#1167)
+Fix: [SymonClient] Report worker path (#1168)
+Fix repeat flag doesn't terminate monika on fail probe (#1165)
+Fix: Validation on Alert Assertion (#1179)
+Fix: Send Recovery Notification from Previous Incident Before Monika Restart in Symon Mode (#1184)
+Fix: Add EHOSTUNREACH and EPROTO error handler (#1190)
+
+## Changed
+
+Update: Log the unhandled error status code in HTTP probing (#1172)
+Update: Use console.error for unhandled request code (#1173)
+Feat: [SymonClient] Use Piscina for reporting (#1157)
+Split the Node.js workflow jobs (#1162)
+Chore: Add cancel workflow and format .github files (#1170)
+Refactor symonClient initiate function (#1175)
+Chore: Auto fix lint (#1187)
+
+## Added
+
+Feat: Allow "CONNECT" and "TRACE" HTTP method (#1161)
+Feat: [SymonClient] User friendly errors (#1183)
+Feat: Add --ignoreInvalidTLS flag (#1185)
+
+## 1.15.11 2023-11-06
+
+## Fixed
+
+Fix: Restore Incident Threshold (#1158)
+Fix: Docker Release from tag pipeline (#1149)
+
+## Changed
+
+Refactor: Encapsulate Database Global Variable (#1155)
+Refactor: Replace Manual Validation with Joi (#1145)
+Chore: Suppress CI Log (#1153)
+Chore: Preparation to Upgrade Oclif to Version 3 (#1140)
+
+## Added
+
+Feat: Make Retry Configurable (#1150)
+Feat: Add Initial Delay (#1147)
+
+## 1.15.10 2023-10-17
+
+## Fixed
+
+Fix: Fail to Connect to Symon (#1144)
+
+## Changed
+
+Hide IP and Geolocation by default (#1090)
+CI: remove unneeded step (#1143)
+Refactor: Increase Request Timeout When Getting Probes from Symon (#1139)
+Refactor: Upgrade Oclif to Version 2 (#1138)
+
+## 1.15.9 2023-10-06
+
+## Fixed
+
+- Fix: Monika Handshake to Symon Crashes If There is No Internet Connection (#1135)
+- Fix: Monika Can not Send Alert to Symon (#1130)
+- Fix: Monika exits when connected to Symon with an empty probe (#1123)
+- Fix: change 20000 to 2000 for response time default alert log (#1120)
+
+## Changed
+
+- Add: custom http response from axios in docs (#1133)
+- Deprecate: Incident and Recovery Threshold (#1129)
+- Removed: isProbeResponsive Field (#1128)
+- Docs: Remove incident and recovery threshold (#1127)
+- Test: Set repeat flag to 1 for Monika command test (#1126)
+- Restructure: PING request (#1125)
+- Add: A new flag to use the Symon API version (#1124)
+- Refactor: Set the Probe Alert ID as a Mandatory Type (#1122)
+- Feat: Replace Incident and Recovery Threshold Mechanism with Backoff (#1119)
+
+## 1.15.8 2023-09-05
+
+## Fixed
+
+- Monika Install (#1116)
+
+## 1.15.7 2023-09-04
+
+## Fixed
+
+- Remove change empty array fallback for requests (#1113)
+- Mailgun notification handle node 18 (#1105)
+
+## Changed
+
+- Make the Probe Result a Mandatory Type (#1111)
+- Remove node_options environment variable when running test (#1112)
+- Adding sendWithCustomContent in sendgrid (#1109)
+
+## 1.15.6 2023-08-28
+
+## Fixed
+
+- Undefined Notification Message (#1103)
+- Webhook Notification is Not Working (#1102)
+- Make Probe Requests Property Optional (#1096)
+
+## Changed
+
+- Make HTTP Prober a Subclass (#1107)
+- Test the Packages Directory (#1106)
+- Update chaining request docs (#1101)
+- Improve Disconnect Notification (#1095)
+- Add simple success/fail result to each probe and new prometheus metric (#1061)
+
+## 1.15.5 2023-08-14
+
+## Fixed
+
+- Fix permision for docs deployment (#1085)
+- Fixed: Broken Docker Release Pipeline (#1086)
+- Fix binary upload workflow (#1087)
+- Fixed: Broken Publish Snapcraft Pipeline (#1088)
+- Fixed: Empty Request Info for Non HTTP Probe (#1091)
+- Fix doc build workflow (#1097)
+- Fix default maxRedirect too shallow (#1070)
+- Fix: Prevent Non-HTTP Probe to Create Prometheus Metrics (#1093)
+
+## Changed
+
+- Refactor: Add Base Class for Non HTTP Prober (#0174)
+- Chore: Upgrade Node.js Version to 18 (#986)
+
+## [1.15.4] - 2023-07-24
+
+## Added
+
+Feat: Improve Error Message When Request URL is not Using Protocol (#1063)
+update readme to import exported notification package (#1054)
+Doc/1050 update whatsapps docs (#1051)
+update guides doc on payload (#1048)
+
+## Fixed
+
+chore: bump typescript and clean up (#1082)
+tweak teams notification (#1080)
+Fix broken Nightly Workflow (#1076)
+Fixed: Confusing Notification Message for Non-HTTP Probe (#1072)
+Clean error msg when failed to load config file (#1057)
+Fix: crashes when some of the probe is removed from the configuration (#1067)
+fix: move instatus to notification workspace and register it as a notification channel (#1056)
+Fix: Probe Doesn't Run After Change Config (#1059)
+
+## Changed
+
+Chore: Upgrade Pino Version (#1079)
+update workflows (#1073)
+Limit workflow permissions and use environment vars to prevent injection. (#1071)
+(origin/main, origin/HEAD) Refactor: Add Test for doProbe Function (#1064)
+refactor: add abort controller to cancel running probe (#1058)
+update workflows to build the notification package (#1055)
+Chore: extract notification to workspace package (#1028)
+
 ## [1.15.3] - 2023-05-22
 
 ## Added

@@ -6,7 +6,7 @@ on:
     types: [opened, synchronize, reopened]
     branches: [main]
     paths:
-        - 'docs/**' # only run if the PR makes changes to the docs content.
+      - 'docs/**' # only run if the PR makes changes to the docs content.
 
 env:
   CI: true
@@ -17,7 +17,7 @@ env:
 permissions:
   issues: read
   pull-requests: read
-  
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -36,10 +36,10 @@ jobs:
       - name: ✍🏻 Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: 16.14
+          node-version: 18
 
       - name: 📥 Install deps
-        run: npm install
+        run: npm install --legacy-peer-deps
 
       - name: 👷‍♂️ Build
         run: npm run build

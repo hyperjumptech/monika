@@ -22,7 +22,6 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { getContext, setContext } from '../../context'
 import { ValidatedResponse } from '../../plugins/validate-response'
 import getIp from '../../utils/ip'
 import { getMessageForAlert } from './alert-message'
@@ -55,31 +54,5 @@ export async function sendAlerts({
     response: validation.response,
   })
 
-  updateLastIncidentData(isRecovery, probeID, url)
-
   return sendNotifications(notifications, message)
-}
-
-function updateLastIncidentData(
-  isRecovery: boolean,
-  probeID: string,
-  url: string
-) {
-  const { incidents } = getContext()
-
-  if (isRecovery) {
-    // delete last incident
-    const newIncidents = incidents.filter(
-      (incident) =>
-        incident.probeID !== probeID && incident.probeRequestURL !== url
-    )
-
-    setContext({ incidents: newIncidents })
-    return
-  }
-
-  // set incident date time to global context to be used later on recovery notification
-  const newIncident = { probeID, probeRequestURL: url, createdAt: new Date() }
-
-  setContext({ incidents: [...incidents, newIncident] })
 }

@@ -39,8 +39,6 @@ probes:
     alerts:
       - query: response.time > 10000
         message: Please check your internet connection
-    incidentThreshold: 1
-    recoveryThreshold: 1
 ```
 
 Let me explain a little bit about this configuration:

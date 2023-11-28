@@ -91,8 +91,9 @@ export async function send(
       break
     }
 
-    default:
+    default: {
       break
+    }
   }
 }
 
@@ -124,7 +125,7 @@ async function createIncident(
     }))
     const data = {
       name: 'Service is down',
-      message: message,
+      message,
       components: [componentID],
       started,
       status,
