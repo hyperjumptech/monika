@@ -31,6 +31,7 @@ import {
   deleteProbe,
   findProbe,
   getProbes,
+  setProbes,
   updateProbe,
 } from './probe'
 
@@ -49,10 +50,10 @@ describe('Probe cache', () => {
   })
   it('should add a probe', () => {
     // act
-    const addedProbe = addProbe(probe)
+    addProbe(probe)
 
     // assert
-    expect(addedProbe.get(probe.id)).eq(probe)
+    expect(findProbe(probe.id)).eq(probe)
   })
 
   it('should update a probe', () => {
@@ -110,5 +111,17 @@ describe('Probe cache', () => {
     // assert
     expect(isDeleted).eq(true)
     expect(getProbes().length).eq(0)
+  })
+
+  it('should set probes', () => {
+    // arrange
+    addProbe(probe)
+    expect(getProbes().length).eq(1)
+
+    // act
+    setProbes([probe])
+
+    // assert
+    expect(getProbes().length).eq(1)
   })
 })

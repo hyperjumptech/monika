@@ -15,9 +15,11 @@ export function findProbe(id: string) {
   return probes.get(id)
 }
 
-export function addProbes(newProbes: Probe[]) {
-  for (const newProbe of newProbes) {
-    addProbe(newProbe)
+export function setProbes(newProbes: Probe[]) {
+  probes.clear()
+
+  for (const probe of newProbes) {
+    addProbe(probe)
   }
 }
 
