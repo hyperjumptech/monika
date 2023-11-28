@@ -85,8 +85,6 @@ type NotificationEvent = {
   alertId: string
 }
 
-const isTestEnvironment = process.env.NODE_ENV === 'test' || process.env.CI
-
 let hasConnectionToSymon = false
 
 const getHandshakeData = async (): Promise<SymonHandshakeData> => {
@@ -135,8 +133,7 @@ class SymonClient {
   monikaId = ''
 
   private apiKey = ''
-  private fetchProbesInterval: number
-
+  private getProbesInterval: NodeJS.Timeout | null = null
   private httpClient: AxiosInstance
 
   private locationId: string
@@ -187,12 +184,6 @@ class SymonClient {
     this.locationId = symonLocationId || ''
 
     this.monikaId = symonMonikaId || ''
-
-    this.fetchProbesInterval = Number.parseInt(
-      process.env.FETCH_PROBES_INTERVAL ?? '60000',
-      10
-    )
-
     this.reportProbesInterval = symonReportInterval ?? 10_000
 
     this.reportProbesLimit = symonReportLimit ?? 100
@@ -213,12 +204,10 @@ class SymonClient {
     )
 
     await this.fetchProbesAndUpdateConfig()
-    if (!isTestEnvironment) {
-      setInterval(
-        this.fetchProbesAndUpdateConfig.bind(this),
-        this.fetchProbesInterval
-      )
-    }
+    this.getProbesInterval = setInterval(
+      this.fetchProbesAndUpdateConfig.bind(this),
+      getContext().flags.symonGetProbesIntervalMs
+    )
 
     await this.report()
   }
@@ -298,7 +287,19 @@ class SymonClient {
     }
   }
 
-  async stopReport(): Promise<void> {
+  async stop() {
+    if (this.eventEmitter) {
+      this.eventEmitter.removeAllListeners()
+    }
+
+    if (this.getProbesInterval) {
+      clearInterval(this.getProbesInterval)
+    }
+
+    await this.stopReport()
+  }
+
+  private async stopReport(): Promise<void> {
     await this.worker.destroy()
   }
 
@@ -349,13 +350,10 @@ class SymonClient {
     // Fetch the probes
     const { hash, probes } = await this.fetchProbes()
     const newConfig: Config = { probes, version: hash }
-    this.updateConfig(newConfig)
+    await this.setConfig(newConfig)
 
-    // If it has no connection to Symon, set as true
-    // Because it could fetch the probes
-    if (!hasConnectionToSymon) {
-      hasConnectionToSymon = true
-    }
+    // Set connection to symon as true, because it could fetch the probes
+    hasConnectionToSymon = true
   }
 
   private async handshake(): Promise<string> {
@@ -385,7 +383,7 @@ class SymonClient {
       .then((res) => res.data?.data.monikaId)
   }
 
-  private updateConfig(newConfig: Config): void {
+  private async setConfig(newConfig: Config) {
     if (
       !newConfig.version ||
       getContext().config?.version === newConfig.version
@@ -394,8 +392,8 @@ class SymonClient {
       return
     }
 
+    await updateConfig(newConfig)
     log.debug('Received config changes. Reloading Monika')
-    updateConfig(newConfig, false)
   }
 }
 
