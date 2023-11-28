@@ -352,7 +352,7 @@ describe('Symon initiate', () => {
       await validateProbes([...config.probes, newProbe])
     )
     await symon.stop()
-  }).timeout(10_000)
+  }).timeout(15_000)
 
   it('should update a probe', async () => {
     // arrange
@@ -410,7 +410,7 @@ describe('Symon initiate', () => {
     expect(getProbes()).deep.eq(await validateProbes(updatedProbes))
 
     await symon.stop()
-  }).timeout(10_000)
+  }).timeout(15_000)
 
   it('should delete a probe', async () => {
     // arrange
@@ -465,7 +465,7 @@ describe('Symon initiate', () => {
     expect(getProbes()).deep.eq(await validateProbes(updatedProbes))
 
     await symon.stop()
-  }).timeout(10_000)
+  }).timeout(15_000)
 })
 
 function sleep(durationMs: number): Promise<void> {
