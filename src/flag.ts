@@ -106,7 +106,6 @@ export const symonAPIVersion = Flags.custom<SYMON_API_VERSION>({
 export const symonGetProbesIntervalMs = Flags.integer({
   default: monikaFlagsDefaultValue.symonGetProbesIntervalMs,
   description: `To determine how often Monika sends a request to Symon to get probe data, in milliseconds. Defaults to ${monikaFlagsDefaultValue.symonGetProbesIntervalMs}ms`,
-  dependsOn: ['symonKey', 'symonUrl'],
 })
 
 export const retryInitialDelayMs = Flags.integer({
