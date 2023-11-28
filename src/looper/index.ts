@@ -26,44 +26,18 @@ import type { Notification } from '@hyperjumptech/monika-notification'
 
 import { AbortSignal } from 'node-abort-controller'
 import { v4 as uuid } from 'uuid'
-import path from 'path'
-// import Queue from 'queue'
-import Piscina from 'piscina'
-
 import type { Probe, ProbeAlert } from '../interfaces/probe'
-
 import { getContext } from '../context'
 import { log } from '../utils/pino'
-import {
-  getProbeContext,
-  getProbeState,
-  initializeProbeStates,
-} from '../utils/probe-state'
-import { getPublicIp, isConnectedToSTUNServer } from '../utils/public-ip'
+import { initializeProbeStates } from '../utils/probe-state'
+import { getPublicIp } from '../utils/public-ip'
 import {
   DEFAULT_INCIDENT_THRESHOLD,
   DEFAULT_RECOVERY_THRESHOLD,
 } from '../components/config/validation/validator/default-values'
-// import { doProbe } from '../components/probe'
+import { addTask, processQueue } from './process'
 
 let checkSTUNinterval: NodeJS.Timeout
-
-// const queue = new Queue({
-//   concurrency: 1,
-//   autostart: true,
-//   timeout: 10_000,
-// })
-
-const worker = new Piscina.Piscina({
-  concurrentTasksPerWorker: 1,
-  // eslint-disable-next-line unicorn/prefer-module
-  filename: path.join(__dirname, '../../lib/workers/probing.js'),
-  idleTimeout: 1000,
-  maxQueue: 1,
-  maxThreads: 1,
-})
-
-const DISABLE_STUN = -1 // -1 is disable stun checking
 
 export function sanitizeProbe(isSymonMode: boolean, probe: Probe): Probe {
   const { id, name, requests, incidentThreshold, recoveryThreshold, alerts } =
@@ -129,65 +103,27 @@ type StartProbingArgs = {
   signal: AbortSignal
 }
 
-export function startProbing({
+export async function startProbing({
   notifications,
   probes,
   signal,
-}: StartProbingArgs): void {
+}: StartProbingArgs) {
   initializeProbeStates(probes)
 
-  const probeInterval = setInterval(() => {
-    if (signal?.aborted) {
-      clearInterval(probeInterval)
-      return
-    }
+  const { retryInitialDelayMs, retryMaxDelayMs } = getContext().flags
 
-    if (isEndOfRepeat(probes)) {
-      // eslint-disable-next-line unicorn/no-process-exit, no-process-exit
-      process.exit(0)
-    }
-
-    if (!isStunOK()) {
-      return
-    }
-
-    // This uses node queue
-    // This is working
-    // for (const probe of probes) {
-    //   queue.push(() =>
-    //     doProbe({
-    //       notifications,
-    //       probe,
-    //     })
-    //   )
-    // }
-
-    // This uses Piscina
-    // Does not working yet
-    worker.run({
-      notifications,
-      probes,
-    })
-  }, 1000)
-}
-
-function isEndOfRepeat(probes: Probe[]) {
-  const isAllProbeFinished = probes.every(
-    ({ id }) => isLastCycleOf(id) && getProbeState(id) !== 'running'
-  )
-
-  return getContext().flags.repeat && isAllProbeFinished
-}
-
-function isStunOK() {
-  return getContext().flags.stun === DISABLE_STUN || isConnectedToSTUNServer
-}
-
-function isLastCycleOf(probeID: string) {
-  const probeCtx = getProbeContext(probeID)
-  if (!probeCtx) {
-    return true
+  for (const probe of probes) {
+    addTask(
+      probe.id,
+      {
+        probe,
+        notifications,
+        retryInitialDelayMs,
+        retryMaxDelayMs,
+      },
+      probe.interval
+    )
   }
 
-  return getContext().flags.repeat === probeCtx.cycle
+  await processQueue(signal, getContext().flags.stun, getContext().flags.repeat)
 }

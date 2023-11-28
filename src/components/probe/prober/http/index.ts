@@ -22,7 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { BaseProber, NotificationType } from '..'
+import { BaseProber, NotificationType, ProbeResult } from '..'
 import { getContext } from '../../../../context'
 import events from '../../../../events'
 import type { ProbeAlert } from '../../../../interfaces/probe'
@@ -62,107 +62,13 @@ export class HTTPProber extends BaseProber {
       )
     }
 
-    const hasFailedRequest = responses.find(
-      ({ result }) => result !== probeRequestResult.success
-    )
-    if (hasFailedRequest) {
-      if (this.hasIncident()) {
-        // this probe is currently 'incident' state so no need to continue
-        this.logMessage(
-          false,
-          getErrorMessage(hasFailedRequest.errMessage || 'Unknown error.')
-        )
-        return
-      }
+    const probeResults: ProbeResult[] = responses.map((response) => ({
+      isAlertTriggered: response.result !== probeRequestResult.success,
+      logMessage: '',
+      requestResponse: response,
+    }))
 
-      // if the incident threshold is not yet met, this will throw and return the execution to `retry` function in src/components/probe/index.ts
-      this.throwIncidentIfNeeded(
-        incidentRetryAttempt,
-        this.probeConfig.incidentThreshold
-      )
-
-      // the threshold has been met, so let's log the message
-      this.logMessage(
-        false,
-        getErrorMessage(hasFailedRequest.errMessage || 'Unknown error.'),
-        getNotificationMessage({ isIncident: true })
-      )
-
-      // this probe is definitely in incident state, so send notification, etc.
-      this.handleFailedProbe(
-        responses.map((requestResponse) => ({ requestResponse }))
-      )
-      return
-    }
-
-    // from here on, the probe can be accessed but might still trigger the assertion
-    for (const requestIndex of responses.keys()) {
-      const response = responses[requestIndex]
-      const validatedResponse = this.validateResponse(
-        response,
-        requests[requestIndex].alerts || []
-      )
-      const triggeredAlertResponse = validatedResponse.find(
-        ({ isAlertTriggered }) => isAlertTriggered
-      )
-
-      if (triggeredAlertResponse) {
-        const { alert } = triggeredAlertResponse
-
-        if (this.hasIncident()) {
-          // this probe is still in incident state
-          this.logMessage(false, getAssertionMessage(alert.assertion))
-          return
-        }
-
-        // if the incident threshold is not yet met, this will throw and return the execution to `retry` function in src/components/probe/index.ts
-        this.throwIncidentIfNeeded(
-          incidentRetryAttempt,
-          this.probeConfig.incidentThreshold,
-          'Probe assertion failed'
-        )
-
-        // this probe is definitely in incident state because of fail assertion, so send notification, etc.
-        this.handleAssertionFailed(response, requestIndex, alert)
-        return
-      }
-    }
-
-    // from here on, the probe is definitely healthy, but if it was incident, we don't want to immediately send notification
-    this.sendRecoveryNotificationIfNeeded(
-      incidentRetryAttempt,
-      responses.map((requestResponse) => ({ requestResponse }))
-    )
-
-    // the probe is healthy and not recovery
-    for (const requestIndex of responses.keys()) {
-      const response = responses[requestIndex]
-      getEventEmitter().emit(events.probe.response.received, {
-        probe: this.probeConfig,
-        requestIndex,
-        response,
-      })
-
-      this.logMessage(
-        true,
-        getProbeResultMessage({
-          request: requests[requestIndex],
-          response,
-        })
-      )
-      logResponseTime(response.responseTime)
-
-      if (
-        isSymonModeFrom(getContext().flags) ||
-        getContext().flags['keep-verbose-logs']
-      ) {
-        saveProbeRequestLog({
-          probe: this.probeConfig,
-          requestIndex,
-          probeRes: response,
-        })
-      }
-    }
+    this.processProbeResults(probeResults, incidentRetryAttempt)
   }
 
   generateVerboseStartupMessage(): string {
@@ -253,6 +159,120 @@ export class HTTPProber extends BaseProber {
       isAlertTriggered: responseChecker(assertion, response),
       response,
     }))
+  }
+
+  protected processProbeResults(
+    probeResults: ProbeResult[],
+    incidentRetryAttempt: number
+  ): void {
+    const requests = this.probeConfig.requests!
+
+    for (const { isAlertTriggered, logMessage } of probeResults) {
+      this.logMessage(!isAlertTriggered, logMessage)
+    }
+
+    const hasFailedRequest = probeResults.find(
+      ({ requestResponse: { result } }) => result !== probeRequestResult.success
+    )?.requestResponse
+
+    if (hasFailedRequest) {
+      if (this.hasIncident()) {
+        // this probe is currently 'incident' state so no need to continue
+        this.logMessage(
+          false,
+          getErrorMessage(hasFailedRequest.errMessage || 'Unknown error.')
+        )
+        return
+      }
+
+      // if the incident threshold is not yet met, this will throw and return the execution to `retry` function in src/components/probe/index.ts
+      this.throwIncidentIfNeeded(
+        incidentRetryAttempt,
+        this.probeConfig.incidentThreshold
+      )
+
+      // the threshold has been met, so let's log the message
+      this.logMessage(
+        false,
+        getErrorMessage(hasFailedRequest.errMessage || 'Unknown error.'),
+        getNotificationMessage({ isIncident: true })
+      )
+
+      // this probe is definitely in incident state, so send notification, etc.
+      this.handleFailedProbe(
+        probeResults.map(({ requestResponse }) => ({ requestResponse }))
+      )
+      return
+    }
+
+    // from here on, the probe can be accessed but might still trigger the assertion
+    for (const requestIndex of probeResults.keys()) {
+      const response = probeResults[requestIndex].requestResponse
+      const validatedResponse = this.validateResponse(
+        response,
+        requests[requestIndex].alerts || []
+      )
+      const triggeredAlertResponse = validatedResponse.find(
+        ({ isAlertTriggered }) => isAlertTriggered
+      )
+
+      if (triggeredAlertResponse) {
+        const { alert } = triggeredAlertResponse
+
+        if (this.hasIncident()) {
+          // this probe is still in incident state
+          this.logMessage(false, getAssertionMessage(alert.assertion))
+          return
+        }
+
+        // if the incident threshold is not yet met, this will throw and return the execution to `retry` function in src/components/probe/index.ts
+        this.throwIncidentIfNeeded(
+          incidentRetryAttempt,
+          this.probeConfig.incidentThreshold,
+          'Probe assertion failed'
+        )
+
+        // this probe is definitely in incident state because of fail assertion, so send notification, etc.
+        this.handleAssertionFailed(response, requestIndex, alert)
+        return
+      }
+    }
+
+    // from here on, the probe is definitely healthy, but if it was incident, we don't want to immediately send notification
+    this.sendRecoveryNotificationIfNeeded(
+      incidentRetryAttempt,
+      probeResults.map(({ requestResponse }) => ({ requestResponse }))
+    )
+
+    // the probe is healthy and not recovery
+    for (const requestIndex of probeResults.keys()) {
+      const response = probeResults[requestIndex].requestResponse
+      getEventEmitter().emit(events.probe.response.received, {
+        probe: this.probeConfig,
+        requestIndex,
+        response,
+      })
+
+      this.logMessage(
+        true,
+        getProbeResultMessage({
+          request: requests[requestIndex],
+          response,
+        })
+      )
+      logResponseTime(response.responseTime)
+
+      if (
+        isSymonModeFrom(getContext().flags) ||
+        getContext().flags['keep-verbose-logs']
+      ) {
+        saveProbeRequestLog({
+          probe: this.probeConfig,
+          requestIndex,
+          probeRes: response,
+        })
+      }
+    }
   }
 }
 
