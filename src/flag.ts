@@ -63,6 +63,7 @@ export type MonikaFlags = {
   symonMonikaId?: string
   symonReportInterval?: number
   symonReportLimit?: number
+  symonGetProbesIntervalMs: number
   symonUrl?: string
   text?: string
   ignoreInvalidTLS?: boolean
@@ -87,6 +88,10 @@ export const monikaFlagsDefaultValue: MonikaFlags = {
   // default is 20s interval lookup
   stun: 20,
   summary: false,
+  symonGetProbesIntervalMs: Number.parseInt(
+    process.env.FETCH_PROBES_INTERVAL ?? '60000',
+    10
+  ),
   verbose: false,
   version: undefined,
 }
@@ -96,6 +101,12 @@ export const symonAPIVersion = Flags.custom<SYMON_API_VERSION>({
   description:
     'Symon API version to use. Available options: v1, v2. Default: v1',
   options: [SYMON_API_VERSION.v1, SYMON_API_VERSION.v2],
+})
+
+export const symonGetProbesIntervalMs = Flags.integer({
+  default: monikaFlagsDefaultValue.symonGetProbesIntervalMs,
+  description: `To determine how often Monika sends a request to Symon to get probe data, in milliseconds. Defaults to ${monikaFlagsDefaultValue.symonGetProbesIntervalMs}ms`,
+  dependsOn: ['symonKey', 'symonUrl'],
 })
 
 export const retryInitialDelayMs = Flags.integer({
