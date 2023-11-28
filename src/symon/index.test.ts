@@ -202,12 +202,9 @@ describe('Symon initiate', () => {
     await symon.initiate()
     await symon.stopReport()
 
-    console.log(getProbes())
-    // console.log(await validateProbes(config.probes))
-
     expect(getContext().config).deep.equals(config)
     expect(getProbes()).deep.eq(config.probes)
-  }).timeout(60_000)
+  }).timeout(15_000)
 
   it('should throw an error if the request to get probes is failed', async () => {
     // arrange
@@ -243,7 +240,7 @@ describe('Symon initiate', () => {
 
     // assert
     expect(errorMessage).eq('Failed to get probes from Symon')
-  }).timeout(60_000)
+  }).timeout(15_000)
 
   it('should send event to Symon when incident or recovery happens', async () => {
     // arrange
@@ -283,5 +280,5 @@ describe('Symon initiate', () => {
     expect(body.event).equals('incident')
     expect(body.alertId).equals('alert86')
     expect(body.response).deep.equals({ status: 400, time: 1000 })
-  }).timeout(60_000)
+  }).timeout(15_000)
 })
