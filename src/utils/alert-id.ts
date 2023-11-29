@@ -24,7 +24,7 @@
 
 import type { ValidatedResponse } from '../plugins/validate-response'
 
-import { getProbes } from '../components/config/probe'
+import { findProbe } from '../components/config/probe'
 
 export function getAlertID(
   url: string,
@@ -35,7 +35,7 @@ export function getAlertID(
     return validation.alert.id
   }
 
-  const probe = getProbes().find(({ id }) => id === probeID)
+  const probe = findProbe(probeID)
   if (!probe) {
     return ''
   }
