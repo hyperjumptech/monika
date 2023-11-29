@@ -267,6 +267,7 @@ describe('Symon initiate', () => {
       probeState: 'DOWN',
       validation: {
         response: {
+          headers: '',
           status: 400,
           responseTime: 1000,
         },

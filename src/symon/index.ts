@@ -190,21 +190,10 @@ export default class SymonClient {
       getContext().flags.symonGetProbesIntervalMs
     )
 
-    this.report()
-      .catch((error) => {
-        this.hasConnectionToSymon = false
-        log.error(`[Symon] Report failed. ${(error as Error).message}`)
-      })
-      .finally(() => {
-        this.reportTimeout = setTimeout(() => {
-          this.report
-            .bind(this)()
-            .catch((error) => {
-              this.hasConnectionToSymon = false
-              log.error(`[Symon] Report failed. ${(error as Error).message}`)
-            })
-        }, this.reportProbesInterval)
-      })
+    this.report().catch((error) => {
+      this.hasConnectionToSymon = false
+      log.error(`[Symon] Report failed. ${(error as Error).message}`)
+    })
 
     this.eventEmitter.on(
       events.probe.notification.willSend,
@@ -235,7 +224,7 @@ export default class SymonClient {
       } event for Alert ID: ${alertId}`
     )
 
-    const { data, headers = {}, responseTime, status } = validation.response
+    const { data, headers, responseTime, status } = validation.response
     this.httpClient
       .post('/events', {
         monikaId: this.monikaId,
@@ -243,7 +232,7 @@ export default class SymonClient {
         event: probeState === 'DOWN' ? 'incident' : 'recovery',
         response: {
           body: data,
-          headers,
+          headers: typeof headers === 'object' ? headers : {},
           size: headers['content-length'],
           status, // status is http status code
           time: responseTime,
@@ -271,8 +260,19 @@ export default class SymonClient {
       url: this.url,
     }
 
-    // Submit the task to Piscina
-    await this.worker.run(JSON.stringify(taskData))
+    try {
+      // Submit the task to Piscina
+      await this.worker.run(JSON.stringify(taskData))
+    } finally {
+      this.reportTimeout = setTimeout(() => {
+        this.report
+          .bind(this)()
+          .catch((error) => {
+            this.hasConnectionToSymon = false
+            log.error(`[Symon] Report failed. ${(error as Error).message}`)
+          })
+      }, this.reportProbesInterval)
+    }
   }
 
   async sendStatus({ isOnline }: { isOnline: boolean }): Promise<void> {
