@@ -25,9 +25,8 @@
 import { expect } from '@oclif/test'
 import { rest } from 'msw'
 import { setupServer } from 'msw/node'
-import sinon from 'sinon'
 
-import type { MonikaFlags } from '../flag'
+import { monikaFlagsDefaultValue, type MonikaFlags } from '../flag'
 import type { Config } from '../interfaces/config'
 import type { Probe } from '../interfaces/probe'
 
@@ -35,7 +34,9 @@ import SymonClient from '.'
 import { getContext, resetContext, setContext } from '../context'
 import { deleteProbe, getProbes } from '../components/config/probe'
 import { validateProbes } from '../components/config/validation'
+import events from '../events'
 import { md5Hash } from '../utils/hash'
+import { getEventEmitter } from '../utils/events'
 
 const config: Config = {
   version: 'asdfg123',
@@ -113,6 +114,8 @@ describe('Symon initiate', () => {
       flags: {
         symonUrl: 'http://localhost:4000',
         symonKey: 'random-key',
+        symonGetProbesIntervalMs:
+          monikaFlagsDefaultValue.symonGetProbesIntervalMs,
       } as MonikaFlags,
     })
 
@@ -161,10 +164,8 @@ describe('Symon initiate', () => {
       symonUrl: 'http://localhost:4000',
       symonKey: 'abcd',
     })
-    const reportSpy = sinon.spy(symon, 'report')
     await symon.initiate()
     await symon.stop()
-    expect(symon.monikaId).equals('1234')
 
     expect(body.publicIp).equals('192.168.1.1')
     expect(body.pid).greaterThan(0)
@@ -176,8 +177,6 @@ describe('Symon initiate', () => {
     expect(body.privateIp).length.greaterThan(0)
     expect(body.os).length.greaterThan(0)
     expect(body.version).equals('v1.5.0')
-
-    expect(reportSpy.called).equals(true)
   }).timeout(15_000)
 
   it('should fetch probes config on initiate', async () => {
@@ -256,27 +255,35 @@ describe('Symon initiate', () => {
         }
       )
     )
-
     const symon = new SymonClient({
       symonUrl: 'http://localhost:4000',
       symonKey: 'abcd',
+      symonMonikaId: '1234',
     })
-    sinon.spy(symon, 'report')
-    symon.monikaId = '1234'
+    await symon.initiate()
 
     // act
-    await symon.notifyEvent({
-      event: 'incident',
-      alertId: 'alert86',
-      response: { status: 400, time: 1000 },
+    getEventEmitter().emit(events.probe.notification.willSend, {
+      probeState: 'DOWN',
+      validation: {
+        response: {
+          status: 400,
+          responseTime: 1000,
+        },
+      },
+      alertId: 'p422i',
     })
     await symon.stop()
 
     // assert
     expect(body.monikaId).equals('1234')
     expect(body.event).equals('incident')
-    expect(body.alertId).equals('alert86')
-    expect(body.response).deep.equals({ status: 400, time: 1000 })
+    expect(body.alertId).equals('p422i')
+    expect(body.response).deep.equals({
+      headers: {},
+      status: 400,
+      time: 1000,
+    })
   }).timeout(15_000)
 
   it('should add a new probe', async () => {

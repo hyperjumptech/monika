@@ -443,8 +443,8 @@ process.on('SIGINT', async () => {
   }
 
   if (symonClient) {
-    await symonClient.stop()
     await symonClient.sendStatus({ isOnline: false })
+    await symonClient.stop()
   }
 
   em.emit(events.application.terminated)
