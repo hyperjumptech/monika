@@ -379,7 +379,7 @@ export default class SymonClient {
       return
     }
 
-    log.info('[Symon] Config changes. Reloading Monika.')
+    log.info('[Symon] Config changes. Reloading Monika')
     await updateConfig(newConfig)
   }
 }
