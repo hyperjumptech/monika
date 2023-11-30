@@ -93,12 +93,15 @@ describe('Probe cache', () => {
   })
 
   it('should not remove a nonexistent probe', () => {
+    // arrange
+    addProbe(probe)
+
     // act
     const isDeleted = deleteProbe('9WpFB')
 
     // assert
     expect(isDeleted).eq(false)
-    expect(getProbes().length).eq(0)
+    expect(getProbes().length).eq(1)
   })
 
   it('should remove a probe', () => {
