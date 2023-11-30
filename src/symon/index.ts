@@ -184,7 +184,6 @@ export default class SymonClient {
       })
 
     await this.fetchProbesAndUpdateConfig()
-    log.error(getContext().flags.symonGetProbesIntervalMs)
     this.getProbesInterval = setInterval(
       this.fetchProbesAndUpdateConfig.bind(this),
       getContext().flags.symonGetProbesIntervalMs
