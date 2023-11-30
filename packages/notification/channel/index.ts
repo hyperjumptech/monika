@@ -89,7 +89,7 @@ export type NotificationMessage = {
     | NotificationStatusUpdateMessageMeta
 }
 
-type NotificationChannel<T = object> = {
+type NotificationChannel<T = object, U = object> = {
   validator: ArraySchema | ObjectSchema
   send: (
     notificationData: T | T[] | undefined,
@@ -97,7 +97,7 @@ type NotificationChannel<T = object> = {
   ) => Promise<void>
   sendWithCustomContent?: (
     notificationData: T | T[],
-    customContent: T | T[]
+    customContent: U | U[]
   ) => Promise<void>
   additionalStartupMessage?: (notificationData: T) => string
 }
