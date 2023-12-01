@@ -112,7 +112,7 @@ async function sendTextMessage({
         },
       },
     })
-  } catch (error) {
+  } catch (error: unknown) {
     throw new Error(
       `Something wrong with your recipient number, Please check your country code: ${recipient} ${error}`
     )
@@ -147,7 +147,7 @@ async function loginUser({
     }
 
     return loginResp.users[0].token
-  } catch (error) {
+  } catch (error: unknown) {
     throw new Error(
       `Something wrong with your whatsapp config please check again. error: ${error}`
     )

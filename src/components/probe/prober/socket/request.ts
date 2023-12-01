@@ -82,7 +82,7 @@ async function tcpCheck(tcpRequest: TCPRequest): Promise<TCPResult> {
       status: 'UP',
       message: '',
     }
-  } catch (error) {
+  } catch (error: unknown) {
     return {
       duration: 0,
       responseData: null,

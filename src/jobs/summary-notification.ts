@@ -123,7 +123,7 @@ ${tweetMessage}
     if (checkIs24HourHasPassed()) {
       resetlogs()
     }
-  } catch (error) {
+  } catch (error: unknown) {
     log.error(`Summary notification: ${error.message}`)
   }
 }
@@ -144,7 +144,7 @@ function readPidFile(): PidObject {
   let data = ''
   try {
     data = fs.readFileSync('monika.pid', 'utf8')
-  } catch (error) {
+  } catch (error: unknown) {
     if (error.code === 'ENOENT') {
       log.info(
         'Could not find the file: monika.pid. Monika is probably not running or ran from a diffent directory'
@@ -245,7 +245,7 @@ export async function printSummary(cliConfig: IConfig): Promise<void> {
     App version : ${cliConfig.userAgent}
 
     `)
-  } catch (error) {
+  } catch (error: unknown) {
     log.error(`Summary notification: ${error.message}`)
   }
 }

@@ -47,7 +47,7 @@ describe('parseConfigFromPostman', () => {
       const collectionStr = JSON.stringify(unsupportedCollection)
 
       parseConfigFromPostman(collectionStr)
-    } catch (error) {
+    } catch (error: unknown) {
       expect(() => {
         throw error
       }).to.throw(

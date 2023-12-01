@@ -98,7 +98,7 @@ async function sendPsqlRequest(params: PostgresParam): Promise<PostgresResult> {
     await client.query('SELECT NOW()')
     result.message = 'postgres ok'
     result.isAlive = true
-  } catch (error) {
+  } catch (error: unknown) {
     result.message = error.message
   } finally {
     if (client !== false) {

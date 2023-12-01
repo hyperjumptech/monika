@@ -22,7 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios from 'axios'
+import axios, { AxiosError } from 'axios'
 import Joi from 'joi'
 import {
   findIncident,
@@ -138,10 +138,13 @@ async function createIncident(
       .then((res) => res?.data?.id)
 
     await insertIncidentToDatabase({ incidentID, probeID, status, url })
-  } catch (error) {
+  } catch (error: unknown) {
+    const axiosError = error instanceof AxiosError ? error : new AxiosError()
     throw new Error(
-      `${error?.message}${
-        error?.data ? `. ${error?.response?.data?.message}` : ''
+      `${axiosError?.message}${
+        axiosError?.response?.data
+          ? `. ${axiosError?.response?.data?.message}`
+          : ''
       }`
     )
   }
@@ -187,10 +190,13 @@ async function updateIncident(
       data,
       getAxiosConfig(apiKey)
     )
-  } catch (error) {
+  } catch (error: unknown) {
+    const axiosError = error instanceof AxiosError ? error : new AxiosError()
     throw new Error(
-      `${error?.message}${
-        error?.data ? `. ${error?.response?.data?.message}` : ''
+      `${axiosError.message}${
+        axiosError?.response?.data
+          ? `. ${axiosError?.response?.data?.message}`
+          : ''
       }`
     )
   }

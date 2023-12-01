@@ -155,7 +155,7 @@ export async function openLogfile(): Promise<void> {
     setDatabase(db)
 
     await migrate()
-  } catch (error) {
+  } catch (error: unknown) {
     log.error("Warning: Can't open logfile. " + error.message)
   }
 }
@@ -486,7 +486,7 @@ export async function saveProbeRequestLog({
         ])
       )
     )
-  } catch (error) {
+  } catch (error: unknown) {
     log.error("Error: Can't insert data into monika-log.db. " + error.message)
   }
 }
@@ -530,7 +530,7 @@ export async function saveNotificationLog(
       notification.id,
       notification.type,
     ])
-  } catch (error) {
+  } catch (error: unknown) {
     log.error("Error: Can't insert data into monika-log.db. " + error.message)
   }
 }

@@ -58,7 +58,7 @@ eventEmitter.on(
         log.info(
           `Atlassian status page (${type}). id: ${incidentID}, probeID: ${probeID}, url: ${url}`
         )
-      } catch (error) {
+      } catch (error: unknown) {
         log.error(
           `Atlassian status page (Error). probeID: ${probeID}, url: ${url}, probeState: ${probeState} error: ${error}`
         )

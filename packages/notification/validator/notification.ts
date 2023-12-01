@@ -23,6 +23,7 @@
  **********************************************************************************/
 
 import { channels, type Notification } from '../channel'
+import { getErrorMessage } from '../utils/catch-error-handler'
 
 export const validateNotification = async (
   notifications: Notification[]
@@ -43,8 +44,9 @@ export const validateNotification = async (
         }
 
         await channel.validator.validateAsync(data)
-      } catch (error) {
-        throw new Error(`${error?.message} (${type})`)
+      } catch (error: unknown) {
+        const message = getErrorMessage(error)
+        throw new Error(`${message} (${type})`)
       }
     })
   )

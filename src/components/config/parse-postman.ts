@@ -132,7 +132,7 @@ export const parseConfigFromPostman = (configString: string): Config => {
     const probes = generateProbesFromConfig(config, version)
 
     return { probes }
-  } catch (error) {
+  } catch (error: unknown) {
     if (error.name === 'SyntaxError') {
       throw new Error('Your Postman file contains an invalid JSON format!')
     }

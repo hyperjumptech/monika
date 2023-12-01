@@ -22,37 +22,33 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import express, { Request, Response, NextFunction } from 'express'
-import helmet from 'helmet'
-import { register } from 'prom-client'
-import { log } from '../../../utils/pino'
+// Credits to Kent C. Dodds
+// taken from https://kentcdodds.com/blog/get-a-catch-block-error-message-with-typescript
+type ErrorWithMessage = {
+  message: string
+}
 
-export function startPrometheusMetricsServer(port: number): void {
-  const app = express()
+function isErrorWithMessage(error: unknown): error is ErrorWithMessage {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'message' in error &&
+    typeof (error as Record<string, unknown>).message === 'string'
+  )
+}
 
-  // security middleware
-  app.use(helmet())
-  app.use((req: Request, res: Response, next: NextFunction) => {
-    if (req.method !== 'GET') {
-      return res.status(405).end()
-    }
+function toErrorWithMessage(maybeError: unknown): ErrorWithMessage {
+  if (isErrorWithMessage(maybeError)) return maybeError
 
-    next()
-  })
+  try {
+    return new Error(JSON.stringify(maybeError))
+  } catch {
+    // fallback in case there's an error stringifying the maybeError
+    // like with circular references for example.
+    return new Error(String(maybeError))
+  }
+}
 
-  app.get('/metrics', async (_: Request, res: Response) => {
-    try {
-      const prometheusMetrics = await register.metrics()
-
-      res.status(200).end(prometheusMetrics)
-    } catch (error: unknown) {
-      res.status(500).json({ message: error.message })
-    }
-  })
-
-  app.listen(port, () => {
-    log.info(
-      `You can scrape Prometheus metrics from http://localhost:${port}/metrics`
-    )
-  })
+export function getErrorMessage(error: unknown) {
+  return toErrorWithMessage(error).message
 }
