@@ -30,15 +30,22 @@ import { hostname } from 'os'
 import path from 'path'
 import Piscina from 'piscina'
 
-import { getProbes } from '../components/config/probe'
+import type { Config } from '../interfaces/config'
+import type { Probe } from '../interfaces/probe'
+import type { ValidatedResponse } from '../plugins/validate-response'
+
+import {
+  addProbe,
+  deleteProbe,
+  getProbes,
+  updateProbe,
+} from '../components/config/probe'
 import { updateConfig } from '../components/config'
+import { validateProbes } from '../components/config/validation/validator/probe'
 import { getOSName } from '../components/notification/alert-message'
 import { getContext } from '../context'
 import events from '../events'
 import { SYMON_API_VERSION, type MonikaFlags } from '../flag'
-import { Config } from '../interfaces/config'
-import { Probe } from '../interfaces/probe'
-import { ValidatedResponse } from '../plugins/validate-response'
 import { getEventEmitter } from '../utils/events'
 import { DEFAULT_TIMEOUT } from '../utils/http'
 import getIp from '../utils/ip'
@@ -83,6 +90,21 @@ type SymonClientParams = Pick<
   | 'symonReportLimit'
   | 'symonUrl'
 >
+
+type LastEvent = {
+  id: string
+  alertId: string
+  locationId: string
+  recoveredAt: Date | null
+}
+
+type ProbeChange = {
+  probe_id: string
+  type: 'add' | 'delete' | 'update'
+  created_at: Date
+  probe: Probe
+  lastEvent: LastEvent
+}
 
 const getHandshakeData = async (): Promise<SymonHandshakeData> => {
   await retry(handleAll, {
@@ -129,11 +151,12 @@ export default class SymonClient {
   private reportProbesInterval: number
   private worker
   private apiKey: string
-  private getProbesInterval: NodeJS.Timeout | undefined
+  private probeChangesInterval: NodeJS.Timeout | undefined
   private hasConnectionToSymon: boolean = false
   private httpClient: AxiosInstance
   private locationId: string
   private monikaId: string
+  private probesLastUpdatedAt: Date | undefined
   private reportProbesLimit: number
   private reportTimeout: NodeJS.Timeout | undefined
   private url: string
@@ -170,24 +193,42 @@ export default class SymonClient {
   }
 
   async initiate(): Promise<void> {
-    log.info('[Symon] Handshake starts')
     this.monikaId = await this.handshake()
-    log.info('[Symon] Handshake succeed')
+    log.info('[Symon] Handshake')
 
-    log.info('[Symon] Send status')
     this.sendStatus({ isOnline: true })
       .then(() => {
-        log.info('[Symon] Send status succeed')
+        log.info('[Symon] Send status')
       })
       .catch((error) => {
         log.error(`[Symon] Send status failed. ${(error as Error).message}`)
       })
 
+    const probeUpdatedAt = new Date()
     await this.fetchProbesAndUpdateConfig()
-    this.getProbesInterval = setInterval(
-      this.fetchProbesAndUpdateConfig.bind(this),
-      getContext().flags.symonGetProbesIntervalMs
-    )
+    this.setProbeUpdatedAt(probeUpdatedAt)
+
+    this.probeChangesInterval = setInterval(() => {
+      const probeUpdatedAt = new Date()
+      this.probeChanges
+        .bind(this)()
+        .then((probeChanges) => {
+          this.setProbeUpdatedAt(probeUpdatedAt)
+          applyProbeChanges(probeChanges)
+          this.eventEmitter.emit(events.config.updated)
+
+          log.info(
+            `[Symon] Get probe changes (${probeChanges.length}) since ${this.probesLastUpdatedAt}`
+          )
+        })
+        .catch((error) =>
+          log.error(
+            `[Symon] Get probe changes since ${
+              this.probesLastUpdatedAt
+            } failed. ${(error as Error).message}`
+          )
+        )
+    }, getContext().flags.symonGetProbesIntervalMs)
 
     this.report().catch((error) => {
       this.hasConnectionToSymon = false
@@ -198,80 +239,6 @@ export default class SymonClient {
       events.probe.notification.willSend,
       this.willSendEventListener.bind(this)
     )
-  }
-
-  async stop(): Promise<void> {
-    if (this.eventEmitter) {
-      this.eventEmitter.removeAllListeners()
-    }
-
-    clearInterval(this.getProbesInterval)
-
-    clearTimeout(this.reportTimeout)
-
-    await this.worker.destroy()
-  }
-
-  private willSendEventListener({
-    probeState,
-    validation,
-    alertId,
-  }: NotificationEvent) {
-    log.info(
-      `[Symon] Send ${
-        probeState === 'DOWN' ? 'incident' : 'recovery'
-      } event for Alert ID: ${alertId}`
-    )
-
-    const { data, headers, responseTime, status } = validation.response
-    this.httpClient
-      .post('/events', {
-        monikaId: this.monikaId,
-        alertId,
-        event: probeState === 'DOWN' ? 'incident' : 'recovery',
-        response: {
-          body: data,
-          headers: typeof headers === 'object' ? headers : {},
-          size: headers['content-length'],
-          status, // status is http status code
-          time: responseTime,
-        },
-      })
-      .catch((error) => {
-        log.error(
-          `[Symon] Send ${
-            probeState === 'DOWN' ? 'incident' : 'recovery'
-          } event for Alert ID: ${alertId} failed.  ${(error as Error).message}`
-        )
-      })
-  }
-
-  private async report(): Promise<void> {
-    log.info('[Symon] Report')
-    // Create a task data object
-    const taskData = {
-      apiKey: this.apiKey,
-      hasConnectionToSymon: this.hasConnectionToSymon,
-      httpClient: this.httpClient,
-      monikaId: this.monikaId,
-      probeIds: getProbes().map(({ id }) => id),
-      reportProbesLimit: this.reportProbesLimit,
-      url: this.url,
-    }
-
-    try {
-      // Submit the task to Piscina
-      await this.worker.run(JSON.stringify(taskData))
-    } finally {
-      this.reportTimeout = setTimeout(() => {
-        this.report
-          .bind(this)()
-          .catch((error) => {
-            this.hasConnectionToSymon = false
-            log.error(`[Symon] Report failed. ${(error as Error).message}`)
-          })
-      }, this.reportProbesInterval)
-    }
   }
 
   async sendStatus({ isOnline }: { isOnline: boolean }): Promise<void> {
@@ -287,6 +254,95 @@ export default class SymonClient {
     if (status === 200) {
       this.hasConnectionToSymon = true
     }
+  }
+
+  async stop(): Promise<void> {
+    if (this.eventEmitter) {
+      this.eventEmitter.removeAllListeners()
+    }
+
+    clearInterval(this.probeChangesInterval)
+    clearTimeout(this.reportTimeout)
+
+    await this.worker.destroy()
+  }
+
+  private setProbeUpdatedAt(probesLastUpdatedAt: Date) {
+    this.probesLastUpdatedAt = probesLastUpdatedAt
+  }
+
+  private willSendEventListener({
+    probeState,
+    validation,
+    alertId,
+  }: NotificationEvent) {
+    const { data, headers, responseTime, status } = validation.response
+    this.httpClient
+      .post('/events', {
+        monikaId: this.monikaId,
+        alertId,
+        event: probeState === 'DOWN' ? 'incident' : 'recovery',
+        response: {
+          body: data,
+          headers: typeof headers === 'object' ? headers : {},
+          size: headers['content-length'],
+          status, // status is http status code
+          time: responseTime,
+        },
+      })
+      .then(() => {
+        log.info(
+          `[Symon] Send ${
+            probeState === 'DOWN' ? 'incident' : 'recovery'
+          } event for Alert ID: ${alertId} succeed`
+        )
+      })
+      .catch((error) => {
+        log.error(
+          `[Symon] Send ${
+            probeState === 'DOWN' ? 'incident' : 'recovery'
+          } event for Alert ID: ${alertId} failed.  ${(error as Error).message}`
+        )
+      })
+  }
+
+  private async report(): Promise<void> {
+    // Create a task data object
+    const taskData = {
+      apiKey: this.apiKey,
+      hasConnectionToSymon: this.hasConnectionToSymon,
+      httpClient: this.httpClient,
+      monikaId: this.monikaId,
+      probeIds: getProbes().map(({ id }) => id),
+      reportProbesLimit: this.reportProbesLimit,
+      url: this.url,
+    }
+
+    try {
+      // Submit the task to Piscina
+      await this.worker.run(JSON.stringify(taskData))
+      log.info('[Symon] Report succeed')
+    } finally {
+      this.reportTimeout = setTimeout(() => {
+        this.report
+          .bind(this)()
+          .catch((error) => {
+            this.hasConnectionToSymon = false
+            log.error(`[Symon] Report failed. ${(error as Error).message}`)
+          })
+      }, this.reportProbesInterval)
+    }
+  }
+
+  private async probeChanges(): Promise<ProbeChange[]> {
+    const response = await this.httpClient.get<{ data: ProbeChange[] }>(
+      `/${this.monikaId}/probe-changes`,
+      {
+        params: { since: this.probesLastUpdatedAt },
+      }
+    )
+
+    return response.data.data
   }
 
   private async fetchProbes() {
@@ -306,8 +362,6 @@ export default class SymonClient {
       })
       .then(async (res) => {
         if (!res.data.data) {
-          log.info('[Symon] No config changes')
-
           return {
             probes: getProbes(),
             hash: res.headers.etag,
@@ -332,11 +386,10 @@ export default class SymonClient {
   }
 
   private async fetchProbesAndUpdateConfig() {
-    log.info('[Symon] Get probes')
     // Fetch the probes
     const { hash, probes } = await this.fetchProbes()
     const newConfig: Config = { probes, version: hash }
-    await this.setConfig(newConfig)
+    await setConfig(newConfig)
 
     // Set connection to symon as true, because it could fetch the probes
     this.hasConnectionToSymon = true
@@ -368,17 +421,48 @@ export default class SymonClient {
       .post('/client-handshake', handshakeData)
       .then((res) => res.data?.data.monikaId)
   }
+}
 
-  private async setConfig(newConfig: Config) {
-    if (
-      !newConfig.version ||
-      getContext().config?.version === newConfig.version
-    ) {
-      log.info('[Symon] No config change')
-      return
+async function applyProbeChanges(probeChanges: ProbeChange[]) {
+  for (const { lastEvent, probe, probe_id: probeId, type } of probeChanges) {
+    switch (type) {
+      case 'delete': {
+        deleteProbe(probeId)
+        return
+      }
+
+      case 'update': {
+        validateProbes([lastEvent ? { ...probe, lastEvent } : probe])
+          .then((probes) => updateProbe(probeId, probes[0]))
+          .catch()
+
+        return
+      }
+
+      case 'add': {
+        validateProbes([lastEvent ? { ...probe, lastEvent } : probe])
+          .then((probes) => addProbe(probes[0]))
+          .catch()
+        return
+      }
+
+      default: {
+        log.error(
+          `[Symon] Apply probe changes. Unknown probe change type (${type}).`
+        )
+      }
     }
-
-    log.info('[Symon] Config changes. Reloading Monika')
-    await updateConfig(newConfig)
   }
+}
+
+async function setConfig(newConfig: Config) {
+  if (
+    !newConfig.version ||
+    getContext().config?.version === newConfig.version
+  ) {
+    return
+  }
+
+  log.info('[Symon] Config changes. Reloading Monika')
+  await updateConfig(newConfig)
 }
