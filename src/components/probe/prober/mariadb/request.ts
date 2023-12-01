@@ -60,8 +60,8 @@ export async function mariaRequest(
       database: params.database,
     })
   } catch (error: any) {
-    baseResponse.body = error.message
-    baseResponse.errMessage = error
+    baseResponse.body = ''
+    baseResponse.error = error.message
     baseResponse.result = probeRequestResult.failed
     isConnected = false
   }

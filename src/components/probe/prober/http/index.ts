@@ -70,7 +70,7 @@ export class HTTPProber extends BaseProber {
         // this probe is currently 'incident' state so no need to continue
         this.logMessage(
           false,
-          getErrorMessage(hasFailedRequest.errMessage || 'Unknown error.')
+          getErrorMessage(hasFailedRequest.error || 'Unknown error.')
         )
         return
       }
@@ -84,7 +84,7 @@ export class HTTPProber extends BaseProber {
       // the threshold has been met, so let's log the message
       this.logMessage(
         false,
-        getErrorMessage(hasFailedRequest.errMessage || 'Unknown error.'),
+        getErrorMessage(hasFailedRequest.error || 'Unknown error.'),
         getNotificationMessage({ isIncident: true })
       )
 

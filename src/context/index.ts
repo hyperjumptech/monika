@@ -38,7 +38,7 @@ type Context = {
   // userAgent example: @hyperjumptech/monika/1.2.3 linux-x64 node-14.17.0
   userAgent: string
   incidents: Incident[]
-  config?: Config
+  config?: Omit<Config, 'probes'>
   flags: MonikaFlags
 }
 
