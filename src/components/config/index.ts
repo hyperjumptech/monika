@@ -98,7 +98,7 @@ export const updateConfig = async (config: Config): Promise<void> => {
 
     setContext({ config: newConfig })
     setProbes(newConfig.probes)
-    emitter.emit(events.config.updated, newConfig)
+    emitter.emit(events.config.updated)
     log.info('Config file update detected')
   } catch (error: any) {
     if (isTestEnvironment) {
