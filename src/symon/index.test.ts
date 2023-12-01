@@ -34,6 +34,7 @@ import SymonClient from '.'
 import { validateProbes } from '../components/config/validation'
 import * as loggerHistory from '../components/logger/history'
 import { setContext } from '../context'
+import { getErrorMessage } from 'src/utils/catch-handler'
 
 let getUnreportedLogsStub: sinon.SinonStub
 
@@ -235,8 +236,8 @@ describe('Symon initiate', () => {
     try {
       // act
       await symon.initiate()
-    } catch (error) {
-      errorMessage = error?.message
+    } catch (error: unknown) {
+      errorMessage = getErrorMessage(error)
     }
 
     // assert

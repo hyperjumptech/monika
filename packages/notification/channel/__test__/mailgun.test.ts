@@ -27,7 +27,7 @@ describe('notificationChecker - mailgunNotification', () => {
           },
         },
       ])
-    } catch (error) {
+    } catch (error: unknown) {
       const message = '"Mailgun API Key" is not allowed to be empty'
 
       expect(() => {
@@ -48,7 +48,7 @@ describe('notificationChecker - mailgunNotification', () => {
           },
         },
       ])
-    } catch (error) {
+    } catch (error: unknown) {
       const message = '"Mailgun Domain" is not allowed to be empty'
 
       expect(() => {

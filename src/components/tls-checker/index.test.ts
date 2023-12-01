@@ -24,6 +24,7 @@
 
 import { expect } from '@oclif/test'
 import { checkTLS } from '../tls-checker'
+import { getErrorMessage } from 'src/utils/catch-handler'
 
 describe('TLS Checker', () => {
   describe('fail attempt', () => {
@@ -34,11 +35,10 @@ describe('TLS Checker', () => {
       try {
         // act
         await checkTLS(url)
-      } catch (error) {
+      } catch (error: unknown) {
+        const message = getErrorMessage(error)
         // assert
-        expect(error.message).to.include(
-          `${url} security certificate has expired at`
-        )
+        expect(message).to.include(`${url} security certificate has expired at`)
       }
     })
 
@@ -49,11 +49,10 @@ describe('TLS Checker', () => {
       try {
         // act
         await checkTLS(url)
-      } catch (error) {
+      } catch (error: unknown) {
+        const message = getErrorMessage(error)
         // assert
-        expect(error.message).to.include(
-          `${url} security certificate will expire at`
-        )
+        expect(message).to.include(`${url} security certificate will expire at`)
       }
     })
   })
@@ -68,12 +67,11 @@ describe('TLS Checker', () => {
         const result = await checkTLS(url)
         // assert
         expect(result).to.equal(null)
-      } catch (error) {
+      } catch (error: unknown) {
+        const message = getErrorMessage(error)
         // assert when example.com certificate will expire
         // because nothing lasts forever
-        expect(error.message).to.include(
-          `${url} security certificate will expire at`
-        )
+        expect(message).to.include(`${url} security certificate will expire at`)
       }
     })
 
@@ -91,10 +89,11 @@ describe('TLS Checker', () => {
         const result = await checkTLS(domainDef)
         // assert
         expect(result).to.equal(null)
-      } catch (error) {
+      } catch (error: unknown) {
+        const message = getErrorMessage(error)
         // assert when example.com certificate will expire
         // because nothing lasts forever
-        expect(error.message).to.include(
+        expect(message).to.include(
           `${domainDef.domain} security certificate will expire at`
         )
       }
