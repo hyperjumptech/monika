@@ -46,15 +46,8 @@ export type UnreportedRequestsLog = {
   id: number
   timestamp: number
   probeId: string
-  probeName?: string
-  requestMethod: string
-  requestUrl: string
-  requestHeader?: string
-  requestBody?: string
   responseStatus: number
-  responseHeader?: string
   responseTime: number
-  responseSize?: number
   alerts: string[]
 }
 
@@ -111,18 +104,8 @@ type UnreportedProbeRequestDB = {
   id: number
 
   probe_id: string
-  probe_name?: string
-  request_method: string
-  request_body?: string
-  request_header?: string
-  request_type: string
-  request_url: string
-  response_header?: string
-  response_size?: number
   response_status: number
   response_time: number
-  socket_host: string
-  socket_port: string
   timestamp: number
   /* eslint-enable camelcase */
 }
@@ -270,18 +253,8 @@ export async function getUnreportedLogs(
     SELECT PR.id,
       PR.created_at as timestamp,
       PR.probe_id,
-      PR.probe_name,
-      PR.request_method,
-      PR.request_url,
-      PR.request_header,
-      PR.request_body,
       PR.response_status,
-      PR.response_header,
       PR.response_time,
-      PR.response_size,
-      PR.request_type,
-      PR.socket_host,
-      PR.socket_port,
       CASE
         WHEN A.type IS NULL THEN json_array()
         ELSE json_group_array(A.type)
@@ -317,18 +290,8 @@ export async function getUnreportedLogs(
               alerts,
               id,
               probe_id,
-              probe_name,
-              request_body,
-              request_header,
-              request_method,
-              request_type,
-              request_url,
-              response_header,
-              response_size,
               response_status,
               response_time,
-              socket_host,
-              socket_port,
               timestamp,
             } = unreportedProbeRequest
 
@@ -336,18 +299,8 @@ export async function getUnreportedLogs(
               alerts: JSON.parse(alerts),
               id,
               probeId: probe_id,
-              probeName: probe_name || '',
-              requestBody: request_body || '',
-              requestHeader: request_header || '',
-              requestMethod: request_method,
-              requestType: request_type,
-              requestUrl: request_url,
-              responseHeader: response_header,
-              responseSize: response_size || 0,
               responseStatus: response_status,
               responseTime: response_time,
-              socketHost: socket_host,
-              socketPort: socket_port,
               timestamp,
             }
           }

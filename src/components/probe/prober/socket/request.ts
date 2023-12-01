@@ -61,7 +61,7 @@ export async function tcpRequest(
         : probeRequestResult.success,
     headers: {},
     responseTime: tcpResp.duration,
-    errMessage: tcpResp.message, // map message if any
+    error: tcpResp.message, // map message if any
   }
 
   return baseResponse

@@ -62,9 +62,9 @@ export async function redisRequest(
     baseResponse.status = 200
     baseResponse.result = probeRequestResult.success
   } else {
-    baseResponse.body = result.message
+    baseResponse.body = ''
     baseResponse.result = probeRequestResult.failed
-    baseResponse.errMessage = result.message
+    baseResponse.error = result.message
   }
 
   return baseResponse
