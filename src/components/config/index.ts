@@ -48,7 +48,7 @@ import {
   mergeConfigs,
 } from './get'
 import { getProbes, setProbes } from './probe'
-import { getErrorMessage } from 'src/utils/catch-error-handler'
+import { getErrorMessage } from '../../utils/catch-error-handler'
 
 type ScheduleRemoteConfigFetcherParams = {
   configType: ConfigType

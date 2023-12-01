@@ -37,7 +37,7 @@ import { validateProbes } from '../components/config/validation'
 import events from '../events'
 import { md5Hash } from '../utils/hash'
 import { getEventEmitter } from '../utils/events'
-import { getErrorMessage } from 'src/utils/catch-error-handler'
+import { getErrorMessage } from '../utils/catch-error-handler'
 
 const config: Config = {
   version: 'asdfg123',

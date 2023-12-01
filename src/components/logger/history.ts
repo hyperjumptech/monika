@@ -31,6 +31,7 @@ import { Probe } from '../../interfaces/probe'
 import type { Notification } from '@hyperjumptech/monika-notification'
 import { log } from '../../utils/pino'
 import { getConfig } from '../config'
+import { getErrorMessage } from '../../utils/catch-error-handler'
 const sqlite3 = SQLite3.verbose()
 const dbPath = path.resolve(process.cwd(), 'monika-logs.db')
 
@@ -156,7 +157,7 @@ export async function openLogfile(): Promise<void> {
 
     await migrate()
   } catch (error: unknown) {
-    log.error("Warning: Can't open logfile. " + error.message)
+    log.error("Warning: Can't open logfile. " + getErrorMessage(error))
   }
 }
 
@@ -487,7 +488,9 @@ export async function saveProbeRequestLog({
       )
     )
   } catch (error: unknown) {
-    log.error("Error: Can't insert data into monika-log.db. " + error.message)
+    log.error(
+      "Error: Can't insert data into monika-log.db. " + getErrorMessage(error)
+    )
   }
 }
 
@@ -531,7 +534,9 @@ export async function saveNotificationLog(
       notification.type,
     ])
   } catch (error: unknown) {
-    log.error("Error: Can't insert data into monika-log.db. " + error.message)
+    log.error(
+      "Error: Can't insert data into monika-log.db. " + getErrorMessage(error)
+    )
   }
 }
 

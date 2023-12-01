@@ -27,6 +27,7 @@ import * as mongodbURI from 'mongodb-uri'
 import { probeRequestResult } from '../../../../interfaces/request'
 import type { ProbeRequestResponse } from '../../../../interfaces/request'
 import { differenceInMilliseconds } from 'date-fns'
+import { getErrorMessage } from '../../../../utils/catch-error-handler'
 
 type MongoRequest = {
   uri?: string // Connection URI
@@ -141,7 +142,7 @@ async function sendMongoRequest(params: MongoRequest): Promise<MongoResult> {
       result.message = `${host}:${port} PONGED`
     }
   } catch (error: unknown) {
-    result.message = error
+    result.message = getErrorMessage(error)
   } finally {
     if (client) {
       await client.close()

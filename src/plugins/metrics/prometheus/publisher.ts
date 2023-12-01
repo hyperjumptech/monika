@@ -26,6 +26,7 @@ import express, { Request, Response, NextFunction } from 'express'
 import helmet from 'helmet'
 import { register } from 'prom-client'
 import { log } from '../../../utils/pino'
+import { getErrorMessage } from '../../../utils/catch-error-handler'
 
 export function startPrometheusMetricsServer(port: number): void {
   const app = express()
@@ -46,7 +47,7 @@ export function startPrometheusMetricsServer(port: number): void {
 
       res.status(200).end(prometheusMetrics)
     } catch (error: unknown) {
-      res.status(500).json({ message: error.message })
+      res.status(500).json({ message: getErrorMessage(error) })
     }
   })
 

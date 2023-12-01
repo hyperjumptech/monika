@@ -24,7 +24,7 @@
 
 import { expect } from '@oclif/test'
 import { checkTLS } from '../tls-checker'
-import { getErrorMessage } from 'src/utils/catch-error-handler'
+import { getErrorMessage } from '../../utils/catch-error-handler'
 
 describe('TLS Checker', () => {
   describe('fail attempt', () => {

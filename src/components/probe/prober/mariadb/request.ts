@@ -22,7 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { getErrorMessage } from 'src/utils/catch-error-handler'
+import { getErrorMessage } from '../../../../utils/catch-error-handler'
 import type { ProbeRequestResponse } from '../../../../interfaces/request'
 import { probeRequestResult } from '../../../../interfaces/request'
 import { differenceInMilliseconds } from 'date-fns'

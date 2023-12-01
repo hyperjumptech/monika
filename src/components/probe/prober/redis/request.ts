@@ -27,6 +27,7 @@ import type { ProbeRequestResponse } from '../../../../interfaces/request'
 import { differenceInMilliseconds } from 'date-fns'
 import type { Redis } from '../../../../interfaces/probe'
 import { probeRequestResult } from '../../../../interfaces/request'
+import { getErrorMessage } from '../../../../utils/catch-error-handler'
 
 type RedisResult = {
   isAlive: boolean // If redis responds to PING/commands
@@ -111,7 +112,7 @@ async function sendRedisRequest(params: Redis): Promise<RedisResult> {
       result.message = `redis PONGED`
     }
   } catch (error: unknown) {
-    result.message = error
+    result.message = getErrorMessage(error)
   }
 
   return result

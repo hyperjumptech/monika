@@ -133,16 +133,18 @@ export const parseConfigFromPostman = (configString: string): Config => {
 
     return { probes }
   } catch (error: unknown) {
-    if (error.name === 'SyntaxError') {
+    const parsingError =
+      error instanceof Error ? error : new Error(`Parsing failed: ${error}`)
+    if (parsingError.name === 'SyntaxError') {
       throw new Error('Your Postman file contains an invalid JSON format!')
     }
 
-    if (error.message === 'UnsupportedVersion') {
+    if (parsingError.message === 'UnsupportedVersion') {
       throw new Error(
         'Your Postman collection version is not supported. Please use v2.0 or v2.1!'
       )
     }
 
-    throw new Error(error.message)
+    throw new Error(parsingError.message)
   }
 }

@@ -50,6 +50,8 @@ import { Config } from '../interfaces/config'
 import { getEventEmitter } from '../utils/events'
 import type { Notification } from '@hyperjumptech/monika-notification'
 import type { Probe } from '../interfaces/probe'
+import { getErrorMessage } from '../utils/catch-error-handler'
+import { readFile } from '../utils/read-file'
 const eventEmitter = getEventEmitter()
 
 type TweetMessage = {
@@ -124,7 +126,7 @@ ${tweetMessage}
       resetlogs()
     }
   } catch (error: unknown) {
-    log.error(`Summary notification: ${error.message}`)
+    log.error(`Summary notification: ${getErrorMessage(error)}`)
   }
 }
 
@@ -140,21 +142,9 @@ interface PidObject {
  * readsPidFile reads a local monika.pid file and returns the information in it
  * @returns {object} PidObject is returned
  */
-function readPidFile(): PidObject {
-  let data = ''
-  try {
-    data = fs.readFileSync('monika.pid', 'utf8')
-  } catch (error: unknown) {
-    if (error.code === 'ENOENT') {
-      log.info(
-        'Could not find the file: monika.pid. Monika is probably not running or ran from a diffent directory'
-      )
-    }
-
-    throw error
-  }
-
-  const json = JSON.parse(data)
+async function readPidFile(): Promise<PidObject> {
+  const fileContent = await readFile('monika.pid', 'utf8')
+  const json = JSON.parse(fileContent)
   return {
     monikaPid: json.monikaPid,
     monikaConfigFile: json.monikaConfigFile,
@@ -222,7 +212,7 @@ function getDaysHours(startTime: Date): string {
  */
 export async function printSummary(cliConfig: IConfig): Promise<void> {
   try {
-    const pidObject = readPidFile()
+    const pidObject = await readPidFile()
     const summary = await getSummary()
 
     const uptime = getDaysHours(pidObject.monikaStartTime)
@@ -246,7 +236,7 @@ export async function printSummary(cliConfig: IConfig): Promise<void> {
 
     `)
   } catch (error: unknown) {
-    log.error(`Summary notification: ${error.message}`)
+    log.error(`Summary notification: ${getErrorMessage(error)}`)
   }
 }
 
