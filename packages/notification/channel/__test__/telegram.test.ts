@@ -27,7 +27,7 @@ describe('notificationChecker - telegramNotification', () => {
           },
         },
       ])
-    } catch (error) {
+    } catch (error: unknown) {
       const message = '"Telegram Group ID" is not allowed to be empty'
 
       expect(() => {
@@ -47,7 +47,7 @@ describe('notificationChecker - telegramNotification', () => {
           },
         },
       ])
-    } catch (error) {
+    } catch (error: unknown) {
       const message = '"Telegram Bot Token" is not allowed to be empty'
 
       expect(() => {

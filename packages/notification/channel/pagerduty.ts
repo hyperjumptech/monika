@@ -107,7 +107,7 @@ export async function send(
 function transformMessageToEventPayload(
   routingKey: string,
   message: NotificationMessage
-): Record<string, any> | null {
+): Record<string, string | object> | null {
   // https://developer.pagerduty.com/docs/ZG9jOjExMDI5NTgw-events-api-v2-overview#pagerduty-common-event-format-pd-cef
   const { meta, summary } = message
   const { probeID, url, alertQuery, type, publicIpAddress } = meta
