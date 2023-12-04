@@ -174,7 +174,7 @@ function getAdditionalMessage(notification: Notification) {
   const { data, type } = notification
   const channel = channels[type]
 
-  if (!channel?.additionalStartupMessage) {
+  if (!channel?.additionalStartupMessage || !data) {
     return ''
   }
 
