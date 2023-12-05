@@ -255,6 +255,12 @@ export default class Monika extends Command {
       hidden: false,
     }),
 
+    symonCouchDb: Flags.string({
+      dependsOn: ['symonKey', 'symonUrl'],
+      description: 'URL of Symon Couch DB installed',
+      hidden: false,
+    }),
+
     text: Flags.string({
       description: 'Run Monika using a Simple text file',
       exclusive: ['postman', 'insomnia', 'sitemap', 'har'],

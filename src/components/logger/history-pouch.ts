@@ -49,6 +49,7 @@ export async function openLogPouch(): Promise<void> {
     // to symon couchdb replication setting
     const { flags } = getContext()
     const symonCouchDB = new PouchDB(flags.symonCouchDb)
+    console.info(`--- symonCouchDb: ${symonCouchDB}`)
     localPouchDB.replicate
       .to(symonCouchDB, {
         live: true,

@@ -65,6 +65,7 @@ export type MonikaFlags = {
   symonReportLimit?: number
   symonGetProbesIntervalMs: number
   symonUrl?: string
+  symonCouchDb?: string
   text?: string
   ignoreInvalidTLS?: boolean
   verbose: boolean
