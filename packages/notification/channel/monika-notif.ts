@@ -31,19 +31,19 @@ type MonikaAlertNotifDataBody = {
   alert: string
   url: string
   time: string
-  monika: string
+  monika?: string
 }
 
 type MonikaStartAndTerminationNotifDataBody = {
   type: 'start' | 'termination'
-  // eslint-disable-next-line camelcase
+
   ip_address: string
 }
 
 type MonikaStatusUpdateNotifDataBody = {
   type: 'status-update'
   time: string
-  monika: string
+  monika?: string
   numberOfProbes: string
   maxResponseTime: string
   minResponseTime: string

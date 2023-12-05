@@ -24,8 +24,8 @@
 
 import { expect, test } from '@oclif/test'
 import path from 'path'
-import cmd from '../../../src'
-import axios from 'axios'
+import cmd from '../../../src/commands/monika'
+import axios, { AxiosError } from 'axios'
 
 const { resolve } = path
 
@@ -39,6 +39,8 @@ describe('Prometheus plugin', () => {
           resolve('./monika.example.json'),
           '--prometheus',
           '4444',
+          '--repeat',
+          '1',
         ])
       )
       .it('runs Prometheus metric server', async (ctx) => {
@@ -48,9 +50,6 @@ describe('Prometheus plugin', () => {
         // assert
         expect(ctx.stdout).to.contain('Starting Monika.')
         expect(res.status).to.equal(200)
-
-        // eslint-disable-next-line unicorn/no-process-exit, no-process-exit
-        process.exit(0)
       })
   })
 
@@ -69,15 +68,19 @@ describe('Prometheus plugin', () => {
           resolve('./monika.example.json'),
           '--prometheus',
           '4446',
+          '--repeat',
+          '1',
         ])
       )
       .it('runs Prometheus metric server but return 405', async () => {
         try {
           // act
           await axios.post('http://localhost:4446/metrics')
-        } catch (error: any) {
+        } catch (error: unknown) {
+          const statusCode =
+            error instanceof AxiosError ? error.response?.status : -1
           // assert
-          expect(error.response.status).to.equal(405)
+          expect(statusCode).to.equal(405)
         }
 
         // eslint-disable-next-line unicorn/no-process-exit, no-process-exit

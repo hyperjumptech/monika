@@ -49,7 +49,7 @@ describe('notificationChecker - discordNotification', () => {
           },
         },
       ])
-    } catch (error) {
+    } catch (error: unknown) {
       const message = '"Discord URL" is not allowed to be empty'
 
       expect(() => {
@@ -68,7 +68,7 @@ describe('notificationChecker - discordNotification', () => {
           },
         },
       ])
-    } catch (error) {
+    } catch (error: unknown) {
       const message = '"Discord URL" must be a valid uri'
 
       expect(() => {

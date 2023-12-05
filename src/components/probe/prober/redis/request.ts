@@ -27,6 +27,7 @@ import type { ProbeRequestResponse } from '../../../../interfaces/request'
 import { differenceInMilliseconds } from 'date-fns'
 import type { Redis } from '../../../../interfaces/probe'
 import { probeRequestResult } from '../../../../interfaces/request'
+import { getErrorMessage } from '../../../../utils/catch-error-handler'
 
 type RedisResult = {
   isAlive: boolean // If redis responds to PING/commands
@@ -50,7 +51,6 @@ export async function redisRequest(
     headers: '',
     responseTime: 0,
     result: probeRequestResult.unknown,
-    isProbeResponsive: false,
   }
   const startTime = new Date()
   const result = await sendRedisRequest(params)
@@ -61,12 +61,11 @@ export async function redisRequest(
     baseResponse.responseTime = duration
     baseResponse.body = result.message
     baseResponse.status = 200
-    baseResponse.isProbeResponsive = true
     baseResponse.result = probeRequestResult.success
   } else {
-    baseResponse.body = result.message
+    baseResponse.body = ''
     baseResponse.result = probeRequestResult.failed
-    baseResponse.errMessage = result.message
+    baseResponse.error = result.message
   }
 
   return baseResponse
@@ -92,12 +91,12 @@ async function sendRedisRequest(params: Redis): Promise<RedisResult> {
       host && port
         ? createClient({
             socket: {
-              host: host,
-              port: port,
+              host,
+              port,
               connectTimeout: CONNECTTIMEOUTMS,
             },
-            password: password,
-            username: username,
+            password,
+            username,
           })
         : createClient({ url: uri })
 
@@ -112,8 +111,8 @@ async function sendRedisRequest(params: Redis): Promise<RedisResult> {
       result.isAlive = true
       result.message = `redis PONGED`
     }
-  } catch (error: any) {
-    result.message = error
+  } catch (error: unknown) {
+    result.message = getErrorMessage(error)
   }
 
   return result

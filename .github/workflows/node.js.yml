@@ -15,9 +15,72 @@ on:
 permissions:
   issues: read
   pull-requests: read
+  actions: write
 
 jobs:
-  build:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js 18.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+      - run: npm ci
+      - run: npm run build -w packages/notification
+      - run: npm run lint
+      - name: Cancel workflow on failure
+        if: 'failure()'
+        uses: 'andymckay/cancel-action@0.3'
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js 18.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+      - run: npm ci
+      - run: npm run build -w packages/notification
+      - run: npm run format
+      - name: Cancel workflow on failure
+        if: 'failure()'
+        uses: 'andymckay/cancel-action@0.3'
+  prod_test_npm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js 18.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+      - run: npm ci
+      - run: npm run build -w packages/notification
+      - run: npm pack
+      - run: npm install -g ./hyperjumptech-monika-*.tgz
+      - run: npm run prod_test
+      - name: Cancel workflow on failure
+        if: 'failure()'
+        uses: 'andymckay/cancel-action@0.3'
+  prod_test_binary:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js 18.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+      - run: npm ci
+      - run: npm run build -w packages/notification
+      - run: npm pack
+      - run: npm run pkg -- -t node18-linux-x64
+        name: Pack the binary using vercel/pkg
+      - run: ./dist/monika -v
+        name: Test to make sure printing the version succeeds
+      - name: Cancel workflow on failure
+        if: 'failure()'
+        uses: 'andymckay/cancel-action@0.3'
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -28,10 +91,6 @@ jobs:
       - run: npm ci
       - run: npm run build -w packages/notification
       - run: npm test && npx codecov
-      - run: npm pack
-      - run: npm install -g ./hyperjumptech-monika-*.tgz
-      - run: npm run prod_test
-      - run: npm run pkg -- -t node18-linux-x64
-        name: Pack the binary using vercel/pkg
-      - run: ./dist/monika -v
-        name: Test if printing the version is not error
+      - name: Cancel workflow on failure
+        if: 'failure()'
+        uses: 'andymckay/cancel-action@0.3'

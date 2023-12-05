@@ -1,7 +1,7 @@
 /**********************************************************************************
  * MIT License                                                                    *
  *                                                                                *
- * Copyright (c) 2021 Hyperjump Technology                                        *
+ * Copyright (c) 2023 Hyperjump Technology                                        *
  *                                                                                *
  * Permission is hereby granted, free of charge, to any person obtaining a copy   *
  * of this software and associated documentation files (the "Software"), to deal  *
@@ -22,30 +22,6 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import Joi from 'joi'
-import { Mongo } from '../../../../interfaces/probe'
-
-export const validateMongoConfig = (
-  mongoConfig?: Mongo[]
-): string | undefined => {
-  if (!mongoConfig) {
-    return ''
-  }
-
-  const schema = Joi.alternatives([
-    Joi.object({
-      uri: Joi.string(),
-    }),
-    Joi.object({
-      host: Joi.alternatives().try(Joi.string().hostname(), Joi.string().ip()),
-      port: Joi.number().min(0).max(65_536).required(),
-      password: Joi.string(),
-      username: Joi.string(),
-    }),
-  ])
-
-  for (const mongo of mongoConfig) {
-    const validationError = schema.validate(mongo)
-    if (validationError?.error?.message) return validationError?.error?.message
-  }
-}
+export const DEFAULT_INCIDENT_THRESHOLD = 5
+export const DEFAULT_RECOVERY_THRESHOLD = 5
+export const DEFAULT_INTERVAL = 10

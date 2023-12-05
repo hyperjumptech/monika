@@ -23,8 +23,7 @@
  **********************************************************************************/
 
 import { Config } from '../../interfaces/config'
-import { readFileSync } from 'fs'
-import type { MonikaFlags } from '../../context/monika-flags'
+import type { MonikaFlags } from '../../flag'
 import { parseConfigFromPostman } from './parse-postman'
 import { parseConfigFromSitemap } from './parse-sitemap'
 import { parseConfigFromText } from './parse-text'
@@ -34,6 +33,7 @@ import yml from 'js-yaml'
 import parseInsomnia from './parse-insomnia'
 import isUrl from 'is-url'
 import { fetchConfig } from './fetch'
+import { readFile } from '../../utils/read-file'
 
 function sleep(ms: number): Promise<void> {
   // eslint-disable-next-line no-promise-executor-return
@@ -48,7 +48,7 @@ export const parseConfig = async (
   try {
     let configString = isUrl(source)
       ? await fetchConfig(source)
-      : readFileSync(source, 'utf-8')
+      : await readFile(source, 'utf8')
 
     if (configString.length === 0) {
       if (isUrl(source))
@@ -60,7 +60,8 @@ export const parseConfig = async (
       let tries = 10 // tries multiple times to load the file
       while (configString.length === 0 && tries > 0) {
         sleep(700)
-        configString = readFileSync(source, 'utf-8')
+        // eslint-disable-next-line no-await-in-loop
+        configString = await readFile(source, 'utf8')
         if (configString.length > 0) {
           break
         }
@@ -87,15 +88,13 @@ export const parseConfig = async (
     }
 
     return JSON.parse(configString)
-  } catch (error: any) {
-    if (error.code === 'ENOENT' && error.path === source) {
-      throw new Error(`Configuration file not found: ${source}.`)
-    }
-
-    if (error.name === 'SyntaxError') {
+  } catch (error: unknown) {
+    const parsingError =
+      error instanceof Error ? error : new Error(String(error))
+    if (parsingError.name === 'SyntaxError') {
       throw new Error('JSON configuration file is in invalid JSON format!')
     }
 
-    throw new Error(error.message)
+    throw new Error(parsingError.message)
   }
 }

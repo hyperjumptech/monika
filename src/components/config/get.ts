@@ -22,13 +22,12 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import type { MonikaFlags } from '../../context/monika-flags'
+import type { MonikaFlags } from '../../flag'
 import type { Config } from '../../interfaces/config'
 import { log } from '../../utils/pino'
 import { parseConfig } from './parse'
 import { validateConfigWithSchema } from './validation'
 import { validateConfig } from './validate'
-import type { RequestConfig } from '../../interfaces/request'
 
 export type ConfigType =
   | 'monika'
@@ -60,14 +59,15 @@ export function mergeConfigs(
   }
 
   // eslint-disable-next-line unicorn/no-array-reduce
-  const mergedConfig = defaultConfigs.reduce((prev, current) => {
-    return {
+  const mergedConfig = defaultConfigs.reduce(
+    (prev, current) => ({
       ...prev,
       ...current,
       notifications: current.notifications || prev.notifications,
       probes: current.probes || prev.probes,
-    }
-  }, nonDefaultConfig || {})
+    }),
+    nonDefaultConfig || {}
+  )
 
   return mergedConfig as Config
 }
@@ -98,38 +98,16 @@ async function parseConfigType(
   const parsed = await parseConfig(source, configType, flags)
 
   // ensure that the parsed config meets our formatting
-  await validateConfig(parsed)
+  const validatedConfig = await validateConfig(parsed)
 
   if (configType !== 'har') {
-    const isValidConfig = validateConfigWithSchema(parsed)
+    const isValidConfig = validateConfigWithSchema(validatedConfig)
     if (!isValidConfig.valid) {
       throw new Error(isValidConfig.message)
     }
   }
 
-  return {
-    ...parsed,
-    probes: parsed.probes?.map((probe) => {
-      const requests: RequestConfig[] | undefined = probe?.requests?.map(
-        (request) => ({
-          ...request,
-          timeout: request.timeout ?? 10_000,
-        })
-      )
-
-      const interval = () => {
-        if (typeof probe?.interval === 'number') return probe.interval
-
-        if (!requests) {
-          return 10
-        }
-
-        return requests.length * 10 === 0 ? 10 : requests.length * 10
-      }
-
-      return { ...probe, interval: interval(), requests }
-    }),
-  }
+  return validatedConfig
 }
 
 async function getNonDefaultFlags(

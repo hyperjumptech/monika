@@ -22,6 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import { getErrorMessage } from '../../../../utils/catch-error-handler'
 import type { ProbeRequestResponse } from '../../../../interfaces/request'
 import { probeRequestResult } from '../../../../interfaces/request'
 import { differenceInMilliseconds } from 'date-fns'
@@ -47,7 +48,6 @@ export async function mariaRequest(
     result: probeRequestResult.unknown,
     headers: '',
     responseTime: 0,
-    isProbeResponsive: false,
   }
 
   const startTime = new Date()
@@ -60,9 +60,9 @@ export async function mariaRequest(
       password: params.password,
       database: params.database,
     })
-  } catch (error: any) {
-    baseResponse.body = error.message
-    baseResponse.errMessage = error
+  } catch (error: unknown) {
+    baseResponse.body = ''
+    baseResponse.error = getErrorMessage(error)
     baseResponse.result = probeRequestResult.failed
     isConnected = false
   }
@@ -75,7 +75,6 @@ export async function mariaRequest(
     baseResponse.body = 'database ok'
     baseResponse.status = 200
     baseResponse.result = probeRequestResult.success
-    baseResponse.isProbeResponsive = true
   }
 
   return baseResponse

@@ -62,8 +62,6 @@ describe('Prometheus collector', () => {
               timeout: 0,
             },
           ],
-          incidentThreshold: 0,
-          recoveryThreshold: 0,
           alerts: [
             {
               id: 'fKBzx',
@@ -80,7 +78,6 @@ describe('Prometheus collector', () => {
           headers: '',
           responseTime: 0,
           result: probeRequestResult.failed,
-          isProbeResponsive: false,
         },
       }
 
@@ -101,8 +98,6 @@ describe('Prometheus collector', () => {
           name: '',
           interval: 0,
           requests: [],
-          incidentThreshold: 0,
-          recoveryThreshold: 0,
           alerts: [{ id: 'fKBzx', assertion: '', message: '' }],
         },
         requestIndex: 0,
@@ -113,7 +108,6 @@ describe('Prometheus collector', () => {
           headers: '',
           responseTime: 0,
           result: probeRequestResult.failed,
-          isProbeResponsive: false,
         },
       }
 
@@ -133,8 +127,6 @@ describe('Prometheus collector', () => {
           id: '',
           name: '',
           interval: 0,
-          incidentThreshold: 0,
-          recoveryThreshold: 0,
           alerts: [
             {
               assertion: '',
@@ -148,7 +140,6 @@ describe('Prometheus collector', () => {
           status: 0,
           headers: '',
           responseTime: 0,
-          isProbeResponsive: false,
         },
       } as ProbeResult
 
@@ -179,8 +170,6 @@ describe('Prometheus collector', () => {
               timeout: 0,
             },
           ],
-          incidentThreshold: 0,
-          recoveryThreshold: 0,
           alerts: [{ id: 'fKBzx', assertion: '', message: '' }],
         },
         requestIndex: 0,
@@ -206,8 +195,6 @@ describe('Prometheus collector', () => {
           name: '',
           interval: 0,
           requests: [],
-          incidentThreshold: 0,
-          recoveryThreshold: 0,
           alerts: [{ id: 'fKBzx', assertion: '', message: '' }],
         },
         requestIndex: 0,
@@ -230,8 +217,6 @@ describe('Prometheus collector', () => {
           id: '',
           name: '',
           interval: 0,
-          incidentThreshold: 0,
-          recoveryThreshold: 0,
           alerts: [
             {
               assertion: '',

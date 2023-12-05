@@ -24,7 +24,7 @@
 
 import { hostname, platform } from 'os'
 import { promisify } from 'util'
-import { format, formatDistanceToNow } from 'date-fns'
+import { format } from 'date-fns'
 import * as Handlebars from 'handlebars'
 import getos from 'getos'
 import osName from 'os-name'
@@ -33,6 +33,7 @@ import type { NotificationMessage } from '@hyperjumptech/monika-notification'
 import { ProbeRequestResponse } from '../../interfaces/request'
 import { ProbeAlert } from '../../interfaces/probe'
 import { publicIpAddress, publicNetworkInfo } from '../../utils/public-ip'
+import { getDowntimeDuration } from '../downtime-counter'
 
 const getLinuxDistro = promisify(getos)
 
@@ -81,7 +82,7 @@ const getExpectedMessage = (
       status,
       time: responseTime,
       body: data,
-      headers: headers,
+      headers,
     },
   })
 }
@@ -94,7 +95,7 @@ export async function getMessageForAlert({
   isRecovery,
   response,
 }: MessageAlertProps): Promise<NotificationMessage> {
-  const { userAgent, incidents } = getContext()
+  const { userAgent } = getContext()
   const [monikaInstance, osName] = await Promise.all([
     getMonikaInstance(ipAddress),
     getOSName(),
@@ -113,14 +114,7 @@ export async function getMessageForAlert({
     version: userAgent,
   }
 
-  const lastIncident = incidents.find(
-    (incident) =>
-      incident.probeID === probeID && incident.probeRequestURL === url
-  )
-  const recoveryMessage = getRecoveryMessage(
-    isRecovery,
-    lastIncident?.createdAt
-  )
+  const recoveryMessage = getRecoveryMessage(isRecovery, probeID, url)
   const expectedMessage = getExpectedMessage(alert, response, isRecovery)
   const bodyString = `Message: ${recoveryMessage}${expectedMessage}
 
@@ -146,14 +140,16 @@ Version: ${userAgent}`
   return message
 }
 
-function getRecoveryMessage(isRecovery: boolean, incidentDateTime?: Date) {
+function getRecoveryMessage(isRecovery: boolean, probeID: string, url: string) {
+  const incidentDateTime = getContext().incidents.find(
+    (incident) =>
+      incident.probeID === probeID && incident.probeRequestURL === url
+  )?.createdAt
   if (!isRecovery || !incidentDateTime) {
     return ''
   }
 
-  const incidentDuration = formatDistanceToNow(incidentDateTime, {
-    includeSeconds: true,
-  })
+  const incidentDuration = getDowntimeDuration({ probeID, url })
   const humanReadableIncidentDateTime = format(
     incidentDateTime,
     'yyyy-MM-dd HH:mm:ss XXX'

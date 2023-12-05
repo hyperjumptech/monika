@@ -26,6 +26,7 @@ import net from 'net'
 import { differenceInMilliseconds } from 'date-fns'
 import { probeRequestResult } from '../../../../interfaces/request'
 import type { ProbeRequestResponse } from '../../../../interfaces/request'
+import { getErrorMessage } from '../../../../utils/catch-error-handler'
 
 type TCPRequest = {
   host: string
@@ -61,9 +62,7 @@ export async function tcpRequest(
         : probeRequestResult.success,
     headers: {},
     responseTime: tcpResp.duration,
-
-    isProbeResponsive: tcpResp.status === 'UP', // map success flag
-    errMessage: tcpResp.message, // map message if any
+    error: tcpResp.message, // map message if any
   }
 
   return baseResponse
@@ -84,12 +83,12 @@ async function tcpCheck(tcpRequest: TCPRequest): Promise<TCPResult> {
       status: 'UP',
       message: '',
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     return {
       duration: 0,
       responseData: null,
       status: 'DOWN',
-      message: error?.message,
+      message: getErrorMessage(error),
     }
   }
 }

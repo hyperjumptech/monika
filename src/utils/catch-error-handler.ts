@@ -22,69 +22,33 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Probe, ProbeAlert } from '../../../../interfaces/probe'
-import { parseAlertStringTime } from '../../../../plugins/validate-response/checkers'
-import { compileExpression } from '../../../../utils/expression-parser'
+// Credits to Kent C. Dodds
+// taken from https://kentcdodds.com/blog/get-a-catch-block-error-message-with-typescript
+type ErrorWithMessage = {
+  message: string
+}
 
-const alertStatusMessage = 'status-not-2xx'
-const responseTimePrefix = 'response-time-greater-than-'
+function isErrorWithMessage(error: unknown): error is ErrorWithMessage {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'message' in error &&
+    typeof (error as Record<string, unknown>).message === 'string'
+  )
+}
 
-const isValidProbeAlert = (alert: ProbeAlert | string): boolean => {
+function toErrorWithMessage(maybeError: unknown): ErrorWithMessage {
+  if (isErrorWithMessage(maybeError)) return maybeError
+
   try {
-    if (typeof alert === 'string') {
-      return (
-        alert === alertStatusMessage ||
-        (alert.startsWith(responseTimePrefix) &&
-          Boolean(parseAlertStringTime(alert)))
-      )
-    }
-
-    return Boolean(
-      compileExpression(alert.assertion || (alert.query as string))
-    )
+    return new Error(JSON.stringify(maybeError))
   } catch {
-    return false
+    // fallback in case there's an error stringifying the maybeError
+    // like with circular references for example.
+    return new Error(String(maybeError))
   }
 }
 
-const convertOldAlertToNewFormat = (
-  probe: Probe,
-  allAlerts: ProbeAlert[]
-): void => {
-  probe.alerts = allAlerts.map((alert: any) => {
-    if (typeof alert === 'string') {
-      let query = ''
-      let message = ''
-      const subject = ''
-
-      if (alert === alertStatusMessage) {
-        query = 'response.status < 200 or response.status > 299'
-        message = 'HTTP Status is {{ response.status }}, expecting 200'
-      } else if (alert.startsWith(responseTimePrefix)) {
-        const expectedTime = parseAlertStringTime(alert)
-        query = `response.time > ${expectedTime}`
-        message = `Response time is {{ response.time }}ms, expecting less than ${expectedTime}ms`
-      }
-
-      return { query, subject, message }
-    }
-
-    return alert
-  })
-}
-
-export const validateAlerts = (probe: Probe): string | undefined => {
-  const { alerts = [], socket } = probe
-  const socketAlerts = socket?.alerts ?? []
-  const allAlerts = [...alerts, ...socketAlerts]
-
-  // Check probe alert properties
-  for (const alert of allAlerts) {
-    const check = isValidProbeAlert(alert)
-    if (!check) {
-      return `Probe alert format is invalid! (${alert})`
-    }
-  }
-
-  convertOldAlertToNewFormat(probe, allAlerts)
+export function getErrorMessage(error: unknown) {
+  return toErrorWithMessage(error).message
 }

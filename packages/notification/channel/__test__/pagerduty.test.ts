@@ -40,9 +40,7 @@ describe('PagerDuty notification', () => {
 
     it('should validate PagerDuty key', () => {
       // act
-      const error = validator.validate([
-        { probeID: '65DDKmmB9mSaeE-8bMXRN' },
-      ] as any)
+      const error = validator.validate([{ probeID: '65DDKmmB9mSaeE-8bMXRN' }])
 
       // assert
       expect(error.error?.message).eq('"Key" is required')
@@ -61,6 +59,39 @@ describe('PagerDuty notification', () => {
   })
 
   describe('send the event', () => {
+    let body = {}
+    const server = setupServer(
+      rest.post(
+        'https://events.pagerduty.com/v2/enqueue',
+        async (req, res, ctx) => {
+          body = await req.json()
+
+          return res(ctx.status(202))
+        }
+      ),
+      rest.post(
+        'https://events.pagerduty.com/v2/enqueue',
+        async (req, res, ctx) => {
+          body = await req.json()
+
+          return res(ctx.status(202))
+        }
+      )
+    )
+
+    before(() => {
+      server.listen()
+    })
+
+    afterEach(() => {
+      body = {}
+      server.resetHandlers()
+    })
+
+    after(() => {
+      server.close()
+    })
+
     it('should ignore non incident/recovery event', async () => {
       // arrange
       const message: NotificationMessage = {
@@ -109,24 +140,12 @@ describe('PagerDuty notification', () => {
       const { summary, meta } = message
       const { probeID, url, alertQuery, publicIpAddress } = meta
       const dedupKey = `${probeID}:${url}:${alertQuery}`.replace(' ', '')
-      let body: Record<string, any> = {}
-      const server = setupServer(
-        rest.post(
-          'https://events.pagerduty.com/v2/enqueue',
-          (req, res, ctx) => {
-            body = req?.body as Record<string, any>
-            return res(ctx.status(202))
-          }
-        )
-      )
 
       // act
-      server.listen()
       await send(
         [{ key: routingKey, probeID: '65DDKmmB9mSaeE-8bMXRN' }],
         message
       )
-      server.close()
 
       // assert
       expect(body).to.deep.eq({
@@ -136,7 +155,7 @@ describe('PagerDuty notification', () => {
         event_action: 'trigger',
         /* eslint-enable camelcase */
         payload: {
-          summary: summary,
+          summary,
           source: publicIpAddress,
           severity: 'error',
           group: probeID,
@@ -166,24 +185,12 @@ describe('PagerDuty notification', () => {
       const { meta } = message
       const { probeID, url, alertQuery } = meta
       const dedupKey = `${probeID}:${url}:${alertQuery}`.replace(' ', '')
-      let body: Record<string, any> = {}
-      const server = setupServer(
-        rest.post(
-          'https://events.pagerduty.com/v2/enqueue',
-          (req, res, ctx) => {
-            body = req?.body as Record<string, any>
-            return res(ctx.status(202))
-          }
-        )
-      )
 
       // act
-      server.listen()
       await send(
         [{ key: routingKey, probeID: '65DDKmmB9mSaeE-8bMXRN' }],
         message
       )
-      server.close()
 
       // assert
       expect(body).to.deep.eq({

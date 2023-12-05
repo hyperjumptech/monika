@@ -26,8 +26,6 @@ import chalk from 'chalk'
 import { getAllLogs } from './history'
 import { log } from '../../utils/pino'
 
-export { RequestLog } from './request-log'
-
 /**
  * getStatusColor colorizes different statusCode
  * @param {any} responseCode is the httpStatus to colorize
@@ -35,13 +33,19 @@ export { RequestLog } from './request-log'
  */
 function getStatusColor(responseCode: number) {
   switch (Math.trunc(responseCode / 100)) {
-    case 2:
+    case 2: {
       return 'cyan'
-    case 4:
+    }
+
+    case 4: {
       return 'orange'
+    }
+
     case 5: // all 5xx errrors
-    case 0: // 0 is uri not found
+    case 0: {
+      // 0 is uri not found
       return 'red'
+    }
   }
 
   return 'white'

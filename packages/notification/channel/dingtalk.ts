@@ -129,12 +129,13 @@ Notifications: ${numberOfSentNotifications}\n
       }
     }
 
-    default:
+    default: {
       return {
         msgtype: 'text',
         text: {
           content: summary,
         },
       }
+    }
   }
 }

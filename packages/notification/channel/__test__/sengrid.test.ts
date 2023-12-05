@@ -27,7 +27,7 @@ describe('notificationChecker - sendgridNotification', () => {
           },
         },
       ])
-    } catch (error) {
+    } catch (error: unknown) {
       const message = '"SendGrid API Key" is not allowed to be empty'
 
       expect(() => {

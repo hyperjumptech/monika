@@ -27,6 +27,7 @@ import {
   ProbeRequestResponse,
   probeRequestResult,
 } from '../../../../interfaces/request'
+import { getErrorMessage } from '../../../../utils/catch-error-handler'
 
 type icmpParams = {
   host: string // target to ping
@@ -57,10 +58,9 @@ export async function icmpRequest(
     data: '',
     body: '',
     status: 0,
-    result: probeRequestResult.failed,
+    result: probeRequestResult.unknown,
     headers: '',
     responseTime: 0,
-    isProbeResponsive: false,
   }
 
   try {
@@ -74,10 +74,10 @@ export async function icmpRequest(
     icmpResp.output = resp.output
 
     return processICMPRequestResult(icmpResp)
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('icmp got error:', error)
-    baseResponse.data = error // map error to data
-    baseResponse.errMessage = error
+    baseResponse.data = ''
+    baseResponse.error = getErrorMessage(error)
   }
 
   return baseResponse
@@ -102,7 +102,5 @@ export function processICMPRequestResult(
     body: msg,
     headers: {},
     responseTime: params.average || 0,
-
-    isProbeResponsive: true,
   }
 }

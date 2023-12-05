@@ -22,57 +22,359 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Probe } from '../../../../interfaces/probe'
-import { validateAlerts } from './alert'
-import { validateRequests } from './request'
-import { validateSchemaConfig } from './schema-config'
+import joi from 'joi'
+import { v4 as uuid } from 'uuid'
+import type { Probe, ProbeAlert } from '../../../../interfaces/probe'
+import { isSymonModeFrom } from '../..'
+import { getContext } from '../../../../context'
+import { FAILED_REQUEST_ASSERTION } from '../../../../looper'
+import { compileExpression } from '../../../../utils/expression-parser'
+import { isValidURL } from '../../../../utils/is-valid-url'
+import { log } from '../../../../utils/pino'
+import {
+  DEFAULT_INCIDENT_THRESHOLD,
+  DEFAULT_INTERVAL,
+  DEFAULT_RECOVERY_THRESHOLD,
+} from './default-values'
+import { getErrorMessage } from '../../../../utils/catch-error-handler'
 
-const NO_PROBES = 'Probes object does not exists or has length lower than 1!'
-const PROBE_NO_REQUESTS =
-  'Probe requests does not exists or has length lower than 1!'
+const ALERT_QUERY = 'status-not-2xx'
+const RESPONSE_TIME_PREFIX = 'response-time-greater-than-'
 
-const checkTotalProbes = (probe: Probe): string | undefined => {
-  const { requests, socket, redis, mongo, postgres, mariadb, mysql } = probe
+export async function validateProbes(probes: Probe[]): Promise<Probe[]> {
+  const alertSchema = joi.alternatives().try(
+    // Legacy alerts
+    joi.string().custom((alert) => {
+      if (alert === ALERT_QUERY) {
+        return {
+          id: uuid(),
+          assertion: 'response.status < 200 or response.status > 299',
+          message: 'HTTP status is {{ response.status }}, expecting 2xx',
+        }
+      }
 
-  const totalProbes =
-    (socket ? 1 : 0) +
-    (redis ? 1 : 0) +
-    (mongo ? 1 : 0) +
-    (postgres ? 1 : 0) +
-    (mariadb ? 1 : 0) +
-    (mysql ? 1 : 0) +
-    (requests?.length ?? 0)
-  if (totalProbes === 0) return PROBE_NO_REQUESTS
+      if (alert.startsWith(RESPONSE_TIME_PREFIX)) {
+        const expectedTime = parseAlertStringTime(alert)
+
+        return {
+          id: uuid(),
+          assertion: `response.time > ${expectedTime}`,
+          message: `Response time is {{ response.time }}ms, expecting less than ${expectedTime}ms`,
+        }
+      }
+
+      throw new Error(`Probe alert format is invalid! (${alert})`)
+    }),
+    joi
+      .object({
+        assertion: joi
+          .string()
+          .allow('')
+          .default((parent) => {
+            if (!parent.query) {
+              return 'response.status < 200 or response.status > 299'
+            }
+
+            return parent.query
+          }),
+        id: joi.string().allow(''),
+        message: joi.string().allow(''),
+        query: joi.string().allow(''),
+      })
+      .custom((alert) => {
+        try {
+          isValidProbeAlert(alert)
+        } catch (error: unknown) {
+          if (isSymonModeFrom(getContext().flags)) {
+            log.error((error as Error)?.message)
+            return ''
+          }
+
+          throw new Error(
+            `Probe alert format is invalid! (${JSON.stringify(alert, null, 1)})`
+          )
+        }
+
+        return alert
+      })
+  )
+  const mysqlSchema = joi.object({
+    command: joi.string().allow(''),
+    data: joi.alternatives().try(joi.string().allow(''), joi.number()),
+    database: joi.string().allow(''),
+    host: joi
+      .alternatives()
+      .try(joi.string().allow('').hostname(), joi.string().allow('').ip())
+      .required(),
+    password: joi.string().allow(''),
+    port: joi.number().default(3306),
+    username: joi.string().allow(''),
+  })
+  const schema = joi
+    .array<Probe[]>()
+    .min(isSymonModeFrom(getContext().flags) ? 0 : 1)
+    .messages({
+      'array.min': 'Probes object does not exists or has length lower than 1!',
+    })
+    .items(
+      joi
+        .object({
+          alerts: joi
+            .array()
+            .items(alertSchema)
+            .default((parent) => {
+              if (isSymonModeFrom(getContext().flags)) {
+                return []
+              }
+
+              const isHTTPProbe = Boolean(parent.requests)
+
+              if (!isHTTPProbe) {
+                return [{ id: uuid(), ...FAILED_REQUEST_ASSERTION }]
+              }
+
+              return [
+                {
+                  id: uuid(),
+                  assertion: 'response.status < 200 or response.status > 299',
+                  message:
+                    'HTTP Status is {{ response.status }}, expecting 2xx',
+                },
+                {
+                  id: uuid(),
+                  assertion: 'response.time > 2000',
+                  message:
+                    'Response time is {{ response.time }}ms, expecting less than 2000ms',
+                },
+                { id: uuid(), ...FAILED_REQUEST_ASSERTION },
+              ]
+            }),
+          description: joi.string().allow(''),
+          id: joi.string().required(),
+          incidentThreshold: joi
+            .number()
+            .default(DEFAULT_INCIDENT_THRESHOLD)
+            .min(1),
+          recoveryThreshold: joi
+            .number()
+            .default(DEFAULT_RECOVERY_THRESHOLD)
+            .min(1),
+          interval: joi.number().default(DEFAULT_INTERVAL).min(1),
+          lastEvent: joi.object({
+            alertId: joi.string(),
+            createdAt: joi.string().allow(''),
+            recoveredAt: joi.string().allow('', null),
+          }),
+          name: joi
+            .string()
+            .allow('')
+            .default((parent) => `monika_${parent.id}`),
+          mariadb: joi.array().items(mysqlSchema),
+          mongo: joi.array().items(
+            joi.alternatives([
+              joi.object({
+                alerts: joi.array().items(alertSchema),
+                uri: joi.string().required(),
+              }),
+              joi.object({
+                alerts: joi.array().items(alertSchema),
+                host: joi
+                  .alternatives()
+                  .try(
+                    joi.string().allow('').hostname(),
+                    joi.string().allow('').ip()
+                  )
+                  .required(),
+                password: joi.string().allow(''),
+                port: joi.number().default(27_017).min(0).max(65_536),
+                username: joi.string().allow(''),
+              }),
+            ])
+          ),
+          mysql: joi.array().items(mysqlSchema),
+          ping: joi.array().items(
+            joi.object({
+              alerts: joi.array().items(alertSchema),
+              uri: joi.string().required(),
+            })
+          ),
+          postgres: joi.array().items(
+            joi.alternatives([
+              joi.object({
+                alerts: joi.array().items(alertSchema),
+                uri: joi.string().required(),
+              }),
+              joi.object({
+                alerts: joi.array().items(alertSchema),
+                command: joi.string().allow(''),
+                data: joi
+                  .alternatives()
+                  .try(joi.string().allow(''), joi.number()),
+                database: joi.string().allow(''),
+                host: joi
+                  .alternatives()
+                  .try(
+                    joi.string().allow('').hostname(),
+                    joi.string().allow('').ip()
+                  )
+                  .required(),
+                password: joi.string().allow(''),
+                port: joi.number().default(5432),
+                username: joi.string().allow(''),
+              }),
+            ])
+          ),
+          redis: joi.array().items(
+            joi
+              .object({
+                alerts: joi.array().items(alertSchema),
+                command: joi.string().allow(''),
+                host: joi
+                  .alternatives()
+                  .try(
+                    joi.string().allow('').hostname(),
+                    joi.string().allow('').ip()
+                  ),
+                password: joi.string().allow(''),
+                port: joi.number().min(0).max(65_536),
+                uri: joi.string().allow(''),
+                username: joi.string().allow(''),
+              })
+              .xor('host', 'uri')
+              .and('host', 'port')
+          ),
+          requests: joi
+            .array()
+            .min(isSymonModeFrom(getContext().flags) ? 0 : 1)
+            .items(
+              joi.object({
+                alerts: joi.array().items(alertSchema),
+                allowUnauthorized: joi.bool(),
+                body: joi
+                  .alternatives()
+                  .try(
+                    joi.string().allow('', null),
+                    joi.object(),
+                    joi.array(),
+                    joi.number(),
+                    joi.bool()
+                  ),
+                headers: joi.object().allow(null),
+                id: joi.string().allow(''),
+                interval: joi.number().min(1),
+                method: joi
+                  .string()
+                  .valid(
+                    'CONNECT',
+                    'GET',
+                    'POST',
+                    'PUT',
+                    'PATCH',
+                    'DELETE',
+                    'HEAD',
+                    'OPTIONS',
+                    'PURGE',
+                    'LINK',
+                    'TRACE',
+                    'UNLINK'
+                  )
+                  .default('GET')
+                  .insensitive()
+                  .label('Probe request method'),
+                ping: joi.bool(),
+                saveBody: joi.bool().default(false),
+                timeout: joi.number().default(10_000).min(1).allow(null),
+                url: joi
+                  .string()
+                  .custom((url) => {
+                    if (!isValidURL(url)) {
+                      throw new Error(
+                        `Probe request URL (${url}) should start with http:// or https://`
+                      )
+                    }
+
+                    return url
+                  })
+                  .label('Probe request URL')
+                  .required(),
+              })
+            )
+            .label('Probe requests'),
+          socket: joi.object({
+            alerts: joi.array().items(alertSchema),
+            data: joi.string().allow('', null),
+            host: joi.string().required(),
+            port: joi.number().required(),
+          }),
+        })
+        .custom((probe) => {
+          if (!isProbeRequestExists(probe)) {
+            throw new Error(
+              'Probe requests does not exists or has length lower than 1!'
+            )
+          }
+
+          return probe
+        })
+    )
+
+  try {
+    return await schema.validateAsync(probes, {
+      stripUnknown: true,
+    })
+  } catch (error: unknown) {
+    throw new Error(
+      `Monika configuration is invalid. Probe: ${getErrorMessage(error)}`
+    )
+  }
 }
 
-export const validateProbes = (probes: Probe[]): string | undefined => {
-  if (probes.length === 0) return NO_PROBES
+function isProbeRequestExists(probe: Probe) {
+  return (
+    probe?.mariadb ||
+    probe?.mongo ||
+    probe?.mysql ||
+    probe?.ping ||
+    probe?.postgres ||
+    probe?.redis ||
+    probe?.requests ||
+    probe?.socket
+  )
+}
 
-  for (const probe of probes) {
-    const { name, interval, requests } = probe
+// parse string like "response-time-greater-than-200-ms" and return the time in ms
+function parseAlertStringTime(str: string): number {
+  // match any string that ends with digits followed by unit 's' or 'ms'
+  const match = str.match(/(\d+)-(m?s)$/)
 
-    if (interval <= 0) {
-      return `The interval in the probe with name "${name}" should be greater than 0.`
-    }
-
-    const totalProbesError = checkTotalProbes(probe)
-    if (totalProbesError) {
-      return totalProbesError
-    }
-
-    const schemaConfigError = validateSchemaConfig(probe)
-    if (schemaConfigError) {
-      return schemaConfigError
-    }
-
-    const validateRequestsError = validateRequests(requests)
-    if (validateRequestsError) {
-      return validateRequestsError
-    }
-
-    const validateAlertError = validateAlerts(probe)
-    if (validateAlertError) {
-      return validateAlertError
-    }
+  if (!match) {
+    throw new Error('Alert string does not contain valid time number')
   }
+
+  const number = Number(match[1])
+  const unit = match[2]
+
+  if (unit === 's') return number * 1000
+
+  return number
+}
+
+function isValidProbeAlert(alert: ProbeAlert) {
+  const expression = alert.assertion || alert.query
+  if (!expression) {
+    return
+  }
+
+  const data = {
+    response: {
+      size: 0,
+      status: 200,
+      time: 0,
+      body: '',
+      headers: {},
+    },
+  }
+  const filter = compileExpression(expression, Object.keys(data))
+
+  filter(data)
 }

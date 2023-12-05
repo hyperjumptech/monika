@@ -11,20 +11,17 @@ let redisPingStub: sinon.SinonStub
 
 describe('Redis Prober', () => {
   beforeEach(() => {
-    redisPingStub = sinon
-      .stub(request, 'redisRequest')
-      .callsFake(async (_options): Promise<ProbeRequestResponse> => {
-        return {
-          requestType: 'redis',
-          data: '',
-          body: '',
-          status: 200,
-          headers: '',
-          responseTime: 0,
-          result: probeRequestResult.failed,
-          isProbeResponsive: false,
-        }
+    redisPingStub = sinon.stub(request, 'redisRequest').callsFake(
+      async (_options): Promise<ProbeRequestResponse> => ({
+        requestType: 'redis',
+        data: '',
+        body: '',
+        status: 200,
+        headers: '',
+        responseTime: 0,
+        result: probeRequestResult.failed,
       })
+    )
   })
 
   afterEach(() => {
@@ -102,20 +99,17 @@ describe('Redis Prober', () => {
   it('should return alert triggered', async () => {
     // arrange
     sinon.restore()
-    redisPingStub = sinon
-      .stub(request, 'redisRequest')
-      .callsFake(async (_options): Promise<ProbeRequestResponse> => {
-        return {
-          requestType: 'redis',
-          data: '',
-          body: '',
-          status: 0,
-          headers: '',
-          responseTime: 0,
-          result: probeRequestResult.failed,
-          isProbeResponsive: false,
-        }
+    redisPingStub = sinon.stub(request, 'redisRequest').callsFake(
+      async (_options): Promise<ProbeRequestResponse> => ({
+        requestType: 'redis',
+        data: '',
+        body: '',
+        status: 0,
+        headers: '',
+        responseTime: 0,
+        result: probeRequestResult.failed,
       })
+    )
     const probeParams = {
       id: 'wTBPV',
       checkOrder: 1,

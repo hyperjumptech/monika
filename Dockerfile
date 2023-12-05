@@ -23,4 +23,5 @@ RUN npm install -g --unsafe-perm ./hyperjumptech-monika-*.tgz
 WORKDIR /
 RUN mkdir /config
 
+STOPSIGNAL SIGINT
 CMD ["monika"]

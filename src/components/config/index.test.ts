@@ -29,10 +29,12 @@ import type { Config } from '../../interfaces/config'
 import events from '../../events'
 import { md5Hash } from '../../utils/hash'
 import { getEventEmitter } from '../../utils/events'
-import type { MonikaFlags } from '../../context/monika-flags'
+import type { MonikaFlags } from '../../flag'
+import { validateProbes } from './validation'
+import { getErrorMessage } from '../../utils/catch-error-handler'
 
 describe('getConfig', () => {
-  afterEach(() => {
+  beforeEach(() => {
     resetContext()
   })
 
@@ -40,6 +42,19 @@ describe('getConfig', () => {
     expect(() => getConfig()).to.throw(
       'Configuration setup has not been run yet'
     )
+  })
+
+  it('should not throw error when config is empty in symon mode', () => {
+    // arrange
+    setContext({
+      flags: {
+        symonKey: 'bDF8j',
+        symonUrl: 'https://example.com',
+      } as MonikaFlags,
+    })
+
+    // act & assert
+    expect(getConfig()).deep.eq({ probes: [] })
   })
 
   it('should return empty array when config is empty in Symon mode', () => {
@@ -53,27 +68,6 @@ describe('getConfig', () => {
 
     // act and assert
     expect(getConfig()).deep.eq({ probes: [] })
-  })
-
-  it('should return config', () => {
-    // arrange
-    const config = {
-      probes: [
-        {
-          id: '1',
-          name: 'example',
-          interval: 1000,
-          incidentThreshold: 1,
-          recoveryThreshold: 1,
-          alerts: [],
-          requests: [{ body: '', url: 'https://example.com', timeout: 1000 }],
-        },
-      ],
-    }
-    setContext({ config })
-
-    // assert
-    expect(getConfig()).to.deep.eq(config)
   })
 })
 
@@ -124,7 +118,7 @@ describe('isSymonModeFrom', () => {
 })
 
 describe('updateConfig', () => {
-  afterEach(() => {
+  beforeEach(() => {
     resetContext()
   })
 
@@ -135,12 +129,12 @@ describe('updateConfig', () => {
     try {
       // act
       await updateConfig({ probes: [] })
-    } catch (error: any) {
-      errorMessage = error.message
+    } catch (error: unknown) {
+      errorMessage = getErrorMessage(error)
     }
 
     // assert
-    expect(errorMessage).eq(
+    expect(errorMessage).contain(
       'Probes object does not exists or has length lower than 1!'
     )
   })
@@ -154,11 +148,13 @@ describe('updateConfig', () => {
           name: '',
           interval: 1000,
           requests: [{ url: 'https://example.com', body: '', timeout: 1000 }],
-          incidentThreshold: 1,
-          recoveryThreshold: 1,
           alerts: [],
         },
       ],
+    }
+    const validatedProbes = {
+      ...config,
+      probes: await validateProbes(config.probes),
     }
     let configFromEmitter = ''
     const eventEmitter = getEventEmitter()
@@ -171,13 +167,13 @@ describe('updateConfig', () => {
 
     // assert
     expect(getContext().config).to.deep.eq({
-      ...config,
-      version: md5Hash(config),
+      ...validatedProbes,
+      version: md5Hash(validatedProbes),
     })
     expect(configFromEmitter).not.eq('')
   })
 
-  it('should should not update config', async () => {
+  it('should should not update config if there is no changes', async () => {
     // arrange
     const config: Config = {
       probes: [
@@ -186,22 +182,19 @@ describe('updateConfig', () => {
           name: '',
           interval: 1000,
           requests: [{ url: 'https://example.com', body: '', timeout: 1000 }],
-          incidentThreshold: 1,
-          recoveryThreshold: 1,
           alerts: [],
         },
       ],
     }
-    setContext({ config: { ...config, version: md5Hash(config) } })
     let configFromEmitter = ''
     const eventEmitter = getEventEmitter()
-    const eventListener = (data: any) => {
+    const eventListener = (data: string) => {
       configFromEmitter = data
     }
 
-    eventEmitter.once(events.config.updated, eventListener)
-
     // act
+    await updateConfig(config)
+    eventEmitter.once(events.config.updated, eventListener)
     await updateConfig(config)
 
     // assert

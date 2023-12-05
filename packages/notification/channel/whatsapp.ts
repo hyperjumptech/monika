@@ -43,13 +43,13 @@ type NotificationData = {
 
 type User = {
   token: string
-  // eslint-disable-next-line camelcase
+
   expires_after: string
 }
 
 type Meta = {
   version: string
-  // eslint-disable-next-line camelcase
+
   api_status: string
 }
 
@@ -97,7 +97,7 @@ async function sendTextMessage({
 
     await sendHttpRequest({
       method: 'POST',
-      url: url,
+      url,
       headers: {
         'Content-Type': 'application/json',
         Authorization: auth,
@@ -112,7 +112,7 @@ async function sendTextMessage({
         },
       },
     })
-  } catch (error) {
+  } catch (error: unknown) {
     throw new Error(
       `Something wrong with your recipient number, Please check your country code: ${recipient} ${error}`
     )
@@ -147,7 +147,7 @@ async function loginUser({
     }
 
     return loginResp.users[0].token
-  } catch (error) {
+  } catch (error: unknown) {
     throw new Error(
       `Something wrong with your whatsapp config please check again. error: ${error}`
     )

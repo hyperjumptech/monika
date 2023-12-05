@@ -26,7 +26,7 @@ import { expect } from 'chai'
 import fs from 'fs'
 import _ from 'lodash'
 
-import type { MonikaFlags } from '../../../context/monika-flags'
+import type { MonikaFlags } from '../../../flag'
 import { createConfig } from '../'
 
 beforeEach(() => {
@@ -65,10 +65,10 @@ describe('Har config', () => {
       await createConfig(flags)
       expect(fs.lstatSync('monika.har.yml').isFile()).to.be.true
 
-      const generated = fs.readFileSync('monika.har.yml', 'utf-8')
+      const generated = fs.readFileSync('monika.har.yml', 'utf8')
       const expected = fs.readFileSync(
         './src/components/config/__tests__/expected.har.yml',
-        'utf-8'
+        'utf8'
       )
       expect(_.isEqual(generated, expected)).to.be.true
     })
@@ -86,10 +86,10 @@ describe('Text config', () => {
       await createConfig(flags)
       expect(fs.lstatSync('monika.textfile.yml').isFile()).to.be.true
 
-      const generated = fs.readFileSync('monika.textfile.yml', 'utf-8')
+      const generated = fs.readFileSync('monika.textfile.yml', 'utf8')
       const expected = fs.readFileSync(
         './src/components/config/__tests__/expected.textfile.yml',
-        'utf-8'
+        'utf8'
       )
       expect(_.isEqual(generated, expected)).to.be.true
     })
@@ -106,10 +106,10 @@ describe('Sitemap config', () => {
       await createConfig(flags)
       expect(fs.lstatSync('monika.sitemap.yml').isFile()).to.be.true
 
-      const generated = fs.readFileSync('monika.sitemap.yml', 'utf-8')
+      const generated = fs.readFileSync('monika.sitemap.yml', 'utf8')
       const expected = fs.readFileSync(
         './src/components/config/__tests__/expected.sitemap.yml',
-        'utf-8'
+        'utf8'
       )
       expect(_.isEqual(generated, expected)).to.be.true
     })
@@ -127,10 +127,10 @@ describe('Sitemap config [--one-probe ]', () => {
       await createConfig(flags)
       expect(fs.lstatSync('monika.sitemap.yml').isFile()).to.be.true
 
-      const generated = fs.readFileSync('monika.sitemap.yml', 'utf-8')
+      const generated = fs.readFileSync('monika.sitemap.yml', 'utf8')
       const expected = fs.readFileSync(
         './src/components/config/__tests__/expected.sitemap-oneprobe.yml',
-        'utf-8'
+        'utf8'
       )
       expect(_.isEqual(generated, expected)).to.be.true
     })
@@ -139,21 +139,21 @@ describe('Sitemap config [--one-probe ]', () => {
 
 const getPostmanConfig = ({ grouped }: { grouped: boolean }) => {
   if (grouped) {
-    const generated = fs.readFileSync('monika.postman-grouped.yml', 'utf-8')
+    const generated = fs.readFileSync('monika.postman-grouped.yml', 'utf8')
 
     const expected = fs.readFileSync(
       './src/components/config/__tests__/mock_files/expected.postman-grouped.yml',
-      'utf-8'
+      'utf8'
     )
 
     return { generated, expected }
   }
 
-  const generated = fs.readFileSync('monika.postman-basic.yml', 'utf-8')
+  const generated = fs.readFileSync('monika.postman-basic.yml', 'utf8')
 
   const expected = fs.readFileSync(
     './src/components/config/__tests__/mock_files/expected.postman-basic.yml',
-    'utf-8'
+    'utf8'
   )
 
   return { generated, expected }
@@ -229,10 +229,10 @@ describe('Insomnia config', () => {
       await createConfig(flags)
       expect(fs.lstatSync('monika.insomnia.yml').isFile()).to.be.true
 
-      const generated = fs.readFileSync('monika.insomnia.yml', 'utf-8')
+      const generated = fs.readFileSync('monika.insomnia.yml', 'utf8')
       const expected = fs.readFileSync(
         './src/components/config/__tests__/expected.insomnia.yml',
-        'utf-8'
+        'utf8'
       )
       expect(_.isEqual(generated, expected)).to.be.true
     })

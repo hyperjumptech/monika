@@ -10,7 +10,7 @@ on:
 
 permissions:
   issues: read
-  pull-requests: read    
+  pull-requests: read
 
 jobs:
   test:

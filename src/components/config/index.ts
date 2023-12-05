@@ -23,15 +23,15 @@
  **********************************************************************************/
 
 import chokidar from 'chokidar'
-import { CliUx } from '@oclif/core'
+import { ux } from '@oclif/core'
 import { existsSync, writeFileSync } from 'fs'
 import isUrl from 'is-url'
 
 import events from '../../events'
 import type { Config } from '../../interfaces/config'
 import { getContext, setContext } from '../../context'
-import { monikaFlagsDefaultValue } from '../../context/monika-flags'
-import type { MonikaFlags } from '../../context/monika-flags'
+import { monikaFlagsDefaultValue } from '../../flag'
+import type { MonikaFlags } from '../../flag'
 import { getEventEmitter } from '../../utils/events'
 import { md5Hash } from '../../utils/hash'
 import { open } from '../../utils/open-website'
@@ -47,6 +47,8 @@ import {
   getConfigFrom,
   mergeConfigs,
 } from './get'
+import { getProbes, setProbes } from './probe'
+import { getErrorMessage } from '../../utils/catch-error-handler'
 
 type ScheduleRemoteConfigFetcherParams = {
   configType: ConfigType
@@ -79,46 +81,42 @@ export const getConfig = (): Config => {
     }
   }
 
-  return config
+  return { ...config, probes: getProbes() }
 }
 
-export const updateConfig = async (
-  config: Config,
-  validate = true
-): Promise<void> => {
+export const updateConfig = async (config: Config): Promise<void> => {
   log.info('Updating config')
-  if (validate) {
-    try {
-      await validateConfig(config)
-    } catch (error: any) {
-      if (isTestEnvironment) {
-        // return error during tests
-        throw new Error(error.message)
-      }
+  try {
+    const validatedConfig = await validateConfig(config)
+    const version = md5Hash(validatedConfig)
+    const hasChangeConfig = getContext().config?.version !== version
 
-      log.error(error?.message)
-      exit(1)
+    if (!hasChangeConfig) {
+      return
     }
-  }
 
-  const version = md5Hash(config)
-  const hasChangeConfig = getContext()?.config?.version !== version
-
-  if (hasChangeConfig) {
-    const newConfig = addConfigVersion(config)
+    const newConfig = addConfigVersion(validatedConfig)
 
     setContext({ config: newConfig })
+    setProbes(newConfig.probes)
     emitter.emit(events.config.updated, newConfig)
-    log.warn('config file update detected')
+    log.info('Config file update detected')
+  } catch (error: unknown) {
+    const message = getErrorMessage(error)
+    if (isTestEnvironment) {
+      // return error during tests
+      throw new Error(message)
+    }
+
+    log.error(message)
+    exit(1)
   }
 }
 
 export const setupConfig = async (flags: MonikaFlags): Promise<void> => {
   const validFlag = await createConfigIfEmpty(flags)
   const config = await getConfigFrom(validFlag)
-  await validateConfig(config)
-
-  setContext({ config: addConfigVersion(config) })
+  await updateConfig(config)
 
   watchConfigsChange(validFlag)
 }
@@ -215,8 +213,8 @@ function scheduleRemoteConfigFetcher({
       }
 
       await updateConfig(mergeConfigs(defaultConfigs, nonDefaultConfig))
-    } catch (error: any) {
-      log.error(error?.message)
+    } catch (error: unknown) {
+      log.error(getErrorMessage(error))
     }
   }, interval * 1000)
 }
@@ -294,7 +292,7 @@ export const createConfig = async (flags: MonikaFlags): Promise<void> => {
     const file = flags.output || 'monika.yml'
 
     if (existsSync(file) && !flags.force) {
-      const ans = await CliUx.ux.prompt(
+      const ans = await ux.ux.prompt(
         `\n${file} file is already exists. Overwrite (Y/n)?`
       )
 

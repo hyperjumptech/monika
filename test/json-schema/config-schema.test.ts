@@ -66,14 +66,6 @@ describe('json schema validation tests', () => {
     expect(isValid).to.be.false
   })
 
-  it('should detect bad probe.incidentThreshold.type', () => {
-    const badType = yaml.load(
-      fs.readFileSync('./test/json-schema/test-configs/bad-type.yml', 'utf8')
-    )
-    const isValid = validate(badType)
-    expect(isValid).to.be.false
-  })
-
   it('should detect missing probe.alert.assertion', () => {
     const badQuery = yaml.load(
       fs.readFileSync(

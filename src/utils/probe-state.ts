@@ -76,17 +76,15 @@ const probeInterpreters = new Map()
 export function initializeProbeStates(probes: Probe[]): void {
   probeInterpreters.clear()
 
-  const getLastStart = (probe: Probe) => {
-    return probe.lastEvent?.createdAt
+  const getLastStart = (probe: Probe) =>
+    probe.lastEvent?.createdAt
       ? new Date(probe.lastEvent.createdAt)
       : new Date()
-  }
 
-  const getLastFinish = (probe: Probe) => {
-    return probe.lastEvent?.recoveredAt
+  const getLastFinish = (probe: Probe) =>
+    probe.lastEvent?.recoveredAt
       ? new Date(probe.lastEvent.recoveredAt)
       : getLastStart(probe)
-  }
 
   for (const probe of probes) {
     const interpreter = interpret(

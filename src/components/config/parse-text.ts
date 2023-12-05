@@ -47,8 +47,7 @@
  **********************************************************************************/
 
 import type { Config } from '../../interfaces/config'
-import { monikaFlagsDefaultValue } from '../../context/monika-flags'
-import { DEFAULT_THRESHOLD } from '../../looper'
+import { monikaFlagsDefaultValue } from '../../flag'
 import type { Probe, ProbeAlert } from '../../interfaces/probe'
 import { isValidURL } from '../../utils/is-valid-url'
 
@@ -64,14 +63,12 @@ export const parseConfigFromText = (configString: string): Config => {
           name: url,
           requests: [
             {
-              url: url,
+              url,
               method: 'GET',
               timeout: 10_000,
               body: {} as JSON,
             },
           ],
-          incidentThreshold: DEFAULT_THRESHOLD,
-          recoveryThreshold: DEFAULT_THRESHOLD,
           interval: monikaFlagsDefaultValue['config-interval'],
           alerts: [
             {

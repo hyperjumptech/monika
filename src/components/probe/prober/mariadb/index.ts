@@ -4,7 +4,7 @@ import { probeRequestResult } from '../../../../interfaces/request'
 import { mariaRequest } from './request'
 
 export class MariaDBProber extends BaseProber {
-  async probe(): Promise<void> {
+  async probe(incidentRetryAttempt: number): Promise<void> {
     const result = await probeMariaDB({
       id: this.probeConfig.id,
       checkOrder: this.counter,
@@ -12,7 +12,7 @@ export class MariaDBProber extends BaseProber {
       mysql: this.probeConfig.mysql,
     })
 
-    this.processProbeResults(result)
+    this.processProbeResults(result, incidentRetryAttempt)
   }
 
   generateVerboseStartupMessage(): string {

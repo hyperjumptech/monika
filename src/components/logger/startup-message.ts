@@ -26,7 +26,7 @@ import path from 'path'
 import isUrl from 'is-url'
 import boxen from 'boxen'
 import chalk from 'chalk'
-import type { MonikaFlags } from '../../context/monika-flags'
+import type { MonikaFlags } from '../../flag'
 import type { Config } from '../../interfaces/config'
 import type { Notification } from '@hyperjumptech/monika-notification'
 import { channels } from '@hyperjumptech/monika-notification'
@@ -174,7 +174,7 @@ function getAdditionalMessage(notification: Notification) {
   const { data, type } = notification
   const channel = channels[type]
 
-  if (!channel?.additionalStartupMessage) {
+  if (!channel?.additionalStartupMessage || !data) {
     return ''
   }
 

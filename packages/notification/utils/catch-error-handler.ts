@@ -22,57 +22,33 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import sinon from 'sinon'
-import { CliUx } from '@oclif/core'
-import { test } from '@oclif/test'
-import * as history from '../components/logger/history'
-import cmd from '../'
-import { flush } from './flush'
+// Credits to Kent C. Dodds
+// taken from https://kentcdodds.com/blog/get-a-catch-block-error-message-with-typescript
+type ErrorWithMessage = {
+  message: string
+}
 
-let flushAllLogsStub: sinon.SinonStub
+function isErrorWithMessage(error: unknown): error is ErrorWithMessage {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'message' in error &&
+    typeof (error as Record<string, unknown>).message === 'string'
+  )
+}
 
-beforeEach(() => {
-  flushAllLogsStub = sinon.stub(history, 'flushAllLogs').resolves()
-})
+function toErrorWithMessage(maybeError: unknown): ErrorWithMessage {
+  if (isErrorWithMessage(maybeError)) return maybeError
 
-afterEach(() => {
-  flushAllLogsStub.restore()
-})
+  try {
+    return new Error(JSON.stringify(maybeError))
+  } catch {
+    // fallback in case there's an error stringifying the maybeError
+    // like with circular references for example.
+    return new Error(String(maybeError))
+  }
+}
 
-describe('Flush command', () => {
-  describe('Force', () => {
-    it('should flush records without asking for confirmation', async () => {
-      // act
-      await flush(true)
-
-      // assert
-      sinon.assert.calledOnce(flushAllLogsStub)
-    })
-  })
-
-  describe('Not force', () => {
-    test
-      // arrange
-      // eslint-disable-next-line unicorn/consistent-function-scoping
-      .stub(CliUx.ux, 'prompt', () => async () => 'n')
-      .stdout()
-      // act
-      .do(() => cmd.run(['--flush']))
-      .it('should cancel flush', () => {
-        // assert
-        sinon.assert.notCalled(flushAllLogsStub)
-      })
-
-    test
-      // arrange
-      // eslint-disable-next-line unicorn/consistent-function-scoping
-      .stub(CliUx.ux, 'prompt', () => async () => 'Y')
-      .stdout()
-      // act
-      .do(() => cmd.run(['--flush']))
-      .it('should flush', () => {
-        // assert
-        sinon.assert.calledOnce(flushAllLogsStub)
-      })
-  })
-})
+export function getErrorMessage(error: unknown) {
+  return toErrorWithMessage(error).message
+}

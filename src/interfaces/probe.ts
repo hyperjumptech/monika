@@ -66,6 +66,7 @@ export type Mongo = {
   port?: number
   username?: string
   password?: string
+  alerts?: ProbeAlert[]
 }
 
 export type Postgres = {
@@ -77,6 +78,11 @@ export type Postgres = {
   password: string
   command?: string
   data?: string | Uint8Array
+  alerts?: ProbeAlert[]
+}
+
+export type Ping = {
+  uri: string
   alerts?: ProbeAlert[]
 }
 
@@ -92,11 +98,13 @@ export interface Probe {
   mariadb?: MariaDB[]
   mysql?: MariaDB[]
   postgres?: Postgres[]
-  incidentThreshold: number
-  recoveryThreshold: number
+  ping?: Ping[]
+  incidentThreshold?: number
+  recoveryThreshold?: number
   alerts: ProbeAlert[]
   lastEvent?: {
+    alertId?: string
     createdAt?: Date
-    recoveredAt?: Date
+    recoveredAt?: Date | null
   }
 }

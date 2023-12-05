@@ -22,19 +22,20 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-/* eslint-disable unicorn/prefer-module */
 import axios, { AxiosInstance } from 'axios'
-import Bree from 'bree'
+import { ExponentialBackoff, handleAll, retry } from 'cockatiel'
 import { EventEmitter } from 'events'
 import mac from 'macaddress'
 import { hostname } from 'os'
 import path from 'path'
+import Piscina from 'piscina'
 
+import { getProbes } from '../components/config/probe'
 import { updateConfig } from '../components/config'
 import { getOSName } from '../components/notification/alert-message'
-import { getContext, setContext } from '../context'
-import type { MonikaFlags } from '../context/monika-flags'
+import { getContext } from '../context'
 import events from '../events'
+import { SYMON_API_VERSION, type MonikaFlags } from '../flag'
 import { Config } from '../interfaces/config'
 import { Probe } from '../interfaces/probe'
 import { ValidatedResponse } from '../plugins/validate-response'
@@ -49,50 +50,55 @@ import {
   publicNetworkInfo,
 } from '../utils/public-ip'
 
-Bree.extend(require('@breejs/ts-worker'))
-
 type SymonHandshakeData = {
-  macAddress: string
-  hostname: string
-  publicIp: string
-  privateIp: string
-  isp: string
   city: string
   country: string
-  pid: number
-  os: string
-  version: string
+  hostname: string
+  isp: string
   locationId?: string
+  macAddress: string
   monikaId?: string
-}
-
-type SymonClientEvent = {
-  event: 'incident' | 'recovery'
-  alertId: string
-  response: {
-    status: number // httpStatus Code
-    time?: number
-    size?: number
-    headers?: Record<string, unknown>
-    body?: unknown
-  }
+  os: string
+  pid: number
+  privateIp: string
+  publicIp: string
+  version: string
 }
 
 type NotificationEvent = {
   probeID: string
-  url: string
   probeState: string
+  url: string
   validation: ValidatedResponse
+  alertId: string
 }
 
-type ConfigListener = (config: Config) => void
-
-const isTestEnvironment = process.env.NODE_ENV === 'test' || process.env.CI
-
-let hasConnectionToSymon = false
+type SymonClientParams = Pick<
+  MonikaFlags,
+  | 'symon-api-version'
+  | 'symonKey'
+  | 'symonLocationId'
+  | 'symonMonikaId'
+  | 'symonReportInterval'
+  | 'symonReportLimit'
+  | 'symonUrl'
+>
 
 const getHandshakeData = async (): Promise<SymonHandshakeData> => {
-  await getPublicNetworkInfo()
+  await retry(handleAll, {
+    backoff: new ExponentialBackoff(),
+  }).execute(async () => {
+    await getPublicNetworkInfo()
+      .then(({ city, hostname, isp, privateIp, publicIp }) => {
+        log.info(
+          `[Symon] Monika is running from: ${city} - ${isp} (${publicIp}) - ${hostname} (${privateIp})`
+        )
+      })
+      .catch((error) => {
+        log.error(`[Symon] ${error}. Retrying...`)
+        throw error
+      })
+  })
   await getPublicIp()
 
   const os = await getOSName()
@@ -100,179 +106,244 @@ const getHandshakeData = async (): Promise<SymonHandshakeData> => {
   const host = hostname()
   const publicIp = publicIpAddress
   const privateIp = getIp()
-  const isp = publicNetworkInfo.isp
-  const city = publicNetworkInfo.city
-  const country = publicNetworkInfo.country
-  const pid = process.pid
+  const { city, country, isp } = publicNetworkInfo!
+  const { pid } = process
   const { userAgent: version } = getContext()
 
   return {
-    macAddress,
-    hostname: host,
-    publicIp,
-    privateIp,
-    isp,
     city,
     country,
-    pid,
+    hostname: host,
+    isp,
+    macAddress,
     os,
+    pid,
+    privateIp,
+    publicIp,
     version,
   }
 }
 
-class SymonClient {
-  monikaId = ''
-
-  config: Config | null = null
-
-  configHash = ''
-
-  private apiKey = ''
-
-  private url = ''
-
-  private fetchProbesInterval: number // (ms)
-
-  private reportProbesInterval = 10_000 // (ms)
-
-  private reportProbesLimit: number
-
-  private probes: Probe[] = []
-
-  eventEmitter: EventEmitter | null = null
-
+export default class SymonClient {
+  private readonly eventEmitter: EventEmitter = getEventEmitter()
+  private reportProbesInterval: number
+  private worker
+  private apiKey: string
+  private getProbesInterval: NodeJS.Timeout | undefined
+  private hasConnectionToSymon: boolean = false
   private httpClient: AxiosInstance
-
   private locationId: string
-
-  private configListeners: ConfigListener[] = []
-
-  private bree = new Bree({
-    root: false,
-    defaultExtension: process.env.NODE_ENV === 'test' ? 'ts' : 'js',
-    jobs: [],
-    logger: log,
-    doRootCheck: false,
-    errorHandler: (error, workerMetadata) => {
-      log.error(error)
-      log.debug(workerMetadata)
-    },
-    removeCompleted: true,
-    outputWorkerMetadata: true,
-    workerMessageHandler: async ({ message }) => {
-      console.log(message)
-      if (message.success) {
-        setTimeout(async () => {
-          await this.report()
-        }, this.reportProbesInterval)
-      }
-    },
-  })
+  private monikaId: string
+  private reportProbesLimit: number
+  private reportTimeout: NodeJS.Timeout | undefined
+  private url: string
 
   constructor({
-    symonUrl = '',
+    'symon-api-version': apiVersion = SYMON_API_VERSION.v1,
     symonKey = '',
-    symonLocationId,
-    symonMonikaId,
-    symonReportInterval,
-    symonReportLimit,
-    'symon-api-version': apiVersion,
-  }: Pick<
-    MonikaFlags,
-    | 'symon-api-version'
-    | 'symonUrl'
-    | 'symonKey'
-    | 'symonLocationId'
-    | 'symonMonikaId'
-    | 'symonReportInterval'
-    | 'symonReportLimit'
-  >) {
+    symonLocationId = '',
+    symonMonikaId = '',
+    symonReportInterval = 10_000,
+    symonReportLimit = 100,
+    symonUrl = '',
+  }: SymonClientParams) {
+    this.apiKey = symonKey
+    this.url = symonUrl
     this.httpClient = axios.create({
-      baseURL: `${symonUrl}/api/${apiVersion}/monika`,
+      baseURL: `${this.url}/api/${apiVersion}/monika`,
       headers: {
-        'x-api-key': symonKey,
+        'x-api-key': this.apiKey,
       },
       timeout: DEFAULT_TIMEOUT,
     })
-
-    this.url = symonUrl
-
-    this.apiKey = symonKey
-
-    this.locationId = symonLocationId || ''
-
-    this.monikaId = symonMonikaId || ''
-
-    this.fetchProbesInterval = Number.parseInt(
-      process.env.FETCH_PROBES_INTERVAL ?? '60000',
-      10
-    )
-
-    this.reportProbesInterval = symonReportInterval ?? 10_000
-
-    this.reportProbesLimit = symonReportLimit ?? 100
+    this.locationId = symonLocationId
+    this.monikaId = symonMonikaId
+    this.reportProbesInterval = symonReportInterval
+    this.reportProbesLimit = symonReportLimit
+    this.worker = new Piscina.Piscina({
+      concurrentTasksPerWorker: 1,
+      // eslint-disable-next-line unicorn/prefer-module
+      filename: path.join(__dirname, '../../lib/workers/report-to-symon.js'),
+      idleTimeout: this.reportProbesInterval,
+      maxQueue: 1,
+    })
   }
 
   async initiate(): Promise<void> {
+    log.info('[Symon] Handshake starts')
     this.monikaId = await this.handshake()
-    await this.sendStatus({ isOnline: true })
+    log.info('[Symon] Handshake succeed')
 
-    setContext({ monikaID: this.monikaId })
-
-    log.debug('Handshake succesful')
-
-    this.eventEmitter = getEventEmitter()
-    this.eventEmitter.on(
-      events.probe.notification.willSend,
-      (args: NotificationEvent) => {
-        this.notifyEvent({
-          event: args.probeState === 'DOWN' ? 'incident' : 'recovery',
-          alertId: args.validation.alert.id ?? '',
-          response: {
-            status: args.validation.response.status, // status is http status code
-            time: args.validation.response.responseTime,
-            size: args.validation.response.headers['content-length'],
-            headers: args.validation.response.headers ?? {},
-            body: args.validation.response.data,
-          },
-        }).catch((error: any) => {
-          log.error(error)
-        })
-      }
-    )
+    log.info('[Symon] Send status')
+    this.sendStatus({ isOnline: true })
+      .then(() => {
+        log.info('[Symon] Send status succeed')
+      })
+      .catch((error) => {
+        log.error(`[Symon] Send status failed. ${(error as Error).message}`)
+      })
 
     await this.fetchProbesAndUpdateConfig()
-    if (!isTestEnvironment) {
-      setInterval(
-        this.fetchProbesAndUpdateConfig.bind(this),
-        this.fetchProbesInterval
-      )
-    }
+    this.getProbesInterval = setInterval(
+      this.fetchProbesAndUpdateConfig.bind(this),
+      getContext().flags.symonGetProbesIntervalMs
+    )
 
-    await this.report()
-    this.onConfig((config) => updateConfig(config, false))
+    this.report().catch((error) => {
+      this.hasConnectionToSymon = false
+      log.error(`[Symon] Report failed. ${(error as Error).message}`)
+    })
+
+    this.eventEmitter.on(
+      events.probe.notification.willSend,
+      this.willSendEventListener.bind(this)
+    )
   }
 
-  async notifyEvent(event: SymonClientEvent): Promise<void> {
-    log.debug('Sending incident/recovery event to Symon')
-    await this.httpClient.post('/events', { monikaId: this.monikaId, ...event })
+  async stop(): Promise<void> {
+    if (this.eventEmitter) {
+      this.eventEmitter.removeAllListeners()
+    }
+
+    clearInterval(this.getProbesInterval)
+
+    clearTimeout(this.reportTimeout)
+
+    await this.worker.destroy()
   }
 
-  // monika subscribes to config update by providing listener callback
-  onConfig(listener: ConfigListener): any {
-    if (this.config) listener(this.config)
+  private willSendEventListener({
+    probeState,
+    validation,
+    alertId,
+  }: NotificationEvent) {
+    log.info(
+      `[Symon] Send ${
+        probeState === 'DOWN' ? 'incident' : 'recovery'
+      } event for Alert ID: ${alertId}`
+    )
 
-    this.configListeners.push(listener)
+    const { data, headers, responseTime, status } = validation.response
+    this.httpClient
+      .post('/events', {
+        monikaId: this.monikaId,
+        alertId,
+        event: probeState === 'DOWN' ? 'incident' : 'recovery',
+        response: {
+          body: data,
+          headers: typeof headers === 'object' ? headers : {},
+          size: headers['content-length'],
+          status, // status is http status code
+          time: responseTime,
+        },
+      })
+      .catch((error) => {
+        log.error(
+          `[Symon] Send ${
+            probeState === 'DOWN' ? 'incident' : 'recovery'
+          } event for Alert ID: ${alertId} failed.  ${(error as Error).message}`
+        )
+      })
+  }
 
-    // return unsubscribe function
-    return () => {
-      const index = this.configListeners.indexOf(listener)
-      this.configListeners.splice(index, 1)
+  private async report(): Promise<void> {
+    log.info('[Symon] Report')
+    // Create a task data object
+    const taskData = {
+      apiKey: this.apiKey,
+      hasConnectionToSymon: this.hasConnectionToSymon,
+      httpClient: this.httpClient,
+      monikaId: this.monikaId,
+      probeIds: getProbes().map(({ id }) => id),
+      reportProbesLimit: this.reportProbesLimit,
+      url: this.url,
     }
+
+    try {
+      // Submit the task to Piscina
+      await this.worker.run(JSON.stringify(taskData))
+    } finally {
+      this.reportTimeout = setTimeout(() => {
+        this.report
+          .bind(this)()
+          .catch((error) => {
+            this.hasConnectionToSymon = false
+            log.error(`[Symon] Report failed. ${(error as Error).message}`)
+          })
+      }, this.reportProbesInterval)
+    }
+  }
+
+  async sendStatus({ isOnline }: { isOnline: boolean }): Promise<void> {
+    const { status } = await this.httpClient({
+      data: {
+        monikaId: this.monikaId,
+        status: isOnline,
+      },
+      method: 'POST',
+      url: '/status',
+    })
+
+    if (status === 200) {
+      this.hasConnectionToSymon = true
+    }
+  }
+
+  private async fetchProbes() {
+    const TIMEOUT = 30_000
+
+    return this.httpClient
+      .get<{ data: Probe[] }>(`/${this.monikaId}/probes`, {
+        timeout: TIMEOUT,
+        headers: {
+          ...(getContext().config?.version
+            ? { 'If-None-Match': getContext().config?.version }
+            : {}),
+        },
+        validateStatus(status) {
+          return [200, 304].includes(status)
+        },
+      })
+      .then(async (res) => {
+        if (!res.data.data) {
+          log.info('[Symon] No config changes')
+
+          return {
+            probes: getProbes(),
+            hash: res.headers.etag,
+          }
+        }
+
+        return { probes: res.data.data, hash: res.headers.etag }
+      })
+      .catch((error) => {
+        if (error.isAxiosError) {
+          if (error.response) {
+            throw new Error(error.response.data.message)
+          }
+
+          if (error.request) {
+            throw new Error('Failed to get probes from Symon')
+          }
+        }
+
+        throw error
+      })
+  }
+
+  private async fetchProbesAndUpdateConfig() {
+    log.info('[Symon] Get probes')
+    // Fetch the probes
+    const { hash, probes } = await this.fetchProbes()
+    const newConfig: Config = { probes, version: hash }
+    await this.setConfig(newConfig)
+
+    // Set connection to symon as true, because it could fetch the probes
+    this.hasConnectionToSymon = true
+    log.info('[Symon] Get probes succeed')
   }
 
   private async handshake(): Promise<string> {
-    log.debug('Performing handshake with symon')
     let handshakeData = await getHandshakeData()
 
     // Check if location id existed and is valid
@@ -298,140 +369,16 @@ class SymonClient {
       .then((res) => res.data?.data.monikaId)
   }
 
-  private async fetchProbes() {
-    log.debug('Getting probes from symon')
-    return this.httpClient
-      .get<{ data: Probe[] }>(`/${this.monikaId}/probes`, {
-        headers: {
-          ...(this.configHash ? { 'If-None-Match': this.configHash } : {}),
-        },
-        validateStatus(status) {
-          return [200, 304].includes(status)
-        },
-      })
-      .then((res) => {
-        if (res.data.data) {
-          this.probes = res.data.data
-
-          log.debug(`Received ${res.data.data.length} probes`)
-        } else {
-          log.debug(`No new config from Symon`)
-        }
-
-        return { probes: res.data.data, hash: res.headers.etag }
-      })
-      .catch((error) => {
-        if (error.isAxiosError) {
-          return Promise.reject(new Error(error.response.data.message))
-        }
-
-        return Promise.reject(error)
-      })
-  }
-
-  private updateConfig(newConfig: Config): void {
-    if (newConfig.version && this.configHash !== newConfig.version) {
-      log.debug(`Received config changes. Reloading monika`)
-      this.config = newConfig
-      this.configHash = newConfig.version
-      for (const listener of this.configListeners) {
-        listener(newConfig)
-      }
-    } else {
-      log.debug(`Received config does not change.`)
-    }
-  }
-
-  private async fetchProbesAndUpdateConfig() {
-    try {
-      // Fetch the probes
-      const { probes, hash } = await this.fetchProbes()
-      const newConfig: Config = { probes, version: hash }
-      this.updateConfig(newConfig)
-
-      // If it has no connection to Symon, set as true
-      // Because it could fetch the probes
-      if (!hasConnectionToSymon) {
-        hasConnectionToSymon = true
-      }
-    } catch (error) {
-      log.warn((error as any).message)
-    }
-  }
-
-  async report(): Promise<any> {
-    const { flags } = getContext()
-    if (flags.symonCouchDb) {
+  private async setConfig(newConfig: Config) {
+    if (
+      !newConfig.version ||
+      getContext().config?.version === newConfig.version
+    ) {
+      log.info('[Symon] No config change')
       return
     }
 
-    try {
-      log.debug('Reporting to Symon')
-
-      // Updating requests and notifications to report
-      const probeIds = this.probes.map((probe: Probe) => probe.id)
-
-      // Creating/updating report job
-      const jobData = {
-        hasConnectionToSymon,
-        probeIds,
-        reportProbesLimit: this.reportProbesLimit,
-        httpClient: this.httpClient,
-        monikaId: this.monikaId,
-        url: this.url,
-        apiKey: this.apiKey,
-      }
-
-      // Create the report job with the prepared worker data
-      await this.bree.add({
-        name: 'report',
-        outputWorkerMetadata: true,
-        path: path.resolve(
-          __dirname,
-          `bree/report.${this.bree.config.defaultExtension}`
-        ),
-        worker: {
-          workerData: {
-            data: JSON.stringify(jobData),
-          },
-        },
-      })
-      await this.bree.run('report')
-    } catch (error) {
-      hasConnectionToSymon = false
-      this.configHash = ''
-      log.error(
-        "Warning: Can't report history to Symon. " + (error as any).message
-      )
-
-      await this.report()
-    }
-  }
-
-  async sendStatus({ isOnline }: { isOnline: boolean }): Promise<void> {
-    try {
-      const response = await this.httpClient({
-        url: '/status',
-        method: 'POST',
-        data: {
-          monikaId: this.monikaId,
-          status: isOnline,
-        },
-      })
-
-      if (response.status === 200) {
-        hasConnectionToSymon = true
-      }
-
-      log.debug('Status successfully sent to Symon.')
-    } catch (error: any) {
-      log.warn(`Warning: Can't send status to Symon. ${error?.message}`)
-    }
-  }
-
-  async stopReport(): Promise<void> {
-    await this.bree.stop()
+    log.info('[Symon] Config changes. Reloading Monika')
+    await updateConfig(newConfig)
   }
 }
-
-export default SymonClient

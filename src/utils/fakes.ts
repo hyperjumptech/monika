@@ -32,12 +32,9 @@ import { faker } from '@faker-js/faker'
  * @param transformArgs is if the parameter will be transformed for the original function
  * @returns Handlebars-helper-friendly function
  */
-const wrapFunctionWithDefaultAndTransform = (
-  originFn: any,
-  defaultArgs: any,
-  transformArgs?: (args: any[]) => any
-) => {
-  return (...arg: any) => {
+const wrapFunctionWithDefaultAndTransform =
+  (originFn: any, defaultArgs: any, transformArgs?: (args: any[]) => any) =>
+  (...arg: any) => {
     let newArgs = [...arg.slice(0, -1), ...defaultArgs.slice(arg.length - 1)]
 
     // If there is transformArgs method, transform the newArgs
@@ -48,7 +45,6 @@ const wrapFunctionWithDefaultAndTransform = (
     // Return the handlebars-helper-friendly function
     return originFn(...newArgs)
   }
-}
 
 // Functions from faker
 const helpers = [

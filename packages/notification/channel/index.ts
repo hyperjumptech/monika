@@ -22,7 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import type { AnySchema } from 'joi'
+import type { ArraySchema, ObjectSchema } from 'joi'
 
 import * as dingtalk from './dingtalk'
 import * as discord from './discord'
@@ -53,7 +53,7 @@ type BaseNotificationMessageMeta = {
   privateIpAddress: string
   publicIpAddress: string
   [key: string]: unknown
-  monikaInstance?: any
+  monikaInstance?: string
   version: string
 }
 
@@ -89,12 +89,15 @@ export type NotificationMessage = {
     | NotificationStatusUpdateMessageMeta
 }
 
-type NotificationChannel<T = any> = {
-  validator: AnySchema
-  send: (notificationData: T, message: NotificationMessage) => Promise<void>
+type NotificationChannel<T = object, U = object> = {
+  validator: ArraySchema | ObjectSchema
+  send: (
+    notificationData: T | T[] | undefined,
+    message: NotificationMessage
+  ) => Promise<void>
   sendWithCustomContent?: (
-    notificationData: T,
-    customContent: T
+    notificationData: T | T[],
+    customContent: U | U[]
   ) => Promise<void>
   additionalStartupMessage?: (notificationData: T) => string
 }
@@ -102,29 +105,29 @@ type NotificationChannel<T = any> = {
 export type Notification = {
   id: string
   type: string
-  data: any
+  data: object | undefined
 }
 
 export const channels: Record<string, NotificationChannel> = {
-  dingtalk,
-  discord,
-  desktop,
-  'google-chat': googlechat,
-  gotify,
-  instatus,
-  lark,
-  mailgun,
-  'monika-notif': monikaNotif,
-  opsgenie,
-  pagerduty,
-  pushbullet,
-  pushover,
-  sendgrid,
-  slack,
-  smtp,
-  teams,
-  telegram,
-  webhook,
-  whatsapp,
-  workplace,
+  dingtalk: dingtalk as NotificationChannel<object>,
+  discord: discord as NotificationChannel<object>,
+  desktop: desktop as NotificationChannel<unknown>,
+  'google-chat': googlechat as NotificationChannel<object>,
+  gotify: gotify as NotificationChannel<object>,
+  instatus: instatus as NotificationChannel<object>,
+  lark: lark as NotificationChannel<object>,
+  mailgun: mailgun as NotificationChannel<object>,
+  'monika-notif': monikaNotif as NotificationChannel<object>,
+  opsgenie: opsgenie as NotificationChannel<object>,
+  pagerduty: pagerduty as NotificationChannel<object>,
+  pushbullet: pushbullet as NotificationChannel<object>,
+  pushover: pushover as NotificationChannel<object>,
+  sendgrid: sendgrid as NotificationChannel<object>,
+  slack: slack as NotificationChannel<object>,
+  smtp: smtp as NotificationChannel<object>,
+  teams: teams as NotificationChannel<object>,
+  telegram: telegram as NotificationChannel<object>,
+  webhook: webhook as NotificationChannel<object>,
+  whatsapp: whatsapp as NotificationChannel<object>,
+  workplace: workplace as NotificationChannel<object>,
 }

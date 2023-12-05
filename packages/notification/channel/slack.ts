@@ -219,7 +219,7 @@ function getContent(
       }
     }
 
-    default:
+    default: {
       return {
         text: `New notification from Monika`,
         blocks: [
@@ -235,5 +235,6 @@ function getContent(
           },
         ],
       }
+    }
   }
 }

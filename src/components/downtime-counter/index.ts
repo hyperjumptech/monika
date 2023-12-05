@@ -22,20 +22,56 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import Joi from 'joi'
-import { Socket } from '../../../../interfaces/probe'
+import { formatDistanceToNow } from 'date-fns'
+import { getContext, setContext } from '../../context'
+import type { ProbeAlert } from '../../interfaces/probe'
 
-export const validateTCPConfig = (tcpConfig?: Socket): string | undefined => {
-  if (!tcpConfig) {
-    return ''
+type DowntimeCounter = {
+  alert: ProbeAlert
+  probeID: string
+  url: string
+  createdAt?: Date
+}
+
+export function startDowntimeCounter({
+  alert,
+  createdAt,
+  probeID,
+  url,
+}: DowntimeCounter): void {
+  const newIncident = {
+    alert,
+    probeID,
+    probeRequestURL: url,
+    createdAt: createdAt || new Date(),
   }
 
-  const schema = Joi.object({
-    host: Joi.string().required(),
-    port: Joi.number().required(),
-    data: Joi.string(),
-  })
-  const validationError = schema.validate(tcpConfig)
+  setContext({ incidents: [...getContext().incidents, newIncident] })
+}
 
-  return validationError?.error?.message
+export function getDowntimeDuration({
+  probeID,
+  url,
+}: Omit<DowntimeCounter, 'alert'>): string {
+  const lastIncident = getContext().incidents.find(
+    (incident) =>
+      incident.probeID === probeID && incident.probeRequestURL === url
+  )
+
+  if (!lastIncident) {
+    return '0 seconds'
+  }
+
+  return formatDistanceToNow(lastIncident.createdAt, {
+    includeSeconds: true,
+  })
+}
+
+export function stopDowntimeCounter({ probeID, url }: DowntimeCounter): void {
+  const newIncidents = getContext().incidents.filter(
+    (incident) =>
+      incident.probeID !== probeID && incident.probeRequestURL !== url
+  )
+
+  setContext({ incidents: newIncidents })
 }

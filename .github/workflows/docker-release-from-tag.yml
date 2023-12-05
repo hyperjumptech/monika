@@ -4,14 +4,14 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Monika NPM version to create docker image"
+        description: 'Monika NPM version to create docker image'
         required: true
         type: string
 
 permissions:
   issues: read
   pull-requests: read
-  
+
 jobs:
   testing:
     name: Testing Release
@@ -31,6 +31,9 @@ jobs:
 
       - name: 📥 Install Dependencies
         run: npm ci
+
+      - name: Build notifications
+        run: npm run build -w packages/notification
 
       - name: 🧪 Run Unit Tests
         run: npm test

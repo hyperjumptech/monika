@@ -24,12 +24,10 @@
           "message": "response status message"
         },
         {
-          "assertion": "response.time > 150",
+          "assertion": "response.time > 30000",
           "message": "response time message"
         }
-      ],
-      "incidentThreshold": 3,
-      "recoveryThreshold": 3
+      ]
     }
   ]
 }

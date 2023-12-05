@@ -22,25 +22,69 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Probe } from '../../../../interfaces/probe'
-import { validateMongoConfig } from './mongo-config'
-import { validateRedisConfig } from './redis-config'
-import { validateTCPConfig } from './tcp-config'
+import { expect } from '@oclif/test'
+import {
+  getDowntimeDuration,
+  startDowntimeCounter,
+  stopDowntimeCounter,
+} from '.'
 
-export const validateSchemaConfig = (probe: Probe): string | undefined => {
-  const { socket, redis, mongo } = probe
-  const tcpConfigError = validateTCPConfig(socket)
-  if (tcpConfigError) {
-    return `Monika configuration: probes.socket ${tcpConfigError}`
-  }
+describe('Downtime counter', () => {
+  it('should start counter', () => {
+    // arrange
+    const probeConfig = {
+      alert: { id: 'PHbCL', assertion: '', message: '' },
+      probeID: 'APDpe',
+      url: 'https://example.com',
+    }
 
-  const redisConfigError = validateRedisConfig(redis)
-  if (redisConfigError) {
-    return `Monika configuration: probes.redis ${redisConfigError}`
-  }
+    // act
+    startDowntimeCounter(probeConfig)
 
-  const mongoConfigError = validateMongoConfig(mongo)
-  if (mongoConfigError) {
-    return `Monika configuration: probes.mongo ${mongoConfigError}`
-  }
-}
+    // assert
+    expect(getDowntimeDuration(probeConfig)).not.eq('0 seconds')
+  })
+
+  it('should stop counter', () => {
+    // arrange
+    const probeConfig = {
+      alert: { id: 'VyYwG', assertion: '', message: '' },
+      probeID: 'P1n9x',
+      url: 'https://example.com',
+    }
+
+    // act
+    startDowntimeCounter(probeConfig)
+    stopDowntimeCounter(probeConfig)
+
+    // assert
+    expect(getDowntimeDuration(probeConfig)).eq('0 seconds')
+  })
+
+  it('should stop inexistent counter', () => {
+    // arrange
+    const probeConfig = {
+      alert: { id: 'knUA4', assertion: '', message: '' },
+      probeID: 'P1n9x',
+      url: 'https://example.com',
+    }
+
+    // act
+    stopDowntimeCounter(probeConfig)
+
+    // assert
+    expect(getDowntimeDuration(probeConfig)).eq('0 seconds')
+  })
+
+  it('should return 0 seconds if not started yet', () => {
+    // arrange
+    const probeConfig = {
+      alert: { id: '9c92j', assertion: '', message: '' },
+      probeID: 'rwrs8',
+      url: 'https://example.com',
+    }
+
+    // assert
+    expect(getDowntimeDuration(probeConfig)).eq('0 seconds')
+  })
+})

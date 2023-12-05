@@ -22,51 +22,28 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { RequestConfig } from '../../../../interfaces/request'
-import { HTTPMethods } from '../../../../utils/http'
-import { isValidURL } from '../../../../utils/is-valid-url'
+import type { ValidatedResponse } from '../plugins/validate-response'
 
-const PROBE_REQUEST_INVALID_METHOD =
-  'Probe request method is invalid! Valid methods are GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS, PURGE, LINK, and UNLINK'
-const PROBE_REQUEST_NO_URL = 'Probe request URL does not exists'
+import { findProbe } from '../components/config/probe'
 
-const checkProbeRequestProperties = (
-  requests: RequestConfig[]
-): string | undefined => {
-  if (requests?.length > 0) {
-    for (const request of requests) {
-      const { method, ping, url } = request
-
-      if (!url) {
-        return PROBE_REQUEST_NO_URL
-      }
-
-      // if not a ping request and url not valid, return INVLID_URL error
-      if (ping !== true && !isValidURL(url)) {
-        return `Probe request URL (${url}) should start with http:// or https://`
-      }
-
-      if (!HTTPMethods.has(method?.toUpperCase() ?? 'GET'))
-        return PROBE_REQUEST_INVALID_METHOD
-    }
-  }
-}
-
-export const validateRequests = (
-  requests?: RequestConfig[]
-): string | undefined => {
-  if (requests === undefined) {
-    return
+export function getAlertID(
+  url: string,
+  validation: ValidatedResponse,
+  probeID: string
+): string {
+  if (validation.alert.id) {
+    return validation.alert.id
   }
 
-  for (const req of requests) {
-    if (req.timeout <= 0) {
-      return `The timeout in the request with id "${req.id}" should be greater than 0.`
-    }
+  const probe = findProbe(probeID)
+  if (!probe) {
+    return ''
   }
 
-  const probeRequestPropertyMessage = checkProbeRequestProperties(requests)
-  if (probeRequestPropertyMessage) {
-    return probeRequestPropertyMessage
+  const request = probe.requests?.find((request) => request.url === url)
+  if (!request) {
+    return ''
   }
+
+  return request.alerts?.find((alert) => alert.query === '')?.id || ''
 }

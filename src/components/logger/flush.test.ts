@@ -22,9 +22,59 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-export interface ServerAlertState {
-  isFirstTime: boolean
-  alertQuery: string
-  state: 'UP' | 'DOWN'
-  shouldSendNotification: boolean
-}
+import sinon from 'sinon'
+import { ux } from '@oclif/core'
+import { test } from '@oclif/test'
+import * as history from './history'
+import cmd from '../../commands/monika'
+import { flush } from './flush'
+
+let flushAllLogsStub: sinon.SinonStub
+
+beforeEach(() => {
+  flushAllLogsStub = sinon.stub(history, 'flushAllLogs').resolves()
+})
+
+afterEach(() => {
+  flushAllLogsStub.restore()
+})
+
+describe('Flush command', () => {
+  describe('Force', () => {
+    it('should flush records without asking for confirmation', async () => {
+      // act
+      await flush(true)
+
+      // assert
+      sinon.assert.calledOnce(flushAllLogsStub)
+    })
+  })
+
+  describe('Not force', () => {
+    test
+      // TODO: Remove skip
+      .skip()
+      // arrange
+      .stub(ux.ux, 'prompt', (stub) => stub.resolves('n'))
+      .stdout()
+      // act
+      .do(() => cmd.run(['--flush']))
+      .it('should cancel flush', () => {
+        // assert
+        sinon.assert.notCalled(flushAllLogsStub)
+      })
+
+    test
+      // TODO: Remove skip
+      .skip()
+      // arrange
+      .stub(ux.ux, 'prompt', (stub) => stub.resolves('Y'))
+      .stdout()
+      // act
+      .do(() => cmd.run(['--flush']))
+      .it('should flush', () => {
+        // assert
+        sinon.assert.calledOnce(flushAllLogsStub)
+      })
+  })
+})

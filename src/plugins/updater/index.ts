@@ -113,14 +113,19 @@ async function runUpdater(config: IConfig, updateMode: UpdateMode) {
   const predicate = (remoteVersion: string) => {
     let regexp = ''
     switch (updateMode) {
-      case 'patch':
+      case 'patch': {
         regexp = `(${currentMajor}\\.${currentMinor}\\.([0-9])+)`
         break
-      case 'minor':
+      }
+
+      case 'minor': {
         regexp = `(${currentMajor}\\.([0-9])+\\.([0-9])+)`
         break
-      default:
+      }
+
+      default: {
         return false
+      }
     }
 
     return remoteVersion.match(regexp) !== null
@@ -151,7 +156,7 @@ async function updateMonika(config: IConfig, remoteVersion: string) {
         `npm install -g @hyperjumptech/monika@${remoteVersion}`,
         true
       )
-    } catch (error) {
+    } catch (error: unknown) {
       log.error(`Updater: npm install error, ${error}`)
     }
 
@@ -242,7 +247,7 @@ async function moveExtractedFiles(config: IConfig, source: string) {
       ) {
         await chmod(destFile, 0o755)
       }
-    } catch (error) {
+    } catch (error: unknown) {
       log.error(`Updater: move files error ${error}`)
     }
   }
@@ -319,14 +324,14 @@ function installationType(commands: string[]): 'npm' | 'oclif-pack' | 'binary' {
   }
 
   // vercel/pkg
-  if (commands[1] === '/snapshot/monika/bin/run') {
+  if (commands[1] === '/snapshot/monika/bin/run.js') {
     return 'binary'
   }
 
   // npx oclif pack
   if (
     commands[0].match('node$') !== null &&
-    commands[1].match('bin/run$') !== null
+    commands[1].match('bin/run.js$') !== null
   ) {
     return 'oclif-pack'
   }
@@ -337,17 +342,18 @@ function installationType(commands: string[]): 'npm' | 'oclif-pack' | 'binary' {
 }
 
 function getPlatform(config: IConfig): string {
-  let platform: string = config.platform
+  const { platform } = config
   switch (platform) {
-    case 'darwin':
-      platform = 'macos'
-      break
-    case 'win32':
-      platform = 'windows'
-      break
-    default:
-      platform = 'linux'
-  }
+    case 'darwin': {
+      return 'macos'
+    }
 
-  return platform
+    case 'win32': {
+      return 'windows'
+    }
+
+    default: {
+      return 'linux'
+    }
+  }
 }

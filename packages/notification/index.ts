@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import { channels, Notification, NotificationMessage } from './channel'
-import { validateNotification } from './validator/notification'
+import { getErrorMessage } from './utils/catch-error-handler'
 
 async function sendNotifications(
   notifications: Notification[],
@@ -39,19 +39,17 @@ async function sendNotifications(
         }
 
         await channel.send(data, message)
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const message = getErrorMessage(error)
         throw new Error(
-          `Failed to send message using ${type}, please check your ${type} notification config.\nMessage: ${error?.message}`
+          `Failed to send message using ${type}, please check your ${type} notification config.\nMessage: ${message}`
         )
       }
     })
   )
 }
 
-export {
-  sendNotifications,
-  channels,
-  validateNotification,
-  Notification,
-  NotificationMessage,
-}
+export { sendNotifications }
+
+export { channels, Notification, NotificationMessage } from './channel'
+export { validateNotification } from './validator/notification'

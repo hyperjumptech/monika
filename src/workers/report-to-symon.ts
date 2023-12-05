@@ -25,107 +25,79 @@
 import axios from 'axios'
 import path from 'path'
 import { open } from 'sqlite'
-import SQLite3 from 'sqlite3'
-import { parentPort, workerData } from 'worker_threads'
+import { verbose } from 'sqlite3'
+
 import {
   UnreportedNotificationsLog,
   UnreportedRequestsLog,
   deleteNotificationLogs,
   deleteRequestLogs,
   getUnreportedLogs,
-} from '../../components/logger/history'
-import { log } from '../../utils/pino'
+} from '../components/logger/history'
+import { log } from '../utils/pino'
 const dbPath = path.resolve(process.cwd(), 'monika-logs.db')
 
-const main = async (data: Record<string, any>) => {
+export default async (stringifiedData: string) => {
   try {
-    const { url, apiKey, probeIds, reportProbesLimit, monikaId } = data
+    const parsedData = JSON.parse(stringifiedData)
+    const { apiKey, monikaId, probeIds, reportProbesLimit, url } = parsedData
 
     // Open database
-    const sqlite3 = SQLite3.verbose()
+    const sqlite3 = verbose()
     const db = await open({
-      filename: dbPath,
-      mode: sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE,
       driver: sqlite3.Database,
+      filename: dbPath,
+      mode: sqlite3.OPEN_READWRITE || sqlite3.OPEN_CREATE,
     })
 
     // Updating requests and notifications to report
     const logs = await getUnreportedLogs(probeIds, reportProbesLimit, db)
-    const requests = logs.requests
-    const notifications = logs.notifications
+    const { requests } = logs
+    const { notifications } = logs
 
     if (requests.length === 0 && notifications.length === 0) {
       // No requests or notifications to report
-      log.debug('Nothing to report')
-
-      parentPort?.postMessage({
-        success: true,
+      log.info('Nothing to report')
+    } else {
+      // Hit the Symon API for receiving Monika report
+      // With the compressed requests and notifications data
+      await axios({
         data: {
-          requests,
-          notifications,
+          data: {
+            notifications,
+            requests,
+          },
+          monikaId,
         },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+        },
+        method: 'POST',
+        url: `${url}/api/v1/monika/report`,
       })
-      return
+
+      log.info(
+        `Reported ${requests.length} requests and ${notifications.length} notifications.`
+      )
+
+      // Delete the reported requests
+      await deleteRequestLogs(
+        requests.map((l: UnreportedRequestsLog) => l.probeId),
+        db
+      )
+      log.info(`Deleted ${requests.length} reported request`)
+
+      // Delete the reported notifications
+      await deleteNotificationLogs(
+        notifications.map((l: UnreportedNotificationsLog) => l.probeId),
+        db
+      )
+      log.info(`Deleted ${notifications.length} reported request`)
     }
-
-    // Hit the Symon API for receiving Monika report
-    // With the compressed requests and notifications data
-    await axios({
-      url: `${url}/api/v1/monika/report`,
-      method: 'POST',
-      data: {
-        monikaId: monikaId,
-        data: {
-          requests,
-          notifications,
-        },
-      },
-      headers: {
-        'Content-Encoding': 'gzip',
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-      },
-    })
-
-    log.info(
-      `Reported ${requests.length} requests and ${notifications.length} notifications.`
-    )
-
-    // Delete the reported requests
-    await deleteRequestLogs(
-      requests.map((log: UnreportedRequestsLog) => log.probeId),
-      db
-    )
-    log.debug(`Deleted ${requests.length} reported request`)
-
-    // Delete the reported notifications
-    await deleteNotificationLogs(
-      notifications.map((log: UnreportedNotificationsLog) => log.probeId),
-      db
-    )
-    log.debug(`Deleted ${notifications.length} reported request`)
-
-    parentPort?.postMessage({
-      success: true,
-      data: {
-        requests,
-        notifications,
-      },
-    })
-  } catch (error) {
-    console.error(error)
+  } catch (error: unknown) {
     log.error(
-      "Warning: Can't report history to Symon. " + (error as any).message
+      "Warning: Can't report history to Symon. " + (error as Error).message
     )
-    parentPort?.postMessage({ success: false, error: error })
   }
 }
-
-;(async () => {
-  try {
-    const data = JSON.parse(workerData.data)
-    await main(data)
-  } catch (error) {
-    console.error(error)
-  }
-})()

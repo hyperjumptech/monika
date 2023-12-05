@@ -22,29 +22,76 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import Joi from 'joi'
-import { Redis } from '../../../../interfaces/probe'
+import type { Ping } from '../../../../interfaces/probe'
+import { BaseProber, type ProbeResult } from '..'
+import { icmpRequest } from './request'
+import { probeRequestResult } from '../../../../interfaces/request'
 
-export const validateRedisConfig = (
-  redisConfig?: Redis[]
-): string | undefined => {
-  if (!redisConfig) {
-    return ''
+export class PingProber extends BaseProber {
+  async probe(incidentRetryAttempt: number): Promise<void> {
+    const result = await probePing({
+      id: this.probeConfig.id,
+      checkOrder: this.counter,
+      pings: this.probeConfig.ping,
+    })
+
+    this.processProbeResults(result, incidentRetryAttempt)
   }
 
-  const schema = Joi.object({
-    host: Joi.alternatives().try(Joi.string().hostname(), Joi.string().ip()),
-    port: Joi.number().min(0).max(65_536),
-    password: Joi.string(),
-    username: Joi.string(),
-    command: Joi.string(),
-    uri: Joi.string(),
-  })
-    .xor('host', 'uri')
-    .and('host', 'port')
+  generateVerboseStartupMessage(): string {
+    const { description, id, interval, name } = this.probeConfig
 
-  for (const redis of redisConfig) {
-    const validationError = schema.validate(redis)
-    if (validationError?.error?.message) return validationError?.error?.message
+    let result = `- Probe ID: ${id} 
+        Name: ${name || '-'}
+        Description: ${description || '-'}
+        Interval: ${interval}
+        `
+    result += '  ping:'
+    result += this.getConnectionDetails()
+
+    return result
   }
+
+  private getConnectionDetails(): string {
+    return (
+      this.probeConfig.ping
+        ?.map(
+          (probe) => `
+            uri: ${probe.uri}`
+        )
+        .join(``) || `\n`
+    )
+  }
+}
+
+type ProbePingParams = {
+  id: string
+  checkOrder: number
+  pings?: Ping[]
+}
+
+export async function probePing({
+  id,
+  checkOrder,
+  pings,
+}: ProbePingParams): Promise<ProbeResult[]> {
+  const probeResults: ProbeResult[] = []
+
+  if (!pings) {
+    // pings defined or length == 0?
+    return probeResults
+  }
+
+  for await (const { uri } of pings) {
+    const requestResponse = await icmpRequest({ host: uri })
+    const { responseTime, result, body } = requestResponse
+
+    const isAlertTriggered = result !== probeRequestResult.success
+    const timeNow = new Date().toISOString()
+    const logMessage = `${timeNow} ${checkOrder} id:${id} ${body} responseTime:${responseTime}`
+
+    probeResults.push({ isAlertTriggered, logMessage, requestResponse })
+  }
+
+  return probeResults
 }
