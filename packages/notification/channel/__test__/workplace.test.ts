@@ -27,7 +27,7 @@ describe('notificationChecker - workplaceNotification', () => {
           },
         },
       ])
-    } catch (error) {
+    } catch (error: unknown) {
       const message = '"Workplace Thread ID" is not allowed to be empty'
 
       expect(() => {
@@ -47,7 +47,7 @@ describe('notificationChecker - workplaceNotification', () => {
           },
         },
       ])
-    } catch (error) {
+    } catch (error: unknown) {
       const message = '"Workplace Access Token" is not allowed to be empty'
 
       expect(() => {

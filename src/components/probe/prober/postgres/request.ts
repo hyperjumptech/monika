@@ -26,6 +26,7 @@ import { Pool } from 'pg'
 import type { ProbeRequestResponse } from '../../../../interfaces/request'
 import { probeRequestResult } from '../../../../interfaces/request'
 import { differenceInMilliseconds } from 'date-fns'
+import { getErrorMessage } from '../../../../utils/catch-error-handler'
 
 export type PostgresParam = {
   host: string // Host address of the psql db
@@ -98,8 +99,8 @@ async function sendPsqlRequest(params: PostgresParam): Promise<PostgresResult> {
     await client.query('SELECT NOW()')
     result.message = 'postgres ok'
     result.isAlive = true
-  } catch (error: any) {
-    result.message = error.message
+  } catch (error: unknown) {
+    result.message = getErrorMessage(error)
   } finally {
     if (client !== false) {
       // release if connect was previously successful.

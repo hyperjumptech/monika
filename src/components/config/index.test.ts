@@ -31,6 +31,7 @@ import { md5Hash } from '../../utils/hash'
 import { getEventEmitter } from '../../utils/events'
 import type { MonikaFlags } from '../../flag'
 import { validateProbes } from './validation'
+import { getErrorMessage } from '../../utils/catch-error-handler'
 
 describe('getConfig', () => {
   beforeEach(() => {
@@ -128,8 +129,8 @@ describe('updateConfig', () => {
     try {
       // act
       await updateConfig({ probes: [] })
-    } catch (error: any) {
-      errorMessage = error.message
+    } catch (error: unknown) {
+      errorMessage = getErrorMessage(error)
     }
 
     // assert

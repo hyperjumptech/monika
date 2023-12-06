@@ -35,7 +35,7 @@ describe('parseConfigFromPostman', () => {
   it('throws invalid JSON format', () => {
     try {
       parseConfigFromPostman('../fetch.ts')
-    } catch (error) {
+    } catch (error: unknown) {
       expect(() => {
         throw error
       }).to.throw('Your Postman file contains an invalid JSON format!')
@@ -47,7 +47,7 @@ describe('parseConfigFromPostman', () => {
       const collectionStr = JSON.stringify(unsupportedCollection)
 
       parseConfigFromPostman(collectionStr)
-    } catch (error) {
+    } catch (error: unknown) {
       expect(() => {
         throw error
       }).to.throw(
