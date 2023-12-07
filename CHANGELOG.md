@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 fix path typo (#1195)
 Fix: cleanup unused report data (#1198)
 fix: error sent as a body to Symon (#1201)
+update snapcraft pipeline (#1204)
 
 ## Changed
 
