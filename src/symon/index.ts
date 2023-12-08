@@ -174,15 +174,6 @@ export default class SymonClient {
     this.monikaId = await this.handshake()
     log.info('[Symon] Handshake succeed')
 
-    log.info('[Symon] Send status')
-    this.sendStatus({ isOnline: true })
-      .then(() => {
-        log.info('[Symon] Send status succeed')
-      })
-      .catch((error) => {
-        log.error(`[Symon] Send status failed. ${(error as Error).message}`)
-      })
-
     await this.fetchProbesAndUpdateConfig()
     this.getProbesInterval = setInterval(
       this.fetchProbesAndUpdateConfig.bind(this),
