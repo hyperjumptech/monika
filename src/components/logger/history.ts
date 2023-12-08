@@ -32,6 +32,7 @@ import type { Notification } from '@hyperjumptech/monika-notification'
 import { log } from '../../utils/pino'
 import { getConfig } from '../config'
 import { getErrorMessage } from '../../utils/catch-error-handler'
+import { fileURLToPath } from 'url'
 const sqlite3 = SQLite3.verbose()
 const dbPath = path.resolve(process.cwd(), 'monika-logs.db')
 
@@ -97,7 +98,6 @@ type ProbeRequestDB = {
   response_status: number
   request_url: string
   response_time: number
-  /* eslint-enable camelcase */
 }
 
 type UnreportedProbeRequestDB = {
@@ -108,7 +108,6 @@ type UnreportedProbeRequestDB = {
   response_status: number
   response_time: number
   timestamp: number
-  /* eslint-enable camelcase */
 }
 
 type UnreportedNotificationDB = {
@@ -121,7 +120,6 @@ type UnreportedNotificationDB = {
   type: string
   notification_id: string
   channel: string
-  /* eslint-enable camelcase */
 }
 
 let db: Database<SQLite3.Database, SQLite3.Statement>
@@ -138,7 +136,7 @@ export function setDatabase(
 
 async function migrate() {
   await database().migrate({
-    migrationsPath: path.join(__dirname, '../../../db/migrations'),
+    migrationsPath: path.dirname(fileURLToPath('../../../db/migrations')),
   })
 }
 
@@ -150,6 +148,7 @@ export async function openLogfile(): Promise<void> {
   try {
     const db = await open({
       filename: dbPath,
+      // eslint-disable-next-line no-bitwise
       mode: sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE,
       driver: sqlite3.Database,
     })

@@ -92,7 +92,7 @@ async function sendTextMessage({
   baseUrl,
 }: SendTextMessageParams): Promise<void> {
   try {
-    const auth = authorize('bearer', token)
+    const auth = authorize({ type: 'bearer', token })
     const url = `${baseUrl}/v1/messages`
 
     await sendHttpRequest({
@@ -100,7 +100,7 @@ async function sendTextMessage({
       url,
       headers: {
         'Content-Type': 'application/json',
-        Authorization: auth,
+        Authorization: auth || '',
       },
       data: {
         to: recipient,
@@ -125,10 +125,7 @@ async function loginUser({
   username,
 }: NotificationData): Promise<string> {
   try {
-    const auth = authorize('basic', {
-      username,
-      password,
-    })
+    const auth = authorize({ type: 'basic', username, password })
 
     const url = `${baseURL}/v1/users/login`
     const resp = await sendHttpRequest({
@@ -136,7 +133,7 @@ async function loginUser({
       url,
       headers: {
         'Content-Type': 'application/json',
-        Authorization: auth,
+        Authorization: auth || '',
       },
     })
     const loginResp: LoginUserSuccessResponse = resp?.data
