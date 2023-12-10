@@ -24,6 +24,7 @@
 
 import { expect } from '@oclif/test'
 import { getDowntimeDuration, addIncident, removeIncident } from '.'
+import { getContext } from '../../context'
 
 describe('Downtime counter', () => {
   it('should start counter', () => {
@@ -82,5 +83,49 @@ describe('Downtime counter', () => {
 
     // assert
     expect(getDowntimeDuration(probeConfig)).eq('0 seconds')
+  })
+
+  it('allow identical urls but different probeID', () => {
+    // arrange
+    const probeConfig = {
+      alert: { id: 'VyYwG', assertion: '', message: '' },
+      probeID: 'Pn9x',
+      url: 'https://example.com',
+    }
+    const probeConfig2 = {
+      alert: { id: 'VyYwG', assertion: '', message: '' },
+      probeID: 'Pn9x-2',
+      url: 'https://example.com',
+    }
+
+    // act
+    addIncident(probeConfig)
+    addIncident(probeConfig2)
+    removeIncident(probeConfig)
+
+    // assert
+    expect(getContext().incidents[0].probeID === probeConfig2.probeID)
+  })
+
+  it('allow identical probe-ids but different urls', () => {
+    // arrange
+    const probeConfig = {
+      alert: { id: 'VyYwG', assertion: '', message: '' },
+      probeID: 'Pn9x',
+      url: 'https://example.com',
+    }
+    const probeConfig2 = {
+      alert: { id: 'VyYwG', assertion: '', message: '' },
+      probeID: 'Pn9x',
+      url: 'https://sub.example.com',
+    }
+
+    // act
+    addIncident(probeConfig)
+    addIncident(probeConfig2)
+    removeIncident(probeConfig)
+
+    // assert
+    expect(getContext().incidents[0].probeRequestURL === probeConfig2.url)
   })
 })
