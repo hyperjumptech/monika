@@ -41,10 +41,7 @@ import {
   DEFAULT_INCIDENT_THRESHOLD,
   DEFAULT_RECOVERY_THRESHOLD,
 } from '../../config/validation/validator/default-values'
-import {
-  startDowntimeCounter,
-  stopDowntimeCounter,
-} from '../../downtime-counter'
+import { addIncident, removeIncident } from '../../downtime-counter'
 import { saveNotificationLog, saveProbeRequestLog } from '../../logger/history'
 import { logResponseTime } from '../../logger/response-time-log'
 import { sendAlerts } from '../../notification'
@@ -330,7 +327,7 @@ export class BaseProber implements Prober {
       alertQuery: failedRequestAssertion,
     })
 
-    startDowntimeCounter({
+    addIncident({
       alert: failedRequestAssertion,
       probeID: this.probeConfig.id,
       url: this.probeConfig?.requests?.[requestIndex].url || '',
@@ -374,7 +371,7 @@ export class BaseProber implements Prober {
       ) || 0
 
     if (recoveredIncident) {
-      stopDowntimeCounter({
+      removeIncident({
         alert: recoveredIncident.alert,
         probeID: this.probeConfig.id,
         url: this.probeConfig?.requests?.[requestIndex].url || '',
@@ -448,7 +445,7 @@ export class BaseProber implements Prober {
       return
     }
 
-    startDowntimeCounter({
+    addIncident({
       alert,
       probeID: this.probeConfig.id,
       url: request.url,

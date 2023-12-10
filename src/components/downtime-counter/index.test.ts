@@ -23,11 +23,7 @@
  **********************************************************************************/
 
 import { expect } from '@oclif/test'
-import {
-  getDowntimeDuration,
-  startDowntimeCounter,
-  stopDowntimeCounter,
-} from '.'
+import { getDowntimeDuration, addIncident, removeIncident } from '.'
 
 describe('Downtime counter', () => {
   it('should start counter', () => {
@@ -39,7 +35,7 @@ describe('Downtime counter', () => {
     }
 
     // act
-    startDowntimeCounter(probeConfig)
+    addIncident(probeConfig)
 
     // assert
     expect(getDowntimeDuration(probeConfig)).not.eq('0 seconds')
@@ -54,8 +50,8 @@ describe('Downtime counter', () => {
     }
 
     // act
-    startDowntimeCounter(probeConfig)
-    stopDowntimeCounter(probeConfig)
+    addIncident(probeConfig)
+    removeIncident(probeConfig)
 
     // assert
     expect(getDowntimeDuration(probeConfig)).eq('0 seconds')
@@ -70,7 +66,7 @@ describe('Downtime counter', () => {
     }
 
     // act
-    stopDowntimeCounter(probeConfig)
+    removeIncident(probeConfig)
 
     // assert
     expect(getDowntimeDuration(probeConfig)).eq('0 seconds')
