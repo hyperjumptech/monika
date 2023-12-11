@@ -23,7 +23,7 @@ describe('notificationChecker - slackNotification', () => {
           data: { url: '' },
         },
       ])
-    } catch (error) {
+    } catch (error: unknown) {
       const message = '"Slack URL" is not allowed to be empty'
 
       expect(() => {
@@ -42,7 +42,7 @@ describe('notificationChecker - slackNotification', () => {
           },
         },
       ])
-    } catch (error) {
+    } catch (error: unknown) {
       const message = '"Slack URL" must be a valid uri'
 
       expect(() => {

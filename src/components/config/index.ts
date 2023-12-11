@@ -48,6 +48,7 @@ import {
   mergeConfigs,
 } from './get'
 import { getProbes, setProbes } from './probe'
+import { getErrorMessage } from '../../utils/catch-error-handler'
 
 type ScheduleRemoteConfigFetcherParams = {
   configType: ConfigType
@@ -100,13 +101,14 @@ export const updateConfig = async (config: Config): Promise<void> => {
     setProbes(newConfig.probes)
     emitter.emit(events.config.updated)
     log.info('Config file update detected')
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = getErrorMessage(error)
     if (isTestEnvironment) {
       // return error during tests
-      throw new Error(error.message)
+      throw new Error(message)
     }
 
-    log.error(error?.message)
+    log.error(message)
     exit(1)
   }
 }
@@ -211,8 +213,8 @@ function scheduleRemoteConfigFetcher({
       }
 
       await updateConfig(mergeConfigs(defaultConfigs, nonDefaultConfig))
-    } catch (error: any) {
-      log.error(error?.message)
+    } catch (error: unknown) {
+      log.error(getErrorMessage(error))
     }
   }, interval * 1000)
 }

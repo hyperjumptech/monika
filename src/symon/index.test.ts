@@ -36,6 +36,7 @@ import { deleteProbe, findProbe, getProbes } from '../components/config/probe'
 import { validateProbes } from '../components/config/validation'
 import events from '../events'
 import { getEventEmitter } from '../utils/events'
+import { getErrorMessage } from '../utils/catch-error-handler'
 
 const config: Config = {
   version: 'asdfg123',
@@ -226,8 +227,8 @@ describe('Symon initiate', () => {
     try {
       // act
       await symon.initiate()
-    } catch (error: any) {
-      errorMessage = error?.message
+    } catch (error: unknown) {
+      errorMessage = getErrorMessage(error)
     }
 
     await symon.stop()

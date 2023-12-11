@@ -44,7 +44,7 @@ describe('notificationChecker - webhookNotification', () => {
           data: { url: '' },
         },
       ])
-    } catch (error) {
+    } catch (error: unknown) {
       const message = '"Webhook URL" is not allowed to be empty'
 
       expect(() => {
@@ -63,7 +63,7 @@ describe('notificationChecker - webhookNotification', () => {
           },
         },
       ])
-    } catch (error) {
+    } catch (error: unknown) {
       const message = '"Webhook URL" must be a valid uri'
 
       expect(() => {
