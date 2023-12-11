@@ -156,7 +156,7 @@ export default class SymonClient {
   private httpClient: AxiosInstance
   private locationId: string
   private monikaId: string
-  private probesLastUpdatedAt: Date | undefined
+  private probeChangesCheckedAt: Date | undefined
   private reportProbesLimit: number
   private reportTimeout: NodeJS.Timeout | undefined
   private url: string
@@ -204,30 +204,45 @@ export default class SymonClient {
         log.error(`[Symon] Send status failed. ${(error as Error).message}`)
       })
 
-    const probeUpdatedAt = new Date()
+    const probeChangesCheckedAt = new Date()
     await this.fetchProbesAndUpdateConfig()
-    this.setProbeUpdatedAt(probeUpdatedAt)
+    this.setProbeChangesCheckedAt(probeChangesCheckedAt)
 
-    this.probeChangesInterval = setInterval(() => {
-      const probeUpdatedAt = new Date()
-      this.probeChanges
-        .bind(this)()
-        .then((probeChanges) => {
-          this.setProbeUpdatedAt(probeUpdatedAt)
-          applyProbeChanges(probeChanges)
-          this.eventEmitter.emit(events.config.updated)
+    this.probeChangesInterval = setInterval(async () => {
+      const probeChangesCheckedAt = new Date()
+      try {
+        const probeChanges = await this.probeChanges.bind(this)()
+        this.setProbeChangesCheckedAt(probeChangesCheckedAt)
 
+        const hasProbeChanges = probeChanges.length > 0
+        if (!hasProbeChanges) {
           log.info(
-            `[Symon] Get probe changes (${probeChanges.length}) since ${this.probesLastUpdatedAt}`
+            `[Symon] No probe changes since ${this.probeChangesCheckedAt}`
           )
-        })
-        .catch((error) =>
-          log.error(
-            `[Symon] Get probe changes since ${
-              this.probesLastUpdatedAt
-            } failed. ${(error as Error).message}`
-          )
+          return
+        }
+
+        const probeChangesApplyResults = await applyProbeChanges(probeChanges)
+        for (const result of probeChangesApplyResults) {
+          if (result.status === 'rejected') {
+            log.error(
+              `[Symon] Get probe changes since ${this.probeChangesCheckedAt}. ${result.reason}`
+            )
+          }
+        }
+
+        this.eventEmitter.emit(events.config.updated)
+
+        log.info(
+          `[Symon] Get probe changes (${probeChanges.length}) since ${this.probeChangesCheckedAt}`
         )
+      } catch (error) {
+        log.error(
+          `[Symon] Get probe changes since ${
+            this.probeChangesCheckedAt
+          } failed. ${(error as Error).message}`
+        )
+      }
     }, getContext().flags.symonGetProbesIntervalMs)
 
     this.report().catch((error) => {
@@ -267,8 +282,8 @@ export default class SymonClient {
     await this.worker.destroy()
   }
 
-  private setProbeUpdatedAt(probesLastUpdatedAt: Date) {
-    this.probesLastUpdatedAt = probesLastUpdatedAt
+  private setProbeChangesCheckedAt(probeChangesCheckedAt: Date) {
+    this.probeChangesCheckedAt = probeChangesCheckedAt
   }
 
   private willSendEventListener({
@@ -338,7 +353,7 @@ export default class SymonClient {
     const response = await this.httpClient.get<{ data: ProbeChange[] }>(
       `/${this.monikaId}/probe-changes`,
       {
-        params: { since: this.probesLastUpdatedAt },
+        params: { since: this.probeChangesCheckedAt },
       }
     )
 
@@ -424,35 +439,37 @@ export default class SymonClient {
 }
 
 async function applyProbeChanges(probeChanges: ProbeChange[]) {
-  for (const { lastEvent, probe, probe_id: probeId, type } of probeChanges) {
-    switch (type) {
-      case 'delete': {
-        deleteProbe(probeId)
-        return
-      }
+  return Promise.allSettled(
+    probeChanges.map(async ({ lastEvent, probe, probe_id: probeId, type }) => {
+      switch (type) {
+        case 'delete': {
+          deleteProbe(probeId)
+          return
+        }
 
-      case 'update': {
-        validateProbes([lastEvent ? { ...probe, lastEvent } : probe])
-          .then((probes) => updateProbe(probeId, probes[0]))
-          .catch()
+        case 'update': {
+          const probes = await validateProbes([
+            lastEvent ? { ...probe, lastEvent } : probe,
+          ])
+          updateProbe(probeId, probes[0])
 
-        return
-      }
+          return
+        }
 
-      case 'add': {
-        validateProbes([lastEvent ? { ...probe, lastEvent } : probe])
-          .then((probes) => addProbe(probes[0]))
-          .catch()
-        return
-      }
+        case 'add': {
+          const probes = await validateProbes([
+            lastEvent ? { ...probe, lastEvent } : probe,
+          ])
+          addProbe(probes[0])
+          return
+        }
 
-      default: {
-        log.error(
-          `[Symon] Apply probe changes. Unknown probe change type (${type}).`
-        )
+        default: {
+          throw new Error(`Unknown probe changes type (${type}).`)
+        }
       }
-    }
-  }
+    })
+  )
 }
 
 async function setConfig(newConfig: Config) {
