@@ -25,7 +25,7 @@ describe('notificationChecker - MonikaNotification', () => {
           },
         },
       ])
-    } catch (error) {
+    } catch (error: unknown) {
       const message = '"Monika Notification URL" is not allowed to be empty'
 
       expect(() => {
@@ -44,7 +44,7 @@ describe('notificationChecker - MonikaNotification', () => {
           },
         },
       ])
-    } catch (error) {
+    } catch (error: unknown) {
       const message = '"Monika Notification URL" must be a valid uri'
 
       expect(() => {

@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.16.1 2023-12-07
+
+## Fixed
+
+fix path typo (#1195)
+Fix: cleanup unused report data (#1198)
+fix: error sent as a body to Symon (#1201)
+update snapcraft pipeline (#1204)
+
+## Changed
+
+tweak wildcard to trigger all subdir (#1193)
+Refactor: Separate Probe and Config Data (#1199)
+Chore: Clean up ESLint warnings in packages/notifications (#1194)
+
 ## 1.16.0 2023-11-21
 
 ## Fixed

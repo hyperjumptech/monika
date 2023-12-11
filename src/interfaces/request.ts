@@ -52,7 +52,7 @@ export interface ProbeRequestResponse<T = any> {
   status: number
   headers: any
   responseTime: number
-  errMessage?: string // any error message from drivers
+  error?: string // any error message from drivers
   result: probeRequestResult // did the probe succeed or fail?
 }
 

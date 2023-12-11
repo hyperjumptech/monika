@@ -341,7 +341,7 @@ export class BaseProber implements Prober {
       requestIndex,
       probeRes: requestResponse,
       alertQueries: [failedRequestAssertion.assertion],
-      error: requestResponse.errMessage,
+      error: requestResponse.error,
     })
 
     const url = this.probeConfig?.requests?.[requestIndex].url || ''

@@ -22,58 +22,109 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import chai, { expect } from 'chai'
-import spies from 'chai-spies'
+import { expect } from '@oclif/test'
 
-import { validateNotification } from '../../validator/notification'
+import type { Probe } from '../../interfaces/probe'
 
-chai.use(spies)
+import {
+  addProbe,
+  deleteProbe,
+  findProbe,
+  getProbes,
+  setProbes,
+  updateProbe,
+} from './probe'
 
-describe('notificationChecker - discordNotification', () => {
-  afterEach(() => {
-    chai.spy.restore()
-  })
+const probe: Probe = {
+  alerts: [],
+  id: 'xVUcW',
+  interval: 10,
+  name: 'Sample Probe',
+}
 
-  const notificationConfig = {
-    id: 'discord',
-    type: 'discord' as const,
-  }
-
-  it('should handle validation error - without URL', async () => {
-    try {
-      await validateNotification([
-        {
-          ...notificationConfig,
-          data: {
-            url: '',
-          },
-        },
-      ])
-    } catch (error: unknown) {
-      const message = '"Discord URL" is not allowed to be empty'
-
-      expect(() => {
-        throw error
-      }).to.throw(message)
+describe('Probe cache', () => {
+  beforeEach(() => {
+    for (const { id } of getProbes()) {
+      deleteProbe(id)
     }
   })
+  it('should add a probe', () => {
+    // act
+    addProbe(probe)
 
-  it('should handle validation error - invalid URL', async () => {
-    try {
-      await validateNotification([
-        {
-          ...notificationConfig,
-          data: {
-            url: 'example',
-          },
-        },
-      ])
-    } catch (error: unknown) {
-      const message = '"Discord URL" must be a valid uri'
+    // assert
+    expect(findProbe(probe.id)).eq(probe)
+  })
 
-      expect(() => {
-        throw error
-      }).to.throw(message)
-    }
+  it('should update a probe', () => {
+    // arrange
+    addProbe(probe)
+    const updatedName = 'Updated Probe'
+
+    // act
+    const isUpdated = updateProbe(probe.id, { ...probe, name: updatedName })
+
+    // assert
+    expect(isUpdated).eq(true)
+    expect(findProbe(probe.id)?.name).eq(updatedName)
+  })
+
+  it('should not update a nonexistent probe', () => {
+    // arrange
+    const updatedName = 'Updated Probe'
+
+    // act
+    const isUpdated = updateProbe('9WpFB', { ...probe, name: updatedName })
+
+    // assert
+    expect(isUpdated).eq(false)
+    expect(findProbe('9WpFB')).undefined
+  })
+
+  it('should get all probes', () => {
+    // arrange
+    addProbe(probe)
+
+    // act
+    const probes = getProbes()
+
+    // assert
+    expect(probes.length).eq(1)
+  })
+
+  it('should not remove a nonexistent probe', () => {
+    // arrange
+    addProbe(probe)
+
+    // act
+    const isDeleted = deleteProbe('9WpFB')
+
+    // assert
+    expect(isDeleted).eq(false)
+    expect(getProbes().length).eq(1)
+  })
+
+  it('should remove a probe', () => {
+    // arrange
+    addProbe(probe)
+
+    // act
+    const isDeleted = deleteProbe(probe.id)
+
+    // assert
+    expect(isDeleted).eq(true)
+    expect(getProbes().length).eq(0)
+  })
+
+  it('should set probes', () => {
+    // arrange
+    addProbe(probe)
+    expect(getProbes().length).eq(1)
+
+    // act
+    setProbes([probe])
+
+    // assert
+    expect(getProbes().length).eq(1)
   })
 })

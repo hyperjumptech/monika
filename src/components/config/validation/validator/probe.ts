@@ -36,6 +36,7 @@ import {
   DEFAULT_INTERVAL,
   DEFAULT_RECOVERY_THRESHOLD,
 } from './default-values'
+import { getErrorMessage } from '../../../../utils/catch-error-handler'
 
 const ALERT_QUERY = 'status-not-2xx'
 const RESPONSE_TIME_PREFIX = 'response-time-greater-than-'
@@ -321,8 +322,10 @@ export async function validateProbes(probes: Probe[]): Promise<Probe[]> {
     return await schema.validateAsync(probes, {
       stripUnknown: true,
     })
-  } catch (error: any) {
-    throw new Error(`Monika configuration is invalid. Probe: ${error?.message}`)
+  } catch (error: unknown) {
+    throw new Error(
+      `Monika configuration is invalid. Probe: ${getErrorMessage(error)}`
+    )
   }
 }
 

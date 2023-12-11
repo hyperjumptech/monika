@@ -156,7 +156,7 @@ async function updateMonika(config: IConfig, remoteVersion: string) {
         `npm install -g @hyperjumptech/monika@${remoteVersion}`,
         true
       )
-    } catch (error) {
+    } catch (error: unknown) {
       log.error(`Updater: npm install error, ${error}`)
     }
 
@@ -247,7 +247,7 @@ async function moveExtractedFiles(config: IConfig, source: string) {
       ) {
         await chmod(destFile, 0o755)
       }
-    } catch (error) {
+    } catch (error: unknown) {
       log.error(`Updater: move files error ${error}`)
     }
   }

@@ -45,6 +45,7 @@ import {
   retryInitialDelayMs,
   retryMaxDelayMs,
   symonAPIVersion,
+  symonGetProbesIntervalMs,
 } from '../flag'
 import { printSummary, savePidFile } from '../jobs/summary-notification'
 import initLoaders from '../loaders'
@@ -221,6 +222,8 @@ export default class Monika extends Command {
       dependsOn: ['symonUrl'],
       description: 'API Key for Symon',
     }),
+
+    symonGetProbesIntervalMs,
 
     symonLocationId: Flags.string({
       dependsOn: ['symonKey', 'symonUrl'],
@@ -440,8 +443,8 @@ process.on('SIGINT', async () => {
   }
 
   if (symonClient) {
-    await symonClient.stopReport()
     await symonClient.sendStatus({ isOnline: false })
+    await symonClient.stop()
   }
 
   em.emit(events.application.terminated)

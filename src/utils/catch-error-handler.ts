@@ -22,28 +22,33 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import type { ValidatedResponse } from '../plugins/validate-response'
+// Credits to Kent C. Dodds
+// taken from https://kentcdodds.com/blog/get-a-catch-block-error-message-with-typescript
+type ErrorWithMessage = {
+  message: string
+}
 
-import { findProbe } from '../components/config/probe'
+function isErrorWithMessage(error: unknown): error is ErrorWithMessage {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'message' in error &&
+    typeof (error as Record<string, unknown>).message === 'string'
+  )
+}
 
-export function getAlertID(
-  url: string,
-  validation: ValidatedResponse,
-  probeID: string
-): string {
-  if (validation.alert.id) {
-    return validation.alert.id
+function toErrorWithMessage(maybeError: unknown): ErrorWithMessage {
+  if (isErrorWithMessage(maybeError)) return maybeError
+
+  try {
+    return new Error(JSON.stringify(maybeError))
+  } catch {
+    // fallback in case there's an error stringifying the maybeError
+    // like with circular references for example.
+    return new Error(String(maybeError))
   }
+}
 
-  const probe = findProbe(probeID)
-  if (!probe) {
-    return ''
-  }
-
-  const request = probe.requests?.find((request) => request.url === url)
-  if (!request) {
-    return ''
-  }
-
-  return request.alerts?.find((alert) => alert.query === '')?.id || ''
+export function getErrorMessage(error: unknown) {
+  return toErrorWithMessage(error).message
 }

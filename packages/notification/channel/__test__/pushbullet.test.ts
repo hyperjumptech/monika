@@ -49,7 +49,7 @@ describe('notificationChecker - pushbulletNotification', () => {
           },
         },
       ])
-    } catch (error) {
+    } catch (error: unknown) {
       const message = '"Pushbullet token" is not allowed to be empty'
 
       expect(() => {

@@ -31,7 +31,7 @@ type MonikaAlertNotifDataBody = {
   alert: string
   url: string
   time: string
-  monika: string
+  monika?: string
 }
 
 type MonikaStartAndTerminationNotifDataBody = {
@@ -43,7 +43,7 @@ type MonikaStartAndTerminationNotifDataBody = {
 type MonikaStatusUpdateNotifDataBody = {
   type: 'status-update'
   time: string
-  monika: string
+  monika?: string
   numberOfProbes: string
   maxResponseTime: string
   minResponseTime: string

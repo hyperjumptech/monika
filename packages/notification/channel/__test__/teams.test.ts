@@ -23,7 +23,7 @@ describe('notificationChecker - teamsNotification', () => {
           data: { url: '' },
         },
       ])
-    } catch (error) {
+    } catch (error: unknown) {
       const message = '"Teams URL" is not allowed to be empty'
 
       expect(() => {
@@ -42,7 +42,7 @@ describe('notificationChecker - teamsNotification', () => {
           },
         },
       ])
-    } catch (error) {
+    } catch (error: unknown) {
       const message = '"Teams URL" must be a valid uri'
 
       expect(() => {

@@ -15,8 +15,8 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 18
       - run: npm ci
@@ -34,8 +34,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: test
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 18
       - run: npm ci --workspaces --if-present
@@ -56,7 +56,8 @@ jobs:
         id: snapcraft
         name: Build Snap package
       - uses: snapcore/action-publish@v1
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.STORE_LOGIN }}
         with:
-          store_login: ${{ secrets.STORE_LOGIN }}
           snap: ${{ steps.snapcraft.outputs.snap }}
           release: edge
