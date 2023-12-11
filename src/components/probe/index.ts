@@ -27,6 +27,7 @@ import { differenceInSeconds } from 'date-fns'
 import { getContext } from '../../context'
 import type { Notification } from '@hyperjumptech/monika-notification'
 import type { Probe } from '../../interfaces/probe'
+import Queue from 'queue'
 import {
   getProbeContext,
   getProbeState,
@@ -48,6 +49,13 @@ type doProbeParams = {
  * @param {object} doProbeParams doProbe parameter
  * @returns {Promise<void>} void
  */
+
+const queue = new Queue({
+  concurrency: 1,
+  autostart: true,
+  timeout: 10_000,
+})
+
 export async function doProbe({
   probe,
   notifications,
@@ -77,15 +85,18 @@ export async function doProbe({
       probe.recoveryThreshold || DEFAULT_RECOVERY_THRESHOLD
     )
 
-    await retry(handleAll, {
-      maxAttempts,
-      backoff: new ExponentialBackoff({
-        initialDelay: getContext().flags.retryInitialDelayMs,
-        maxDelay: getContext().flags.retryMaxDelayMs,
-      }),
-    }).execute(({ attempt }) =>
-      Promise.all(probers.map(async (prober) => prober.probe(attempt)))
-    )
+    // Enqueue each prober into the prober queue with retry backoff
+    queue.push(async () => {
+      await retry(handleAll, {
+        maxAttempts,
+        backoff: new ExponentialBackoff({
+          initialDelay: getContext().flags.retryInitialDelayMs,
+          maxDelay: getContext().flags.retryMaxDelayMs,
+        }),
+      }).execute(({ attempt }) =>
+        Promise.all(probers.map(async (prober) => prober.probe(attempt)))
+      )
+    })
 
     setProbeFinish(probe.id)
   }, randomTimeoutMilliseconds)
@@ -116,7 +127,5 @@ function isCycleEnd(probeID: string) {
 }
 
 function getRandomTimeoutMilliseconds(): number {
-  return [1000, 2000, 3000].sort(() => {
-    return Math.random() - 0.5
-  })[0]
+  return [1000, 2000, 3000].sort(() => Math.random() - 0.5)[0]
 }
