@@ -26,7 +26,9 @@ import type { Config } from '../../interfaces/config'
 
 type CollectionVersion = 'v2.0' | 'v2.1'
 
-const getCollectionVersion = (config: any) => {
+const getCollectionVersion = (
+  config: { info: { schema: string } } | undefined
+) => {
   if (config?.info?.schema?.includes('v2.0')) {
     return 'v2.0'
   }
@@ -59,20 +61,24 @@ const generateHeaderContentType = (mode: string, rawType?: string) => {
   }
 }
 
-const generateBody = (body: any, mode: string, rawType?: string) => {
+const generateBody = (
+  body: Record<string, string>[] | string,
+  mode: string,
+  rawType?: string
+) => {
   switch (mode) {
     case 'formdata':
     case 'urlencoded': {
       return {
-        body: body?.reduce(
-          (obj: any, it: any) => Object.assign(obj, { [it.key]: it.value }),
+        body: (body as Record<string, string>[])?.reduce(
+          (obj, it) => Object.assign(obj, { [it.key]: it.value }),
           {}
         ),
       }
     }
 
     case 'raw': {
-      if (rawType === 'json') return { body: JSON.parse(body) }
+      if (rawType === 'json') return { body: JSON.parse(body as string) }
       return { body }
     }
 
