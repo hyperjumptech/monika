@@ -93,17 +93,18 @@ export default function parseInsomnia(
     )
   }
 
-  const env = data.reverse().find((d: unknown) => {
-    const { error, value: res } = resourceValidator.validate(d)
-
-    return (
-      !error &&
-      res._type === 'environment' &&
-      res.data?.scheme &&
-      res.data?.host &&
-      res.data?.base_path
+  const env = data
+    .reverse()
+    .find(
+      (res: {
+        _type: string
+        data: { scheme: string; host: string; base_path: string }
+      }) =>
+        res._type === 'environment' &&
+        res.data?.scheme &&
+        res.data?.host &&
+        res.data?.base_path
     )
-  })
 
   environmentVariables = env
   baseUrl = env
@@ -113,19 +114,25 @@ export default function parseInsomnia(
   return mapInsomniaToConfig(data)
 }
 
-function mapInsomniaToConfig(data: unknown[]): Config {
-  const insomniaRequests = data.filter((d: unknown) => {
-    const { _type, url, body } = resourceValidator.validate(d).value
-
-    return (
+function mapInsomniaToConfig(data: unknown): Config {
+  const res = Joi.array().items(resourceValidator).validate(data).value
+  const insomniaRequests = res.filter(
+    ({
+      _type,
+      url,
+      body,
+    }: {
+      _type: string
+      url: string
+      body: { mimeType: string }
+    }) =>
       _type === 'request' &&
       url &&
       // skip binary upload requests
       body?.mimeType !== 'application/octet-stream'
-    )
-  })
+  )
 
-  const probes = insomniaRequests.map<Probe>((probe) =>
+  const probes = insomniaRequests.map((probe: unknown) =>
     mapInsomniaRequestToConfig(probe)
   )
 

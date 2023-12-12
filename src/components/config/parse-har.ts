@@ -31,11 +31,11 @@ const keyValValidator = Joi.array().items(
   Joi.object({ key: Joi.string(), value: Joi.string() })
 )
 
-const convertNameValueArraysToObject = (keyVal: unknown) => {
-  const { value: validated, error } = keyValValidator.validate(keyVal)
-  if (error) throw new Error(error.message)
+const convertNameValueArraysToObject = (
+  keyVal: { name: string; value: string }[]
+) => {
   const obj: Record<string, string> = {}
-  for (const item of validated) {
+  for (const item of keyVal) {
     if (item.name.charAt(0) !== ':') {
       obj[item.name] = item.value
     }
@@ -50,9 +50,9 @@ const postDataValidator = Joi.object({
   params: keyValValidator.optional(),
 })
 
-const parsePostData = (postDataIn: unknown) => {
-  const { value: postData, error } = postDataValidator.validate(postDataIn)
-  if (error) throw new Error(error.message)
+const parsePostData = (
+  postData: { mimeType: string; text: string } | undefined
+) => {
   if (!postData) {
     return {}
   }
@@ -88,17 +88,21 @@ export const parseHarFile = (fileContents: string): Config => {
     if (error) throw new Error('No HTTP requests in your HAR file')
 
     const harRequest: RequestConfig[] = harJson.log.entries.map(
-      (e: unknown) => {
-        const { value: entry } = entryValidator.validate(e)
-
-        return {
-          method: entry.request.method,
-          url: entry.request.url,
-          headers: convertNameValueArraysToObject(entry.request.headers),
-          params: convertNameValueArraysToObject(entry.request.queryString),
-          body: parsePostData(entry.request.postData),
+      (entry: {
+        request: {
+          method: string
+          url: string
+          headers: { name: string; value: string }[]
+          queryString: { name: string; value: string }[]
+          postData?: { mimeType: string; text: string }
         }
-      }
+      }) => ({
+        method: entry.request.method,
+        url: entry.request.url,
+        headers: convertNameValueArraysToObject(entry.request.headers),
+        params: convertNameValueArraysToObject(entry.request.queryString),
+        body: parsePostData(entry.request.postData),
+      })
     )
 
     const harConfig: Config = {
