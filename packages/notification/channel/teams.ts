@@ -148,7 +148,7 @@ export function getContent({
     case 'status-update': {
       return {
         '@type': 'MessageCard',
-        summary: summary,
+        summary,
         sections: [
           {
             activityTitle: 'Monika Status',
@@ -192,10 +192,11 @@ export function getContent({
       }
     }
 
-    default:
+    default: {
       return {
         '@type': 'MessageCard',
         summary,
       }
+    }
   }
 }

@@ -56,7 +56,7 @@ export const send = async (
   const DEFAULT_SENDER_NAME = 'Monika'
   const transporter = nodemailer.createTransport({
     host: hostname,
-    port: port,
+    port,
     secure: port === 465,
     auth: {
       user: username,

@@ -40,9 +40,7 @@ describe('PagerDuty notification', () => {
 
     it('should validate PagerDuty key', () => {
       // act
-      const error = validator.validate([
-        { probeID: '65DDKmmB9mSaeE-8bMXRN' },
-      ] as any)
+      const error = validator.validate([{ probeID: '65DDKmmB9mSaeE-8bMXRN' }])
 
       // assert
       expect(error.error?.message).eq('"Key" is required')
@@ -157,7 +155,7 @@ describe('PagerDuty notification', () => {
         event_action: 'trigger',
         /* eslint-enable camelcase */
         payload: {
-          summary: summary,
+          summary,
           source: publicIpAddress,
           severity: 'error',
           group: probeID,

@@ -58,7 +58,7 @@ eventEmitter.on(
         log.info(
           `Atlassian status page (${type}). id: ${incidentID}, probeID: ${probeID}, url: ${url}`
         )
-      } catch (error: any) {
+      } catch (error: unknown) {
         log.error(
           `Atlassian status page (Error). probeID: ${probeID}, url: ${url}, probeState: ${probeState} error: ${error}`
         )
@@ -69,12 +69,16 @@ eventEmitter.on(
 
 function getNotificationType(probeState: string): 'incident' | 'recovery' | '' {
   switch (probeState) {
-    case 'UP':
+    case 'UP': {
       return 'recovery'
-    case 'DOWN':
-      return 'incident'
+    }
 
-    default:
+    case 'DOWN': {
+      return 'incident'
+    }
+
+    default: {
       return ''
+    }
   }
 }

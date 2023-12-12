@@ -27,7 +27,7 @@ import Joi from 'joi'
 import { type as osType } from 'os'
 import type { NotificationMessage } from '.'
 
-export const validator = Joi.any()
+export const validator = Joi.object()
 
 export const send = async (
   // actually do not need data property
@@ -76,8 +76,9 @@ export const send = async (
       return
     }
 
-    default:
+    default: {
       throw new Error('Unknown operating system')
+    }
   }
 }
 
@@ -89,7 +90,7 @@ export const send = async (
 function psEscape(str: string): string {
   let result = ''
   for (const ch of str) {
-    if (ch.charCodeAt(0) === 39) {
+    if (ch.codePointAt(0) === 39) {
       // single quote, escape it with another single quote
       result += ch
     }

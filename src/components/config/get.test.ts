@@ -60,7 +60,7 @@ describe('Add default notification', () => {
     // arrange
     const config: Partial<Config> = {
       notifications: [
-        { id: '1', type: 'webhook', data: 'https://example.com' },
+        { id: '1', type: 'webhook', data: { url: 'https://example.com' } },
       ],
     }
 

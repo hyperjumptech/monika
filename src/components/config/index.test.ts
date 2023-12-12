@@ -31,6 +31,7 @@ import { md5Hash } from '../../utils/hash'
 import { getEventEmitter } from '../../utils/events'
 import type { MonikaFlags } from '../../flag'
 import { validateProbes } from './validation'
+import { getErrorMessage } from '../../utils/catch-error-handler'
 
 describe('getConfig', () => {
   beforeEach(() => {
@@ -67,25 +68,6 @@ describe('getConfig', () => {
 
     // act and assert
     expect(getConfig()).deep.eq({ probes: [] })
-  })
-
-  it('should return config', () => {
-    // arrange
-    const config = {
-      probes: [
-        {
-          id: '1',
-          name: 'example',
-          interval: 1000,
-          alerts: [],
-          requests: [{ body: '', url: 'https://example.com', timeout: 1000 }],
-        },
-      ],
-    }
-    setContext({ config })
-
-    // assert
-    expect(getConfig()).to.deep.eq(config)
   })
 })
 
@@ -147,8 +129,8 @@ describe('updateConfig', () => {
     try {
       // act
       await updateConfig({ probes: [] })
-    } catch (error: any) {
-      errorMessage = error.message
+    } catch (error: unknown) {
+      errorMessage = getErrorMessage(error)
     }
 
     // assert

@@ -14,7 +14,6 @@ type UpdateIncident = Pick<Incident, 'incidentID' | 'status'>
 type FindIncident = Pick<Incident, 'probeID' | 'status' | 'url'>
 
 type FindIncidentResponse = {
-  // eslint-disable-next-line camelcase
   incident_id: string
 }
 

@@ -22,7 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios from 'axios'
+import axios, { AxiosError } from 'axios'
 import http from 'http'
 import https from 'https'
 import Joi from 'joi'
@@ -96,8 +96,9 @@ export class AtlassianStatusPageAPI {
         return incidentID
       }
 
-      default:
+      default: {
         throw new Error(`Statuspage notification: type ${type} is unknown`)
+      }
     }
   }
 
@@ -132,10 +133,13 @@ export class AtlassianStatusPageAPI {
       await insertIncidentToDatabase({ incidentID, probeID, status, url })
 
       return incidentID
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const axiosError = error instanceof AxiosError ? error : new AxiosError()
       throw new Error(
-        `${error?.message}${
-          error?.data ? `. ${error?.response?.data?.message}` : ''
+        `${axiosError?.message}${
+          axiosError?.response?.data
+            ? `. ${axiosError?.response?.data?.message}`
+            : ''
         }`
       )
     }
@@ -168,10 +172,13 @@ export class AtlassianStatusPageAPI {
         data,
         this.axiosConfig
       )
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const axiosError = error instanceof AxiosError ? error : new AxiosError()
       throw new Error(
-        `${error?.message}${
-          error?.data ? `. ${error?.response?.data?.message}` : ''
+        `${axiosError?.message}${
+          axiosError?.response?.data
+            ? `. ${axiosError?.response?.data?.message}`
+            : ''
         }`
       )
     }

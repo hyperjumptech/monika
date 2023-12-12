@@ -82,7 +82,7 @@ const getExpectedMessage = (
       status,
       time: responseTime,
       body: data,
-      headers: headers,
+      headers,
     },
   })
 }

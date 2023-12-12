@@ -63,7 +63,7 @@ export const parseConfigFromText = (configString: string): Config => {
           name: url,
           requests: [
             {
-              url: url,
+              url,
               method: 'GET',
               timeout: 10_000,
               body: {} as JSON,

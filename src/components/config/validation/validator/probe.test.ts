@@ -28,8 +28,8 @@ import type { Probe } from '../../../../interfaces/probe'
 
 import { FAILED_REQUEST_ASSERTION } from '../../../../looper'
 import { validateProbes } from './probe'
-import { resetContext, setContext } from '../../../../../src/context'
-import type { MonikaFlags } from '../../../../../src/flag'
+import { resetContext, setContext } from '../../../../context'
+import type { MonikaFlags } from '../../../../flag'
 
 describe('Probe validation', () => {
   describe('Probe sanitization', () => {
