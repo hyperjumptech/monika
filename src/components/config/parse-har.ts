@@ -22,17 +22,20 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import Joi from 'joi'
 import { Config } from '../../interfaces/config'
 import { RequestConfig } from '../../interfaces/request'
+import { DEFAULT_INTERVAL } from './validation/validator/default-values'
 
-const convertNameValueArraysToObject = (
-  headers: {
-    name: string
-    value: any
-  }[]
-) => {
-  const obj: any = {}
-  for (const item of headers) {
+const keyValValidator = Joi.array().items(
+  Joi.object({ key: Joi.string(), value: Joi.string() })
+)
+
+const convertNameValueArraysToObject = (keyVal: unknown) => {
+  const { value: validated, error } = keyValValidator.validate(keyVal)
+  if (error) throw new Error(error.message)
+  const obj: Record<string, string> = {}
+  for (const item of validated) {
     if (item.name.charAt(0) !== ':') {
       obj[item.name] = item.value
     }
@@ -41,7 +44,15 @@ const convertNameValueArraysToObject = (
   return obj
 }
 
-const parsePostData = (postData: any) => {
+const postDataValidator = Joi.object({
+  mimeType: Joi.string(),
+  text: Joi.string(),
+  params: keyValValidator.optional(),
+})
+
+const parsePostData = (postDataIn: unknown) => {
+  const { value: postData, error } = postDataValidator.validate(postDataIn)
+  if (error) throw new Error(error.message)
   if (!postData) {
     return {}
   }
@@ -56,23 +67,48 @@ const parsePostData = (postData: any) => {
 export const parseHarFile = (fileContents: string): Config => {
   // Read file from filepath
   try {
-    const harJson = JSON.parse(fileContents)
+    const entryValidator = Joi.object({
+      entry: Joi.object({
+        request: Joi.object({
+          method: Joi.string(),
+          url: Joi.string(),
+          headers: Joi.array().items(keyValValidator),
+          queryString: Joi.array().items(keyValValidator),
+          postData: postDataValidator,
+        }),
+      }),
+    })
+
+    const { value: harJson, error } = Joi.object({
+      log: Joi.object({
+        entries: Joi.array().items(entryValidator.required()),
+      }),
+    }).validate(JSON.parse(fileContents))
+
+    if (error) throw new Error('No HTTP requests in your HAR file')
 
     const harRequest: RequestConfig[] = harJson.log.entries.map(
-      (entry: { request: any }) => ({
-        method: entry.request.method,
-        url: entry.request.url,
-        headers: convertNameValueArraysToObject(entry.request.headers),
-        params: convertNameValueArraysToObject(entry.request.queryString),
-        body: parsePostData(entry.request.postData),
-      })
+      (e: unknown) => {
+        const { value: entry } = entryValidator.validate(e)
+
+        return {
+          method: entry.request.method,
+          url: entry.request.url,
+          headers: convertNameValueArraysToObject(entry.request.headers),
+          params: convertNameValueArraysToObject(entry.request.queryString),
+          body: parsePostData(entry.request.postData),
+        }
+      }
     )
 
-    const harConfig: any = {
+    const harConfig: Config = {
       probes: [
         {
           id: harRequest[0].url,
+          name: harRequest[0].url,
+          interval: DEFAULT_INTERVAL,
           requests: harRequest,
+          alerts: [],
         },
       ],
     }

@@ -116,7 +116,7 @@ describe('parseConfigFromPostman', () => {
 
       expect(config.probes.length).to.equals(5)
 
-      for (const [index, item] of (basicCollectionV21 as any).item.entries()) {
+      for (const [index, item] of basicCollectionV21.item.entries()) {
         expect(item.name).to.equals(config.probes[index].name)
 
         for (const req of config.probes[index].requests || []) {
@@ -227,9 +227,7 @@ describe('parseConfigFromPostman', () => {
 
       expect(config.probes.length).to.equals(2)
 
-      for (const [index, item] of (
-        groupedCollectionV21 as any
-      ).item.entries()) {
+      for (const [index, item] of groupedCollectionV21.item.entries()) {
         expect(item.name).to.equals(config.probes[index].name)
 
         for (const [rIndex, req] of (
