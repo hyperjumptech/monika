@@ -205,6 +205,7 @@ export default class SymonClient {
       })
 
     const probeChangesCheckedAt = new Date()
+
     await this.fetchProbesAndUpdateConfig()
     this.setProbeChangesCheckedAt(probeChangesCheckedAt)
 
