@@ -104,7 +104,7 @@ describe('Downtime counter', () => {
     removeIncident(probeConfig)
 
     // assert
-    expect(getContext().incidents[0].probeID === probeConfig2.probeID)
+    expect(getContext().incidents[0].probeID).eq(probeConfig2.probeID)
   })
 
   it('allow identical probe-ids but different urls', () => {
@@ -126,6 +126,6 @@ describe('Downtime counter', () => {
     removeIncident(probeConfig)
 
     // assert
-    expect(getContext().incidents[0].probeRequestURL === probeConfig2.url)
+    expect(getContext().incidents[0].probeRequestURL).eq(probeConfig2.url)
   })
 })
