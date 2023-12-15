@@ -132,8 +132,6 @@ export function startProbing({
       return
     }
 
-    // This uses node queue
-    // This is working
     for (const probe of probes) {
       doProbe({
         notifications,
