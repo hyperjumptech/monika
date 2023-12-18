@@ -33,7 +33,7 @@ jobs:
               echo "::set-output name=webhook_text::${{ github.event.pull_request.html_url }}"   
           fi
       - name: Notify Teams
-        uses: joelwmale/webhook-action@fd99bb3b8272237103e349e9bb4d9b0ead9a217c
+        uses: joelwmale/webhook-action@master
         with:
           url: ${{secrets.HYPERJUMP_TEAMS_SYMON_WEBHOOK}}
           body: '{"title": "${{ steps.set_variables.outputs.webhook_title }}", "text": "${{ steps.set_variables.outputs.webhook_text }}"}'
