@@ -46,7 +46,9 @@ const sitemapValidator = Joi.object({
 })
 
 const generateProbesFromXml = (parseResult: unknown) => {
-  const { value } = sitemapValidator.validate(parseResult)
+  const { value } = sitemapValidator.validate(parseResult, {
+    allowUnknown: true,
+  })
   const probes = value?.urlset?.url?.map(
     (item: { loc: string; 'xhtml:link': { '@_href': string }[] }) => {
       const requests = [
@@ -81,7 +83,9 @@ const generateProbesFromXml = (parseResult: unknown) => {
 const generateProbesFromXmlOneProbe = (parseResult: unknown) => {
   let probe: Probe | undefined
   let requests: RequestConfig[] = []
-  const config = sitemapValidator.validate(parseResult).value
+  const config = sitemapValidator.validate(parseResult, {
+    allowUnknown: true,
+  }).value
   const resources = config?.urlset?.url
   for (const [, item] of resources.entries()) {
     requests = [

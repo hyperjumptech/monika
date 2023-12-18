@@ -79,7 +79,10 @@ export default function parseInsomnia(
       ? yml.load(configString, { json: true })
       : JSON.parse(configString)
 
-  const { error, value: insomniaData } = insomniaValidator.validate(parseResult)
+  const { error, value: insomniaData } = insomniaValidator.validate(
+    parseResult,
+    { allowUnknown: true }
+  )
 
   if (error) throw new Error(error?.message)
 
@@ -115,7 +118,9 @@ export default function parseInsomnia(
 }
 
 function mapInsomniaToConfig(data: unknown): Config {
-  const res = Joi.array().items(resourceValidator).validate(data).value
+  const res = Joi.array()
+    .items(resourceValidator)
+    .validate(data, { allowUnknown: true }).value
   const insomniaRequests = res.filter(
     ({
       _type,
@@ -140,7 +145,7 @@ function mapInsomniaToConfig(data: unknown): Config {
 }
 
 function mapInsomniaRequestToConfig(req: unknown): Probe {
-  const { value: res } = resourceValidator.validate(req)
+  const { value: res } = resourceValidator.validate(req, { allowUnknown: true })
   // eslint-disable-next-line camelcase
   const url = compileTemplate(res.url)({ base_url: baseUrl })
   const authorization = getAuthorizationHeader(res)
@@ -175,7 +180,9 @@ function mapInsomniaRequestToConfig(req: unknown): Probe {
 }
 
 function getAuthorizationHeader(data: unknown): string | undefined {
-  const { value: res } = resourceValidator.validate(data)
+  const { value: res } = resourceValidator.validate(data, {
+    allowUnknown: true,
+  })
   let authorization: string | undefined
   if (
     res.authentication?.type === 'bearer' &&

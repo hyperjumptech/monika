@@ -155,7 +155,7 @@ const generateRequests = (item: ItemExport, version: CollectionVersion) => {
   return [generateEachRequest(item?.request, version)]
 }
 
-const a = Joi.object({
+const requestValidator = Joi.object({
   header: Joi.array().items(Joi.object()),
   body: Joi.object({
     mode: Joi.string().allow('formdata', 'raw'),
@@ -171,22 +171,24 @@ const a = Joi.object({
 
 const postmanValidator = Joi.object({
   name: Joi.string(),
-  request: a,
+  request: requestValidator,
   item: Joi.array().items(
     Joi.object({
       name: Joi.string(),
       item: Joi.object({
-        request: a,
+        request: requestValidator,
       }),
     })
   ),
-})
+}).unknown(true)
 
 const generateProbesFromConfig = (
   parseResult: unknown,
   version: CollectionVersion
 ) => {
-  const { value: config } = postmanValidator.validate(parseResult)
+  const { value: config } = postmanValidator.validate(parseResult, {
+    allowUnknown: true,
+  })
   const probes = config?.item?.map((item: ItemExport) => ({
     id: item?.name,
     name: item?.name,

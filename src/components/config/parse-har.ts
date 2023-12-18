@@ -83,9 +83,10 @@ export const parseHarFile = (fileContents: string): Config => {
       log: Joi.object({
         entries: Joi.array().items(entryValidator.required()),
       }),
-    }).validate(JSON.parse(fileContents))
+    }).validate(JSON.parse(fileContents), { allowUnknown: true })
 
-    if (error) throw new Error('No HTTP requests in your HAR file')
+    if (error)
+      throw new Error(`No HTTP requests in your HAR file. ${error.message}`)
 
     const harRequest: RequestConfig[] = harJson.log.entries.map(
       (entry: {
