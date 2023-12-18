@@ -28,7 +28,8 @@ import * as auth from './authorization'
 describe('utils authorization tests', () => {
   it('should return basic authorization', async () => {
     chai.spy.on(auth, 'authBasic', () => Promise.resolve('basic token'))
-    const token = auth.authorize('basic', {
+    const token = auth.authorize({
+      type: 'basic',
       username: 'someusername',
       password: 'somepassword',
     })
@@ -39,7 +40,7 @@ describe('utils authorization tests', () => {
 
   it('should return bearer authorization', async () => {
     chai.spy.on(auth, 'authBearer', () => Promise.resolve('bearer token'))
-    const token = auth.authorize('bearer', 'token')
+    const token = auth.authorize({ type: 'bearer', token: 'token' })
 
     expect(auth.authBearer).to.have.been.called()
     expect(token).not.undefined
