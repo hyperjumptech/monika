@@ -180,7 +180,7 @@ const postmanValidator = Joi.object({
       }),
     })
   ),
-}).unknown(true)
+})
 
 const generateProbesFromConfig = (
   parseResult: unknown,

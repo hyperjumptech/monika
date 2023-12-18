@@ -30,7 +30,7 @@ import type { AxiosRequestHeaders, Method } from 'axios'
 import Joi from 'joi'
 
 const envValidator = Joi.object({
-  scheme: Joi.string(),
+  scheme: Joi.array().items(Joi.string()),
   host: Joi.string(),
   // eslint-disable-next-line camelcase
   base_path: Joi.string(),
@@ -45,7 +45,7 @@ const resourceValidator = Joi.object({
   }),
   name: Joi.string(),
   data: envValidator,
-  description: Joi.string(),
+  description: Joi.string().allow(''),
   url: Joi.string(),
   headers: Joi.array().items(
     Joi.object({
@@ -107,7 +107,7 @@ export default function parseInsomnia(
         res.data?.scheme &&
         res.data?.host &&
         res.data?.base_path
-    )
+    )?.data
 
   environmentVariables = env
   baseUrl = env

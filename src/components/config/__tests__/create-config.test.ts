@@ -200,7 +200,6 @@ describe('Postman config', () => {
       expect(fs.lstatSync('monika.postman-grouped.yml').isFile()).to.be.true
 
       const { generated, expected } = getPostmanConfig({ grouped: true })
-      console.log(generated)
       expect(_.isEqual(generated, expected)).to.be.true
     })
 
