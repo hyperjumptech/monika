@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import path from 'path'
-import SQLite3 from 'sqlite3'
+import SQLite3, { verbose as verboseSQLite } from 'sqlite3'
 import { open, Database, ISqlite } from 'sqlite'
 
 import { ProbeRequestResponse } from '../../interfaces/request'
@@ -33,7 +33,7 @@ import { log } from '../../utils/pino'
 import { getConfig } from '../config'
 import { getErrorMessage } from '../../utils/catch-error-handler'
 import { fileURLToPath } from 'url'
-const sqlite3 = SQLite3.verbose()
+const sqlite3 = verboseSQLite()
 const dbPath = path.resolve(process.cwd(), 'monika-logs.db')
 
 type RequestsLog = {
@@ -560,7 +560,7 @@ export async function getSummary(): Promise<Summary> {
   const config = getConfig()
 
   return {
-    numberOfProbes: config?.probes?.length ? config.probes.length : 0,
+    numberOfProbes: config?.probes?.length || 0,
     numberOfIncidents,
     numberOfRecoveries,
     numberOfSentNotifications,
