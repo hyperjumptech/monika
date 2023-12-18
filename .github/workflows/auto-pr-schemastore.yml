@@ -24,7 +24,7 @@ jobs:
   create-auto-PR:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           repository: SchemaStore/schemastore
           token: ${{ secrets.AUTO_PR_TOKEN }}
@@ -41,7 +41,7 @@ jobs:
           git commit -m "update json schema"
 
       - name: ✍🏻 Setup node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 18
 
@@ -53,7 +53,7 @@ jobs:
 
       - name: Create Pull Request
         id: cpr
-        uses: peter-evans/create-pull-request@v4
+        uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.AUTO_PR_TOKEN }}
           commit-message: Update monika-config-schema

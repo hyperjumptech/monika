@@ -23,11 +23,8 @@
  **********************************************************************************/
 
 import { expect } from '@oclif/test'
-import {
-  getDowntimeDuration,
-  startDowntimeCounter,
-  stopDowntimeCounter,
-} from '.'
+import { getDowntimeDuration, addIncident, removeIncident } from '.'
+import { getContext } from '../../context'
 
 describe('Downtime counter', () => {
   it('should start counter', () => {
@@ -39,7 +36,7 @@ describe('Downtime counter', () => {
     }
 
     // act
-    startDowntimeCounter(probeConfig)
+    addIncident(probeConfig)
 
     // assert
     expect(getDowntimeDuration(probeConfig)).not.eq('0 seconds')
@@ -54,8 +51,8 @@ describe('Downtime counter', () => {
     }
 
     // act
-    startDowntimeCounter(probeConfig)
-    stopDowntimeCounter(probeConfig)
+    addIncident(probeConfig)
+    removeIncident(probeConfig)
 
     // assert
     expect(getDowntimeDuration(probeConfig)).eq('0 seconds')
@@ -70,7 +67,7 @@ describe('Downtime counter', () => {
     }
 
     // act
-    stopDowntimeCounter(probeConfig)
+    removeIncident(probeConfig)
 
     // assert
     expect(getDowntimeDuration(probeConfig)).eq('0 seconds')
@@ -86,5 +83,49 @@ describe('Downtime counter', () => {
 
     // assert
     expect(getDowntimeDuration(probeConfig)).eq('0 seconds')
+  })
+
+  it('allow identical urls but different probeID', () => {
+    // arrange
+    const probeConfig = {
+      alert: { id: 'VyYwG', assertion: '', message: '' },
+      probeID: 'Pn9x',
+      url: 'https://example.com',
+    }
+    const probeConfig2 = {
+      alert: { id: 'VyYwG', assertion: '', message: '' },
+      probeID: 'Pn9x-2',
+      url: 'https://example.com',
+    }
+
+    // act
+    addIncident(probeConfig)
+    addIncident(probeConfig2)
+    removeIncident(probeConfig)
+
+    // assert
+    expect(getContext().incidents[0].probeID).eq(probeConfig2.probeID)
+  })
+
+  it('allow identical probe-ids but different urls', () => {
+    // arrange
+    const probeConfig = {
+      alert: { id: 'VyYwG', assertion: '', message: '' },
+      probeID: 'Pn9x',
+      url: 'https://example.com',
+    }
+    const probeConfig2 = {
+      alert: { id: 'VyYwG', assertion: '', message: '' },
+      probeID: 'Pn9x',
+      url: 'https://sub.example.com',
+    }
+
+    // act
+    addIncident(probeConfig)
+    addIncident(probeConfig2)
+    removeIncident(probeConfig)
+
+    // assert
+    expect(getContext().incidents[0].probeRequestURL).eq(probeConfig2.url)
   })
 })

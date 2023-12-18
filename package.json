@@ -1,7 +1,7 @@
 {
   "name": "@hyperjumptech/monika",
   "description": "Synthetic monitoring made easy",
-  "version": "1.16.1",
+  "version": "1.16.2",
   "license": "MIT",
   "author": "@hyperjumptech",
   "main": "lib/index.js",
@@ -59,7 +59,7 @@
   "dependencies": {
     "@breejs/ts-worker": "^2.0.0",
     "@faker-js/faker": "^7.4.0",
-    "@hyperjumptech/monika-notification": "1.15.12",
+    "@hyperjumptech/monika-notification": "^1.15.13",
     "@oclif/core": "2.15.0",
     "@oclif/plugin-help": "5.2.20",
     "@oclif/plugin-version": "1.3.10",
