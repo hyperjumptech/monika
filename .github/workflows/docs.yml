@@ -27,15 +27,15 @@ jobs:
         working-directory: ./docs
     steps:
       - name: 🛑 Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.9.1
+        uses: styfle/cancel-workflow-action@0.12.0
 
       - name: ⬇️ Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
 
       - name: ✍🏻 Setup node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 16.14
 
@@ -59,15 +59,15 @@ jobs:
         working-directory: ./docs
     steps:
       - name: 🛑 Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.9.1
+        uses: styfle/cancel-workflow-action@0.12.0
 
       - name: ⬇️ Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
 
       - name: ✍🏻 Setup node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 16.14
 
@@ -78,7 +78,7 @@ jobs:
         run: sudo apt-get install -y jq
 
       - name: 🔎 Send to Algolia
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Get the content of algolia.json as config
         id: algolia_config
