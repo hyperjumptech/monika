@@ -32,10 +32,9 @@ import type { Probe } from '../interfaces/probe'
 
 import SymonClient from '.'
 import { getContext, resetContext, setContext } from '../context'
-import { deleteProbe, getProbes } from '../components/config/probe'
+import { deleteProbe, findProbe, getProbes } from '../components/config/probe'
 import { validateProbes } from '../components/config/validation'
 import events from '../events'
-import { md5Hash } from '../utils/hash'
 import { getEventEmitter } from '../utils/events'
 import { getErrorMessage } from '../utils/catch-error-handler'
 
@@ -290,32 +289,6 @@ describe('Symon initiate', () => {
 
   it('should add a new probe', async () => {
     // arrange
-    const symonGetProbesIntervalMs = 100
-    setContext({
-      flags: {
-        symonUrl: 'http://localhost:4000',
-        symonKey: 'random-key',
-        symonGetProbesIntervalMs,
-      } as MonikaFlags,
-    })
-    const symon = new SymonClient({
-      symonUrl: 'http://localhost:4000',
-      symonKey: 'abcd',
-    })
-
-    // 1. Check initial probe cache
-    expect(getProbes()).deep.eq([])
-
-    // act
-    // 2. Initiate Symon and get all the probes
-    await symon.initiate()
-
-    // assert
-    // 3. Check the probe data after connected to Symon
-    expect(getProbes()).deep.eq(await validateProbes(config.probes))
-
-    // arrange
-    // 4. Simulate adding a probe
     const newProbe: Probe = {
       id: '3',
       name: 'New Probe',
@@ -325,46 +298,16 @@ describe('Symon initiate', () => {
     }
     server.use(
       rest.get(
-        'http://localhost:4000/api/v1/monika/1234/probes',
-        (_, res, ctx) => {
-          const newProbes: Probe[] = [...config.probes, newProbe]
-
-          return res(
-            ctx.set('etag', md5Hash(newProbes)),
+        'http://localhost:4000/api/v1/monika/1234/probe-changes',
+        (_, res, ctx) =>
+          res(
             ctx.json({
-              statusCode: 'ok',
-              message: 'Successfully get probes configuration',
-              data: newProbes,
+              message: 'Successfully get probe changes',
+              data: [{ type: 'add', probe: newProbe }],
             })
           )
-        }
       )
     )
-
-    // act
-    // 5. Wait for the probe fetch to run
-    await sleep(symonGetProbesIntervalMs)
-
-    // assert
-    // 6. Check the updated probe cache
-    expect(getProbes()).deep.eq(
-      await validateProbes([...config.probes, newProbe])
-    )
-
-    // act
-    // 7. Wait for probe fetch to run
-    await sleep(symonGetProbesIntervalMs)
-
-    // assert
-    // 8. Should not update the probe cache
-    expect(getProbes()).deep.eq(
-      await validateProbes([...config.probes, newProbe])
-    )
-    await symon.stop()
-  }).timeout(15_000)
-
-  it('should update a probe', async () => {
-    // arrange
     const symonGetProbesIntervalMs = 100
     setContext({
       flags: {
@@ -387,42 +330,97 @@ describe('Symon initiate', () => {
 
     // assert
     // 3. Check the probe data after connected to Symon
-    expect(getProbes()).deep.eq(await validateProbes(config.probes))
-
-    // arrange
-    // 4. Simulate updating a probe
-    const updatedProbes: Probe[] = [{ ...config.probes[0], interval: 5 }]
-    server.use(
-      rest.get(
-        'http://localhost:4000/api/v1/monika/1234/probes',
-        (_, res, ctx) => {
-          const newProbes: Probe[] = updatedProbes
-
-          return res(
-            ctx.set('etag', md5Hash(newProbes)),
-            ctx.json({
-              statusCode: 'ok',
-              message: 'Successfully get probes configuration',
-              data: newProbes,
-            })
-          )
-        }
-      )
-    )
+    expect(getProbes().length).eq(2)
 
     // act
-    // 5. Wait for the probe fetch to run
+    // 4. Wait for the probe fetch to run
     await sleep(symonGetProbesIntervalMs)
 
     // assert
-    // 6. Check the updated probe cache
-    expect(getProbes()).deep.eq(await validateProbes(updatedProbes))
+    // 5. Check the updated probe cache
+    expect(getProbes().length).eq(3)
+
+    await symon.stop()
+  }).timeout(15_000)
+
+  it('should update a probe', async () => {
+    // arrange
+    server.use(
+      rest.get(
+        'http://localhost:4000/api/v1/monika/1234/probe-changes',
+        (_, res, ctx) =>
+          res(
+            ctx.json({
+              message: 'Successfully get probe changes',
+              data: [
+                {
+                  type: 'update',
+                  // eslint-disable-next-line camelcase
+                  probe_id: '1',
+                  probe: { ...findProbe('1'), interval: 2 },
+                },
+              ],
+            })
+          )
+      )
+    )
+    const symonGetProbesIntervalMs = 100
+    setContext({
+      flags: {
+        symonUrl: 'http://localhost:4000',
+        symonKey: 'random-key',
+        symonGetProbesIntervalMs,
+      } as MonikaFlags,
+    })
+    const symon = new SymonClient({
+      symonUrl: 'http://localhost:4000',
+      symonKey: 'abcd',
+    })
+
+    // 1. Check initial probe cache
+    expect(getProbes()).deep.eq([])
+
+    // act
+    // 2. Initiate Symon and get all the probes
+    await symon.initiate()
+
+    // assert
+    // 3. Check the probe data after connected to Symon
+    expect(getProbes().length).eq(2)
+
+    // act
+    // 4. Wait for the probe fetch to run
+    await sleep(symonGetProbesIntervalMs)
+
+    // assert
+    // 5. Check the updated probe cache
+    expect(getProbes().length).eq(2)
+    expect(findProbe('1')?.interval).eq(2)
 
     await symon.stop()
   }).timeout(15_000)
 
   it('should delete a probe', async () => {
     // arrange
+    server.use(
+      rest.get(
+        'http://localhost:4000/api/v1/monika/1234/probe-changes',
+        (_, res, ctx) =>
+          res(
+            ctx.json({
+              message: 'Successfully get probe changes',
+              data: [
+                {
+                  type: 'delete',
+                  // eslint-disable-next-line camelcase
+                  probe_id: '1',
+                  probe: {},
+                },
+              ],
+            })
+          )
+      )
+    )
     const symonGetProbesIntervalMs = 100
     setContext({
       flags: {
@@ -445,33 +443,15 @@ describe('Symon initiate', () => {
 
     // assert
     // 3. Check the probe data after connected to Symon
-    expect(getProbes()).deep.eq(await validateProbes(config.probes))
-
-    // arrange
-    // 4. Simulate deleting a probe
-    const updatedProbes: Probe[] = config.probes.filter(({ id }) => id === '1')
-    server.use(
-      rest.get(
-        'http://localhost:4000/api/v1/monika/1234/probes',
-        (_, res, ctx) =>
-          res(
-            ctx.set('etag', md5Hash(updatedProbes)),
-            ctx.json({
-              statusCode: 'ok',
-              message: 'Successfully get probes configuration',
-              data: updatedProbes,
-            })
-          )
-      )
-    )
+    expect(getProbes().length).eq(2)
 
     // act
-    // 5. Wait for the probe fetch to run
+    // 4. Wait for the probe fetch to run
     await sleep(symonGetProbesIntervalMs)
 
     // assert
-    // 6. Check the updated probe cache
-    expect(getProbes()).deep.eq(await validateProbes(updatedProbes))
+    // 5. Check the updated probe cache
+    expect(getProbes().length).eq(1)
 
     await symon.stop()
   }).timeout(15_000)
