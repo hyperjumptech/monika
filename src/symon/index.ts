@@ -453,7 +453,7 @@ async function applyProbeChanges(probeChanges: ProbeChange[]) {
             lastEvent ? { ...probe, lastEvent } : probe,
           ])
           updateProbe(probeId, probes[0])
-          syncProbeStateFrom(probes[0])
+          syncProbeStateFrom(probes[0], 1)
           return
         }
 

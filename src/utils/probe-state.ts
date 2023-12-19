@@ -81,7 +81,7 @@ export function initializeProbeStates(probes: Probe[]): void {
   }
 }
 
-export function syncProbeStateFrom(probe: Probe) {
+export function syncProbeStateFrom(probe: Probe, cycle: number = 0) {
   const getLastStart = (probe: Probe) =>
     probe.lastEvent?.createdAt
       ? new Date(probe.lastEvent.createdAt)
@@ -94,7 +94,7 @@ export function syncProbeStateFrom(probe: Probe) {
 
   const interpreter = interpret(
     probeStateMachine.withContext({
-      cycle: 0,
+      cycle,
       lastStart: getLastStart(probe),
       lastFinish: getLastFinish(probe),
     })
