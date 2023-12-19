@@ -193,12 +193,13 @@ export async function httpRequest({
       // 400, 500 get here
       if (error?.response) {
         return {
-          data: error?.response?.data,
-          body: error?.response?.data,
-          status: error?.response?.status as number,
+          data: '',
+          body: '',
+          status: error?.response?.status,
           headers: error?.response?.headers,
           responseTime,
-          result: probeRequestResult.success,
+          result: probeRequestResult.failed,
+          error: error?.response?.data,
         }
       }
 
