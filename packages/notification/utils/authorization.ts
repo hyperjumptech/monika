@@ -24,7 +24,13 @@
 
 import { AxiosBasicCredentials } from 'axios'
 
-export const authBasic = (cred: AxiosBasicCredentials): any => {
+type BasicCredentials = AxiosBasicCredentials & {
+  type: 'basic'
+}
+
+type Bearer = { type: 'bearer'; token: string }
+
+export const authBasic = (cred: AxiosBasicCredentials): string => {
   if (!cred.username)
     throw new Error('Username should not be empty or undefined')
   if (!cred.password || cred.password.length < 6)
@@ -39,14 +45,16 @@ export const authBasic = (cred: AxiosBasicCredentials): any => {
 
 export const authBearer = (token: string): string => `Bearer ${token}`
 
-export const authorize = (type: string, args: any): any => {
-  switch (type) {
+export const authorize = (
+  args: BasicCredentials | Bearer
+): string | undefined => {
+  switch (args.type) {
     case 'basic': {
       return authBasic(args)
     }
 
     case 'bearer': {
-      return authBearer(args)
+      return authBearer(args.token)
     }
 
     default: {

@@ -1,4 +1,4 @@
-import cron from 'node-cron'
+import { schedule as scheduleCron } from 'node-cron'
 import type { ScheduledTask } from 'node-cron'
 import type { MonikaFlags } from '../../flag'
 import type { Config } from '../../interfaces/config'
@@ -40,7 +40,7 @@ export function scheduleSummaryNotification({
     config['status-notification'] ||
     DEFAULT_SCHEDULE_CRON_EXPRESSION
 
-  const scheduledStatusUpdateTask = cron.schedule(
+  const scheduledStatusUpdateTask = scheduleCron(
     schedule,
     getSummaryAndSendNotif
   )

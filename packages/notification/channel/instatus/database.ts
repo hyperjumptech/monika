@@ -1,5 +1,29 @@
+/**********************************************************************************
+ * MIT License                                                                    *
+ *                                                                                *
+ * Copyright (c) 2021 Hyperjump Technology                                        *
+ *                                                                                *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy   *
+ * of this software and associated documentation files (the "Software"), to deal  *
+ * in the Software without restriction, including without limitation the rights   *
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell      *
+ * copies of the Software, and to permit persons to whom the Software is          *
+ * furnished to do so, subject to the following conditions:                       *
+ *                                                                                *
+ * The above copyright notice and this permission notice shall be included in all *
+ * copies or substantial portions of the Software.                                *
+ *                                                                                *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR     *
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,       *
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE    *
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER         *
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,  *
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  *
+ * SOFTWARE.                                                                      *
+ **********************************************************************************/
+
 import path from 'path'
-import sqlite3 from 'sqlite3'
+import * as sqlite3 from 'sqlite3'
 import { open, type Database } from 'sqlite'
 
 type Incident = {
@@ -37,7 +61,7 @@ export async function insertIncident({
   ) VALUES (?, ?, ?, ?, ?, ?);`
   const sqlParams = [status, url, probeID, incidentID, dateNow, dateNow]
 
-  await (await getDatabase()).run(sqlStatement, sqlParams)
+  await getDatabase().then((db) => db.run(sqlStatement, sqlParams))
 }
 
 export async function updateIncident({
@@ -49,7 +73,7 @@ export async function updateIncident({
    WHERE incident_id = ?`
   const sqlParams = [status, dateNow, incidentID]
 
-  await (await getDatabase()).run(sqlStatement, sqlParams)
+  await getDatabase().then((db) => db.run(sqlStatement, sqlParams))
 }
 
 export async function findIncident({
@@ -60,9 +84,9 @@ export async function findIncident({
   const sqlStatement = `SELECT incident_id FROM instatus_page_incidents 
     WHERE status = ? AND url = ? AND probe_id = ? LIMIT 1`
   const sqlParams = [status, url, probeID]
-  const incident = await (
-    await getDatabase()
-  ).get<FindIncidentResponse>(sqlStatement, sqlParams)
+  const incident = await getDatabase().then((db) =>
+    db.get<FindIncidentResponse>(sqlStatement, sqlParams)
+  )
 
   return incident
 }
@@ -73,6 +97,7 @@ async function getDatabase(): Promise<
   if (!db) {
     db = await open({
       filename: dbPath,
+      // eslint-disable-next-line no-bitwise
       mode: sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE,
       driver: sqlite3.Database,
     })

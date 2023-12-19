@@ -22,7 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import chokidar from 'chokidar'
+import { watch } from 'chokidar'
 import { ux } from '@oclif/core'
 import { existsSync, writeFileSync } from 'fs'
 import isUrl from 'is-url'
@@ -222,7 +222,7 @@ function scheduleRemoteConfigFetcher({
 function watchConfigFile({ flags, path }: WatchConfigFileParams) {
   const isWatchConfigFile = !(isTestEnvironment || flags.repeat !== 0)
   if (isWatchConfigFile) {
-    const watcher = chokidar.watch(path)
+    const watcher = watch(path)
     watcher.on('change', async () => {
       const config = await getConfigFrom(flags)
 

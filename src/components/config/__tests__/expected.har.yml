@@ -1,5 +1,7 @@
 probes:
   - id: https://namb.ch/api/admin/login
+    name: https://namb.ch/api/admin/login
+    interval: 10
     requests:
       - method: POST
         url: https://namb.ch/api/admin/login
@@ -29,6 +31,7 @@ probes:
             _gat_gtag_UA_89898_8=1; _ga_AAAAA=GS1.1.1.26.1.1.0; _ga=1.1
         params: {}
         body: email=myemail&password=mypass
+    alerts: []
 notifications:
   - id: default
     type: desktop

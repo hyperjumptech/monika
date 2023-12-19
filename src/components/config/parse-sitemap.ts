@@ -27,41 +27,65 @@ import { XMLParser } from 'fast-xml-parser'
 import { monikaFlagsDefaultValue } from '../../flag'
 import type { MonikaFlags } from '../../flag'
 import type { Probe, ProbeAlert } from '../../interfaces/probe'
+import Joi from 'joi'
+import { RequestConfig } from 'src/interfaces/request'
 
-const generateProbesFromXml = (config: any) => {
-  const probes = config?.urlset?.url?.map((item: any) => {
-    const requests = [
-      {
-        url: item?.loc,
-        method: 'GET',
-        timeout: 10_000,
-      },
-    ]
-    if (item['xhtml:link']) {
-      for (const alt of item['xhtml:link']) {
-        requests.push({
-          url: alt['@_href'],
+const sitemapValidator = Joi.object({
+  config: Joi.object({
+    urlset: Joi.object({
+      url: Joi.array().items(
+        Joi.object({
+          loc: Joi.string(),
+          'xhtml:link': Joi.array().items(
+            Joi.object({ '@_href': Joi.string() })
+          ),
+        })
+      ),
+    }),
+  }),
+})
+
+const generateProbesFromXml = (parseResult: unknown) => {
+  const { value } = sitemapValidator.validate(parseResult, {
+    allowUnknown: true,
+  })
+  const probes = value?.urlset?.url?.map(
+    (item: { loc: string; 'xhtml:link': { '@_href': string }[] }) => {
+      const requests = [
+        {
+          url: item?.loc,
           method: 'GET',
           timeout: 10_000,
-        })
+        },
+      ]
+      if (item['xhtml:link']) {
+        for (const alt of item['xhtml:link']) {
+          requests.push({
+            url: alt['@_href'],
+            method: 'GET',
+            timeout: 10_000,
+          })
+        }
+      }
+
+      return {
+        id: item?.loc,
+        name: item?.loc,
+        requests,
+        alerts: [],
       }
     }
-
-    return {
-      id: item?.loc,
-      name: item?.loc,
-      requests,
-      alerts: [],
-    }
-  })
+  )
 
   return probes ?? []
 }
 
-const generateProbesFromXmlOneProbe = (config: any) => {
+const generateProbesFromXmlOneProbe = (parseResult: unknown) => {
   let probe: Probe | undefined
-  let requests: any = []
-
+  let requests: RequestConfig[] = []
+  const config = sitemapValidator.validate(parseResult, {
+    allowUnknown: true,
+  }).value
   const resources = config?.urlset?.url
   for (const [, item] of resources.entries()) {
     requests = [
@@ -70,6 +94,7 @@ const generateProbesFromXmlOneProbe = (config: any) => {
         url: item.loc,
         method: 'GET',
         timeout: 10_000,
+        body: '',
       },
     ]
     if (item['xhtml:link']) {
@@ -80,6 +105,7 @@ const generateProbesFromXmlOneProbe = (config: any) => {
             url: alt['@_href'],
             method: 'GET',
             timeout: 10_000,
+            body: '',
           },
         ]
       }

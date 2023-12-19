@@ -37,7 +37,7 @@ export type Content = {
     activityTitle?: string
     facts?: {
       name?: string
-      value?: any
+      value?: unknown
     }[]
     activitySubtitle?: string
     markdown?: boolean
