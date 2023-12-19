@@ -6,6 +6,7 @@ probes:
         method: GET
         headers: {}
         timeout: 10000
+        body: {}
     alerts: []
   - id: '[BODY-FORMDATA] Hyperjump GitHub'
     name: '[BODY-FORMDATA] Hyperjump GitHub'

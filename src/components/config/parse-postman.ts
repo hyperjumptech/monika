@@ -22,11 +22,14 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import Joi from 'joi'
 import type { Config } from '../../interfaces/config'
 
 type CollectionVersion = 'v2.0' | 'v2.1'
 
-const getCollectionVersion = (config: any) => {
+const getCollectionVersion = (
+  config: { info: { schema: string } } | undefined
+) => {
   if (config?.info?.schema?.includes('v2.0')) {
     return 'v2.0'
   }
@@ -59,20 +62,24 @@ const generateHeaderContentType = (mode: string, rawType?: string) => {
   }
 }
 
-const generateBody = (body: any, mode: string, rawType?: string) => {
+const generateBody = (
+  body: Record<string, string>[] | string,
+  mode: string | undefined,
+  rawType?: string
+) => {
   switch (mode) {
     case 'formdata':
     case 'urlencoded': {
       return {
-        body: body?.reduce(
-          (obj: any, it: any) => Object.assign(obj, { [it.key]: it.value }),
+        body: (body as Record<string, string>[])?.reduce(
+          (obj, it) => Object.assign(obj, { [it.key]: it.value }),
           {}
         ),
       }
     }
 
     case 'raw': {
-      if (rawType === 'json') return { body: JSON.parse(body) }
+      if (rawType === 'json') return { body: JSON.parse(body as string) }
       return { body }
     }
 
@@ -82,31 +89,65 @@ const generateBody = (body: any, mode: string, rawType?: string) => {
   }
 }
 
-const generateEachRequest = (request: any, version: CollectionVersion) => {
+const generateEachRequest = (
+  request:
+    | {
+        header?: Record<string, string>[]
+        body: {
+          mode: 'formdata' | 'raw'
+          formdata: Record<string, string>[] | undefined
+          raw: string | undefined
+          options: { raw: { language: string } }
+        }
+        url: { raw: string }
+        method: string
+      }
+    | undefined,
+  version: CollectionVersion
+) => {
   const mode = request?.body?.mode
-  const body = mode ? request?.body[mode] : {}
+  let body = mode ? request?.body?.[mode] : undefined
   const language = request?.body?.options?.raw?.language
+  body = body ? generateBody(body, mode, language).body : {}
 
   return {
     url: version === 'v2.0' ? request?.url : request?.url.raw,
     method: request?.method,
     headers: {
       ...request?.header?.reduce(
-        (obj: any, it: any) => Object.assign(obj, { [it.key]: it.value }),
+        (obj, it) => Object.assign(obj, { [it.key]: it.value }),
         {}
       ),
-      ...generateHeaderContentType(mode, language),
+      ...generateHeaderContentType(mode || '', language),
     },
     timeout: 10_000,
-    ...generateBody(body, mode, language),
+    body,
   }
 }
 
-const generateRequests = (item: any, version: CollectionVersion) => {
+type ItemExport = {
+  name: string
+  request:
+    | {
+        header?: Record<string, string>[]
+        body: {
+          mode: 'formdata' | 'raw'
+          formdata: Record<string, string>[] | undefined
+          raw: string | undefined
+          options: { raw: { language: string } }
+        }
+        url: { raw: string }
+        method: string
+      }
+    | undefined
+  item: ItemExport[] | undefined
+}
+
+const generateRequests = (item: ItemExport, version: CollectionVersion) => {
   const subitems = item?.item
 
-  if (subitems?.length > 0) {
-    return subitems?.map((subitem: any) =>
+  if ((subitems?.length || 0) > 0) {
+    return subitems?.map((subitem) =>
       generateEachRequest(subitem?.request, version)
     )
   }
@@ -114,8 +155,41 @@ const generateRequests = (item: any, version: CollectionVersion) => {
   return [generateEachRequest(item?.request, version)]
 }
 
-const generateProbesFromConfig = (config: any, version: CollectionVersion) => {
-  const probes = config?.item?.map((item: any) => ({
+const requestValidator = Joi.object({
+  header: Joi.array().items(Joi.object()),
+  body: Joi.object({
+    mode: Joi.string().allow('formdata', 'raw'),
+    formdata: Joi.object(),
+    raw: Joi.string(),
+    options: Joi.object({
+      raw: Joi.object({ language: Joi.string() }),
+    }),
+  }),
+  url: Joi.string(),
+  method: Joi.string(),
+})
+
+const postmanValidator = Joi.object({
+  name: Joi.string(),
+  request: requestValidator,
+  item: Joi.array().items(
+    Joi.object({
+      name: Joi.string(),
+      item: Joi.object({
+        request: requestValidator,
+      }),
+    })
+  ),
+})
+
+const generateProbesFromConfig = (
+  parseResult: unknown,
+  version: CollectionVersion
+) => {
+  const { value: config } = postmanValidator.validate(parseResult, {
+    allowUnknown: true,
+  })
+  const probes = config?.item?.map((item: ItemExport) => ({
     id: item?.name,
     name: item?.name,
     requests: generateRequests(item, version),

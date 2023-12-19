@@ -22,17 +22,20 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import Joi from 'joi'
 import { Config } from '../../interfaces/config'
 import { RequestConfig } from '../../interfaces/request'
+import { DEFAULT_INTERVAL } from './validation/validator/default-values'
+
+const keyValValidator = Joi.array().items(
+  Joi.object({ key: Joi.string(), value: Joi.string() })
+)
 
 const convertNameValueArraysToObject = (
-  headers: {
-    name: string
-    value: any
-  }[]
+  keyVal: { name: string; value: string }[]
 ) => {
-  const obj: any = {}
-  for (const item of headers) {
+  const obj: Record<string, string> = {}
+  for (const item of keyVal) {
     if (item.name.charAt(0) !== ':') {
       obj[item.name] = item.value
     }
@@ -41,7 +44,15 @@ const convertNameValueArraysToObject = (
   return obj
 }
 
-const parsePostData = (postData: any) => {
+const postDataValidator = Joi.object({
+  mimeType: Joi.string(),
+  text: Joi.string(),
+  params: keyValValidator.optional(),
+})
+
+const parsePostData = (
+  postData: { mimeType: string; text: string } | undefined
+) => {
   if (!postData) {
     return {}
   }
@@ -56,10 +67,37 @@ const parsePostData = (postData: any) => {
 export const parseHarFile = (fileContents: string): Config => {
   // Read file from filepath
   try {
-    const harJson = JSON.parse(fileContents)
+    const entryValidator = Joi.object({
+      entry: Joi.object({
+        request: Joi.object({
+          method: Joi.string(),
+          url: Joi.string(),
+          headers: Joi.array().items(keyValValidator),
+          queryString: Joi.array().items(keyValValidator),
+          postData: postDataValidator,
+        }),
+      }),
+    })
+
+    const { value: harJson, error } = Joi.object({
+      log: Joi.object({
+        entries: Joi.array().items(entryValidator.required()),
+      }),
+    }).validate(JSON.parse(fileContents), { allowUnknown: true })
+
+    if (error)
+      throw new Error(`No HTTP requests in your HAR file. ${error.message}`)
 
     const harRequest: RequestConfig[] = harJson.log.entries.map(
-      (entry: { request: any }) => ({
+      (entry: {
+        request: {
+          method: string
+          url: string
+          headers: { name: string; value: string }[]
+          queryString: { name: string; value: string }[]
+          postData?: { mimeType: string; text: string }
+        }
+      }) => ({
         method: entry.request.method,
         url: entry.request.url,
         headers: convertNameValueArraysToObject(entry.request.headers),
@@ -68,11 +106,14 @@ export const parseHarFile = (fileContents: string): Config => {
       })
     )
 
-    const harConfig: any = {
+    const harConfig: Config = {
       probes: [
         {
           id: harRequest[0].url,
+          name: harRequest[0].url,
+          interval: DEFAULT_INTERVAL,
           requests: harRequest,
+          alerts: [],
         },
       ],
     }
