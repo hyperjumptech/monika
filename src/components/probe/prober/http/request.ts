@@ -209,13 +209,13 @@ export async function httpRequest({
         const { status, description } = getErrorStatusWithExplanation(error)
 
         return {
-          data: description,
+          data: '',
           body: '',
           status,
           headers: '',
           responseTime,
           result: probeRequestResult.failed,
-          error: (error as AxiosError).message,
+          error: description,
         }
       }
     }
