@@ -29,6 +29,7 @@ import { v4 as uuid } from 'uuid'
 
 import type { Probe, ProbeAlert } from '../interfaces/probe'
 
+import { getProbes } from '../components/config/probe'
 import { doProbe } from '../components/probe'
 import { getContext } from '../context'
 import { log } from '../utils/pino'
@@ -124,7 +125,7 @@ export function startProbing({
       return
     }
 
-    if (isEndOfRepeat(probes)) {
+    if (isEndOfRepeat(getProbes())) {
       // eslint-disable-next-line unicorn/no-process-exit, no-process-exit
       process.exit(0)
     }
@@ -133,7 +134,7 @@ export function startProbing({
       return
     }
 
-    for (const probe of probes) {
+    for (const probe of getProbes()) {
       doProbe({
         notifications,
         probe,
