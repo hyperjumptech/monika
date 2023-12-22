@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.16.3 - 2023-12-22
+
+### Changed
+
+- Refactored to update probe data independently (#1203).
+- Updated GitHub Action libraries (#1213).
+
+### Fixed
+
+- Wrong SQLite migration path (#1219).
+- Asymmetric recovery issue (#1210).
+- Write permission to pipeline (#1209).
+
+### Security
+
+- Clean up ESLint warnings to improve code quality and security (#1215).
+
 ## 1.16.2 2023-12-12
 
 ## Changed
