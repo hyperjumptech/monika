@@ -32,7 +32,6 @@ import type { Notification } from '@hyperjumptech/monika-notification'
 import { log } from '../../utils/pino'
 import { getConfig } from '../config'
 import { getErrorMessage } from '../../utils/catch-error-handler'
-import { fileURLToPath } from 'url'
 const sqlite3 = verboseSQLite()
 const dbPath = path.resolve(process.cwd(), 'monika-logs.db')
 
@@ -136,7 +135,7 @@ export function setDatabase(
 
 async function migrate() {
   await database().migrate({
-    migrationsPath: path.dirname(fileURLToPath('../../../db/migrations')),
+    migrationsPath: path.join(__dirname, '../../../db/migrations'),
   })
 }
 
