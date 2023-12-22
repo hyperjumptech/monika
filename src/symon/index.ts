@@ -50,6 +50,7 @@ import { getEventEmitter } from '../utils/events'
 import { DEFAULT_TIMEOUT } from '../utils/http'
 import getIp from '../utils/ip'
 import { log } from '../utils/pino'
+import { removeProbeState, syncProbeStateFrom } from '../utils/probe-state'
 import {
   getPublicIp,
   getPublicNetworkInfo,
@@ -231,8 +232,6 @@ export default class SymonClient {
             )
           }
         }
-
-        this.eventEmitter.emit(events.config.updated)
 
         log.info(
           `[Symon] Get probe changes (${probeChanges.length}) since ${this.probeChangesCheckedAt}`
@@ -445,6 +444,7 @@ async function applyProbeChanges(probeChanges: ProbeChange[]) {
       switch (type) {
         case 'delete': {
           deleteProbe(probeId)
+          removeProbeState(probeId)
           return
         }
 
@@ -453,7 +453,7 @@ async function applyProbeChanges(probeChanges: ProbeChange[]) {
             lastEvent ? { ...probe, lastEvent } : probe,
           ])
           updateProbe(probeId, probes[0])
-
+          syncProbeStateFrom(probes[0], 1)
           return
         }
 
@@ -462,6 +462,7 @@ async function applyProbeChanges(probeChanges: ProbeChange[]) {
             lastEvent ? { ...probe, lastEvent } : probe,
           ])
           addProbe(probes[0])
+          syncProbeStateFrom(probes[0])
           return
         }
 

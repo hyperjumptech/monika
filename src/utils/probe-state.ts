@@ -76,6 +76,12 @@ const probeInterpreters = new Map()
 export function initializeProbeStates(probes: Probe[]): void {
   probeInterpreters.clear()
 
+  for (const probe of probes) {
+    syncProbeStateFrom(probe)
+  }
+}
+
+export function syncProbeStateFrom(probe: Probe, cycle: number = 0) {
   const getLastStart = (probe: Probe) =>
     probe.lastEvent?.createdAt
       ? new Date(probe.lastEvent.createdAt)
@@ -86,17 +92,19 @@ export function initializeProbeStates(probes: Probe[]): void {
       ? new Date(probe.lastEvent.recoveredAt)
       : getLastStart(probe)
 
-  for (const probe of probes) {
-    const interpreter = interpret(
-      probeStateMachine.withContext({
-        cycle: 0,
-        lastStart: getLastStart(probe),
-        lastFinish: getLastFinish(probe),
-      })
-    ).start()
+  const interpreter = interpret(
+    probeStateMachine.withContext({
+      cycle,
+      lastStart: getLastStart(probe),
+      lastFinish: getLastFinish(probe),
+    })
+  ).start()
 
-    probeInterpreters.set(probe.id, interpreter)
-  }
+  probeInterpreters.set(probe.id, interpreter)
+}
+
+export function removeProbeState(probeId: string) {
+  probeInterpreters.delete(probeId)
 }
 
 export function setProbeRunning(probeId: string): string {
