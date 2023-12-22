@@ -198,7 +198,7 @@ export async function httpRequest({
           status: error?.response?.status,
           headers: error?.response?.headers,
           responseTime,
-          result: probeRequestResult.failed,
+          result: probeRequestResult.success,
           error: error?.response?.data,
         }
       }
