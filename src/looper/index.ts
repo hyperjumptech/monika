@@ -26,10 +26,8 @@ import type { Notification } from '@hyperjumptech/monika-notification'
 
 import { AbortSignal } from 'node-abort-controller'
 import { v4 as uuid } from 'uuid'
-
 import type { Probe, ProbeAlert } from '../interfaces/probe'
 
-import { doProbe } from '../components/probe'
 import { getContext } from '../context'
 import { log } from '../utils/pino'
 import {
@@ -42,6 +40,7 @@ import {
   DEFAULT_INCIDENT_THRESHOLD,
   DEFAULT_RECOVERY_THRESHOLD,
 } from '../components/config/validation/validator/default-values'
+import { doProbe } from '../components/probe'
 
 let checkSTUNinterval: NodeJS.Timeout
 
