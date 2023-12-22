@@ -5,10 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 1.16.3 - 2023-12-22
+## [1.16.3] - 2023-12-22
 
 ### Changed
 
+- Update Probe in Symon Mode Without Restarting (#1218).
 - Refactored to update probe data independently (#1203).
 - Updated GitHub Action libraries (#1213).
 
