@@ -24,7 +24,7 @@
 
 import { createHash } from 'crypto'
 
-export const md5Hash = (data: string | Record<string, any>): string => {
+export const md5Hash = (data: string | object): string => {
   const str = typeof data === 'string' ? data : JSON.stringify(data)
   return createHash('md5').update(str).digest('hex')
 }

@@ -122,7 +122,7 @@ export async function httpRequest({
 
       if (contentTypeKey) {
         const { content, contentType } = transformContentByType(
-          newReq.body,
+          newReq?.body,
           (headers || {})[contentTypeKey]
         )
 
@@ -233,7 +233,7 @@ export async function httpRequest({
 }
 
 export function generateRequestChainingBody(
-  body: JSON | string,
+  body: object | string,
   responses: ProbeRequestResponse[]
 ): JSON | string {
   const isString = typeof body === 'string'
@@ -244,13 +244,13 @@ export function generateRequestChainingBody(
 }
 
 function transformContentByType(
-  content: any,
+  content: object | string,
   contentType?: string | number | boolean
 ) {
   switch (contentType) {
     case 'application/x-www-form-urlencoded': {
       return {
-        content: qs.stringify(content),
+        content: qs.stringify(content as never),
         contentType,
       }
     }
@@ -259,7 +259,7 @@ function transformContentByType(
       const form = new FormData()
 
       for (const contentKey of Object.keys(content)) {
-        form.append(contentKey, content[contentKey])
+        form.append(contentKey, (content as Record<string, never>)[contentKey])
       }
 
       return { content: form, contentType: form.getHeaders()['content-type'] }

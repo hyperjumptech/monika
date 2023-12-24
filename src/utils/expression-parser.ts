@@ -53,8 +53,8 @@ export const sanitizeExpression = (
 }
 
 export const compileExpression =
-  (expression: string, objectKeys: string[] = []): any =>
-  (obj: any): any => {
+  (expression: string, objectKeys: string[] = []) =>
+  (obj: object | object[]) => {
     const sanitizedExpression = sanitizeExpression(expression, objectKeys)
 
     return _compileExpression(sanitizedExpression, {

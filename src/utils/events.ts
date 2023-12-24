@@ -28,6 +28,7 @@ let em: NodeJS.EventEmitter
 
 export const getEventEmitter = (): EventEmitter => {
   if (!em) {
+    // eslint-disable-next-line unicorn/prefer-event-target
     em = new EventEmitter()
   }
 

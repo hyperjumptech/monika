@@ -123,7 +123,7 @@ describe('probingHTTP', () => {
           return res(ctx.status(200))
         })
       )
-      const request: any = {
+      const request = {
         url: 'http://localhost:4000/login',
         method: 'POST',
         headers: { 'content-type': 'application/x-www-form-urlencoded' },
@@ -162,7 +162,7 @@ describe('probingHTTP', () => {
         url: 'https://example.com',
         method: 'POST',
         headers: { 'content-type': 'multipart/form-data' },
-        body: { username: 'john@example.com', password: 'drowssap' } as any,
+        body: { username: 'john@example.com', password: 'drowssap' } as never,
         timeout: 10_000,
       }
 
@@ -200,7 +200,7 @@ describe('probingHTTP', () => {
         url: 'https://example.com',
         method: 'POST',
         headers: { 'content-type': 'text/plain' },
-        body: 'multiline string\nexample' as any,
+        body: 'multiline string\nexample',
         timeout: 10_000,
       }
 
@@ -238,7 +238,7 @@ describe('probingHTTP', () => {
         url: 'https://example.com',
         method: 'POST',
         headers: { 'content-type': 'text/yaml' },
-        body: { username: 'john@example.com', password: 'secret' } as any,
+        body: { username: 'john@example.com', password: 'secret' } as never,
         timeout: 10_000,
       }
 
@@ -276,7 +276,7 @@ describe('probingHTTP', () => {
         url: 'https://example.com',
         method: 'POST',
         headers: { 'content-type': 'application/xml' },
-        body: { username: 'john@example.com', password: 'secret' } as any,
+        body: { username: 'john@example.com', password: 'secret' } as never,
         timeout: 10_000,
       }
 
@@ -314,7 +314,7 @@ describe('probingHTTP', () => {
         url: 'https://example.com',
         method: 'POST',
         headers: { 'content-type': 'text/plain' },
-        body: 'multiline string\nexample' as any,
+        body: 'multiline string\nexample',
         timeout: 10_000,
         allowUnauthorized: true,
       }
@@ -335,9 +335,9 @@ describe('probingHTTP', () => {
       it('should generate request chaining body', () => {
         // arrange
         type TestTable = {
-          body: Record<string, any> | string
+          body: Record<string, unknown> | string
           responses: ProbeRequestResponse[]
-          expected: Record<string, any> | string
+          expected: Record<string, unknown> | string
         }
         const testTables: TestTable[] = [
           {

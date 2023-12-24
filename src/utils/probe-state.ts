@@ -26,7 +26,7 @@ import { assign, createMachine, type EventObject, interpret } from 'xstate'
 
 import type { Probe } from '../interfaces/probe'
 
-type ProbeStateValue = any
+type ProbeStateValue = unknown
 
 type ProbeStateContext = {
   cycle: number

@@ -45,7 +45,7 @@ type TCPResult = {
 // tcpRequest sends out the tcp request and returns a monika standard request response
 export async function tcpRequest(
   param: TCPRequest
-): Promise<ProbeRequestResponse<any>> {
+): Promise<ProbeRequestResponse<unknown>> {
   const { host, port, data, timeout } = param
 
   const tcpResp = await tcpCheck({ host, port, data, timeout })
@@ -95,7 +95,7 @@ async function tcpCheck(tcpRequest: TCPRequest): Promise<TCPResult> {
 
 const SOCKETTIMEOUTMS = 10_000
 
-async function sendTCP(tcpRequest: TCPRequest): Promise<any> {
+async function sendTCP(tcpRequest: TCPRequest): Promise<Buffer | null> {
   const { host, port, data, timeout } = tcpRequest
 
   return new Promise((resolve, reject) => {
@@ -106,7 +106,7 @@ async function sendTCP(tcpRequest: TCPRequest): Promise<any> {
     client.setTimeout(timeout || SOCKETTIMEOUTMS)
 
     client.on('data', (data) => {
-      resolve(data.toString())
+      resolve(data)
       client.end()
     })
 

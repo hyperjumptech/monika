@@ -89,7 +89,7 @@ export async function getPublicNetworkInfo(): Promise<PublicNetwork> {
  * getPublicIP sends a request to stun server getting IP address
  * @returns Promise<any>
  */
-export async function getPublicIp(): Promise<any> {
+export async function getPublicIp() {
   const { flags } = getContext()
   const time = new Date().toISOString()
   const isSymonMode = isSymonModeFrom(flags)
@@ -111,8 +111,5 @@ export async function getPublicIp(): Promise<any> {
   } catch {
     isConnectedToSTUNServer = false
     log.warn(`${time} STUN Server is temporarily unreachable. Check network.`)
-    return // couldn't access public stun but resolve and retry
   }
-
-  return null
 }

@@ -262,7 +262,7 @@ function getProbeResultMessage({
 }: ProbeResultMessageParams): string {
   // TODO: make this more generic not probe dependent
   if (request?.ping) {
-    return response?.body
+    return response?.body as string
   }
 
   if (getContext().flags.verbose) {

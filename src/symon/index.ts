@@ -300,7 +300,8 @@ export default class SymonClient {
         response: {
           body: data,
           headers: typeof headers === 'object' ? headers : {},
-          size: headers['content-length'],
+          size:
+            typeof headers === 'object' ? headers['content-length'] : undefined,
           status, // status is http status code
           time: responseTime,
         },
