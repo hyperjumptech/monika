@@ -291,7 +291,8 @@ export default class SymonClient {
     validation,
     alertId,
   }: NotificationEvent) {
-    const { data, headers, responseTime, status } = validation.response
+    const { data, headers, responseTime, status, error } = validation.response
+
     this.httpClient
       .post('/events', {
         monikaId: this.monikaId,
@@ -304,6 +305,7 @@ export default class SymonClient {
             typeof headers === 'object' ? headers['content-length'] : undefined,
           status, // status is http status code
           time: responseTime,
+          error,
         },
       })
       .then(() => {

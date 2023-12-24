@@ -193,12 +193,13 @@ export async function httpRequest({
       // 400, 500 get here
       if (error?.response) {
         return {
-          data: error?.response?.data,
-          body: error?.response?.data,
-          status: error?.response?.status as number,
+          data: '',
+          body: '',
+          status: error?.response?.status,
           headers: error?.response?.headers,
           responseTime,
           result: probeRequestResult.success,
+          error: error?.response?.data,
         }
       }
 
@@ -208,13 +209,13 @@ export async function httpRequest({
         const { status, description } = getErrorStatusWithExplanation(error)
 
         return {
-          data: description,
+          data: '',
           body: '',
           status,
           headers: '',
           responseTime,
           result: probeRequestResult.failed,
-          error: (error as AxiosError).message,
+          error: description,
         }
       }
     }
