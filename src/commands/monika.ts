@@ -23,7 +23,6 @@
  **********************************************************************************/
 
 import { Command, Errors, Flags } from '@oclif/core'
-import { AbortController } from 'node-abort-controller'
 import pEvent from 'p-event'
 
 import type { Config } from '../interfaces/config'

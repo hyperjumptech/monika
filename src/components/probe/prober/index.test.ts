@@ -30,7 +30,6 @@ import type { ProberMetadata } from '.'
 
 import { getContext } from '../../../context'
 import { createProber } from './factory'
-import { AbortController } from 'node-abort-controller'
 
 describe('Prober', () => {
   describe('Initial incident state', () => {

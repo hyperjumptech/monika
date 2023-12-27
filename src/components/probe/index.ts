@@ -24,7 +24,6 @@
 
 import { ExponentialBackoff, retry, handleAll } from 'cockatiel'
 import { differenceInSeconds } from 'date-fns'
-import { AbortSignal } from 'node-abort-controller'
 import { getContext } from '../../context'
 import type { Notification } from '@hyperjumptech/monika-notification'
 import type { Probe } from '../../interfaces/probe'

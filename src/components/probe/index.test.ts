@@ -38,7 +38,6 @@ import { getContext, resetContext, setContext } from '../../context'
 import type { MonikaFlags } from '../../flag'
 import { FAILED_REQUEST_ASSERTION } from '../../looper'
 import { closeLog, openLogfile } from '../logger/history'
-import { AbortController } from 'node-abort-controller'
 
 let notificationAlert: Record<string, Record<string, any>> = {}
 const server = setupServer(

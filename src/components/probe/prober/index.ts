@@ -23,7 +23,6 @@
  **********************************************************************************/
 
 import type { Notification } from '@hyperjumptech/monika-notification'
-import { AbortSignal } from 'node-abort-controller'
 import { getContext, type Incident } from '../../../context'
 import events from '../../../events'
 import type { Probe, ProbeAlert } from '../../../interfaces/probe'
