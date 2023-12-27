@@ -132,7 +132,7 @@ export class PrometheusCollector {
     prometheusCustomCollector.probesTotal.set(total)
   }
 
-  decreaseProbeRunningTotal(id: string) {
+  decrementProbeRunningTotal(id: string) {
     if (!prometheusCustomCollector) {
       throw new Error('Prometheus collector is not registered')
     }
@@ -140,7 +140,7 @@ export class PrometheusCollector {
     prometheusCustomCollector.probeRunningTotal.labels(id).dec()
   }
 
-  increaseProbeRunningTotal(id: string) {
+  incrementProbeRunningTotal(id: string) {
     if (!prometheusCustomCollector) {
       throw new Error('Prometheus collector is not registered')
     }
