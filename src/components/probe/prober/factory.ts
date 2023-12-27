@@ -29,7 +29,7 @@ import { PingProber } from './icmp'
 import { PostgresProber } from './postgres'
 import { RedisProber } from './redis'
 import { SocketProber } from './socket'
-import { BaseProber, type Prober, type ProberMetadata } from '.'
+import type { Prober, ProberMetadata } from '.'
 
 export function createProbers(probeMetadata: ProberMetadata): Prober[] {
   const { probeConfig } = probeMetadata
@@ -97,5 +97,5 @@ export function createProber(probeMetadata: ProberMetadata): Prober {
     return new PingProber(probeMetadata)
   }
 
-  return new BaseProber(probeMetadata)
+  throw new Error('Unknown probe type')
 }

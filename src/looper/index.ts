@@ -120,7 +120,7 @@ export function startProbing({
   initializeProbeStates(probes)
 
   const probeInterval = setInterval(() => {
-    if (signal?.aborted) {
+    if (signal.aborted) {
       clearInterval(probeInterval)
       return
     }
@@ -138,6 +138,7 @@ export function startProbing({
       doProbe({
         notifications,
         probe,
+        signal,
       })
     }
   }, 1000)

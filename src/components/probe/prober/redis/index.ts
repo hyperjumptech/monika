@@ -1,11 +1,11 @@
 import parse from 'url-parse'
-import { BaseProber, type ProbeResult } from '..'
+import { BaseProber, type ProbeParams, type ProbeResult } from '..'
 import type { Redis } from '../../../../interfaces/probe'
 import { probeRequestResult } from '../../../../interfaces/request'
 import { redisRequest } from './request'
 
 export class RedisProber extends BaseProber {
-  async probe(incidentRetryAttempt: number): Promise<void> {
+  async probe({ incidentRetryAttempt }: ProbeParams): Promise<void> {
     if (!this.probeConfig.redis) {
       throw new Error(
         `Redis configuration is empty. Probe ID: ${this.probeConfig.id}`

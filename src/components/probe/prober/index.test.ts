@@ -30,6 +30,7 @@ import type { ProberMetadata } from '.'
 
 import { getContext } from '../../../context'
 import { createProber } from './factory'
+import { AbortController } from 'node-abort-controller'
 
 describe('Prober', () => {
   describe('Initial incident state', () => {
@@ -80,7 +81,10 @@ describe('Prober', () => {
 
       // act
       const prober = createProber(proberMetadata)
-      await prober.probe(0)
+      await prober.probe({
+        incidentRetryAttempt: 0,
+        signal: new AbortController().signal,
+      })
 
       // assert
       expect(probeRequestTotal).eq(1)
@@ -114,7 +118,10 @@ describe('Prober', () => {
 
       // act
       const prober = createProber(proberMetadata)
-      await prober.probe(0)
+      await prober.probe({
+        incidentRetryAttempt: 0,
+        signal: new AbortController().signal,
+      })
 
       // assert
       expect(probeRequestTotal).eq(1)
@@ -149,7 +156,10 @@ describe('Prober', () => {
 
       // act
       const prober = createProber(proberMetadata)
-      await prober.probe(0)
+      await prober.probe({
+        incidentRetryAttempt: 0,
+        signal: new AbortController().signal,
+      })
 
       // assert
       expect(probeRequestTotal).eq(1)
@@ -184,7 +194,10 @@ describe('Prober', () => {
 
       // act
       const prober = createProber(proberMetadata)
-      await prober.probe(0)
+      await prober.probe({
+        incidentRetryAttempt: 0,
+        signal: new AbortController().signal,
+      })
 
       // assert
       expect(probeRequestTotal).eq(1)
@@ -233,7 +246,10 @@ describe('Prober', () => {
 
       // act
       const prober = createProber(proberMetadata)
-      await prober.probe(0)
+      await prober.probe({
+        incidentRetryAttempt: 0,
+        signal: new AbortController().signal,
+      })
       await sleep(200)
 
       // assert
@@ -290,7 +306,10 @@ describe('Prober', () => {
 
       // act
       const prober = createProber(proberMetadata)
-      await prober.probe(0)
+      await prober.probe({
+        incidentRetryAttempt: 0,
+        signal: new AbortController().signal,
+      })
 
       // assert
       expect(probeRequestTotal).eq(1)
@@ -339,7 +358,10 @@ describe('Prober', () => {
 
       // act
       const prober = createProber(proberMetadata)
-      await prober.probe(0)
+      await prober.probe({
+        incidentRetryAttempt: 0,
+        signal: new AbortController().signal,
+      })
 
       // assert
       expect(probeRequestTotal).eq(1)
@@ -395,7 +417,10 @@ describe('Prober', () => {
 
       // act
       const prober = createProber(proberMetadata)
-      await prober.probe(0)
+      await prober.probe({
+        incidentRetryAttempt: 0,
+        signal: new AbortController().signal,
+      })
       await sleep(200)
 
       // assert

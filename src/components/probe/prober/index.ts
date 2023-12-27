@@ -23,6 +23,7 @@
  **********************************************************************************/
 
 import type { Notification } from '@hyperjumptech/monika-notification'
+import { AbortSignal } from 'node-abort-controller'
 import { getContext, type Incident } from '../../../context'
 import events from '../../../events'
 import type { Probe, ProbeAlert } from '../../../interfaces/probe'
@@ -64,8 +65,13 @@ type SendNotificationParams = {
   alertId: string
 }
 
+export type ProbeParams = {
+  incidentRetryAttempt: number
+  signal: AbortSignal
+}
+
 export interface Prober {
-  probe: (incidentRetryAttempt: number) => Promise<void>
+  probe: ({ incidentRetryAttempt, signal }: ProbeParams) => Promise<void>
   generateVerboseStartupMessage: () => string
 }
 
@@ -93,7 +99,7 @@ export abstract class BaseProber implements Prober {
     this.initializeProbeState()
   }
 
-  abstract probe(incidentRetryAttempt: number): Promise<void>
+  abstract probe({ incidentRetryAttempt, signal }: ProbeParams): Promise<void>
 
   abstract generateVerboseStartupMessage(): string
 
