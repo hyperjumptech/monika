@@ -41,6 +41,8 @@ export default {
     response: {
       received: 'PROBE_RESPONSE_RECEIVED',
     },
+    ran: 'PROBE_RAN',
+    finished: 'PROBE_FINISHED',
     notification: {
       willSend: 'PROBE_NOTIFICATION_WILL_SEND',
     },
