@@ -80,7 +80,7 @@ enum ProbeState {
   Down = 'DOWN',
 }
 
-export class BaseProber implements Prober {
+export abstract class BaseProber implements Prober {
   protected readonly counter: number
   protected readonly notifications: Notification[]
   protected readonly probeConfig: Probe
@@ -93,13 +93,9 @@ export class BaseProber implements Prober {
     this.initializeProbeState()
   }
 
-  async probe(incidentRetryAttempt: number): Promise<void> {
-    this.processProbeResults([], incidentRetryAttempt)
-  }
+  abstract probe(incidentRetryAttempt: number): Promise<void>
 
-  generateVerboseStartupMessage(): string {
-    return ''
-  }
+  abstract generateVerboseStartupMessage(): string
 
   protected processProbeResults(
     probeResults: ProbeResult[],
