@@ -96,10 +96,10 @@ function getPostgresConnectionDetails(postgres: Postgres) {
   const { database, host, password, port, user } = parse(uri)
 
   return {
-    host: host ?? '0.0.0.0',
-    port: Number(port) ?? 5432,
-    database: database ?? '',
-    username: user ?? '',
-    password: password ?? '',
+    host: host || '0.0.0.0',
+    port: Number(port) || 5432,
+    database: database || '',
+    username: user || '',
+    password: password || '',
   }
 }

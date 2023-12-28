@@ -135,6 +135,8 @@ export function setDatabase(
 
 async function migrate() {
   await database().migrate({
+    // TODO: Current vercel/pkg is dependent with CommonJS
+    // eslint-disable-next-line unicorn/prefer-module
     migrationsPath: path.join(__dirname, '../../../db/migrations'),
   })
 }
@@ -468,7 +470,9 @@ export async function saveProbeRequestLog({
         JSON.stringify(probeRes.headers),
         responseBody,
         probeRes?.responseTime ?? 0,
-        probeRes.headers['content-length'],
+        typeof probeRes.headers === 'string'
+          ? probeRes.headers
+          : probeRes.headers['content-length'],
         errorResp,
         probe.socket ? 'tcp' : 'http',
         probe.socket?.host || '',

@@ -35,8 +35,8 @@ const { resolve } = path
 chai.use(spies)
 
 describe('monika', () => {
-  let getPublicIPStub: any
-  let getPublicNetworkInfoStub: any
+  let getPublicIPStub: sinon.SinonStub
+  let getPublicNetworkInfoStub: sinon.SinonStub
   beforeEach(() => {
     getPublicIPStub = sinon.stub(IpUtil, 'getPublicIp' as never)
     getPublicNetworkInfoStub = sinon

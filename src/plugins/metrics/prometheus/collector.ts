@@ -173,8 +173,11 @@ export class PrometheusCollector {
     const { headers, responseTime, status } = response
     const result = response.result ?? probeRequestResult.unknown
     const milliSecond = 1000
-    const responseTimeInSecond = responseTime / milliSecond ?? 0
-    const responseSizeBytes = Number(headers['content-length'])
+    const responseTimeInSecond = responseTime / milliSecond || 0
+    const responseSizeBytes =
+      typeof headers === 'string'
+        ? undefined
+        : Number(headers['content-length'])
     const labels = {
       id,
       name,
@@ -208,9 +211,7 @@ export class PrometheusCollector {
       })
       .set(result)
     resposeTimeCollector?.labels(labels).observe(responseTimeInSecond)
-    responseSize
-      ?.labels(labels)
-      .set(Number.isNaN(responseSizeBytes) ? 0 : responseSizeBytes)
+    responseSize?.labels(labels).set(responseSizeBytes || 0)
   }
 
   collectTriggeredAlert(

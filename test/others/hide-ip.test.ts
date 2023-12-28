@@ -38,8 +38,8 @@ chai.use(spies)
 let interceptor: RequestInterceptor
 
 describe('Monika should hide ip unless verbose', () => {
-  let getPublicIPStub: any
-  let getPublicNetworkInfoStub: any
+  let getPublicIPStub: sinon.SinonStub
+  let getPublicNetworkInfoStub: sinon.SinonStub
 
   beforeEach(() => {
     interceptor = new RequestInterceptor(withDefaultInterceptors)

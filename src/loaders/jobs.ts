@@ -21,12 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  *
  * SOFTWARE.                                                                      *
  **********************************************************************************/
-import cron from 'node-cron'
+import * as cron from 'node-cron'
 import { tlsChecker } from '../jobs/tls-check'
 import { checkDBSize } from '../jobs/check-database'
 import { getConfig } from '../components/config'
 
-export function jobsLoader(): any {
+export function jobsLoader() {
   const config = getConfig()
   // schedule TLS checker every day at 00:00
   cron.schedule('0 0 * * *', tlsChecker)

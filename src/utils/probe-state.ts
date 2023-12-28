@@ -28,7 +28,7 @@ import events from '../events'
 import type { Probe } from '../interfaces/probe'
 import { getEventEmitter } from './events'
 
-type ProbeStateValue = any
+type ProbeStateValue = unknown
 
 type ProbeStateContext = {
   cycle: number

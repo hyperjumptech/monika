@@ -33,8 +33,12 @@ import { faker } from '@faker-js/faker'
  * @returns Handlebars-helper-friendly function
  */
 const wrapFunctionWithDefaultAndTransform =
-  (originFn: any, defaultArgs: any, transformArgs?: (args: any[]) => any) =>
-  (...arg: any) => {
+  (
+    originFn: (...arg: unknown[]) => unknown,
+    defaultArgs: unknown[],
+    transformArgs?: (args: unknown[]) => unknown
+  ) =>
+  (...arg: unknown[]) => {
     let newArgs = [...arg.slice(0, -1), ...defaultArgs.slice(arg.length - 1)]
 
     // If there is transformArgs method, transform the newArgs
@@ -68,7 +72,7 @@ const helpers = [
     fn: faker.datatype.number,
     expr: 'number',
     default: [0, 100],
-    transformArgs: (args: any[]) => ({ min: args[0], max: args[1] }),
+    transformArgs: (args: unknown[]) => ({ min: args[0], max: args[1] }),
   },
   { fn: faker.database.mongodbObjectId, expr: 'objectId' },
   { fn: faker.internet.httpStatusCode, expr: 'statusCode' },
@@ -95,7 +99,7 @@ export default function registerFakes(
       handlebarsInstance.registerHelper(
         helper.expr,
         wrapFunctionWithDefaultAndTransform(
-          helper.fn,
+          helper.fn as (...args: unknown[]) => string,
           helper.default || [],
           helper.transformArgs
         )

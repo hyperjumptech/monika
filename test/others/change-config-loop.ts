@@ -70,11 +70,11 @@ notifications:
 `
 
 function changefile() {
-  writeFileSync('./testchange.yml', changeFile, 'utf-8')
+  writeFileSync('./testchange.yml', changeFile, 'utf8')
 }
 
 function restorefile() {
-  writeFileSync('./testchange.yml', initFile, 'utf-8')
+  writeFileSync('./testchange.yml', initFile, 'utf8')
 }
 
 function sleep(ms: number) {
@@ -106,4 +106,4 @@ async function test() {
   }
 }
 
-test()
+await test()

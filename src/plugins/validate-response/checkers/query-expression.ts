@@ -34,7 +34,10 @@ import { ProbeRequestResponse } from '../../../interfaces/request'
 const queryExpression = (res: ProbeRequestResponse, query: string): boolean => {
   const object = {
     response: {
-      size: Number(res.headers['content-length']),
+      size:
+        typeof res.headers === 'string'
+          ? undefined
+          : Number(res.headers['content-length']),
       status: res.status,
       time: res.responseTime,
       body: res.data,

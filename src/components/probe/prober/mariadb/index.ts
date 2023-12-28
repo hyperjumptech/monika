@@ -30,9 +30,8 @@ export class MariaDBProber extends BaseProber {
   }
 
   private getConnectionDetails(): string {
-    const connectionDetails = this.probeConfig?.mariadb
-      ? this.probeConfig?.mariadb
-      : this.probeConfig?.mysql
+    const connectionDetails =
+      this.probeConfig?.mariadb || this.probeConfig?.mysql
 
     return (
       connectionDetails

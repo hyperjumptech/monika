@@ -37,7 +37,10 @@ import { FAILED_REQUEST_ASSERTION } from '../../../../looper'
 import { closeLog, openLogfile } from '../../../logger/history'
 
 let urlRequestTotal = 0
-let notificationAlert: Record<string, Record<string, any>> = {}
+let notificationAlert: Record<
+  string,
+  Record<string, Record<string, never>>
+> = {}
 const server = setupServer(
   rest.get('https://example.com', (_, res, ctx) => {
     urlRequestTotal += 1
