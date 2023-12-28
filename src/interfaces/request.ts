@@ -22,7 +22,11 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { AxiosRequestConfig, AxiosRequestHeaders } from 'axios'
+import {
+  AxiosRequestConfig,
+  AxiosRequestHeaders,
+  AxiosResponseHeaders,
+} from 'axios'
 import { ProbeAlert } from './probe'
 
 // RequestTypes are used to define the type of request that is being made.
@@ -45,12 +49,12 @@ export enum probeRequestResult {
 }
 
 // ProbeRequestResponse is used to define the response from a probe requests.
-export interface ProbeRequestResponse<T = any> {
+export interface ProbeRequestResponse<T = unknown> {
   requestType?: RequestTypes // is this for http (default) or icmp  or others
   data: T
   body: T
   status: number
-  headers: any
+  headers: string | AxiosResponseHeaders
   responseTime: number
   error?: string // any error message from drivers
   result: probeRequestResult // did the probe succeed or fail?
@@ -61,7 +65,7 @@ export interface RequestConfig extends Omit<AxiosRequestConfig, 'data'> {
   id?: string
   saveBody?: boolean // save response body to db?
   url: string
-  body: JSON | string
+  body: object | string
   timeout: number // request timeout
   alerts?: ProbeAlert[]
   headers?: AxiosRequestHeaders

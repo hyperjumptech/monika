@@ -39,7 +39,10 @@ import type { MonikaFlags } from '../../flag'
 import { FAILED_REQUEST_ASSERTION } from '../../looper'
 import { closeLog, openLogfile } from '../logger/history'
 
-let notificationAlert: Record<string, Record<string, any>> = {}
+let notificationAlert: Record<
+  string,
+  Record<string, Record<string, never>>
+> = {}
 const server = setupServer(
   rest.get('https://example.com', (_, res, ctx) => res(ctx.status(200))),
   rest.post('https://example.com/webhook', async (req, res, ctx) => {
@@ -444,7 +447,7 @@ describe('Base Probe processing', () => {
             async connect() {},
             on: () => '',
             ping: async () => 'PONG',
-          } as any)
+          } as never)
       )
       const probes = [
         {
@@ -483,7 +486,7 @@ describe('Base Probe processing', () => {
             async connect() {},
             on: () => '',
             ping: async () => 'PONG',
-          } as any)
+          } as never)
       )
       const probes = [
         {
@@ -514,16 +517,18 @@ describe('Base Probe processing', () => {
 
     it('should probe socket', async () => {
       const requestStub = sinon.stub(net, 'createConnection').callsFake(() => {
-        let data = ''
-
+        let data: Buffer | Uint8Array
         return {
-          write(d: any) {
+          write(d: Buffer | Uint8Array) {
             data = d
           },
           setTimeout(timeoutMs: number) {
             return timeoutMs
           },
-          on(type: string, callback: (data?: any) => void) {
+          on(
+            type: string,
+            callback: (data?: Buffer | Uint8Array | Error) => void
+          ) {
             switch (type) {
               case 'data': {
                 callback(data)
@@ -541,7 +546,7 @@ describe('Base Probe processing', () => {
               }
 
               case 'error': {
-                callback('error')
+                callback(new Error('Stub Error'))
                 break
               }
 

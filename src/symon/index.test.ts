@@ -139,7 +139,7 @@ describe('Symon initiate', () => {
         symonKey: 'random-key',
       } as MonikaFlags,
     })
-    let body: any
+    let body: Record<string, string> = {}
     // mock the outgoing requests
     server.use(
       rest.post(
@@ -239,7 +239,7 @@ describe('Symon initiate', () => {
 
   it('should send event to Symon when incident or recovery happens', async () => {
     // arrange
-    let body: any
+    let body: Record<string, string> = {}
     server.use(
       rest.post(
         'http://localhost:4000/api/v1/monika/events',

@@ -55,7 +55,7 @@ describe('validate example configs', () => {
   it('should detect examples that does not conform to the schema', () => {
     const files = getAllFiles('./config_sample', [])
 
-    let sampleFile: any
+    let sampleFile: unknown
 
     for (const file of files) {
       switch (path.extname(file)) {

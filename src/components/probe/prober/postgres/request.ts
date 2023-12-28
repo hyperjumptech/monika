@@ -22,7 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Pool } from 'pg'
+import { Pool, PoolClient } from 'pg'
 import type { ProbeRequestResponse } from '../../../../interfaces/request'
 import { probeRequestResult } from '../../../../interfaces/request'
 import { differenceInMilliseconds } from 'date-fns'
@@ -83,7 +83,7 @@ async function sendPsqlRequest(params: PostgresParam): Promise<PostgresResult> {
     message: '',
   }
 
-  let client: any = false
+  let client: PoolClient | undefined
   try {
     const pool = new Pool({
       host: params.host,
@@ -102,9 +102,9 @@ async function sendPsqlRequest(params: PostgresParam): Promise<PostgresResult> {
   } catch (error: unknown) {
     result.message = getErrorMessage(error)
   } finally {
-    if (client !== false) {
+    if (client) {
       // release if connect was previously successful.
-      await client.release(true)
+      client.release(true)
     }
   }
 

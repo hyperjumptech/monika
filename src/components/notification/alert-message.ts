@@ -78,7 +78,10 @@ const getExpectedMessage = (
 
   return Handlebars.compile(alert.message)({
     response: {
-      size: Number(headers['content-length']),
+      size:
+        typeof headers === 'string'
+          ? undefined
+          : Number(headers['content-length']),
       status,
       time: responseTime,
       body: data,

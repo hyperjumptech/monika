@@ -102,7 +102,7 @@ async function sendRedisRequest(params: Redis): Promise<RedisResult> {
 
     await client.connect()
 
-    client.on('error', (error: any) => {
+    client.on('error', (error: string | undefined) => {
       result.message = error
     })
 

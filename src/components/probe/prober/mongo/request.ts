@@ -132,7 +132,7 @@ async function sendMongoRequest(params: MongoRequest): Promise<MongoResult> {
   try {
     await client.connect()
 
-    client.on('error', (error: any) => {
+    client.on('error', (error: string | undefined) => {
       result.message = error
     })
 

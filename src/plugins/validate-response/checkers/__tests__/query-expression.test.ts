@@ -62,7 +62,7 @@ describe('queryExpression', () => {
       data: '',
       body: '',
       status: 200,
-      headers: { 'content-length': 2000 },
+      headers: { 'content-length': '2000' },
       responseTime: 200,
       result: probeRequestResult.success,
     }
