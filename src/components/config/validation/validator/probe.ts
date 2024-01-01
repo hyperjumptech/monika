@@ -198,6 +198,13 @@ export async function validateProbes(probes: Probe[]): Promise<Probe[]> {
               uri: joi.string().required(),
             })
           ),
+          script: joi.array().items(
+            joi.object({
+              cmd: joi.string().required(),
+              workingDir: joi.string(),
+              timeout: joi.number().default(10_000).min(1).allow(null),
+            })
+          ),
           postgres: joi.array().items(
             joi.alternatives([
               joi.object({

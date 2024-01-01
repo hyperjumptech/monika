@@ -81,6 +81,12 @@ export type Postgres = {
   alerts?: ProbeAlert[]
 }
 
+export type Script = {
+  cmd: string
+  workingDir?: string
+  timeout?: number
+}
+
 export type Ping = {
   uri: string
   alerts?: ProbeAlert[]
@@ -98,6 +104,7 @@ export interface Probe {
   mariadb?: MariaDB[]
   mysql?: MariaDB[]
   postgres?: Postgres[]
+  script?: Script[]
   ping?: Ping[]
   incidentThreshold?: number
   recoveryThreshold?: number

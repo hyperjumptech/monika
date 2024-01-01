@@ -29,6 +29,7 @@ import { PingProber } from './icmp'
 import { PostgresProber } from './postgres'
 import { RedisProber } from './redis'
 import { SocketProber } from './socket'
+import { ScriptProber } from './script'
 import { BaseProber, type Prober, type ProberMetadata } from '.'
 
 export function createProbers(probeMetadata: ProberMetadata): Prober[] {
@@ -95,6 +96,10 @@ export function createProber(probeMetadata: ProberMetadata): Prober {
 
   if (probeConfig?.ping) {
     return new PingProber(probeMetadata)
+  }
+
+  if (probeConfig?.script) {
+    return new ScriptProber(probeMetadata)
   }
 
   return new BaseProber(probeMetadata)

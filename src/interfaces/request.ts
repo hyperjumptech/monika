@@ -40,6 +40,7 @@ export type RequestTypes =
   | 'mariadb'
   | 'mongo'
   | 'postgres'
+  | 'script'
 
 // The success/failure result of a probe
 export enum probeRequestResult {
