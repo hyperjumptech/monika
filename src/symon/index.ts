@@ -101,7 +101,7 @@ type LastEvent = {
 
 type ProbeChange = {
   probe_id: string
-  type: 'add' | 'delete' | 'update'
+  type: 'add' | 'delete' | 'disabled' | 'enabled' | 'update'
   created_at: Date
   probe: Probe
   lastEvent: LastEvent
@@ -445,7 +445,8 @@ async function applyProbeChanges(probeChanges: ProbeChange[]) {
   return Promise.allSettled(
     probeChanges.map(async ({ lastEvent, probe, probe_id: probeId, type }) => {
       switch (type) {
-        case 'delete': {
+        case 'delete':
+        case 'disabled': {
           deleteProbe(probeId)
           removeProbeState(probeId)
           return
@@ -460,7 +461,8 @@ async function applyProbeChanges(probeChanges: ProbeChange[]) {
           return
         }
 
-        case 'add': {
+        case 'add':
+        case 'enabled': {
           const probes = await validateProbes([
             lastEvent ? { ...probe, lastEvent } : probe,
           ])
