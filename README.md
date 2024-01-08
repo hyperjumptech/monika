@@ -53,7 +53,7 @@ For contribution details on how to add custom notifications [see the New Notific
 
 If you are developing feature/fix related to notification by making changes inside the `packages/notification` folder, it's easier to temporarily change the dependency source in `package.json` to be like this
 
-```
+```json
 "@hyperjumptech/monika-notification": "*"
 ```
 
@@ -123,6 +123,12 @@ probes:
     redis:
       - uri: redis://:redis_password@localhost:6379
 ```
+
+### How to Monitor Monika Locally
+
+1. Run [Prometheus](https://prometheus.io/). Run `docker compose -f ./dev/prometheus/docker-compose.yaml up`.
+2. Run Monika with the Prometheus flag. Run `npm start -- --prometheus 3001`.
+3. Open Prometheus [Expression Browser](https://prometheus.io/docs/visualization/browser/). Visit `http://localhost:9090/graph`.
 
 ## Development References
 

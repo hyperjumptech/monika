@@ -42,6 +42,7 @@ import {
 type doProbeParams = {
   probe: Probe // probe contains all the probes
   notifications: Notification[] // notifications contains all the notifications
+  signal: AbortSignal
 }
 /**
  * doProbe sends out the http request
@@ -51,6 +52,7 @@ type doProbeParams = {
 export async function doProbe({
   probe,
   notifications,
+  signal,
 }: doProbeParams): Promise<void> {
   if (!isTimeToProbe(probe) || isCycleEnd(probe.id)) {
     return
@@ -59,9 +61,10 @@ export async function doProbe({
   const randomTimeoutMilliseconds = getRandomTimeoutMilliseconds()
   setProbeRunning(probe.id)
 
-  setTimeout(async () => {
+  const randomTimeoutInterval = setTimeout(async () => {
     const probeCtx = getProbeContext(probe.id)
-    if (!probeCtx) {
+    if (!probeCtx || signal.aborted) {
+      clearTimeout(randomTimeoutInterval)
       return
     }
 
@@ -84,10 +87,16 @@ export async function doProbe({
         maxDelay: getContext().flags.retryMaxDelayMs,
       }),
     }).execute(({ attempt }) =>
-      Promise.all(probers.map(async (prober) => prober.probe(attempt)))
+      Promise.all(
+        probers.map(async (prober) =>
+          prober.probe({ incidentRetryAttempt: attempt, signal })
+        )
+      )
     )
 
-    setProbeFinish(probe.id)
+    if (!signal.aborted) {
+      setProbeFinish(probe.id)
+    }
   }, randomTimeoutMilliseconds)
 }
 

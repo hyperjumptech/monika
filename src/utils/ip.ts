@@ -36,9 +36,13 @@ export default function getIp(): string {
     const ifaces = networkInterfaces()
     for (const dev in ifaces) {
       if (dev) {
-        const iface = ifaces[dev].filter(
+        const iface = ifaces[dev]?.filter(
           (details) => details.family === 'IPv4' && details.internal === false
         )
+
+        if (!iface) {
+          continue
+        }
 
         if (iface.length > 0) address = iface[0].address
       }

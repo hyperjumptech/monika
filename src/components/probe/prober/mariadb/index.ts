@@ -1,10 +1,10 @@
-import { BaseProber, type ProbeResult } from '../'
+import { BaseProber, type ProbeParams, type ProbeResult } from '../'
 import type { MariaDB } from '../../../../interfaces/probe'
 import { probeRequestResult } from '../../../../interfaces/request'
 import { mariaRequest } from './request'
 
 export class MariaDBProber extends BaseProber {
-  async probe(incidentRetryAttempt: number): Promise<void> {
+  async probe({ incidentRetryAttempt }: ProbeParams): Promise<void> {
     const result = await probeMariaDB({
       id: this.probeConfig.id,
       checkOrder: this.counter,
