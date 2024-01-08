@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.16.4] - 2024-01-05
+
+### Fixed
+
+- Fixed missing send error field when an error response exists (#1217).
+
+### Changed
+
+- Cleaned up all warnings (#1221).
+
 ## [1.16.3] - 2023-12-22
 
 ### Changed
