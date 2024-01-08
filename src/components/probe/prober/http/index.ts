@@ -22,7 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { BaseProber, NotificationType } from '..'
+import { BaseProber, NotificationType, type ProbeParams } from '..'
 import { getContext } from '../../../../context'
 import events from '../../../../events'
 import type { ProbeAlert } from '../../../../interfaces/probe'
@@ -47,7 +47,7 @@ type ProbeResultMessageParams = {
 }
 
 export class HTTPProber extends BaseProber {
-  async probe(incidentRetryAttempt: number): Promise<void> {
+  async probe({ incidentRetryAttempt, signal }: ProbeParams): Promise<void> {
     const requests = this.probeConfig.requests!
     // sending multiple http requests for request chaining
     const responses: ProbeRequestResponse[] = []
@@ -56,7 +56,7 @@ export class HTTPProber extends BaseProber {
       responses.push(
         // eslint-disable-next-line no-await-in-loop
         await httpRequest({
-          requestConfig,
+          requestConfig: { ...requestConfig, signal },
           responses,
         })
       )

@@ -83,6 +83,9 @@ export default async function init(
       collectProbeTotal,
       collectProbeRequestMetrics,
       collectTriggeredAlert,
+      decrementProbeRunningTotal,
+      incrementProbeRunningTotal,
+      resetProbeRunningTotal,
     } = new PrometheusCollector()
 
     // collect prometheus metrics
@@ -91,6 +94,9 @@ export default async function init(
     })
     eventEmitter.on(events.probe.response.received, collectProbeRequestMetrics)
     eventEmitter.on(events.probe.alert.triggered, collectTriggeredAlert)
+    eventEmitter.on(events.probe.ran, incrementProbeRunningTotal)
+    eventEmitter.on(events.probe.finished, decrementProbeRunningTotal)
+    eventEmitter.on(events.config.updated, resetProbeRunningTotal)
 
     startPrometheusMetricsServer(flags.prometheus)
   }

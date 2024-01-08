@@ -107,7 +107,13 @@ describe('Base Probe processing', () => {
 
       // act
       await Promise.all(
-        probes.map((probe) => doProbe({ probe, notifications: [] }))
+        probes.map((probe) =>
+          doProbe({
+            probe,
+            notifications: [],
+            signal: new AbortController().signal,
+          })
+        )
       )
       // wait for random timeout
       await sleep(3 * seconds)
@@ -152,6 +158,7 @@ describe('Base Probe processing', () => {
             type: 'webhook',
           },
         ],
+        signal: new AbortController().signal,
       })
       // wait for random timeout
       await sleep(3 * seconds)
@@ -231,6 +238,7 @@ describe('Base Probe processing', () => {
             type: 'webhook',
           },
         ],
+        signal: new AbortController().signal,
       })
       // gonna need to wait for a while until monika does the probing twice
       await sleep(7000)
@@ -275,7 +283,13 @@ describe('Base Probe processing', () => {
 
       // act
       await Promise.all(
-        probes.map((probe) => doProbe({ probe, notifications: [] }))
+        probes.map((probe) =>
+          doProbe({
+            probe,
+            notifications: [],
+            signal: new AbortController().signal,
+          })
+        )
       )
       // wait for random timeout
       await sleep(3 * seconds)
@@ -315,7 +329,13 @@ describe('Base Probe processing', () => {
 
       // act
       await Promise.all(
-        probes.map((probe) => doProbe({ probe, notifications: [] }))
+        probes.map((probe) =>
+          doProbe({
+            probe,
+            notifications: [],
+            signal: new AbortController().signal,
+          })
+        )
       )
       // wait for random timeout
       await sleep(3 * seconds)
@@ -356,7 +376,13 @@ describe('Base Probe processing', () => {
 
       // act
       await Promise.all(
-        probes.map((probe) => doProbe({ probe, notifications: [] }))
+        probes.map((probe) =>
+          doProbe({
+            probe,
+            notifications: [],
+            signal: new AbortController().signal,
+          })
+        )
       )
       // wait for random timeout
       await sleep(3 * seconds)
@@ -395,7 +421,13 @@ describe('Base Probe processing', () => {
 
       // act
       await Promise.all(
-        probes.map((probe) => doProbe({ probe, notifications: [] }))
+        probes.map((probe) =>
+          doProbe({
+            probe,
+            notifications: [],
+            signal: new AbortController().signal,
+          })
+        )
       )
       // wait for random timeout
       await sleep(3 * seconds)
@@ -430,7 +462,13 @@ describe('Base Probe processing', () => {
 
       // act
       await Promise.all(
-        probes.map((probe) => doProbe({ probe, notifications: [] }))
+        probes.map((probe) =>
+          doProbe({
+            probe,
+            notifications: [],
+            signal: new AbortController().signal,
+          })
+        )
       )
       // wait for random timeout
       await sleep(3 * seconds)
@@ -469,7 +507,13 @@ describe('Base Probe processing', () => {
 
       // act
       await Promise.all(
-        probes.map((probe) => doProbe({ probe, notifications: [] }))
+        probes.map((probe) =>
+          doProbe({
+            probe,
+            notifications: [],
+            signal: new AbortController().signal,
+          })
+        )
       )
       // wait for random timeout
       await sleep(3 * seconds)
@@ -506,7 +550,13 @@ describe('Base Probe processing', () => {
 
       // act
       await Promise.all(
-        probes.map((probe) => doProbe({ probe, notifications: [] }))
+        probes.map((probe) =>
+          doProbe({
+            probe,
+            notifications: [],
+            signal: new AbortController().signal,
+          })
+        )
       )
       // wait for random timeout
       await sleep(3 * seconds)
@@ -575,7 +625,13 @@ describe('Base Probe processing', () => {
 
       // act
       await Promise.all(
-        probes.map((probe) => doProbe({ probe, notifications: [] }))
+        probes.map((probe) =>
+          doProbe({
+            probe,
+            notifications: [],
+            signal: new AbortController().signal,
+          })
+        )
       )
       // wait for random timeout
       await sleep(3 * seconds)

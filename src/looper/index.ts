@@ -24,7 +24,6 @@
 
 import type { Notification } from '@hyperjumptech/monika-notification'
 
-import { AbortSignal } from 'node-abort-controller'
 import { v4 as uuid } from 'uuid'
 
 import type { Probe, ProbeAlert } from '../interfaces/probe'
@@ -120,7 +119,7 @@ export function startProbing({
   initializeProbeStates(probes)
 
   const probeInterval = setInterval(() => {
-    if (signal?.aborted) {
+    if (signal.aborted) {
       clearInterval(probeInterval)
       return
     }
@@ -138,6 +137,7 @@ export function startProbing({
       doProbe({
         notifications,
         probe,
+        signal,
       })
     }
   }, 1000)

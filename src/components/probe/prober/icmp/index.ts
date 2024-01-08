@@ -23,12 +23,12 @@
  **********************************************************************************/
 
 import type { Ping } from '../../../../interfaces/probe'
-import { BaseProber, type ProbeResult } from '..'
+import { BaseProber, type ProbeParams, type ProbeResult } from '..'
 import { icmpRequest } from './request'
 import { probeRequestResult } from '../../../../interfaces/request'
 
 export class PingProber extends BaseProber {
-  async probe(incidentRetryAttempt: number): Promise<void> {
+  async probe({ incidentRetryAttempt }: ProbeParams): Promise<void> {
     const result = await probePing({
       id: this.probeConfig.id,
       checkOrder: this.counter,

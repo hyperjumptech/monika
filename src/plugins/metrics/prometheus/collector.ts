@@ -36,6 +36,7 @@ import type { ProbeRequestResponse } from '../../../interfaces/request'
 type PrometheusCustomCollector = {
   statusCode: Gauge<'id' | 'name' | 'url' | 'method'>
   probeResult: Gauge<'id' | 'name' | 'url' | 'method'>
+  probeRunningTotal: Gauge<'id'>
   responseTime: Histogram<
     'id' | 'name' | 'url' | 'method' | 'statusCode' | 'result'
   >
@@ -99,6 +100,11 @@ export class PrometheusCollector {
       help: 'Total alert triggered',
       labelNames: ['id', 'name', 'url', 'method', 'alertQuery'] as const,
     })
+    const probeRunningTotal = new Gauge({
+      name: 'monika_probe_running_total',
+      help: 'Total of probe running',
+      labelNames: ['id'] as const,
+    })
     const probesTotal = new Gauge({
       name: 'monika_probes_total',
       help: 'Total of all probe',
@@ -113,6 +119,7 @@ export class PrometheusCollector {
       responseTime,
       responseSize,
       alertTriggeredTotal,
+      probeRunningTotal,
       probesTotal,
     }
   }
@@ -123,6 +130,30 @@ export class PrometheusCollector {
     }
 
     prometheusCustomCollector.probesTotal.set(total)
+  }
+
+  decrementProbeRunningTotal(id: string) {
+    if (!prometheusCustomCollector) {
+      throw new Error('Prometheus collector is not registered')
+    }
+
+    prometheusCustomCollector.probeRunningTotal.labels(id).dec()
+  }
+
+  incrementProbeRunningTotal(id: string) {
+    if (!prometheusCustomCollector) {
+      throw new Error('Prometheus collector is not registered')
+    }
+
+    prometheusCustomCollector.probeRunningTotal.labels(id).inc()
+  }
+
+  resetProbeRunningTotal() {
+    if (!prometheusCustomCollector) {
+      throw new Error('Prometheus collector is not registered')
+    }
+
+    prometheusCustomCollector.probeRunningTotal.reset()
   }
 
   collectProbeRequestMetrics(probeResult: ProbeResult): void {

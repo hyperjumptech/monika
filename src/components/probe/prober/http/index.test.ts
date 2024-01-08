@@ -99,8 +99,16 @@ describe('HTTP Probe processing', () => {
     await sleep(seconds)
 
     // act
-    doProbe({ probe: probes[0], notifications: [] })
-    await doProbe({ probe: probes[0], notifications: [] })
+    doProbe({
+      probe: probes[0],
+      notifications: [],
+      signal: new AbortController().signal,
+    })
+    await doProbe({
+      probe: probes[0],
+      notifications: [],
+      signal: new AbortController().signal,
+    })
     // wait for random timeout
     await sleep(3 * seconds)
 
@@ -113,7 +121,11 @@ describe('HTTP Probe processing', () => {
     initializeProbeStates(probes)
 
     // act
-    doProbe({ notifications: [], probe: { ...probes[0], interval: 10 } })
+    doProbe({
+      notifications: [],
+      probe: { ...probes[0], interval: 10 },
+      signal: new AbortController().signal,
+    })
 
     // assert
     expect(urlRequestTotal).eq(0)
@@ -131,9 +143,21 @@ describe('HTTP Probe processing', () => {
     await sleep(seconds)
 
     // act
-    await doProbe({ probe: probes[0], notifications: [] })
-    await doProbe({ probe: probes[0], notifications: [] })
-    await doProbe({ probe: probes[0], notifications: [] })
+    await doProbe({
+      probe: probes[0],
+      notifications: [],
+      signal: new AbortController().signal,
+    })
+    await doProbe({
+      probe: probes[0],
+      notifications: [],
+      signal: new AbortController().signal,
+    })
+    await doProbe({
+      probe: probes[0],
+      notifications: [],
+      signal: new AbortController().signal,
+    })
     // wait for random timeout
     await sleep(3 * seconds)
 
@@ -154,7 +178,13 @@ describe('HTTP Probe processing', () => {
 
     // act
     await Promise.all(
-      uniqueProbes.map((probe) => doProbe({ probe, notifications: [] }))
+      uniqueProbes.map((probe) =>
+        doProbe({
+          probe,
+          notifications: [],
+          signal: new AbortController().signal,
+        })
+      )
     )
     // wait for random timeout
     await sleep(3 * seconds)
@@ -205,6 +235,7 @@ describe('HTTP Probe processing', () => {
           type: 'webhook',
         },
       ],
+      signal: new AbortController().signal,
     })
     // wait for random timeout
     await sleep(3 * seconds)
@@ -252,6 +283,7 @@ describe('HTTP Probe processing', () => {
           type: 'webhook',
         },
       ],
+      signal: new AbortController().signal,
     })
     // wait for random timeout
     await sleep(3 * seconds)
@@ -303,6 +335,7 @@ describe('HTTP Probe processing', () => {
     await doProbe({
       probe,
       notifications,
+      signal: new AbortController().signal,
     })
     // wait for random timeout
     await sleep(3 * seconds)

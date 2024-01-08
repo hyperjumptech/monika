@@ -24,7 +24,9 @@
 
 import { assign, createMachine, type EventObject, interpret } from 'xstate'
 
+import events from '../events'
 import type { Probe } from '../interfaces/probe'
+import { getEventEmitter } from './events'
 
 type ProbeStateValue = unknown
 
@@ -105,6 +107,7 @@ export function syncProbeStateFrom(probe: Probe, cycle: number = 0) {
 
 export function removeProbeState(probeId: string) {
   probeInterpreters.delete(probeId)
+  getEventEmitter().emit(events.probe.finished, probeId)
 }
 
 export function setProbeRunning(probeId: string): string {
@@ -115,6 +118,7 @@ export function setProbeRunning(probeId: string): string {
   }
 
   interpreter.send('RUN')
+  getEventEmitter().emit(events.probe.ran, probeId)
 
   return probeId
 }
@@ -122,6 +126,7 @@ export function setProbeRunning(probeId: string): string {
 export function setProbeFinish(probeId: string): void {
   const interpreter = probeInterpreters.get(probeId)
   interpreter?.send('FINISH')
+  getEventEmitter().emit(events.probe.finished, probeId)
 }
 
 export function getProbeState(probeId: string): 'idle' | 'running' | undefined {
