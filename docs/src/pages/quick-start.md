@@ -35,9 +35,7 @@ Alternatively, Monika for macOS can be installed from its prebuilt binary. Head 
 
 ### Linux
 
-The recommended approach is to use [Snapcraft](https://snapcraft.io/), a universal package manager for Linux. Check [Monika page on Snapcraft](https://snapcraft.io/monika) for more detailed information.
-
-Alternatively, Monika for Linux can be automatically downloaded and installed by running an installation script as follows:
+Monika for Linux can be automatically downloaded and installed by running an installation script as follows:
 
 ```bash
 curl https://raw.githubusercontent.com/hyperjumptech/monika/main/scripts/monika-install.sh | sh
