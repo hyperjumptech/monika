@@ -197,14 +197,6 @@ export default class SymonClient {
     this.monikaId = await this.handshake()
     log.info('[Symon] Handshake')
 
-    this.sendStatus({ isOnline: true })
-      .then(() => {
-        log.info('[Symon] Send status succeed')
-      })
-      .catch((error) => {
-        log.error(`[Symon] Send status failed. ${(error as Error).message}`)
-      })
-
     const probeChangesCheckedAt = new Date()
 
     await this.fetchProbesAndUpdateConfig()
