@@ -153,7 +153,6 @@ export default class SymonClient {
   private worker
   private apiKey: string
   private probeChangesInterval: NodeJS.Timeout | undefined
-  private hasConnectionToSymon: boolean = false
   private httpClient: AxiosInstance
   private locationId: string
   private monikaId: string
@@ -238,7 +237,6 @@ export default class SymonClient {
     }, getContext().flags.symonGetProbesIntervalMs)
 
     this.report().catch((error) => {
-      this.hasConnectionToSymon = false
       log.error(`[Symon] Report failed. ${(error as Error).message}`)
     })
 
@@ -249,7 +247,7 @@ export default class SymonClient {
   }
 
   async sendStatus({ isOnline }: { isOnline: boolean }): Promise<void> {
-    const { status } = await this.httpClient({
+    await this.httpClient({
       data: {
         monikaId: this.monikaId,
         status: isOnline,
@@ -257,10 +255,6 @@ export default class SymonClient {
       method: 'POST',
       url: '/status',
     })
-
-    if (status === 200) {
-      this.hasConnectionToSymon = true
-    }
   }
 
   async stop(): Promise<void> {
@@ -320,7 +314,6 @@ export default class SymonClient {
     // Create a task data object
     const taskData = {
       apiKey: this.apiKey,
-      hasConnectionToSymon: this.hasConnectionToSymon,
       httpClient: this.httpClient,
       monikaId: this.monikaId,
       probeIds: getProbes().map(({ id }) => id),
@@ -337,7 +330,6 @@ export default class SymonClient {
         this.report
           .bind(this)()
           .catch((error) => {
-            this.hasConnectionToSymon = false
             log.error(`[Symon] Report failed. ${(error as Error).message}`)
           })
       }, this.reportProbesInterval)
@@ -399,10 +391,8 @@ export default class SymonClient {
     // Fetch the probes
     const { hash, probes } = await this.fetchProbes()
     const newConfig: Config = { probes, version: hash }
-    await setConfig(newConfig)
 
-    // Set connection to symon as true, because it could fetch the probes
-    this.hasConnectionToSymon = true
+    await setConfig(newConfig)
     log.info('[Symon] Get probes succeed')
   }
 
