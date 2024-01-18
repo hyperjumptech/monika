@@ -199,42 +199,12 @@ export default class SymonClient {
     const probeChangesCheckedAt = new Date()
 
     await this.fetchProbesAndUpdateConfig()
+
     this.setProbeChangesCheckedAt(probeChangesCheckedAt)
-
-    this.probeChangesInterval = setInterval(async () => {
-      const probeChangesCheckedAt = new Date()
-      try {
-        const probeChanges = await this.probeChanges.bind(this)()
-        this.setProbeChangesCheckedAt(probeChangesCheckedAt)
-
-        const hasProbeChanges = probeChanges.length > 0
-        if (!hasProbeChanges) {
-          log.info(
-            `[Symon] No probe changes since ${this.probeChangesCheckedAt}`
-          )
-          return
-        }
-
-        const probeChangesApplyResults = await applyProbeChanges(probeChanges)
-        for (const result of probeChangesApplyResults) {
-          if (result.status === 'rejected') {
-            log.error(
-              `[Symon] Get probe changes since ${this.probeChangesCheckedAt}. ${result.reason}`
-            )
-          }
-        }
-
-        log.info(
-          `[Symon] Get probe changes (${probeChanges.length}) since ${this.probeChangesCheckedAt}`
-        )
-      } catch (error) {
-        log.error(
-          `[Symon] Get probe changes since ${
-            this.probeChangesCheckedAt
-          } failed. ${(error as Error).message}`
-        )
-      }
-    }, getContext().flags.symonGetProbesIntervalMs)
+    this.probeChangesInterval = setInterval(
+      this.fetchAndApplyProbeChanges,
+      getContext().flags.symonGetProbesIntervalMs
+    )
 
     this.report().catch((error) => {
       log.error(`[Symon] Report failed. ${(error as Error).message}`)
@@ -270,6 +240,40 @@ export default class SymonClient {
 
   private setProbeChangesCheckedAt(probeChangesCheckedAt: Date) {
     this.probeChangesCheckedAt = probeChangesCheckedAt
+  }
+
+  private async fetchAndApplyProbeChanges() {
+    const probeChangesCheckedAt = new Date()
+
+    try {
+      const probeChanges = await this.probeChanges.bind(this)()
+      this.setProbeChangesCheckedAt(probeChangesCheckedAt)
+
+      const hasProbeChanges = probeChanges.length > 0
+      if (!hasProbeChanges) {
+        log.info(`[Symon] No probe changes since ${this.probeChangesCheckedAt}`)
+        return
+      }
+
+      const probeChangesApplyResults = await applyProbeChanges(probeChanges)
+      for (const result of probeChangesApplyResults) {
+        if (result.status === 'rejected') {
+          log.error(
+            `[Symon] Get probe changes since ${this.probeChangesCheckedAt}. ${result.reason}`
+          )
+        }
+      }
+
+      log.info(
+        `[Symon] Get probe changes (${probeChanges.length}) since ${this.probeChangesCheckedAt}`
+      )
+    } catch (error) {
+      log.error(
+        `[Symon] Get probe changes since ${
+          this.probeChangesCheckedAt
+        } failed. ${(error as Error).message}`
+      )
+    }
   }
 
   private willSendEventListener({
