@@ -153,9 +153,12 @@ export default class SymonClient {
   private worker
   private apiKey: string
   private probeChangesInterval: NodeJS.Timeout | undefined
+  private probeAssignmentChangesInterval: NodeJS.Timeout | undefined
   private httpClient: AxiosInstance
   private locationId: string
   private monikaId: string
+  private isMultiNode: boolean
+  private probeAssignmentLastUpdatedAt: Date | null = null
   private probeChangesCheckedAt: Date | undefined
   private reportProbesLimit: number
   private reportTimeout: NodeJS.Timeout | undefined
@@ -181,6 +184,7 @@ export default class SymonClient {
     })
     this.locationId = symonLocationId
     this.monikaId = symonMonikaId
+    this.isMultiNode = apiVersion === SYMON_API_VERSION.v2
     this.reportProbesInterval = symonReportInterval
     this.reportProbesLimit = symonReportLimit
     this.worker = new Piscina.Piscina({
@@ -202,9 +206,16 @@ export default class SymonClient {
 
     this.setProbeChangesCheckedAt(probeChangesCheckedAt)
     this.probeChangesInterval = setInterval(
-      this.fetchAndApplyProbeChanges,
+      this.fetchAndApplyProbeChanges.bind(this),
       getContext().flags.symonGetProbesIntervalMs
     )
+
+    if (this.isMultiNode) {
+      this.probeAssignmentChangesInterval = setInterval(
+        this.fetchAndApplyProbeAssignmentChanges.bind(this),
+        getContext().flags.symonGetProbesIntervalMs
+      )
+    }
 
     this.report().catch((error) => {
       log.error(`[Symon] Report failed. ${(error as Error).message}`)
@@ -233,6 +244,7 @@ export default class SymonClient {
     }
 
     clearInterval(this.probeChangesInterval)
+    clearInterval(this.probeAssignmentChangesInterval)
     clearTimeout(this.reportTimeout)
 
     await this.worker.destroy()
@@ -246,7 +258,7 @@ export default class SymonClient {
     const probeChangesCheckedAt = new Date()
 
     try {
-      const probeChanges = await this.probeChanges.bind(this)()
+      const probeChanges = await this.probeChanges()
       this.setProbeChangesCheckedAt(probeChangesCheckedAt)
 
       const hasProbeChanges = probeChanges.length > 0
@@ -424,6 +436,31 @@ export default class SymonClient {
     return this.httpClient
       .post('/client-handshake', handshakeData)
       .then((res) => res.data?.data.monikaId)
+  }
+
+  private async fetchAndApplyProbeAssignmentChanges(): Promise<void> {
+    const probeAssignmentLastUpdatedAt =
+      await this.fetchProbeAssignmentLastUpdatedAt()
+
+    if (probeAssignmentLastUpdatedAt !== this.probeAssignmentLastUpdatedAt) {
+      await this.fetchProbesAndUpdateConfig()
+      this.setProbeAssignmentLastUpdatedAt(probeAssignmentLastUpdatedAt)
+      log.info('[Symon] The probe assignment has been updated')
+    }
+  }
+
+  private setProbeAssignmentLastUpdatedAt(
+    probeAssignmentLastUpdatedAt: Date | null
+  ) {
+    this.probeAssignmentLastUpdatedAt = probeAssignmentLastUpdatedAt
+  }
+
+  private async fetchProbeAssignmentLastUpdatedAt(): Promise<Date | null> {
+    const response = await this.httpClient.get<{
+      data: { updatedAt: Date | null }
+    }>(`/${this.monikaId}/probe-assignments/last-updated-at`)
+
+    return response.data.data.updatedAt
   }
 }
 
