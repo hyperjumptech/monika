@@ -107,6 +107,8 @@ type ProbeChange = {
   lastEvent: LastEvent
 }
 
+type ProbeAssignmentTotal = { total: number; updatedAt?: Date }
+
 const getHandshakeData = async (): Promise<SymonHandshakeData> => {
   await retry(handleAll, {
     backoff: new ExponentialBackoff(),
@@ -158,7 +160,10 @@ export default class SymonClient {
   private locationId: string
   private monikaId: string
   private isMultiNode: boolean
-  private probeAssignmentLastUpdatedAt: Date | null = null
+  private probeAssignmentTotal: ProbeAssignmentTotal = {
+    total: 0,
+  }
+
   private probeChangesCheckedAt: Date | undefined
   private reportProbesLimit: number
   private reportTimeout: NodeJS.Timeout | undefined
@@ -439,28 +444,32 @@ export default class SymonClient {
   }
 
   private async fetchAndApplyProbeAssignmentChanges(): Promise<void> {
-    const probeAssignmentLastUpdatedAt =
-      await this.fetchProbeAssignmentLastUpdatedAt()
+    const probeAssignmentTotal = await this.fetchProbeAssignmentTotal()
+    const { total, updatedAt } = probeAssignmentTotal
 
-    if (probeAssignmentLastUpdatedAt !== this.probeAssignmentLastUpdatedAt) {
+    if (
+      total !== this.probeAssignmentTotal.total ||
+      updatedAt !== this.probeAssignmentTotal.updatedAt
+    ) {
       await this.fetchProbesAndUpdateConfig()
-      this.setProbeAssignmentLastUpdatedAt(probeAssignmentLastUpdatedAt)
+      this.setProbeAssignmentTotal(probeAssignmentTotal)
       log.info('[Symon] The probe assignment has been updated')
     }
   }
 
-  private setProbeAssignmentLastUpdatedAt(
-    probeAssignmentLastUpdatedAt: Date | null
-  ) {
-    this.probeAssignmentLastUpdatedAt = probeAssignmentLastUpdatedAt
+  private setProbeAssignmentTotal(probeAssignmentTotal: ProbeAssignmentTotal) {
+    this.probeAssignmentTotal = probeAssignmentTotal
   }
 
-  private async fetchProbeAssignmentLastUpdatedAt(): Promise<Date | null> {
+  private async fetchProbeAssignmentTotal(): Promise<{
+    total: number
+    updatedAt: Date
+  }> {
     const response = await this.httpClient.get<{
-      data: { updatedAt: Date | null }
-    }>(`/${this.monikaId}/probe-assignments/last-updated-at`)
+      data: { total: number; updatedAt: Date }
+    }>(`/${this.monikaId}/probe-assignments/total`)
 
-    return response.data.data.updatedAt
+    return response.data.data
   }
 }
 
