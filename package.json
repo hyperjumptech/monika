@@ -213,7 +213,7 @@
     "outputPath": "dist"
   },
   "volta": {
-    "node": "18.14.0"
+    "node": "20.11.0"
   },
   "workspaces": [
     "packages/*"

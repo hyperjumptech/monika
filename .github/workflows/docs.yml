@@ -37,7 +37,7 @@ jobs:
       - name: ✍🏻 Setup node
         uses: actions/setup-node@v4
         with:
-          node-version: 16.14
+          node-version: 20.x
 
       - name: 📥 Install deps
         run: npm ci
@@ -69,7 +69,7 @@ jobs:
       - name: ✍🏻 Setup node
         uses: actions/setup-node@v4
         with:
-          node-version: 16.14
+          node-version: 20.x
 
       - name: 📥 Install deps
         run: npm ci
