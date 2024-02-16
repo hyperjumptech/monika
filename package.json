@@ -4,6 +4,7 @@
   "version": "1.17.0",
   "license": "MIT",
   "author": "@hyperjumptech",
+  "type": "module",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "bin": {
