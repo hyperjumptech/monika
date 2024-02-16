@@ -22,13 +22,14 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import type { Config } from '../../interfaces/config'
-import { XMLParser } from 'fast-xml-parser'
-import { monikaFlagsDefaultValue } from '../../flag'
-import type { MonikaFlags } from '../../flag'
-import type { Probe, ProbeAlert } from '../../interfaces/probe'
 import Joi from 'joi'
-import { RequestConfig } from 'src/interfaces/request'
+
+import type { Config } from '../../interfaces/config.js'
+import { XMLParser } from 'fast-xml-parser'
+import { monikaFlagsDefaultValue } from '../../flag.js'
+import type { MonikaFlags } from '../../flag.js'
+import type { Probe, ProbeAlert } from '../../interfaces/probe.js'
+import type { RequestConfig } from '../../interfaces/request.js'
 
 const sitemapValidator = Joi.object({
   config: Joi.object({
@@ -142,7 +143,7 @@ export const parseConfigFromSitemap = (
     const parser = new XMLParser({ ignoreAttributes: false })
     const xmlObj = parser.parse(configString)
     let probes = generateProbesFromXml(xmlObj)
-    if (flags && flags['one-probe']) {
+    if (flags && flags['one-probe.js']) {
       probes = generateProbesFromXmlOneProbe(xmlObj)
     }
 

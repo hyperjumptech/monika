@@ -22,24 +22,24 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { BaseProber, NotificationType, type ProbeParams } from '..'
-import { getContext } from '../../../../context'
-import events from '../../../../events'
-import type { ProbeAlert } from '../../../../interfaces/probe'
+import { BaseProber, NotificationType, type ProbeParams } from '../index.js'
+import { getContext } from '../../../../context/index.js'
+import events from '../../../../events/index.js'
+import type { ProbeAlert } from '../../../../interfaces/probe.js'
 import {
   probeRequestResult,
   type ProbeRequestResponse,
   type RequestConfig,
-} from '../../../../interfaces/request'
-import type { ValidatedResponse } from '../../../../plugins/validate-response'
-import responseChecker from '../../../../plugins/validate-response/checkers'
-import { getAlertID } from '../../../../utils/alert-id'
-import { getEventEmitter } from '../../../../utils/events'
-import { isSymonModeFrom } from '../../../config'
-import { addIncident } from '../../../downtime-counter'
-import { saveProbeRequestLog } from '../../../logger/history'
-import { logResponseTime } from '../../../logger/response-time-log'
-import { httpRequest } from './request'
+} from '../../../../interfaces/request.js'
+import type { ValidatedResponse } from '../../../../plugins/validate-response/index.js'
+import responseChecker from '../../../../plugins/validate-response/checkers/index.js'
+import { getAlertID } from '../../../../utils/alert-id.js'
+import { getEventEmitter } from '../../../../utils/events.js'
+import { isSymonModeFrom } from '../../../config/index.js'
+import { addIncident } from '../../../downtime-counter/index.js'
+import { saveProbeRequestLog } from '../../../logger/history.js'
+import { logResponseTime } from '../../../logger/response-time-log.js'
+import { httpRequest } from './request.js'
 
 type ProbeResultMessageParams = {
   request: RequestConfig

@@ -25,19 +25,23 @@
 import { Command, Errors, Flags } from '@oclif/core'
 import pEvent from 'p-event'
 
-import type { Config } from '../interfaces/config'
-import type { Probe } from '../interfaces/probe'
+import type { Config } from '../interfaces/config.js'
+import type { Probe } from '../interfaces/probe.js'
 
-import { createConfig, getConfig, isSymonModeFrom } from '../components/config'
-import { sortProbes } from '../components/config/sort'
-import { printAllLogs } from '../components/logger'
-import { flush } from '../components/logger/flush'
-import { closeLog, openLogfile } from '../components/logger/history'
-import { logStartupMessage } from '../components/logger/startup-message'
-import { scheduleSummaryNotification } from '../components/notification/schedule-notification'
-import { sendMonikaStartMessage } from '../components/notification/start-message'
-import { setContext } from '../context'
-import events from '../events'
+import {
+  createConfig,
+  getConfig,
+  isSymonModeFrom,
+} from '../components/config/index.js'
+import { sortProbes } from '../components/config/sort.js'
+import { printAllLogs } from '../components/logger/index.js'
+import { flush } from '../components/logger/flush.js'
+import { closeLog, openLogfile } from '../components/logger/history.js'
+import { logStartupMessage } from '../components/logger/startup-message.js'
+import { scheduleSummaryNotification } from '../components/notification/schedule-notification.js'
+import { sendMonikaStartMessage } from '../components/notification/start-message.js'
+import { setContext } from '../context/index.js'
+import events from '../events/index.js'
 import {
   type MonikaFlags,
   monikaFlagsDefaultValue,
@@ -45,13 +49,13 @@ import {
   retryMaxDelayMs,
   symonAPIVersion,
   symonGetProbesIntervalMs,
-} from '../flag'
-import { printSummary, savePidFile } from '../jobs/summary-notification'
-import initLoaders from '../loaders'
-import { sanitizeProbe, startProbing } from '../looper'
-import SymonClient from '../symon'
-import { getEventEmitter } from '../utils/events'
-import { log } from '../utils/pino'
+} from '../flag.js'
+import { printSummary, savePidFile } from '../jobs/summary-notification.js'
+import initLoaders from '../loaders/index.js'
+import { sanitizeProbe, startProbing } from '../looper/index.js'
+import SymonClient from '../symon/index.js'
+import { getEventEmitter } from '../utils/events.js'
+import { log } from '../utils/pino.js'
 
 type GetProbesParams = {
   config: Config
@@ -158,9 +162,9 @@ export default class Monika extends Command {
       description: 'Print all logs.',
     }),
 
-    'one-probe': Flags.boolean({
+    'one-probe.js': Flags.boolean({
       dependsOn: ['sitemap'],
-      description: 'One Probe',
+      description: 'One probe.js',
     }),
 
     output: Flags.string({

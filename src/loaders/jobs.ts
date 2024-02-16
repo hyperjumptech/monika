@@ -22,9 +22,9 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 import * as cron from 'node-cron'
-import { tlsChecker } from '../jobs/tls-check'
-import { checkDBSize } from '../jobs/check-database'
-import { getConfig } from '../components/config'
+import { tlsChecker } from '../jobs/tls-check.js'
+import { checkDBSize } from '../jobs/check-database.js'
+import { getConfig } from '../components/config/index.js'
 
 export function jobsLoader() {
   const config = getConfig()

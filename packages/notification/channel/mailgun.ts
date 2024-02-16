@@ -24,9 +24,9 @@
 
 import FormData from 'form-data'
 import Joi from 'joi'
-import type { NotificationMessage } from '.'
+import type { NotificationMessage } from './index.js'
 import Mailgen from 'mailgen'
-import { sendHttpRequest } from '../utils/http'
+import { sendHttpRequest } from '../utils/http.js'
 
 export type NotificationData = {
   apiKey: string

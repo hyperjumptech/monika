@@ -22,8 +22,8 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import type { Config } from '../../interfaces/config'
-import { validateProbes, validateSymonConfig } from './validation'
+import type { Config } from '../../interfaces/config.js'
+import { validateProbes, validateSymonConfig } from './validation/index.js'
 import { validateNotification } from '@hyperjumptech/monika-notification'
 
 export const validateConfig = async (

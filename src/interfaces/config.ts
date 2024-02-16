@@ -22,11 +22,11 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Certificate } from './certificate'
+import { Certificate } from './certificate.js'
 import type { Notification } from '@hyperjumptech/monika-notification'
-import { Probe } from './probe'
-import { SymonConfig } from '../components/reporter'
-import type { DBLimit } from './data'
+import { Probe } from './probe.js'
+import { SymonConfig } from '../components/reporter/index.js'
+import type { DBLimit } from './data.js'
 
 export interface Config {
   certificate?: Certificate

@@ -29,8 +29,8 @@ import { setupServer } from 'msw/node'
 import type {
   ProbeRequestResponse,
   RequestConfig,
-} from '../../../../interfaces/request'
-import { generateRequestChainingBody, httpRequest } from './request'
+} from '../../../../interfaces/request.js'
+import { generateRequestChainingBody, httpRequest } from './request.js'
 
 const server = setupServer()
 

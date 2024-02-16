@@ -27,14 +27,18 @@ import { AxiosError } from 'axios'
 import { rest } from 'msw'
 import { setupServer } from 'msw/node'
 import sinon from 'sinon'
-import * as httpRequest from '../../../../utils/http'
-import { doProbe } from '../..'
-import { initializeProbeStates } from '../../../../utils/probe-state'
-import type { Probe } from '../../../../interfaces/probe'
-import { getContext, resetContext, setContext } from '../../../../context'
-import type { MonikaFlags } from '../../../../flag'
-import { FAILED_REQUEST_ASSERTION } from '../../../../looper'
-import { closeLog, openLogfile } from '../../../logger/history'
+import * as httpRequest from '../../../../utils/http.js'
+import { doProbe } from '../../index.js'
+import { initializeProbeStates } from '../../../../utils/probe-state.js'
+import type { Probe } from '../../../../interfaces/probe.js'
+import {
+  getContext,
+  resetContext,
+  setContext,
+} from '../../../../context/index.js'
+import type { MonikaFlags } from '../../../../flag.js'
+import { FAILED_REQUEST_ASSERTION } from '../../../../looper/index.js'
+import { closeLog, openLogfile } from '../../../logger/history.js'
 
 let urlRequestTotal = 0
 let notificationAlert: Record<
@@ -165,7 +169,7 @@ describe('HTTP Probe processing', () => {
     expect(urlRequestTotal).eq(1)
   })
 
-  it('should run the probe', async () => {
+  it('should run the probe.js', async () => {
     // arrange
     const uniqueProbes: Probe[] = Array.from({ length: 5 }).map((_, index) => ({
       ...probes[0],

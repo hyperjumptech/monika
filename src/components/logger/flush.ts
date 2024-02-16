@@ -1,6 +1,6 @@
 import { ux } from '@oclif/core'
-import { flushAllLogs } from './history'
-import { log } from '../../utils/pino'
+import { flushAllLogs } from './history.js'
+import { log } from '../../utils/pino.js'
 
 export async function flush(isForce: boolean): Promise<void> {
   if (isForce) {

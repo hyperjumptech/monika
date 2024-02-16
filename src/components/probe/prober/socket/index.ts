@@ -1,7 +1,7 @@
-import { BaseProber, type ProbeParams, type ProbeResult } from '..'
-import { probeRequestResult } from '../../../../interfaces/request'
-import type { Socket } from '../../../../interfaces/probe'
-import { tcpRequest } from './request'
+import { BaseProber, type ProbeParams, type ProbeResult } from '../index.js'
+import { probeRequestResult } from '../../../../interfaces/request.js'
+import type { Socket } from '../../../../interfaces/probe.js'
+import { tcpRequest } from './request.js'
 
 export class SocketProber extends BaseProber {
   async probe({ incidentRetryAttempt }: ProbeParams): Promise<void> {

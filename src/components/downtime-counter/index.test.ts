@@ -23,8 +23,8 @@
  **********************************************************************************/
 
 import { expect } from '@oclif/test'
-import { getDowntimeDuration, addIncident, removeIncident } from '.'
-import { getContext } from '../../context'
+import { getDowntimeDuration, addIncident, removeIncident } from './index.js'
+import { getContext } from '../../context/index.js'
 
 describe('Downtime counter', () => {
   it('should start counter', () => {

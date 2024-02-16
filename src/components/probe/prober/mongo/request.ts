@@ -24,10 +24,10 @@
 
 import { MongoClient } from 'mongodb'
 import * as mongodbURI from 'mongodb-uri'
-import { probeRequestResult } from '../../../../interfaces/request'
-import type { ProbeRequestResponse } from '../../../../interfaces/request'
+import { probeRequestResult } from '../../../../interfaces/request.js'
+import type { ProbeRequestResponse } from '../../../../interfaces/request.js'
 import { differenceInMilliseconds } from 'date-fns'
-import { getErrorMessage } from '../../../../utils/catch-error-handler'
+import { getErrorMessage } from '../../../../utils/catch-error-handler.js'
 
 type MongoRequest = {
   uri?: string // Connection URI

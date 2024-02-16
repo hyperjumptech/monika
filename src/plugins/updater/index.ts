@@ -36,12 +36,12 @@ import {
 import { Stream } from 'stream'
 import * as os from 'os'
 import { setInterval } from 'timers'
-import { log } from '../../utils/pino'
+import { log } from '../../utils/pino.js'
 import { format } from 'date-fns'
 import { spawn } from 'child_process'
 import * as unzipper from 'unzipper'
 import hasha from 'hasha'
-import { sendHttpRequest } from '../../utils/http'
+import { sendHttpRequest } from '../../utils/http.js'
 
 const DEFAULT_UPDATE_CHECK = 86_400 // 24 hours
 type UpdateMode = 'major' | 'minor' | 'patch'

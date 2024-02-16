@@ -23,13 +23,13 @@
  **********************************************************************************/
 
 import { hostname } from 'os'
-import { getConfig } from '../../components/config'
+import { getConfig } from '../../components/config/index.js'
 import { sendNotifications } from '@hyperjumptech/monika-notification'
-import { getMessageForTerminate } from '../../components/notification/alert-message'
-import events from '../../events'
-import { getEventEmitter } from '../../utils/events'
-import getIp from '../../utils/ip'
-import { log } from '../../utils/pino'
+import { getMessageForTerminate } from '../../components/notification/alert-message.js'
+import events from '../../events/index.js'
+import { getEventEmitter } from '../../utils/events.js'
+import getIp from '../../utils/ip.js'
+import { log } from '../../utils/pino.js'
 
 const eventEmitter = getEventEmitter()
 

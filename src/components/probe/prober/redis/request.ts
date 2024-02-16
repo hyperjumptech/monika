@@ -23,11 +23,11 @@
  **********************************************************************************/
 
 import { createClient } from 'redis'
-import type { ProbeRequestResponse } from '../../../../interfaces/request'
+import type { ProbeRequestResponse } from '../../../../interfaces/request.js'
 import { differenceInMilliseconds } from 'date-fns'
-import type { Redis } from '../../../../interfaces/probe'
-import { probeRequestResult } from '../../../../interfaces/request'
-import { getErrorMessage } from '../../../../utils/catch-error-handler'
+import type { Redis } from '../../../../interfaces/probe.js'
+import { probeRequestResult } from '../../../../interfaces/request.js'
+import { getErrorMessage } from '../../../../utils/catch-error-handler.js'
 
 type RedisResult = {
   isAlive: boolean // If redis responds to PING/commands

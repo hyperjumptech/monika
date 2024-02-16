@@ -26,8 +26,8 @@ import { expect } from 'chai'
 import fs from 'fs'
 import _ from 'lodash'
 
-import type { MonikaFlags } from '../../../flag'
-import { createConfig } from '../'
+import type { MonikaFlags } from '../../../flag.js'
+import { createConfig } from '../index.js'
 
 beforeEach(() => {
   if (fs.existsSync('monika.har.yml')) {
@@ -122,7 +122,7 @@ describe('Sitemap config [--one-probe ]', () => {
       const flags = {
         sitemap: './src/components/config/__tests__/sitemap.xml',
         output: 'monika.sitemap.yml',
-        'one-probe': true,
+        'one-probe.js': true,
       } as MonikaFlags
       await createConfig(flags)
       expect(fs.lstatSync('monika.sitemap.yml').isFile()).to.be.true

@@ -26,10 +26,10 @@ import { rest } from 'msw'
 import { setupServer } from 'msw/node'
 import { expect } from '@oclif/test'
 
-import type { ProberMetadata } from '.'
+import type { ProberMetadata } from './index.js'
 
-import { getContext } from '../../../context'
-import { createProber } from './factory'
+import { getContext } from '../../../context/index.js'
+import { createProber } from './factory.js'
 
 describe('Prober', () => {
   describe('Initial incident state', () => {

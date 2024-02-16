@@ -22,7 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { AxiosBasicCredentials } from 'axios'
+import type { AxiosBasicCredentials } from 'axios'
 
 type BasicCredentials = AxiosBasicCredentials & {
   type: 'basic'

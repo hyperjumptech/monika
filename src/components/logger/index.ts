@@ -23,8 +23,8 @@
  **********************************************************************************/
 
 import chalk from 'chalk'
-import { getAllLogs } from './history'
-import { log } from '../../utils/pino'
+import { getAllLogs } from './history.js'
+import { log } from '../../utils/pino.js'
 
 /**
  * getStatusColor colorizes different statusCode

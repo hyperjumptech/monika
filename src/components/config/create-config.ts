@@ -23,9 +23,9 @@
  **********************************************************************************/
 
 import fs from 'fs'
-import type { MonikaFlags } from '../../flag'
-import { log } from '../../utils/pino'
-import { sendHttpRequest } from '../../utils/http'
+import type { MonikaFlags } from '../../flag.js'
+import { log } from '../../utils/pino.js'
+import { sendHttpRequest } from '../../utils/http.js'
 
 export const createConfigFile = async (flags: MonikaFlags): Promise<string> => {
   const filename = flags['config-filename']

@@ -23,8 +23,8 @@
  **********************************************************************************/
 
 import { expect } from '@oclif/test'
-import type { Config } from '../../interfaces/config'
-import { addDefaultNotifications } from './get'
+import type { Config } from '../../interfaces/config.js'
+import { addDefaultNotifications } from './get.js'
 
 describe('Add default notification', () => {
   it('should add default notification', () => {

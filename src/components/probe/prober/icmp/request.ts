@@ -22,12 +22,12 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { sendPing } from '../../../../utils/ping'
+import { sendPing } from '../../../../utils/ping.js'
 import {
   ProbeRequestResponse,
   probeRequestResult,
-} from '../../../../interfaces/request'
-import { getErrorMessage } from '../../../../utils/catch-error-handler'
+} from '../../../../interfaces/request.js'
+import { getErrorMessage } from '../../../../utils/catch-error-handler.js'
 
 type icmpParams = {
   host: string // target to ping

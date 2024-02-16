@@ -30,7 +30,7 @@ import Ajv from 'ajv'
 
 const ajv = new Ajv()
 
-import mySchema from '../../src/monika-config-schema.json'
+import mySchema from '../../src/monika-config-schema.json.js'
 
 const validate = ajv.compile(mySchema)
 

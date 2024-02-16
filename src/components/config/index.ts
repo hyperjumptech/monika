@@ -27,18 +27,18 @@ import { ux } from '@oclif/core'
 import { existsSync, writeFileSync } from 'fs'
 import isUrl from 'is-url'
 
-import events from '../../events'
-import type { Config } from '../../interfaces/config'
-import { getContext, setContext } from '../../context'
-import { monikaFlagsDefaultValue } from '../../flag'
-import type { MonikaFlags } from '../../flag'
-import { getEventEmitter } from '../../utils/events'
-import { md5Hash } from '../../utils/hash'
-import { open } from '../../utils/open-website'
-import { log } from '../../utils/pino'
-import { parseConfig } from './parse'
-import { validateConfig } from './validate'
-import { createConfigFile } from './create-config'
+import events from '../../events/index.js'
+import type { Config } from '../../interfaces/config.js'
+import { getContext, setContext } from '../../context/index.js'
+import { monikaFlagsDefaultValue } from '../../flag.js'
+import type { MonikaFlags } from '../../flag.js'
+import { getEventEmitter } from '../../utils/events.js'
+import { md5Hash } from '../../utils/hash.js'
+import { open } from '../../utils/open-website.js'
+import { log } from '../../utils/pino.js'
+import { parseConfig } from './parse.js'
+import { validateConfig } from './validate.js'
+import { createConfigFile } from './create-config.js'
 import yml from 'js-yaml'
 import { exit } from 'process'
 import {
@@ -46,9 +46,9 @@ import {
   addDefaultNotifications,
   getConfigFrom,
   mergeConfigs,
-} from './get'
-import { getProbes, setProbes } from './probe'
-import { getErrorMessage } from '../../utils/catch-error-handler'
+} from './get.js'
+import { getProbes, setProbes } from './probe.js'
+import { getErrorMessage } from '../../utils/catch-error-handler.js'
 
 type ScheduleRemoteConfigFetcherParams = {
   configType: ConfigType

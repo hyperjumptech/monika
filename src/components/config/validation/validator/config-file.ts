@@ -23,14 +23,19 @@
  **********************************************************************************/
 
 import Ajv from 'ajv'
-import { Validation } from '../../../../interfaces/validation'
-import mySchema from '../../../../monika-config-schema.json'
-import { Config } from '../../../../interfaces/config'
+import { Validation } from '../../../../interfaces/validation.js'
+import { Config } from '../../../../interfaces/config.js'
+import { readFileSync } from 'fs'
 
-const ajv = new Ajv()
+// eslint-disable-next-line new-cap
+const ajv = new Ajv.default()
 
 // validate the config file  loaded by monika against a JSON Schema
 export function validateConfigWithSchema(config: Partial<Config>): Validation {
+  const monikaConfigSchema = readFileSync(
+    '../../../../monika-config-schema.json'
+  )
+  const mySchema = JSON.parse(String(monikaConfigSchema))
   const result: Validation = {
     valid: false,
     message: `Errors detected in config file ${JSON.stringify(

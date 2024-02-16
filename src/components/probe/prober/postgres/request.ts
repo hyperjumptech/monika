@@ -23,10 +23,10 @@
  **********************************************************************************/
 
 import { Pool, PoolClient } from 'pg'
-import type { ProbeRequestResponse } from '../../../../interfaces/request'
-import { probeRequestResult } from '../../../../interfaces/request'
+import type { ProbeRequestResponse } from '../../../../interfaces/request.js'
+import { probeRequestResult } from '../../../../interfaces/request.js'
 import { differenceInMilliseconds } from 'date-fns'
-import { getErrorMessage } from '../../../../utils/catch-error-handler'
+import { getErrorMessage } from '../../../../utils/catch-error-handler.js'
 
 export type PostgresParam = {
   host: string // Host address of the psql db

@@ -24,9 +24,9 @@
 
 import { assign, createMachine, type EventObject, interpret } from 'xstate'
 
-import events from '../events'
-import type { Probe } from '../interfaces/probe'
-import { getEventEmitter } from './events'
+import events from '../events/index.js'
+import type { Probe } from '../interfaces/probe.js'
+import { getEventEmitter } from './events.js'
 
 type ProbeStateValue = unknown
 

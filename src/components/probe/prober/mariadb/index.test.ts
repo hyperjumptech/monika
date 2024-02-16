@@ -1,11 +1,11 @@
 import { expect } from '@oclif/test'
 import sinon from 'sinon'
-import { probeMariaDB } from '.'
+import { probeMariaDB } from './index.js'
 import {
   type ProbeRequestResponse,
   probeRequestResult,
-} from '../../../../interfaces/request'
-import * as request from './request'
+} from '../../../../interfaces/request.js'
+import * as request from './request.js'
 
 let mariaDBRequestStub: sinon.SinonStub
 

@@ -24,7 +24,7 @@
 
 import { expect, test } from '@oclif/test'
 import path from 'path'
-import cmd from '../../../src/commands/monika'
+import cmd from '../../../src/commands/monika.js'
 import axios, { AxiosError } from 'axios'
 
 const { resolve } = path

@@ -1,4 +1,4 @@
-import type { Probe } from '../../interfaces/probe'
+import type { Probe } from '../../interfaces/probe.js'
 
 export function sortProbes(probes: Probe[], idFlag?: string): Probe[] {
   if (!idFlag) {

@@ -1,11 +1,11 @@
 import { expect } from '@oclif/test'
 import sinon from 'sinon'
-import { probePostgres } from '.'
+import { probePostgres } from './index.js'
 import {
   type ProbeRequestResponse,
   probeRequestResult,
-} from '../../../../interfaces/request'
-import * as request from './request'
+} from '../../../../interfaces/request.js'
+import * as request from './request.js'
 
 let postgresRequestStub: sinon.SinonStub
 

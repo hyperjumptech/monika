@@ -24,7 +24,7 @@
 
 import type { RequestOptions } from 'https'
 import sslChecker from 'ssl-checker'
-import type { Domain } from '../../interfaces/certificate'
+import type { Domain } from '../../interfaces/certificate.js'
 
 export async function checkTLS(
   domain: Domain,
@@ -34,7 +34,7 @@ export async function checkTLS(
   const hostname = getHostname(domain)
   const requestOptions = getRequestOptions(domain)
 
-  const { valid, validTo, daysRemaining } = await sslChecker(
+  const { valid, validTo, daysRemaining } = await sslChecker.default(
     hostname,
     requestOptions
   )

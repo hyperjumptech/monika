@@ -22,12 +22,12 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import {
+import type {
   AxiosRequestConfig,
   AxiosRequestHeaders,
   AxiosResponseHeaders,
 } from 'axios'
-import { ProbeAlert } from './probe'
+import { ProbeAlert } from './probe.js'
 
 // RequestTypes are used to define the type of request that is being made.
 export type RequestTypes =

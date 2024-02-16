@@ -22,14 +22,14 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { getConfig } from '../components/config'
-import { saveNotificationLog } from '../components/logger/history'
-import { sendAlerts } from '../components/notification'
-import { checkTLS, getHostname } from '../components/tls-checker'
+import { getConfig } from '../components/config/index.js'
+import { saveNotificationLog } from '../components/logger/history.js'
+import { sendAlerts } from '../components/notification/index.js'
+import { checkTLS, getHostname } from '../components/tls-checker/index.js'
 import type { Notification } from '@hyperjumptech/monika-notification'
-import type { ValidatedResponse } from '../plugins/validate-response'
-import { log } from '../utils/pino'
-import { probeRequestResult } from '../interfaces/request'
+import type { ValidatedResponse } from '../plugins/validate-response/index.js'
+import { log } from '../utils/pino.js'
+import { probeRequestResult } from '../interfaces/request.js'
 
 type SendTLSErrorNotificationProps = {
   hostname: string

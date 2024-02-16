@@ -24,7 +24,7 @@
 
 import { Flags } from '@oclif/core'
 
-import { getDefaultConfig } from './context/monika-flags'
+import { getDefaultConfig } from './context/monika-flags.js'
 
 export enum SYMON_API_VERSION {
   'v1' = 'v1',
@@ -46,7 +46,7 @@ export type MonikaFlags = {
   json?: boolean
   'keep-verbose-logs': boolean
   logs: boolean
-  'one-probe': boolean
+  'one-probe.js': boolean
   output?: string
   postman?: string
   prometheus?: number
@@ -81,7 +81,7 @@ export const monikaFlagsDefaultValue: MonikaFlags = {
   force: false,
   'keep-verbose-logs': false,
   logs: false,
-  'one-probe': false,
+  'one-probe.js': false,
   repeat: 0,
   retryInitialDelayMs: 2000,
   retryMaxDelayMs: 30_000,

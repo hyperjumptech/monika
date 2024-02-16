@@ -23,26 +23,26 @@
  **********************************************************************************/
 
 import type { Config as IConfig } from '@oclif/core'
-import { isSymonModeFrom, setupConfig } from '../components/config'
-import { setContext } from '../context'
-import events from '../events'
-import type { MonikaFlags } from '../flag'
-import { tlsChecker } from '../jobs/tls-check'
-import type { Probe } from '../interfaces/probe'
-import { loopCheckSTUNServer } from '../looper'
+import { isSymonModeFrom, setupConfig } from '../components/config/index.js'
+import { setContext } from '../context/index.js'
+import events from '../events/index.js'
+import type { MonikaFlags } from '../flag.js'
+import { tlsChecker } from '../jobs/tls-check.js'
+import type { Probe } from '../interfaces/probe.js'
+import { loopCheckSTUNServer } from '../looper/index.js'
 import {
   PrometheusCollector,
   startPrometheusMetricsServer,
-} from '../plugins/metrics/prometheus'
-import { getEventEmitter } from '../utils/events'
-import { getPublicNetworkInfo } from '../utils/public-ip'
-import { jobsLoader } from './jobs'
-import { enableAutoUpdate } from '../plugins/updater'
-import { log } from '../utils/pino'
+} from '../plugins/metrics/prometheus/index.js'
+import { getEventEmitter } from '../utils/events.js'
+import { getPublicNetworkInfo } from '../utils/public-ip.js'
+import { jobsLoader } from './jobs.js'
+import { enableAutoUpdate } from '../plugins/updater/index.js'
+import { log } from '../utils/pino.js'
 
 // import the subscriber file to activate the event emitter subscribers
-import '../events/subscribers/application'
-import '../events/subscribers/probe'
+import '../events/subscribers/application.js'
+import '../events/subscribers/probe.js'
 
 export default async function init(
   flags: MonikaFlags,

@@ -30,33 +30,33 @@ import { hostname } from 'os'
 import path from 'path'
 import Piscina from 'piscina'
 
-import type { Config } from '../interfaces/config'
-import type { Probe } from '../interfaces/probe'
-import type { ValidatedResponse } from '../plugins/validate-response'
+import type { Config } from '../interfaces/config.js'
+import type { Probe } from '../interfaces/probe.js'
+import type { ValidatedResponse } from '../plugins/validate-response/index.js'
 
 import {
   addProbe,
   deleteProbe,
   getProbes,
   updateProbe,
-} from '../components/config/probe'
-import { updateConfig } from '../components/config'
-import { validateProbes } from '../components/config/validation/validator/probe'
-import { getOSName } from '../components/notification/alert-message'
-import { getContext } from '../context'
-import events from '../events'
-import { SYMON_API_VERSION, type MonikaFlags } from '../flag'
-import { getEventEmitter } from '../utils/events'
-import { DEFAULT_TIMEOUT } from '../utils/http'
-import getIp from '../utils/ip'
-import { log } from '../utils/pino'
-import { removeProbeState, syncProbeStateFrom } from '../utils/probe-state'
+} from '../components/config/probe.js'
+import { updateConfig } from '../components/config/index.js'
+import { validateProbes } from '../components/config/validation/validator/probe.js'
+import { getOSName } from '../components/notification/alert-message.js'
+import { getContext } from '../context/index.js'
+import events from '../events/index.js'
+import { SYMON_API_VERSION, type MonikaFlags } from '../flag.js'
+import { getEventEmitter } from '../utils/events.js'
+import { DEFAULT_TIMEOUT } from '../utils/http.js'
+import getIp from '../utils/ip.js'
+import { log } from '../utils/pino.js'
+import { removeProbeState, syncProbeStateFrom } from '../utils/probe-state.js'
 import {
   getPublicIp,
   getPublicNetworkInfo,
   publicIpAddress,
   publicNetworkInfo,
-} from '../utils/public-ip'
+} from '../utils/public-ip.js'
 
 type SymonHandshakeData = {
   city: string
@@ -180,7 +180,7 @@ export default class SymonClient {
   }: SymonClientParams) {
     this.apiKey = symonKey
     this.url = symonUrl
-    this.httpClient = axios.create({
+    this.httpClient = axios.default.create({
       baseURL: `${this.url}/api/${apiVersion}/monika`,
       headers: {
         'x-api-key': this.apiKey,

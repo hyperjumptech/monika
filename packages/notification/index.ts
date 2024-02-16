@@ -22,8 +22,8 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { channels, Notification, NotificationMessage } from './channel'
-import { getErrorMessage } from './utils/catch-error-handler'
+import { channels, Notification, NotificationMessage } from './channel/index.js'
+import { getErrorMessage } from './utils/catch-error-handler.js'
 
 async function sendNotifications(
   notifications: Notification[],
@@ -51,5 +51,5 @@ async function sendNotifications(
 
 export { sendNotifications }
 
-export { channels, Notification, NotificationMessage } from './channel'
-export { validateNotification } from './validator/notification'
+export { channels, Notification, NotificationMessage } from './channel/index.js'
+export { validateNotification } from './validator/notification.js'

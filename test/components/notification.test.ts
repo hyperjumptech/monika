@@ -24,10 +24,10 @@
 
 import chai, { expect } from 'chai'
 import spies from 'chai-spies'
-import { sendAlerts } from '../../src/components/notification'
+import { sendAlerts } from '../../src/components/notification.js'
 import { channels } from '@hyperjumptech/monika-notification'
 import type { NotificationMessage } from '@hyperjumptech/monika-notification'
-import { probeRequestResult } from '../../src/interfaces/request'
+import { probeRequestResult } from '../../src/interfaces/request.js'
 
 const { discord, mailgun, slack, smtp, telegram, webhook, whatsapp, lark } =
   channels

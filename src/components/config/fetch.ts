@@ -22,7 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { sendHttpRequest } from '../../utils/http'
+import { sendHttpRequest } from '../../utils/http.js'
 
 export const fetchConfig = async (url: string): Promise<string> => {
   try {

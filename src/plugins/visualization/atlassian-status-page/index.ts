@@ -30,7 +30,7 @@ import {
   findIncident,
   insertIncident as insertIncidentToDatabase,
   updateIncident as updateIncidentToDatabase,
-} from './database'
+} from './database.js'
 
 type NotifyIncident = {
   probeID: string
@@ -123,7 +123,7 @@ export class AtlassianStatusPageAPI {
     }
 
     try {
-      const resp = await axios.post(
+      const resp = await axios.default.post(
         `${this.statusPageBaseURL}/v1/pages/${this.pageID}/incidents`,
         data,
         this.axiosConfig
@@ -167,7 +167,7 @@ export class AtlassianStatusPageAPI {
     const { incident_id: incidentID } = incident
 
     try {
-      await axios.patch(
+      await axios.default.patch(
         `${this.statusPageBaseURL}/v1/pages/${this.pageID}/incidents/${incidentID}`,
         data,
         this.axiosConfig

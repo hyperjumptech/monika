@@ -22,18 +22,18 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Config } from '../../interfaces/config'
-import type { MonikaFlags } from '../../flag'
-import { parseConfigFromPostman } from './parse-postman'
-import { parseConfigFromSitemap } from './parse-sitemap'
-import { parseConfigFromText } from './parse-text'
-import { parseHarFile } from './parse-har'
+import { Config } from '../../interfaces/config.js'
+import type { MonikaFlags } from '../../flag.js'
+import { parseConfigFromPostman } from './parse-postman.js'
+import { parseConfigFromSitemap } from './parse-sitemap.js'
+import { parseConfigFromText } from './parse-text.js'
+import { parseHarFile } from './parse-har.js'
 import path from 'path'
 import yml from 'js-yaml'
-import parseInsomnia from './parse-insomnia'
+import parseInsomnia from './parse-insomnia.js'
 import isUrl from 'is-url'
-import { fetchConfig } from './fetch'
-import { readFile } from '../../utils/read-file'
+import { fetchConfig } from './fetch.js'
+import { readFile } from '../../utils/read-file.js'
 
 function sleep(ms: number): Promise<void> {
   // eslint-disable-next-line no-promise-executor-return

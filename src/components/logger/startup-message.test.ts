@@ -24,9 +24,9 @@
 
 import chai, { expect } from 'chai'
 import spies from 'chai-spies'
-import type { Config } from '../../interfaces/config'
-import { log } from '../../utils/pino'
-import { logStartupMessage } from './startup-message'
+import type { Config } from '../../interfaces/config.js'
+import { log } from '../../utils/pino.js'
+import { logStartupMessage } from './startup-message.js'
 
 chai.use(spies)
 

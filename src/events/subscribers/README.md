@@ -5,5 +5,5 @@ For example:
 ```typescript
 // import the subscriber file to activate the event emitter subscribers
 import '../events/subscribers/application'
-import '../events/subscribers/probe'
+import '../events/subscribers/probe.js'
 ```

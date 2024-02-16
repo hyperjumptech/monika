@@ -22,6 +22,6 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-export { validateConfigWithSchema } from './validator/config-file'
-export { validateProbes } from './validator/probe'
-export { validateSymonConfig } from './validator/symon-config'
+export { validateConfigWithSchema } from './validator/config-file.js'
+export { validateProbes } from './validator/probe.js'
+export { validateSymonConfig } from './validator/symon-config.js'

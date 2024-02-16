@@ -24,13 +24,13 @@
 
 import { expect } from '@oclif/test'
 
-import type { MonikaFlags } from '../flag'
-import type { Probe } from '../interfaces/probe'
+import type { MonikaFlags } from '../flag.js'
+import type { Probe } from '../interfaces/probe.js'
 
-import { resetContext, setContext } from '../context'
-import { sanitizeProbe } from '.'
+import { resetContext, setContext } from '../context/index.js'
+import { sanitizeProbe } from './index.js'
 
-describe('Sanitize probe', () => {
+describe('Sanitize probe.js', () => {
   it('should remove alerts on Symon mode', () => {
     // arrange
     setContext({

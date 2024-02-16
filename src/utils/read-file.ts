@@ -1,4 +1,4 @@
-import { log } from './pino'
+import { log } from './pino.js'
 import fs from 'fs'
 
 // Alternative of fs.readFileSync() API with type safety error NodeJS.ErrnoException

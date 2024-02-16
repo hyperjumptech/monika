@@ -23,8 +23,8 @@
  **********************************************************************************/
 
 import { expect } from 'chai'
-import { Probe } from '../../../interfaces/probe'
-import { createProber } from './factory'
+import { Probe } from '../../../interfaces/probe.js'
+import { createProber } from './factory.js'
 
 describe('Prober factory', () => {
   describe('Prober verbose startup message', () => {
@@ -116,7 +116,7 @@ describe('Prober factory', () => {
       // arrange
       const probe = {
         id: '1',
-        description: 'MySQL probe',
+        description: 'MySQL probe.js',
         interval: 1,
         mariadb: [
           {
@@ -182,7 +182,7 @@ describe('Prober factory', () => {
       // arrange
       const probe = {
         id: '1',
-        description: 'PostgreSQL probe',
+        description: 'PostgreSQL probe.js',
         interval: 1,
         postgres: [
           {
@@ -237,7 +237,7 @@ describe('Prober factory', () => {
       // arrange
       const probe = {
         id: '1',
-        description: 'Redis probe',
+        description: 'Redis probe.js',
         interval: 1,
         redis: [
           {

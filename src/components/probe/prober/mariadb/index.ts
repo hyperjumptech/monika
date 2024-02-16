@@ -1,7 +1,7 @@
-import { BaseProber, type ProbeParams, type ProbeResult } from '../'
-import type { MariaDB } from '../../../../interfaces/probe'
-import { probeRequestResult } from '../../../../interfaces/request'
-import { mariaRequest } from './request'
+import { BaseProber, type ProbeParams, type ProbeResult } from '../index.js'
+import type { MariaDB } from '../../../../interfaces/probe.js'
+import { probeRequestResult } from '../../../../interfaces/request.js'
+import { mariaRequest } from './request.js'
 
 export class MariaDBProber extends BaseProber {
   async probe({ incidentRetryAttempt }: ProbeParams): Promise<void> {

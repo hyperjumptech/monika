@@ -28,12 +28,12 @@ import { format } from 'date-fns'
 import * as Handlebars from 'handlebars'
 import getos from 'getos'
 import osName from 'os-name'
-import { getContext } from '../../context'
+import { getContext } from '../../context/index.js'
 import type { NotificationMessage } from '@hyperjumptech/monika-notification'
-import { ProbeRequestResponse } from '../../interfaces/request'
-import { ProbeAlert } from '../../interfaces/probe'
-import { publicIpAddress, publicNetworkInfo } from '../../utils/public-ip'
-import { getDowntimeDuration } from '../downtime-counter'
+import { ProbeRequestResponse } from '../../interfaces/request.js'
+import { ProbeAlert } from '../../interfaces/probe.js'
+import { publicIpAddress, publicNetworkInfo } from '../../utils/public-ip.js'
+import { getDowntimeDuration } from '../downtime-counter/index.js'
 
 const getLinuxDistro = promisify(getos)
 

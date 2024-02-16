@@ -29,7 +29,7 @@ import Ajv from 'ajv'
 
 const ajv = new Ajv()
 const defaultConfig = yaml.load(fs.readFileSync('monika.example.yml', 'utf8'))
-import mySchema from '../../src/monika-config-schema.json'
+import mySchema from '../../src/monika-config-schema.json.js'
 
 const validate = ajv.compile(mySchema)
 

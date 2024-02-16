@@ -23,8 +23,8 @@
  **********************************************************************************/
 
 import { formatDistanceToNow } from 'date-fns'
-import { getContext, setContext } from '../../context'
-import type { ProbeAlert } from '../../interfaces/probe'
+import { getContext, setContext } from '../../context/index.js'
+import type { ProbeAlert } from '../../interfaces/probe.js'
 
 type DowntimeCounter = {
   alert: ProbeAlert

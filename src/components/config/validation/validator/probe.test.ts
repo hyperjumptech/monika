@@ -24,12 +24,12 @@
 
 import { expect } from '@oclif/test'
 
-import type { Probe } from '../../../../interfaces/probe'
+import type { Probe } from '../../../../interfaces/probe.js'
 
-import { FAILED_REQUEST_ASSERTION } from '../../../../looper'
-import { validateProbes } from './probe'
-import { resetContext, setContext } from '../../../../context'
-import type { MonikaFlags } from '../../../../flag'
+import { FAILED_REQUEST_ASSERTION } from '../../../../looper/index.js'
+import { validateProbes } from './probe.js'
+import { resetContext, setContext } from '../../../../context/index.js'
+import type { MonikaFlags } from '../../../../flag.js'
 
 describe('Probe validation', () => {
   describe('Probe sanitization', () => {
@@ -47,7 +47,7 @@ describe('Probe validation', () => {
       expect(validatedProbes[0].requests?.[0].method).eq('GET')
     })
 
-    it('should set default alerts for HTTP probe', async () => {
+    it('should set default alerts for HTTP probe.js', async () => {
       // arrange
       const probe = {
         id: 'Example',
@@ -140,7 +140,7 @@ describe('Probe validation', () => {
       expect(validatedProbes[0].name).eq('monika_Example')
     })
 
-    it('should set default alerts for non HTTP probe', async () => {
+    it('should set default alerts for non HTTP probe.js', async () => {
       // arrange
       const probe = {
         id: 'Example',

@@ -23,14 +23,14 @@
  **********************************************************************************/
 
 import { expect } from 'chai'
-import type { Probe } from '../interfaces/probe'
+import type { Probe } from '../interfaces/probe.js'
 import {
   getProbeContext,
   getProbeState,
   initializeProbeStates,
   setProbeFinish,
   setProbeRunning,
-} from './probe-state'
+} from './probe-state.js'
 import sinon from 'sinon'
 
 describe('probe-state', () => {
@@ -45,7 +45,7 @@ describe('probe-state', () => {
     clock.restore()
   })
 
-  describe('Initial probe', () => {
+  describe('Initial probe.js', () => {
     it('should set initial state', () => {
       // arrange
       const probes: Probe[] = [

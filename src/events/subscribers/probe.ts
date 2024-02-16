@@ -23,11 +23,11 @@
  **********************************************************************************/
 
 import type { Notification } from '@hyperjumptech/monika-notification'
-import events from '../../events'
-import type { StatuspageNotification } from '../../plugins/visualization/atlassian-status-page'
-import { AtlassianStatusPageAPI } from '../../plugins/visualization/atlassian-status-page'
-import { getEventEmitter } from '../../utils/events'
-import { log } from '../../utils/pino'
+import events from '../../events/index.js'
+import type { StatuspageNotification } from '../../plugins/visualization/atlassian-status-page/index.js'
+import { AtlassianStatusPageAPI } from '../../plugins/visualization/atlassian-status-page/index.js'
+import { getEventEmitter } from '../../utils/events.js'
+import { log } from '../../utils/pino.js'
 
 const eventEmitter = getEventEmitter()
 

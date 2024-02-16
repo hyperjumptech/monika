@@ -29,17 +29,17 @@ import {
   type ProbeRequestResponse,
   type RequestConfig,
   probeRequestResult,
-} from '../../../../interfaces/request'
+} from '../../../../interfaces/request.js'
 
 // eslint-disable-next-line no-restricted-imports
 import * as qs from 'querystring'
 
 import http from 'http'
 import https from 'https'
-import { getContext } from '../../../../context'
-import { icmpRequest } from '../icmp/request'
-import registerFakes from '../../../../utils/fakes'
-import { sendHttpRequest } from '../../../../utils/http'
+import { getContext } from '../../../../context/index.js'
+import { icmpRequest } from '../icmp/request.js'
+import registerFakes from '../../../../utils/fakes.js'
+import { sendHttpRequest } from '../../../../utils/http.js'
 import { AxiosError } from 'axios'
 
 // Register Handlebars helpers
@@ -376,7 +376,7 @@ function getErrorStatusWithExplanation(error: unknown): {
       }
     }
 
-    case 'ERR_BAD_REQUEST': {
+    case 'ERR_BAD_request.js': {
       return {
         status: 11,
         description:

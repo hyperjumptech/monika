@@ -22,14 +22,14 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { log } from './pino'
+import { log } from './pino.js'
 import stun from 'stun'
 import { hostname } from 'os'
-import getIp from './ip'
-import { sendPing } from './ping'
-import { sendHttpRequest } from './http'
-import { getContext } from '../context'
-import { isSymonModeFrom } from '../components/config'
+import getIp from './ip.js'
+import { sendPing } from './ping.js'
+import { sendHttpRequest } from './http.js'
+import { getContext } from '../context/index.js'
+import { isSymonModeFrom } from '../components/config/index.js'
 
 type PublicNetwork = {
   country: string

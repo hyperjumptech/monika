@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import Joi from 'joi'
-import type { SymonConfig } from '../../../reporter'
+import type { SymonConfig } from '../../../reporter/index.js'
 
 export const validateSymonConfig = (
   symonConfig?: SymonConfig

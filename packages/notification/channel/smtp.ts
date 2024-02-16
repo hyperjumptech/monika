@@ -26,7 +26,7 @@ import * as nodemailer from 'nodemailer'
 import Mailgen from 'mailgen'
 import Joi from 'joi'
 
-import type { NotificationMessage } from '.'
+import type { NotificationMessage } from './index.js'
 
 type NotificationData = {
   hostname: string

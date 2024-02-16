@@ -23,12 +23,12 @@
  **********************************************************************************/
 
 import { expect } from '@oclif/test'
-import type { Probe } from '../../../interfaces/probe'
+import type { Probe } from '../../../interfaces/probe.js'
 import {
   probeRequestResult,
   type ProbeRequestResponse,
-} from '../../../interfaces/request'
-import { PrometheusCollector } from './collector'
+} from '../../../interfaces/request.js'
+import { PrometheusCollector } from './collector.js'
 
 type ProbeResult = {
   probe: Probe
@@ -90,7 +90,7 @@ describe('Prometheus collector', () => {
       ).not.to.throw()
     })
 
-    it('should not throw with empty request', () => {
+    it('should not throw with empty request.js', () => {
       // arrange
       const probeResult: ProbeResult = {
         probe: {
@@ -120,7 +120,7 @@ describe('Prometheus collector', () => {
       ).not.to.throw()
     })
 
-    it('should not throw with undefined request', () => {
+    it('should not throw with undefined request.js', () => {
       // arrange
       const probeResult = {
         probe: {
@@ -185,7 +185,7 @@ describe('Prometheus collector', () => {
       ).not.to.throw()
     })
 
-    it('should not throw with empty request', () => {
+    it('should not throw with empty request.js', () => {
       // arrange
       const probeResult: Omit<ProbeResult, 'response'> & {
         alertQuery: string
@@ -210,7 +210,7 @@ describe('Prometheus collector', () => {
       ).not.to.throw()
     })
 
-    it('should not throw with undefined request', () => {
+    it('should not throw with undefined request.js', () => {
       // arrange
       const probeResult = {
         probe: {

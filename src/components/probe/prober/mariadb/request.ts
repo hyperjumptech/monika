@@ -22,9 +22,9 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { getErrorMessage } from '../../../../utils/catch-error-handler'
-import type { ProbeRequestResponse } from '../../../../interfaces/request'
-import { probeRequestResult } from '../../../../interfaces/request'
+import { getErrorMessage } from '../../../../utils/catch-error-handler.js'
+import type { ProbeRequestResponse } from '../../../../interfaces/request.js'
+import { probeRequestResult } from '../../../../interfaces/request.js'
 import { differenceInMilliseconds } from 'date-fns'
 import { createConnection } from 'mariadb'
 

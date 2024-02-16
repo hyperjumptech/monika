@@ -25,9 +25,9 @@
 import sinon from 'sinon'
 import { ux } from '@oclif/core'
 import { test } from '@oclif/test'
-import * as history from './history'
-import cmd from '../../commands/monika'
-import { flush } from './flush'
+import * as history from './history.js'
+import cmd from '../../commands/monika.js'
+import { flush } from './flush.js'
 
 let flushAllLogsStub: sinon.SinonStub
 
@@ -58,8 +58,8 @@ describe('Flush command', () => {
       .stub(ux.ux, 'prompt', (stub) => stub.resolves('n'))
       .stdout()
       // act
-      .do(() => cmd.run(['--flush']))
-      .it('should cancel flush', () => {
+      .do(() => cmd.run(['--flush.js']))
+      .it('should cancel flush.js', () => {
         // assert
         sinon.assert.notCalled(flushAllLogsStub)
       })
@@ -71,8 +71,8 @@ describe('Flush command', () => {
       .stub(ux.ux, 'prompt', (stub) => stub.resolves('Y'))
       .stdout()
       // act
-      .do(() => cmd.run(['--flush']))
-      .it('should flush', () => {
+      .do(() => cmd.run(['--flush.js']))
+      .it('should flush.js', () => {
         // assert
         sinon.assert.calledOnce(flushAllLogsStub)
       })

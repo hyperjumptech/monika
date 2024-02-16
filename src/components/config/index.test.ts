@@ -23,15 +23,15 @@
  **********************************************************************************/
 
 import { expect } from '@oclif/test'
-import { getConfig, isSymonModeFrom, updateConfig } from '.'
-import { getContext, resetContext, setContext } from '../../context'
-import type { Config } from '../../interfaces/config'
-import events from '../../events'
-import { md5Hash } from '../../utils/hash'
-import { getEventEmitter } from '../../utils/events'
-import type { MonikaFlags } from '../../flag'
-import { validateProbes } from './validation'
-import { getErrorMessage } from '../../utils/catch-error-handler'
+import { getConfig, isSymonModeFrom, updateConfig } from './index.js'
+import { getContext, resetContext, setContext } from '../../context/index.js'
+import type { Config } from '../../interfaces/config.js'
+import events from '../../events/index.js'
+import { md5Hash } from '../../utils/hash.js'
+import { getEventEmitter } from '../../utils/events.js'
+import type { MonikaFlags } from '../../flag.js'
+import { validateProbes } from './validation/index.js'
+import { getErrorMessage } from '../../utils/catch-error-handler.js'
 
 describe('getConfig', () => {
   beforeEach(() => {

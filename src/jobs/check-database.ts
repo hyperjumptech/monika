@@ -24,13 +24,13 @@
 
 import path from 'path'
 import fs from 'fs'
-import { getConfig } from '../components/config'
+import { getConfig } from '../components/config/index.js'
 import {
   deleteFromAlerts,
   deleteFromNotifications,
   deleteFromProbeRequests,
-} from '../components/logger/history'
-import { Config } from '../interfaces/config'
+} from '../components/logger/history.js'
+import { Config } from '../interfaces/config.js'
 const dbPath = path.resolve(process.cwd(), 'monika-logs.db')
 
 export function checkDBSize(): void {

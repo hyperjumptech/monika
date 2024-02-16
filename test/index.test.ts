@@ -26,9 +26,9 @@ import { expect, test } from '@oclif/test'
 import path from 'path'
 import chai from 'chai'
 import spies from 'chai-spies'
-import cmd from '../src/commands/monika'
+import cmd from '../src/commands/monika.js'
 import sinon from 'sinon'
-import * as IpUtil from '../src/utils/public-ip'
+import * as IpUtil from '../src/utils/public-ip.js'
 
 const { resolve } = path
 
@@ -138,7 +138,7 @@ describe('monika', () => {
         'Probe requests does not exists or has length lower than 1!'
       )
     })
-    .it('runs with config without probe request')
+    .it('runs with config without probe request.js')
 
   test
     .stdout()

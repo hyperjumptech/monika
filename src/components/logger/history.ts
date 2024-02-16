@@ -23,16 +23,17 @@
  **********************************************************************************/
 
 import path from 'path'
-import SQLite3, { verbose as verboseSQLite } from 'sqlite3'
+import SQLite3 from 'sqlite3'
 import { open, Database, ISqlite } from 'sqlite'
 
-import { ProbeRequestResponse } from '../../interfaces/request'
-import { Probe } from '../../interfaces/probe'
+import { ProbeRequestResponse } from '../../interfaces/request.js'
+import { Probe } from '../../interfaces/probe.js'
 import type { Notification } from '@hyperjumptech/monika-notification'
-import { log } from '../../utils/pino'
-import { getConfig } from '../config'
-import { getErrorMessage } from '../../utils/catch-error-handler'
-const sqlite3 = verboseSQLite()
+import { log } from '../../utils/pino.js'
+import { getConfig } from '../config/index.js'
+import { getErrorMessage } from '../../utils/catch-error-handler.js'
+
+const sqlite3 = SQLite3.verbose()
 const dbPath = path.resolve(process.cwd(), 'monika-logs.db')
 
 type RequestsLog = {

@@ -22,10 +22,10 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import type { Config } from '../interfaces/config'
-import type { ProbeAlert } from '../interfaces/probe'
+import type { Config } from '../interfaces/config.js'
+import type { ProbeAlert } from '../interfaces/probe.js'
 
-import { type MonikaFlags, monikaFlagsDefaultValue } from '../flag'
+import { type MonikaFlags, monikaFlagsDefaultValue } from '../flag.js'
 
 export type Incident = {
   probeID: string

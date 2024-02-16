@@ -26,17 +26,21 @@ import { expect } from '@oclif/test'
 import { rest } from 'msw'
 import { setupServer } from 'msw/node'
 
-import { monikaFlagsDefaultValue, type MonikaFlags } from '../flag'
-import type { Config } from '../interfaces/config'
-import type { Probe } from '../interfaces/probe'
+import { monikaFlagsDefaultValue, type MonikaFlags } from '../flag.js'
+import type { Config } from '../interfaces/config.js'
+import type { Probe } from '../interfaces/probe.js'
 
-import SymonClient from '.'
-import { getContext, resetContext, setContext } from '../context'
-import { deleteProbe, findProbe, getProbes } from '../components/config/probe'
-import { validateProbes } from '../components/config/validation'
-import events from '../events'
-import { getEventEmitter } from '../utils/events'
-import { getErrorMessage } from '../utils/catch-error-handler'
+import SymonClient from './index.js'
+import { getContext, resetContext, setContext } from '../context/index.js'
+import {
+  deleteProbe,
+  findProbe,
+  getProbes,
+} from '../components/config/probe.js'
+import { validateProbes } from '../components/config/validation/index.js'
+import events from '../events/index.js'
+import { getEventEmitter } from '../utils/events.js'
+import { getErrorMessage } from '../utils/catch-error-handler.js'
 
 const config: Config = {
   version: 'asdfg123',
@@ -287,11 +291,11 @@ describe('Symon initiate', () => {
     })
   }).timeout(15_000)
 
-  it('should add a new probe', async () => {
+  it('should add a new probe.js', async () => {
     // arrange
     const newProbe: Probe = {
       id: '3',
-      name: 'New Probe',
+      name: 'New probe.js',
       interval: 2,
       requests: [{ url: 'https://example.com', body: '', timeout: 2000 }],
       alerts: [],
@@ -343,7 +347,7 @@ describe('Symon initiate', () => {
     await symon.stop()
   }).timeout(15_000)
 
-  it('should update a probe', async () => {
+  it('should update a probe.js', async () => {
     // arrange
     server.use(
       rest.get(
@@ -400,7 +404,7 @@ describe('Symon initiate', () => {
     await symon.stop()
   }).timeout(15_000)
 
-  it('should delete a probe', async () => {
+  it('should delete a probe.js', async () => {
     // arrange
     server.use(
       rest.get(
