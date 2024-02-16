@@ -69,7 +69,7 @@ jobs:
         name: Install dependencies
       - run: npm run build -w packages/notification
 
-      - run: npm run pkg -- -t node18-${{ matrix.platform }}
+      - run: npm run pkg -- -t node20-${{ matrix.platform }}
         name: Pack the binary using vercel/pkg
 
       - run: file ./dist/*
