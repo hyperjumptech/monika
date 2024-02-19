@@ -22,10 +22,12 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios, { AxiosError } from 'axios'
+import axios from 'axios'
 import http from 'http'
 import https from 'https'
 import Joi from 'joi'
+
+import { getErrorMessage } from '../../../utils/catch-error-handler.js'
 import {
   findIncident,
   insertIncident as insertIncidentToDatabase,
@@ -134,14 +136,7 @@ export class AtlassianStatusPageAPI {
 
       return incidentID
     } catch (error: unknown) {
-      const axiosError = error instanceof AxiosError ? error : new AxiosError()
-      throw new Error(
-        `${axiosError?.message}${
-          axiosError?.response?.data
-            ? `. ${axiosError?.response?.data?.message}`
-            : ''
-        }`
-      )
+      throw new Error(getErrorMessage(error))
     }
   }
 
@@ -173,14 +168,7 @@ export class AtlassianStatusPageAPI {
         this.axiosConfig
       )
     } catch (error: unknown) {
-      const axiosError = error instanceof AxiosError ? error : new AxiosError()
-      throw new Error(
-        `${axiosError?.message}${
-          axiosError?.response?.data
-            ? `. ${axiosError?.response?.data?.message}`
-            : ''
-        }`
-      )
+      throw new Error(getErrorMessage(error))
     }
 
     await updateIncidentToDatabase({ incidentID, status })

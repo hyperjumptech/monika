@@ -22,7 +22,8 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios, { AxiosInstance } from 'axios'
+import axios from 'axios'
+import type { AxiosInstance } from 'axios'
 import { ExponentialBackoff, handleAll, retry } from 'cockatiel'
 import { EventEmitter } from 'events'
 import mac from 'macaddress'
@@ -46,6 +47,7 @@ import { getOSName } from '../components/notification/alert-message.js'
 import { getContext } from '../context/index.js'
 import events from '../events/index.js'
 import { SYMON_API_VERSION, type MonikaFlags } from '../flag.js'
+import { getErrorMessage } from '../utils/catch-error-handler.js'
 import { getEventEmitter } from '../utils/events.js'
 import { DEFAULT_TIMEOUT } from '../utils/http.js'
 import getIp from '../utils/ip.js'
@@ -394,9 +396,9 @@ export default class SymonClient {
         return { probes: res.data.data, hash: res.headers.etag }
       })
       .catch((error) => {
-        if (error.isAxiosError) {
+        if (axios.default.isAxiosError(error)) {
           if (error.response) {
-            throw new Error(error.response.data.message)
+            throw new Error(getErrorMessage(error))
           }
 
           if (error.request) {
