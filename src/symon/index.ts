@@ -28,8 +28,8 @@ import { ExponentialBackoff, handleAll, retry } from 'cockatiel'
 import { EventEmitter } from 'events'
 import mac from 'macaddress'
 import { hostname } from 'os'
-import path from 'path'
 import Piscina from 'piscina'
+import { fileURLToPath } from 'node:url'
 
 import type { Config } from '../interfaces/config.js'
 import type { Probe } from '../interfaces/probe.js'
@@ -196,8 +196,9 @@ export default class SymonClient {
     this.reportProbesLimit = symonReportLimit
     this.worker = new Piscina.Piscina({
       concurrentTasksPerWorker: 1,
-      // eslint-disable-next-line unicorn/prefer-module
-      filename: path.join(__dirname, '../../lib/workers/report-to-symon.js'),
+      filename: fileURLToPath(
+        new URL('../../lib/workers/report-to-symon.js', import.meta.url)
+      ),
       idleTimeout: this.reportProbesInterval,
       maxQueue: 1,
     })

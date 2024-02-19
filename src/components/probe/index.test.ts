@@ -29,7 +29,7 @@ import sinon from 'sinon'
 import mariadb from 'mariadb'
 import { MongoClient, type Db } from 'mongodb'
 import net from 'net'
-import { Pool } from 'pg'
+import pg from 'pg'
 import * as redis from 'redis'
 import { doProbe } from './index.js'
 import { initializeProbeStates } from '../../utils/probe-state.js'
@@ -38,6 +38,8 @@ import { getContext, resetContext, setContext } from '../../context/index.js'
 import type { MonikaFlags } from '../../flag.js'
 import { FAILED_REQUEST_ASSERTION } from '../../looper/index.js'
 import { closeLog, openLogfile } from '../logger/history.js'
+
+const { Pool } = pg
 
 let notificationAlert: Record<
   string,

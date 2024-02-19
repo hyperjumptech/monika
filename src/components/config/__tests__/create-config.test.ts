@@ -22,9 +22,8 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { expect } from 'chai'
+import { expect } from '@oclif/test'
 import fs from 'fs'
-import _ from 'lodash'
 
 import type { MonikaFlags } from '../../../flag.js'
 import { createConfig } from '../index.js'
@@ -70,7 +69,7 @@ describe('Har config', () => {
         './src/components/config/__tests__/expected.har.yml',
         'utf8'
       )
-      expect(_.isEqual(generated, expected)).to.be.true
+      expect(generated).eq(expected)
     })
   })
 })
@@ -91,7 +90,7 @@ describe('Text config', () => {
         './src/components/config/__tests__/expected.textfile.yml',
         'utf8'
       )
-      expect(_.isEqual(generated, expected)).to.be.true
+      expect(generated).eq(expected)
     })
   })
 })
@@ -111,7 +110,7 @@ describe('Sitemap config', () => {
         './src/components/config/__tests__/expected.sitemap.yml',
         'utf8'
       )
-      expect(_.isEqual(generated, expected)).to.be.true
+      expect(generated).eq(expected)
     })
   })
 })
@@ -132,7 +131,7 @@ describe('Sitemap config [--one-probe ]', () => {
         './src/components/config/__tests__/expected.sitemap-oneprobe.yml',
         'utf8'
       )
-      expect(_.isEqual(generated, expected)).to.be.true
+      expect(generated).eq(expected)
     })
   })
 })
@@ -172,7 +171,7 @@ describe('Postman config', () => {
       expect(fs.lstatSync('monika.postman-basic.yml').isFile()).to.be.true
 
       const { generated, expected } = getPostmanConfig({ grouped: false })
-      expect(_.isEqual(generated, expected)).to.be.true
+      expect(generated).eq(expected)
     })
 
     it('[v2.1] - should create config from basic postman file', async () => {
@@ -186,7 +185,7 @@ describe('Postman config', () => {
       expect(fs.lstatSync('monika.postman-basic.yml').isFile()).to.be.true
 
       const { generated, expected } = getPostmanConfig({ grouped: false })
-      expect(_.isEqual(generated, expected)).to.be.true
+      expect(generated).eq(expected)
     })
 
     it('[v2.0] - should create config from grouped postman file', async () => {
@@ -200,7 +199,7 @@ describe('Postman config', () => {
       expect(fs.lstatSync('monika.postman-grouped.yml').isFile()).to.be.true
 
       const { generated, expected } = getPostmanConfig({ grouped: true })
-      expect(_.isEqual(generated, expected)).to.be.true
+      expect(generated).eq(expected)
     })
 
     it('[v2.1] - should create config from grouped postman file', async () => {
@@ -214,7 +213,7 @@ describe('Postman config', () => {
       expect(fs.lstatSync('monika.postman-grouped.yml').isFile()).to.be.true
 
       const { generated, expected } = getPostmanConfig({ grouped: true })
-      expect(_.isEqual(generated, expected)).to.be.true
+      expect(generated).eq(expected)
     })
   })
 })
@@ -234,7 +233,7 @@ describe('Insomnia config', () => {
         './src/components/config/__tests__/expected.insomnia.yml',
         'utf8'
       )
-      expect(_.isEqual(generated, expected)).to.be.true
+      expect(generated).eq(expected)
     })
   })
 })

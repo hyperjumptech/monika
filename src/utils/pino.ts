@@ -23,8 +23,8 @@
  **********************************************************************************/
 
 import fs from 'fs'
-import path from 'path'
 import { pino, transport } from 'pino'
+import { fileURLToPath } from 'node:url'
 
 export const log = pino(getOptions())
 
@@ -43,9 +43,7 @@ function getOptions() {
     hideObject: true,
   }
 
-  // TODO: Current vercel/pkg is dependent with CommonJS
-  // eslint-disable-next-line unicorn/prefer-module
-  const project = path.join(__dirname, '../../tsconfig.json')
+  const project = fileURLToPath(new URL('../../tsconfig.json', import.meta.url))
   const dev = fs.existsSync(project)
 
   return transport({

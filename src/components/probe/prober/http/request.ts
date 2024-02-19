@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import axios from 'axios'
-import * as Handlebars from 'handlebars'
+import Handlebars from 'handlebars'
 import FormData from 'form-data'
 import YAML from 'yaml'
 import {

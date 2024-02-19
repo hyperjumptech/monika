@@ -23,9 +23,10 @@
  **********************************************************************************/
 
 import Ajv from 'ajv'
-import { Validation } from '../../../../interfaces/validation.js'
-import { Config } from '../../../../interfaces/config.js'
-import { readFileSync } from 'fs'
+import { readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
+import type { Validation } from '../../../../interfaces/validation.js'
+import type { Config } from '../../../../interfaces/config.js'
 
 // eslint-disable-next-line new-cap
 const ajv = new Ajv.default()
@@ -33,9 +34,12 @@ const ajv = new Ajv.default()
 // validate the config file  loaded by monika against a JSON Schema
 export function validateConfigWithSchema(config: Partial<Config>): Validation {
   const monikaConfigSchema = readFileSync(
-    '../../../../monika-config-schema.json'
+    fileURLToPath(
+      new URL('../../../../monika-config-schema.json', import.meta.url)
+    ),
+    'utf8'
   )
-  const mySchema = JSON.parse(String(monikaConfigSchema))
+  const isValid = ajv.compile(JSON.parse(monikaConfigSchema))
   const result: Validation = {
     valid: false,
     message: `Errors detected in config file ${JSON.stringify(
@@ -45,11 +49,7 @@ export function validateConfigWithSchema(config: Partial<Config>): Validation {
     )}`,
   }
 
-  const validate = ajv.compile(mySchema)
-
-  const isValid = validate(config)
-
-  if (isValid) {
+  if (isValid(config)) {
     result.valid = true
     result.message = `config: ${config} is ok`
     return result

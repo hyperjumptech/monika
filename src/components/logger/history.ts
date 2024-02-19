@@ -25,6 +25,7 @@
 import path from 'path'
 import SQLite3 from 'sqlite3'
 import { open, Database, ISqlite } from 'sqlite'
+import { fileURLToPath } from 'node:url'
 
 import { ProbeRequestResponse } from '../../interfaces/request.js'
 import { Probe } from '../../interfaces/probe.js'
@@ -136,9 +137,9 @@ export function setDatabase(
 
 async function migrate() {
   await database().migrate({
-    // TODO: Current vercel/pkg is dependent with CommonJS
-    // eslint-disable-next-line unicorn/prefer-module
-    migrationsPath: path.join(__dirname, '../../../db/migrations'),
+    migrationsPath: fileURLToPath(
+      new URL('../../../db/migrations', import.meta.url)
+    ),
   })
 }
 

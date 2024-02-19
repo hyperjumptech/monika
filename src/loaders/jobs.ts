@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  *
  * SOFTWARE.                                                                      *
  **********************************************************************************/
-import * as cron from 'node-cron'
+import cron from 'node-cron'
 import { tlsChecker } from '../jobs/tls-check.js'
 import { checkDBSize } from '../jobs/check-database.js'
 import { getConfig } from '../components/config/index.js'

@@ -23,7 +23,9 @@
  **********************************************************************************/
 
 import { compileExpression as _compileExpression } from 'filtrex'
-import {
+import lodash from 'lodash'
+
+const {
   endsWith,
   get,
   has,
@@ -33,7 +35,7 @@ import {
   size,
   startsWith,
   upperCase,
-} from 'lodash'
+} = lodash
 
 // wrap substrings that are object accessor with double quote
 // then wrap again with __getValueByPath function call

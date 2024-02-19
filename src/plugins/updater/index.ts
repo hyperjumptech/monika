@@ -23,16 +23,7 @@
  **********************************************************************************/
 
 import { Config as IConfig } from '@oclif/core'
-import {
-  createReadStream,
-  createWriteStream,
-  readdir,
-  realpath,
-  chmod,
-  remove,
-  mkdirs,
-  move,
-} from 'fs-extra'
+import fsExtra from 'fs-extra'
 import { Stream } from 'stream'
 import * as os from 'os'
 import { setInterval } from 'timers'
@@ -42,6 +33,17 @@ import { spawn } from 'child_process'
 import * as unzipper from 'unzipper'
 import hasha from 'hasha'
 import { sendHttpRequest } from '../../utils/http.js'
+
+const {
+  createReadStream,
+  createWriteStream,
+  readdir,
+  realpath,
+  chmod,
+  remove,
+  mkdirs,
+  move,
+} = fsExtra
 
 const DEFAULT_UPDATE_CHECK = 86_400 // 24 hours
 type UpdateMode = 'major' | 'minor' | 'patch'
