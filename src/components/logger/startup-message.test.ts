@@ -426,5 +426,21 @@ describe('Startup message', () => {
       // assert
       expect(logMessage).include('config file')
     })
+
+    it('should show experimental fetch toggle', () => {
+      // act
+      logStartupMessage({
+        config: defaultConfig,
+        flags: {
+          config: ['./monika.yaml'],
+          verbose: false,
+          'experimental-fetch': true,
+        },
+        isFirstRun: false,
+      })
+
+      // assert
+      expect(logMessage).include('Using native Node.js fetch for HTTP client')
+    })
   })
 })
