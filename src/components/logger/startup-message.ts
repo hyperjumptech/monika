@@ -37,7 +37,10 @@ import { createProber } from '../probe/prober/factory'
 
 type LogStartupMessage = {
   config: Config
-  flags: Pick<MonikaFlags, 'config' | 'symonKey' | 'symonUrl' | 'verbose'>
+  flags: Pick<
+    MonikaFlags,
+    'config' | 'symonKey' | 'symonUrl' | 'verbose' | 'experimental-fetch'
+  >
   isFirstRun: boolean
 }
 
@@ -57,6 +60,10 @@ export function logStartupMessage({
     } else if (configSource.length > 0) {
       log.info(`Using config file: ${path.resolve(configSource)}`)
     }
+  }
+
+  if (flags['experimental-fetch']) {
+    log.info('Using native Node.js fetch for HTTP client')
   }
 
   const startupMessage = generateStartupMessage({
