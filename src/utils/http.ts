@@ -22,7 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios'
+import axios, { AxiosRequestHeaders, AxiosResponse } from 'axios'
 import http from 'http'
 import https from 'https'
 
@@ -36,14 +36,38 @@ export const DEFAULT_TIMEOUT = 10_000
 const axiosInstance = axios.create()
 
 export async function sendHttpRequest(
-  config: AxiosRequestConfig
+  config: Omit<RequestInit, 'headers'> & {
+    headers?: object | undefined
+    url?: string
+    maxRedirects?: number | undefined
+    timeout?: number | undefined
+    allowUnauthorizedSsl?: boolean | undefined
+    responseType?: 'stream' | undefined
+  }
 ): Promise<AxiosResponse> {
+  let headers: AxiosRequestHeaders | undefined
+  if (config.headers) {
+    headers = {}
+    for (const [key, value] of Object.entries(config.headers)) {
+      headers[key] = value
+    }
+  }
+
   const resp = await axiosInstance.request({
     ...config,
+    headers,
     timeout: config.timeout ?? DEFAULT_TIMEOUT, // Ensure default timeout if not filled.
-    httpAgent: config.httpAgent ?? httpAgent,
-    httpsAgent: config.httpsAgent ?? httpsAgent,
+    httpAgent,
+    httpsAgent: config.allowUnauthorizedSsl
+      ? new https.Agent({ keepAlive: true, rejectUnauthorized: true })
+      : httpsAgent,
   })
 
   return resp
+}
+
+export async function sendHttpRequestFetch(
+  config: RequestInit & { url: string }
+): Promise<Response> {
+  return fetch(config.url, config)
 }

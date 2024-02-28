@@ -34,8 +34,6 @@ import {
 // eslint-disable-next-line no-restricted-imports
 import * as qs from 'querystring'
 
-import http from 'http'
-import https from 'https'
 import { getContext } from '../../../../context'
 import { icmpRequest } from '../icmp/request'
 import registerFakes from '../../../../utils/fakes'
@@ -44,14 +42,6 @@ import { AxiosError } from 'axios'
 
 // Register Handlebars helpers
 registerFakes(Handlebars)
-
-// Keep the agents alive to reduce the overhead of DNS queries and creating TCP connection.
-// More information here: https://rakshanshetty.in/nodejs-http-keep-alive/
-const httpAgent = new http.Agent({ keepAlive: true })
-const httpsAgent = new https.Agent({
-  keepAlive: true,
-  rejectUnauthorized: getContext().flags.ignoreInvalidTLS,
-})
 
 type probingParams = {
   requestConfig: Omit<RequestConfig, 'saveBody' | 'alert'> // is a config object
@@ -80,18 +70,18 @@ export async function httpRequest({
   // In some case such as value is not string, it will be returned as is without being compiled.
   // If the request does not have any headers, then it should skip this process.
   if (headers) {
-    for (const header of Object.keys(headers)) {
-      const rawHeader = headers[header]
+    for (const [key, value] of Object.entries(headers)) {
+      const rawHeader = value
       const renderHeader = Handlebars.compile(rawHeader)
       const renderedHeader = renderHeader({ responses })
 
       newReq.headers = {
         ...newReq.headers,
-        [header]: renderedHeader,
+        [value]: renderedHeader,
       }
 
       // evaluate "Content-Type" header in case-insensitive manner
-      if (header.toLocaleLowerCase() === 'content-type') {
+      if (key.toLocaleLowerCase() === 'content-type') {
         const { contentType } = transformContentByType(body, rawHeader)
 
         if (rawHeader === 'multipart/form-data') {
@@ -101,7 +91,7 @@ export async function httpRequest({
           //    "content-type": "multipart/form-data"
           // to
           //    "content-type": "multipart/form-data; boundary=--------------------------012345678900123456789012"
-          delete newReq.headers[header]
+          delete newReq.headers[key as never]
 
           newReq.headers = {
             ...newReq.headers,
@@ -120,13 +110,13 @@ export async function httpRequest({
         (hk) => hk.toLocaleLowerCase() === 'content-type'
       )
 
-      if (contentTypeKey) {
+      if (headers && contentTypeKey) {
         const { content, contentType } = transformContentByType(
           newReq?.body,
-          (headers || {})[contentTypeKey]
+          headers[contentTypeKey as never]
         )
 
-        delete newReq.headers[contentTypeKey]
+        delete newReq.headers[contentTypeKey as never]
 
         newReq.body = content
         newReq.headers = {
@@ -135,24 +125,6 @@ export async function httpRequest({
         }
       }
     }
-  }
-
-  // check if this request must ignore ssl cert
-  // if it is, then create new https agent solely for this request
-  // allowUnauthorized in a request takes higher priority than the global ignoreInvalidTLS flag
-  let optHttpsAgent
-  if (allowUnauthorized) {
-    // Use the agent with the rejectUnauthorized value from the config
-    optHttpsAgent = new https.Agent({
-      rejectUnauthorized: !allowUnauthorized,
-    })
-  } else {
-    const ignoringInvalidTLS = getContext().flags.ignoreInvalidTLS
-    httpsAgent.options = {
-      ...httpsAgent.options,
-      rejectUnauthorized: !ignoringInvalidTLS,
-    }
-    optHttpsAgent = httpsAgent
   }
 
   const requestStartedAt = Date.now()
@@ -166,11 +138,14 @@ export async function httpRequest({
     // Do the request using compiled URL and compiled headers (if exists)
     const resp = await sendHttpRequest({
       ...newReq,
+      allowUnauthorizedSsl: allowUnauthorized,
+      keepalive: true,
       url: renderedURL,
-      data: newReq.body,
       maxRedirects: flags['follow-redirects'],
-      httpAgent,
-      httpsAgent: optHttpsAgent,
+      body:
+        typeof newReq.body === 'string'
+          ? newReq.body
+          : JSON.stringify(newReq.body),
     })
 
     const responseTime = Date.now() - requestStartedAt
