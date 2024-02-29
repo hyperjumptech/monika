@@ -56,7 +56,7 @@ describe('Downtime counter', () => {
 
     // act
     addIncident(probeConfig)
-    removeIncident(probeConfig)
+    removeIncident({ probeId: probeConfig.probeID, url: probeConfig.url })
 
     // assert
     expect(getDowntimeDuration(probeConfig)).eq('0 seconds')
@@ -71,7 +71,7 @@ describe('Downtime counter', () => {
     }
 
     // act
-    removeIncident(probeConfig)
+    removeIncident({ probeId: probeConfig.probeID, url: probeConfig.url })
 
     // assert
     expect(getDowntimeDuration(probeConfig)).eq('0 seconds')
@@ -105,7 +105,7 @@ describe('Downtime counter', () => {
     // act
     addIncident(probeConfig)
     addIncident(probeConfig2)
-    removeIncident(probeConfig)
+    removeIncident({ probeId: probeConfig.probeID, url: probeConfig.url })
 
     // assert
     expect(getIncidents()[0].probeID).eq(probeConfig2.probeID)
@@ -127,7 +127,7 @@ describe('Downtime counter', () => {
     // act
     addIncident(probeConfig)
     addIncident(probeConfig2)
-    removeIncident(probeConfig)
+    removeIncident({ probeId: probeConfig.probeID, url: probeConfig.url })
 
     // assert
     expect(getIncidents()[0].probeRequestURL).eq(probeConfig2.url)

@@ -376,8 +376,7 @@ export abstract class BaseProber implements Prober {
 
     if (recoveredIncident) {
       removeIncident({
-        alert: recoveredIncident.alert,
-        probeID: this.probeConfig.id,
+        probeId: this.probeConfig.id,
         url: this.probeConfig?.requests?.[requestIndex].url || '',
       })
 
