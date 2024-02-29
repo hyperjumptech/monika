@@ -33,6 +33,10 @@ type DowntimeCounter = {
   createdAt?: Date
 }
 
+export function getIncident() {
+  return getContext().incidents
+}
+
 export function addIncident({
   alert,
   createdAt,
@@ -46,14 +50,14 @@ export function addIncident({
     createdAt: createdAt || new Date(),
   }
 
-  setContext({ incidents: [...getContext().incidents, newIncident] })
+  setContext({ incidents: [...getIncident(), newIncident] })
 }
 
 export function getDowntimeDuration({
   probeID,
   url,
 }: Omit<DowntimeCounter, 'alert'>): string {
-  const lastIncident = getContext().incidents.find(
+  const lastIncident = getIncident().find(
     (incident) =>
       incident.probeID === probeID && incident.probeRequestURL === url
   )
@@ -68,7 +72,7 @@ export function getDowntimeDuration({
 }
 
 export function removeIncident({ probeID, url }: DowntimeCounter): void {
-  const newIncidents = getContext().incidents.filter(
+  const newIncidents = getIncident().filter(
     (incident) =>
       incident.probeID !== probeID || incident.probeRequestURL !== url
     // remove incidents with exact mach of probeID and url

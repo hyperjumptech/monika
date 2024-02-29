@@ -41,7 +41,11 @@ import {
   DEFAULT_INCIDENT_THRESHOLD,
   DEFAULT_RECOVERY_THRESHOLD,
 } from '../../config/validation/validator/default-values'
-import { addIncident, removeIncident } from '../../downtime-counter'
+import {
+  addIncident,
+  getIncident,
+  removeIncident,
+} from '../../downtime-counter'
 import { saveNotificationLog, saveProbeRequestLog } from '../../logger/history'
 import { logResponseTime } from '../../logger/response-time-log'
 import { sendAlerts } from '../../notification'
@@ -193,7 +197,7 @@ export abstract class BaseProber implements Prober {
   }
 
   protected hasIncident(): Incident | undefined {
-    return getContext().incidents.find(
+    return getIncident().find(
       (incident) => incident.probeID === this.probeConfig.id
     )
   }
@@ -363,7 +367,7 @@ export abstract class BaseProber implements Prober {
   protected handleRecovery(
     probeResults: Pick<ProbeResult, 'requestResponse'>[]
   ): void {
-    const recoveredIncident = getContext().incidents.find(
+    const recoveredIncident = getIncident().find(
       (incident) => incident.probeID === this.probeConfig.id
     )
     const requestIndex =

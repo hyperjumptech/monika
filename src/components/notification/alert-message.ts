@@ -33,7 +33,7 @@ import type { NotificationMessage } from '@hyperjumptech/monika-notification'
 import { ProbeRequestResponse } from '../../interfaces/request'
 import { ProbeAlert } from '../../interfaces/probe'
 import { publicIpAddress, publicNetworkInfo } from '../../utils/public-ip'
-import { getDowntimeDuration } from '../downtime-counter'
+import { getDowntimeDuration, getIncident } from '../downtime-counter'
 
 const getLinuxDistro = promisify(getos)
 
@@ -144,7 +144,7 @@ Version: ${userAgent}`
 }
 
 function getRecoveryMessage(isRecovery: boolean, probeID: string, url: string) {
-  const incidentDateTime = getContext().incidents.find(
+  const incidentDateTime = getIncident().find(
     (incident) =>
       incident.probeID === probeID && incident.probeRequestURL === url
   )?.createdAt
