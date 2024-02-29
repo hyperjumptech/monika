@@ -105,6 +105,12 @@ export default class Monika extends Command {
         'Create config from HAR (-H), postman (-p), insomnia (-I), sitemap (--sitemap), textfile (--text) export file, or open Monika Configuration Generator using default browser',
     }),
 
+    'experimental-fetch': Flags.boolean({
+      default: monikaFlagsDefaultValue['experimental-fetch'],
+      description:
+        'Use native fetch Node.js API instead of Axios for HTTP client',
+    }),
+
     flush: Flags.boolean({
       description: 'Flush logs',
     }),
