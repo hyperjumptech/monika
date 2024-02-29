@@ -33,7 +33,7 @@ import type { NotificationMessage } from '@hyperjumptech/monika-notification'
 import { ProbeRequestResponse } from '../../interfaces/request'
 import { ProbeAlert } from '../../interfaces/probe'
 import { publicIpAddress, publicNetworkInfo } from '../../utils/public-ip'
-import { getIncidents } from '../downtime-counter'
+import { getIncidents } from '../incident'
 
 const getLinuxDistro = promisify(getos)
 

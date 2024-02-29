@@ -46,7 +46,7 @@ import {
   findIncident,
   getIncidents,
   removeIncident,
-} from '../../downtime-counter'
+} from '../../incident'
 import { saveNotificationLog, saveProbeRequestLog } from '../../logger/history'
 import { logResponseTime } from '../../logger/response-time-log'
 import { sendAlerts } from '../../notification'

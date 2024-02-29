@@ -29,7 +29,7 @@ import { expect } from '@oclif/test'
 import type { ProberMetadata } from '.'
 
 import { createProber } from './factory'
-import { getIncidents } from '../../downtime-counter'
+import { getIncidents } from '../../incident'
 
 describe('Prober', () => {
   describe('Initial incident state', () => {
