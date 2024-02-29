@@ -28,8 +28,8 @@ import { expect } from '@oclif/test'
 
 import type { ProberMetadata } from '.'
 
-import { getContext } from '../../../context'
 import { createProber } from './factory'
+import { getIncidents } from '../../downtime-counter'
 
 describe('Prober', () => {
   describe('Initial incident state', () => {
@@ -88,7 +88,7 @@ describe('Prober', () => {
       // assert
       expect(probeRequestTotal).eq(1)
       expect(webhookBody).eq(null)
-      expect(getContext().incidents.length).eq(0)
+      expect(getIncidents().length).eq(0)
     })
 
     it('should not initialize probe state if last event id is not specify', async () => {
@@ -125,7 +125,7 @@ describe('Prober', () => {
       // assert
       expect(probeRequestTotal).eq(1)
       expect(webhookBody).eq(null)
-      expect(getContext().incidents.length).eq(0)
+      expect(getIncidents().length).eq(0)
     })
 
     it('should not initialize probe state if last event recovered at is not null', async () => {
@@ -163,7 +163,7 @@ describe('Prober', () => {
       // assert
       expect(probeRequestTotal).eq(1)
       expect(webhookBody).eq(null)
-      expect(getContext().incidents.length).eq(0)
+      expect(getIncidents().length).eq(0)
     })
 
     it('should not initialize probe state if alert is not found', async () => {
@@ -201,7 +201,7 @@ describe('Prober', () => {
       // assert
       expect(probeRequestTotal).eq(1)
       expect(webhookBody).eq(null)
-      expect(getContext().incidents.length).eq(0)
+      expect(getIncidents().length).eq(0)
     })
 
     it('should send recovery notification if recovered_at is null and target is healthy', async () => {
@@ -254,7 +254,7 @@ describe('Prober', () => {
       // assert
       expect(probeRequestTotal).eq(1)
       expect(webhookBody).not.eq(null)
-      expect(getContext().incidents.length).eq(0)
+      expect(getIncidents().length).eq(0)
     })
 
     it('should not send incident notification if recovered_at is null and target is not healthy', async () => {
@@ -313,7 +313,7 @@ describe('Prober', () => {
       // assert
       expect(probeRequestTotal).eq(1)
       expect(webhookBody).eq(null)
-      expect(getContext().incidents.length).eq(1)
+      expect(getIncidents().length).eq(1)
     })
 
     it('should not send recovery notification if recovered_at is not null and target is healthy', async () => {
@@ -365,7 +365,7 @@ describe('Prober', () => {
       // assert
       expect(probeRequestTotal).eq(1)
       expect(webhookBody).eq(null)
-      expect(getContext().incidents.length).eq(0)
+      expect(getIncidents().length).eq(0)
     })
 
     it('should send incident notification if recovered_at is not null and target is not healthy', async () => {
@@ -425,7 +425,7 @@ describe('Prober', () => {
       // assert
       expect(probeRequestTotal).eq(1)
       expect(webhookBody).not.eq(null)
-      expect(getContext().incidents.length).eq(1)
+      expect(getIncidents().length).eq(1)
     })
   })
 })

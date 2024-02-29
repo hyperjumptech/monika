@@ -43,7 +43,8 @@ import {
 } from '../../config/validation/validator/default-values'
 import {
   addIncident,
-  getIncident,
+  findIncident,
+  getIncidents,
   removeIncident,
 } from '../../downtime-counter'
 import { saveNotificationLog, saveProbeRequestLog } from '../../logger/history'
@@ -197,9 +198,7 @@ export abstract class BaseProber implements Prober {
   }
 
   protected hasIncident(): Incident | undefined {
-    return getIncident().find(
-      (incident) => incident.probeID === this.probeConfig.id
-    )
+    return findIncident(this.probeConfig.id)
   }
 
   /**
@@ -367,7 +366,7 @@ export abstract class BaseProber implements Prober {
   protected handleRecovery(
     probeResults: Pick<ProbeResult, 'requestResponse'>[]
   ): void {
-    const recoveredIncident = getIncident().find(
+    const recoveredIncident = getIncidents().find(
       (incident) => incident.probeID === this.probeConfig.id
     )
     const requestIndex =

@@ -23,8 +23,12 @@
  **********************************************************************************/
 
 import { expect } from '@oclif/test'
-import { getDowntimeDuration, addIncident, removeIncident } from '.'
-import { getContext } from '../../context'
+import {
+  getDowntimeDuration,
+  addIncident,
+  removeIncident,
+  getIncidents,
+} from '.'
 
 describe('Downtime counter', () => {
   it('should start counter', () => {
@@ -104,7 +108,7 @@ describe('Downtime counter', () => {
     removeIncident(probeConfig)
 
     // assert
-    expect(getContext().incidents[0].probeID).eq(probeConfig2.probeID)
+    expect(getIncidents()[0].probeID).eq(probeConfig2.probeID)
   })
 
   it('allow identical probe-ids but different urls', () => {
@@ -126,6 +130,6 @@ describe('Downtime counter', () => {
     removeIncident(probeConfig)
 
     // assert
-    expect(getContext().incidents[0].probeRequestURL).eq(probeConfig2.url)
+    expect(getIncidents()[0].probeRequestURL).eq(probeConfig2.url)
   })
 })
