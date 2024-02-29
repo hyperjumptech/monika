@@ -482,7 +482,7 @@ async function applyProbeChanges(probeChanges: ProbeChange[]) {
         case 'disabled': {
           deleteProbe(probeId)
           removeProbeState(probeId)
-          removeIncident({ probeId })
+          removeIncident({ probeID: probeId })
           return
         }
 

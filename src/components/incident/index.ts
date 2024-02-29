@@ -22,15 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { getContext, setContext } from '../../context'
-import type { ProbeAlert } from '../../interfaces/probe'
-
-type DowntimeCounter = {
-  alert: ProbeAlert
-  probeID: string
-  url: string
-  createdAt?: Date
-}
+import { type Incident, getContext, setContext } from '../../context'
 
 export function getIncidents() {
   return getContext().incidents
@@ -40,34 +32,31 @@ export function findIncident(probeId: string) {
   return getIncidents().find(({ probeID }) => probeID === probeId)
 }
 
-export function addIncident({
-  alert,
-  createdAt,
-  probeID,
-  url,
-}: DowntimeCounter): void {
+export function addIncident(
+  incident: Omit<Incident, 'createdAt'> & Partial<Pick<Incident, 'createdAt'>>
+): void {
   const newIncident = {
-    alert,
-    probeID,
-    probeRequestURL: url,
-    createdAt: createdAt || new Date(),
+    ...incident,
+    createdAt: incident?.createdAt || new Date(),
   }
 
   setContext({ incidents: [...getIncidents(), newIncident] })
 }
 
-type RemoveIncidentParams = {
-  probeId: string
-  url?: string
-}
-
-export function removeIncident({ probeId, url }: RemoveIncidentParams): void {
-  const newIncidents = getIncidents().filter(({ probeID, probeRequestURL }) => {
-    if (!url) {
-      return probeId !== probeID
+export function removeIncident({
+  probeID,
+  probeRequestURL,
+}: Pick<Incident, 'probeID'> &
+  Partial<Pick<Incident, 'probeRequestURL'>>): void {
+  const newIncidents = getIncidents().filter((incident) => {
+    if (!probeRequestURL) {
+      return probeID !== incident.probeID
     }
 
-    return probeId !== probeID || probeRequestURL !== url
+    return (
+      probeID !== incident.probeID ||
+      probeRequestURL !== incident.probeRequestURL
+    )
     // remove incidents with exact mach of probeID and url
   })
 

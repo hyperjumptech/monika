@@ -147,41 +147,20 @@ function getRecoveryMessage(isRecovery: boolean, probeID: string, url: string) {
   const incidentDateTime = getIncidents().find(
     (incident) =>
       incident.probeID === probeID && incident.probeRequestURL === url
-  )?.createdAt
+  )
   if (!isRecovery || !incidentDateTime) {
     return ''
   }
 
-  const incidentDuration = getDowntimeDuration({ probeID, url })
+  const incidentDuration = formatDistanceToNow(incidentDateTime.createdAt, {
+    includeSeconds: true,
+  })
   const humanReadableIncidentDateTime = format(
-    incidentDateTime,
+    incidentDateTime.createdAt,
     'yyyy-MM-dd HH:mm:ss XXX'
   )
 
   return `Target is back to normal after ${incidentDuration}. The incident happened at ${humanReadableIncidentDateTime}. `
-}
-
-type GetDowntimeDurationParams = {
-  probeID: string
-  url?: string
-}
-
-function getDowntimeDuration({
-  probeID,
-  url,
-}: GetDowntimeDurationParams): string {
-  const lastIncident = getIncidents().find(
-    (incident) =>
-      incident.probeID === probeID && incident.probeRequestURL === url
-  )
-
-  if (!lastIncident) {
-    return '0 seconds'
-  }
-
-  return formatDistanceToNow(lastIncident.createdAt, {
-    includeSeconds: true,
-  })
 }
 
 export const getMessageForStart = async (

@@ -505,12 +505,12 @@ describe('Symon initiate', () => {
     addIncident({
       alert: { assertion: '', id: '', message: '' },
       probeID: config.probes[0].id,
-      url: '',
+      probeRequestURL: '',
     })
     addIncident({
       alert: { assertion: '', id: '', message: '' },
       probeID: config.probes[1].id,
-      url: '',
+      probeRequestURL: '',
     })
 
     // act

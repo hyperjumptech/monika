@@ -203,7 +203,7 @@ export class HTTPProber extends BaseProber {
     addIncident({
       alert: triggeredAlert,
       probeID,
-      url,
+      probeRequestURL: url,
     })
 
     this.sendNotification({

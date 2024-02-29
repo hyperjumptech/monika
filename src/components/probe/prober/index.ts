@@ -334,7 +334,7 @@ export abstract class BaseProber implements Prober {
     addIncident({
       alert: failedRequestAssertion,
       probeID: this.probeConfig.id,
-      url: this.probeConfig?.requests?.[requestIndex].url || '',
+      probeRequestURL: this.probeConfig?.requests?.[requestIndex].url || '',
     })
 
     saveProbeRequestLog({
@@ -376,8 +376,7 @@ export abstract class BaseProber implements Prober {
 
     if (recoveredIncident) {
       removeIncident({
-        probeId: this.probeConfig.id,
-        url: this.probeConfig?.requests?.[requestIndex].url || '',
+        probeID: this.probeConfig.id,
       })
 
       const url = this.probeConfig?.requests?.[requestIndex].url || ''
@@ -387,7 +386,6 @@ export abstract class BaseProber implements Prober {
         response: probeResults[requestIndex].requestResponse,
       }
       const probeID = this.probeConfig.id
-
       const alertId = getAlertID(url, validation, probeID)
 
       this.sendNotification({
@@ -451,7 +449,7 @@ export abstract class BaseProber implements Prober {
     addIncident({
       alert,
       probeID: this.probeConfig.id,
-      url: request.url,
+      probeRequestURL: request.url,
       createdAt,
     })
   }
