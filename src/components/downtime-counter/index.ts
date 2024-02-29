@@ -22,7 +22,6 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { formatDistanceToNow } from 'date-fns'
 import { getContext, setContext } from '../../context'
 import type { ProbeAlert } from '../../interfaces/probe'
 
@@ -55,24 +54,6 @@ export function addIncident({
   }
 
   setContext({ incidents: [...getIncidents(), newIncident] })
-}
-
-export function getDowntimeDuration({
-  probeID,
-  url,
-}: Omit<DowntimeCounter, 'alert'>): string {
-  const lastIncident = getIncidents().find(
-    (incident) =>
-      incident.probeID === probeID && incident.probeRequestURL === url
-  )
-
-  if (!lastIncident) {
-    return '0 seconds'
-  }
-
-  return formatDistanceToNow(lastIncident.createdAt, {
-    includeSeconds: true,
-  })
 }
 
 type RemoveIncidentParams = {

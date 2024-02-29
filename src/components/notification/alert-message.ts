@@ -24,7 +24,7 @@
 
 import { hostname, platform } from 'os'
 import { promisify } from 'util'
-import { format } from 'date-fns'
+import { format, formatDistanceToNow } from 'date-fns'
 import * as Handlebars from 'handlebars'
 import getos from 'getos'
 import osName from 'os-name'
@@ -33,7 +33,7 @@ import type { NotificationMessage } from '@hyperjumptech/monika-notification'
 import { ProbeRequestResponse } from '../../interfaces/request'
 import { ProbeAlert } from '../../interfaces/probe'
 import { publicIpAddress, publicNetworkInfo } from '../../utils/public-ip'
-import { getDowntimeDuration, getIncidents } from '../downtime-counter'
+import { getIncidents } from '../downtime-counter'
 
 const getLinuxDistro = promisify(getos)
 
@@ -159,6 +159,29 @@ function getRecoveryMessage(isRecovery: boolean, probeID: string, url: string) {
   )
 
   return `Target is back to normal after ${incidentDuration}. The incident happened at ${humanReadableIncidentDateTime}. `
+}
+
+type GetDowntimeDurationParams = {
+  probeID: string
+  url?: string
+}
+
+function getDowntimeDuration({
+  probeID,
+  url,
+}: GetDowntimeDurationParams): string {
+  const lastIncident = getIncidents().find(
+    (incident) =>
+      incident.probeID === probeID && incident.probeRequestURL === url
+  )
+
+  if (!lastIncident) {
+    return '0 seconds'
+  }
+
+  return formatDistanceToNow(lastIncident.createdAt, {
+    includeSeconds: true,
+  })
 }
 
 export const getMessageForStart = async (
