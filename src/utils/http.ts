@@ -25,6 +25,16 @@
 import axios, { AxiosRequestHeaders, AxiosResponse } from 'axios'
 import http from 'http'
 import https from 'https'
+import { Agent } from 'undici'
+
+type HttpRequestParams = Omit<RequestInit, 'headers'> & {
+  url: string
+  maxRedirects?: number
+  headers?: object
+  timeout?: number
+  allowUnauthorizedSsl?: boolean
+  responseType?: 'stream'
+}
 
 // Keep the agents alive to reduce the overhead of DNS queries and creating TCP connection.
 // More information here: https://rakshanshetty.in/nodejs-http-keep-alive/
@@ -36,14 +46,7 @@ export const DEFAULT_TIMEOUT = 10_000
 const axiosInstance = axios.create()
 
 export async function sendHttpRequest(
-  config: Omit<RequestInit, 'headers'> & {
-    headers?: object | undefined
-    url?: string
-    maxRedirects?: number | undefined
-    timeout?: number | undefined
-    allowUnauthorizedSsl?: boolean | undefined
-    responseType?: 'stream' | undefined
-  }
+  config: HttpRequestParams
 ): Promise<AxiosResponse> {
   let headers: AxiosRequestHeaders | undefined
   if (config.headers) {
@@ -55,6 +58,7 @@ export async function sendHttpRequest(
 
   const resp = await axiosInstance.request({
     ...config,
+    data: config.body,
     headers,
     timeout: config.timeout ?? DEFAULT_TIMEOUT, // Ensure default timeout if not filled.
     httpAgent,
@@ -67,7 +71,28 @@ export async function sendHttpRequest(
 }
 
 export async function sendHttpRequestFetch(
-  config: RequestInit & { url: string }
+  config: HttpRequestParams
 ): Promise<Response> {
-  return fetch(config.url, config)
+  let headers: Record<string, string> | undefined
+  if (config.headers) {
+    headers = {}
+    for (const [key, value] of Object.entries(config.headers)) {
+      headers[key] = value
+    }
+  }
+
+  return fetch(config.url, {
+    ...config,
+    headers,
+    redirect: 'manual',
+    keepalive: true,
+    dispatcher: new Agent({
+      connect: {
+        timeout: config.timeout,
+        keepAlive: true,
+        rejectUnauthorized: !config.allowUnauthorizedSsl,
+      },
+      maxRedirections: config.maxRedirects,
+    }),
+  })
 }

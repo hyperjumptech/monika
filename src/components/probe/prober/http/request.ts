@@ -37,7 +37,8 @@ import * as qs from 'querystring'
 import { getContext } from '../../../../context'
 import { icmpRequest } from '../icmp/request'
 import registerFakes from '../../../../utils/fakes'
-import { sendHttpRequest } from '../../../../utils/http'
+import { sendHttpRequest, sendHttpRequestFetch } from '../../../../utils/http'
+import { log } from '../../../../utils/pino'
 import { AxiosError } from 'axios'
 
 // Register Handlebars helpers
@@ -53,6 +54,7 @@ type probingParams = {
  * @param {obj} parameter as input object
  * @returns ProbeRequestResponse, response to the probe request
  */
+// eslint-disable-next-line complexity
 export async function httpRequest({
   requestConfig,
   responses,
@@ -77,7 +79,7 @@ export async function httpRequest({
 
       newReq.headers = {
         ...newReq.headers,
-        [value]: renderedHeader,
+        [key]: renderedHeader,
       }
 
       // evaluate "Content-Type" header in case-insensitive manner
@@ -133,6 +135,46 @@ export async function httpRequest({
     // is this a request for ping?
     if (newReq.ping === true) {
       return icmpRequest({ host: renderedURL })
+    }
+
+    if (flags['experimental-fetch']) {
+      if (flags.verbose) log.info(`Probing ${renderedURL} with Node.js fetch`)
+      const response = await sendHttpRequestFetch({
+        ...newReq,
+        allowUnauthorizedSsl: allowUnauthorized,
+        keepalive: true,
+        url: renderedURL,
+        maxRedirects: flags['follow-redirects'],
+        body:
+          typeof newReq.body === 'string'
+            ? newReq.body
+            : JSON.stringify(newReq.body),
+      })
+
+      const responseTime = Date.now() - requestStartedAt
+      let responseHeaders: Record<string, string> | undefined
+      if (response.headers) {
+        responseHeaders = {}
+        for (const [key, value] of Object.entries(response.headers)) {
+          responseHeaders[key] = value
+        }
+      }
+
+      const responseBody = response.headers
+        .get('Content-Type')
+        ?.includes('application/json')
+        ? response.json()
+        : response.text()
+
+      return {
+        requestType: 'HTTP',
+        data: responseBody,
+        body: responseBody,
+        status: response.status,
+        headers: responseHeaders || '',
+        responseTime,
+        result: probeRequestResult.success,
+      }
     }
 
     // Do the request using compiled URL and compiled headers (if exists)
