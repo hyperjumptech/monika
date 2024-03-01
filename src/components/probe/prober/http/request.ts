@@ -54,7 +54,6 @@ type probingParams = {
  * @param {obj} parameter as input object
  * @returns ProbeRequestResponse, response to the probe request
  */
-// eslint-disable-next-line complexity
 export async function httpRequest({
   requestConfig,
   responses,
@@ -67,70 +66,17 @@ export async function httpRequest({
   const renderedURL = renderURL({ responses })
 
   const { flags } = getContext()
-
-  // Compile headers using handlebars to render URLs that uses previous responses data.
-  // In some case such as value is not string, it will be returned as is without being compiled.
-  // If the request does not have any headers, then it should skip this process.
-  if (headers) {
-    for (const [key, value] of Object.entries(headers)) {
-      const rawHeader = value
-      const renderHeader = Handlebars.compile(rawHeader)
-      const renderedHeader = renderHeader({ responses })
-
-      newReq.headers = {
-        ...newReq.headers,
-        [key]: renderedHeader,
-      }
-
-      // evaluate "Content-Type" header in case-insensitive manner
-      if (key.toLocaleLowerCase() === 'content-type') {
-        const { contentType } = transformContentByType(body, rawHeader)
-
-        if (rawHeader === 'multipart/form-data') {
-          // delete the previous content-type header and add a new header with boundary
-          // it needs to be deleted because multipart/form data needs to append the boundary data
-          // from
-          //    "content-type": "multipart/form-data"
-          // to
-          //    "content-type": "multipart/form-data; boundary=--------------------------012345678900123456789012"
-          delete newReq.headers[key as never]
-
-          newReq.headers = {
-            ...newReq.headers,
-            'content-type': contentType,
-          }
-        }
-      }
-    }
-  }
-
-  if (body) {
-    newReq.body = generateRequestChainingBody(body, responses)
-
-    if (newReq.headers) {
-      const contentTypeKey = Object.keys(headers || {}).find(
-        (hk) => hk.toLocaleLowerCase() === 'content-type'
-      )
-
-      if (headers && contentTypeKey) {
-        const { content, contentType } = transformContentByType(
-          newReq?.body,
-          headers[contentTypeKey as never]
-        )
-
-        delete newReq.headers[contentTypeKey as never]
-
-        newReq.body = content
-        newReq.headers = {
-          ...newReq.headers,
-          'content-type': contentType,
-        }
-      }
-    }
-  }
+  newReq.headers = compileHeaders(headers, body, responses as never)
+  // compile body needs to modify headers if necessary
+  const { headers: newHeaders, body: newBody } = compileBody(
+    newReq.headers,
+    body,
+    responses
+  )
+  newReq.headers = newHeaders
+  newReq.body = newBody
 
   const requestStartedAt = Date.now()
-
   try {
     // is this a request for ping?
     if (newReq.ping === true) {
@@ -250,10 +196,94 @@ export async function httpRequest({
   }
 }
 
+function compileHeaders(
+  headers: object | undefined,
+  body: string | object,
+  responses: never
+) {
+  // return as-is if falsy
+  if (!headers) return headers
+  // Compile headers using handlebars to render URLs that uses previous responses data.
+  // In some case such as value is not string, it will be returned as is without being compiled.
+  // If the request does not have any headers, then it should skip this process.
+  let newHeaders = headers
+  for (const [key, value] of Object.entries(headers)) {
+    const rawHeader = value
+    const renderHeader = Handlebars.compile(rawHeader)
+    const renderedHeader = renderHeader({ responses })
+
+    newHeaders = {
+      ...newHeaders,
+      [key]: renderedHeader,
+    }
+
+    // evaluate "Content-Type" header in case-insensitive manner
+    if (key.toLocaleLowerCase() === 'content-type') {
+      const { contentType } = transformContentByType(body, rawHeader)
+
+      if (rawHeader === 'multipart/form-data') {
+        // delete the previous content-type header and add a new header with boundary
+        // it needs to be deleted because multipart/form data needs to append the boundary data
+        // from
+        //    "content-type": "multipart/form-data"
+        // to
+        //    "content-type": "multipart/form-data; boundary=--------------------------012345678900123456789012"
+        delete newHeaders[key as never]
+
+        newHeaders = {
+          ...newHeaders,
+          'content-type': contentType,
+        }
+      }
+    }
+  }
+
+  return newHeaders
+}
+
+function compileBody(
+  headers: object | undefined,
+  body: object | string,
+  responses: ProbeRequestResponse[]
+): {
+  headers: object | undefined
+  body: object | string
+} {
+  // return as-is if falsy
+  if (!body) return { headers, body }
+  let newHeaders = headers
+  let newBody = generateRequestChainingBody(body, responses)
+
+  if (newHeaders) {
+    const contentTypeKey = Object.keys(newHeaders || {}).find(
+      (hk) => hk.toLocaleLowerCase() === 'content-type'
+    )
+
+    if (newHeaders && contentTypeKey) {
+      const { content, contentType } = transformContentByType(
+        newBody,
+        newHeaders[contentTypeKey as never]
+      )
+
+      delete newHeaders[contentTypeKey as never]
+
+      newBody = content
+      newHeaders = newHeaders
+        ? {
+            ...(newHeaders as object),
+            'content-type': contentType,
+          }
+        : undefined
+    }
+  }
+
+  return { headers: newHeaders, body: newBody }
+}
+
 export function generateRequestChainingBody(
   body: object | string,
   responses: ProbeRequestResponse[]
-): JSON | string {
+): object | string {
   const isString = typeof body === 'string'
   const template = Handlebars.compile(isString ? body : JSON.stringify(body))
   const renderedBody = template({ responses })
@@ -448,11 +478,11 @@ function getErrorStatusWithExplanation(error: unknown): {
 
     default: {
       if (error instanceof AxiosError) {
-        console.error(
+        log.error(
           `Error code 99: Unhandled error while probing ${error.request.url}, got ${error.code} ${error.stack} `
         )
       } else {
-        console.error(
+        log.error(
           `Error code 99: Unhandled error, got ${(error as AxiosError).stack}`
         )
       }
