@@ -83,7 +83,7 @@ export async function httpRequest({
       return icmpRequest({ host: renderedURL })
     }
 
-    if (flags['experimental-fetch']) {
+    if (flags['use-node-fetch']) {
       if (flags.verbose) log.info(`Probing ${renderedURL} with Node.js fetch`)
       const response = await sendHttpRequestFetch({
         ...newReq,
