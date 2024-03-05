@@ -39,7 +39,7 @@ type LogStartupMessage = {
   config: Config
   flags: Pick<
     MonikaFlags,
-    'config' | 'symonKey' | 'symonUrl' | 'verbose' | 'use-node-fetch'
+    'config' | 'symonKey' | 'symonUrl' | 'verbose' | 'native-fetch'
   >
   isFirstRun: boolean
 }
@@ -62,7 +62,7 @@ export function logStartupMessage({
     }
   }
 
-  if (flags['use-node-fetch']) {
+  if (flags['native-fetch']) {
     log.info('Using native Node.js fetch for HTTP client')
   }
 

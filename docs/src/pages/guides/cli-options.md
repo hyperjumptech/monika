@@ -285,10 +285,10 @@ monika --retryMaxDelayMs 30000
 
 ## Experimental Native Node Fetch
 
-Monika use Axios as HTTP client by default, use `--use-node-fetch` to switch to native fetch provided by Node.js runtime.
+Monika use Axios as HTTP client by default, use `--native-fetch` to switch to native fetch provided by Node.js runtime.
 
 ```sh
-monika --use-node-fetch
+monika --native-fetch
 ```
 
 ## Follow Redirects

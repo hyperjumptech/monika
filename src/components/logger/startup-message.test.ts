@@ -437,7 +437,7 @@ describe('Startup message', () => {
         flags: {
           config: ['./monika.yaml'],
           verbose: false,
-          'use-node-fetch': true,
+          'native-fetch': true,
         },
         isFirstRun: false,
       })
@@ -453,7 +453,7 @@ describe('Startup message', () => {
         flags: {
           config: ['./monika.yaml'],
           verbose: false,
-          'use-node-fetch': false,
+          'native-fetch': false,
         },
         isFirstRun: false,
       })
