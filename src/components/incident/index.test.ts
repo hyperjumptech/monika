@@ -22,57 +22,51 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { formatDistanceToNow } from 'date-fns'
-import { getContext, setContext } from '../../context'
-import type { ProbeAlert } from '../../interfaces/probe'
+import { expect } from '@oclif/test'
+import { addIncident, removeIncident, getIncidents } from '.'
 
-type DowntimeCounter = {
-  alert: ProbeAlert
-  probeID: string
-  url: string
-  createdAt?: Date
-}
+describe('Incident', () => {
+  it('allow identical urls but different probeID', () => {
+    // arrange
+    const probeConfig = {
+      alert: { id: 'VyYwG', assertion: '', message: '' },
+      probeID: 'Pn9x',
+      probeRequestURL: 'https://example.com',
+    }
+    const probeConfig2 = {
+      alert: { id: 'VyYwG', assertion: '', message: '' },
+      probeID: 'Pn9x-2',
+      probeRequestURL: 'https://example.com',
+    }
 
-export function addIncident({
-  alert,
-  createdAt,
-  probeID,
-  url,
-}: DowntimeCounter): void {
-  const newIncident = {
-    alert,
-    probeID,
-    probeRequestURL: url,
-    createdAt: createdAt || new Date(),
-  }
+    // act
+    addIncident(probeConfig)
+    addIncident(probeConfig2)
+    removeIncident(probeConfig)
 
-  setContext({ incidents: [...getContext().incidents, newIncident] })
-}
-
-export function getDowntimeDuration({
-  probeID,
-  url,
-}: Omit<DowntimeCounter, 'alert'>): string {
-  const lastIncident = getContext().incidents.find(
-    (incident) =>
-      incident.probeID === probeID && incident.probeRequestURL === url
-  )
-
-  if (!lastIncident) {
-    return '0 seconds'
-  }
-
-  return formatDistanceToNow(lastIncident.createdAt, {
-    includeSeconds: true,
+    // assert
+    expect(getIncidents()[0].probeID).eq(probeConfig2.probeID)
   })
-}
 
-export function removeIncident({ probeID, url }: DowntimeCounter): void {
-  const newIncidents = getContext().incidents.filter(
-    (incident) =>
-      incident.probeID !== probeID || incident.probeRequestURL !== url
-    // remove incidents with exact mach of probeID and url
-  )
+  it('allow identical probe-ids but different urls', () => {
+    // arrange
+    const probeConfig = {
+      alert: { id: 'VyYwG', assertion: '', message: '' },
+      probeID: 'Pn9x',
+      probeRequestURL: 'https://example.com',
+    }
+    const probeConfig2 = {
+      alert: { id: 'VyYwG', assertion: '', message: '' },
+      probeID: 'Pn9x',
+      probeRequestURL: 'https://sub.example.com',
+    }
 
-  setContext({ incidents: newIncidents })
-}
+    // act
+    addIncident(probeConfig)
+    addIncident(probeConfig2)
+    removeIncident(probeConfig)
+
+    // assert
+    expect(getIncidents()[0].probeRequestURL).eq(probeConfig2.probeRequestURL)
+  })
+})

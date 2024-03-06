@@ -42,6 +42,7 @@ import {
 } from '../components/config/probe'
 import { updateConfig } from '../components/config'
 import { validateProbes } from '../components/config/validation/validator/probe'
+import { removeIncident } from '../components/incident'
 import { getOSName } from '../components/notification/alert-message'
 import { getContext } from '../context'
 import events from '../events'
@@ -481,6 +482,7 @@ async function applyProbeChanges(probeChanges: ProbeChange[]) {
         case 'disabled': {
           deleteProbe(probeId)
           removeProbeState(probeId)
+          removeIncident({ probeID: probeId })
           return
         }
 

@@ -36,7 +36,7 @@ import responseChecker from '../../../../plugins/validate-response/checkers'
 import { getAlertID } from '../../../../utils/alert-id'
 import { getEventEmitter } from '../../../../utils/events'
 import { isSymonModeFrom } from '../../../config'
-import { addIncident } from '../../../downtime-counter'
+import { addIncident } from '../../../incident'
 import { saveProbeRequestLog } from '../../../logger/history'
 import { logResponseTime } from '../../../logger/response-time-log'
 import { httpRequest } from './request'
@@ -203,7 +203,7 @@ export class HTTPProber extends BaseProber {
     addIncident({
       alert: triggeredAlert,
       probeID,
-      url,
+      probeRequestURL: url,
     })
 
     this.sendNotification({
