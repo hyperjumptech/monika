@@ -283,7 +283,7 @@ You can also set the maximum of delay by using the `--retryMaxDelayMs` flag. Def
 monika --retryMaxDelayMs 30000
 ```
 
-## Experimental Native Node Fetch
+## Native Fetch from Node.js
 
 Monika use Axios as HTTP client by default, use `--native-fetch` to switch to native fetch provided by Node.js runtime.
 
