@@ -113,6 +113,7 @@
   },
   "devDependencies": {
     "@gmrchk/cli-testing-library": "^0.1.2",
+    "@mapbox/node-pre-gyp": "^1.0.11",
     "@oclif/test": "3.0.2",
     "@types/chai": "^4.2.15",
     "@types/chai-spies": "^1.0.4",
