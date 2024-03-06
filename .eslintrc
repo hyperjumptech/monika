@@ -19,6 +19,7 @@
         "perfectionist/sort-union-types": "off",
         "prefer-arrow-callback": "warn",
         "prefer-destructuring": "warn",
+        "prefer-object-has-own": "warn",
         "unicorn/no-await-expression-member": "warn",
         "unicorn/no-empty-file": "warn",
         "unicorn/no-useless-promise-resolve-reject": "warn",
