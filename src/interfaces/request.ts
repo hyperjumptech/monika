@@ -22,11 +22,6 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import {
-  AxiosRequestConfig,
-  AxiosRequestHeaders,
-  AxiosResponseHeaders,
-} from 'axios'
 import { ProbeAlert } from './probe'
 
 // RequestTypes are used to define the type of request that is being made.
@@ -54,21 +49,21 @@ export interface ProbeRequestResponse<T = unknown> {
   data: T
   body: T
   status: number
-  headers: string | AxiosResponseHeaders
+  headers: string | Record<string, string>
   responseTime: number
   error?: string // any error message from drivers
   result: probeRequestResult // did the probe succeed or fail?
 }
 
 // ProbeRequest is used to define the requests that is being made.
-export interface RequestConfig extends Omit<AxiosRequestConfig, 'data'> {
+export interface RequestConfig extends Omit<RequestInit, 'headers' | 'body'> {
   id?: string
   saveBody?: boolean // save response body to db?
   url: string
   body: object | string
   timeout: number // request timeout
   alerts?: ProbeAlert[]
-  headers?: AxiosRequestHeaders
+  headers?: object
   ping?: boolean // is this request for a ping?
   allowUnauthorized?: boolean // ignore ssl cert?
 }

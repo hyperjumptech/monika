@@ -34,24 +34,15 @@ import {
 // eslint-disable-next-line no-restricted-imports
 import * as qs from 'querystring'
 
-import http from 'http'
-import https from 'https'
 import { getContext } from '../../../../context'
 import { icmpRequest } from '../icmp/request'
 import registerFakes from '../../../../utils/fakes'
-import { sendHttpRequest } from '../../../../utils/http'
+import { sendHttpRequest, sendHttpRequestFetch } from '../../../../utils/http'
+import { log } from '../../../../utils/pino'
 import { AxiosError } from 'axios'
 
 // Register Handlebars helpers
 registerFakes(Handlebars)
-
-// Keep the agents alive to reduce the overhead of DNS queries and creating TCP connection.
-// More information here: https://rakshanshetty.in/nodejs-http-keep-alive/
-const httpAgent = new http.Agent({ keepAlive: true })
-const httpsAgent = new https.Agent({
-  keepAlive: true,
-  rejectUnauthorized: getContext().flags.ignoreInvalidTLS,
-})
 
 type probingParams = {
   requestConfig: Omit<RequestConfig, 'saveBody' | 'alert'> // is a config object
@@ -75,102 +66,74 @@ export async function httpRequest({
   const renderedURL = renderURL({ responses })
 
   const { flags } = getContext()
-
-  // Compile headers using handlebars to render URLs that uses previous responses data.
-  // In some case such as value is not string, it will be returned as is without being compiled.
-  // If the request does not have any headers, then it should skip this process.
-  if (headers) {
-    for (const header of Object.keys(headers)) {
-      const rawHeader = headers[header]
-      const renderHeader = Handlebars.compile(rawHeader)
-      const renderedHeader = renderHeader({ responses })
-
-      newReq.headers = {
-        ...newReq.headers,
-        [header]: renderedHeader,
-      }
-
-      // evaluate "Content-Type" header in case-insensitive manner
-      if (header.toLocaleLowerCase() === 'content-type') {
-        const { contentType } = transformContentByType(body, rawHeader)
-
-        if (rawHeader === 'multipart/form-data') {
-          // delete the previous content-type header and add a new header with boundary
-          // it needs to be deleted because multipart/form data needs to append the boundary data
-          // from
-          //    "content-type": "multipart/form-data"
-          // to
-          //    "content-type": "multipart/form-data; boundary=--------------------------012345678900123456789012"
-          delete newReq.headers[header]
-
-          newReq.headers = {
-            ...newReq.headers,
-            'content-type': contentType,
-          }
-        }
-      }
-    }
-  }
-
-  if (body) {
-    newReq.body = generateRequestChainingBody(body, responses)
-
-    if (newReq.headers) {
-      const contentTypeKey = Object.keys(headers || {}).find(
-        (hk) => hk.toLocaleLowerCase() === 'content-type'
-      )
-
-      if (contentTypeKey) {
-        const { content, contentType } = transformContentByType(
-          newReq?.body,
-          (headers || {})[contentTypeKey]
-        )
-
-        delete newReq.headers[contentTypeKey]
-
-        newReq.body = content
-        newReq.headers = {
-          ...newReq.headers,
-          'content-type': contentType,
-        }
-      }
-    }
-  }
-
-  // check if this request must ignore ssl cert
-  // if it is, then create new https agent solely for this request
-  // allowUnauthorized in a request takes higher priority than the global ignoreInvalidTLS flag
-  let optHttpsAgent
-  if (allowUnauthorized) {
-    // Use the agent with the rejectUnauthorized value from the config
-    optHttpsAgent = new https.Agent({
-      rejectUnauthorized: !allowUnauthorized,
-    })
-  } else {
-    const ignoringInvalidTLS = getContext().flags.ignoreInvalidTLS
-    httpsAgent.options = {
-      ...httpsAgent.options,
-      rejectUnauthorized: !ignoringInvalidTLS,
-    }
-    optHttpsAgent = httpsAgent
-  }
+  newReq.headers = compileHeaders(headers, body, responses as never)
+  // compile body needs to modify headers if necessary
+  const { headers: newHeaders, body: newBody } = compileBody(
+    newReq.headers,
+    body,
+    responses
+  )
+  newReq.headers = newHeaders
+  newReq.body = newBody
 
   const requestStartedAt = Date.now()
-
   try {
     // is this a request for ping?
     if (newReq.ping === true) {
       return icmpRequest({ host: renderedURL })
     }
 
+    if (flags['native-fetch']) {
+      if (flags.verbose) log.info(`Probing ${renderedURL} with Node.js fetch`)
+      const response = await sendHttpRequestFetch({
+        ...newReq,
+        allowUnauthorizedSsl: allowUnauthorized,
+        keepalive: true,
+        url: renderedURL,
+        maxRedirects: flags['follow-redirects'],
+        body:
+          typeof newReq.body === 'string'
+            ? newReq.body
+            : JSON.stringify(newReq.body),
+      })
+
+      const responseTime = Date.now() - requestStartedAt
+      let responseHeaders: Record<string, string> | undefined
+      if (response.headers) {
+        responseHeaders = {}
+        for (const [key, value] of Object.entries(response.headers)) {
+          responseHeaders[key] = value
+        }
+      }
+
+      const responseBody = response.headers
+        .get('Content-Type')
+        ?.includes('application/json')
+        ? response.json()
+        : response.text()
+
+      return {
+        requestType: 'HTTP',
+        data: responseBody,
+        body: responseBody,
+        status: response.status,
+        headers: responseHeaders || '',
+        responseTime,
+        result: probeRequestResult.success,
+      }
+    }
+
     // Do the request using compiled URL and compiled headers (if exists)
     const resp = await sendHttpRequest({
       ...newReq,
+      allowUnauthorizedSsl: allowUnauthorized,
+      keepalive: true,
       url: renderedURL,
-      data: newReq.body,
       maxRedirects: flags['follow-redirects'],
-      httpAgent,
-      httpsAgent: optHttpsAgent,
+      body:
+        typeof newReq.body === 'string'
+          ? newReq.body
+          : JSON.stringify(newReq.body),
     })
 
     const responseTime = Date.now() - requestStartedAt
@@ -233,10 +196,94 @@ export async function httpRequest({
   }
 }
 
+function compileHeaders(
+  headers: object | undefined,
+  body: string | object,
+  responses: never
+) {
+  // return as-is if falsy
+  if (!headers) return headers
+  // Compile headers using handlebars to render URLs that uses previous responses data.
+  // In some case such as value is not string, it will be returned as is without being compiled.
+  // If the request does not have any headers, then it should skip this process.
+  let newHeaders = headers
+  for (const [key, value] of Object.entries(headers)) {
+    const rawHeader = value
+    const renderHeader = Handlebars.compile(rawHeader)
+    const renderedHeader = renderHeader({ responses })
+
+    newHeaders = {
+      ...newHeaders,
+      [key]: renderedHeader,
+    }
+
+    // evaluate "Content-Type" header in case-insensitive manner
+    if (key.toLocaleLowerCase() === 'content-type') {
+      const { contentType } = transformContentByType(body, rawHeader)
+
+      if (rawHeader === 'multipart/form-data') {
+        // delete the previous content-type header and add a new header with boundary
+        // it needs to be deleted because multipart/form data needs to append the boundary data
+        // from
+        //    "content-type": "multipart/form-data"
+        // to
+        //    "content-type": "multipart/form-data; boundary=--------------------------012345678900123456789012"
+        delete newHeaders[key as never]
+
+        newHeaders = {
+          ...newHeaders,
+          'content-type': contentType,
+        }
+      }
+    }
+  }
+
+  return newHeaders
+}
+
+function compileBody(
+  headers: object | undefined,
+  body: object | string,
+  responses: ProbeRequestResponse[]
+): {
+  headers: object | undefined
+  body: object | string
+} {
+  // return as-is if falsy
+  if (!body) return { headers, body }
+  let newHeaders = headers
+  let newBody = generateRequestChainingBody(body, responses)
+
+  if (newHeaders) {
+    const contentTypeKey = Object.keys(newHeaders || {}).find(
+      (hk) => hk.toLocaleLowerCase() === 'content-type'
+    )
+
+    if (newHeaders && contentTypeKey) {
+      const { content, contentType } = transformContentByType(
+        newBody,
+        newHeaders[contentTypeKey as never]
+      )
+
+      delete newHeaders[contentTypeKey as never]
+
+      newBody = content
+      newHeaders = newHeaders
+        ? {
+            ...(newHeaders as object),
+            'content-type': contentType,
+          }
+        : undefined
+    }
+  }
+
+  return { headers: newHeaders, body: newBody }
+}
+
 export function generateRequestChainingBody(
   body: object | string,
   responses: ProbeRequestResponse[]
-): JSON | string {
+): object | string {
   const isString = typeof body === 'string'
   const template = Handlebars.compile(isString ? body : JSON.stringify(body))
   const renderedBody = template({ responses })
@@ -431,11 +478,11 @@ function getErrorStatusWithExplanation(error: unknown): {
 
     default: {
       if (error instanceof AxiosError) {
-        console.error(
+        log.error(
           `Error code 99: Unhandled error while probing ${error.request.url}, got ${error.code} ${error.stack} `
         )
       } else {
-        console.error(
+        log.error(
           `Error code 99: Unhandled error, got ${(error as AxiosError).stack}`
         )
       }

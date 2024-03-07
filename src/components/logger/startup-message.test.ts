@@ -426,8 +426,10 @@ describe('Startup message', () => {
       // assert
       expect(logMessage).include('config file')
     })
+  })
 
-    // delete test on removing toggle
+  // delete tests on removing toggle
+  describe('Node fetch toggle', () => {
     it('should show experimental fetch toggle', () => {
       // act
       logStartupMessage({
@@ -435,7 +437,7 @@ describe('Startup message', () => {
         flags: {
           config: ['./monika.yaml'],
           verbose: false,
-          'experimental-fetch': true,
+          'native-fetch': true,
         },
         isFirstRun: false,
       })
@@ -444,7 +446,6 @@ describe('Startup message', () => {
       expect(logMessage).include('Using native Node.js fetch for HTTP client')
     })
 
-    // delete test on removing toggle
     it('should hide experimental fetch toggle', () => {
       // act
       logStartupMessage({
@@ -452,7 +453,7 @@ describe('Startup message', () => {
         flags: {
           config: ['./monika.yaml'],
           verbose: false,
-          'experimental-fetch': false,
+          'native-fetch': false,
         },
         isFirstRun: false,
       })
