@@ -657,7 +657,7 @@ function handleUndiciError(
       headers: '',
       responseTime,
       result: probeRequestResult.failed,
-      error: 'EINVALIDARGUMENT: HTTP arguments are invalid.',
+      error: 'EINVALIDARGUMENT: Invalid HTTP arguments.',
     }
   }
 
@@ -709,7 +709,7 @@ function handleUndiciError(
     return {
       data: '',
       body: '',
-      status: 25,
+      status: 24,
       headers: '',
       responseTime,
       result: probeRequestResult.failed,
@@ -724,7 +724,7 @@ function handleUndiciError(
     return {
       data: '',
       body: '',
-      status: 26,
+      status: 25,
       headers: '',
       responseTime,
       result: probeRequestResult.failed,
@@ -733,11 +733,13 @@ function handleUndiciError(
   }
 
   // expected error from fetch, but exact reason is in the message string
+  // error messages are unpredictable
+  // reference https://github.com/search?q=repo:nodejs/undici+new+InformationalError(&type=code
   if (error instanceof undiciErrors.InformationalError) {
     return {
       data: '',
       body: '',
-      status: 27,
+      status: 26,
       headers: '',
       responseTime,
       result: probeRequestResult.failed,
