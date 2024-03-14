@@ -83,7 +83,7 @@ describe('Prometheus plugin', () => {
           expect(statusCode).to.equal(405)
         }
 
-        // eslint-disable-next-line unicorn/no-process-exit, no-process-exit
+        // eslint-disable-next-line unicorn/no-process-exit, n/no-process-exit
         process.exit(0)
       })
   })
