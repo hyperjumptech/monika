@@ -147,7 +147,6 @@
     "lint-staged": "^10.5.4",
     "mocha": "^9.1.2",
     "msw": "^2.2.3",
-    "node-request-interceptor": "^0.6.3",
     "nyc": "^15.1.0",
     "oclif": "4.0.2",
     "pkg": "^5.8.1",
