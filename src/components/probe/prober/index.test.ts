@@ -22,7 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { rest } from 'msw'
+import { http } from 'msw'
 import { setupServer } from 'msw/node'
 import { expect } from '@oclif/test'
 
@@ -36,11 +36,11 @@ describe('Prober', () => {
     let probeRequestTotal = 0
     let webhookBody: Record<string, string> | null = null
     const server = setupServer(
-      rest.get('https://example.com', (_, res, ctx) => {
+      http.get('https://example.com', (_, res, ctx) => {
         probeRequestTotal++
         return res(ctx.status(200))
       }),
-      rest.post('https://example.com/webhook', async (req, res, ctx) => {
+      http.post('https://example.com/webhook', async (req, res, ctx) => {
         webhookBody = await req.json()
         return res(ctx.status(202))
       })
@@ -260,7 +260,7 @@ describe('Prober', () => {
     it('should not send incident notification if recovered_at is null and target is not healthy', async () => {
       // arrange
       server.use(
-        rest.get('https://example.com', (_, res, ctx) => {
+        http.get('https://example.com', (_, res, ctx) => {
           probeRequestTotal++
           return res(ctx.status(404))
         })
@@ -371,7 +371,7 @@ describe('Prober', () => {
     it('should send incident notification if recovered_at is not null and target is not healthy', async () => {
       // arrange
       server.use(
-        rest.get('https://example.com', (_, res, ctx) => {
+        http.get('https://example.com', (_, res, ctx) => {
           probeRequestTotal++
           return res(ctx.status(404))
         })

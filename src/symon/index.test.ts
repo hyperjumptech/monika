@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import { expect } from '@oclif/test'
-import { rest } from 'msw'
+import { http } from 'msw'
 import { setupServer } from 'msw/node'
 
 import { monikaFlagsDefaultValue, type MonikaFlags } from '../flag'
@@ -60,7 +60,7 @@ const config: Config = {
   ],
 }
 const server = setupServer(
-  rest.get('http://ip-api.com/json/192.168.1.1', (_, res, ctx) =>
+  http.get('http://ip-api.com/json/192.168.1.1', (_, res, ctx) =>
     res(
       ctx.json({
         city: 'jakarta',
@@ -69,7 +69,7 @@ const server = setupServer(
       })
     )
   ),
-  rest.post(
+  http.post(
     'http://localhost:4000/api/v1/monika/client-handshake',
     (_, res, ctx) =>
       res(
@@ -82,7 +82,7 @@ const server = setupServer(
         })
       )
   ),
-  rest.get('http://localhost:4000/api/v1/monika/1234/probes', (_, res, ctx) =>
+  http.get('http://localhost:4000/api/v1/monika/1234/probes', (_, res, ctx) =>
     res(
       ctx.set('etag', config.version || ''),
       ctx.json({
@@ -92,8 +92,8 @@ const server = setupServer(
       })
     )
   ),
-  rest.get('https://example.com', (_, res, ctx) => res(ctx.json({}))),
-  rest.get('http://localhost:4000/api/v1/monika/report', (_, res, ctx) =>
+  http.get('https://example.com', (_, res, ctx) => res(ctx.json({}))),
+  http.get('http://localhost:4000/api/v1/monika/report', (_, res, ctx) =>
     res(
       ctx.json({
         statusCode: 'ok',
@@ -142,7 +142,7 @@ describe('Symon initiate', () => {
     let body: Record<string, string> = {}
     // mock the outgoing requests
     server.use(
-      rest.post(
+      http.post(
         'http://localhost:4000/api/v1/monika/client-handshake',
         async (req, res, ctx) => {
           body = await req.json()
@@ -200,7 +200,7 @@ describe('Symon initiate', () => {
   it('should throw an error if the request to get probes is failed', async () => {
     // arrange
     server.use(
-      rest.post(
+      http.post(
         'http://localhost:4000/api/v1/monika/client-handshake',
         (_, res, ctx) =>
           res(
@@ -213,7 +213,7 @@ describe('Symon initiate', () => {
             })
           )
       ),
-      rest.get('http://localhost:4000/api/v1/monika/1234/probes', () => {
+      http.get('http://localhost:4000/api/v1/monika/1234/probes', () => {
         throw new Error('Failed')
       })
     )
@@ -241,7 +241,7 @@ describe('Symon initiate', () => {
     // arrange
     let body: Record<string, string> = {}
     server.use(
-      rest.post(
+      http.post(
         'http://localhost:4000/api/v1/monika/events',
         async (req, res, ctx) => {
           body = await req.json()
@@ -297,7 +297,7 @@ describe('Symon initiate', () => {
       alerts: [],
     }
     server.use(
-      rest.get(
+      http.get(
         'http://localhost:4000/api/v1/monika/1234/probe-changes',
         (_, res, ctx) =>
           res(
@@ -346,7 +346,7 @@ describe('Symon initiate', () => {
   it('should update a probe', async () => {
     // arrange
     server.use(
-      rest.get(
+      http.get(
         'http://localhost:4000/api/v1/monika/1234/probe-changes',
         (_, res, ctx) =>
           res(
@@ -403,7 +403,7 @@ describe('Symon initiate', () => {
   it('should delete a probe', async () => {
     // arrange
     server.use(
-      rest.get(
+      http.get(
         'http://localhost:4000/api/v1/monika/1234/probe-changes',
         (_, res, ctx) =>
           res(
@@ -459,7 +459,7 @@ describe('Symon initiate', () => {
   it('should disable a probe', async () => {
     // arrange
     server.use(
-      rest.get(
+      http.get(
         'http://localhost:4000/api/v1/monika/1234/probe-changes',
         (_, res, ctx) =>
           res(

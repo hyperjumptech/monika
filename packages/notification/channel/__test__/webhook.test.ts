@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import { expect } from 'chai'
-import { rest } from 'msw'
+import { http } from 'msw'
 import { setupServer } from 'msw/node'
 
 import { validateNotification } from '../../validator/notification'
@@ -77,7 +77,7 @@ describe('Webhook Notification', () => {
   describe('Send', () => {
     let body = {}
     const server = setupServer(
-      rest.post('https://example.com', async (req, res, ctx) => {
+      http.post('https://example.com', async (req, res, ctx) => {
         body = await req.json()
 
         return res(ctx.status(200))

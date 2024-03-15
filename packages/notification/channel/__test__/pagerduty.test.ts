@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import { expect } from 'chai'
-import { rest } from 'msw'
+import { http } from 'msw'
 import { setupServer } from 'msw/node'
 import type { NotificationMessage } from '../../channel'
 import { send, validator } from '../pagerduty'
@@ -61,7 +61,7 @@ describe('PagerDuty notification', () => {
   describe('send the event', () => {
     let body = {}
     const server = setupServer(
-      rest.post(
+      http.post(
         'https://events.pagerduty.com/v2/enqueue',
         async (req, res, ctx) => {
           body = await req.json()
@@ -69,7 +69,7 @@ describe('PagerDuty notification', () => {
           return res(ctx.status(202))
         }
       ),
-      rest.post(
+      http.post(
         'https://events.pagerduty.com/v2/enqueue',
         async (req, res, ctx) => {
           body = await req.json()

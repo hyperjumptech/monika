@@ -24,7 +24,7 @@
 
 import { expect } from '@oclif/test'
 import { AxiosError } from 'axios'
-import { rest } from 'msw'
+import { http } from 'msw'
 import { setupServer } from 'msw/node'
 import sinon from 'sinon'
 import * as httpRequest from '../../../../utils/http'
@@ -42,11 +42,11 @@ let notificationAlert: Record<
   Record<string, Record<string, never>>
 > = {}
 const server = setupServer(
-  rest.get('https://example.com', (_, res, ctx) => {
+  http.get('https://example.com', (_, res, ctx) => {
     urlRequestTotal += 1
     return res(ctx.status(200))
   }),
-  rest.post('https://example.com/webhook', async (req, res, ctx) => {
+  http.post('https://example.com/webhook', async (req, res, ctx) => {
     const requestBody = await req.json()
     if (requestBody?.body?.url) {
       notificationAlert[requestBody.body.url] = requestBody
@@ -252,7 +252,7 @@ describe('HTTP Probe processing', () => {
   it('should send incident notification when assertion fails', async () => {
     // arrange
     server.use(
-      rest.get('https://example.com', (_, res, ctx) => {
+      http.get('https://example.com', (_, res, ctx) => {
         urlRequestTotal += 1
         return res(ctx.status(404))
       })
@@ -305,7 +305,7 @@ describe('HTTP Probe processing', () => {
   it('should send recovery notification', async () => {
     // arrange
     server.use(
-      rest.get('https://example.com', (_, res, ctx) => {
+      http.get('https://example.com', (_, res, ctx) => {
         urlRequestTotal += 1
         return res(ctx.status(404))
       })
