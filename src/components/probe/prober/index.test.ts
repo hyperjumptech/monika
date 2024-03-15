@@ -22,7 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { HttpResponse, http } from 'msw'
+import { type DefaultBodyType, HttpResponse, http } from 'msw'
 import { setupServer } from 'msw/node'
 import { expect } from '@oclif/test'
 
@@ -34,7 +34,7 @@ import { getIncidents } from '../../incident'
 describe('Prober', () => {
   describe('Initial incident state', () => {
     let probeRequestTotal = 0
-    let webhookBody: Record<string, string> | null = null
+    let webhookBody: DefaultBodyType = null
     const server = setupServer(
       http.get('https://example.com', () => {
         probeRequestTotal++

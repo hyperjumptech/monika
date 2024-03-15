@@ -49,7 +49,7 @@ const server = setupServer(
     })
   }),
   http.post('https://example.com/webhook', async ({ request }) => {
-    const requestBody = await request.json()
+    const requestBody = (await request.json()) as Record<string, any>
     if (requestBody?.body?.url) {
       notificationAlert[requestBody.body.url] = requestBody
     }

@@ -48,7 +48,7 @@ describe('probingHTTP', () => {
     it('should render correct headers', async () => {
       // arrange
       const tokens = ['1', '2']
-      let verifyHeader: Record<string, string> = {}
+      let verifyHeader = new Headers()
       let sentToken = ''
 
       server.use(
@@ -59,7 +59,7 @@ describe('probingHTTP', () => {
           return HttpResponse.json({ token })
         }),
         http.post('http://localhost:4000/verify', async ({ request }) => {
-          verifyHeader = request.headers.all()
+          verifyHeader = request.headers
 
           return HttpResponse.json({ verified: true })
         })
@@ -97,7 +97,7 @@ describe('probingHTTP', () => {
             responses.push(resp)
             if (j !== 0) {
               results.push({
-                sentToken: verifyHeader.authorization,
+                sentToken: verifyHeader.get('authorization'),
                 expectedToken: sentToken,
               })
             }

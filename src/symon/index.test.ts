@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import { expect } from '@oclif/test'
-import { HttpResponse, http } from 'msw'
+import { type DefaultBodyType, HttpResponse, http } from 'msw'
 import { setupServer } from 'msw/node'
 
 import { monikaFlagsDefaultValue, type MonikaFlags } from '../flag'
@@ -131,7 +131,7 @@ describe('Symon initiate', () => {
         symonKey: 'random-key',
       } as MonikaFlags,
     })
-    let body: Record<string, string> = {}
+    let body: DefaultBodyType = {}
     // mock the outgoing requests
     server.use(
       http.post(
@@ -225,7 +225,7 @@ describe('Symon initiate', () => {
 
   it('should send event to Symon when incident or recovery happens', async () => {
     // arrange
-    let body: Record<string, string> = {}
+    let body: DefaultBodyType = {}
     server.use(
       http.post(
         'http://localhost:4000/api/v1/monika/events',
