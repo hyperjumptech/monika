@@ -22,7 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { http } from 'msw'
+import { HttpResponse, http } from 'msw'
 import { setupServer } from 'msw/node'
 import { expect } from '@oclif/test'
 
@@ -36,13 +36,17 @@ describe('Prober', () => {
     let probeRequestTotal = 0
     let webhookBody: Record<string, string> | null = null
     const server = setupServer(
-      http.get('https://example.com', (_, res, ctx) => {
+      http.get('https://example.com', () => {
         probeRequestTotal++
-        return res(ctx.status(200))
+        return new HttpResponse(null, {
+          status: 200,
+        })
       }),
       http.post('https://example.com/webhook', async ({ request }) => {
         webhookBody = await request.json()
-        return res(ctx.status(202))
+        return new HttpResponse(null, {
+          status: 202,
+        })
       })
     )
 
@@ -260,9 +264,11 @@ describe('Prober', () => {
     it('should not send incident notification if recovered_at is null and target is not healthy', async () => {
       // arrange
       server.use(
-        http.get('https://example.com', (_, res, ctx) => {
+        http.get('https://example.com', () => {
           probeRequestTotal++
-          return res(ctx.status(404))
+          return new HttpResponse(null, {
+            status: 404,
+          })
         })
       )
       const proberMetadata: ProberMetadata = {
@@ -371,9 +377,11 @@ describe('Prober', () => {
     it('should send incident notification if recovered_at is not null and target is not healthy', async () => {
       // arrange
       server.use(
-        http.get('https://example.com', (_, res, ctx) => {
+        http.get('https://example.com', () => {
           probeRequestTotal++
-          return res(ctx.status(404))
+          return new HttpResponse(null, {
+            status: 404,
+          })
         })
       )
       const proberMetadata: ProberMetadata = {

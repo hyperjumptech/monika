@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import { expect } from '@oclif/test'
-import { http } from 'msw'
+import { HttpResponse, http } from 'msw'
 import { setupServer } from 'msw/node'
 
 import type {
@@ -52,16 +52,16 @@ describe('probingHTTP', () => {
       let sentToken = ''
 
       server.use(
-        http.get('http://localhost:4000/get_key', async (_, res, ctx) => {
+        http.get('http://localhost:4000/get_key', async () => {
           const token = tokens.pop() as string
           sentToken = token
 
-          return res(ctx.json({ token }))
+          return HttpResponse.json({ token })
         }),
-        http.post('http://localhost:4000/verify', async (req, res, ctx) => {
-          verifyHeader = req.headers.all()
+        http.post('http://localhost:4000/verify', async ({ request }) => {
+          verifyHeader = request.headers.all()
 
-          return res(ctx.json({ verified: true }))
+          return HttpResponse.json({ verified: true })
         })
       )
 
@@ -113,14 +113,18 @@ describe('probingHTTP', () => {
 
     it('should submit correct form', async () => {
       server.use(
-        http.post('http://localhost:4000/login', async (req, res, ctx) => {
-          const reqBody = await req.text()
+        http.post('http://localhost:4000/login', async ({ request }) => {
+          const reqBody = await request.text()
 
           if (reqBody !== 'username=example%40example.com&password=example') {
-            return res(ctx.status(400))
+            return new HttpResponse(null, {
+              status: 400,
+            })
           }
 
-          return res(ctx.status(200))
+          return new HttpResponse(null, {
+            status: 200,
+          })
         })
       )
       const request = {
@@ -143,19 +147,23 @@ describe('probingHTTP', () => {
     it('should send request with multipart/form-data content-type', async () => {
       // arrange
       server.use(
-        http.post('https://example.com', async (req, res, ctx) => {
-          const { headers } = req
-          const reqBody = await req.text()
+        http.post('https://example.com', async ({ request }) => {
+          const { headers } = request
+          const reqBody = await request.text()
 
           if (
             !headers.get('content-type')?.startsWith('multipart/form-data') ||
             !reqBody.includes('john@example.com') ||
             !reqBody.includes('drowssap')
           ) {
-            return res(ctx.status(400))
+            return new HttpResponse(null, {
+              status: 400,
+            })
           }
 
-          return res(ctx.status(200))
+          return new HttpResponse(null, {
+            status: 200,
+          })
         })
       )
       const request: RequestConfig = {
@@ -179,9 +187,9 @@ describe('probingHTTP', () => {
     it('should send request with text-plain content-type', async () => {
       // arrange
       server.use(
-        http.post('https://example.com', async (req, res, ctx) => {
-          const { headers } = req
-          const body = await req.text()
+        http.post('https://example.com', async ({ request }) => {
+          const { headers } = request
+          const body = await request.text()
 
           if (
             headers.get('content-type') !== 'text/plain' ||
@@ -190,10 +198,14 @@ describe('probingHTTP', () => {
             console.error(headers.get('content-type'))
             console.error(body)
 
-            return res(ctx.status(400))
+            return new HttpResponse(null, {
+              status: 400,
+            })
           }
 
-          return res(ctx.status(200))
+          return new HttpResponse(null, {
+            status: 200,
+          })
         })
       )
       const request: RequestConfig = {
@@ -217,9 +229,9 @@ describe('probingHTTP', () => {
     it('should send request with text/yaml content-type', async () => {
       // arrange
       server.use(
-        http.post('https://example.com', async (req, res, ctx) => {
-          const { headers } = req
-          const body = await req.text()
+        http.post('https://example.com', async ({ request }) => {
+          const { headers } = request
+          const body = await request.text()
 
           if (
             headers.get('content-type') !== 'text/yaml' ||
@@ -228,10 +240,14 @@ describe('probingHTTP', () => {
             console.error(headers.get('content-type'))
             console.error(body)
 
-            return res(ctx.status(400))
+            return new HttpResponse(null, {
+              status: 400,
+            })
           }
 
-          return res(ctx.status(200))
+          return new HttpResponse(null, {
+            status: 200,
+          })
         })
       )
       const request: RequestConfig = {
@@ -255,9 +271,9 @@ describe('probingHTTP', () => {
     it('should send request with application/xml content-type', async () => {
       // arrange
       server.use(
-        http.post('https://example.com', async (req, res, ctx) => {
-          const { headers } = req
-          const body = await req.text()
+        http.post('https://example.com', async ({ request }) => {
+          const { headers } = request
+          const body = await request.text()
 
           if (
             headers.get('content-type') !== 'application/xml' ||
@@ -266,10 +282,14 @@ describe('probingHTTP', () => {
             console.error(headers.get('content-type'))
             console.error(JSON.stringify(body))
 
-            return res(ctx.status(400))
+            return new HttpResponse(null, {
+              status: 400,
+            })
           }
 
-          return res(ctx.status(200))
+          return new HttpResponse(null, {
+            status: 200,
+          })
         })
       )
       const request: RequestConfig = {
@@ -293,9 +313,9 @@ describe('probingHTTP', () => {
     it('should send request with text-plain content-type even with allowUnauthorized option', async () => {
       // arrange
       server.use(
-        http.post('https://example.com', async (req, res, ctx) => {
-          const { headers } = req
-          const body = await req.text()
+        http.post('https://example.com', async ({ request }) => {
+          const { headers } = request
+          const body = await request.text()
 
           if (
             headers.get('content-type') !== 'text/plain' ||
@@ -304,10 +324,14 @@ describe('probingHTTP', () => {
             console.error(headers.get('content-type'))
             console.error(body)
 
-            return res(ctx.status(400))
+            return new HttpResponse(null, {
+              status: 400,
+            })
           }
 
-          return res(ctx.status(200))
+          return new HttpResponse(null, {
+            status: 200,
+          })
         })
       )
       const request: RequestConfig = {

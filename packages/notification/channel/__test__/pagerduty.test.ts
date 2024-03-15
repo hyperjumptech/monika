@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import { expect } from 'chai'
-import { http } from 'msw'
+import { HttpResponse, http } from 'msw'
 import { setupServer } from 'msw/node'
 import type { NotificationMessage } from '../../channel'
 import { send, validator } from '../pagerduty'
@@ -66,7 +66,9 @@ describe('PagerDuty notification', () => {
         async ({ request }) => {
           body = await request.json()
 
-          return res(ctx.status(202))
+          return new HttpResponse(null, {
+            status: 202,
+          })
         }
       ),
       http.post(
@@ -74,7 +76,9 @@ describe('PagerDuty notification', () => {
         async ({ request }) => {
           body = await request.json()
 
-          return res(ctx.status(202))
+          return new HttpResponse(null, {
+            status: 202,
+          })
         }
       )
     )

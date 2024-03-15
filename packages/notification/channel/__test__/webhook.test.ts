@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import { expect } from 'chai'
-import { http } from 'msw'
+import { HttpResponse, http } from 'msw'
 import { setupServer } from 'msw/node'
 
 import { validateNotification } from '../../validator/notification'
@@ -80,7 +80,9 @@ describe('Webhook Notification', () => {
       http.post('https://example.com', async ({ request }) => {
         body = await request.json()
 
-        return res(ctx.status(200))
+        return new HttpResponse(null, {
+          status: 200,
+        })
       })
     )
 

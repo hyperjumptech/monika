@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import { expect } from '@oclif/test'
-import { http } from 'msw'
+import { HttpResponse, http } from 'msw'
 import { setupServer } from 'msw/node'
 import sinon from 'sinon'
 import mariadb from 'mariadb'
@@ -44,14 +44,22 @@ let notificationAlert: Record<
   Record<string, Record<string, never>>
 > = {}
 const server = setupServer(
-  http.get('https://example.com', (_, res, ctx) => res(ctx.status(200))),
+  http.get(
+    'https://example.com',
+    () =>
+      new HttpResponse(null, {
+        status: 200,
+      })
+  ),
   http.post('https://example.com/webhook', async ({ request }) => {
     const requestBody = await request.json()
     if (requestBody?.body?.url) {
       notificationAlert[requestBody.body.url] = requestBody
     }
 
-    return res(ctx.status(200))
+    return new HttpResponse(null, {
+      status: 200,
+    })
   })
 )
 
