@@ -77,8 +77,8 @@ describe('Webhook Notification', () => {
   describe('Send', () => {
     let body = {}
     const server = setupServer(
-      http.post('https://example.com', async (req, res, ctx) => {
-        body = await req.json()
+      http.post('https://example.com', async ({ request }) => {
+        body = await request.json()
 
         return res(ctx.status(200))
       })

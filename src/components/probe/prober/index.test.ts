@@ -40,8 +40,8 @@ describe('Prober', () => {
         probeRequestTotal++
         return res(ctx.status(200))
       }),
-      http.post('https://example.com/webhook', async (req, res, ctx) => {
-        webhookBody = await req.json()
+      http.post('https://example.com/webhook', async ({ request }) => {
+        webhookBody = await request.json()
         return res(ctx.status(202))
       })
     )

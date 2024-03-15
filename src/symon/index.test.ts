@@ -144,8 +144,8 @@ describe('Symon initiate', () => {
     server.use(
       http.post(
         'http://localhost:4000/api/v1/monika/client-handshake',
-        async (req, res, ctx) => {
-          body = await req.json()
+        async ({ request }) => {
+          body = await request.json()
 
           return res(
             ctx.json({
@@ -243,8 +243,8 @@ describe('Symon initiate', () => {
     server.use(
       http.post(
         'http://localhost:4000/api/v1/monika/events',
-        async (req, res, ctx) => {
-          body = await req.json()
+        async ({ request }) => {
+          body = await request.json()
 
           return res(
             ctx.json({

@@ -63,16 +63,16 @@ describe('PagerDuty notification', () => {
     const server = setupServer(
       http.post(
         'https://events.pagerduty.com/v2/enqueue',
-        async (req, res, ctx) => {
-          body = await req.json()
+        async ({ request }) => {
+          body = await request.json()
 
           return res(ctx.status(202))
         }
       ),
       http.post(
         'https://events.pagerduty.com/v2/enqueue',
-        async (req, res, ctx) => {
-          body = await req.json()
+        async ({ request }) => {
+          body = await request.json()
 
           return res(ctx.status(202))
         }

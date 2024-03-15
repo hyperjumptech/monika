@@ -45,8 +45,8 @@ let notificationAlert: Record<
 > = {}
 const server = setupServer(
   http.get('https://example.com', (_, res, ctx) => res(ctx.status(200))),
-  http.post('https://example.com/webhook', async (req, res, ctx) => {
-    const requestBody = await req.json()
+  http.post('https://example.com/webhook', async ({ request }) => {
+    const requestBody = await request.json()
     if (requestBody?.body?.url) {
       notificationAlert[requestBody.body.url] = requestBody
     }
