@@ -23,29 +23,17 @@
  **********************************************************************************/
 
 import { test } from '@oclif/test'
-import path from 'path'
-import chai from 'chai'
-import spies from 'chai-spies'
+import { resolve } from 'node:path'
 import cmd from '../../src/commands/monika'
 import sinon from 'sinon'
 import * as IpUtil from '../../src/utils/public-ip'
-import { RequestInterceptor } from 'node-request-interceptor'
-import withDefaultInterceptors from 'node-request-interceptor/lib/presets/default'
-
-const { resolve } = path
-chai.use(spies)
-
-let interceptor: RequestInterceptor
 
 describe('Monika should hide ip unless verbose', () => {
   let getPublicIPStub: sinon.SinonStub
   let getPublicNetworkInfoStub: sinon.SinonStub
 
   beforeEach(() => {
-    interceptor = new RequestInterceptor(withDefaultInterceptors)
-
     getPublicIPStub = sinon.stub(IpUtil, 'getPublicIp' as never)
-
     getPublicNetworkInfoStub = sinon
       .stub(IpUtil, 'getPublicNetworkInfo' as never)
       .callsFake(async () => ({
@@ -56,23 +44,8 @@ describe('Monika should hide ip unless verbose', () => {
         privateIp: '7.6.5.4',
         publicIp: '1.2.3.4',
       }))
-
-    interceptor.use((req) => {
-      // mock the call to get isp and city
-      if (req.url.origin === 'http://localhost:3000') {
-        return {
-          status: 200,
-          body: JSON.stringify({
-            statusCode: 'ok',
-            message: 'Successfully handshaked with Symon',
-            data: {
-              monikaId: '1234',
-            },
-          }),
-        }
-      }
-    })
   })
+
   afterEach(() => {
     getPublicIPStub.restore()
     getPublicNetworkInfoStub.restore()
