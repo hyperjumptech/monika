@@ -62,10 +62,6 @@ export function logStartupMessage({
     }
   }
 
-  if (flags['native-fetch']) {
-    log.info('Using native Node.js fetch for HTTP client')
-  }
-
   const startupMessage = generateStartupMessage({
     config,
     flags,

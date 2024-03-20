@@ -25,12 +25,12 @@
 import axios, { AxiosRequestHeaders, AxiosResponse } from 'axios'
 import http from 'http'
 import https from 'https'
-import { Agent } from 'undici'
+import { Agent, type HeadersInit } from 'undici'
 
 type HttpRequestParams = Omit<RequestInit, 'headers'> & {
   url: string
   maxRedirects?: number
-  headers?: object
+  headers?: HeadersInit
   timeout?: number
   allowUnauthorizedSsl?: boolean
   responseType?: 'stream'
@@ -48,51 +48,77 @@ const axiosInstance = axios.create()
 export async function sendHttpRequest(
   config: HttpRequestParams
 ): Promise<AxiosResponse> {
-  let headers: AxiosRequestHeaders | undefined
-  if (config.headers) {
-    headers = {}
-    for (const [key, value] of Object.entries(config.headers)) {
-      headers[key] = value
-    }
-  }
+  const { allowUnauthorizedSsl, body, headers, timeout, ...options } = config
 
-  const resp = await axiosInstance.request({
-    ...config,
-    data: config.body,
-    headers,
-    timeout: config.timeout ?? DEFAULT_TIMEOUT, // Ensure default timeout if not filled.
+  return axiosInstance.request({
+    ...options,
+    data: body,
+    headers: convertHeadersToAxios(headers),
+    timeout: timeout ?? DEFAULT_TIMEOUT, // Ensure default timeout if not filled.
     httpAgent,
-    httpsAgent: config.allowUnauthorizedSsl
+    httpsAgent: allowUnauthorizedSsl
       ? new https.Agent({ keepAlive: true, rejectUnauthorized: true })
       : httpsAgent,
   })
+}
 
-  return resp
+function convertHeadersToAxios(headersInit: HeadersInit | undefined) {
+  const headers: AxiosRequestHeaders = {}
+
+  if (headersInit instanceof Headers) {
+    // If headersInit is a Headers object
+    for (const [key, value] of headersInit.entries()) {
+      headers[key] = value
+    }
+
+    return headers
+  }
+
+  if (typeof headersInit === 'object') {
+    // If headersInit is a plain object
+    for (const [key, value] of Object.entries(headersInit)) {
+      headers[key] = value as never
+    }
+
+    return headers
+  }
+
+  return headers
 }
 
 export async function sendHttpRequestFetch(
   config: HttpRequestParams
 ): Promise<Response> {
-  let headers: Record<string, string> | undefined
-  if (config.headers) {
-    headers = {}
-    for (const [key, value] of Object.entries(config.headers)) {
-      headers[key] = value
-    }
-  }
-
-  return fetch(config.url, {
-    ...config,
+  const {
+    allowUnauthorizedSsl,
+    body,
     headers,
-    redirect: 'manual',
-    keepalive: true,
+    maxRedirects,
+    method,
+    timeout,
+    url,
+  } = config
+  const controller = new AbortController()
+  const { signal } = controller
+  const timeoutId = setTimeout(() => {
+    controller.abort()
+  }, timeout || DEFAULT_TIMEOUT)
+  const resp = await fetch(url, {
+    body: body === '' ? undefined : body,
     dispatcher: new Agent({
       connect: {
-        timeout: config.timeout,
-        keepAlive: true,
-        rejectUnauthorized: !config.allowUnauthorizedSsl,
+        rejectUnauthorized: !allowUnauthorizedSsl,
       },
-      maxRedirections: config.maxRedirects,
+      maxRedirections: maxRedirects,
     }),
+    headers,
+    keepalive: true,
+    method,
+    signal,
+  }).then((response) => {
+    clearTimeout(timeoutId)
+    return response
   })
+
+  return resp
 }
