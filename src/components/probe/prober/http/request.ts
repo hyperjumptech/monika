@@ -42,7 +42,7 @@ import { log } from '../../../../utils/pino'
 import { AxiosError } from 'axios'
 import { MonikaFlags } from 'src/flag'
 import { getErrorMessage } from '../../../../utils/catch-error-handler'
-import { errors as undiciErrors } from 'undici'
+import { type HeadersInit, errors as undiciErrors } from 'undici'
 import Joi from 'joi'
 
 // Register Handlebars helpers
@@ -69,19 +69,21 @@ export async function httpRequest({
   // Compile URL using handlebars to render URLs that uses previous responses data
   const { method, url, headers, timeout, body, ping, allowUnauthorized } =
     requestConfig
-  const newReq = { method, headers, timeout, body, ping }
+  const newReq = { method, headers: new Headers(headers), timeout, body, ping }
   const renderURL = Handlebars.compile(url)
   const renderedURL = renderURL({ responses })
 
   const { flags } = getContext()
-  newReq.headers = compileHeaders(headers, body, responses as never)
+  newReq.headers = new Headers(
+    compileHeaders(headers, body, responses as never)
+  )
   // compile body needs to modify headers if necessary
   const { headers: newHeaders, body: newBody } = compileBody(
     newReq.headers,
     body,
     responses
   )
-  newReq.headers = newHeaders
+  newReq.headers = new Headers(newHeaders)
   newReq.body = newBody
 
   const startTime = Date.now()
@@ -139,10 +141,10 @@ export async function httpRequest({
 }
 
 function compileHeaders(
-  headers: object | undefined,
+  headers: HeadersInit | undefined,
   body: string | object,
   responses: never
-) {
+): HeadersInit | undefined {
   // return as-is if falsy
   if (!headers) return headers
   // Compile headers using handlebars to render URLs that uses previous responses data.
@@ -183,14 +185,16 @@ function compileHeaders(
   return newHeaders
 }
 
+type CompiledBody = {
+  headers: HeadersInit | undefined
+  body: object | string
+}
+
 function compileBody(
-  headers: object | undefined,
+  headers: HeadersInit | undefined,
   body: object | string,
   responses: ProbeRequestResponse[]
-): {
-  headers: object | undefined
-  body: object | string
-} {
+): CompiledBody {
   // return as-is if falsy
   if (!body) return { headers, body }
   let newHeaders = headers
@@ -235,23 +239,24 @@ async function probeHttpFetch({
   allowUnauthorized: boolean | undefined
   requestParams: {
     method: string | undefined
-    headers: object | undefined
+    headers: Headers | undefined
     timeout: number
     body: string | object
     ping: boolean | undefined
   }
 }): Promise<ProbeRequestResponse> {
   if (flags.verbose) log.info(`Probing ${renderedURL} with Node.js fetch`)
+
+  const { body, headers, method, timeout } = requestParams
+  const { content } = transformContentByType(body, headers?.get('content-type'))
   const response = await sendHttpRequestFetch({
-    ...requestParams,
     allowUnauthorizedSsl: allowUnauthorized,
-    keepalive: true,
-    url: renderedURL,
+    body: content,
+    headers,
     maxRedirects: flags['follow-redirects'],
-    body:
-      typeof requestParams.body === 'string'
-        ? requestParams.body
-        : JSON.stringify(requestParams.body),
+    method,
+    timeout,
+    url: renderedURL,
   })
 
   const responseTime = Date.now() - startTime
@@ -263,11 +268,11 @@ async function probeHttpFetch({
     }
   }
 
-  const responseBody = response.headers
+  const responseBody = await (response.headers
     .get('Content-Type')
     ?.includes('application/json')
     ? response.json()
-    : response.text()
+    : response.text())
 
   return {
     requestType: 'HTTP',
@@ -293,33 +298,34 @@ async function probeHttpAxios({
   allowUnauthorized: boolean | undefined
   requestParams: {
     method: string | undefined
-    headers: object | undefined
+    headers: Headers | undefined
     timeout: number
     body: string | object
     ping: boolean | undefined
   }
 }): Promise<ProbeRequestResponse> {
+  const { body, headers, method, timeout } = requestParams
+  const { content } = transformContentByType(body, headers?.get('content-type'))
   const resp = await sendHttpRequest({
-    ...requestParams,
     allowUnauthorizedSsl: allowUnauthorized,
+    body: content,
+    headers,
     keepalive: true,
-    url: renderedURL,
     maxRedirects: flags['follow-redirects'],
-    body:
-      typeof requestParams.body === 'string'
-        ? requestParams.body
-        : JSON.stringify(requestParams.body),
+    method,
+    timeout,
+    url: renderedURL,
   })
 
   const responseTime = Date.now() - startTime
-  const { data, headers, status } = resp
+  const { data, headers: requestHeaders, status } = resp
 
   return {
     requestType: 'HTTP',
     data,
     body: data,
     status,
-    headers,
+    headers: requestHeaders,
     responseTime,
     result: probeRequestResult.success,
   }
@@ -338,9 +344,13 @@ export function generateRequestChainingBody(
 
 function transformContentByType(
   content: object | string,
-  contentType?: string | number | boolean
+  contentType?: string | null | undefined
 ) {
   switch (contentType) {
+    case 'application/json': {
+      return { content: JSON.stringify(content), contentType }
+    }
+
     case 'application/x-www-form-urlencoded': {
       return {
         content: qs.stringify(content as never),
@@ -366,7 +376,11 @@ function transformContentByType(
     }
 
     default: {
-      return { content, contentType }
+      return {
+        content:
+          typeof content === 'object' ? JSON.stringify(content) : content,
+        contentType,
+      }
     }
   }
 }

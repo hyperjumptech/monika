@@ -22,7 +22,8 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { ProbeAlert } from './probe'
+import type { HeadersInit } from 'undici'
+import type { ProbeAlert } from './probe'
 
 // RequestTypes are used to define the type of request that is being made.
 export type RequestTypes =
@@ -63,7 +64,7 @@ export interface RequestConfig extends Omit<RequestInit, 'headers' | 'body'> {
   body: object | string
   timeout: number // request timeout
   alerts?: ProbeAlert[]
-  headers?: object
+  headers?: HeadersInit
   ping?: boolean // is this request for a ping?
   allowUnauthorized?: boolean // ignore ssl cert?
 }
