@@ -34,7 +34,7 @@ before(async () => {
   monikaPath = getStdout()
     .join('\r\n')
     .replace('{{homedir}}', process.env.HOME || '')
-  console.log('Setup: Got monika path', monikaPath)
+  console.log('Setup: Using monika path', monikaPath)
   await cleanup()
 })
 
