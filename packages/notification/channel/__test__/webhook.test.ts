@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import { expect } from 'chai'
-import { rest } from 'msw'
+import { type DefaultBodyType, HttpResponse, http } from 'msw'
 import { setupServer } from 'msw/node'
 
 import { validateNotification } from '../../validator/notification'
@@ -75,12 +75,14 @@ describe('notificationChecker - webhookNotification', () => {
 
 describe('Webhook Notification', () => {
   describe('Send', () => {
-    let body = {}
+    let body: DefaultBodyType = {}
     const server = setupServer(
-      rest.post('https://example.com', async (req, res, ctx) => {
-        body = await req.json()
+      http.post('https://example.com', async ({ request }) => {
+        body = await request.json()
 
-        return res(ctx.status(200))
+        return new HttpResponse(null, {
+          status: 200,
+        })
       })
     )
 

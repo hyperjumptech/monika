@@ -3,7 +3,7 @@ services:
     image: prom/prometheus
     container_name: monika_prometheus
     volumes:
-     - ./prometheus.yaml:/etc/prometheus/prometheus.yml
+      - ./prometheus.yaml:/etc/prometheus/prometheus.yml
     ports:
       - 9090:9090
     network_mode: host

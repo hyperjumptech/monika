@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.19.0] - 2024-03-14
+
+### Added
+
+- Implement Node.js fetch (#1243)
+
+### Fixed
+
+- Fix Algolia Build in the Docs Action (#1251)
+- Fix Docs Build Workflow (#1250)
+
+## [1.18.0] - 2024-03-07
+
+### Added
+
+- Add --experimental-fetch as toggle feature (#1240).
+
+### Fixed
+
+- Fix Monika multi node implementation (#1233).
+- Fix the disabled failed probe is not retrying when it encounters an incident after enabling it (#1242).
+
+### Changed
+
+- Upgrade to Node to v20.x (#1235)
+
 ## [1.17.0] - 2024-01-10
 
 ### Added

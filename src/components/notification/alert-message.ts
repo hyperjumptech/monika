@@ -24,16 +24,16 @@
 
 import { hostname, platform } from 'os'
 import { promisify } from 'util'
-import { format } from 'date-fns'
+import { format, formatDistanceToNow } from 'date-fns'
 import * as Handlebars from 'handlebars'
 import getos from 'getos'
 import osName from 'os-name'
-import { getContext } from '../../context/index.js'
 import type { NotificationMessage } from '@hyperjumptech/monika-notification'
-import { ProbeRequestResponse } from '../../interfaces/request.js'
-import { ProbeAlert } from '../../interfaces/probe.js'
+import { getContext } from '../../context/index.js'
+import { getIncidents } from '../incident/index.js'
+import type { ProbeRequestResponse } from '../../interfaces/request.js'
+import type { ProbeAlert } from '../../interfaces/probe.js'
 import { publicIpAddress, publicNetworkInfo } from '../../utils/public-ip.js'
-import { getDowntimeDuration } from '../downtime-counter/index.js'
 
 const getLinuxDistro = promisify(getos)
 
@@ -144,17 +144,19 @@ Version: ${userAgent}`
 }
 
 function getRecoveryMessage(isRecovery: boolean, probeID: string, url: string) {
-  const incidentDateTime = getContext().incidents.find(
+  const incidentDateTime = getIncidents().find(
     (incident) =>
       incident.probeID === probeID && incident.probeRequestURL === url
-  )?.createdAt
+  )
   if (!isRecovery || !incidentDateTime) {
     return ''
   }
 
-  const incidentDuration = getDowntimeDuration({ probeID, url })
+  const incidentDuration = formatDistanceToNow(incidentDateTime.createdAt, {
+    includeSeconds: true,
+  })
   const humanReadableIncidentDateTime = format(
-    incidentDateTime,
+    incidentDateTime.createdAt,
     'yyyy-MM-dd HH:mm:ss XXX'
   )
 

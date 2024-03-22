@@ -37,6 +37,7 @@ export type MonikaFlags = {
   'config-filename': string
   'config-interval': number
   'create-config': boolean
+  'native-fetch'?: boolean
   flush: boolean
   'follow-redirects': number
   force: boolean
@@ -76,6 +77,7 @@ export const monikaFlagsDefaultValue: MonikaFlags = {
   'config-filename': 'monika.yml',
   'config-interval': 900,
   'create-config': false,
+  'native-fetch': false,
   flush: false,
   'follow-redirects': 21,
   force: false,

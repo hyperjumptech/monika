@@ -24,7 +24,6 @@
 
 import type { Config } from '../../interfaces/config.js'
 import yml from 'js-yaml'
-import type { Probe } from '../../interfaces/probe.js'
 import handlebars from 'handlebars'
 import type { AxiosRequestHeaders, Method } from 'axios'
 import Joi from 'joi'
@@ -144,7 +143,7 @@ function mapInsomniaToConfig(data: unknown): Config {
   return { probes }
 }
 
-function mapInsomniaRequestToConfig(req: unknown): Probe {
+function mapInsomniaRequestToConfig(req: unknown) {
   const { value: res } = resourceValidator.validate(req, { allowUnknown: true })
   // eslint-disable-next-line camelcase
   const url = handlebars.compile(res.url)({ base_url: baseUrl })

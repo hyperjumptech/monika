@@ -81,29 +81,24 @@ describe('parseConfigFromPostman', () => {
             expect(req.body).to.deep.equals({ message: 'Hello, world!' })
           }
 
-          if (mode === 'formdata') {
-            expect((req.headers || {})['Content-Type']).to.equals(
-              'multipart/form-data'
-            )
+          const headers = req.headers || {}
+          if (mode === 'formdata' && 'Content-Type' in headers) {
+            expect(headers['Content-Type']).to.equals('multipart/form-data')
           }
 
-          if (mode === 'urlencoded') {
-            expect((req.headers || {})['Content-Type']).to.equals(
+          if (mode === 'urlencoded' && 'Content-Type' in headers) {
+            expect(headers['Content-Type']).to.equals(
               'application/x-www-form-urlencoded'
             )
           }
 
           if (mode === 'raw') {
-            if (language === 'json') {
-              expect((req.headers || {})['Content-Type']).to.equals(
-                'application/json'
-              )
+            if (language === 'json' && 'Content-Type' in headers) {
+              expect(headers['Content-Type']).to.equals('application/json')
             }
 
-            if (language === 'text') {
-              expect((req.headers || {})['Content-Type']).to.equals(
-                'text/plain'
-              )
+            if (language === 'text' && 'Content-Type' in headers) {
+              expect(headers['Content-Type']).to.equals('text/plain')
             }
           }
         }
@@ -134,29 +129,24 @@ describe('parseConfigFromPostman', () => {
             expect(req.body).to.deep.equals({ message: 'Hello, world!' })
           }
 
-          if (mode === 'formdata') {
-            expect((req.headers || {})['Content-Type']).to.equals(
-              'multipart/form-data'
-            )
+          const headers = req.headers || {}
+          if (mode === 'formdata' && 'Content-Type' in headers) {
+            expect(headers['Content-Type']).to.equals('multipart/form-data')
           }
 
-          if (mode === 'urlencoded') {
-            expect((req.headers || {})['Content-Type']).to.equals(
+          if (mode === 'urlencoded' && 'Content-Type' in headers) {
+            expect(headers['Content-Type']).to.equals(
               'application/x-www-form-urlencoded'
             )
           }
 
           if (mode === 'raw') {
-            if (language === 'json') {
-              expect((req.headers || {})['Content-Type']).to.equals(
-                'application/json'
-              )
+            if (language === 'json' && 'Content-Type' in headers) {
+              expect(headers['Content-Type']).to.equals('application/json')
             }
 
-            if (language === 'text') {
-              expect((req.headers || {})['Content-Type']).to.equals(
-                'text/plain'
-              )
+            if (language === 'text' && 'Content-Type' in headers) {
+              expect(headers['Content-Type']).to.equals('text/plain')
             }
           }
         }
@@ -192,29 +182,24 @@ describe('parseConfigFromPostman', () => {
             expect(req.body).to.deep.equals({ message: 'Hello, world!' })
           }
 
-          if (mode === 'formdata') {
-            expect((req.headers || {})['Content-Type']).to.equals(
-              'multipart/form-data'
-            )
+          const headers = req.headers || {}
+          if (mode === 'formdata' && 'Content-Type' in headers) {
+            expect(headers['Content-Type']).to.equals('multipart/form-data')
           }
 
-          if (mode === 'urlencoded') {
-            expect((req.headers || {})['Content-Type']).to.equals(
+          if (mode === 'urlencoded' && 'Content-Type' in headers) {
+            expect(headers['Content-Type']).to.equals(
               'application/x-www-form-urlencoded'
             )
           }
 
           if (mode === 'raw') {
-            if (language === 'json') {
-              expect((req.headers || {})['Content-Type']).to.equals(
-                'application/json'
-              )
+            if (language === 'json' && 'Content-Type' in headers) {
+              expect(headers['Content-Type']).to.equals('application/json')
             }
 
-            if (language === 'text') {
-              expect((req.headers || {})['Content-Type']).to.equals(
-                'text/plain'
-              )
+            if (language === 'text' && 'Content-Type' in headers) {
+              expect(headers['Content-Type']).to.equals('text/plain')
             }
           }
         }
@@ -248,29 +233,24 @@ describe('parseConfigFromPostman', () => {
             expect(req.body).to.deep.equals({ message: 'Hello, world!' })
           }
 
-          if (mode === 'formdata') {
-            expect((req.headers || {})['Content-Type']).to.equals(
-              'multipart/form-data'
-            )
+          const headers = req.headers || {}
+          if (mode === 'formdata' && 'Content-Type' in headers) {
+            expect(headers['Content-Type']).to.equals('multipart/form-data')
           }
 
-          if (mode === 'urlencoded') {
-            expect((req.headers || {})['Content-Type']).to.equals(
+          if (mode === 'urlencoded' && 'Content-Type' in headers) {
+            expect(headers['Content-Type']).to.equals(
               'application/x-www-form-urlencoded'
             )
           }
 
           if (mode === 'raw') {
-            if (language === 'json') {
-              expect((req.headers || {})['Content-Type']).to.equals(
-                'application/json'
-              )
+            if (language === 'json' && 'Content-Type' in headers) {
+              expect(headers['Content-Type']).to.equals('application/json')
             }
 
-            if (language === 'text') {
-              expect((req.headers || {})['Content-Type']).to.equals(
-                'text/plain'
-              )
+            if (language === 'text' && 'Content-Type' in headers) {
+              expect(headers['Content-Type']).to.equals('text/plain')
             }
           }
         }

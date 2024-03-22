@@ -125,7 +125,7 @@ export function startProbing({
     }
 
     if (isEndOfRepeat(getProbes())) {
-      // eslint-disable-next-line unicorn/no-process-exit, no-process-exit
+      // eslint-disable-next-line unicorn/no-process-exit, n/no-process-exit
       process.exit(0)
     }
 

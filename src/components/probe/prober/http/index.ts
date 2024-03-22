@@ -23,6 +23,7 @@
  **********************************************************************************/
 
 import { BaseProber, NotificationType, type ProbeParams } from '../index.js'
+import { addIncident } from '../../../../components/incident/index.js'
 import { getContext } from '../../../../context/index.js'
 import events from '../../../../events/index.js'
 import type { ProbeAlert } from '../../../../interfaces/probe.js'
@@ -36,7 +37,6 @@ import responseChecker from '../../../../plugins/validate-response/checkers/inde
 import { getAlertID } from '../../../../utils/alert-id.js'
 import { getEventEmitter } from '../../../../utils/events.js'
 import { isSymonModeFrom } from '../../../config/index.js'
-import { addIncident } from '../../../downtime-counter/index.js'
 import { saveProbeRequestLog } from '../../../logger/history.js'
 import { logResponseTime } from '../../../logger/response-time-log.js'
 import { httpRequest } from './request.js'
@@ -203,7 +203,7 @@ export class HTTPProber extends BaseProber {
     addIncident({
       alert: triggeredAlert,
       probeID,
-      url,
+      probeRequestURL: url,
     })
 
     this.sendNotification({

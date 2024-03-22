@@ -23,10 +23,9 @@
  **********************************************************************************/
 
 import { expect } from '@oclif/test'
-import { rest } from 'msw'
+import { HttpResponse, http } from 'msw'
 import { setupServer } from 'msw/node'
 import sinon from 'sinon'
-import * as httpRequest from '../../../../utils/http.js'
 import { doProbe } from '../../index.js'
 import { initializeProbeStates } from '../../../../utils/probe-state.js'
 import type { Probe } from '../../../../interfaces/probe.js'
@@ -45,17 +44,21 @@ let notificationAlert: Record<
   Record<string, Record<string, never>>
 > = {}
 const server = setupServer(
-  rest.get('https://example.com', (_, res, ctx) => {
+  http.get('https://example.com', () => {
     urlRequestTotal += 1
-    return res(ctx.status(200))
+    return new HttpResponse(null, {
+      status: 200,
+    })
   }),
-  rest.post('https://example.com/webhook', async (req, res, ctx) => {
-    const requestBody = await req.json()
+  http.post('https://example.com/webhook', async ({ request }) => {
+    const requestBody = (await request.json()) as Record<string, any>
     if (requestBody?.body?.url) {
       notificationAlert[requestBody.body.url] = requestBody
     }
 
-    return res(ctx.status(200))
+    return new HttpResponse(null, {
+      status: 200,
+    })
   })
 )
 const probes: Probe[] = [
@@ -198,9 +201,7 @@ describe('HTTP Probe processing', () => {
 
   it('should send incident notification if the request is failed', async () => {
     // arrange
-    sinon.stub(httpRequest, 'sendHttpRequest').callsFake(async () => {
-      throw new Error('ECONNABORTED')
-    })
+    server.use(http.get('https://example.com', () => HttpResponse.error()))
     const probe = {
       ...probes[0],
       id: '2md9a',
@@ -255,9 +256,11 @@ describe('HTTP Probe processing', () => {
   it('should send incident notification when assertion fails', async () => {
     // arrange
     server.use(
-      rest.get('https://example.com', (_, res, ctx) => {
+      http.get('https://example.com', () => {
         urlRequestTotal += 1
-        return res(ctx.status(404))
+        return new HttpResponse(null, {
+          status: 404,
+        })
       })
     )
     const probe = {
@@ -308,9 +311,11 @@ describe('HTTP Probe processing', () => {
   it('should send recovery notification', async () => {
     // arrange
     server.use(
-      rest.get('https://example.com', (_, res, ctx) => {
+      http.get('https://example.com', () => {
         urlRequestTotal += 1
-        return res(ctx.status(404))
+        return new HttpResponse(null, {
+          status: 404,
+        })
       })
     )
     const probe = {

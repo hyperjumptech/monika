@@ -307,24 +307,33 @@ Probe response data could be used for [Request Chaining](https://hyperjumptech.g
 
 To make it easier to troubleshoot HTTP requests, we have mapped low-level errors returned by the HTTP library to numbers between 0 and 99. These custom errors are returned as the HTTP status code and can be used to trigger alerts in the same way as regular HTTP status codes.
 
-| Code | Error                |
-| :--- | -------------------- |
-| 0    | Connection not found |
-| 1    | Connection reset     |
-| 2    | Connection refused   |
-| 3    | Too many redirects   |
-| 4    | Bad option value     |
-| 5    | Bad option           |
-| 6    | Timed out            |
-| 7    | Network error        |
-| 8    | Deprecated           |
-| 9    | Bad response         |
-| 11   | Bad request          |
-| 12   | Canceled             |
-| 13   | Not Supported        |
-| 14   | Invalid URL          |
-| 99   | Others               |
-| 599  | Connection aborted   |
+| Code | Error                                                             |
+| :--- | ----------------------------------------------------------------- |
+| 0    | Connection not found                                              |
+| 1    | Connection reset                                                  |
+| 2    | Connection refused                                                |
+| 3    | Too many redirects                                                |
+| 4    | Bad option value                                                  |
+| 5    | Bad option                                                        |
+| 6    | Timed out                                                         |
+| 7    | Network error                                                     |
+| 8    | Deprecated                                                        |
+| 9    | Bad response                                                      |
+| 11   | Bad request                                                       |
+| 12   | Canceled                                                          |
+| 13   | Not Supported                                                     |
+| 14   | Invalid URL                                                       |
+| 18   | Header / response size limit exceeded                             |
+| 19   | HTTP status code returns >= 400                                   |
+| 20   | Invalid HTTP arguments                                            |
+| 21   | Unexpected HTTP response to handle                                |
+| 22   | Connection closed unexpectedly                                    |
+| 23   | Unsupported HTTP functionality                                    |
+| 24   | Request / response size mismatch with Content-Length header value |
+| 25   | Missing HTTP client pool                                          |
+| 26   | Expected error, exact reason is shown on runtime                  |
+| 99   | Others                                                            |
+| 599  | Connection aborted                                                |
 
 ## Execution order
 

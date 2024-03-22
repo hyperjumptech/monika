@@ -2,7 +2,7 @@ global:
   scrape_interval: 1s
 
 scrape_configs:
-  - job_name: "monika"
+  - job_name: 'monika'
 
     static_configs:
-      - targets: ["localhost:3001"]
+      - targets: ['localhost:3001']

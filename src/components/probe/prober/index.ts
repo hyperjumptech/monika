@@ -41,7 +41,12 @@ import {
   DEFAULT_INCIDENT_THRESHOLD,
   DEFAULT_RECOVERY_THRESHOLD,
 } from '../../config/validation/validator/default-values.js'
-import { addIncident, removeIncident } from '../../downtime-counter/index.js'
+import {
+  addIncident,
+  findIncident,
+  getIncidents,
+  removeIncident,
+} from '../../incident/index.js'
 import {
   saveNotificationLog,
   saveProbeRequestLog,
@@ -196,9 +201,7 @@ export abstract class BaseProber implements Prober {
   }
 
   protected hasIncident(): Incident | undefined {
-    return getContext().incidents.find(
-      (incident) => incident.probeID === this.probeConfig.id
-    )
+    return findIncident(this.probeConfig.id)
   }
 
   /**
@@ -334,7 +337,7 @@ export abstract class BaseProber implements Prober {
     addIncident({
       alert: failedRequestAssertion,
       probeID: this.probeConfig.id,
-      url: this.probeConfig?.requests?.[requestIndex].url || '',
+      probeRequestURL: this.probeConfig?.requests?.[requestIndex].url || '',
     })
 
     saveProbeRequestLog({
@@ -366,7 +369,7 @@ export abstract class BaseProber implements Prober {
   protected handleRecovery(
     probeResults: Pick<ProbeResult, 'requestResponse'>[]
   ): void {
-    const recoveredIncident = getContext().incidents.find(
+    const recoveredIncident = getIncidents().find(
       (incident) => incident.probeID === this.probeConfig.id
     )
     const requestIndex =
@@ -376,9 +379,7 @@ export abstract class BaseProber implements Prober {
 
     if (recoveredIncident) {
       removeIncident({
-        alert: recoveredIncident.alert,
         probeID: this.probeConfig.id,
-        url: this.probeConfig?.requests?.[requestIndex].url || '',
       })
 
       const url = this.probeConfig?.requests?.[requestIndex].url || ''
@@ -388,7 +389,6 @@ export abstract class BaseProber implements Prober {
         response: probeResults[requestIndex].requestResponse,
       }
       const probeID = this.probeConfig.id
-
       const alertId = getAlertID(url, validation, probeID)
 
       this.sendNotification({
@@ -452,7 +452,7 @@ export abstract class BaseProber implements Prober {
     addIncident({
       alert,
       probeID: this.probeConfig.id,
-      url: request.url,
+      probeRequestURL: request.url,
       createdAt,
     })
   }

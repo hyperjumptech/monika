@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import { expect } from '@oclif/test'
-import { rest } from 'msw'
+import { type DefaultBodyType, HttpResponse, http } from 'msw'
 import { setupServer } from 'msw/node'
 
 import { monikaFlagsDefaultValue, type MonikaFlags } from '../flag.js'
@@ -38,9 +38,11 @@ import {
   getProbes,
 } from '../components/config/probe.js'
 import { validateProbes } from '../components/config/validation/index.js'
+import { addIncident, findIncident } from '../components/incident/index.js'
 import events from '../events/index.js'
 import { getEventEmitter } from '../utils/events.js'
 import { getErrorMessage } from '../utils/catch-error-handler.js'
+import { getProbeState, initializeProbeStates } from '../utils/probe-state.js'
 
 const config: Config = {
   version: 'asdfg123',
@@ -62,49 +64,38 @@ const config: Config = {
   ],
 }
 const server = setupServer(
-  rest.get('http://ip-api.com/json/192.168.1.1', (_, res, ctx) =>
-    res(
-      ctx.json({
-        city: 'jakarta',
-        isp: 'hyperjump',
-        country: 'Indonesia',
-      })
-    )
+  http.get('http://ip-api.com/json/192.168.1.1', () =>
+    HttpResponse.json({
+      city: 'jakarta',
+      isp: 'hyperjump',
+      country: 'Indonesia',
+    })
   ),
-  rest.post(
-    'http://localhost:4000/api/v1/monika/client-handshake',
-    (_, res, ctx) =>
-      res(
-        ctx.json({
-          statusCode: 'ok',
-          message: 'Successfully handshaked with Symon',
-          data: {
-            monikaId: '1234',
-          },
-        })
-      )
+  http.post('http://localhost:4000/api/v1/monika/client-handshake', () =>
+    HttpResponse.json({
+      statusCode: 'ok',
+      message: 'Successfully handshaked with Symon',
+      data: {
+        monikaId: '1234',
+      },
+    })
   ),
-  rest.post('http://localhost:4000/api/v1/monika/status', (_, res, ctx) =>
-    res(ctx.status(200))
-  ),
-  rest.get('http://localhost:4000/api/v1/monika/1234/probes', (_, res, ctx) =>
-    res(
-      ctx.set('etag', config.version || ''),
-      ctx.json({
+  http.get('http://localhost:4000/api/v1/monika/1234/probes', () =>
+    HttpResponse.json(
+      {
         statusCode: 'ok',
         message: 'Successfully get probes configuration',
         data: config.probes,
-      })
+      },
+      { headers: { etag: config.version || '' } }
     )
   ),
-  rest.get('https://example.com', (_, res, ctx) => res(ctx.json({}))),
-  rest.get('http://localhost:4000/api/v1/monika/report', (_, res, ctx) =>
-    res(
-      ctx.json({
-        statusCode: 'ok',
-        message: 'Successfully report to Symon',
-      })
-    )
+  http.get('https://example.com', () => HttpResponse.json({})),
+  http.get('http://localhost:4000/api/v1/monika/report', () =>
+    HttpResponse.json({
+      statusCode: 'ok',
+      message: 'Successfully report to Symon',
+    })
   )
 )
 
@@ -133,6 +124,7 @@ describe('Symon initiate', () => {
   })
   after(() => {
     server.close()
+    resetContext()
   })
 
   it('should send handshake data on initiate', async () => {
@@ -143,23 +135,21 @@ describe('Symon initiate', () => {
         symonKey: 'random-key',
       } as MonikaFlags,
     })
-    let body: Record<string, string> = {}
+    let body: DefaultBodyType = {}
     // mock the outgoing requests
     server.use(
-      rest.post(
+      http.post(
         'http://localhost:4000/api/v1/monika/client-handshake',
-        async (req, res, ctx) => {
-          body = await req.json()
+        async ({ request }) => {
+          body = await request.json()
 
-          return res(
-            ctx.json({
-              statusCode: 'ok',
-              message: 'Successfully handshaked with Symon',
-              data: {
-                monikaId: '1234',
-              },
-            })
-          )
+          return HttpResponse.json({
+            statusCode: 'ok',
+            message: 'Successfully handshaked with Symon',
+            data: {
+              monikaId: '1234',
+            },
+          })
         }
       )
     )
@@ -204,20 +194,16 @@ describe('Symon initiate', () => {
   it('should throw an error if the request to get probes is failed', async () => {
     // arrange
     server.use(
-      rest.post(
-        'http://localhost:4000/api/v1/monika/client-handshake',
-        (_, res, ctx) =>
-          res(
-            ctx.json({
-              statusCode: 'ok',
-              message: 'Successfully handshaked with Symon',
-              data: {
-                monikaId: '1234',
-              },
-            })
-          )
+      http.post('http://localhost:4000/api/v1/monika/client-handshake', () =>
+        HttpResponse.json({
+          statusCode: 'ok',
+          message: 'Successfully handshaked with Symon',
+          data: {
+            monikaId: '1234',
+          },
+        })
       ),
-      rest.get('http://localhost:4000/api/v1/monika/1234/probes', () => {
+      http.get('http://localhost:4000/api/v1/monika/1234/probes', () => {
         throw new Error('Failed')
       })
     )
@@ -243,19 +229,17 @@ describe('Symon initiate', () => {
 
   it('should send event to Symon when incident or recovery happens', async () => {
     // arrange
-    let body: Record<string, string> = {}
+    let body: DefaultBodyType = {}
     server.use(
-      rest.post(
+      http.post(
         'http://localhost:4000/api/v1/monika/events',
-        async (req, res, ctx) => {
-          body = await req.json()
+        async ({ request }) => {
+          body = await request.json()
 
-          return res(
-            ctx.json({
-              message: 'Successfully send incident event to Symon',
-              data: null,
-            })
-          )
+          return HttpResponse.json({
+            message: 'Successfully send incident event to Symon',
+            data: null,
+          })
         }
       )
     )
@@ -301,15 +285,11 @@ describe('Symon initiate', () => {
       alerts: [],
     }
     server.use(
-      rest.get(
-        'http://localhost:4000/api/v1/monika/1234/probe-changes',
-        (_, res, ctx) =>
-          res(
-            ctx.json({
-              message: 'Successfully get probe changes',
-              data: [{ type: 'add', probe: newProbe }],
-            })
-          )
+      http.get('http://localhost:4000/api/v1/monika/1234/probe-changes', () =>
+        HttpResponse.json({
+          message: 'Successfully get probe changes',
+          data: [{ type: 'add', probe: newProbe }],
+        })
       )
     )
     const symonGetProbesIntervalMs = 100
@@ -350,22 +330,18 @@ describe('Symon initiate', () => {
   it('should update a probe.js', async () => {
     // arrange
     server.use(
-      rest.get(
-        'http://localhost:4000/api/v1/monika/1234/probe-changes',
-        (_, res, ctx) =>
-          res(
-            ctx.json({
-              message: 'Successfully get probe changes',
-              data: [
-                {
-                  type: 'update',
-                  // eslint-disable-next-line camelcase
-                  probe_id: '1',
-                  probe: { ...findProbe('1'), interval: 2 },
-                },
-              ],
-            })
-          )
+      http.get('http://localhost:4000/api/v1/monika/1234/probe-changes', () =>
+        HttpResponse.json({
+          message: 'Successfully get probe changes',
+          data: [
+            {
+              type: 'update',
+              // eslint-disable-next-line camelcase
+              probe_id: '1',
+              probe: { ...findProbe('1'), interval: 2 },
+            },
+          ],
+        })
       )
     )
     const symonGetProbesIntervalMs = 100
@@ -407,22 +383,18 @@ describe('Symon initiate', () => {
   it('should delete a probe.js', async () => {
     // arrange
     server.use(
-      rest.get(
-        'http://localhost:4000/api/v1/monika/1234/probe-changes',
-        (_, res, ctx) =>
-          res(
-            ctx.json({
-              message: 'Successfully get probe changes',
-              data: [
-                {
-                  type: 'delete',
-                  // eslint-disable-next-line camelcase
-                  probe_id: '1',
-                  probe: {},
-                },
-              ],
-            })
-          )
+      http.get('http://localhost:4000/api/v1/monika/1234/probe-changes', () =>
+        HttpResponse.json({
+          message: 'Successfully get probe changes',
+          data: [
+            {
+              type: 'delete',
+              // eslint-disable-next-line camelcase
+              probe_id: '1',
+              probe: {},
+            },
+          ],
+        })
       )
     )
     const symonGetProbesIntervalMs = 100
@@ -456,6 +428,74 @@ describe('Symon initiate', () => {
     // assert
     // 5. Check the updated probe cache
     expect(getProbes().length).eq(1)
+
+    await symon.stop()
+  }).timeout(15_000)
+
+  it('should disable a probe', async () => {
+    // arrange
+    server.use(
+      http.get('http://localhost:4000/api/v1/monika/1234/probe-changes', () =>
+        HttpResponse.json({
+          message: 'Successfully get probe changes',
+          data: [
+            {
+              type: 'disabled',
+              // eslint-disable-next-line camelcase
+              probe_id: '1',
+              probe: {},
+            },
+          ],
+        })
+      )
+    )
+
+    const symonGetProbesIntervalMs = 100
+    setContext({
+      flags: {
+        symonUrl: 'http://localhost:4000',
+        symonKey: 'random-key',
+        symonGetProbesIntervalMs,
+      } as MonikaFlags,
+    })
+    const symon = new SymonClient({
+      symonUrl: 'http://localhost:4000',
+      symonKey: 'abcd',
+    })
+
+    // 1. Check initial probe cache
+    expect(getProbes()).deep.eq([])
+
+    // act
+    // 2. Initiate Symon and get all the probes
+    await symon.initiate()
+
+    // assert
+    // 3. Check the probe data after connected to Symon
+    expect(getProbes().length).eq(2)
+    initializeProbeStates(getProbes())
+    addIncident({
+      alert: { assertion: '', id: '', message: '' },
+      probeID: config.probes[0].id,
+      probeRequestURL: '',
+    })
+    addIncident({
+      alert: { assertion: '', id: '', message: '' },
+      probeID: config.probes[1].id,
+      probeRequestURL: '',
+    })
+
+    // act
+    // 4. Wait for the probe fetch to run
+    await sleep(symonGetProbesIntervalMs)
+
+    // assert
+    // 5. Check the updated probe cache and state
+    expect(getProbes().length).eq(1)
+    expect(getProbeState('1')).to.be.undefined
+    expect(getProbeState('2')).to.not.undefined
+    expect(findIncident('1')).to.be.undefined
+    expect(findIncident('2')).to.not.be.undefined
 
     await symon.stop()
   }).timeout(15_000)

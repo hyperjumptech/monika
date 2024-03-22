@@ -109,6 +109,12 @@ export default class Monika extends Command {
         'Create config from HAR (-H), postman (-p), insomnia (-I), sitemap (--sitemap), textfile (--text) export file, or open Monika Configuration Generator using default browser',
     }),
 
+    'native-fetch': Flags.boolean({
+      default: monikaFlagsDefaultValue['native-fetch'],
+      description:
+        'Use native fetch Node.js API instead of Axios for HTTP client',
+    }),
+
     flush: Flags.boolean({
       description: 'Flush logs',
     }),
@@ -288,7 +294,7 @@ export default class Monika extends Command {
     if (error.message.includes('EEXIT: 0')) {
       // this is normal exit, for example after running with --version,
       // not an error so just quit immediately
-      // eslint-disable-next-line no-process-exit, unicorn/no-process-exit
+      // eslint-disable-next-line n/no-process-exit, unicorn/no-process-exit
       process.exit(0)
     }
 
@@ -452,6 +458,6 @@ process.on('SIGINT', async () => {
 
   em.emit(events.application.terminated)
 
-  // eslint-disable-next-line no-process-exit
+  // eslint-disable-next-line n/no-process-exit
   process.exit(process.exitCode)
 })

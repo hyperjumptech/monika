@@ -22,57 +22,43 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { formatDistanceToNow } from 'date-fns'
-import { getContext, setContext } from '../../context/index.js'
-import type { ProbeAlert } from '../../interfaces/probe.js'
+import { type Incident, getContext, setContext } from '../../context/index.js'
 
-type DowntimeCounter = {
-  alert: ProbeAlert
-  probeID: string
-  url: string
-  createdAt?: Date
+export function getIncidents() {
+  return getContext().incidents
 }
 
-export function addIncident({
-  alert,
-  createdAt,
-  probeID,
-  url,
-}: DowntimeCounter): void {
+export function findIncident(probeId: string) {
+  return getIncidents().find(({ probeID }) => probeID === probeId)
+}
+
+export function addIncident(
+  incident: Omit<Incident, 'createdAt'> & Partial<Pick<Incident, 'createdAt'>>
+): void {
   const newIncident = {
-    alert,
-    probeID,
-    probeRequestURL: url,
-    createdAt: createdAt || new Date(),
+    ...incident,
+    createdAt: incident?.createdAt || new Date(),
   }
 
-  setContext({ incidents: [...getContext().incidents, newIncident] })
+  setContext({ incidents: [...getIncidents(), newIncident] })
 }
 
-export function getDowntimeDuration({
+export function removeIncident({
   probeID,
-  url,
-}: Omit<DowntimeCounter, 'alert'>): string {
-  const lastIncident = getContext().incidents.find(
-    (incident) =>
-      incident.probeID === probeID && incident.probeRequestURL === url
-  )
+  probeRequestURL,
+}: Pick<Incident, 'probeID'> &
+  Partial<Pick<Incident, 'probeRequestURL'>>): void {
+  const newIncidents = getIncidents().filter((incident) => {
+    if (!probeRequestURL) {
+      return probeID !== incident.probeID
+    }
 
-  if (!lastIncident) {
-    return '0 seconds'
-  }
-
-  return formatDistanceToNow(lastIncident.createdAt, {
-    includeSeconds: true,
-  })
-}
-
-export function removeIncident({ probeID, url }: DowntimeCounter): void {
-  const newIncidents = getContext().incidents.filter(
-    (incident) =>
-      incident.probeID !== probeID || incident.probeRequestURL !== url
+    return (
+      probeID !== incident.probeID ||
+      probeRequestURL !== incident.probeRequestURL
+    )
     // remove incidents with exact mach of probeID and url
-  )
+  })
 
   setContext({ incidents: newIncidents })
 }

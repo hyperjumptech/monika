@@ -283,6 +283,14 @@ You can also set the maximum of delay by using the `--retryMaxDelayMs` flag. Def
 monika --retryMaxDelayMs 30000
 ```
 
+## Native Fetch from Node.js
+
+Monika use Axios as HTTP client by default, use `--native-fetch` to switch to native fetch provided by Node.js runtime.
+
+```sh
+monika --native-fetch
+```
+
 ## Follow Redirects
 
 By default Monika will follow redirects 21 times. You can set the value of `--follow-redirects` flag to tell Monika to follow redirects as many as you want. If you don't want to follow redirects, set the value to zero.

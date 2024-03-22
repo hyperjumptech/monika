@@ -37,7 +37,10 @@ import { createProber } from '../probe/prober/factory.js'
 
 type LogStartupMessage = {
   config: Config
-  flags: Pick<MonikaFlags, 'config' | 'symonKey' | 'symonUrl' | 'verbose'>
+  flags: Pick<
+    MonikaFlags,
+    'config' | 'symonKey' | 'symonUrl' | 'verbose' | 'native-fetch'
+  >
   isFirstRun: boolean
 }
 

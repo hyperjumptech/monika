@@ -22,7 +22,6 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios from 'axios'
 import Handlebars from 'handlebars'
 import FormData from 'form-data'
 import YAML from 'yaml'
@@ -35,29 +34,31 @@ import {
 // eslint-disable-next-line no-restricted-imports
 import * as qs from 'querystring'
 
-import http from 'http'
-import https from 'https'
 import { getContext } from '../../../../context/index.js'
 import { icmpRequest } from '../icmp/request.js'
 import registerFakes from '../../../../utils/fakes.js'
-import { sendHttpRequest } from '../../../../utils/http.js'
+import {
+  sendHttpRequest,
+  sendHttpRequestFetch,
+} from '../../../../utils/http.js'
+import { log } from '../../../../utils/pino.js'
+import { AxiosError } from 'axios'
+import { MonikaFlags } from '../../../../flag.js'
 import { getErrorMessage } from '../../../../utils/catch-error-handler.js'
+import { type HeadersInit, errors as undiciErrors } from 'undici'
+import Joi from 'joi'
 
 // Register Handlebars helpers
 registerFakes(Handlebars)
-
-// Keep the agents alive to reduce the overhead of DNS queries and creating TCP connection.
-// More information here: https://rakshanshetty.in/nodejs-http-keep-alive/
-const httpAgent = new http.Agent({ keepAlive: true })
-const httpsAgent = new https.Agent({
-  keepAlive: true,
-  rejectUnauthorized: getContext().flags.ignoreInvalidTLS,
-})
 
 type probingParams = {
   requestConfig: Omit<RequestConfig, 'saveBody' | 'alert'> // is a config object
   responses: Array<ProbeRequestResponse> // an array of previous responses
 }
+
+const UndiciErrorValidator = Joi.object({
+  cause: Joi.object({ name: Joi.string(), code: Joi.string() }),
+})
 
 /**
  * probing() is the heart of monika requests generation
@@ -71,93 +72,24 @@ export async function httpRequest({
   // Compile URL using handlebars to render URLs that uses previous responses data
   const { method, url, headers, timeout, body, ping, allowUnauthorized } =
     requestConfig
-  const newReq = { method, headers, timeout, body, ping }
+  const newReq = { method, headers: new Headers(headers), timeout, body, ping }
   const renderURL = Handlebars.compile(url)
   const renderedURL = renderURL({ responses })
 
   const { flags } = getContext()
+  newReq.headers = new Headers(
+    compileHeaders(headers, body, responses as never)
+  )
+  // compile body needs to modify headers if necessary
+  const { headers: newHeaders, body: newBody } = compileBody(
+    newReq.headers,
+    body,
+    responses
+  )
+  newReq.headers = new Headers(newHeaders)
+  newReq.body = newBody
 
-  // Compile headers using handlebars to render URLs that uses previous responses data.
-  // In some case such as value is not string, it will be returned as is without being compiled.
-  // If the request does not have any headers, then it should skip this process.
-  if (headers) {
-    for (const header of Object.keys(headers)) {
-      const rawHeader = headers[header]
-      const renderHeader = Handlebars.compile(rawHeader)
-      const renderedHeader = renderHeader({ responses })
-
-      newReq.headers = {
-        ...newReq.headers,
-        [header]: renderedHeader,
-      }
-
-      // evaluate "Content-Type" header in case-insensitive manner
-      if (header.toLocaleLowerCase() === 'content-type') {
-        const { contentType } = transformContentByType(body, rawHeader)
-
-        if (rawHeader === 'multipart/form-data') {
-          // delete the previous content-type header and add a new header with boundary
-          // it needs to be deleted because multipart/form data needs to append the boundary data
-          // from
-          //    "content-type": "multipart/form-data"
-          // to
-          //    "content-type": "multipart/form-data; boundary=--------------------------012345678900123456789012"
-          delete newReq.headers[header]
-
-          newReq.headers = {
-            ...newReq.headers,
-            'content-type': contentType,
-          }
-        }
-      }
-    }
-  }
-
-  if (body) {
-    newReq.body = generateRequestChainingBody(body, responses)
-
-    if (newReq.headers) {
-      const contentTypeKey = Object.keys(headers || {}).find(
-        (hk) => hk.toLocaleLowerCase() === 'content-type'
-      )
-
-      if (contentTypeKey) {
-        const { content, contentType } = transformContentByType(
-          newReq?.body,
-          (headers || {})[contentTypeKey]
-        )
-
-        delete newReq.headers[contentTypeKey]
-
-        newReq.body = content
-        newReq.headers = {
-          ...newReq.headers,
-          'content-type': contentType,
-        }
-      }
-    }
-  }
-
-  // check if this request must ignore ssl cert
-  // if it is, then create new https agent solely for this request
-  // allowUnauthorized in a request takes higher priority than the global ignoreInvalidTLS flag
-  let optHttpsAgent
-  if (allowUnauthorized) {
-    // Use the agent with the rejectUnauthorized value from the config
-    optHttpsAgent = new https.Agent({
-      rejectUnauthorized: !allowUnauthorized,
-    })
-  } else {
-    const ignoringInvalidTLS = getContext().flags.ignoreInvalidTLS
-    httpsAgent.options = {
-      ...httpsAgent.options,
-      rejectUnauthorized: !ignoringInvalidTLS,
-    }
-    optHttpsAgent = httpsAgent
-  }
-
-  const requestStartedAt = Date.now()
-
+  const startTime = Date.now()
   try {
     // is this a request for ping?
     if (newReq.ping === true) {
@@ -165,60 +97,37 @@ export async function httpRequest({
     }
 
     // Do the request using compiled URL and compiled headers (if exists)
-    const resp = await sendHttpRequest({
-      ...newReq,
-      url: renderedURL,
-      data: newReq.body,
-      maxRedirects: flags['follow-redirects'],
-      httpAgent,
-      httpsAgent: optHttpsAgent,
-    })
-
-    const responseTime = Date.now() - requestStartedAt
-    const { data, headers, status } = resp
-
-    return {
-      requestType: 'HTTP',
-      data,
-      body: data,
-      status,
-      headers,
-      responseTime,
-      result: probeRequestResult.success,
+    if (flags['native-fetch']) {
+      return await probeHttpFetch({
+        startTime,
+        flags,
+        renderedURL,
+        requestParams: newReq,
+        allowUnauthorized,
+      })
     }
+
+    return await probeHttpAxios({
+      startTime,
+      flags,
+      renderedURL,
+      requestParams: newReq,
+      allowUnauthorized,
+    })
   } catch (error: unknown) {
-    const responseTime = Date.now() - requestStartedAt
+    const responseTime = Date.now() - startTime
 
-    if (axios.default.isAxiosError(error)) {
-      // The request was made and the server responded with a status code
-      // 400, 500 get here
-      if (error?.response) {
-        return {
-          data: '',
-          body: '',
-          status: error.response?.status,
-          headers: error.response?.headers,
-          responseTime,
-          result: probeRequestResult.success,
-          error: String(error.response?.data),
-        }
-      }
+    if (error instanceof AxiosError) {
+      return handleAxiosError(responseTime, error)
+    }
 
-      // The request was made but no response was received
-      // timeout is here, ECONNABORTED, ENOTFOUND, ECONNRESET, ECONNREFUSED
-      if (error?.request) {
-        const { status, description } = getErrorStatusWithExplanation(error)
+    const { value, error: undiciErrorValidator } =
+      UndiciErrorValidator.validate(error, {
+        allowUnknown: true,
+      })
 
-        return {
-          data: '',
-          body: '',
-          status,
-          headers: '',
-          responseTime,
-          result: probeRequestResult.failed,
-          error: description,
-        }
-      }
+    if (!undiciErrorValidator) {
+      return handleUndiciError(responseTime, value.cause)
     }
 
     // other errors
@@ -229,15 +138,206 @@ export async function httpRequest({
       headers: '',
       responseTime,
       result: probeRequestResult.failed,
-      error: (error as Error).message,
+      error: getErrorMessage(error),
     }
+  }
+}
+
+function compileHeaders(
+  headers: HeadersInit | undefined,
+  body: string | object,
+  responses: never
+): HeadersInit | undefined {
+  // return as-is if falsy
+  if (!headers) return headers
+  // Compile headers using handlebars to render URLs that uses previous responses data.
+  // In some case such as value is not string, it will be returned as is without being compiled.
+  // If the request does not have any headers, then it should skip this process.
+  let newHeaders = headers
+  for (const [key, value] of Object.entries(headers)) {
+    const rawHeader = value
+    const renderHeader = Handlebars.compile(rawHeader)
+    const renderedHeader = renderHeader({ responses })
+
+    newHeaders = {
+      ...newHeaders,
+      [key]: renderedHeader,
+    }
+
+    // evaluate "Content-Type" header in case-insensitive manner
+    if (key.toLocaleLowerCase() === 'content-type') {
+      const { contentType } = transformContentByType(body, rawHeader)
+
+      if (rawHeader === 'multipart/form-data') {
+        // delete the previous content-type header and add a new header with boundary
+        // it needs to be deleted because multipart/form data needs to append the boundary data
+        // from
+        //    "content-type": "multipart/form-data"
+        // to
+        //    "content-type": "multipart/form-data; boundary=--------------------------012345678900123456789012"
+        delete newHeaders[key as never]
+
+        newHeaders = {
+          ...newHeaders,
+          'content-type': contentType,
+        }
+      }
+    }
+  }
+
+  return newHeaders
+}
+
+type CompiledBody = {
+  headers: HeadersInit | undefined
+  body: object | string
+}
+
+function compileBody(
+  headers: HeadersInit | undefined,
+  body: object | string,
+  responses: ProbeRequestResponse[]
+): CompiledBody {
+  // return as-is if falsy
+  if (!body) return { headers, body }
+  let newHeaders = headers
+  let newBody = generateRequestChainingBody(body, responses)
+
+  if (newHeaders) {
+    const contentTypeKey = Object.keys(newHeaders || {}).find(
+      (hk) => hk.toLocaleLowerCase() === 'content-type'
+    )
+
+    if (newHeaders && contentTypeKey) {
+      const { content, contentType } = transformContentByType(
+        newBody,
+        newHeaders[contentTypeKey as never]
+      )
+
+      delete newHeaders[contentTypeKey as never]
+
+      newBody = content
+      newHeaders = newHeaders
+        ? {
+            ...(newHeaders as object),
+            'content-type': contentType,
+          }
+        : undefined
+    }
+  }
+
+  return { headers: newHeaders, body: newBody }
+}
+
+async function probeHttpFetch({
+  startTime,
+  flags,
+  renderedURL,
+  requestParams,
+  allowUnauthorized,
+}: {
+  startTime: number
+  flags: MonikaFlags
+  renderedURL: string
+  allowUnauthorized: boolean | undefined
+  requestParams: {
+    method: string | undefined
+    headers: Headers | undefined
+    timeout: number
+    body: string | object
+    ping: boolean | undefined
+  }
+}): Promise<ProbeRequestResponse> {
+  if (flags.verbose) log.info(`Probing ${renderedURL} with Node.js fetch`)
+
+  const { body, headers, method, timeout } = requestParams
+  const { content } = transformContentByType(body, headers?.get('content-type'))
+  const response = await sendHttpRequestFetch({
+    allowUnauthorizedSsl: allowUnauthorized,
+    body: content,
+    headers,
+    maxRedirects: flags['follow-redirects'],
+    method,
+    timeout,
+    url: renderedURL,
+  })
+
+  const responseTime = Date.now() - startTime
+  let responseHeaders: Record<string, string> | undefined
+  if (response.headers) {
+    responseHeaders = {}
+    for (const [key, value] of Object.entries(response.headers)) {
+      responseHeaders[key] = value
+    }
+  }
+
+  const responseBody = await (response.headers
+    .get('Content-Type')
+    ?.includes('application/json')
+    ? response.json()
+    : response.text())
+
+  return {
+    requestType: 'HTTP',
+    data: responseBody,
+    body: responseBody,
+    status: response.status,
+    headers: responseHeaders || '',
+    responseTime,
+    result: probeRequestResult.success,
+  }
+}
+
+async function probeHttpAxios({
+  startTime,
+  flags,
+  renderedURL,
+  requestParams,
+  allowUnauthorized,
+}: {
+  startTime: number
+  flags: MonikaFlags
+  renderedURL: string
+  allowUnauthorized: boolean | undefined
+  requestParams: {
+    method: string | undefined
+    headers: Headers | undefined
+    timeout: number
+    body: string | object
+    ping: boolean | undefined
+  }
+}): Promise<ProbeRequestResponse> {
+  const { body, headers, method, timeout } = requestParams
+  const { content } = transformContentByType(body, headers?.get('content-type'))
+  const resp = await sendHttpRequest({
+    allowUnauthorizedSsl: allowUnauthorized,
+    body: content,
+    headers,
+    keepalive: true,
+    maxRedirects: flags['follow-redirects'],
+    method,
+    timeout,
+    url: renderedURL,
+  })
+
+  const responseTime = Date.now() - startTime
+  const { data, headers: requestHeaders, status } = resp
+
+  return {
+    requestType: 'HTTP',
+    data,
+    body: data,
+    status,
+    headers: requestHeaders,
+    responseTime,
+    result: probeRequestResult.success,
   }
 }
 
 export function generateRequestChainingBody(
   body: object | string,
   responses: ProbeRequestResponse[]
-): JSON | string {
+): object | string {
   const isString = typeof body === 'string'
   const template = Handlebars.compile(isString ? body : JSON.stringify(body))
   const renderedBody = template({ responses })
@@ -247,9 +347,13 @@ export function generateRequestChainingBody(
 
 function transformContentByType(
   content: object | string,
-  contentType?: string | number | boolean
+  contentType?: string | null | undefined
 ) {
   switch (contentType) {
+    case 'application/json': {
+      return { content: JSON.stringify(content), contentType }
+    }
+
     case 'application/x-www-form-urlencoded': {
       return {
         content: qs.stringify(content as never),
@@ -275,12 +379,61 @@ function transformContentByType(
     }
 
     default: {
-      return { content, contentType }
+      return {
+        content:
+          typeof content === 'object' ? JSON.stringify(content) : content,
+        contentType,
+      }
     }
   }
 }
 
-function getErrorStatusWithExplanation(error: any): {
+function handleAxiosError(
+  responseTime: number,
+  error: AxiosError
+): ProbeRequestResponse {
+  // The request was made and the server responded with a status code
+  // 400, 500 get here
+  if (error?.response) {
+    return {
+      data: '',
+      body: '',
+      status: error?.response?.status,
+      headers: error?.response?.headers,
+      responseTime,
+      result: probeRequestResult.success,
+      error: error?.response?.data as string,
+    }
+  }
+
+  // The request was made but no response was received
+  // timeout is here, ECONNABORTED, ENOTFOUND, ECONNRESET, ECONNREFUSED
+  if (error?.request) {
+    const { status, description } = getErrorStatusWithExplanation(error)
+    return {
+      data: '',
+      body: '',
+      status,
+      headers: '',
+      responseTime,
+      result: probeRequestResult.failed,
+      error: description,
+    }
+  }
+
+  return {
+    data: '',
+    body: '',
+    status: 99,
+    headers: '',
+    responseTime,
+    result: probeRequestResult.failed,
+    error: getErrorMessage(error),
+  }
+}
+
+// eslint-disable-next-line complexity
+function getErrorStatusWithExplanation(error: AxiosError): {
   status: number
   description: string
 } {
@@ -433,14 +586,194 @@ function getErrorStatusWithExplanation(error: any): {
     }
 
     default: {
-      console.error(
-        `Error code 99: Unhandled error while probing ${error.request.url}, got ${error.code} ${error.stack} `
-      )
+      if (error instanceof AxiosError) {
+        log.error(
+          `Error code 99: Unhandled error while probing ${error.request.url}, got ${error.code} ${error.stack} `
+        )
+      } else {
+        log.error(
+          `Error code 99: Unhandled error, got ${(error as AxiosError).stack}`
+        )
+      }
 
       return {
         status: 99,
         description: `Error code 99: ${getErrorMessage(error)}`,
       }
     } // in the event an unlikely unknown error, send here
+  }
+}
+
+function handleUndiciError(
+  responseTime: number,
+  error: undiciErrors.UndiciError
+): ProbeRequestResponse {
+  if (
+    error instanceof undiciErrors.BodyTimeoutError ||
+    error instanceof undiciErrors.ConnectTimeoutError ||
+    error instanceof undiciErrors.HeadersTimeoutError
+  ) {
+    return {
+      data: '',
+      body: '',
+      status: 6,
+      headers: '',
+      responseTime,
+      result: probeRequestResult.failed,
+      error: 'ETIMEDOUT: Connection attempt has timed out.',
+    }
+  }
+
+  if (error instanceof undiciErrors.RequestAbortedError) {
+    // https://httpstatuses.com/599
+    return {
+      data: '',
+      body: '',
+      status: 599,
+      headers: '',
+      responseTime,
+      result: probeRequestResult.failed,
+      error:
+        'ECONNABORTED: The connection was unexpectedly terminated, often due to server issues, network problems, or timeouts.',
+    }
+  }
+
+  // BEGIN Node.js fetch error status code outside Axios' error handler range (code >= 18)
+  // fetch's client maxResponseSize and maxHeaderSize is set, limit exceeded
+  if (
+    error instanceof undiciErrors.HeadersOverflowError ||
+    error instanceof undiciErrors.ResponseExceededMaxSizeError
+  ) {
+    return {
+      data: '',
+      body: '',
+      status: 18,
+      headers: '',
+      responseTime,
+      result: probeRequestResult.failed,
+      error: 'ECONNOVERFLOW: Header / response max size exceeded.',
+    }
+  }
+
+  // fetch throwOnError is set to true, got HTTP status code >= 400
+  if (error instanceof undiciErrors.ResponseStatusCodeError) {
+    return {
+      data: '',
+      body: '',
+      status: 19,
+      headers: '',
+      responseTime,
+      result: probeRequestResult.failed,
+      error: 'ERESPONSESTATUSCODE: HTTP status code returns >= 400.',
+    }
+  }
+
+  // invalid fetch argument passed
+  if (error instanceof undiciErrors.InvalidArgumentError) {
+    return {
+      data: '',
+      body: '',
+      status: 20,
+      headers: '',
+      responseTime,
+      result: probeRequestResult.failed,
+      error: 'EINVALIDARGUMENT: Invalid HTTP arguments.',
+    }
+  }
+
+  // fetch failed to handle return value
+  if (error instanceof undiciErrors.InvalidReturnValueError) {
+    return {
+      data: '',
+      body: '',
+      status: 21,
+      headers: '',
+      responseTime,
+      result: probeRequestResult.failed,
+      error: 'EINVALIDRETURN: Unexpected HTTP response to handle.',
+    }
+  }
+
+  if (
+    error instanceof undiciErrors.ClientClosedError ||
+    error instanceof undiciErrors.ClientDestroyedError ||
+    error instanceof undiciErrors.SocketError
+  ) {
+    return {
+      data: '',
+      body: '',
+      status: 22,
+      headers: '',
+      responseTime,
+      result: probeRequestResult.failed,
+      error: 'ECONNCLOSED: HTTP client closed unexpectedly.',
+    }
+  }
+
+  if (error instanceof undiciErrors.NotSupportedError) {
+    return {
+      data: '',
+      body: '',
+      status: 23,
+      headers: '',
+      responseTime,
+      result: probeRequestResult.failed,
+      error: 'ESUPPORT: Unsupported HTTP functionality.',
+    }
+  }
+
+  if (
+    error instanceof undiciErrors.RequestContentLengthMismatchError ||
+    error instanceof undiciErrors.ResponseContentLengthMismatchError
+  ) {
+    return {
+      data: '',
+      body: '',
+      status: 24,
+      headers: '',
+      responseTime,
+      result: probeRequestResult.failed,
+      error:
+        'ECONTENTLENGTH: Request / response content length mismatch with Content-Length header value.',
+    }
+  }
+
+  // inline docs in Undici state that this would never happen,
+  // but they declare and throw this condition anyway
+  if (error instanceof undiciErrors.BalancedPoolMissingUpstreamError) {
+    return {
+      data: '',
+      body: '',
+      status: 25,
+      headers: '',
+      responseTime,
+      result: probeRequestResult.failed,
+      error: `EMISSINGPOOL: Missing HTTP client pool.`,
+    }
+  }
+
+  // expected error from fetch, but exact reason is in the message string
+  // error messages are unpredictable
+  // reference https://github.com/search?q=repo:nodejs/undici+new+InformationalError(&type=code
+  if (error instanceof undiciErrors.InformationalError) {
+    return {
+      data: '',
+      body: '',
+      status: 26,
+      headers: '',
+      responseTime,
+      result: probeRequestResult.failed,
+      error: `EINFORMATIONAL: ${error.message}.`,
+    }
+  }
+
+  return {
+    data: '',
+    body: '',
+    status: 99,
+    headers: '',
+    responseTime,
+    result: probeRequestResult.failed,
+    error: getErrorMessage(error),
   }
 }

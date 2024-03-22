@@ -22,27 +22,31 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { rest } from 'msw'
+import { type DefaultBodyType, HttpResponse, http } from 'msw'
 import { setupServer } from 'msw/node'
 import { expect } from '@oclif/test'
 
 import type { ProberMetadata } from './index.js'
 
-import { getContext } from '../../../context/index.js'
 import { createProber } from './factory.js'
+import { getIncidents } from '../../incident/index.js'
 
 describe('Prober', () => {
   describe('Initial incident state', () => {
     let probeRequestTotal = 0
-    let webhookBody: Record<string, string> | null = null
+    let webhookBody: DefaultBodyType = null
     const server = setupServer(
-      rest.get('https://example.com', (_, res, ctx) => {
+      http.get('https://example.com', () => {
         probeRequestTotal++
-        return res(ctx.status(200))
+        return new HttpResponse(null, {
+          status: 200,
+        })
       }),
-      rest.post('https://example.com/webhook', async (req, res, ctx) => {
-        webhookBody = await req.json()
-        return res(ctx.status(202))
+      http.post('https://example.com/webhook', async ({ request }) => {
+        webhookBody = await request.json()
+        return new HttpResponse(null, {
+          status: 202,
+        })
       })
     )
 
@@ -88,7 +92,7 @@ describe('Prober', () => {
       // assert
       expect(probeRequestTotal).eq(1)
       expect(webhookBody).eq(null)
-      expect(getContext().incidents.length).eq(0)
+      expect(getIncidents().length).eq(0)
     })
 
     it('should not initialize probe state if last event id is not specify', async () => {
@@ -125,7 +129,7 @@ describe('Prober', () => {
       // assert
       expect(probeRequestTotal).eq(1)
       expect(webhookBody).eq(null)
-      expect(getContext().incidents.length).eq(0)
+      expect(getIncidents().length).eq(0)
     })
 
     it('should not initialize probe state if last event recovered at is not null', async () => {
@@ -163,7 +167,7 @@ describe('Prober', () => {
       // assert
       expect(probeRequestTotal).eq(1)
       expect(webhookBody).eq(null)
-      expect(getContext().incidents.length).eq(0)
+      expect(getIncidents().length).eq(0)
     })
 
     it('should not initialize probe state if alert is not found', async () => {
@@ -201,7 +205,7 @@ describe('Prober', () => {
       // assert
       expect(probeRequestTotal).eq(1)
       expect(webhookBody).eq(null)
-      expect(getContext().incidents.length).eq(0)
+      expect(getIncidents().length).eq(0)
     })
 
     it('should send recovery notification if recovered_at is null and target is healthy', async () => {
@@ -254,15 +258,17 @@ describe('Prober', () => {
       // assert
       expect(probeRequestTotal).eq(1)
       expect(webhookBody).not.eq(null)
-      expect(getContext().incidents.length).eq(0)
+      expect(getIncidents().length).eq(0)
     })
 
     it('should not send incident notification if recovered_at is null and target is not healthy', async () => {
       // arrange
       server.use(
-        rest.get('https://example.com', (_, res, ctx) => {
+        http.get('https://example.com', () => {
           probeRequestTotal++
-          return res(ctx.status(404))
+          return new HttpResponse(null, {
+            status: 404,
+          })
         })
       )
       const proberMetadata: ProberMetadata = {
@@ -313,7 +319,7 @@ describe('Prober', () => {
       // assert
       expect(probeRequestTotal).eq(1)
       expect(webhookBody).eq(null)
-      expect(getContext().incidents.length).eq(1)
+      expect(getIncidents().length).eq(1)
     })
 
     it('should not send recovery notification if recovered_at is not null and target is healthy', async () => {
@@ -365,15 +371,17 @@ describe('Prober', () => {
       // assert
       expect(probeRequestTotal).eq(1)
       expect(webhookBody).eq(null)
-      expect(getContext().incidents.length).eq(0)
+      expect(getIncidents().length).eq(0)
     })
 
     it('should send incident notification if recovered_at is not null and target is not healthy', async () => {
       // arrange
       server.use(
-        rest.get('https://example.com', (_, res, ctx) => {
+        http.get('https://example.com', () => {
           probeRequestTotal++
-          return res(ctx.status(404))
+          return new HttpResponse(null, {
+            status: 404,
+          })
         })
       )
       const proberMetadata: ProberMetadata = {
@@ -425,7 +433,7 @@ describe('Prober', () => {
       // assert
       expect(probeRequestTotal).eq(1)
       expect(webhookBody).not.eq(null)
-      expect(getContext().incidents.length).eq(1)
+      expect(getIncidents().length).eq(1)
     })
   })
 })
