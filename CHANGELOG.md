@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.19.1] - 2024-03-25
 
-### Changes
+### Changed
 
 - Handle Node.js fetch errors
 - Upgrade MSW to version 2
