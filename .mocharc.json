@@ -1,7 +1,10 @@
 {
-  "node-option": ["loader=ts-node/esm"],
-  "require": ["ts-node/register"],
   "bail": true,
-  "timeout": 5000,
-  "exit": true
+  "exit": true,
+  "node-option": [
+    "loader=ts-node/esm",
+    "experimental-specifier-resolution=node"
+  ],
+  "require": ["ts-node/register"],
+  "timeout": 5000
 }

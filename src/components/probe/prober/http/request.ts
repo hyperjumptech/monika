@@ -22,6 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import axios from 'axios'
 import Handlebars from 'handlebars'
 import FormData from 'form-data'
 import YAML from 'yaml'
@@ -42,7 +43,6 @@ import {
   sendHttpRequestFetch,
 } from '../../../../utils/http.js'
 import { log } from '../../../../utils/pino.js'
-import { AxiosError } from 'axios'
 import { MonikaFlags } from '../../../../flag.js'
 import { getErrorMessage } from '../../../../utils/catch-error-handler.js'
 import { type HeadersInit, errors as undiciErrors } from 'undici'
@@ -117,7 +117,7 @@ export async function httpRequest({
   } catch (error: unknown) {
     const responseTime = Date.now() - startTime
 
-    if (error instanceof AxiosError) {
+    if (axios.default.isAxiosError(error)) {
       return handleAxiosError(responseTime, error)
     }
 
@@ -165,22 +165,21 @@ function compileHeaders(
     }
 
     // evaluate "Content-Type" header in case-insensitive manner
-    if (key.toLocaleLowerCase() === 'content-type') {
-      const { contentType } = transformContentByType(body, rawHeader)
+    if (
+      key.toLocaleLowerCase() === 'content-type' &&
+      rawHeader === 'multipart/form-data'
+    ) {
+      // delete the previous content-type header and add a new header with boundary
+      // it needs to be deleted because multipart/form data needs to append the boundary data
+      // from
+      //    "content-type": "multipart/form-data"
+      // to
+      //    "content-type": "multipart/form-data; boundary=--------------------------012345678900123456789012"
+      delete newHeaders[key as never]
 
-      if (rawHeader === 'multipart/form-data') {
-        // delete the previous content-type header and add a new header with boundary
-        // it needs to be deleted because multipart/form data needs to append the boundary data
-        // from
-        //    "content-type": "multipart/form-data"
-        // to
-        //    "content-type": "multipart/form-data; boundary=--------------------------012345678900123456789012"
-        delete newHeaders[key as never]
-
-        newHeaders = {
-          ...newHeaders,
-          'content-type': contentType,
-        }
+      newHeaders = {
+        ...newHeaders,
+        'content-type': 'multipart/form-data',
       }
     }
   }
@@ -200,7 +199,7 @@ function compileBody(
 ): CompiledBody {
   // return as-is if falsy
   if (!body) return { headers, body }
-  let newHeaders = headers
+  const newHeaders = new Headers(headers)
   let newBody = generateRequestChainingBody(body, responses)
 
   if (newHeaders) {
@@ -214,15 +213,12 @@ function compileBody(
         newHeaders[contentTypeKey as never]
       )
 
-      delete newHeaders[contentTypeKey as never]
+      newHeaders.delete(contentTypeKey)
 
       newBody = content
-      newHeaders = newHeaders
-        ? {
-            ...(newHeaders as object),
-            'content-type': contentType,
-          }
-        : undefined
+      if (newHeaders) {
+        newHeaders.append('content-type', contentType || '')
+      }
     }
   }
 
@@ -368,7 +364,7 @@ function transformContentByType(
         form.append(contentKey, (content as Record<string, never>)[contentKey])
       }
 
-      return { content: form, contentType: form.getHeaders()['content-type'] }
+      return { content: form, contentType }
     }
 
     case 'text/yaml': {
@@ -390,7 +386,7 @@ function transformContentByType(
 
 function handleAxiosError(
   responseTime: number,
-  error: AxiosError
+  error: axios.AxiosError
 ): ProbeRequestResponse {
   // The request was made and the server responded with a status code
   // 400, 500 get here
@@ -433,7 +429,7 @@ function handleAxiosError(
 }
 
 // eslint-disable-next-line complexity
-function getErrorStatusWithExplanation(error: AxiosError): {
+function getErrorStatusWithExplanation(error: axios.AxiosError): {
   status: number
   description: string
 } {
@@ -586,14 +582,12 @@ function getErrorStatusWithExplanation(error: AxiosError): {
     }
 
     default: {
-      if (error instanceof AxiosError) {
+      if (axios.default.isAxiosError(error)) {
         log.error(
           `Error code 99: Unhandled error while probing ${error.request.url}, got ${error.code} ${error.stack} `
         )
       } else {
-        log.error(
-          `Error code 99: Unhandled error, got ${(error as AxiosError).stack}`
-        )
+        log.error(`Error code 99: Unhandled error, got ${error}`)
       }
 
       return {
