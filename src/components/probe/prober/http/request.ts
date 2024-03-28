@@ -42,7 +42,7 @@ import { log } from '../../../../utils/pino'
 import { AxiosError } from 'axios'
 import { MonikaFlags } from 'src/flag'
 import { getErrorMessage } from '../../../../utils/catch-error-handler'
-import { type HeadersInit, errors as undiciErrors } from 'undici'
+import { errors as undiciErrors } from 'undici'
 import Joi from 'joi'
 
 // Register Handlebars helpers
@@ -69,21 +69,19 @@ export async function httpRequest({
   // Compile URL using handlebars to render URLs that uses previous responses data
   const { method, url, headers, timeout, body, ping, allowUnauthorized } =
     requestConfig
-  const newReq = { method, headers: new Headers(headers), timeout, body, ping }
+  const newReq = { method, headers, timeout, body, ping }
   const renderURL = Handlebars.compile(url)
   const renderedURL = renderURL({ responses })
 
   const { flags } = getContext()
-  newReq.headers = new Headers(
-    compileHeaders(headers, body, responses as never)
-  )
+  newReq.headers = compileHeaders(headers, body, responses as never)
   // compile body needs to modify headers if necessary
   const { headers: newHeaders, body: newBody } = compileBody(
     newReq.headers,
     body,
     responses
   )
-  newReq.headers = new Headers(newHeaders)
+  newReq.headers = newHeaders
   newReq.body = newBody
 
   const startTime = Date.now()
@@ -93,13 +91,18 @@ export async function httpRequest({
       return icmpRequest({ host: renderedURL })
     }
 
+    const requestHeaders = new Headers()
+    for (const [key, value] of Object.entries(newReq.headers || {})) {
+      requestHeaders.set(key, value)
+    }
+
     // Do the request using compiled URL and compiled headers (if exists)
     if (flags['native-fetch']) {
       return await probeHttpFetch({
         startTime,
         flags,
         renderedURL,
-        requestParams: newReq,
+        requestParams: { ...newReq, headers: requestHeaders },
         allowUnauthorized,
       })
     }
@@ -108,7 +111,7 @@ export async function httpRequest({
       startTime,
       flags,
       renderedURL,
-      requestParams: newReq,
+      requestParams: { ...newReq, headers: requestHeaders },
       allowUnauthorized,
     })
   } catch (error: unknown) {
@@ -141,18 +144,17 @@ export async function httpRequest({
 }
 
 function compileHeaders(
-  headers: HeadersInit | undefined,
+  headers: object | undefined,
   body: string | object,
   responses: never
-): HeadersInit | undefined {
+) {
   // return as-is if falsy
   if (!headers) return headers
   // Compile headers using handlebars to render URLs that uses previous responses data.
   // In some case such as value is not string, it will be returned as is without being compiled.
   // If the request does not have any headers, then it should skip this process.
   let newHeaders = headers
-  for (const [key, value] of Object.entries(headers)) {
-    const rawHeader = value
+  for (const [key, rawHeader] of Object.entries(headers)) {
     const renderHeader = Handlebars.compile(rawHeader)
     const renderedHeader = renderHeader({ responses })
 
@@ -185,16 +187,14 @@ function compileHeaders(
   return newHeaders
 }
 
-type CompiledBody = {
-  headers: HeadersInit | undefined
-  body: object | string
-}
-
 function compileBody(
-  headers: HeadersInit | undefined,
+  headers: object | undefined,
   body: object | string,
   responses: ProbeRequestResponse[]
-): CompiledBody {
+): {
+  headers: object | undefined
+  body: object | string
+} {
   // return as-is if falsy
   if (!body) return { headers, body }
   let newHeaders = headers
@@ -246,17 +246,16 @@ async function probeHttpFetch({
   }
 }): Promise<ProbeRequestResponse> {
   if (flags.verbose) log.info(`Probing ${renderedURL} with Node.js fetch`)
-
-  const { body, headers, method, timeout } = requestParams
-  const { content } = transformContentByType(body, headers?.get('content-type'))
   const response = await sendHttpRequestFetch({
+    ...requestParams,
     allowUnauthorizedSsl: allowUnauthorized,
-    body: content,
-    headers,
-    maxRedirects: flags['follow-redirects'],
-    method,
-    timeout,
+    keepalive: true,
     url: renderedURL,
+    maxRedirects: flags['follow-redirects'],
+    body:
+      typeof requestParams.body === 'string'
+        ? requestParams.body
+        : JSON.stringify(requestParams.body),
   })
 
   const responseTime = Date.now() - startTime
@@ -268,11 +267,11 @@ async function probeHttpFetch({
     }
   }
 
-  const responseBody = await (response.headers
+  const responseBody = response.headers
     .get('Content-Type')
     ?.includes('application/json')
-    ? response.json()
-    : response.text())
+    ? await response.json()
+    : await response.text()
 
   return {
     requestType: 'HTTP',
@@ -304,28 +303,27 @@ async function probeHttpAxios({
     ping: boolean | undefined
   }
 }): Promise<ProbeRequestResponse> {
-  const { body, headers, method, timeout } = requestParams
-  const { content } = transformContentByType(body, headers?.get('content-type'))
   const resp = await sendHttpRequest({
+    ...requestParams,
     allowUnauthorizedSsl: allowUnauthorized,
-    body: content,
-    headers,
     keepalive: true,
-    maxRedirects: flags['follow-redirects'],
-    method,
-    timeout,
     url: renderedURL,
+    maxRedirects: flags['follow-redirects'],
+    body:
+      typeof requestParams.body === 'string'
+        ? requestParams.body
+        : JSON.stringify(requestParams.body),
   })
 
   const responseTime = Date.now() - startTime
-  const { data, headers: requestHeaders, status } = resp
+  const { data, headers, status } = resp
 
   return {
     requestType: 'HTTP',
     data,
     body: data,
     status,
-    headers: requestHeaders,
+    headers,
     responseTime,
     result: probeRequestResult.success,
   }
@@ -344,7 +342,7 @@ export function generateRequestChainingBody(
 
 function transformContentByType(
   content: object | string,
-  contentType?: string | null | undefined
+  contentType?: string | number | boolean
 ) {
   switch (contentType) {
     case 'application/json': {
@@ -376,11 +374,7 @@ function transformContentByType(
     }
 
     default: {
-      return {
-        content:
-          typeof content === 'object' ? JSON.stringify(content) : content,
-        contentType,
-      }
+      return { content, contentType }
     }
   }
 }
