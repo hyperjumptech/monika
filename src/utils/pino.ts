@@ -43,7 +43,6 @@ function getOptions() {
     hideObject: true,
   }
 
-  // TODO: Current vercel/pkg is dependent with CommonJS
   // eslint-disable-next-line unicorn/prefer-module
   const project = path.join(__dirname, '../../tsconfig.json')
   const dev = fs.existsSync(project)

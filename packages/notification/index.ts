@@ -22,13 +22,23 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { channels, Notification, NotificationMessage } from './channel'
+import {
+  channels,
+  type Notification,
+  type NotificationMessage,
+} from './channel'
 import { getErrorMessage } from './utils/catch-error-handler'
+import { type InputSender, updateSender } from './utils/default-sender'
 
 async function sendNotifications(
   notifications: Notification[],
-  message: NotificationMessage
+  message: NotificationMessage,
+  sender?: InputSender
 ): Promise<void> {
+  if (sender) {
+    updateSender(sender)
+  }
+
   await Promise.all(
     notifications.map(async ({ data, type }) => {
       const channel = channels[type]

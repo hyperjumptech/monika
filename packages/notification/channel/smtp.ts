@@ -26,6 +26,7 @@ import * as nodemailer from 'nodemailer'
 import Mailgen from 'mailgen'
 import Joi from 'joi'
 
+import { getSender } from '../utils/default-sender'
 import type { NotificationMessage } from '.'
 
 type NotificationData = {
@@ -51,8 +52,7 @@ export const send = async (
   { hostname, password, port, recipients, username }: NotificationData,
   { body, subject }: NotificationMessage
 ): Promise<void> => {
-  // TODO: Read from ENV Variables
-  const DEFAULT_EMAIL = 'monika@hyperjump.tech'
+  const DEFAULT_EMAIL = getSender().email
   const DEFAULT_SENDER_NAME = 'Monika'
   const transporter = nodemailer.createTransport({
     host: hostname,
