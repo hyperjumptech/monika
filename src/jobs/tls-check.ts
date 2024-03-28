@@ -22,20 +22,24 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import {
+  sendNotifications,
+  type Notification,
+  type NotificationMessage,
+} from '@hyperjumptech/monika-notification'
+import { format } from 'date-fns'
+
 import { getConfig } from '../components/config'
 import { saveNotificationLog } from '../components/logger/history'
-import { sendAlerts } from '../components/notification'
+import {
+  getMonikaInstance,
+  getOSName,
+} from '../components/notification/alert-message'
 import { checkTLS, getHostname } from '../components/tls-checker'
-import type { Notification } from '@hyperjumptech/monika-notification'
-import type { ValidatedResponse } from '../plugins/validate-response'
+import { getContext } from '../context'
+import getIp from '../utils/ip'
 import { log } from '../utils/pino'
-import { probeRequestResult } from '../interfaces/request'
-
-type SendTLSErrorNotificationProps = {
-  hostname: string
-  notifications: Notification[]
-  errorMessage: string
-}
+import { publicIpAddress } from '../utils/public-ip'
 
 export function tlsChecker(): void {
   const config = getConfig()
@@ -64,62 +68,86 @@ export function tlsChecker(): void {
         return
       }
 
-      sendTLSErrorNotification({
+      sendErrorNotification({
+        errorMessage: error.message,
         hostname,
         notifications: notifications || [],
-        errorMessage: error.message,
-      })
+      }).catch(console.error)
     })
   }
 }
 
-function sendTLSErrorNotification({
+type SendErrorNotificationParams = {
+  errorMessage: string
+  hostname: string
+  notifications: Notification[]
+}
+
+async function sendErrorNotification({
+  errorMessage,
   hostname,
   notifications,
-  errorMessage,
-}: SendTLSErrorNotificationProps) {
-  // TODO: Remove probe below
-  // probe is used because probe detail is needed to save the notification log
+}: SendErrorNotificationParams) {
   const probe = {
     id: '',
+    alerts: [],
+    interval: 10,
     name: '',
     requests: [],
-    interval: 10,
-    alerts: [],
   }
 
-  for (const notification of notifications) {
-    // TODO: Remove validation below
-    // validation is used because it is needed to send alert
-    const validation: ValidatedResponse = {
-      alert: {
-        id: '',
-        assertion: '',
-        message: errorMessage,
-      },
-      isAlertTriggered: true,
-      response: {
-        status: 500,
-        responseTime: 0,
-        data: {},
-        body: {},
-        headers: {},
-        result: probeRequestResult.success,
-      },
-    }
+  await Promise.allSettled(
+    notifications.map(async (notification) => {
+      await sendNotifications(
+        notifications,
+        await getNotificationMessage({ hostname, errorMessage })
+      )
+      await saveNotificationLog(probe, notification, 'NOTIFY-TLS', errorMessage)
+    })
+  )
+}
 
-    saveNotificationLog(probe, notification, 'NOTIFY-TLS', errorMessage).catch(
-      (error) => log.error(error.message)
-    )
+type GetMessageParams = {
+  hostname: string
+  errorMessage: string
+}
 
-    // TODO: invoke sendNotifications function instead
-    // looks like the sendAlerts function does not handle this
-    sendAlerts({
+async function getNotificationMessage({
+  hostname,
+  errorMessage,
+}: GetMessageParams): Promise<NotificationMessage> {
+  const privateIpAddress = getIp()
+  const { userAgent } = getContext()
+  const [monikaInstance, osName] = await Promise.all([
+    getMonikaInstance(privateIpAddress),
+    getOSName(),
+  ])
+  const time = format(new Date(), 'yyyy-MM-dd HH:mm:ss XXX')
+  const body = `Message: ${errorMessage}
+
+  URL: ${hostname}
+
+  Time: ${time}
+
+  From: ${monikaInstance}
+
+  OS: ${osName}
+
+  Version: ${userAgent}`
+
+  return {
+    subject: 'New Incident from Monika',
+    body,
+    summary: errorMessage,
+    meta: {
+      hostname,
+      privateIpAddress,
       probeID: '',
+      publicIpAddress,
+      time,
+      type: 'incident',
       url: hostname,
-      probeState: 'invalid',
-      notifications: notifications ?? [],
-      validation,
-    }).catch((error) => log.error(error.message))
+      version: userAgent,
+    },
   }
 }

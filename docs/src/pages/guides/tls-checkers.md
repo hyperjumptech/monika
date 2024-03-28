@@ -7,7 +7,8 @@ You can check TLS validity and set the threshold to send notification before the
 
 ```yaml
 probes:
-  - requests:
+  - id: 'Example'
+    requests:
       - url: http://example.com
 certificate:
   domains:

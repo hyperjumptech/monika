@@ -9,7 +9,7 @@ There are many ways to install Monika. However, currently only x64 architecture 
 
 ### Windows
 
-The recommendeded approach is to use [Chocolatey](https://community.chocolatey.org/packages/monika), a popular package manager for Windows. Check [Monika page on Chocolatey](https://community.chocolatey.org/packages/monika) for more detailed information.
+The recommended approach is to use [Chocolatey](https://community.chocolatey.org/packages/monika), a popular package manager for Windows. Check [Monika page on Chocolatey](https://community.chocolatey.org/packages/monika) for more detailed information.
 
 If you have installed Chocolatey in your PC, then run the following command to install Monika:
 

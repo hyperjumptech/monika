@@ -135,7 +135,6 @@ export function setDatabase(
 
 async function migrate() {
   await database().migrate({
-    // TODO: Current vercel/pkg is dependent with CommonJS
     // eslint-disable-next-line unicorn/prefer-module
     migrationsPath: path.join(__dirname, '../../../db/migrations'),
   })
@@ -448,7 +447,6 @@ export async function saveProbeRequestLog({
   const now = Math.round(Date.now() / 1000)
   const requestConfig = probe.requests?.[requestIndex]
 
-  // TODO: limit data stored.
   const responseBody = requestConfig?.saveBody
     ? typeof probeRes.data === 'string'
       ? probeRes.data

@@ -26,6 +26,8 @@ import FormData from 'form-data'
 import Joi from 'joi'
 import type { NotificationMessage } from '.'
 import Mailgen from 'mailgen'
+
+import { getSender } from '../utils/default-sender'
 import { sendHttpRequest } from '../utils/http'
 
 export type NotificationData = {
@@ -109,10 +111,8 @@ function getContent({
   subject: string
   domain: string
 }): Content {
-  // TODO: Read from ENV Variables
-  const DEFAULT_SENDER_NAME = 'Monika'
+  const DEFAULT_SENDER_NAME = getSender().name
   const from = `${DEFAULT_SENDER_NAME} <mailgun@${domain}>`
-
   const mailGenerator = new Mailgen({
     theme: 'default',
     product: {
