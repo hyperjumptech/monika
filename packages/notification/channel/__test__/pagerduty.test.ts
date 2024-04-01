@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import { expect } from 'chai'
-import { rest } from 'msw'
+import { type DefaultBodyType, HttpResponse, http } from 'msw'
 import { setupServer } from 'msw/node'
 import type { NotificationMessage } from '../../channel'
 import { send, validator } from '../pagerduty'
@@ -59,22 +59,26 @@ describe('PagerDuty notification', () => {
   })
 
   describe('send the event', () => {
-    let body = {}
+    let body: DefaultBodyType = {}
     const server = setupServer(
-      rest.post(
+      http.post(
         'https://events.pagerduty.com/v2/enqueue',
-        async (req, res, ctx) => {
-          body = await req.json()
+        async ({ request }) => {
+          body = await request.json()
 
-          return res(ctx.status(202))
+          return new HttpResponse(null, {
+            status: 202,
+          })
         }
       ),
-      rest.post(
+      http.post(
         'https://events.pagerduty.com/v2/enqueue',
-        async (req, res, ctx) => {
-          body = await req.json()
+        async ({ request }) => {
+          body = await request.json()
 
-          return res(ctx.status(202))
+          return new HttpResponse(null, {
+            status: 202,
+          })
         }
       )
     )

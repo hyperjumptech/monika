@@ -290,7 +290,7 @@ export default class Monika extends Command {
     if (error.message.includes('EEXIT: 0')) {
       // this is normal exit, for example after running with --version,
       // not an error so just quit immediately
-      // eslint-disable-next-line no-process-exit, unicorn/no-process-exit
+      // eslint-disable-next-line n/no-process-exit, unicorn/no-process-exit
       process.exit(0)
     }
 
@@ -454,6 +454,6 @@ process.on('SIGINT', async () => {
 
   em.emit(events.application.terminated)
 
-  // eslint-disable-next-line no-process-exit
+  // eslint-disable-next-line n/no-process-exit
   process.exit(process.exitCode)
 })

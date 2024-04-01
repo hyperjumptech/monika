@@ -25,15 +25,26 @@
 import { prepareEnvironment } from '@gmrchk/cli-testing-library'
 import { expect } from 'chai'
 
-const monika = './bin/run.js'
+let monikaPath: string
 
-describe('Node CLI Testing', () => {
+before(async () => {
+  const { spawn, cleanup } = await prepareEnvironment()
+  const { getStdout, waitForText } = await spawn('which', 'monika', '.')
+  await waitForText('/monika')
+  monikaPath = getStdout()
+    .join('\r\n')
+    .replace('{{homedir}}', process.env.HOME || '')
+  console.log('Setup: Using monika path', monikaPath)
+  await cleanup()
+})
+
+describe('Binary CLI Testing', () => {
   it('shows version', async () => {
     // arrange
     const { spawn, cleanup } = await prepareEnvironment()
 
     // act
-    const { getStdout, waitForText } = await spawn('node', `${monika} -v`)
+    const { getStdout, waitForText } = await spawn(monikaPath, '-v')
     await waitForText('@hyperjumptech/monika')
 
     const stdout = getStdout().join('\r\n')
@@ -43,6 +54,7 @@ describe('Node CLI Testing', () => {
 
     await cleanup()
   })
+
   it('shows initializing file when no config', async () => {
     // arrange
     const { spawn, cleanup, exists, removeFile } = await prepareEnvironment()
@@ -56,7 +68,7 @@ describe('Node CLI Testing', () => {
       await removeFile('./monika.yml')
     }
 
-    const { getStdout, waitForText } = await spawn('node', `${monika} -r 1`)
+    const { getStdout, waitForText } = await spawn(monikaPath, '-r 1')
     await waitForText(assertText2)
     const stdout = getStdout().join('\r\n')
 
@@ -66,14 +78,15 @@ describe('Node CLI Testing', () => {
 
     await cleanup()
   })
+
   it('shows starting message with valid json config', async () => {
     // arrange
     const { spawn, cleanup } = await prepareEnvironment()
 
     // act
     const { getStdout, waitForText } = await spawn(
-      'node',
-      `${monika} -r 1 -c ./monika.example.json`
+      monikaPath,
+      '-r 1 -c ./monika.example.json'
     )
     await waitForText('Starting Monika.')
     const stdout = getStdout().join('\r\n')
@@ -83,14 +96,15 @@ describe('Node CLI Testing', () => {
 
     await cleanup()
   })
+
   it('shows starting message with valid yml config', async () => {
     // arrange
     const { spawn, cleanup } = await prepareEnvironment()
 
     // act
     const { getStdout, waitForText } = await spawn(
-      'node',
-      `${monika} -r 1 -c ./monika.example.yml`
+      monikaPath,
+      '-r 1 -c ./monika.example.yml'
     )
     await waitForText('Starting Monika.')
     const stdout = getStdout().join('\r\n')
@@ -100,6 +114,7 @@ describe('Node CLI Testing', () => {
 
     await cleanup()
   })
+
   it('Detect config file changes successfully', async () => {
     // arrange
     const { spawn, cleanup, writeFile } = await prepareEnvironment()
@@ -139,8 +154,8 @@ describe('Node CLI Testing', () => {
 
     // run monika
     const { getStdout, waitForText, kill, wait } = await spawn(
-      'node',
-      `${monika} -c cli-test.yml`
+      monikaPath,
+      '-c cli-test.yml'
     )
 
     try {

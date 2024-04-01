@@ -44,8 +44,7 @@ export const open = (url: string): void => {
     }
 
     default: {
-      // TODO: Handle new OS
-      break
+      throw new Error(`Unknown operating system: ${operatingSystem}`)
     }
   }
 }

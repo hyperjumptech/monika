@@ -40,6 +40,10 @@ import registerFakes from '../../../../utils/fakes'
 import { sendHttpRequest, sendHttpRequestFetch } from '../../../../utils/http'
 import { log } from '../../../../utils/pino'
 import { AxiosError } from 'axios'
+import { MonikaFlags } from 'src/flag'
+import { getErrorMessage } from '../../../../utils/catch-error-handler'
+import { errors as undiciErrors } from 'undici'
+import Joi from 'joi'
 
 // Register Handlebars helpers
 registerFakes(Handlebars)
@@ -48,6 +52,10 @@ type probingParams = {
   requestConfig: Omit<RequestConfig, 'saveBody' | 'alert'> // is a config object
   responses: Array<ProbeRequestResponse> // an array of previous responses
 }
+
+const UndiciErrorValidator = Joi.object({
+  cause: Joi.object({ name: Joi.string(), code: Joi.string() }),
+})
 
 /**
  * probing() is the heart of monika requests generation
@@ -76,111 +84,50 @@ export async function httpRequest({
   newReq.headers = newHeaders
   newReq.body = newBody
 
-  const requestStartedAt = Date.now()
+  const startTime = Date.now()
   try {
     // is this a request for ping?
     if (newReq.ping === true) {
       return icmpRequest({ host: renderedURL })
     }
 
-    if (flags['native-fetch']) {
-      if (flags.verbose) log.info(`Probing ${renderedURL} with Node.js fetch`)
-      const response = await sendHttpRequestFetch({
-        ...newReq,
-        allowUnauthorizedSsl: allowUnauthorized,
-        keepalive: true,
-        url: renderedURL,
-        maxRedirects: flags['follow-redirects'],
-        body:
-          typeof newReq.body === 'string'
-            ? newReq.body
-            : JSON.stringify(newReq.body),
-      })
-
-      const responseTime = Date.now() - requestStartedAt
-      let responseHeaders: Record<string, string> | undefined
-      if (response.headers) {
-        responseHeaders = {}
-        for (const [key, value] of Object.entries(response.headers)) {
-          responseHeaders[key] = value
-        }
-      }
-
-      const responseBody = response.headers
-        .get('Content-Type')
-        ?.includes('application/json')
-        ? response.json()
-        : response.text()
-
-      return {
-        requestType: 'HTTP',
-        data: responseBody,
-        body: responseBody,
-        status: response.status,
-        headers: responseHeaders || '',
-        responseTime,
-        result: probeRequestResult.success,
-      }
+    const requestHeaders = new Headers()
+    for (const [key, value] of Object.entries(newReq.headers || {})) {
+      requestHeaders.set(key, value)
     }
 
     // Do the request using compiled URL and compiled headers (if exists)
-    const resp = await sendHttpRequest({
-      ...newReq,
-      allowUnauthorizedSsl: allowUnauthorized,
-      keepalive: true,
-      url: renderedURL,
-      maxRedirects: flags['follow-redirects'],
-      body:
-        typeof newReq.body === 'string'
-          ? newReq.body
-          : JSON.stringify(newReq.body),
-    })
-
-    const responseTime = Date.now() - requestStartedAt
-    const { data, headers, status } = resp
-
-    return {
-      requestType: 'HTTP',
-      data,
-      body: data,
-      status,
-      headers,
-      responseTime,
-      result: probeRequestResult.success,
+    if (flags['native-fetch']) {
+      return await probeHttpFetch({
+        startTime,
+        flags,
+        renderedURL,
+        requestParams: { ...newReq, headers: requestHeaders },
+        allowUnauthorized,
+      })
     }
+
+    return await probeHttpAxios({
+      startTime,
+      flags,
+      renderedURL,
+      requestParams: { ...newReq, headers: requestHeaders },
+      allowUnauthorized,
+    })
   } catch (error: unknown) {
-    const responseTime = Date.now() - requestStartedAt
+    const responseTime = Date.now() - startTime
 
     if (error instanceof AxiosError) {
-      // The request was made and the server responded with a status code
-      // 400, 500 get here
-      if (error?.response) {
-        return {
-          data: '',
-          body: '',
-          status: error?.response?.status,
-          headers: error?.response?.headers,
-          responseTime,
-          result: probeRequestResult.success,
-          error: error?.response?.data,
-        }
-      }
+      return handleAxiosError(responseTime, error)
+    }
 
-      // The request was made but no response was received
-      // timeout is here, ECONNABORTED, ENOTFOUND, ECONNRESET, ECONNREFUSED
-      if (error?.request) {
-        const { status, description } = getErrorStatusWithExplanation(error)
+    const { value, error: undiciErrorValidator } =
+      UndiciErrorValidator.validate(error, {
+        allowUnknown: true,
+      })
 
-        return {
-          data: '',
-          body: '',
-          status,
-          headers: '',
-          responseTime,
-          result: probeRequestResult.failed,
-          error: description,
-        }
-      }
+    if (!undiciErrorValidator) {
+      return handleUndiciError(responseTime, value.cause)
     }
 
     // other errors
@@ -191,7 +138,7 @@ export async function httpRequest({
       headers: '',
       responseTime,
       result: probeRequestResult.failed,
-      error: (error as Error).message,
+      error: getErrorMessage(error),
     }
   }
 }
@@ -207,8 +154,7 @@ function compileHeaders(
   // In some case such as value is not string, it will be returned as is without being compiled.
   // If the request does not have any headers, then it should skip this process.
   let newHeaders = headers
-  for (const [key, value] of Object.entries(headers)) {
-    const rawHeader = value
+  for (const [key, rawHeader] of Object.entries(headers)) {
     const renderHeader = Handlebars.compile(rawHeader)
     const renderedHeader = renderHeader({ responses })
 
@@ -280,6 +226,109 @@ function compileBody(
   return { headers: newHeaders, body: newBody }
 }
 
+async function probeHttpFetch({
+  startTime,
+  flags,
+  renderedURL,
+  requestParams,
+  allowUnauthorized,
+}: {
+  startTime: number
+  flags: MonikaFlags
+  renderedURL: string
+  allowUnauthorized: boolean | undefined
+  requestParams: {
+    method: string | undefined
+    headers: Headers | undefined
+    timeout: number
+    body: string | object
+    ping: boolean | undefined
+  }
+}): Promise<ProbeRequestResponse> {
+  if (flags.verbose) log.info(`Probing ${renderedURL} with Node.js fetch`)
+  const response = await sendHttpRequestFetch({
+    ...requestParams,
+    allowUnauthorizedSsl: allowUnauthorized,
+    keepalive: true,
+    url: renderedURL,
+    maxRedirects: flags['follow-redirects'],
+    body:
+      typeof requestParams.body === 'string'
+        ? requestParams.body
+        : JSON.stringify(requestParams.body),
+  })
+
+  const responseTime = Date.now() - startTime
+  let responseHeaders: Record<string, string> | undefined
+  if (response.headers) {
+    responseHeaders = {}
+    for (const [key, value] of Object.entries(response.headers)) {
+      responseHeaders[key] = value
+    }
+  }
+
+  const responseBody = response.headers
+    .get('Content-Type')
+    ?.includes('application/json')
+    ? await response.json()
+    : await response.text()
+
+  return {
+    requestType: 'HTTP',
+    data: responseBody,
+    body: responseBody,
+    status: response.status,
+    headers: responseHeaders || '',
+    responseTime,
+    result: probeRequestResult.success,
+  }
+}
+
+async function probeHttpAxios({
+  startTime,
+  flags,
+  renderedURL,
+  requestParams,
+  allowUnauthorized,
+}: {
+  startTime: number
+  flags: MonikaFlags
+  renderedURL: string
+  allowUnauthorized: boolean | undefined
+  requestParams: {
+    method: string | undefined
+    headers: Headers | undefined
+    timeout: number
+    body: string | object
+    ping: boolean | undefined
+  }
+}): Promise<ProbeRequestResponse> {
+  const resp = await sendHttpRequest({
+    ...requestParams,
+    allowUnauthorizedSsl: allowUnauthorized,
+    keepalive: true,
+    url: renderedURL,
+    maxRedirects: flags['follow-redirects'],
+    body:
+      typeof requestParams.body === 'string'
+        ? requestParams.body
+        : JSON.stringify(requestParams.body),
+  })
+
+  const responseTime = Date.now() - startTime
+  const { data, headers, status } = resp
+
+  return {
+    requestType: 'HTTP',
+    data,
+    body: data,
+    status,
+    headers,
+    responseTime,
+    result: probeRequestResult.success,
+  }
+}
+
 export function generateRequestChainingBody(
   body: object | string,
   responses: ProbeRequestResponse[]
@@ -296,6 +345,10 @@ function transformContentByType(
   contentType?: string | number | boolean
 ) {
   switch (contentType) {
+    case 'application/json': {
+      return { content: JSON.stringify(content), contentType }
+    }
+
     case 'application/x-www-form-urlencoded': {
       return {
         content: qs.stringify(content as never),
@@ -323,6 +376,50 @@ function transformContentByType(
     default: {
       return { content, contentType }
     }
+  }
+}
+
+function handleAxiosError(
+  responseTime: number,
+  error: AxiosError
+): ProbeRequestResponse {
+  // The request was made and the server responded with a status code
+  // 400, 500 get here
+  if (error?.response) {
+    return {
+      data: '',
+      body: '',
+      status: error?.response?.status,
+      headers: error?.response?.headers,
+      responseTime,
+      result: probeRequestResult.success,
+      error: error?.response?.data as string,
+    }
+  }
+
+  // The request was made but no response was received
+  // timeout is here, ECONNABORTED, ENOTFOUND, ECONNRESET, ECONNREFUSED
+  if (error?.request) {
+    const { status, description } = getErrorStatusWithExplanation(error)
+    return {
+      data: '',
+      body: '',
+      status,
+      headers: '',
+      responseTime,
+      result: probeRequestResult.failed,
+      error: description,
+    }
+  }
+
+  return {
+    data: '',
+    body: '',
+    status: 99,
+    headers: '',
+    responseTime,
+    result: probeRequestResult.failed,
+    error: getErrorMessage(error),
   }
 }
 
@@ -492,5 +589,179 @@ function getErrorStatusWithExplanation(error: unknown): {
         description: `Error code 99: ${(error as AxiosError).stack}`,
       }
     } // in the event an unlikely unknown error, send here
+  }
+}
+
+function handleUndiciError(
+  responseTime: number,
+  error: undiciErrors.UndiciError
+): ProbeRequestResponse {
+  if (
+    error instanceof undiciErrors.BodyTimeoutError ||
+    error instanceof undiciErrors.ConnectTimeoutError ||
+    error instanceof undiciErrors.HeadersTimeoutError
+  ) {
+    return {
+      data: '',
+      body: '',
+      status: 6,
+      headers: '',
+      responseTime,
+      result: probeRequestResult.failed,
+      error: 'ETIMEDOUT: Connection attempt has timed out.',
+    }
+  }
+
+  if (error instanceof undiciErrors.RequestAbortedError) {
+    // https://httpstatuses.com/599
+    return {
+      data: '',
+      body: '',
+      status: 599,
+      headers: '',
+      responseTime,
+      result: probeRequestResult.failed,
+      error:
+        'ECONNABORTED: The connection was unexpectedly terminated, often due to server issues, network problems, or timeouts.',
+    }
+  }
+
+  // BEGIN Node.js fetch error status code outside Axios' error handler range (code >= 18)
+  // fetch's client maxResponseSize and maxHeaderSize is set, limit exceeded
+  if (
+    error instanceof undiciErrors.HeadersOverflowError ||
+    error instanceof undiciErrors.ResponseExceededMaxSizeError
+  ) {
+    return {
+      data: '',
+      body: '',
+      status: 18,
+      headers: '',
+      responseTime,
+      result: probeRequestResult.failed,
+      error: 'ECONNOVERFLOW: Header / response max size exceeded.',
+    }
+  }
+
+  // fetch throwOnError is set to true, got HTTP status code >= 400
+  if (error instanceof undiciErrors.ResponseStatusCodeError) {
+    return {
+      data: '',
+      body: '',
+      status: 19,
+      headers: '',
+      responseTime,
+      result: probeRequestResult.failed,
+      error: 'ERESPONSESTATUSCODE: HTTP status code returns >= 400.',
+    }
+  }
+
+  // invalid fetch argument passed
+  if (error instanceof undiciErrors.InvalidArgumentError) {
+    return {
+      data: '',
+      body: '',
+      status: 20,
+      headers: '',
+      responseTime,
+      result: probeRequestResult.failed,
+      error: 'EINVALIDARGUMENT: Invalid HTTP arguments.',
+    }
+  }
+
+  // fetch failed to handle return value
+  if (error instanceof undiciErrors.InvalidReturnValueError) {
+    return {
+      data: '',
+      body: '',
+      status: 21,
+      headers: '',
+      responseTime,
+      result: probeRequestResult.failed,
+      error: 'EINVALIDRETURN: Unexpected HTTP response to handle.',
+    }
+  }
+
+  if (
+    error instanceof undiciErrors.ClientClosedError ||
+    error instanceof undiciErrors.ClientDestroyedError ||
+    error instanceof undiciErrors.SocketError
+  ) {
+    return {
+      data: '',
+      body: '',
+      status: 22,
+      headers: '',
+      responseTime,
+      result: probeRequestResult.failed,
+      error: 'ECONNCLOSED: HTTP client closed unexpectedly.',
+    }
+  }
+
+  if (error instanceof undiciErrors.NotSupportedError) {
+    return {
+      data: '',
+      body: '',
+      status: 23,
+      headers: '',
+      responseTime,
+      result: probeRequestResult.failed,
+      error: 'ESUPPORT: Unsupported HTTP functionality.',
+    }
+  }
+
+  if (
+    error instanceof undiciErrors.RequestContentLengthMismatchError ||
+    error instanceof undiciErrors.ResponseContentLengthMismatchError
+  ) {
+    return {
+      data: '',
+      body: '',
+      status: 24,
+      headers: '',
+      responseTime,
+      result: probeRequestResult.failed,
+      error:
+        'ECONTENTLENGTH: Request / response content length mismatch with Content-Length header value.',
+    }
+  }
+
+  // inline docs in Undici state that this would never happen,
+  // but they declare and throw this condition anyway
+  if (error instanceof undiciErrors.BalancedPoolMissingUpstreamError) {
+    return {
+      data: '',
+      body: '',
+      status: 25,
+      headers: '',
+      responseTime,
+      result: probeRequestResult.failed,
+      error: `EMISSINGPOOL: Missing HTTP client pool.`,
+    }
+  }
+
+  // expected error from fetch, but exact reason is in the message string
+  // error messages are unpredictable
+  // reference https://github.com/search?q=repo:nodejs/undici+new+InformationalError(&type=code
+  if (error instanceof undiciErrors.InformationalError) {
+    return {
+      data: '',
+      body: '',
+      status: 26,
+      headers: '',
+      responseTime,
+      result: probeRequestResult.failed,
+      error: `EINFORMATIONAL: ${error.message}.`,
+    }
+  }
+
+  return {
+    data: '',
+    body: '',
+    status: 99,
+    headers: '',
+    responseTime,
+    result: probeRequestResult.failed,
+    error: getErrorMessage(error),
   }
 }

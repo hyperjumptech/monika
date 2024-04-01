@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.19.2] - 2024-04-01
+
+### Fixed
+
+- Fix crash on headers type handling
+
+## [1.19.1] - 2024-03-25
+
+### Changed
+
+- Handle Node.js fetch errors
+- Upgrade MSW to version 2
+- Fix fetch implementation
+- Change bats to Node.js spawn
+
+## [1.19.0] - 2024-03-14
+
+### Added
+
+- Implement Node.js fetch (#1243)
+
+### Fixed
+
+- Fix Algolia Build in the Docs Action (#1251)
+- Fix Docs Build Workflow (#1250)
+
 ## [1.18.0] - 2024-03-07
 
 ### Added

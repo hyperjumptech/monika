@@ -232,7 +232,6 @@ function watchConfigFile({ flags, path }: WatchConfigFileParams) {
 }
 
 const getPathAndTypeFromFlag = (flags: MonikaFlags) => {
-  // TODO: Assuming the first index of config is the primary config
   let path = flags.config?.[0]
   let type = 'monika'
 
