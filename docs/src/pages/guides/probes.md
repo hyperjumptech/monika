@@ -332,6 +332,7 @@ To make it easier to troubleshoot HTTP requests, we have mapped low-level errors
 | 24   | Request / response size mismatch with Content-Length header value |
 | 25   | Missing HTTP client pool                                          |
 | 26   | Expected error, exact reason is shown on runtime                  |
+| 27   | Unable to verify the first / leaf certificate                     |
 | 99   | Others                                                            |
 | 599  | Connection aborted                                                |
 

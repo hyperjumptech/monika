@@ -423,6 +423,8 @@ function handleAxiosError(
   }
 }
 
+// suppress switch-case complexity since this is dead-simple mapping to error code
+// eslint-disable-next-line complexity
 function getErrorStatusWithExplanation(error: unknown): {
   status: number
   description: string
@@ -570,6 +572,14 @@ function getErrorStatusWithExplanation(error: unknown): {
         status: 17,
         description:
           "EPROTO: There are issues with the website's SSL/TLS certificates, incompatible protocols, or other SSL-related problems.",
+      }
+    }
+
+    case 'UNABLE_TO_VERIFY_LEAF_SIGNATURE': {
+      return {
+        status: 27,
+        description:
+          'ELEAFSIGNATURE: Unable to verify the first / leaf certificate.',
       }
     }
 
