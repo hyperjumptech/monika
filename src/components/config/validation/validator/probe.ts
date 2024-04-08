@@ -259,6 +259,10 @@ export async function validateProbes(probes: Probe[]): Promise<Probe[]> {
                     joi.number(),
                     joi.bool()
                   ),
+                followRedirects: joi
+                  .number()
+                  .min(0)
+                  .default(getContext().flags['follow-redirects']),
                 headers: joi.object().allow(null),
                 id: joi.string().allow(''),
                 interval: joi.number().min(1),

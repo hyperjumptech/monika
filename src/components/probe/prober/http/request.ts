@@ -67,8 +67,16 @@ export async function httpRequest({
   responses,
 }: probingParams): Promise<ProbeRequestResponse> {
   // Compile URL using handlebars to render URLs that uses previous responses data
-  const { method, url, headers, timeout, body, ping, allowUnauthorized } =
-    requestConfig
+  const {
+    method,
+    url,
+    headers,
+    timeout,
+    body,
+    ping,
+    allowUnauthorized,
+    followRedirects,
+  } = requestConfig
   const newReq = { method, headers, timeout, body, ping }
   const renderURL = Handlebars.compile(url)
   const renderedURL = renderURL({ responses })
@@ -104,6 +112,7 @@ export async function httpRequest({
         renderedURL,
         requestParams: { ...newReq, headers: requestHeaders },
         allowUnauthorized,
+        followRedirects,
       })
     }
 
@@ -113,6 +122,7 @@ export async function httpRequest({
       renderedURL,
       requestParams: { ...newReq, headers: requestHeaders },
       allowUnauthorized,
+      followRedirects,
     })
   } catch (error: unknown) {
     const responseTime = Date.now() - startTime
@@ -232,6 +242,7 @@ async function probeHttpFetch({
   renderedURL,
   requestParams,
   allowUnauthorized,
+  followRedirects,
 }: {
   startTime: number
   flags: MonikaFlags
@@ -244,6 +255,7 @@ async function probeHttpFetch({
     body: string | object
     ping: boolean | undefined
   }
+  followRedirects: number
 }): Promise<ProbeRequestResponse> {
   if (flags.verbose) log.info(`Probing ${renderedURL} with Node.js fetch`)
   const response = await sendHttpRequestFetch({
@@ -251,7 +263,7 @@ async function probeHttpFetch({
     allowUnauthorizedSsl: allowUnauthorized,
     keepalive: true,
     url: renderedURL,
-    maxRedirects: flags['follow-redirects'],
+    maxRedirects: followRedirects,
     body:
       typeof requestParams.body === 'string'
         ? requestParams.body
@@ -284,13 +296,7 @@ async function probeHttpFetch({
   }
 }
 
-async function probeHttpAxios({
-  startTime,
-  flags,
-  renderedURL,
-  requestParams,
-  allowUnauthorized,
-}: {
+type ProbeHTTPAxiosParams = {
   startTime: number
   flags: MonikaFlags
   renderedURL: string
@@ -302,13 +308,22 @@ async function probeHttpAxios({
     body: string | object
     ping: boolean | undefined
   }
-}): Promise<ProbeRequestResponse> {
+  followRedirects: number
+}
+
+async function probeHttpAxios({
+  startTime,
+  renderedURL,
+  requestParams,
+  allowUnauthorized,
+  followRedirects,
+}: ProbeHTTPAxiosParams): Promise<ProbeRequestResponse> {
   const resp = await sendHttpRequest({
     ...requestParams,
     allowUnauthorizedSsl: allowUnauthorized,
     keepalive: true,
     url: renderedURL,
-    maxRedirects: flags['follow-redirects'],
+    maxRedirects: followRedirects,
     body:
       typeof requestParams.body === 'string'
         ? requestParams.body
