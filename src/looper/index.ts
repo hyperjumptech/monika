@@ -93,7 +93,7 @@ export async function loopCheckSTUNServer(interval: number): Promise<unknown> {
   if (interval === -1) return
 
   // if interval = 0 get ip once and exit. No need to setup interval.
-  if (interval === 0 || process.env.CI || process.env.NODE_ENV === 'test') {
+  if (interval === 0 || getContext().isTest) {
     await getPublicIp()
     return
   }

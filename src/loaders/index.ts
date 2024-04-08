@@ -24,7 +24,7 @@
 
 import type { Config as IConfig } from '@oclif/core'
 import { isSymonModeFrom, setupConfig } from '../components/config'
-import { setContext } from '../context'
+import { getContext, setContext } from '../context'
 import events from '../events'
 import type { MonikaFlags } from '../flag'
 import { tlsChecker } from '../jobs/tls-check'
@@ -49,7 +49,6 @@ export default async function init(
   cliConfig: IConfig
 ): Promise<void> {
   const eventEmitter = getEventEmitter()
-  const isTestEnvironment = process.env.CI || process.env.NODE_ENV === 'test'
   const isSymonMode = isSymonModeFrom(flags)
 
   setContext({ userAgent: cliConfig.userAgent })
@@ -67,7 +66,7 @@ export default async function init(
       )
   } else {
     // if note verbose, remove location details
-    ;`Monika is running.`
+    log.info('Monika is running.')
   }
 
   // check if connected to STUN Server and getting the public IP in the same time
@@ -107,7 +106,7 @@ export default async function init(
     // check TLS when Monika starts
     tlsChecker()
 
-    if (!isTestEnvironment) {
+    if (!getContext().isTest) {
       // load cron jobs
       jobsLoader()
     }

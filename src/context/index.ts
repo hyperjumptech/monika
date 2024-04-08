@@ -38,6 +38,7 @@ type Context = {
   // userAgent example: @hyperjumptech/monika/1.2.3 linux-x64 node-14.17.0
   userAgent: string
   incidents: Incident[]
+  isTest: boolean
   config?: Omit<Config, 'probes'>
   flags: MonikaFlags
 }
@@ -47,6 +48,7 @@ type NewContext = Partial<Context>
 const initialContext: Context = {
   userAgent: '',
   incidents: [],
+  isTest: process.env.CI === 'true' || process.env.NODE_ENV === 'test',
   flags: monikaFlagsDefaultValue,
 }
 

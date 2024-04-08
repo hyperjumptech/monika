@@ -44,8 +44,6 @@ export let publicIpAddress = ''
 export let isConnectedToSTUNServer = true
 export let publicNetworkInfo: PublicNetwork | undefined
 
-const isTestEnvironment = process.env.CI || process.env.NODE_ENV === 'test'
-
 /**
  * pokeStun sends a poke/request to stun server
  * @returns Promise<string>
@@ -53,7 +51,7 @@ const isTestEnvironment = process.env.CI || process.env.NODE_ENV === 'test'
 async function pokeStun(): Promise<string> {
   // for testing, bypass ping/stun server... apparently ping cannot run in github actions
   // reference: https://github.com/actions/virtual-environments/issues/1519
-  if (isTestEnvironment) {
+  if (getContext().isTest) {
     return '192.168.1.1' // adding for specific asserts in other tests
   }
 
