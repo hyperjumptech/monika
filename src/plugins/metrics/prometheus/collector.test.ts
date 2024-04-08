@@ -59,6 +59,7 @@ describe('Prometheus collector', () => {
             {
               url: '',
               body: '',
+              followRedirects: 21,
               timeout: 0,
             },
           ],
@@ -167,6 +168,7 @@ describe('Prometheus collector', () => {
             {
               url: '',
               body: '',
+              followRedirects: 21,
               timeout: 0,
             },
           ],

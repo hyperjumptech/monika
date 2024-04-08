@@ -147,7 +147,14 @@ describe('updateConfig', () => {
           id: '1',
           name: '',
           interval: 1000,
-          requests: [{ url: 'https://example.com', body: '', timeout: 1000 }],
+          requests: [
+            {
+              url: 'https://example.com',
+              body: '',
+              followRedirects: 21,
+              timeout: 1000,
+            },
+          ],
           alerts: [],
         },
       ],
@@ -181,7 +188,14 @@ describe('updateConfig', () => {
           id: '1',
           name: '',
           interval: 1000,
-          requests: [{ url: 'https://example.com', body: '', timeout: 1000 }],
+          requests: [
+            {
+              url: 'https://example.com',
+              body: '',
+              followRedirects: 21,
+              timeout: 1000,
+            },
+          ],
           alerts: [],
         },
       ],

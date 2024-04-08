@@ -78,7 +78,14 @@ describe('Prober', () => {
           id: 'bcDnX',
           interval: 2,
           name: 'Example',
-          requests: [{ body: '', timeout: 30_000, url: 'https://example.com' }],
+          requests: [
+            {
+              body: '',
+              followRedirects: 21,
+              timeout: 30_000,
+              url: 'https://example.com',
+            },
+          ],
         },
       }
 
@@ -115,7 +122,14 @@ describe('Prober', () => {
             createdAt: new Date(),
             recoveredAt: null,
           },
-          requests: [{ body: '', timeout: 30_000, url: 'https://example.com' }],
+          requests: [
+            {
+              body: '',
+              followRedirects: 21,
+              timeout: 30_000,
+              url: 'https://example.com',
+            },
+          ],
         },
       }
 
@@ -153,7 +167,14 @@ describe('Prober', () => {
             createdAt: new Date(),
             recoveredAt: new Date(),
           },
-          requests: [{ body: '', timeout: 30_000, url: 'https://example.com' }],
+          requests: [
+            {
+              body: '',
+              followRedirects: 21,
+              timeout: 30_000,
+              url: 'https://example.com',
+            },
+          ],
         },
       }
 
@@ -191,7 +212,14 @@ describe('Prober', () => {
             createdAt: new Date(),
             recoveredAt: null,
           },
-          requests: [{ body: '', timeout: 30_000, url: 'https://example.com' }],
+          requests: [
+            {
+              body: '',
+              followRedirects: 21,
+              timeout: 30_000,
+              url: 'https://example.com',
+            },
+          ],
         },
       }
 
@@ -233,6 +261,7 @@ describe('Prober', () => {
           requests: [
             {
               body: '',
+              followRedirects: 21,
               timeout: 30_000,
               url: 'https://example.com',
               alerts: [
@@ -295,6 +324,7 @@ describe('Prober', () => {
           requests: [
             {
               body: '',
+              followRedirects: 21,
               timeout: 30_000,
               url: 'https://example.com',
               alerts: [
@@ -347,6 +377,7 @@ describe('Prober', () => {
           requests: [
             {
               body: '',
+              followRedirects: 21,
               timeout: 30_000,
               url: 'https://example.com',
               alerts: [
@@ -408,6 +439,7 @@ describe('Prober', () => {
           requests: [
             {
               body: '',
+              followRedirects: 21,
               timeout: 30_000,
               url: 'https://example.com',
               alerts: [

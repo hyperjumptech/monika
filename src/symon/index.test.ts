@@ -26,7 +26,7 @@ import { expect } from '@oclif/test'
 import { type DefaultBodyType, HttpResponse, http } from 'msw'
 import { setupServer } from 'msw/node'
 
-import { monikaFlagsDefaultValue, type MonikaFlags } from '../flag'
+import { monikaFlagsDefaultValue } from '../flag'
 import type { Config } from '../interfaces/config'
 import type { Probe } from '../interfaces/probe'
 
@@ -54,7 +54,14 @@ const config: Config = {
       id: '2',
       name: 'Example',
       interval: 10,
-      requests: [{ url: 'https://example.com', body: '', timeout: 2000 }],
+      requests: [
+        {
+          url: 'https://example.com',
+          body: '',
+          followRedirects: 21,
+          timeout: 2000,
+        },
+      ],
       alerts: [],
     },
   ],
@@ -103,11 +110,12 @@ describe('Symon initiate', () => {
     resetContext()
     setContext({
       flags: {
+        ...getContext().flags,
         symonUrl: 'http://localhost:4000',
         symonKey: 'random-key',
         symonGetProbesIntervalMs:
           monikaFlagsDefaultValue.symonGetProbesIntervalMs,
-      } as MonikaFlags,
+      },
     })
 
     // reset probe cache
@@ -127,9 +135,10 @@ describe('Symon initiate', () => {
     setContext({
       userAgent: 'v1.5.0',
       flags: {
+        ...getContext().flags,
         symonUrl: 'http://localhost:4000',
         symonKey: 'random-key',
-      } as MonikaFlags,
+      },
     })
     let body: DefaultBodyType = {}
     // mock the outgoing requests
@@ -277,7 +286,14 @@ describe('Symon initiate', () => {
       id: '3',
       name: 'New Probe',
       interval: 2,
-      requests: [{ url: 'https://example.com', body: '', timeout: 2000 }],
+      requests: [
+        {
+          url: 'https://example.com',
+          body: '',
+          followRedirects: 21,
+          timeout: 2000,
+        },
+      ],
       alerts: [],
     }
     server.use(
@@ -291,10 +307,11 @@ describe('Symon initiate', () => {
     const symonGetProbesIntervalMs = 100
     setContext({
       flags: {
+        ...getContext().flags,
         symonUrl: 'http://localhost:4000',
         symonKey: 'random-key',
         symonGetProbesIntervalMs,
-      } as MonikaFlags,
+      },
     })
     const symon = new SymonClient({
       symonUrl: 'http://localhost:4000',
@@ -343,10 +360,11 @@ describe('Symon initiate', () => {
     const symonGetProbesIntervalMs = 100
     setContext({
       flags: {
+        ...getContext().flags,
         symonUrl: 'http://localhost:4000',
         symonKey: 'random-key',
         symonGetProbesIntervalMs,
-      } as MonikaFlags,
+      },
     })
     const symon = new SymonClient({
       symonUrl: 'http://localhost:4000',
@@ -396,10 +414,11 @@ describe('Symon initiate', () => {
     const symonGetProbesIntervalMs = 100
     setContext({
       flags: {
+        ...getContext().flags,
         symonUrl: 'http://localhost:4000',
         symonKey: 'random-key',
         symonGetProbesIntervalMs,
-      } as MonikaFlags,
+      },
     })
     const symon = new SymonClient({
       symonUrl: 'http://localhost:4000',
@@ -449,10 +468,11 @@ describe('Symon initiate', () => {
     const symonGetProbesIntervalMs = 100
     setContext({
       flags: {
+        ...getContext().flags,
         symonUrl: 'http://localhost:4000',
         symonKey: 'random-key',
         symonGetProbesIntervalMs,
-      } as MonikaFlags,
+      },
     })
     const symon = new SymonClient({
       symonUrl: 'http://localhost:4000',

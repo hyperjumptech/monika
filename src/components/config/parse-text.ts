@@ -46,6 +46,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import { getContext } from '../../context'
 import type { Config } from '../../interfaces/config'
 import { monikaFlagsDefaultValue } from '../../flag'
 import type { Probe, ProbeAlert } from '../../interfaces/probe'
@@ -67,6 +68,7 @@ export const parseConfigFromText = (configString: string): Config => {
               method: 'GET',
               timeout: 10_000,
               body: {} as JSON,
+              followRedirects: getContext().flags['follow-redirects'],
             },
           ],
           interval: monikaFlagsDefaultValue['config-interval'],
