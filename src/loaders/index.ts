@@ -48,7 +48,6 @@ export default async function init(
   flags: MonikaFlags,
   cliConfig: IConfig
 ): Promise<void> {
-  const eventEmitter = getEventEmitter()
   const isSymonMode = isSymonModeFrom(flags)
 
   setContext({ userAgent: cliConfig.userAgent })
@@ -63,26 +62,7 @@ export default async function init(
 
   // start Promotheus server
   if (flags.prometheus) {
-    const {
-      collectProbeTotal,
-      collectProbeRequestMetrics,
-      collectTriggeredAlert,
-      decrementProbeRunningTotal,
-      incrementProbeRunningTotal,
-      resetProbeRunningTotal,
-    } = new PrometheusCollector()
-
-    // collect prometheus metrics
-    eventEmitter.on(events.config.sanitized, (probes: Probe[]) => {
-      collectProbeTotal(probes.length)
-    })
-    eventEmitter.on(events.probe.response.received, collectProbeRequestMetrics)
-    eventEmitter.on(events.probe.alert.triggered, collectTriggeredAlert)
-    eventEmitter.on(events.probe.ran, incrementProbeRunningTotal)
-    eventEmitter.on(events.probe.finished, decrementProbeRunningTotal)
-    eventEmitter.on(events.config.updated, resetProbeRunningTotal)
-
-    startPrometheusMetricsServer(flags.prometheus)
+    initPrometheus(flags.prometheus)
   }
 
   if (!isSymonMode) {
@@ -116,4 +96,28 @@ async function logRunningInfo({ isVerbose, isSymonMode }: RunningInfoParams) {
   } catch (error) {
     log.warn(`Failed to obtain location/ISP info. Got: ${error}`)
   }
+}
+
+function initPrometheus(prometheusPort: number) {
+  const eventEmitter = getEventEmitter()
+  const {
+    collectProbeTotal,
+    collectProbeRequestMetrics,
+    collectTriggeredAlert,
+    decrementProbeRunningTotal,
+    incrementProbeRunningTotal,
+    resetProbeRunningTotal,
+  } = new PrometheusCollector()
+
+  // collect prometheus metrics
+  eventEmitter.on(events.config.sanitized, (probes: Probe[]) => {
+    collectProbeTotal(probes.length)
+  })
+  eventEmitter.on(events.probe.response.received, collectProbeRequestMetrics)
+  eventEmitter.on(events.probe.alert.triggered, collectTriggeredAlert)
+  eventEmitter.on(events.probe.ran, incrementProbeRunningTotal)
+  eventEmitter.on(events.probe.finished, decrementProbeRunningTotal)
+  eventEmitter.on(events.config.updated, resetProbeRunningTotal)
+
+  startPrometheusMetricsServer(prometheusPort)
 }
