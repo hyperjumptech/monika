@@ -35,7 +35,7 @@ import {
   startPrometheusMetricsServer,
 } from '../plugins/metrics/prometheus'
 import { getEventEmitter } from '../utils/events'
-import { getPublicNetworkInfo } from '../utils/public-ip'
+import { fetchAndCacheNetworkInfo } from '../utils/public-ip'
 import { jobsLoader } from './jobs'
 import { enableAutoUpdate } from '../plugins/updater'
 import { log } from '../utils/pino'
@@ -52,22 +52,7 @@ export default async function init(
   const isSymonMode = isSymonModeFrom(flags)
 
   setContext({ userAgent: cliConfig.userAgent })
-
-  if (flags.verbose || isSymonMode) {
-    // cache location & ISP info
-    getPublicNetworkInfo()
-      .then(({ city, hostname, isp, privateIp, publicIp }) => {
-        log.info(
-          `Monika is running from: ${city} - ${isp} (${publicIp}) - ${hostname} (${privateIp})`
-        )
-      })
-      .catch((error) =>
-        log.warn(`Failed to obtain location/ISP info. Got: ${error}`)
-      )
-  } else {
-    // if note verbose, remove location details
-    log.info('Monika is running.')
-  }
+  await logRunningInfo({ isSymonMode, isVerbose: flags.verbose })
 
   // check if connected to STUN Server and getting the public IP in the same time
   loopCheckSTUNServer(flags.stun)
@@ -110,5 +95,25 @@ export default async function init(
       // load cron jobs
       jobsLoader()
     }
+  }
+}
+
+type RunningInfoParams = { isSymonMode: boolean; isVerbose: boolean }
+
+async function logRunningInfo({ isVerbose, isSymonMode }: RunningInfoParams) {
+  if (!isVerbose && !isSymonMode) {
+    log.info('Monika is running.')
+    return
+  }
+
+  try {
+    const { city, hostname, isp, privateIp, publicIp } =
+      await fetchAndCacheNetworkInfo()
+
+    log.info(
+      `Monika is running from: ${city} - ${isp} (${publicIp}) - ${hostname} (${privateIp})`
+    )
+  } catch (error) {
+    log.warn(`Failed to obtain location/ISP info. Got: ${error}`)
   }
 }

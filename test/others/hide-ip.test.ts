@@ -30,12 +30,12 @@ import * as IpUtil from '../../src/utils/public-ip'
 
 describe('Monika should hide ip unless verbose', () => {
   let getPublicIPStub: sinon.SinonStub
-  let getPublicNetworkInfoStub: sinon.SinonStub
+  let fetchAndCacheNetworkInfoStub: sinon.SinonStub
 
   beforeEach(() => {
     getPublicIPStub = sinon.stub(IpUtil, 'getPublicIp' as never)
-    getPublicNetworkInfoStub = sinon
-      .stub(IpUtil, 'getPublicNetworkInfo' as never)
+    fetchAndCacheNetworkInfoStub = sinon
+      .stub(IpUtil, 'fetchAndCacheNetworkInfo' as never)
       .callsFake(async () => ({
         country: 'Earth',
         city: 'Gotham',
@@ -48,7 +48,7 @@ describe('Monika should hide ip unless verbose', () => {
 
   afterEach(() => {
     getPublicIPStub.restore()
-    getPublicNetworkInfoStub.restore()
+    fetchAndCacheNetworkInfoStub.restore()
   })
 
   test
@@ -56,8 +56,8 @@ describe('Monika should hide ip unless verbose', () => {
     .do(() =>
       cmd.run(['--config', resolve('./test/testConfigs/simple-1p-1n.yaml')])
     )
-    .it('should not call getPublicNetworkInfo()', () => {
-      sinon.assert.notCalled(getPublicNetworkInfoStub)
+    .it('should not call fetchAndCacheNetworkInfo()', () => {
+      sinon.assert.notCalled(fetchAndCacheNetworkInfoStub)
     })
 
   test
@@ -69,7 +69,7 @@ describe('Monika should hide ip unless verbose', () => {
         '--verbose',
       ])
     )
-    .it('should call getPublicNetworkInfo() when --verbose', () => {
-      sinon.assert.calledOnce(getPublicNetworkInfoStub)
+    .it('should call fetchAndCacheNetworkInfo() when --verbose', () => {
+      sinon.assert.calledOnce(fetchAndCacheNetworkInfoStub)
     })
 })

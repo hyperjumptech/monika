@@ -42,7 +42,7 @@ type PublicNetwork = {
 
 export let publicIpAddress = ''
 export let isConnectedToSTUNServer = true
-export let publicNetworkInfo: PublicNetwork | undefined
+let publicNetworkInfo: PublicNetwork | undefined
 
 /**
  * pokeStun sends a poke/request to stun server
@@ -64,14 +64,14 @@ async function pokeStun(): Promise<string> {
   throw new Error('stun inaccessible') // could not connect to STUN server
 }
 
-export async function getPublicNetworkInfo(): Promise<PublicNetwork> {
+async function fetchPublicNetworkInfo(): Promise<PublicNetwork> {
   const publicIp = await pokeStun()
   const response = await sendHttpRequest({
     url: `http://ip-api.com/json/${publicIp}`,
   })
   const { country, city, isp } = response.data
 
-  publicNetworkInfo = {
+  return {
     country,
     city,
     hostname: hostname(),
@@ -79,8 +79,22 @@ export async function getPublicNetworkInfo(): Promise<PublicNetwork> {
     privateIp: getIp(),
     publicIp,
   }
+}
 
+async function setPublicNetworkInfo(publicNetwork: PublicNetwork) {
+  publicNetworkInfo = publicNetwork
+}
+
+export function getPublicNetworkInfo(): PublicNetwork | undefined {
   return publicNetworkInfo
+}
+
+// cache location & ISP info
+export async function fetchAndCacheNetworkInfo() {
+  const publicNetwork = await fetchPublicNetworkInfo()
+  await setPublicNetworkInfo(publicNetwork)
+
+  return publicNetwork
 }
 
 /**
