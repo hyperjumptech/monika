@@ -251,6 +251,14 @@ async function probeHttpFetch({
   }
 }): Promise<ProbeRequestResponse> {
   if (isVerbose) log.info(`Probing ${renderedURL} with Node.js fetch`)
+  console.log(
+    'renderedURL =',
+    renderedURL,
+    '| requestParams =',
+    JSON.stringify(requestParams),
+    '| maxRedirects =',
+    maxRedirects
+  )
   const response = await sendHttpRequestFetch({
     ...requestParams,
     allowUnauthorizedSsl: allowUnauthorized,

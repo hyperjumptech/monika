@@ -131,27 +131,35 @@ async function fetchRedirect(
   fetcher: (url: string) => Promise<Response>
 ) {
   let redirected = 0
-  let nextResponse: Response
-  let nextUrl = url
+  let currentResponse: Response
+  let currentUrl = url
 
   // do HTTP fetch request at least once
   // then follow redirect based maxRedirects value and HTTP status code 3xx
   do {
     // eslint-disable-next-line no-await-in-loop
-    nextResponse = await fetcher(nextUrl)
+    currentResponse = await fetcher(currentUrl)
     // check for HTTP status code 3xx
     const shouldRedirect =
-      nextResponse.status >= 300 && nextResponse.status < 400
+      currentResponse.status >= 300 && currentResponse.status < 400
     if (!shouldRedirect) break
-    // parse nextUrl to Node.js URL to get protocol and host
-    const parsedURL = new URL(nextUrl)
-    // compose redirected URL from parsed protocol, host, and location header
-    nextUrl = `${parsedURL.protocol}//${parsedURL.host}${
-      nextResponse.headers.get('location') || ''
-    }`
+
+    try {
+      currentUrl = new URL(
+        currentResponse.headers.get('location') || ''
+      ).toString()
+    } catch {
+      // parse nextUrl to Node.js URL to get protocol and host
+      const parsedURL = new URL(currentUrl)
+      // compose redirected URL from parsed protocol, host, and location header
+      currentUrl = `${parsedURL.protocol}//${parsedURL.host}${
+        currentResponse.headers.get('location') || ''
+      }`
+    }
+
     // increment redirected value for while loop
     redirected++
-  } while (redirected < (maxRedirects || 0))
+  } while (redirected <= (maxRedirects || 0))
 
-  return nextResponse
+  return currentResponse
 }

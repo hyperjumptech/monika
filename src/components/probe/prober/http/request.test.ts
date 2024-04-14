@@ -316,7 +316,7 @@ describe('probingHTTP', () => {
       expect(res.status).to.eq(200)
     })
 
-    it('Should handle HTTP redirect', async () => {
+    it('Should handle HTTP redirect with axios', async () => {
       // arrange
       server.use(
         http.get(
@@ -346,7 +346,7 @@ describe('probingHTTP', () => {
       const requestConfig: RequestConfig = {
         url: 'https://example.com/redirect/3',
         method: 'GET',
-        body: {} as never,
+        body: '',
         timeout: 10_000,
       }
 
@@ -357,7 +357,49 @@ describe('probingHTTP', () => {
         responses: [],
       })
 
-      console.log(JSON.stringify(res))
+      expect(res.status).to.eq(200)
+    })
+    it('Should handle HTTP redirect with fetch', async () => {
+      // arrange
+      server.use(
+        http.get(
+          'https://example.com/get',
+          () => new HttpResponse(null, { status: 200 })
+        ),
+        http.get(
+          'https://example.com/redirect/:nredirect',
+          async ({ params }) => {
+            const { nredirect } = params
+            const castRedirect = Number(nredirect)
+            return new HttpResponse(null, {
+              status: 302,
+              headers: [
+                [
+                  'Location',
+                  castRedirect === 1
+                    ? 'https://example.com/get'
+                    : `https://example.com/redirect/${castRedirect - 1}`,
+                ],
+              ],
+            })
+          }
+        )
+      )
+
+      const requestConfig: RequestConfig = {
+        url: 'https://example.com/redirect/3',
+        method: 'GET',
+        body: '',
+        timeout: 10_000,
+      }
+
+      const res = await httpRequest({
+        isEnableFetch: false,
+        maxRedirects: 3,
+        requestConfig,
+        responses: [],
+      })
+
       expect(res.status).to.eq(200)
     })
 
