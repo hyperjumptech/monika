@@ -132,29 +132,37 @@ async function fetchRedirect(
 ) {
   let redirected = 0
   let currentResponse: Response
-  let currentUrl = url
+  let nextUrl = url
 
   // do HTTP fetch request at least once
   // then follow redirect based maxRedirects value and HTTP status code 3xx
   do {
     // eslint-disable-next-line no-await-in-loop
-    currentResponse = await fetcher(currentUrl)
+    currentResponse = await fetcher(nextUrl)
     // check for HTTP status code 3xx
     const shouldRedirect =
       currentResponse.status >= 300 && currentResponse.status < 400
     if (!shouldRedirect) break
 
+    // location header could either be full url, relative path, or absolute path
+    // e.g. "https://something.tld", "new/path", "/new/path", respectively
+    // refer to : RFC-7231 https://datatracker.ietf.org/doc/html/rfc7231#section-7.1.2
+    const newLocation = currentResponse.headers.get('location') || ''
+    // try-catch to evaluate if redirect location is a url
     try {
-      currentUrl = new URL(
+      // when it is valid url, immediately set nextUrl from location header
+      nextUrl = new URL(
         currentResponse.headers.get('location') || ''
       ).toString()
     } catch {
+      // new redirect location is relative / absolute url
+      const newEndpoint = newLocation.startsWith('/')
+        ? newLocation
+        : `/${newLocation}`
       // parse nextUrl to Node.js URL to get protocol and host
-      const parsedURL = new URL(currentUrl)
-      // compose redirected URL from parsed protocol, host, and location header
-      currentUrl = `${parsedURL.protocol}//${parsedURL.host}${
-        currentResponse.headers.get('location') || ''
-      }`
+      const parsedURL = new URL(nextUrl)
+      // compose nextUrl from parsed protocol, host, and newEndpoint
+      nextUrl = `${parsedURL.protocol}//${parsedURL.host}${newEndpoint}`
     }
 
     // increment redirected value for while loop
