@@ -22,6 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import { monikaFlagsDefaultValue } from '../../../../flag'
 import { BaseProber, NotificationType, type ProbeParams } from '..'
 import { getContext } from '../../../../context'
 import events from '../../../../events'
@@ -56,6 +57,11 @@ export class HTTPProber extends BaseProber {
       responses.push(
         // eslint-disable-next-line no-await-in-loop
         await httpRequest({
+          isVerbose: getContext().flags.verbose,
+          maxRedirects:
+            getContext().flags['follow-redirects'] ||
+            monikaFlagsDefaultValue['follow-redirects'],
+          isEnableFetch: getContext().flags['native-fetch'],
           requestConfig: { ...requestConfig, signal },
           responses,
         })
