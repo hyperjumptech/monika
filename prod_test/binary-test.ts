@@ -57,7 +57,6 @@ describe('Binary CLI Testing', () => {
 
   it('shows initializing file when no config', async () => {
     // arrange
-    console.info('init')
     const { spawn, cleanup, exists, removeFile } = await prepareEnvironment()
     const assertText1 = 'No Monika configuration available, initializing...'
     const assertText2 =
@@ -65,24 +64,19 @@ describe('Binary CLI Testing', () => {
 
     // act
     const prevConfig = await exists('./monika.yml')
-    console.info(prevConfig)
     if (prevConfig) {
       await removeFile('./monika.yml')
     }
 
-    console.info('getStdout')
     const { getStdout, waitForText } = await spawn(monikaPath, '-r 1')
-    console.info('waitForText')
     await waitForText(assertText2)
     const stdout = getStdout().join('\r\n')
-    console.info(stdout)
 
     // assert
     expect(stdout).to.contain(assertText1)
     expect(stdout).to.contain(assertText2)
 
     await cleanup()
-    console.info('end')
   })
 
   it('shows starting message with valid json config', async () => {
