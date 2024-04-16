@@ -34,13 +34,11 @@ import {
 // eslint-disable-next-line no-restricted-imports
 import * as qs from 'querystring'
 
-import { getContext } from '../../../../context'
 import { icmpRequest } from '../icmp/request'
 import registerFakes from '../../../../utils/fakes'
 import { sendHttpRequest, sendHttpRequestFetch } from '../../../../utils/http'
 import { log } from '../../../../utils/pino'
 import { AxiosError } from 'axios'
-import { MonikaFlags } from 'src/flag'
 import { getErrorMessage } from '../../../../utils/catch-error-handler'
 import { errors as undiciErrors } from 'undici'
 import Joi from 'joi'
@@ -49,8 +47,11 @@ import Joi from 'joi'
 registerFakes(Handlebars)
 
 type probingParams = {
+  maxRedirects: number
   requestConfig: Omit<RequestConfig, 'saveBody' | 'alert'> // is a config object
   responses: Array<ProbeRequestResponse> // an array of previous responses
+  isVerbose?: boolean
+  isEnableFetch?: boolean
 }
 
 const UndiciErrorValidator = Joi.object({
@@ -63,8 +64,11 @@ const UndiciErrorValidator = Joi.object({
  * @returns ProbeRequestResponse, response to the probe request
  */
 export async function httpRequest({
+  maxRedirects,
   requestConfig,
   responses,
+  isEnableFetch,
+  isVerbose,
 }: probingParams): Promise<ProbeRequestResponse> {
   // Compile URL using handlebars to render URLs that uses previous responses data
   const {
@@ -80,8 +84,6 @@ export async function httpRequest({
   const newReq = { method, headers, timeout, body, ping }
   const renderURL = Handlebars.compile(url)
   const renderedURL = renderURL({ responses })
-
-  const { flags } = getContext()
   newReq.headers = compileHeaders(headers, body, responses as never)
   // compile body needs to modify headers if necessary
   const { headers: newHeaders, body: newBody } = compileBody(
@@ -105,10 +107,10 @@ export async function httpRequest({
     }
 
     // Do the request using compiled URL and compiled headers (if exists)
-    if (flags['native-fetch']) {
+    if (isEnableFetch) {
       return await probeHttpFetch({
         startTime,
-        flags,
+        isVerbose,
         renderedURL,
         requestParams: { ...newReq, headers: requestHeaders },
         allowUnauthorized,
@@ -118,7 +120,7 @@ export async function httpRequest({
 
     return await probeHttpAxios({
       startTime,
-      flags,
+      maxRedirects,
       renderedURL,
       requestParams: { ...newReq, headers: requestHeaders },
       allowUnauthorized,
@@ -238,16 +240,16 @@ function compileBody(
 
 async function probeHttpFetch({
   startTime,
-  flags,
   renderedURL,
   requestParams,
   allowUnauthorized,
+  isVerbose,
   followRedirects,
 }: {
   startTime: number
-  flags: MonikaFlags
   renderedURL: string
   allowUnauthorized: boolean | undefined
+  isVerbose?: boolean
   requestParams: {
     method: string | undefined
     headers: Headers | undefined
@@ -257,7 +259,7 @@ async function probeHttpFetch({
   }
   followRedirects: number
 }): Promise<ProbeRequestResponse> {
-  if (flags.verbose) log.info(`Probing ${renderedURL} with Node.js fetch`)
+  if (isVerbose) log.info(`Probing ${renderedURL} with Node.js fetch`)
   const response = await sendHttpRequestFetch({
     ...requestParams,
     allowUnauthorizedSsl: allowUnauthorized,
@@ -298,9 +300,9 @@ async function probeHttpFetch({
 
 type ProbeHTTPAxiosParams = {
   startTime: number
-  flags: MonikaFlags
   renderedURL: string
   allowUnauthorized: boolean | undefined
+  maxRedirects: number
   requestParams: {
     method: string | undefined
     headers: Headers | undefined

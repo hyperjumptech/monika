@@ -93,6 +93,7 @@ describe('probingHTTP', () => {
           try {
             // eslint-disable-next-line no-await-in-loop
             const resp = await httpRequest({
+              maxRedirects: 0,
               requestConfig: request,
               responses,
             })
@@ -141,6 +142,7 @@ describe('probingHTTP', () => {
       }
 
       const result = await httpRequest({
+        maxRedirects: 0,
         requestConfig: request,
         responses: [],
       })
@@ -180,6 +182,7 @@ describe('probingHTTP', () => {
 
       // act
       const res = await httpRequest({
+        maxRedirects: 0,
         requestConfig: request,
         responses: [],
       })
@@ -223,6 +226,7 @@ describe('probingHTTP', () => {
 
       // act
       const res = await httpRequest({
+        maxRedirects: 0,
         requestConfig: request,
         responses: [],
       })
@@ -266,6 +270,7 @@ describe('probingHTTP', () => {
 
       // act
       const res = await httpRequest({
+        maxRedirects: 0,
         requestConfig: request,
         responses: [],
       })
@@ -309,11 +314,99 @@ describe('probingHTTP', () => {
 
       // act
       const res = await httpRequest({
+        maxRedirects: 0,
         requestConfig: request,
         responses: [],
       })
 
       // assert
+      expect(res.status).to.eq(200)
+    })
+
+    it('Should handle HTTP redirect with axios', async () => {
+      // arrange
+      server.use(
+        http.get(
+          'https://example.com/get',
+          () => new HttpResponse(null, { status: 200 })
+        ),
+        http.get(
+          'https://example.com/redirect/:nredirect',
+          async ({ params }) => {
+            const { nredirect } = params
+            const castRedirect = Number(nredirect)
+            return new HttpResponse(null, {
+              status: 302,
+              headers: [
+                [
+                  'Location',
+                  castRedirect === 1
+                    ? 'https://example.com/get'
+                    : `https://example.com/redirect/${castRedirect - 1}`,
+                ],
+              ],
+            })
+          }
+        )
+      )
+
+      const requestConfig: RequestConfig = {
+        url: 'https://example.com/redirect/3',
+        method: 'GET',
+        body: '',
+        timeout: 10_000,
+      }
+
+      const res = await httpRequest({
+        isEnableFetch: true,
+        maxRedirects: 3,
+        requestConfig,
+        responses: [],
+      })
+
+      expect(res.status).to.eq(200)
+    })
+    it('Should handle HTTP redirect with fetch', async () => {
+      // arrange
+      server.use(
+        http.get(
+          'https://example.com/get',
+          () => new HttpResponse(null, { status: 200 })
+        ),
+        http.get(
+          'https://example.com/redirect/:nredirect',
+          async ({ params }) => {
+            const { nredirect } = params
+            const castRedirect = Number(nredirect)
+            return new HttpResponse(null, {
+              status: 302,
+              headers: [
+                [
+                  'Location',
+                  castRedirect === 1
+                    ? 'https://example.com/get'
+                    : `https://example.com/redirect/${castRedirect - 1}`,
+                ],
+              ],
+            })
+          }
+        )
+      )
+
+      const requestConfig: RequestConfig = {
+        url: 'https://example.com/redirect/3',
+        method: 'GET',
+        body: '',
+        timeout: 10_000,
+      }
+
+      const res = await httpRequest({
+        isEnableFetch: false,
+        maxRedirects: 3,
+        requestConfig,
+        responses: [],
+      })
+
       expect(res.status).to.eq(200)
     })
 
@@ -353,6 +446,7 @@ describe('probingHTTP', () => {
 
       // act
       const res = await httpRequest({
+        maxRedirects: 0,
         requestConfig: request,
         responses: [],
       })
