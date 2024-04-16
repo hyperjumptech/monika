@@ -24,34 +24,30 @@
 
 import * as Handlebars from 'handlebars'
 import FormData from 'form-data'
+import Joi from 'joi'
+// eslint-disable-next-line no-restricted-imports
+import * as qs from 'querystring'
+import { errors as undiciErrors } from 'undici'
 import YAML from 'yaml'
 import {
   type ProbeRequestResponse,
   type RequestConfig,
   probeRequestResult,
 } from '../../../../interfaces/request'
-
-// eslint-disable-next-line no-restricted-imports
-import * as qs from 'querystring'
-
+import { getContext } from '../../../../context'
 import { icmpRequest } from '../icmp/request'
 import registerFakes from '../../../../utils/fakes'
 import { sendHttpRequest, sendHttpRequestFetch } from '../../../../utils/http'
 import { log } from '../../../../utils/pino'
 import { AxiosError } from 'axios'
 import { getErrorMessage } from '../../../../utils/catch-error-handler'
-import { errors as undiciErrors } from 'undici'
-import Joi from 'joi'
 
 // Register Handlebars helpers
 registerFakes(Handlebars)
 
 type probingParams = {
-  maxRedirects: number
   requestConfig: Omit<RequestConfig, 'saveBody' | 'alert'> // is a config object
   responses: Array<ProbeRequestResponse> // an array of previous responses
-  isVerbose?: boolean
-  isEnableFetch?: boolean
 }
 
 const UndiciErrorValidator = Joi.object({
@@ -64,11 +60,8 @@ const UndiciErrorValidator = Joi.object({
  * @returns ProbeRequestResponse, response to the probe request
  */
 export async function httpRequest({
-  maxRedirects,
   requestConfig,
   responses,
-  isEnableFetch,
-  isVerbose,
 }: probingParams): Promise<ProbeRequestResponse> {
   // Compile URL using handlebars to render URLs that uses previous responses data
   const {
@@ -107,24 +100,22 @@ export async function httpRequest({
     }
 
     // Do the request using compiled URL and compiled headers (if exists)
-    if (isEnableFetch) {
+    if (getContext().flags['native-fetch']) {
       return await probeHttpFetch({
         startTime,
-        isVerbose,
+        maxRedirects: followRedirects,
         renderedURL,
         requestParams: { ...newReq, headers: requestHeaders },
         allowUnauthorized,
-        followRedirects,
       })
     }
 
     return await probeHttpAxios({
       startTime,
-      maxRedirects,
+      maxRedirects: followRedirects,
       renderedURL,
       requestParams: { ...newReq, headers: requestHeaders },
       allowUnauthorized,
-      followRedirects,
     })
   } catch (error: unknown) {
     const responseTime = Date.now() - startTime
@@ -243,13 +234,12 @@ async function probeHttpFetch({
   renderedURL,
   requestParams,
   allowUnauthorized,
-  isVerbose,
-  followRedirects,
+  maxRedirects,
 }: {
   startTime: number
   renderedURL: string
   allowUnauthorized: boolean | undefined
-  isVerbose?: boolean
+  maxRedirects: number
   requestParams: {
     method: string | undefined
     headers: Headers | undefined
@@ -257,15 +247,17 @@ async function probeHttpFetch({
     body: string | object
     ping: boolean | undefined
   }
-  followRedirects: number
 }): Promise<ProbeRequestResponse> {
-  if (isVerbose) log.info(`Probing ${renderedURL} with Node.js fetch`)
+  if (getContext().flags.verbose) {
+    log.info(`Probing ${renderedURL} with Node.js fetch`)
+  }
+
   const response = await sendHttpRequestFetch({
     ...requestParams,
     allowUnauthorizedSsl: allowUnauthorized,
     keepalive: true,
     url: renderedURL,
-    maxRedirects: followRedirects,
+    maxRedirects,
     body:
       typeof requestParams.body === 'string'
         ? requestParams.body
@@ -310,7 +302,6 @@ type ProbeHTTPAxiosParams = {
     body: string | object
     ping: boolean | undefined
   }
-  followRedirects: number
 }
 
 async function probeHttpAxios({
@@ -318,14 +309,14 @@ async function probeHttpAxios({
   renderedURL,
   requestParams,
   allowUnauthorized,
-  followRedirects,
+  maxRedirects,
 }: ProbeHTTPAxiosParams): Promise<ProbeRequestResponse> {
   const resp = await sendHttpRequest({
     ...requestParams,
     allowUnauthorizedSsl: allowUnauthorized,
     keepalive: true,
     url: renderedURL,
-    maxRedirects: followRedirects,
+    maxRedirects,
     body:
       typeof requestParams.body === 'string'
         ? requestParams.body

@@ -26,6 +26,7 @@ import { expect } from '@oclif/test'
 import { HttpResponse, http } from 'msw'
 import { setupServer } from 'msw/node'
 
+import { getContext, resetContext, setContext } from '../../../../context'
 import type {
   ProbeRequestResponse,
   RequestConfig,
@@ -38,9 +39,14 @@ describe('probingHTTP', () => {
   describe('httpRequest function', () => {
     before(() => {
       server.listen()
+      setContext({
+        ...getContext(),
+        flags: { ...getContext().flags, 'follow-redirects': 0 },
+      })
     })
     afterEach(() => {
       server.resetHandlers()
+      resetContext()
     })
     after(() => {
       server.close()
@@ -93,7 +99,6 @@ describe('probingHTTP', () => {
           try {
             // eslint-disable-next-line no-await-in-loop
             const resp = await httpRequest({
-              maxRedirects: 0,
               requestConfig: request,
               responses,
             })
@@ -142,7 +147,6 @@ describe('probingHTTP', () => {
       }
 
       const result = await httpRequest({
-        maxRedirects: 0,
         requestConfig: request,
         responses: [],
       })
@@ -182,7 +186,6 @@ describe('probingHTTP', () => {
 
       // act
       const res = await httpRequest({
-        maxRedirects: 0,
         requestConfig: request,
         responses: [],
       })
@@ -226,7 +229,6 @@ describe('probingHTTP', () => {
 
       // act
       const res = await httpRequest({
-        maxRedirects: 0,
         requestConfig: request,
         responses: [],
       })
@@ -270,7 +272,6 @@ describe('probingHTTP', () => {
 
       // act
       const res = await httpRequest({
-        maxRedirects: 0,
         requestConfig: request,
         responses: [],
       })
@@ -314,7 +315,6 @@ describe('probingHTTP', () => {
 
       // act
       const res = await httpRequest({
-        maxRedirects: 0,
         requestConfig: request,
         responses: [],
       })
@@ -325,6 +325,13 @@ describe('probingHTTP', () => {
 
     it('Should handle HTTP redirect with axios', async () => {
       // arrange
+      setContext({
+        ...getContext(),
+        flags: {
+          ...getContext().flags,
+          'follow-redirects': 3,
+        },
+      })
       server.use(
         http.get(
           'https://example.com/get',
@@ -355,11 +362,10 @@ describe('probingHTTP', () => {
         method: 'GET',
         body: '',
         timeout: 10_000,
+        followRedirects: 3,
       }
 
       const res = await httpRequest({
-        isEnableFetch: true,
-        maxRedirects: 3,
         requestConfig,
         responses: [],
       })
@@ -398,11 +404,10 @@ describe('probingHTTP', () => {
         method: 'GET',
         body: '',
         timeout: 10_000,
+        followRedirects: 3,
       }
 
       const res = await httpRequest({
-        isEnableFetch: false,
-        maxRedirects: 3,
         requestConfig,
         responses: [],
       })
@@ -446,7 +451,6 @@ describe('probingHTTP', () => {
 
       // act
       const res = await httpRequest({
-        maxRedirects: 0,
         requestConfig: request,
         responses: [],
       })
