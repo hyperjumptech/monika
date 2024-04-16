@@ -48,7 +48,7 @@ type NewContext = Partial<Context>
 const initialContext: Context = {
   userAgent: '',
   incidents: [],
-  isTest: process.env.CI === 'true' || process.env.NODE_ENV === 'test',
+  isTest: process.env.NODE_ENV === 'test',
   flags: monikaFlagsDefaultValue,
 }
 
