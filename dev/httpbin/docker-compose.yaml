@@ -1,0 +1,5 @@
+services:
+  httpbin:
+    image: kennethreitz/httpbin
+    ports:
+      - 3000:80
