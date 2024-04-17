@@ -63,11 +63,37 @@ See this [docs](https://turbo.build/repo/docs/handbook/workspaces#workspaces-whi
 
 ### How to Test Probe Locally
 
-If you need to test a probe locally, there are predefined services in /dev/docker-compose.yaml. You are **encouraged** to add other services that can be probed by Monika. Run `cd dev && docker compose up` to run those services.
+If you need to test a probe locally, there are predefined services in `/dev/docker-compose.yaml`. You are **encouraged** to add other services that can be probed by Monika. Run `cd dev && docker compose up` to run those services.
 
 #### Available Services
 
 Use the following Monika config to probe the service.
+
+##### HTTPBin
+
+```yaml
+probes:
+  - id: 'should not follow redirect'
+    requests:
+      - url: http://localhost:3000/status/302
+        followRedirects: 0
+    alerts:
+      - assertion: response.status != 302
+        message: You should not follow redirect
+  - id: 'should follow redirect with default config'
+    requests:
+      - url: http://localhost:3000/absolute-redirect/20
+    alerts:
+      - assertion: response.status == 302
+        message: You are not follow redirect
+  - id: 'should follow redirect with customize config'
+    requests:
+      - url: http://localhost:3000/status/302
+        followRedirects: 2
+    alerts:
+      - assertion: response.status == 302
+        message: You are not follow redirect
+```
 
 ##### MariaDB
 
