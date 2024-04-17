@@ -23,8 +23,6 @@
  **********************************************************************************/
 
 import { watch } from 'chokidar'
-import { ux } from '@oclif/core'
-import { existsSync, writeFileSync } from 'fs'
 import isUrl from 'is-url'
 
 import events from '../../events'
@@ -34,19 +32,12 @@ import { monikaFlagsDefaultValue } from '../../flag'
 import type { MonikaFlags } from '../../flag'
 import { getEventEmitter } from '../../utils/events'
 import { md5Hash } from '../../utils/hash'
-import { open } from '../../utils/open-website'
 import { log } from '../../utils/pino'
 import { parseConfig } from './parse'
 import { validateConfig } from './validate'
 import { createConfigFile } from './create-config'
-import yml from 'js-yaml'
 import { exit } from 'process'
-import {
-  type ConfigType,
-  addDefaultNotifications,
-  getConfigFrom,
-  mergeConfigs,
-} from './get'
+import { type ConfigType, getConfigFrom, mergeConfigs } from './get'
 import { getProbes, setProbes } from './probe'
 import { getErrorMessage } from '../../utils/catch-error-handler'
 
@@ -228,84 +219,6 @@ function watchConfigFile({ flags, path }: WatchConfigFileParams) {
 
       await updateConfig(config)
     })
-  }
-}
-
-const getPathAndTypeFromFlag = (flags: MonikaFlags) => {
-  let path = flags.config?.[0]
-  let type = 'monika'
-
-  if (flags.postman) {
-    path = flags.postman
-    type = 'postman'
-  }
-
-  if (flags.har) {
-    path = flags.har
-    type = 'har'
-  }
-
-  if (flags.insomnia) {
-    path = flags.insomnia
-    type = 'insomnia'
-  }
-
-  if (flags.sitemap) {
-    path = flags.sitemap
-    type = 'sitemap'
-  }
-
-  if (flags.text) {
-    path = flags.text
-    type = 'text'
-  }
-
-  return {
-    path,
-    type,
-  }
-}
-
-export const createConfig = async (flags: MonikaFlags): Promise<void> => {
-  if (
-    !flags.har &&
-    !flags.postman &&
-    !flags.insomnia &&
-    !flags.sitemap &&
-    !flags.text
-  ) {
-    log.info(
-      'Opening Monika Configuration Generator in your default browser...'
-    )
-    open('https://hyperjumptech.github.io/monika-config-generator/')
-  } else {
-    const { path, type } = getPathAndTypeFromFlag(flags)
-
-    if (!existsSync(path)) {
-      log.error(`Couldn't found the ${path} file.`)
-      return
-    }
-
-    const parse = await parseConfig(path, type, flags)
-    const result = addDefaultNotifications(parse)
-    const file = flags.output || 'monika.yml'
-
-    if (existsSync(file) && !flags.force) {
-      const ans = await ux.ux.prompt(
-        `\n${file} file is already exists. Overwrite (Y/n)?`
-      )
-
-      if (ans.toLowerCase() !== 'y') {
-        log.warn(
-          `Command cancelled. You can use the -o flag to specify an output file or --force to overwrite without prompting.`
-        )
-        return
-      }
-    }
-
-    const yamlDoc = yml.dump(result)
-    writeFileSync(file, yamlDoc, 'utf8')
-    log.info(`${file} file has been created.`)
   }
 }
 
