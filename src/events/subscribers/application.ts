@@ -26,6 +26,7 @@ import { hostname } from 'os'
 import { getConfig } from '../../components/config'
 import { sendNotifications } from '@hyperjumptech/monika-notification'
 import { getMessageForTerminate } from '../../components/notification/alert-message'
+import { getContext } from '../../context'
 import events from '../../events'
 import { getEventEmitter } from '../../utils/events'
 import getIp from '../../utils/ip'
@@ -34,9 +35,7 @@ import { log } from '../../utils/pino'
 const eventEmitter = getEventEmitter()
 
 eventEmitter.on(events.application.terminated, async () => {
-  const isTestEnvironment = process.env.NODE_ENV === 'test'
-
-  if (!isTestEnvironment) {
+  if (!getContext().isTest) {
     const message = await getMessageForTerminate(hostname(), getIp())
     const config = getConfig()
 

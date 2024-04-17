@@ -23,6 +23,8 @@
  **********************************************************************************/
 
 import { expect } from 'chai'
+import sinon from 'sinon'
+
 import type { Probe } from '../interfaces/probe'
 import {
   getProbeContext,
@@ -31,7 +33,6 @@ import {
   setProbeFinish,
   setProbeRunning,
 } from './probe-state'
-import sinon from 'sinon'
 
 describe('probe-state', () => {
   const timeNow = new Date()
@@ -54,7 +55,14 @@ describe('probe-state', () => {
           id: '1',
           interval: 1,
           name: 'Example',
-          requests: [{ url: 'https://example.com', body: '', timeout: 2 }],
+          requests: [
+            {
+              url: 'https://example.com',
+              body: '',
+              followRedirects: 21,
+              timeout: 2,
+            },
+          ],
         },
       ]
 
@@ -79,7 +87,14 @@ describe('probe-state', () => {
           id: '1',
           interval: 1,
           name: 'Example',
-          requests: [{ url: 'https://example.com', body: '', timeout: 2 }],
+          requests: [
+            {
+              url: 'https://example.com',
+              body: '',
+              followRedirects: 21,
+              timeout: 2,
+            },
+          ],
           lastEvent: {
             createdAt: lastEventCreatedAt,
           },
@@ -109,7 +124,14 @@ describe('probe-state', () => {
           id: '1',
           interval: 1,
           name: 'Example',
-          requests: [{ url: 'https://example.com', body: '', timeout: 2 }],
+          requests: [
+            {
+              url: 'https://example.com',
+              body: '',
+              followRedirects: 21,
+              timeout: 2,
+            },
+          ],
           lastEvent: {
             recoveredAt: lastEventCreatedAt,
           },
@@ -137,7 +159,14 @@ describe('probe-state', () => {
           id: '1',
           interval: 1,
           name: 'Example',
-          requests: [{ url: 'https://example.com', body: '', timeout: 2 }],
+          requests: [
+            {
+              url: 'https://example.com',
+              body: '',
+              followRedirects: 21,
+              timeout: 2,
+            },
+          ],
           lastEvent: {
             createdAt: lastEventCreatedAt,
             recoveredAt: lastEventCreatedAt,
@@ -167,7 +196,14 @@ describe('probe-state', () => {
           id: '1',
           interval: 1,
           name: 'Example',
-          requests: [{ url: 'https://example.com', body: '', timeout: 2 }],
+          requests: [
+            {
+              url: 'https://example.com',
+              body: '',
+              followRedirects: 21,
+              timeout: 2,
+            },
+          ],
         },
       ]
 
@@ -187,7 +223,14 @@ describe('probe-state', () => {
           id: '1',
           interval: 1,
           name: 'Example',
-          requests: [{ url: 'https://example.com', body: '', timeout: 2 }],
+          requests: [
+            {
+              url: 'https://example.com',
+              body: '',
+              followRedirects: 21,
+              timeout: 2,
+            },
+          ],
         },
       ]
 
@@ -208,7 +251,14 @@ describe('probe-state', () => {
           id: '1',
           interval: 1,
           name: 'Example',
-          requests: [{ url: 'https://example.com', body: '', timeout: 2 }],
+          requests: [
+            {
+              url: 'https://example.com',
+              body: '',
+              followRedirects: 21,
+              timeout: 2,
+            },
+          ],
         },
       ]
 
@@ -228,7 +278,14 @@ describe('probe-state', () => {
           id: '1',
           interval: 1,
           name: 'Example',
-          requests: [{ url: 'https://example.com', body: '', timeout: 2 }],
+          requests: [
+            {
+              url: 'https://example.com',
+              body: '',
+              followRedirects: 21,
+              timeout: 2,
+            },
+          ],
         },
       ]
 
@@ -248,7 +305,14 @@ describe('probe-state', () => {
           id: '1',
           interval: 1,
           name: 'Example',
-          requests: [{ url: 'https://example.com', body: '', timeout: 2 }],
+          requests: [
+            {
+              url: 'https://example.com',
+              body: '',
+              followRedirects: 21,
+              timeout: 2,
+            },
+          ],
         },
       ]
 
@@ -269,7 +333,14 @@ describe('probe-state', () => {
           id: '1',
           interval: 1,
           name: 'Example',
-          requests: [{ url: 'https://example.com', body: '', timeout: 2 }],
+          requests: [
+            {
+              url: 'https://example.com',
+              body: '',
+              followRedirects: 21,
+              timeout: 2,
+            },
+          ],
         },
       ]
 
@@ -292,7 +363,14 @@ describe('probe-state', () => {
           id: '1',
           interval: 1,
           name: 'Example',
-          requests: [{ url: 'https://example.com', body: '', timeout: 2 }],
+          requests: [
+            {
+              url: 'https://example.com',
+              body: '',
+              followRedirects: 21,
+              timeout: 2,
+            },
+          ],
         },
       ]
 
@@ -314,7 +392,14 @@ describe('probe-state', () => {
           id: '1',
           interval: 1,
           name: 'Example',
-          requests: [{ url: 'https://example.com', body: '', timeout: 2 }],
+          requests: [
+            {
+              url: 'https://example.com',
+              body: '',
+              followRedirects: 21,
+              timeout: 2,
+            },
+          ],
         },
       ]
 
@@ -336,7 +421,14 @@ describe('probe-state', () => {
           id: '1',
           interval: 1,
           name: 'Example',
-          requests: [{ url: 'https://example.com', body: '', timeout: 2 }],
+          requests: [
+            {
+              url: 'https://example.com',
+              body: '',
+              followRedirects: 21,
+              timeout: 2,
+            },
+          ],
         },
       ]
 

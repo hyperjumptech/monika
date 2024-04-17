@@ -36,7 +36,7 @@ import { closeLog, openLogfile } from '../components/logger/history'
 import { logStartupMessage } from '../components/logger/startup-message'
 import { scheduleSummaryNotification } from '../components/notification/schedule-notification'
 import { sendMonikaStartMessage } from '../components/notification/start-message'
-import { setContext } from '../context'
+import { getContext, setContext } from '../context'
 import events from '../events'
 import {
   type MonikaFlags,
@@ -410,7 +410,7 @@ export default class Monika extends Command {
           signal,
         })
 
-        if (process.env.NODE_ENV === 'test') {
+        if (getContext().isTest) {
           break
         }
 

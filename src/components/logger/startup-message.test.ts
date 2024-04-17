@@ -37,7 +37,13 @@ const defaultConfig: Config = {
       name: 'Acme Inc.',
       interval: 3000,
       requests: [
-        { url: 'https://example.com', headers: {}, body: '', timeout: 0 },
+        {
+          url: 'https://example.com',
+          headers: {},
+          body: '',
+          followRedirects: 21,
+          timeout: 0,
+        },
       ],
       alerts: [
         {
@@ -240,6 +246,7 @@ describe('Startup message', () => {
                     url: 'https://example.com',
                     headers: {},
                     body: '',
+                    followRedirects: 21,
                     timeout: 0,
                   },
                 ],

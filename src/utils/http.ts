@@ -89,36 +89,85 @@ function convertHeadersToAxios(headersInit: HeadersInit | undefined) {
 export async function sendHttpRequestFetch(
   config: HttpRequestParams
 ): Promise<Response> {
-  const {
-    allowUnauthorizedSsl,
-    body,
-    headers,
-    maxRedirects,
-    method,
-    timeout,
-    url,
-  } = config
+  const { maxRedirects, timeout, url } = config
   const controller = new AbortController()
   const { signal } = controller
   const timeoutId = setTimeout(() => {
     controller.abort()
   }, timeout || DEFAULT_TIMEOUT)
-  const resp = await fetch(url, {
-    body: body === '' ? undefined : body,
-    dispatcher: new Agent({
-      connect: {
-        rejectUnauthorized: !allowUnauthorizedSsl,
-      },
-      maxRedirections: maxRedirects,
-    }),
-    headers,
-    keepalive: true,
-    method,
-    signal,
-  }).then((response) => {
+  const fetcher = compileFetch(config, signal)
+  return fetchRedirect(url, maxRedirects, fetcher).then((response) => {
     clearTimeout(timeoutId)
     return response
   })
+}
 
-  return resp
+function compileFetch(
+  config: HttpRequestParams,
+  signal: AbortSignal
+): (url: string) => Promise<Response> {
+  const { allowUnauthorizedSsl, body, headers, method } = config
+
+  return (url) =>
+    fetch(url, {
+      body: body === '' ? undefined : body,
+      redirect: 'manual',
+      dispatcher: new Agent({
+        connect: {
+          rejectUnauthorized: !allowUnauthorizedSsl,
+        },
+      }),
+      headers,
+      keepalive: true,
+      method,
+      signal,
+    })
+}
+
+// fetchRedirect handles HTTP status code 3xx returned by fetcher
+async function fetchRedirect(
+  url: string,
+  maxRedirects: number | undefined,
+  fetcher: (url: string) => Promise<Response>
+) {
+  let redirected = 0
+  let currentResponse: Response
+  let nextUrl = url
+
+  // do HTTP fetch request at least once
+  // then follow redirect based maxRedirects value and HTTP status code 3xx
+  do {
+    // eslint-disable-next-line no-await-in-loop
+    currentResponse = await fetcher(nextUrl)
+    // check for HTTP status code 3xx
+    const shouldRedirect =
+      currentResponse.status >= 300 && currentResponse.status < 400
+    if (!shouldRedirect) break
+
+    // location header could either be full url, relative path, or absolute path
+    // e.g. "https://something.tld", "new/path", "/new/path", respectively
+    // refer to : RFC-7231 https://datatracker.ietf.org/doc/html/rfc7231#section-7.1.2
+    const newLocation = currentResponse.headers.get('location') || ''
+    // try-catch to evaluate if redirect location is a url
+    try {
+      // when it is valid url, immediately set nextUrl from location header
+      nextUrl = new URL(
+        currentResponse.headers.get('location') || ''
+      ).toString()
+    } catch {
+      // new redirect location is relative / absolute url
+      const newEndpoint = newLocation.startsWith('/')
+        ? newLocation
+        : `/${newLocation}`
+      // parse nextUrl to Node.js URL to get protocol and host
+      const parsedURL = new URL(nextUrl)
+      // compose nextUrl from parsed protocol, host, and newEndpoint
+      nextUrl = `${parsedURL.protocol}//${parsedURL.host}${newEndpoint}`
+    }
+
+    // increment redirected value for while loop
+    redirected++
+  } while (redirected <= (maxRedirects || 0))
+
+  return currentResponse
 }

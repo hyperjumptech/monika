@@ -22,49 +22,76 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { ProbeAlert } from './probe'
+import { expect } from '@oclif/test'
 
-// RequestTypes are used to define the type of request that is being made.
-export type RequestTypes =
-  | 'http'
-  | 'HTTP'
-  | 'icmp'
-  | 'ICMP'
-  | 'tcp'
-  | 'redis'
-  | 'mariadb'
-  | 'mongo'
-  | 'postgres'
+import { getContext, setContext } from '../../context'
+import type { Probe } from '../../interfaces/probe'
+import { validateProbes } from './validation'
 
-// The success/failure result of a probe
-export enum probeRequestResult {
-  failed = 0,
-  success = 1,
-  unknown = 2,
-}
+describe('Configuration validation', () => {
+  it('should use default follow redirect from flag', async () => {
+    // arrange
+    const probes: Probe[] = [
+      {
+        id: 'hrf6g',
+        requests: [
+          {
+            body: '',
+            url: 'https://example.com',
+            timeout: 1000,
+          },
+        ],
+      } as Probe,
+    ]
+    // act
+    const validatedProbes = await validateProbes(probes)
 
-// ProbeRequestResponse is used to define the response from a probe requests.
-export interface ProbeRequestResponse<T = unknown> {
-  requestType?: RequestTypes // is this for http (default) or icmp  or others
-  data: T
-  body: T
-  status: number
-  headers: string | Record<string, string>
-  responseTime: number
-  error?: string // any error message from drivers
-  result: probeRequestResult // did the probe succeed or fail?
-}
+    // assert
+    expect(validatedProbes[0].requests![0].followRedirects).eq(21)
+  })
 
-// ProbeRequest is used to define the requests that is being made.
-export interface RequestConfig extends Omit<RequestInit, 'headers' | 'body'> {
-  id?: string
-  saveBody?: boolean // save response body to db?
-  url: string
-  body: object | string
-  followRedirects: number
-  timeout: number // request timeout
-  alerts?: ProbeAlert[]
-  headers?: object
-  ping?: boolean // is this request for a ping?
-  allowUnauthorized?: boolean // ignore ssl cert?
-}
+  it('should use follow redirect from flag', async () => {
+    // arrange
+    setContext({ flags: { ...getContext().flags, 'follow-redirects': 0 } })
+    const probes: Probe[] = [
+      {
+        id: 'hrf6g',
+        requests: [
+          {
+            body: '',
+            url: 'https://example.com',
+            timeout: 1000,
+          },
+        ],
+      } as Probe,
+    ]
+    // act
+    const validatedProbes = await validateProbes(probes)
+
+    // assert
+    expect(validatedProbes[0].requests![0].followRedirects).eq(0)
+  })
+
+  it('should use follow redirect from config', async () => {
+    // arrange
+    setContext({ flags: { ...getContext().flags, 'follow-redirects': 0 } })
+    const probes: Probe[] = [
+      {
+        id: 'hrf6g',
+        requests: [
+          {
+            body: '',
+            followRedirects: 1,
+            url: 'https://example.com',
+            timeout: 1000,
+          },
+        ],
+      } as Probe,
+    ]
+    // act
+    const validatedProbes = await validateProbes(probes)
+
+    // assert
+    expect(validatedProbes[0].requests![0].followRedirects).eq(1)
+  })
+})

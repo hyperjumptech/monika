@@ -53,10 +53,10 @@ import getIp from '../utils/ip'
 import { log } from '../utils/pino'
 import { removeProbeState, syncProbeStateFrom } from '../utils/probe-state'
 import {
+  fetchAndCacheNetworkInfo,
   getPublicIp,
   getPublicNetworkInfo,
   publicIpAddress,
-  publicNetworkInfo,
 } from '../utils/public-ip'
 
 type SymonHandshakeData = {
@@ -111,20 +111,23 @@ type ProbeChange = {
 type ProbeAssignmentTotal = { total: number; updatedAt?: Date }
 
 const getHandshakeData = async (): Promise<SymonHandshakeData> => {
-  await retry(handleAll, {
-    backoff: new ExponentialBackoff(),
-  }).execute(async () => {
-    await getPublicNetworkInfo()
-      .then(({ city, hostname, isp, privateIp, publicIp }) => {
+  if (!getPublicNetworkInfo()) {
+    await retry(handleAll, {
+      backoff: new ExponentialBackoff(),
+    }).execute(async () => {
+      try {
+        const { city, hostname, isp, privateIp, publicIp } =
+          await fetchAndCacheNetworkInfo()
         log.info(
           `[Symon] Monika is running from: ${city} - ${isp} (${publicIp}) - ${hostname} (${privateIp})`
         )
-      })
-      .catch((error) => {
+      } catch (error) {
         log.error(`[Symon] ${error}. Retrying...`)
         throw error
-      })
-  })
+      }
+    })
+  }
+
   await getPublicIp()
 
   const os = await getOSName()
@@ -132,7 +135,7 @@ const getHandshakeData = async (): Promise<SymonHandshakeData> => {
   const host = hostname()
   const publicIp = publicIpAddress
   const privateIp = getIp()
-  const { city, country, isp } = publicNetworkInfo!
+  const { city, country, isp } = getPublicNetworkInfo()!
   const { pid } = process
   const { userAgent: version } = getContext()
 

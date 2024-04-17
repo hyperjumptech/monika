@@ -25,11 +25,12 @@
 import fs from 'fs'
 import path from 'path'
 import { pino, transport } from 'pino'
+import { getContext } from '../context'
 
 export const log = pino(getOptions())
 
 function getOptions() {
-  if (process.env.NODE_ENV === 'test') {
+  if (getContext().isTest) {
     return {
       base: undefined,
       level: 'error',

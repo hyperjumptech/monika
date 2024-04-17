@@ -32,7 +32,7 @@ import { getContext } from '../../context'
 import type { NotificationMessage } from '@hyperjumptech/monika-notification'
 import { ProbeRequestResponse } from '../../interfaces/request'
 import { ProbeAlert } from '../../interfaces/probe'
-import { publicIpAddress, publicNetworkInfo } from '../../utils/public-ip'
+import { getPublicNetworkInfo, publicIpAddress } from '../../utils/public-ip'
 import { getIncidents } from '../incident'
 
 const getLinuxDistro = promisify(getos)
@@ -40,6 +40,7 @@ const getLinuxDistro = promisify(getos)
 export const getMonikaInstance = async (ipAddress: string): Promise<string> => {
   const osHostname = hostname()
 
+  const publicNetworkInfo = getPublicNetworkInfo()
   if (publicNetworkInfo) {
     const { city, isp } = publicNetworkInfo
 

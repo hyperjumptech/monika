@@ -24,26 +24,23 @@
 
 import * as Handlebars from 'handlebars'
 import FormData from 'form-data'
+import Joi from 'joi'
+// eslint-disable-next-line no-restricted-imports
+import * as qs from 'querystring'
+import { errors as undiciErrors } from 'undici'
 import YAML from 'yaml'
 import {
   type ProbeRequestResponse,
   type RequestConfig,
   probeRequestResult,
 } from '../../../../interfaces/request'
-
-// eslint-disable-next-line no-restricted-imports
-import * as qs from 'querystring'
-
 import { getContext } from '../../../../context'
 import { icmpRequest } from '../icmp/request'
 import registerFakes from '../../../../utils/fakes'
 import { sendHttpRequest, sendHttpRequestFetch } from '../../../../utils/http'
 import { log } from '../../../../utils/pino'
 import { AxiosError } from 'axios'
-import { MonikaFlags } from 'src/flag'
 import { getErrorMessage } from '../../../../utils/catch-error-handler'
-import { errors as undiciErrors } from 'undici'
-import Joi from 'joi'
 
 // Register Handlebars helpers
 registerFakes(Handlebars)
@@ -67,13 +64,19 @@ export async function httpRequest({
   responses,
 }: probingParams): Promise<ProbeRequestResponse> {
   // Compile URL using handlebars to render URLs that uses previous responses data
-  const { method, url, headers, timeout, body, ping, allowUnauthorized } =
-    requestConfig
+  const {
+    method,
+    url,
+    headers,
+    timeout,
+    body,
+    ping,
+    allowUnauthorized,
+    followRedirects,
+  } = requestConfig
   const newReq = { method, headers, timeout, body, ping }
   const renderURL = Handlebars.compile(url)
   const renderedURL = renderURL({ responses })
-
-  const { flags } = getContext()
   newReq.headers = compileHeaders(headers, body, responses as never)
   // compile body needs to modify headers if necessary
   const { headers: newHeaders, body: newBody } = compileBody(
@@ -97,10 +100,10 @@ export async function httpRequest({
     }
 
     // Do the request using compiled URL and compiled headers (if exists)
-    if (flags['native-fetch']) {
+    if (getContext().flags['native-fetch']) {
       return await probeHttpFetch({
         startTime,
-        flags,
+        maxRedirects: followRedirects,
         renderedURL,
         requestParams: { ...newReq, headers: requestHeaders },
         allowUnauthorized,
@@ -109,7 +112,7 @@ export async function httpRequest({
 
     return await probeHttpAxios({
       startTime,
-      flags,
+      maxRedirects: followRedirects,
       renderedURL,
       requestParams: { ...newReq, headers: requestHeaders },
       allowUnauthorized,
@@ -228,15 +231,15 @@ function compileBody(
 
 async function probeHttpFetch({
   startTime,
-  flags,
   renderedURL,
   requestParams,
   allowUnauthorized,
+  maxRedirects,
 }: {
   startTime: number
-  flags: MonikaFlags
   renderedURL: string
   allowUnauthorized: boolean | undefined
+  maxRedirects: number
   requestParams: {
     method: string | undefined
     headers: Headers | undefined
@@ -245,13 +248,16 @@ async function probeHttpFetch({
     ping: boolean | undefined
   }
 }): Promise<ProbeRequestResponse> {
-  if (flags.verbose) log.info(`Probing ${renderedURL} with Node.js fetch`)
+  if (getContext().flags.verbose) {
+    log.info(`Probing ${renderedURL} with Node.js fetch`)
+  }
+
   const response = await sendHttpRequestFetch({
     ...requestParams,
     allowUnauthorizedSsl: allowUnauthorized,
     keepalive: true,
     url: renderedURL,
-    maxRedirects: flags['follow-redirects'],
+    maxRedirects,
     body:
       typeof requestParams.body === 'string'
         ? requestParams.body
@@ -284,17 +290,11 @@ async function probeHttpFetch({
   }
 }
 
-async function probeHttpAxios({
-  startTime,
-  flags,
-  renderedURL,
-  requestParams,
-  allowUnauthorized,
-}: {
+type ProbeHTTPAxiosParams = {
   startTime: number
-  flags: MonikaFlags
   renderedURL: string
   allowUnauthorized: boolean | undefined
+  maxRedirects: number
   requestParams: {
     method: string | undefined
     headers: Headers | undefined
@@ -302,13 +302,21 @@ async function probeHttpAxios({
     body: string | object
     ping: boolean | undefined
   }
-}): Promise<ProbeRequestResponse> {
+}
+
+async function probeHttpAxios({
+  startTime,
+  renderedURL,
+  requestParams,
+  allowUnauthorized,
+  maxRedirects,
+}: ProbeHTTPAxiosParams): Promise<ProbeRequestResponse> {
   const resp = await sendHttpRequest({
     ...requestParams,
     allowUnauthorizedSsl: allowUnauthorized,
     keepalive: true,
     url: renderedURL,
-    maxRedirects: flags['follow-redirects'],
+    maxRedirects,
     body:
       typeof requestParams.body === 'string'
         ? requestParams.body
@@ -423,6 +431,8 @@ function handleAxiosError(
   }
 }
 
+// suppress switch-case complexity since this is dead-simple mapping to error code
+// eslint-disable-next-line complexity
 function getErrorStatusWithExplanation(error: unknown): {
   status: number
   description: string
@@ -570,6 +580,14 @@ function getErrorStatusWithExplanation(error: unknown): {
         status: 17,
         description:
           "EPROTO: There are issues with the website's SSL/TLS certificates, incompatible protocols, or other SSL-related problems.",
+      }
+    }
+
+    case 'UNABLE_TO_VERIFY_LEAF_SIGNATURE': {
+      return {
+        status: 27,
+        description:
+          'ELEAFSIGNATURE: Unable to verify the first / leaf certificate.',
       }
     }
 
