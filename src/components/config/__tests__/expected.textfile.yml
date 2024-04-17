@@ -6,6 +6,7 @@ probes:
         method: GET
         timeout: 10000
         body: {}
+        followRedirects: 21
     interval: 900
     alerts:
       - assertion: response.status < 200 or response.status > 299
@@ -19,6 +20,7 @@ probes:
         method: GET
         timeout: 10000
         body: {}
+        followRedirects: 21
     interval: 900
     alerts:
       - assertion: response.status < 200 or response.status > 299

@@ -24,34 +24,30 @@
 
 import * as Handlebars from 'handlebars'
 import FormData from 'form-data'
+import Joi from 'joi'
+// eslint-disable-next-line no-restricted-imports
+import * as qs from 'querystring'
+import { errors as undiciErrors } from 'undici'
 import YAML from 'yaml'
 import {
   type ProbeRequestResponse,
   type RequestConfig,
   probeRequestResult,
 } from '../../../../interfaces/request'
-
-// eslint-disable-next-line no-restricted-imports
-import * as qs from 'querystring'
-
+import { getContext } from '../../../../context'
 import { icmpRequest } from '../icmp/request'
 import registerFakes from '../../../../utils/fakes'
 import { sendHttpRequest, sendHttpRequestFetch } from '../../../../utils/http'
 import { log } from '../../../../utils/pino'
 import { AxiosError } from 'axios'
 import { getErrorMessage } from '../../../../utils/catch-error-handler'
-import { errors as undiciErrors } from 'undici'
-import Joi from 'joi'
 
 // Register Handlebars helpers
 registerFakes(Handlebars)
 
 type probingParams = {
-  maxRedirects: number
   requestConfig: Omit<RequestConfig, 'saveBody' | 'alert'> // is a config object
   responses: Array<ProbeRequestResponse> // an array of previous responses
-  isVerbose?: boolean
-  isEnableFetch?: boolean
 }
 
 const UndiciErrorValidator = Joi.object({
@@ -64,15 +60,20 @@ const UndiciErrorValidator = Joi.object({
  * @returns ProbeRequestResponse, response to the probe request
  */
 export async function httpRequest({
-  maxRedirects,
   requestConfig,
   responses,
-  isEnableFetch,
-  isVerbose,
 }: probingParams): Promise<ProbeRequestResponse> {
   // Compile URL using handlebars to render URLs that uses previous responses data
-  const { method, url, headers, timeout, body, ping, allowUnauthorized } =
-    requestConfig
+  const {
+    method,
+    url,
+    headers,
+    timeout,
+    body,
+    ping,
+    allowUnauthorized,
+    followRedirects,
+  } = requestConfig
   const newReq = { method, headers, timeout, body, ping }
   const renderURL = Handlebars.compile(url)
   const renderedURL = renderURL({ responses })
@@ -99,11 +100,10 @@ export async function httpRequest({
     }
 
     // Do the request using compiled URL and compiled headers (if exists)
-    if (isEnableFetch) {
+    if (getContext().flags['native-fetch']) {
       return await probeHttpFetch({
         startTime,
-        isVerbose,
-        maxRedirects,
+        maxRedirects: followRedirects,
         renderedURL,
         requestParams: { ...newReq, headers: requestHeaders },
         allowUnauthorized,
@@ -112,7 +112,7 @@ export async function httpRequest({
 
     return await probeHttpAxios({
       startTime,
-      maxRedirects,
+      maxRedirects: followRedirects,
       renderedURL,
       requestParams: { ...newReq, headers: requestHeaders },
       allowUnauthorized,
@@ -235,13 +235,11 @@ async function probeHttpFetch({
   requestParams,
   allowUnauthorized,
   maxRedirects,
-  isVerbose,
 }: {
   startTime: number
   renderedURL: string
   allowUnauthorized: boolean | undefined
   maxRedirects: number
-  isVerbose?: boolean
   requestParams: {
     method: string | undefined
     headers: Headers | undefined
@@ -250,15 +248,10 @@ async function probeHttpFetch({
     ping: boolean | undefined
   }
 }): Promise<ProbeRequestResponse> {
-  if (isVerbose) log.info(`Probing ${renderedURL} with Node.js fetch`)
-  console.log(
-    'renderedURL =',
-    renderedURL,
-    '| requestParams =',
-    JSON.stringify(requestParams),
-    '| maxRedirects =',
-    maxRedirects
-  )
+  if (getContext().flags.verbose) {
+    log.info(`Probing ${renderedURL} with Node.js fetch`)
+  }
+
   const response = await sendHttpRequestFetch({
     ...requestParams,
     allowUnauthorizedSsl: allowUnauthorized,
@@ -297,13 +290,7 @@ async function probeHttpFetch({
   }
 }
 
-async function probeHttpAxios({
-  startTime,
-  renderedURL,
-  allowUnauthorized,
-  maxRedirects,
-  requestParams,
-}: {
+type ProbeHTTPAxiosParams = {
   startTime: number
   renderedURL: string
   allowUnauthorized: boolean | undefined
@@ -315,7 +302,15 @@ async function probeHttpAxios({
     body: string | object
     ping: boolean | undefined
   }
-}): Promise<ProbeRequestResponse> {
+}
+
+async function probeHttpAxios({
+  startTime,
+  renderedURL,
+  requestParams,
+  allowUnauthorized,
+  maxRedirects,
+}: ProbeHTTPAxiosParams): Promise<ProbeRequestResponse> {
   const resp = await sendHttpRequest({
     ...requestParams,
     allowUnauthorizedSsl: allowUnauthorized,

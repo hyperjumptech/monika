@@ -24,7 +24,7 @@
 
 import type { Config as IConfig } from '@oclif/core'
 import { isSymonModeFrom, setupConfig } from '../components/config'
-import { setContext } from '../context'
+import { getContext, setContext } from '../context'
 import events from '../events'
 import type { MonikaFlags } from '../flag'
 import { tlsChecker } from '../jobs/tls-check'
@@ -35,7 +35,7 @@ import {
   startPrometheusMetricsServer,
 } from '../plugins/metrics/prometheus'
 import { getEventEmitter } from '../utils/events'
-import { getPublicNetworkInfo } from '../utils/public-ip'
+import { fetchAndCacheNetworkInfo } from '../utils/public-ip'
 import { jobsLoader } from './jobs'
 import { enableAutoUpdate } from '../plugins/updater'
 import { log } from '../utils/pino'
@@ -48,27 +48,10 @@ export default async function init(
   flags: MonikaFlags,
   cliConfig: IConfig
 ): Promise<void> {
-  const eventEmitter = getEventEmitter()
-  const isTestEnvironment = process.env.CI || process.env.NODE_ENV === 'test'
   const isSymonMode = isSymonModeFrom(flags)
 
   setContext({ userAgent: cliConfig.userAgent })
-
-  if (flags.verbose || isSymonMode) {
-    // cache location & ISP info
-    getPublicNetworkInfo()
-      .then(({ city, hostname, isp, privateIp, publicIp }) => {
-        log.info(
-          `Monika is running from: ${city} - ${isp} (${publicIp}) - ${hostname} (${privateIp})`
-        )
-      })
-      .catch((error) =>
-        log.warn(`Failed to obtain location/ISP info. Got: ${error}`)
-      )
-  } else {
-    // if note verbose, remove location details
-    ;`Monika is running.`
-  }
+  await logRunningInfo({ isSymonMode, isVerbose: flags.verbose })
 
   // check if connected to STUN Server and getting the public IP in the same time
   loopCheckSTUNServer(flags.stun)
@@ -79,26 +62,7 @@ export default async function init(
 
   // start Promotheus server
   if (flags.prometheus) {
-    const {
-      collectProbeTotal,
-      collectProbeRequestMetrics,
-      collectTriggeredAlert,
-      decrementProbeRunningTotal,
-      incrementProbeRunningTotal,
-      resetProbeRunningTotal,
-    } = new PrometheusCollector()
-
-    // collect prometheus metrics
-    eventEmitter.on(events.config.sanitized, (probes: Probe[]) => {
-      collectProbeTotal(probes.length)
-    })
-    eventEmitter.on(events.probe.response.received, collectProbeRequestMetrics)
-    eventEmitter.on(events.probe.alert.triggered, collectTriggeredAlert)
-    eventEmitter.on(events.probe.ran, incrementProbeRunningTotal)
-    eventEmitter.on(events.probe.finished, decrementProbeRunningTotal)
-    eventEmitter.on(events.config.updated, resetProbeRunningTotal)
-
-    startPrometheusMetricsServer(flags.prometheus)
+    initPrometheus(flags.prometheus)
   }
 
   if (!isSymonMode) {
@@ -107,9 +71,53 @@ export default async function init(
     // check TLS when Monika starts
     tlsChecker()
 
-    if (!isTestEnvironment) {
+    if (!getContext().isTest) {
       // load cron jobs
       jobsLoader()
     }
   }
+}
+
+type RunningInfoParams = { isSymonMode: boolean; isVerbose: boolean }
+
+async function logRunningInfo({ isVerbose, isSymonMode }: RunningInfoParams) {
+  if (!isVerbose && !isSymonMode) {
+    log.info('Monika is running.')
+    return
+  }
+
+  try {
+    const { city, hostname, isp, privateIp, publicIp } =
+      await fetchAndCacheNetworkInfo()
+
+    log.info(
+      `Monika is running from: ${city} - ${isp} (${publicIp}) - ${hostname} (${privateIp})`
+    )
+  } catch (error) {
+    log.warn(`Failed to obtain location/ISP info. Got: ${error}`)
+  }
+}
+
+function initPrometheus(prometheusPort: number) {
+  const eventEmitter = getEventEmitter()
+  const {
+    collectProbeTotal,
+    collectProbeRequestMetrics,
+    collectTriggeredAlert,
+    decrementProbeRunningTotal,
+    incrementProbeRunningTotal,
+    resetProbeRunningTotal,
+  } = new PrometheusCollector()
+
+  // collect prometheus metrics
+  eventEmitter.on(events.config.sanitized, (probes: Probe[]) => {
+    collectProbeTotal(probes.length)
+  })
+  eventEmitter.on(events.probe.response.received, collectProbeRequestMetrics)
+  eventEmitter.on(events.probe.alert.triggered, collectTriggeredAlert)
+  eventEmitter.on(events.probe.ran, incrementProbeRunningTotal)
+  eventEmitter.on(events.probe.finished, decrementProbeRunningTotal)
+  eventEmitter.on(events.config.updated, resetProbeRunningTotal)
+
+  startPrometheusMetricsServer(prometheusPort)
 }

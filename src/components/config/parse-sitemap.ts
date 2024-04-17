@@ -24,11 +24,12 @@
 
 import type { Config } from '../../interfaces/config'
 import { XMLParser } from 'fast-xml-parser'
+import { getContext } from '../../context'
 import { monikaFlagsDefaultValue } from '../../flag'
 import type { MonikaFlags } from '../../flag'
 import type { Probe, ProbeAlert } from '../../interfaces/probe'
+import type { RequestConfig } from '../../interfaces/request'
 import Joi from 'joi'
-import { RequestConfig } from 'src/interfaces/request'
 
 const sitemapValidator = Joi.object({
   config: Joi.object({
@@ -95,6 +96,7 @@ const generateProbesFromXmlOneProbe = (parseResult: unknown) => {
         method: 'GET',
         timeout: 10_000,
         body: '',
+        followRedirects: getContext().flags['follow-redirects'],
       },
     ]
     if (item['xhtml:link']) {
@@ -106,6 +108,7 @@ const generateProbesFromXmlOneProbe = (parseResult: unknown) => {
             method: 'GET',
             timeout: 10_000,
             body: '',
+            followRedirects: getContext().flags['follow-redirects'],
           },
         ]
       }

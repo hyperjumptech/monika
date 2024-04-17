@@ -62,7 +62,6 @@ type WatchConfigFileParams = {
   path: string
 }
 
-const isTestEnvironment = process.env.CI || process.env.NODE_ENV === 'test'
 const emitter = getEventEmitter()
 
 const defaultConfigs: Partial<Config>[] = []
@@ -103,7 +102,8 @@ export const updateConfig = async (config: Config): Promise<void> => {
     log.info('Config file update detected')
   } catch (error: unknown) {
     const message = getErrorMessage(error)
-    if (isTestEnvironment) {
+
+    if (getContext().isTest) {
       // return error during tests
       throw new Error(message)
     }
@@ -220,7 +220,7 @@ function scheduleRemoteConfigFetcher({
 }
 
 function watchConfigFile({ flags, path }: WatchConfigFileParams) {
-  const isWatchConfigFile = !(isTestEnvironment || flags.repeat !== 0)
+  const isWatchConfigFile = !(getContext().isTest || flags.repeat !== 0)
   if (isWatchConfigFile) {
     const watcher = watch(path)
     watcher.on('change', async () => {

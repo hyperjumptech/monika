@@ -6,22 +6,27 @@ probes:
         method: GET
         timeout: 10000
         body: ''
+        followRedirects: 21
       - url: https://de.wiktionary.org/wiki/hyperjump
         method: GET
         timeout: 10000
         body: ''
+        followRedirects: 21
       - url: https://id.wiktionary.org/wiki/hyperjump
         method: GET
         timeout: 10000
         body: ''
+        followRedirects: 21
       - url: https://en.wiktionary.org/wiki/hyperjump
         method: GET
         timeout: 10000
         body: ''
+        followRedirects: 21
       - url: https://monika.hyperjump.tech/index
         method: GET
         timeout: 10000
         body: ''
+        followRedirects: 21
     interval: 900
     alerts:
       - assertion: response.status < 200 or response.status > 299

@@ -302,6 +302,13 @@
           "body": {
             "$ref": "#/definitions/body"
           },
+          "followRedirects": {
+            "title": "Follow Redirects",
+            "description": "The request follows redirects as many times as specified here",
+            "type": "integer",
+            "examples": ["21"],
+            "default": "21"
+          },
           "headers": {
             "$ref": "#/definitions/headers"
           }

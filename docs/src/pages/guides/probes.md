@@ -50,6 +50,7 @@ probes:
           - assertion: response.status != 200
             message: Status not 2xx
         allowUnauthorized: true
+        followRedirects: 1
     incidentThreshold: 3
     alerts:
       - assertion: response.status != 200
@@ -72,6 +73,7 @@ Details of the field are given in the table below.
 | alerts (optional)            | The condition which will trigger an alert, and the subsequent notification method to send out the alert. See below for further details on alerts and notifications. See [alerts](./alerts) section for detailed information.                                                                                                                                                                                                                                                                                                                                                                      |
 | ping (optional)              | (boolean), If set true then send a PING to the specified url instead.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | allowUnauthorized (optional) | (boolean), If set to true, will make https agent to not check for ssl certificate validity                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| followRedirects (optional)   | The request follows redirects as many times as specified here. If unspecified, it will fallback to the value set by the [follow redirects flag](https://monika.hyperjump.tech/guides/cli-options#follow-redirects)                                                                                                                                                                                                                                                                                                                                                                                |
 
 ## Request Body
 

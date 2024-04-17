@@ -66,6 +66,7 @@ const probes: Probe[] = [
       {
         url: 'https://example.com',
         body: '',
+        followRedirects: 21,
         timeout: 30,
       },
     ],
@@ -205,6 +206,7 @@ describe('HTTP Probe processing', () => {
         {
           url: 'https://example.com',
           body: '',
+          followRedirects: 21,
           timeout: 30,
         },
       ],
@@ -314,11 +316,18 @@ describe('HTTP Probe processing', () => {
         })
       })
     )
-    const probe = {
+    const probe: Probe = {
       ...probes[0],
       id: 'fj43l',
       incidentThreshold: 1,
-      requests: [{ url: 'https://example.com', body: '', timeout: 30 }],
+      requests: [
+        {
+          url: 'https://example.com',
+          body: '',
+          followRedirects: 21,
+          timeout: 30,
+        },
+      ],
       alerts: [
         { id: 'jFQBd', assertion: 'response.status != 200', message: '' },
       ],
@@ -348,10 +357,10 @@ describe('HTTP Probe processing', () => {
     await sleep(3 * seconds)
 
     // assert
-    expect(notificationAlert?.[probe.requests[0].url]?.body?.url).eq(
+    expect(notificationAlert?.[probe.requests![0].url]?.body?.url).eq(
       'https://example.com'
     )
-    expect(notificationAlert?.[probe.requests[0].url]?.body?.alert).eq(
+    expect(notificationAlert?.[probe.requests![0].url]?.body?.alert).eq(
       'response.status != 200'
     )
   }).timeout(10_000)

@@ -42,9 +42,7 @@ type PublicNetwork = {
 
 export let publicIpAddress = ''
 export let isConnectedToSTUNServer = true
-export let publicNetworkInfo: PublicNetwork | undefined
-
-const isTestEnvironment = process.env.CI || process.env.NODE_ENV === 'test'
+let publicNetworkInfo: PublicNetwork | undefined
 
 /**
  * pokeStun sends a poke/request to stun server
@@ -53,7 +51,7 @@ const isTestEnvironment = process.env.CI || process.env.NODE_ENV === 'test'
 async function pokeStun(): Promise<string> {
   // for testing, bypass ping/stun server... apparently ping cannot run in github actions
   // reference: https://github.com/actions/virtual-environments/issues/1519
-  if (isTestEnvironment) {
+  if (getContext().isTest) {
     return '192.168.1.1' // adding for specific asserts in other tests
   }
 
@@ -66,14 +64,14 @@ async function pokeStun(): Promise<string> {
   throw new Error('stun inaccessible') // could not connect to STUN server
 }
 
-export async function getPublicNetworkInfo(): Promise<PublicNetwork> {
+async function fetchPublicNetworkInfo(): Promise<PublicNetwork> {
   const publicIp = await pokeStun()
   const response = await sendHttpRequest({
     url: `http://ip-api.com/json/${publicIp}`,
   })
   const { country, city, isp } = response.data
 
-  publicNetworkInfo = {
+  return {
     country,
     city,
     hostname: hostname(),
@@ -81,8 +79,22 @@ export async function getPublicNetworkInfo(): Promise<PublicNetwork> {
     privateIp: getIp(),
     publicIp,
   }
+}
 
+async function setPublicNetworkInfo(publicNetwork: PublicNetwork) {
+  publicNetworkInfo = publicNetwork
+}
+
+export function getPublicNetworkInfo(): PublicNetwork | undefined {
   return publicNetworkInfo
+}
+
+// cache location & ISP info
+export async function fetchAndCacheNetworkInfo() {
+  const publicNetwork = await fetchPublicNetworkInfo()
+  await setPublicNetworkInfo(publicNetwork)
+
+  return publicNetwork
 }
 
 /**

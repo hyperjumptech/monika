@@ -26,6 +26,7 @@ import { expect } from '@oclif/test'
 import { HttpResponse, http } from 'msw'
 import { setupServer } from 'msw/node'
 
+import { getContext, resetContext, setContext } from '../../../../context'
 import type {
   ProbeRequestResponse,
   RequestConfig,
@@ -38,9 +39,14 @@ describe('probingHTTP', () => {
   describe('httpRequest function', () => {
     before(() => {
       server.listen()
+      setContext({
+        ...getContext(),
+        flags: { ...getContext().flags, 'follow-redirects': 0 },
+      })
     })
     afterEach(() => {
       server.resetHandlers()
+      resetContext()
     })
     after(() => {
       server.close()
@@ -66,10 +72,11 @@ describe('probingHTTP', () => {
       )
 
       // create the requests
-      const requests = [
+      const requests: RequestConfig[] = [
         {
           url: 'http://localhost:4000/get_key',
           body: '',
+          followRedirects: 21,
           timeout: 10_000,
         },
         {
@@ -79,6 +86,7 @@ describe('probingHTTP', () => {
             Authorization: '{{ responses.[0].data.token }}',
           },
           body: '',
+          followRedirects: 21,
           timeout: 10_000,
         },
       ]
@@ -91,7 +99,6 @@ describe('probingHTTP', () => {
           try {
             // eslint-disable-next-line no-await-in-loop
             const resp = await httpRequest({
-              maxRedirects: 0,
               requestConfig: request,
               responses,
             })
@@ -135,11 +142,11 @@ describe('probingHTTP', () => {
         body: JSON.parse(
           '{"username": "example@example.com", "password": "example"}'
         ),
+        followRedirects: 21,
         timeout: 10_000,
       }
 
       const result = await httpRequest({
-        maxRedirects: 0,
         requestConfig: request,
         responses: [],
       })
@@ -173,12 +180,12 @@ describe('probingHTTP', () => {
         method: 'POST',
         headers: { 'content-type': 'multipart/form-data' },
         body: { username: 'john@example.com', password: 'drowssap' } as never,
+        followRedirects: 21,
         timeout: 10_000,
       }
 
       // act
       const res = await httpRequest({
-        maxRedirects: 0,
         requestConfig: request,
         responses: [],
       })
@@ -216,12 +223,12 @@ describe('probingHTTP', () => {
         method: 'POST',
         headers: { 'content-type': 'text/plain' },
         body: 'multiline string\nexample',
+        followRedirects: 21,
         timeout: 10_000,
       }
 
       // act
       const res = await httpRequest({
-        maxRedirects: 0,
         requestConfig: request,
         responses: [],
       })
@@ -259,12 +266,12 @@ describe('probingHTTP', () => {
         method: 'POST',
         headers: { 'content-type': 'text/yaml' },
         body: { username: 'john@example.com', password: 'secret' } as never,
+        followRedirects: 21,
         timeout: 10_000,
       }
 
       // act
       const res = await httpRequest({
-        maxRedirects: 0,
         requestConfig: request,
         responses: [],
       })
@@ -302,12 +309,12 @@ describe('probingHTTP', () => {
         method: 'POST',
         headers: { 'content-type': 'application/xml' },
         body: { username: 'john@example.com', password: 'secret' } as never,
+        followRedirects: 21,
         timeout: 10_000,
       }
 
       // act
       const res = await httpRequest({
-        maxRedirects: 0,
         requestConfig: request,
         responses: [],
       })
@@ -318,6 +325,13 @@ describe('probingHTTP', () => {
 
     it('Should handle HTTP redirect with axios', async () => {
       // arrange
+      setContext({
+        ...getContext(),
+        flags: {
+          ...getContext().flags,
+          'follow-redirects': 3,
+        },
+      })
       server.use(
         http.get(
           'https://example.com/get',
@@ -348,11 +362,10 @@ describe('probingHTTP', () => {
         method: 'GET',
         body: '',
         timeout: 10_000,
+        followRedirects: 3,
       }
 
       const res = await httpRequest({
-        isEnableFetch: true,
-        maxRedirects: 3,
         requestConfig,
         responses: [],
       })
@@ -391,11 +404,10 @@ describe('probingHTTP', () => {
         method: 'GET',
         body: '',
         timeout: 10_000,
+        followRedirects: 3,
       }
 
       const res = await httpRequest({
-        isEnableFetch: false,
-        maxRedirects: 3,
         requestConfig,
         responses: [],
       })
@@ -432,19 +444,110 @@ describe('probingHTTP', () => {
         method: 'POST',
         headers: { 'content-type': 'text/plain' },
         body: 'multiline string\nexample',
+        followRedirects: 21,
         timeout: 10_000,
         allowUnauthorized: true,
       }
 
       // act
       const res = await httpRequest({
-        maxRedirects: 0,
         requestConfig: request,
         responses: [],
       })
 
       // assert
       expect(res.status).to.eq(200)
+    })
+
+    it('should follow redirect', async () => {
+      // arrange
+      server.use(
+        http.get(
+          'https://example.com/redirect-1',
+          async () =>
+            new HttpResponse(null, {
+              status: 302,
+              headers: {
+                Location: '/redirect-2',
+              },
+            })
+        ),
+        http.get(
+          'https://example.com/redirect-2',
+          async () =>
+            new HttpResponse(null, {
+              status: 302,
+              headers: {
+                Location: '/',
+              },
+            })
+        ),
+        http.get(
+          'https://example.com',
+          async () =>
+            new HttpResponse(null, {
+              status: 200,
+            })
+        )
+      )
+      const request = {
+        url: 'https://example.com/redirect-1',
+      } as RequestConfig
+
+      // act
+      const res = await httpRequest({
+        requestConfig: request,
+        responses: [],
+      })
+
+      // assert
+      expect(res.status).to.eq(200)
+    })
+
+    it('should not follow redirect', async () => {
+      // arrange
+      server.use(
+        http.get(
+          'https://example.com/redirect-1',
+          async () =>
+            new HttpResponse(null, {
+              status: 302,
+              headers: {
+                Location: '/redirect-2',
+              },
+            })
+        ),
+        http.get(
+          'https://example.com/redirect-2',
+          async () =>
+            new HttpResponse(null, {
+              status: 301,
+              headers: {
+                Location: '/',
+              },
+            })
+        ),
+        http.get(
+          'https://example.com',
+          async () =>
+            new HttpResponse(null, {
+              status: 200,
+            })
+        )
+      )
+      const request = {
+        url: 'https://example.com/redirect-1',
+        followRedirects: 0,
+      } as RequestConfig
+
+      // act
+      const res = await httpRequest({
+        requestConfig: request,
+        responses: [],
+      })
+
+      // assert
+      expect(res.status).to.eq(302)
     })
   })
 
