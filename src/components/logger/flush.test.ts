@@ -22,14 +22,15 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import sinon from 'sinon'
+import { type SinonStub, assert, stub } from 'sinon'
+import { getContext, resetContext, setContext } from '../../context'
 import * as history from './history'
 import { flush } from './flush'
 
-let flushAllLogsStub: sinon.SinonStub
+let flushAllLogsStub: SinonStub
 
 beforeEach(() => {
-  flushAllLogsStub = sinon.stub(history, 'flushAllLogs').resolves()
+  flushAllLogsStub = stub(history, 'flushAllLogs').resolves()
 })
 
 afterEach(() => {
@@ -39,11 +40,16 @@ afterEach(() => {
 describe('Flush command', () => {
   describe('Force', () => {
     it('should flush records without asking for confirmation', async () => {
+      // arrange
+      setContext({ flags: { ...getContext().flags, force: true } })
+
       // act
-      await flush(true)
+      await flush()
 
       // assert
-      sinon.assert.calledOnce(flushAllLogsStub)
+      assert.calledOnce(flushAllLogsStub)
+
+      resetContext()
     })
   })
 })

@@ -79,20 +79,20 @@ probes:
         followRedirects: 0
     alerts:
       - assertion: response.status != 302
-        message: You should not follow redirect
+        message: You should not follow the redirect
   - id: 'should follow redirect with default config'
     requests:
       - url: http://localhost:3000/absolute-redirect/20
     alerts:
       - assertion: response.status == 302
-        message: You are not follow redirect
-  - id: 'should follow redirect with customize config'
+        message: You are not following the redirect
+  - id: 'should follow redirect with customized config'
     requests:
       - url: http://localhost:3000/status/302
         followRedirects: 2
     alerts:
       - assertion: response.status == 302
-        message: You are not follow redirect
+        message: You are not following the redirect
 ```
 
 ##### MariaDB
