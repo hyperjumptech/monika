@@ -28,7 +28,8 @@ import pEvent from 'p-event'
 import type { Config } from '../interfaces/config'
 import type { Probe } from '../interfaces/probe'
 
-import { createConfig, getConfig, isSymonModeFrom } from '../components/config'
+import { getConfig, isSymonModeFrom } from '../components/config'
+import { createConfig } from '../components/config/create'
 import { sortProbes } from '../components/config/sort'
 import { printAllLogs } from '../components/logger'
 import { flush } from '../components/logger/flush'
@@ -350,7 +351,7 @@ export default class Monika extends Command {
 
     try {
       if (_flags['create-config']) {
-        await createConfig(_flags)
+        await createConfig()
         return
       }
 
