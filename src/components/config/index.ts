@@ -288,11 +288,11 @@ export const createConfig = async (flags: MonikaFlags): Promise<void> => {
 
     const parse = await parseConfig(path, type, flags)
     const result = addDefaultNotifications(parse)
-    const file = flags.output || 'monika.yml'
+    const { force, output } = flags
 
-    if (existsSync(file) && !flags.force) {
+    if (existsSync(output) && !force) {
       const ans = await ux.ux.prompt(
-        `\n${file} file is already exists. Overwrite (Y/n)?`
+        `\n${output} file is already exists. Overwrite (Y/n)?`
       )
 
       if (ans.toLowerCase() !== 'y') {
@@ -304,8 +304,8 @@ export const createConfig = async (flags: MonikaFlags): Promise<void> => {
     }
 
     const yamlDoc = yml.dump(result)
-    writeFileSync(file, yamlDoc, 'utf8')
-    log.info(`${file} file has been created.`)
+    writeFileSync(output, yamlDoc, 'utf8')
+    log.info(`${output} file has been created.`)
   }
 }
 

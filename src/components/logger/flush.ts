@@ -1,25 +1,22 @@
 import { ux } from '@oclif/core'
-import { flushAllLogs } from './history'
+import { getContext } from '../../context'
 import { log } from '../../utils/pino'
+import { flushAllLogs, openLogfile } from './history'
 
-export async function flush(isForce: boolean): Promise<void> {
-  if (isForce) {
-    await flushAllLogs()
-    log.info('Records flushed, thank you.')
+export async function flush(): Promise<void> {
+  if (!getContext().flags.force) {
+    const answer = await ux.ux.prompt(
+      'Are you sure you want to flush all logs in monika-logs.db (Y/n)?'
+    )
 
-    return
+    if (answer !== 'Y') {
+      log.info('Cancelled. Thank you.')
+
+      return
+    }
   }
 
-  const ans = await ux.ux.prompt(
-    'Are you sure you want to flush all logs in monika-logs.db (Y/n)?'
-  )
-
-  if (ans === 'Y') {
-    await flushAllLogs()
-    log.info('Records flushed, thank you.')
-
-    return
-  }
-
-  log.info('Cancelled. Thank you.')
+  await openLogfile()
+  await flushAllLogs()
+  log.info('Records flushed, thank you.')
 }

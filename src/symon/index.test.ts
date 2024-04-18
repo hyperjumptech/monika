@@ -26,7 +26,7 @@ import { expect } from '@oclif/test'
 import { type DefaultBodyType, HttpResponse, http } from 'msw'
 import { setupServer } from 'msw/node'
 
-import { monikaFlagsDefaultValue } from '../flag'
+import { monikaFlagsDefaultValue, sanitizeFlags } from '../flag'
 import type { Config } from '../interfaces/config'
 import type { Probe } from '../interfaces/probe'
 
@@ -159,10 +159,12 @@ describe('Symon initiate', () => {
       )
     )
 
-    const symon = new SymonClient({
-      symonUrl: 'http://localhost:4000',
-      symonKey: 'abcd',
-    })
+    const symon = new SymonClient(
+      sanitizeFlags({
+        symonUrl: 'http://localhost:4000',
+        symonKey: 'abcd',
+      })
+    )
     await symon.initiate()
     await symon.stop()
 
@@ -179,10 +181,12 @@ describe('Symon initiate', () => {
   }).timeout(15_000)
 
   it('should fetch probes config on initiate', async () => {
-    const symon = new SymonClient({
-      symonUrl: 'http://localhost:4000',
-      symonKey: 'abcd',
-    })
+    const symon = new SymonClient(
+      sanitizeFlags({
+        symonUrl: 'http://localhost:4000',
+        symonKey: 'abcd',
+      })
+    )
 
     expect(getContext().config).to.be.undefined
 
@@ -213,10 +217,12 @@ describe('Symon initiate', () => {
       })
     )
 
-    const symon = new SymonClient({
-      symonUrl: 'http://localhost:4000',
-      symonKey: 'abcd',
-    })
+    const symon = new SymonClient(
+      sanitizeFlags({
+        symonUrl: 'http://localhost:4000',
+        symonKey: 'abcd',
+      })
+    )
     let errorMessage = ''
 
     try {
@@ -248,11 +254,13 @@ describe('Symon initiate', () => {
         }
       )
     )
-    const symon = new SymonClient({
-      symonUrl: 'http://localhost:4000',
-      symonKey: 'abcd',
-      symonMonikaId: '1234',
-    })
+    const symon = new SymonClient(
+      sanitizeFlags({
+        symonUrl: 'http://localhost:4000',
+        symonKey: 'abcd',
+        symonMonikaId: '1234',
+      })
+    )
     await symon.initiate()
 
     // act
@@ -313,10 +321,12 @@ describe('Symon initiate', () => {
         symonGetProbesIntervalMs,
       },
     })
-    const symon = new SymonClient({
-      symonUrl: 'http://localhost:4000',
-      symonKey: 'abcd',
-    })
+    const symon = new SymonClient(
+      sanitizeFlags({
+        symonUrl: 'http://localhost:4000',
+        symonKey: 'abcd',
+      })
+    )
 
     // 1. Check initial probe cache
     expect(getProbes()).deep.eq([])
@@ -366,10 +376,12 @@ describe('Symon initiate', () => {
         symonGetProbesIntervalMs,
       },
     })
-    const symon = new SymonClient({
-      symonUrl: 'http://localhost:4000',
-      symonKey: 'abcd',
-    })
+    const symon = new SymonClient(
+      sanitizeFlags({
+        symonUrl: 'http://localhost:4000',
+        symonKey: 'abcd',
+      })
+    )
 
     // 1. Check initial probe cache
     expect(getProbes()).deep.eq([])
@@ -420,10 +432,12 @@ describe('Symon initiate', () => {
         symonGetProbesIntervalMs,
       },
     })
-    const symon = new SymonClient({
-      symonUrl: 'http://localhost:4000',
-      symonKey: 'abcd',
-    })
+    const symon = new SymonClient(
+      sanitizeFlags({
+        symonUrl: 'http://localhost:4000',
+        symonKey: 'abcd',
+      })
+    )
 
     // 1. Check initial probe cache
     expect(getProbes()).deep.eq([])
@@ -474,10 +488,12 @@ describe('Symon initiate', () => {
         symonGetProbesIntervalMs,
       },
     })
-    const symon = new SymonClient({
-      symonUrl: 'http://localhost:4000',
-      symonKey: 'abcd',
-    })
+    const symon = new SymonClient(
+      sanitizeFlags({
+        symonUrl: 'http://localhost:4000',
+        symonKey: 'abcd',
+      })
+    )
 
     // 1. Check initial probe cache
     expect(getProbes()).deep.eq([])
