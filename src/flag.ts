@@ -45,7 +45,6 @@ export type MonikaFlags = {
   har?: string
   id?: string
   insomnia?: string
-  json?: boolean
   'keep-verbose-logs': boolean
   logs: boolean
   'one-probe': boolean
@@ -70,21 +69,23 @@ export type MonikaFlags = {
   text?: string
   ignoreInvalidTLS: boolean
   verbose: boolean
-  version: void
 }
+
+const DEFAULT_CONFIG_INTERVAL_SECONDS = 900
+const DEFAULT_SYMON_REPORT_INTERVAL_MS = 10_000
 
 export const monikaFlagsDefaultValue: MonikaFlags = {
   config: getDefaultConfig(),
   'config-filename': 'monika.yml',
-  'config-interval': 900,
+  'config-interval': DEFAULT_CONFIG_INTERVAL_SECONDS,
   'create-config': false,
-  'native-fetch': false,
   flush: false,
   'follow-redirects': 21,
   force: false,
   ignoreInvalidTLS: false,
   'keep-verbose-logs': false,
   logs: false,
+  'native-fetch': false,
   'one-probe': false,
   output: 'monika.yml',
   repeat: 0,
@@ -94,14 +95,10 @@ export const monikaFlagsDefaultValue: MonikaFlags = {
   stun: 20,
   summary: false,
   'symon-api-version': SYMON_API_VERSION.v1,
-  symonGetProbesIntervalMs: Number.parseInt(
-    process.env.FETCH_PROBES_INTERVAL ?? '60000',
-    10
-  ),
-  symonReportInterval: 10_000,
+  symonGetProbesIntervalMs: 60_000,
+  symonReportInterval: DEFAULT_SYMON_REPORT_INTERVAL_MS,
   symonReportLimit: 100,
   verbose: false,
-  version: undefined,
 }
 
 function getDefaultConfig(): Array<string> {
@@ -128,206 +125,161 @@ export const flags = {
     env: 'MONIKA_JSON_CONFIG',
     multiple: true,
   }),
-
   'config-filename': Flags.string({
     default: monikaFlagsDefaultValue['config-filename'],
     dependsOn: ['config'],
     description:
       'The configuration filename for config file created if there is no config file found ',
   }),
-
   'config-interval': Flags.integer({
     default: monikaFlagsDefaultValue['config-interval'],
     dependsOn: ['config'],
     description:
       'The interval (in seconds) for periodic config checking if url is used as config source',
   }),
-
   'create-config': Flags.boolean({
     description:
       'Create config from HAR (-H), postman (-p), insomnia (-I), sitemap (--sitemap), textfile (--text) export file, or open Monika Configuration Generator using default browser',
+    default: monikaFlagsDefaultValue['create-config'],
   }),
-
-  'native-fetch': Flags.boolean({
-    default: monikaFlagsDefaultValue['native-fetch'],
-    description:
-      'Use native fetch Node.js API instead of Axios for HTTP client',
-  }),
-
   flush: Flags.boolean({
     description: 'Flush logs',
+    default: monikaFlagsDefaultValue.flush,
   }),
-
   'follow-redirects': Flags.integer({
     default: monikaFlagsDefaultValue['follow-redirects'],
     description:
       'Monika will follow redirects as many times as the specified value here. By default, Monika will follow redirects once. To disable redirects following, set the value to zero.',
   }),
-
   force: Flags.boolean({
-    default: false,
+    default: monikaFlagsDefaultValue.force,
     description: 'Force commands with a yes whenever Y/n is prompted.',
   }),
-
   har: Flags.string({
     char: 'H', // (H)ar file to
     description: 'Run Monika using a HAR file',
     exclusive: ['postman', 'insomnia', 'sitemap', 'text'],
-    multiple: false,
   }),
-
   help: Flags.help({ char: 'h' }),
-
   id: Flags.string({
     char: 'i', // (i)ds to run
     description: 'Define specific probe ids to run',
-    multiple: false,
   }),
-
   ignoreInvalidTLS: Flags.boolean({
     description:
       'Configures whether HTTPS requests should ignore invalid certificates',
-    default: false,
+    default: monikaFlagsDefaultValue.ignoreInvalidTLS,
   }),
-
   insomnia: Flags.string({
     char: 'I', // (I)nsomnia file to
     description: 'Run Monika using an Insomnia json/yaml file',
     exclusive: ['har', 'postman', 'sitemap', 'text'],
-    multiple: false,
   }),
-
   'keep-verbose-logs': Flags.boolean({
-    default: false,
+    default: monikaFlagsDefaultValue['keep-verbose-logs'],
     description: 'Store all requests logs to database',
   }),
-
   logs: Flags.boolean({
     char: 'l', // prints the (l)ogs
     description: 'Print all logs.',
+    default: monikaFlagsDefaultValue.logs,
   }),
-
+  'native-fetch': Flags.boolean({
+    default: monikaFlagsDefaultValue['native-fetch'],
+    description:
+      'Use native fetch Node.js API instead of Axios for HTTP client',
+  }),
   'one-probe': Flags.boolean({
     dependsOn: ['sitemap'],
     description: 'One Probe',
   }),
-
   output: Flags.string({
     char: 'o', // (o)utput file to write config to
     description: 'Write monika config file to this file',
-    multiple: false,
+    default: monikaFlagsDefaultValue.output,
   }),
-
   postman: Flags.string({
     char: 'p', // (p)ostman
     description: 'Run Monika using a Postman json file.',
     exclusive: ['har', 'insomnia', 'sitemap', 'text'],
-    multiple: false,
   }),
-
   prometheus: Flags.integer({
     description:
       'Specifies the port the Prometheus metric server is listening on. e.g., 3001. (EXPERIMENTAL)',
     exclusive: ['r'],
   }),
-
   repeat: Flags.integer({
     char: 'r', // (r)epeat
-    default: 0,
+    default: monikaFlagsDefaultValue.repeat,
     description: 'Repeats the test run n times',
-    multiple: false,
   }),
-
   retryInitialDelayMs: Flags.integer({
     default: monikaFlagsDefaultValue.retryInitialDelayMs,
     description: `The initial, first delay of the backoff retry when probe request is failed, in milliseconds. Defaults to ${monikaFlagsDefaultValue.retryInitialDelayMs}ms`,
   }),
-
   retryMaxDelayMs: Flags.integer({
     default: monikaFlagsDefaultValue.retryMaxDelayMs,
     description: `Maximum backoff retry delay, in milliseconds. Defaults to ${monikaFlagsDefaultValue.retryMaxDelayMs}ms.`,
   }),
-
   sitemap: Flags.string({
     description: 'Run Monika using a Sitemap xml file.',
     exclusive: ['har', 'insomnia', 'postman', 'text'],
-    multiple: false,
   }),
-
   'status-notification': Flags.string({
     description: 'Cron syntax for status notification schedule',
   }),
-
   stun: Flags.integer({
     char: 's', // (s)stun
     default: monikaFlagsDefaultValue.stun,
     description: 'Interval in seconds to check STUN server',
-    multiple: false,
   }),
-
   summary: Flags.boolean({
-    default: false,
+    default: monikaFlagsDefaultValue.summary,
     description: 'Display a summary of monika running stats',
   }),
-
   'symon-api-version': Flags.custom<SYMON_API_VERSION>({
-    default: SYMON_API_VERSION.v1,
+    default: monikaFlagsDefaultValue['symon-api-version'],
     description:
       'Symon API version to use. Available options: v1, v2. Default: v1',
     options: [SYMON_API_VERSION.v1, SYMON_API_VERSION.v2],
   })(),
-
   symonKey: Flags.string({
     dependsOn: ['symonUrl'],
     description: 'API Key for Symon',
   }),
-
   symonGetProbesIntervalMs: Flags.integer({
     default: monikaFlagsDefaultValue.symonGetProbesIntervalMs,
     description: `To determine how often Monika sends a request to Symon to get probe data, in milliseconds. Defaults to ${monikaFlagsDefaultValue.symonGetProbesIntervalMs}ms`,
   }),
-
   symonLocationId: Flags.string({
     dependsOn: ['symonKey', 'symonUrl'],
     description: 'Location ID for Symon (optional)',
-    required: false,
   }),
-
   symonMonikaId: Flags.string({
     dependsOn: ['symonKey', 'symonUrl'],
     description: 'Monika ID for Symon (optional)',
-    required: false,
   }),
-
   symonReportInterval: Flags.integer({
     dependsOn: ['symonKey', 'symonUrl'],
     description: 'Interval for reporting to Symon in milliseconds (optional)',
-    required: false,
   }),
-
   symonReportLimit: Flags.integer({
     dependsOn: ['symonKey', 'symonUrl'],
     description: 'Data limit to be reported to Symon (optional)',
-    required: false,
   }),
-
   symonUrl: Flags.string({
     dependsOn: ['symonKey'],
     description: 'URL of Symon',
     hidden: false,
   }),
-
   text: Flags.string({
     description: 'Run Monika using a Simple text file',
     exclusive: ['postman', 'insomnia', 'sitemap', 'har'],
-    multiple: false,
   }),
-
   verbose: Flags.boolean({
-    default: false,
+    default: monikaFlagsDefaultValue.verbose,
     description: 'Show verbose log messages',
   }),
-
   version: Flags.version({ char: 'v' }),
 }
 
