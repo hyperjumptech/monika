@@ -174,12 +174,12 @@ export default class SymonClient {
   private url: string
 
   constructor({
-    'symon-api-version': apiVersion = SYMON_API_VERSION.v1,
+    'symon-api-version': apiVersion,
     symonKey = '',
     symonLocationId = '',
     symonMonikaId = '',
-    symonReportInterval = 10_000,
-    symonReportLimit = 100,
+    symonReportInterval,
+    symonReportLimit,
     symonUrl = '',
   }: SymonClientParams) {
     this.apiKey = symonKey

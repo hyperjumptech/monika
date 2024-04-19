@@ -22,16 +22,15 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import fs from 'fs'
-import path from 'path'
+import { expect } from '@oclif/test'
+import { monikaFlagsDefaultValue, sanitizeFlags } from './flag'
 
-export function getDefaultConfig(): Array<string> {
-  const filesArray = fs.readdirSync(path.dirname('../'))
-  const monikaDotJsonFile = filesArray.find((x) => x === 'monika.json')
-  const monikaDotYamlFile = filesArray.find(
-    (x) => x === 'monika.yml' || x === 'monika.yaml'
-  )
-  const defaultConfig = monikaDotYamlFile || monikaDotJsonFile
+describe('Flag', () => {
+  it('should fill flags with the default value', () => {
+    // act
+    const sanitizedFlags = sanitizeFlags({})
 
-  return defaultConfig ? [defaultConfig] : []
-}
+    // assert
+    expect(sanitizedFlags).deep.eq(monikaFlagsDefaultValue)
+  })
+})

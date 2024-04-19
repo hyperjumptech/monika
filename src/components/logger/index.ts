@@ -23,15 +23,35 @@
  **********************************************************************************/
 
 import chalk from 'chalk'
-import { getAllLogs } from './history'
 import { log } from '../../utils/pino'
+import { getAllLogs, openLogfile } from './history'
+
+// printAllLogs dumps the content of monika-logs.db onto the screen
+export async function printAllLogs(): Promise<void> {
+  await openLogfile()
+  const data = await getAllLogs()
+
+  for (const {
+    id,
+    probeId,
+    requestUrl,
+    responseStatus,
+    responseTime,
+  } of data) {
+    log.info(
+      `${id} id: ${probeId} responseCode: ${chalk.keyword(
+        getStatusColor(responseStatus)
+      )(String(responseStatus))} - ${requestUrl}, ${responseTime || '- '}ms`
+    )
+  }
+}
 
 /**
  * getStatusColor colorizes different statusCode
  * @param {any} responseCode is the httpStatus to colorize
  * @returns {string} color code based on chalk: Chalk & { supportsColor: ColorSupport };
  */
-function getStatusColor(responseCode: number) {
+function getStatusColor(responseCode: number): string {
   switch (Math.trunc(responseCode / 100)) {
     case 2: {
       return 'cyan'
@@ -49,22 +69,4 @@ function getStatusColor(responseCode: number) {
   }
 
   return 'white'
-}
-
-/**
- * printAllLogs dumps the content of monika-logs.db onto the screen
- * @returns Promise<void>
- */
-export async function printAllLogs(): Promise<void> {
-  const data = await getAllLogs()
-
-  for (const row of data) {
-    log.info(
-      `${row.id} id: ${row.probeId} responseCode: ${chalk.keyword(
-        getStatusColor(row.responseStatus)
-      )(String(row.responseStatus))} - ${row.requestUrl}, ${
-        row.responseTime || '- '
-      }ms`
-    )
-  }
 }

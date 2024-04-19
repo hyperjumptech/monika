@@ -24,7 +24,8 @@
 
 import type { Config as IConfig } from '@oclif/core'
 import { isSymonModeFrom, setupConfig } from '../components/config'
-import { getContext, setContext } from '../context'
+import { openLogfile } from '../components/logger/history'
+import { getContext } from '../context'
 import events from '../events'
 import type { MonikaFlags } from '../flag'
 import { tlsChecker } from '../jobs/tls-check'
@@ -35,10 +36,8 @@ import {
   startPrometheusMetricsServer,
 } from '../plugins/metrics/prometheus'
 import { getEventEmitter } from '../utils/events'
-import { fetchAndCacheNetworkInfo } from '../utils/public-ip'
 import { jobsLoader } from './jobs'
 import { enableAutoUpdate } from '../plugins/updater'
-import { log } from '../utils/pino'
 
 // import the subscriber file to activate the event emitter subscribers
 import '../events/subscribers/application'
@@ -48,13 +47,9 @@ export default async function init(
   flags: MonikaFlags,
   cliConfig: IConfig
 ): Promise<void> {
-  const isSymonMode = isSymonModeFrom(flags)
-
-  setContext({ userAgent: cliConfig.userAgent })
-  await logRunningInfo({ isSymonMode, isVerbose: flags.verbose })
-
+  await openLogfile()
   // check if connected to STUN Server and getting the public IP in the same time
-  loopCheckSTUNServer(flags.stun)
+  await loopCheckSTUNServer(flags.stun)
   // run auto-updater
   if (flags['auto-update']) {
     await enableAutoUpdate(cliConfig, flags['auto-update'])
@@ -65,7 +60,7 @@ export default async function init(
     initPrometheus(flags.prometheus)
   }
 
-  if (!isSymonMode) {
+  if (!isSymonModeFrom(flags)) {
     await setupConfig(flags)
 
     // check TLS when Monika starts
@@ -75,26 +70,6 @@ export default async function init(
       // load cron jobs
       jobsLoader()
     }
-  }
-}
-
-type RunningInfoParams = { isSymonMode: boolean; isVerbose: boolean }
-
-async function logRunningInfo({ isVerbose, isSymonMode }: RunningInfoParams) {
-  if (!isVerbose && !isSymonMode) {
-    log.info('Monika is running.')
-    return
-  }
-
-  try {
-    const { city, hostname, isp, privateIp, publicIp } =
-      await fetchAndCacheNetworkInfo()
-
-    log.info(
-      `Monika is running from: ${city} - ${isp} (${publicIp}) - ${hostname} (${privateIp})`
-    )
-  } catch (error) {
-    log.warn(`Failed to obtain location/ISP info. Got: ${error}`)
   }
 }
 

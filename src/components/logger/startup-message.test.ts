@@ -24,6 +24,7 @@
 
 import chai, { expect } from 'chai'
 import spies from 'chai-spies'
+import { sanitizeFlags } from '../../flag'
 import type { Config } from '../../interfaces/config'
 import { log } from '../../utils/pino'
 import { logStartupMessage } from './startup-message'
@@ -82,12 +83,12 @@ describe('Startup message', () => {
       // act
       logStartupMessage({
         config: { probes: [] },
-        flags: {
+        flags: sanitizeFlags({
           config: [],
           symonKey: 'secret-key',
           symonUrl: 'https://example.com',
           verbose: false,
-        },
+        }),
         isFirstRun: false,
       })
 
@@ -102,7 +103,12 @@ describe('Startup message', () => {
         // arrange
         logStartupMessage({
           config: { probes: [] },
-          flags: { config: [], symonKey: '', symonUrl: '', verbose: false },
+          flags: sanitizeFlags({
+            config: [],
+            symonKey: '',
+            symonUrl: '',
+            verbose: false,
+          }),
           isFirstRun: false,
         })
 
@@ -116,7 +122,12 @@ describe('Startup message', () => {
         // arrange
         logStartupMessage({
           config: defaultConfig,
-          flags: { config: [], symonKey: '', symonUrl: '', verbose: false },
+          flags: sanitizeFlags({
+            config: [],
+            symonKey: '',
+            symonUrl: '',
+            verbose: false,
+          }),
           isFirstRun: true,
         })
 
@@ -128,7 +139,12 @@ describe('Startup message', () => {
         // arrange
         logStartupMessage({
           config: defaultConfig,
-          flags: { config: [], symonKey: '', symonUrl: '', verbose: false },
+          flags: sanitizeFlags({
+            config: [],
+            symonKey: '',
+            symonUrl: '',
+            verbose: false,
+          }),
           isFirstRun: false,
         })
 
@@ -140,7 +156,12 @@ describe('Startup message', () => {
         // arrange
         logStartupMessage({
           config: defaultConfig,
-          flags: { config: [], symonKey: '', symonUrl: '', verbose: false },
+          flags: sanitizeFlags({
+            config: [],
+            symonKey: '',
+            symonUrl: '',
+            verbose: false,
+          }),
           isFirstRun: true,
         })
 
@@ -156,7 +177,12 @@ describe('Startup message', () => {
             ...defaultConfig,
             notifications: [],
           },
-          flags: { config: [], symonKey: '', symonUrl: '', verbose: false },
+          flags: sanitizeFlags({
+            config: [],
+            symonKey: '',
+            symonUrl: '',
+            verbose: false,
+          }),
           isFirstRun: true,
         })
 
@@ -180,7 +206,12 @@ describe('Startup message', () => {
               },
             ],
           },
-          flags: { config: [], symonKey: '', symonUrl: '', verbose: true },
+          flags: sanitizeFlags({
+            config: [],
+            symonKey: '',
+            symonUrl: '',
+            verbose: true,
+          }),
           isFirstRun: true,
         })
         // assert
@@ -205,7 +236,12 @@ describe('Startup message', () => {
               },
             ],
           },
-          flags: { config: [], symonKey: '', symonUrl: '', verbose: true },
+          flags: sanitizeFlags({
+            config: [],
+            symonKey: '',
+            symonUrl: '',
+            verbose: true,
+          }),
           isFirstRun: true,
         })
         // assert
@@ -221,7 +257,12 @@ describe('Startup message', () => {
         // arrange
         logStartupMessage({
           config: defaultConfig,
-          flags: { config: [], symonKey: '', symonUrl: '', verbose: true },
+          flags: sanitizeFlags({
+            config: [],
+            symonKey: '',
+            symonUrl: '',
+            verbose: true,
+          }),
           isFirstRun: true,
         })
         // assert
@@ -254,7 +295,12 @@ describe('Startup message', () => {
               },
             ],
           },
-          flags: { config: [], symonKey: '', symonUrl: '', verbose: true },
+          flags: sanitizeFlags({
+            config: [],
+            symonKey: '',
+            symonUrl: '',
+            verbose: true,
+          }),
           isFirstRun: true,
         })
         // assert
@@ -268,7 +314,12 @@ describe('Startup message', () => {
         // arrange
         logStartupMessage({
           config: defaultConfig,
-          flags: { config: [], symonKey: '', symonUrl: '', verbose: true },
+          flags: sanitizeFlags({
+            config: [],
+            symonKey: '',
+            symonUrl: '',
+            verbose: true,
+          }),
           isFirstRun: true,
         })
         // assert
@@ -295,7 +346,12 @@ describe('Startup message', () => {
               },
             ],
           },
-          flags: { config: [], symonKey: '', symonUrl: '', verbose: true },
+          flags: sanitizeFlags({
+            config: [],
+            symonKey: '',
+            symonUrl: '',
+            verbose: true,
+          }),
           isFirstRun: true,
         })
         // assert
@@ -313,7 +369,12 @@ describe('Startup message', () => {
             ...defaultConfig,
             notifications: [{ id: 'UVIsL', type: 'desktop', data: undefined }],
           },
-          flags: { config: [], symonKey: '', symonUrl: '', verbose: true },
+          flags: sanitizeFlags({
+            config: [],
+            symonKey: '',
+            symonUrl: '',
+            verbose: true,
+          }),
           isFirstRun: true,
         })
         // assert
@@ -341,7 +402,12 @@ describe('Startup message', () => {
               },
             ],
           },
-          flags: { config: [], symonKey: '', symonUrl: '', verbose: true },
+          flags: sanitizeFlags({
+            config: [],
+            symonKey: '',
+            symonUrl: '',
+            verbose: true,
+          }),
           isFirstRun: true,
         })
         // assert
@@ -368,7 +434,12 @@ describe('Startup message', () => {
               },
             ],
           },
-          flags: { config: [], symonKey: '', symonUrl: '', verbose: true },
+          flags: sanitizeFlags({
+            config: [],
+            symonKey: '',
+            symonUrl: '',
+            verbose: true,
+          }),
           isFirstRun: true,
         })
         // assert
@@ -390,7 +461,12 @@ describe('Startup message', () => {
               },
             ],
           },
-          flags: { config: [], symonKey: '', symonUrl: '', verbose: true },
+          flags: sanitizeFlags({
+            config: [],
+            symonKey: '',
+            symonUrl: '',
+            verbose: true,
+          }),
           isFirstRun: true,
         })
         // assert
@@ -404,12 +480,12 @@ describe('Startup message', () => {
       // act
       logStartupMessage({
         config: defaultConfig,
-        flags: {
+        flags: sanitizeFlags({
           config: ['https://example.com/monika.yaml'],
           symonKey: '',
           symonUrl: '',
           verbose: false,
-        },
+        }),
         isFirstRun: false,
       })
 
@@ -421,12 +497,12 @@ describe('Startup message', () => {
       // act
       logStartupMessage({
         config: defaultConfig,
-        flags: {
+        flags: sanitizeFlags({
           config: ['./monika.yaml'],
           symonKey: '',
           symonUrl: '',
           verbose: false,
-        },
+        }),
         isFirstRun: false,
       })
 
