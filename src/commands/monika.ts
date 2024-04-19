@@ -249,13 +249,11 @@ function deprecationHandler(config: Config): Config {
  * Show Exit Message
  */
 process.on('SIGINT', async () => {
-  if (!process.env.DISABLE_EXIT_MESSAGE) {
-    log.info('Thank you for using Monika!')
-    log.info('We need your help to make Monika better.')
-    log.info(
-      'Can you give us some feedback by clicking this link https://github.com/hyperjumptech/monika/discussions?\n'
-    )
-  }
+  log.info('Thank you for using Monika!')
+  log.info('We need your help to make Monika better.')
+  log.info(
+    'Can you give us some feedback by clicking this link https://github.com/hyperjumptech/monika/discussions?\n'
+  )
 
   if (symonClient) {
     await symonClient.sendStatus({ isOnline: false })

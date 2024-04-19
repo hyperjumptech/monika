@@ -28,7 +28,6 @@ import isUrl from 'is-url'
 import events from '../../events'
 import type { Config } from '../../interfaces/config'
 import { getContext, setContext } from '../../context'
-import { monikaFlagsDefaultValue } from '../../flag'
 import type { MonikaFlags } from '../../flag'
 import { getEventEmitter } from '../../utils/events'
 import { md5Hash } from '../../utils/hash'
@@ -146,9 +145,7 @@ async function watchConfigsChange(flags: MonikaFlags) {
     flags.config.map((source, index) =>
       watchConfigChange({
         flags,
-        interval:
-          flags['config-interval'] ||
-          monikaFlagsDefaultValue['config-interval'],
+        interval: flags['config-interval'],
         source,
         type: 'monika',
         index,
