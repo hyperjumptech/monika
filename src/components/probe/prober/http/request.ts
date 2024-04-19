@@ -37,9 +37,8 @@ import {
 import { getContext } from '../../../../context'
 import { icmpRequest } from '../icmp/request'
 import registerFakes from '../../../../utils/fakes'
-import { sendHttpRequest, sendHttpRequestFetch } from '../../../../utils/http'
+import { sendHttpRequestFetch } from '../../../../utils/http'
 import { log } from '../../../../utils/pino'
-import { AxiosError } from 'axios'
 import { getErrorMessage } from '../../../../utils/catch-error-handler'
 
 // Register Handlebars helpers
@@ -99,18 +98,7 @@ export async function httpRequest({
       requestHeaders.set(key, value)
     }
 
-    // Do the request using compiled URL and compiled headers (if exists)
-    if (getContext().flags['native-fetch']) {
-      return await probeHttpFetch({
-        startTime,
-        maxRedirects: followRedirects,
-        renderedURL,
-        requestParams: { ...newReq, headers: requestHeaders },
-        allowUnauthorized,
-      })
-    }
-
-    return await probeHttpAxios({
+    return await probeHttpFetch({
       startTime,
       maxRedirects: followRedirects,
       renderedURL,
@@ -119,10 +107,6 @@ export async function httpRequest({
     })
   } catch (error: unknown) {
     const responseTime = Date.now() - startTime
-
-    if (error instanceof AxiosError) {
-      return handleAxiosError(responseTime, error)
-    }
 
     const { value, error: undiciErrorValidator } =
       UndiciErrorValidator.validate(error, {
@@ -290,53 +274,6 @@ async function probeHttpFetch({
   }
 }
 
-type ProbeHTTPAxiosParams = {
-  startTime: number
-  renderedURL: string
-  allowUnauthorized: boolean | undefined
-  maxRedirects: number
-  requestParams: {
-    method: string | undefined
-    headers: Headers | undefined
-    timeout: number
-    body: string | object
-    ping: boolean | undefined
-  }
-}
-
-async function probeHttpAxios({
-  startTime,
-  renderedURL,
-  requestParams,
-  allowUnauthorized,
-  maxRedirects,
-}: ProbeHTTPAxiosParams): Promise<ProbeRequestResponse> {
-  const resp = await sendHttpRequest({
-    ...requestParams,
-    allowUnauthorizedSsl: allowUnauthorized,
-    keepalive: true,
-    url: renderedURL,
-    maxRedirects,
-    body:
-      typeof requestParams.body === 'string'
-        ? requestParams.body
-        : JSON.stringify(requestParams.body),
-  })
-
-  const responseTime = Date.now() - startTime
-  const { data, headers, status } = resp
-
-  return {
-    requestType: 'HTTP',
-    data,
-    body: data,
-    status,
-    headers,
-    responseTime,
-    result: probeRequestResult.success,
-  }
-}
-
 export function generateRequestChainingBody(
   body: object | string,
   responses: ProbeRequestResponse[]
@@ -384,229 +321,6 @@ function transformContentByType(
     default: {
       return { content, contentType }
     }
-  }
-}
-
-function handleAxiosError(
-  responseTime: number,
-  error: AxiosError
-): ProbeRequestResponse {
-  // The request was made and the server responded with a status code
-  // 400, 500 get here
-  if (error?.response) {
-    return {
-      data: '',
-      body: '',
-      status: error?.response?.status,
-      headers: error?.response?.headers,
-      responseTime,
-      result: probeRequestResult.success,
-      error: error?.response?.data as string,
-    }
-  }
-
-  // The request was made but no response was received
-  // timeout is here, ECONNABORTED, ENOTFOUND, ECONNRESET, ECONNREFUSED
-  if (error?.request) {
-    const { status, description } = getErrorStatusWithExplanation(error)
-    return {
-      data: '',
-      body: '',
-      status,
-      headers: '',
-      responseTime,
-      result: probeRequestResult.failed,
-      error: description,
-    }
-  }
-
-  return {
-    data: '',
-    body: '',
-    status: 99,
-    headers: '',
-    responseTime,
-    result: probeRequestResult.failed,
-    error: getErrorMessage(error),
-  }
-}
-
-// suppress switch-case complexity since this is dead-simple mapping to error code
-// eslint-disable-next-line complexity
-function getErrorStatusWithExplanation(error: unknown): {
-  status: number
-  description: string
-} {
-  switch ((error as AxiosError).code) {
-    case 'ECONNABORTED': {
-      return {
-        status: 599,
-        description:
-          'ECONNABORTED: The connection was unexpectedly terminated, often due to server issues, network problems, or timeouts.',
-      }
-    } // https://httpstatuses.com/599
-
-    case 'ENOTFOUND': {
-      // not found, the abyss never returned a statusCode
-      // assign some unique errResponseCode for decoding later.
-      return {
-        status: 0,
-        description:
-          "ENOTFOUND: The monitored website or server couldn't be found, similar to entering an incorrect web address or encountering a temporary network/server issue.",
-      }
-    }
-
-    case 'ECONNRESET': {
-      // connection reset from target, assign some unique number responsecCode
-      return {
-        status: 1,
-        description:
-          'ECONNRESET: The connection to a server was unexpectedly reset, often pointing to issues on the server side or network interruptions.',
-      }
-    }
-
-    case 'ECONNREFUSED': {
-      // got rejected, again
-      return {
-        status: 2,
-        description:
-          'ECONNREFUSED: Attempted to connect to a server, but the server declined the connection.',
-      }
-    }
-
-    case 'ERR_FR_TOO_MANY_REDIRECTS': {
-      // redirect higher than set in maxRedirects
-      return {
-        status: 3,
-        description:
-          'ERR_FR_TOO_MANY_REDIRECTS: Webpage is stuck in a loop of continuously redirecting.',
-      }
-    }
-
-    // cover all possible axios connection issues
-    case 'ERR_BAD_OPTION_VALUE': {
-      return {
-        status: 4,
-        description:
-          'ERR_BAD_OPTION_VALUE: Invalid or inappropriate value is provided for an option.',
-      }
-    }
-
-    case 'ERR_BAD_OPTION': {
-      return {
-        status: 5,
-        description: 'ERR_BAD_OPTION: Invalid or inappropriate option is used.',
-      }
-    }
-
-    case 'ETIMEDOUT': {
-      return {
-        status: 6,
-        description: 'ETIMEDOUT: Connection attempt has timed out.',
-      }
-    }
-
-    case 'ERR_NETWORK': {
-      return {
-        status: 7,
-        description:
-          'ERR_NETWORK: Signals a general network-related issue such as poor connectivity, DNS issues, or firewall restrictions.',
-      }
-    }
-
-    case 'ERR_DEPRECATED': {
-      return {
-        status: 8,
-        description:
-          'ERR_DEPRECATED: Feature, method, or functionality used in the code is outdated or no longer supported.',
-      }
-    }
-
-    case 'ERR_BAD_RESPONSE': {
-      return {
-        status: 9,
-        description:
-          'ERR_BAD_RESPONSE: Server provides a response that cannot be understood or is considered invalid.',
-      }
-    }
-
-    case 'ERR_BAD_REQUEST': {
-      return {
-        status: 11,
-        description:
-          "ERR_BAD_REQUEST:  Client's request to the server is malformed or invalid.",
-      }
-    }
-
-    case 'ERR_CANCELED': {
-      return {
-        status: 12,
-        description:
-          'ERR_CANCELED: Request or operation is canceled before it completes.',
-      }
-    }
-
-    case 'ERR_NOT_SUPPORT': {
-      return {
-        status: 13,
-        description: 'ERR_NOT_SUPPORT: Feature or operation is not supported.',
-      }
-    }
-
-    case 'ERR_INVALID_URL': {
-      return {
-        status: 14,
-        description:
-          'ERR_INVALID_URL: URL is not formatted correctly or is not a valid web address.',
-      }
-    }
-
-    case 'EAI_AGAIN': {
-      return {
-        status: 15,
-        description: 'EAI_AGAIN: Temporary failure in resolving a domain name.',
-      }
-    }
-
-    case 'EHOSTUNREACH': {
-      return {
-        status: 16,
-        description: 'EHOSTUNREACH: The host is unreachable.',
-      }
-    }
-
-    case 'EPROTO': {
-      return {
-        status: 17,
-        description:
-          "EPROTO: There are issues with the website's SSL/TLS certificates, incompatible protocols, or other SSL-related problems.",
-      }
-    }
-
-    case 'UNABLE_TO_VERIFY_LEAF_SIGNATURE': {
-      return {
-        status: 27,
-        description:
-          'ELEAFSIGNATURE: Unable to verify the first / leaf certificate.',
-      }
-    }
-
-    default: {
-      if (error instanceof AxiosError) {
-        log.error(
-          `Error code 99: Unhandled error while probing ${error.request.url}, got ${error.code} ${error.stack} `
-        )
-      } else {
-        log.error(
-          `Error code 99: Unhandled error, got ${(error as AxiosError).stack}`
-        )
-      }
-
-      return {
-        status: 99,
-        description: `Error code 99: ${(error as AxiosError).stack}`,
-      }
-    } // in the event an unlikely unknown error, send here
   }
 }
 

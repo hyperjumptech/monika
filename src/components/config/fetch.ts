@@ -22,14 +22,16 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { sendHttpRequest } from '../../utils/http'
+import { sendHttpRequestFetch } from '../../utils/http'
 
 export const fetchConfig = async (url: string): Promise<string> => {
-  try {
-    const { data } = await sendHttpRequest({ url })
-    return data
-  } catch {
-    throw new Error(`The configuration file in ${url} is unreachable. Please check the URL again or your internet connection. 
-    `)
+  const resp = await sendHttpRequestFetch({ url })
+  if (!resp.ok) {
+    // does not throw error on 404
+    throw new Error(
+      `The configuration file in ${url} is unreachable. Please check the URL again or your internet connection.`
+    )
   }
+
+  return resp.text()
 }

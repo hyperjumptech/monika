@@ -41,7 +41,7 @@ import { format } from 'date-fns'
 import { spawn } from 'child_process'
 import * as unzipper from 'unzipper'
 import hasha from 'hasha'
-import { sendHttpRequest } from '../../utils/http'
+import { sendHttpRequestFetch } from '../../utils/http'
 
 const DEFAULT_UPDATE_CHECK = 86_400 // 24 hours
 type UpdateMode = 'major' | 'minor' | 'patch'
@@ -88,9 +88,11 @@ export async function enableAutoUpdate(
 async function runUpdater(config: IConfig, updateMode: UpdateMode) {
   log.info('Updater: starting')
   const currentVersion = config.version
-  const { data } = await sendHttpRequest({
+  const resp = await sendHttpRequestFetch({
     url: 'https://registry.npmjs.org/@hyperjumptech/monika',
   })
+
+  const data: any = await resp.json()
 
   const latestVersion = data['dist-tags'].latest
   if (latestVersion === currentVersion || config.debug) {
@@ -268,14 +270,19 @@ async function downloadMonika(
   const filename = `monika-v${remoteVersion}-${platformName}-x64`
   const downloadUri = `https://github.com/hyperjumptech/monika/releases/download/v${remoteVersion}/${filename}.zip`
   log.info(`Updater: download from ${downloadUri}`)
-  const { data: downloadStream } = await sendHttpRequest({
+  const resp = await sendHttpRequestFetch({
     url: downloadUri,
     responseType: 'stream',
   })
 
-  const { data: checksum }: { data: string } = await sendHttpRequest({
+  const { data: downloadStream } = (await resp.json()) as { data: Stream }
+
+  const resp2 = await sendHttpRequestFetch({
     url: `https://github.com/hyperjumptech/monika/releases/download/v${remoteVersion}/${filename}-CHECKSUM.txt`,
   })
+  const { data: checksum }: { data: string } = (await resp2.json()) as {
+    data: string
+  }
 
   return new Promise((resolve, reject) => {
     const targetPath = `${os.tmpdir()}/${filename}`

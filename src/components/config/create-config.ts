@@ -25,7 +25,7 @@
 import fs from 'fs'
 import type { MonikaFlags } from '../../flag'
 import { log } from '../../utils/pino'
-import { sendHttpRequest } from '../../utils/http'
+import { sendHttpRequestFetch } from '../../utils/http'
 
 export const createConfigFile = async (flags: MonikaFlags): Promise<string> => {
   const filename = flags['config-filename']
@@ -33,7 +33,7 @@ export const createConfigFile = async (flags: MonikaFlags): Promise<string> => {
   try {
     const url =
       'https://raw.githubusercontent.com/hyperjumptech/monika/main/monika.example.yml'
-    await sendHttpRequest({ url }).then((resp) => {
+    await sendHttpRequestFetch({ url }).then((resp: any) => {
       fs.writeFileSync(filename, resp.data, 'utf8')
     })
     log.info(
