@@ -79,7 +79,7 @@ async function createExampleConfigFile() {
 
   setContext({ flags: { ...getContext().flags, config: [outputFilePath] } })
   log.info(
-    `An example of Monika configuration has been created. You can change the URL to probe and other configurations in the ${outputFilePath} file.`
+    `${outputFilePath} file has been created in this directory. You can change the URL to probe and other configurations in that ${outputFilePath} file.`
   )
 }
 
