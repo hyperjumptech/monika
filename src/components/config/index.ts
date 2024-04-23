@@ -55,6 +55,7 @@ export async function initConfig() {
 }
 
 async function createExampleConfigFile() {
+  log.info('No Monika configuration available, initializing...')
   const outputFilePath = getContext().flags['config-filename']
   const url =
     'https://raw.githubusercontent.com/hyperjumptech/monika/main/monika.example.yml'
