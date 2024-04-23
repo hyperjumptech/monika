@@ -1322,6 +1322,12 @@
           "examples": [30]
         }
       }
+    },
+    "version": {
+      "type": "string",
+      "title": "Monika configuration version",
+      "description": "Monika configuration version",
+      "default": "1"
     }
   },
   "type": "object"

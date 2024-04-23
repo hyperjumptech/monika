@@ -24,14 +24,15 @@
 
 import chai, { expect } from 'chai'
 import spies from 'chai-spies'
+import { sanitizeConfig } from '../config/sanitize'
 import { sanitizeFlags } from '../../flag'
-import type { Config } from '../../interfaces/config'
+import type { ValidatedConfig } from '../../interfaces/config'
 import { log } from '../../utils/pino'
 import { logStartupMessage } from './startup-message'
 
 chai.use(spies)
 
-const defaultConfig: Config = {
+const defaultConfig: ValidatedConfig = {
   probes: [
     {
       id: 'uYJaw',
@@ -55,7 +56,9 @@ const defaultConfig: Config = {
       ],
     },
   ],
-  notifications: [{ id: 'UVIsL', type: 'desktop', data: undefined }],
+  notifications: [{ id: 'UVIsL', type: 'desktop' }],
+  'status-notification': '',
+  version: '1',
 }
 
 describe('Startup message', () => {
@@ -82,7 +85,7 @@ describe('Startup message', () => {
     it('should show running in Symon mode', () => {
       // act
       logStartupMessage({
-        config: { probes: [] },
+        config: sanitizeConfig({ probes: [] }),
         flags: sanitizeFlags({
           config: [],
           symonKey: 'secret-key',
@@ -102,7 +105,12 @@ describe('Startup message', () => {
       it('should show has no notification warning', () => {
         // arrange
         logStartupMessage({
-          config: { probes: [] },
+          config: {
+            notifications: [],
+            probes: [],
+            'status-notification': '',
+            version: '1',
+          },
           flags: sanitizeFlags({
             config: [],
             symonKey: '',
@@ -226,6 +234,7 @@ describe('Startup message', () => {
         // arrange
         logStartupMessage({
           config: {
+            notifications: [],
             probes: [
               {
                 id: 'uYJaw',
@@ -235,6 +244,8 @@ describe('Startup message', () => {
                 alerts: [],
               },
             ],
+            'status-notification': '',
+            version: '1',
           },
           flags: sanitizeFlags({
             config: [],
@@ -367,7 +378,7 @@ describe('Startup message', () => {
         logStartupMessage({
           config: {
             ...defaultConfig,
-            notifications: [{ id: 'UVIsL', type: 'desktop', data: undefined }],
+            notifications: [{ id: 'UVIsL', type: 'desktop' }],
           },
           flags: sanitizeFlags({
             config: [],

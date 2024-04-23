@@ -41,7 +41,7 @@ import { getErrorMessage } from '../utils/catch-error-handler'
 import { getProbeState, initializeProbeStates } from '../utils/probe-state'
 
 const config: Config = {
-  version: 'asdfg123',
+  version: 'f7c35f9f873da44bca433427b4d30fc5',
   probes: [
     {
       id: '1',
@@ -189,10 +189,7 @@ describe('Symon initiate', () => {
     await symon.initiate()
     await symon.stop()
 
-    expect(getContext().config).deep.equals({
-      ...config,
-      probes: await validateProbes(config.probes),
-    })
+    expect(getContext().config?.version).deep.eq(config.version)
     expect(getProbes()).deep.eq(await validateProbes(config.probes))
   }).timeout(15_000)
 

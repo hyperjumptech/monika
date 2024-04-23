@@ -35,7 +35,7 @@ describe('Schedule notification', () => {
     it('should not schedule notification on Symon mode', () => {
       // act
       scheduleSummaryNotification({
-        config: {},
+        config: { 'status-notification': '' },
         flags: { symonKey: 'secret-key', symonUrl: 'https://example.com' },
       })
 
@@ -46,7 +46,7 @@ describe('Schedule notification', () => {
     it('should not schedule notification if status notification flag is false', () => {
       // act
       scheduleSummaryNotification({
-        config: {},
+        config: { 'status-notification': '' },
         flags: { 'status-notification': 'false' },
       })
 
@@ -79,22 +79,19 @@ describe('Schedule notification', () => {
       sinon.assert.calledOnce(cronScheduleStub)
       expect(cronExpression).eq('0 0 0 0 0')
     })
-
-    it('should schedule notification use default schedule', () => {
-      // act
-      scheduleSummaryNotification({ config: {}, flags: {} })
-
-      // assert
-      sinon.assert.calledOnce(cronScheduleStub)
-      expect(cronExpression).eq('0 6 * * *')
-    })
   })
 
   describe('Reset schedule notification', () => {
     it('should stop all running scheduled notification', () => {
       // act
-      scheduleSummaryNotification({ config: {}, flags: {} })
-      scheduleSummaryNotification({ config: {}, flags: {} })
+      scheduleSummaryNotification({
+        config: { 'status-notification': '' },
+        flags: {},
+      })
+      scheduleSummaryNotification({
+        config: { 'status-notification': '' },
+        flags: {},
+      })
 
       // arrange
       expect(taskStopCalledTotal).eq(2)

@@ -27,7 +27,7 @@ import { hostname } from 'node:os'
 import { sendNotifications } from '@hyperjumptech/monika-notification'
 import format from 'date-fns/format'
 
-import { getConfig } from '../components/config'
+import { getValidatedConfig } from '../components/config'
 import { getSummary } from '../components/logger/history'
 import {
   maxResponseTime,
@@ -43,7 +43,7 @@ import {
 } from '../components/notification/alert-message'
 import { getContext } from '../context'
 import events from '../events'
-import type { Config } from '../interfaces/config'
+import type { ValidatedConfig } from '../interfaces/config'
 import { getEventEmitter } from '../utils/events'
 import { getErrorMessage } from '../utils/catch-error-handler'
 import getIp from '../utils/ip'
@@ -60,7 +60,7 @@ type TweetMessage = {
 }
 
 export async function getSummaryAndSendNotif(): Promise<void> {
-  const config = getConfig()
+  const config = getValidatedConfig()
   const { notifications, probes } = config
 
   if (!notifications) return
@@ -126,19 +126,17 @@ ${tweetMessage}
   }
 }
 
-/**
- * savePidFile saves a monika.pid file with some useful information
- * @param {string} configFile is the configuration file used
- * @param {obj} config is a Config object
- * @returns void
- */
-export function savePidFile(configFile: string[], config: Config): void {
+// savePidFile saves a monika.pid file with some useful information
+export function savePidFile(
+  configFile: string[],
+  { notifications, probes }: ValidatedConfig
+): void {
   const data = JSON.stringify({
     monikaStartTime: new Date(),
     monikaConfigFile: configFile,
     monikaPid: process.pid,
-    monikaProbes: config.probes ? config.probes.length : '0',
-    monikaNotifs: config.notifications ? config.notifications.length : '0',
+    monikaProbes: probes.length,
+    monikaNotifs: notifications.length,
   })
 
   fs.writeFile('monika.pid', data, (err) => {

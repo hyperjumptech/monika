@@ -27,7 +27,7 @@ import isUrl from 'is-url'
 import boxen from 'boxen'
 import chalk from 'chalk'
 import type { MonikaFlags } from '../../flag'
-import type { Config } from '../../interfaces/config'
+import type { ValidatedConfig } from '../../interfaces/config'
 import type { Notification } from '@hyperjumptech/monika-notification'
 import { channels } from '@hyperjumptech/monika-notification'
 import type { Probe } from '../../interfaces/probe'
@@ -36,7 +36,7 @@ import { isSymonModeFrom } from '../config'
 import { createProber } from '../probe/prober/factory'
 
 type LogStartupMessage = {
-  config: Config
+  config: ValidatedConfig
   flags: Pick<
     MonikaFlags,
     'config' | 'symonKey' | 'symonUrl' | 'verbose' | 'native-fetch'
@@ -75,7 +75,7 @@ function generateStartupMessage({
   flags,
   isFirstRun,
 }: LogStartupMessage): string {
-  const { notifications = [], probes } = config
+  const { notifications, probes } = config
   const notificationTotal = notifications.length
   const probeTotal = probes.length
   const hasNotification = notificationTotal > 0
@@ -95,7 +95,7 @@ function generateStartupMessage({
 
   if (flags.verbose) {
     startupMessage += generateProbeMessage(probes)
-    startupMessage += generateNotificationMessage(notifications || [])
+    startupMessage += generateNotificationMessage(notifications)
   }
 
   return startupMessage

@@ -22,42 +22,68 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { watch } from 'chokidar'
-import isUrl from 'is-url'
+import { writeFile } from 'node:fs/promises'
 
 import events from '../../events'
-import type { Config } from '../../interfaces/config'
+import type { Config, ValidatedConfig } from '../../interfaces/config'
 import { getContext, setContext } from '../../context'
 import type { MonikaFlags } from '../../flag'
 import { getEventEmitter } from '../../utils/events'
-import { md5Hash } from '../../utils/hash'
+import { sendHttpRequest } from '../..//utils/http'
 import { log } from '../../utils/pino'
-import { parseConfig } from './parse'
-import { validateConfig } from './validate'
-import { createConfigFile } from './create-config'
-import { exit } from 'process'
-import { type ConfigType, getConfigFrom, mergeConfigs } from './get'
+import { getRawConfig } from './get'
 import { getProbes, setProbes } from './probe'
-import { getErrorMessage } from '../../utils/catch-error-handler'
+import { sanitizeConfig } from './sanitize'
+import { validateConfig } from './validate'
 
-type ScheduleRemoteConfigFetcherParams = {
-  configType: ConfigType
-  interval: number
-  url: string
-  index?: number
+export async function initConfig() {
+  const { flags } = getContext()
+  const hasConfig =
+    flags.config.length > 0 ||
+    flags.har ||
+    flags.insomnia ||
+    flags.postman ||
+    flags.sitemap ||
+    flags.text
+
+  if (!hasConfig) {
+    await createExampleConfigFile()
+  }
+
+  const config = await getRawConfig()
+  await updateConfig(config)
 }
 
-type WatchConfigFileParams = {
-  flags: MonikaFlags
-  path: string
+async function createExampleConfigFile() {
+  const outputFilePath = getContext().flags['config-filename']
+  const url =
+    'https://raw.githubusercontent.com/hyperjumptech/monika/main/monika.example.yml'
+
+  try {
+    const resp = await sendHttpRequest({ url })
+    await writeFile(outputFilePath, resp.data, { encoding: 'utf8' })
+  } catch {
+    const ymlConfig = `
+    probes:
+    - id: '1'
+      requests:
+        - url: http://example.com
+    
+    db_limit:
+      max_db_size: 1000000000
+      deleted_data: 1
+      cron_schedule: '*/1 * * * *'
+    `
+    await writeFile(outputFilePath, ymlConfig, { encoding: 'utf8' })
+  }
+
+  setContext({ flags: { ...getContext().flags, config: [outputFilePath] } })
+  log.info(
+    `An example of Monika configuration has been created. You can change the URL to probe and other configurations in the ${outputFilePath} file.`
+  )
 }
 
-const emitter = getEventEmitter()
-
-const defaultConfigs: Partial<Config>[] = []
-let nonDefaultConfig: Partial<Config>
-
-export const getConfig = (): Config => {
+export function getValidatedConfig(): ValidatedConfig {
   const { config, flags } = getContext()
 
   if (!config) {
@@ -65,158 +91,32 @@ export const getConfig = (): Config => {
       throw new Error('Configuration setup has not been run yet')
     }
 
-    return {
+    return sanitizeConfig({
       probes: [],
-    }
+    })
   }
 
   return { ...config, probes: getProbes() }
 }
 
-export const updateConfig = async (config: Config): Promise<void> => {
-  log.info('Updating config')
-  try {
-    const validatedConfig = await validateConfig(config)
-    const version = md5Hash(validatedConfig)
-    const hasChangeConfig = getContext().config?.version !== version
+export async function updateConfig(config: Config): Promise<void> {
+  const validatedConfig = await validateConfig(config)
+  const sanitizedConfig = sanitizeConfig(validatedConfig)
+  const hasConfigChange =
+    getContext().config?.version !== sanitizedConfig.version
 
-    if (!hasChangeConfig) {
-      return
-    }
-
-    const newConfig = addConfigVersion(validatedConfig)
-
-    setContext({ config: newConfig })
-    setProbes(newConfig.probes)
-    emitter.emit(events.config.updated)
-    log.info('Config file update detected')
-  } catch (error: unknown) {
-    const message = getErrorMessage(error)
-
-    if (getContext().isTest) {
-      // return error during tests
-      throw new Error(message)
-    }
-
-    log.error(message)
-    exit(1)
-  }
-}
-
-export const setupConfig = async (flags: MonikaFlags): Promise<void> => {
-  const validFlag = await createConfigIfEmpty(flags)
-  const config = await getConfigFrom(validFlag)
-  await updateConfig(config)
-
-  watchConfigsChange(validFlag)
-}
-
-function addConfigVersion(config: Config) {
-  if (config.version) {
-    return config
-  }
-
-  const version = config.version || md5Hash(config)
-
-  return { ...config, version }
-}
-
-async function createConfigIfEmpty(flags: MonikaFlags): Promise<MonikaFlags> {
-  // check for default config path when -c/--config not provided
-  const hasConfig =
-    flags.config.length > 0 ||
-    flags.har ||
-    flags.postman ||
-    flags.insomnia ||
-    flags.sitemap ||
-    flags.text
-
-  if (!hasConfig) {
-    log.info('No Monika configuration available, initializing...')
-    const configFilename = await createConfigFile(flags)
-    return { ...flags, config: [configFilename] }
-  }
-
-  return flags
-}
-
-async function watchConfigsChange(flags: MonikaFlags) {
-  await Promise.all(
-    flags.config.map((source, index) =>
-      watchConfigChange({
-        flags,
-        interval: flags['config-interval'],
-        source,
-        type: 'monika',
-        index,
-      })
-    )
-  )
-}
-
-type WatchConfigChangeParams = {
-  flags: MonikaFlags
-  interval: number
-  source: string
-  type: ConfigType
-  index?: number
-}
-
-function watchConfigChange({
-  flags,
-  interval,
-  source,
-  type,
-  index,
-}: WatchConfigChangeParams) {
-  if (isUrl(source)) {
-    scheduleRemoteConfigFetcher({
-      configType: type,
-      interval,
-      url: source,
-      index,
-    })
+  if (!hasConfigChange) {
     return
   }
 
-  watchConfigFile({
-    flags,
-    path: source,
-  })
-}
-
-function scheduleRemoteConfigFetcher({
-  configType,
-  interval,
-  url,
-  index,
-}: ScheduleRemoteConfigFetcherParams) {
-  setInterval(async () => {
-    try {
-      const newConfig = await parseConfig(url, configType)
-      if (index === undefined) {
-        nonDefaultConfig = newConfig
-      } else {
-        defaultConfigs[index] = newConfig
-      }
-
-      await updateConfig(mergeConfigs(defaultConfigs, nonDefaultConfig))
-    } catch (error: unknown) {
-      log.error(getErrorMessage(error))
-    }
-  }, interval * 1000)
-}
-
-function watchConfigFile({ flags, path }: WatchConfigFileParams) {
-  const isWatchConfigFile = !(getContext().isTest || flags.repeat !== 0)
-  if (isWatchConfigFile) {
-    const watcher = watch(path)
-    watcher.on('change', async () => {
-      const config = await getConfigFrom(flags)
-
-      await updateConfig(config)
-    })
+  const isInitalSetup = getContext().config?.version === undefined
+  if (!isInitalSetup) {
+    log.info('Config changes. Updating config...')
   }
+
+  setContext({ config: sanitizedConfig })
+  setProbes(sanitizedConfig.probes)
+  getEventEmitter().emit(events.config.updated)
 }
 
 export function isSymonModeFrom({

@@ -22,7 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import type { Config } from '../interfaces/config'
+import type { ValidatedConfig } from '../interfaces/config'
 import type { ProbeAlert } from '../interfaces/probe'
 
 import { type MonikaFlags, monikaFlagsDefaultValue } from '../flag'
@@ -39,7 +39,7 @@ type Context = {
   userAgent: string
   incidents: Incident[]
   isTest: boolean
-  config?: Omit<Config, 'probes'>
+  config?: Omit<ValidatedConfig, 'probes'>
   flags: MonikaFlags
 }
 
