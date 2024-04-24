@@ -247,6 +247,13 @@
         "additionalProperties": false,
         "required": ["url"],
         "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string",
+            "description": "Unique string identification of the request",
+            "examples": ["1"],
+            "default": "1"
+          },
           "method": {
             "title": "HTTP Method",
             "type": "string",

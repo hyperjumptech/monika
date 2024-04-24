@@ -26,9 +26,11 @@ import { validateNotification } from '@hyperjumptech/monika-notification'
 import Ajv from 'ajv'
 import Joi from 'joi'
 
+import { getContext } from '../../context'
 import type { Config, SymonConfig } from '../../interfaces/config'
 import monikaConfigSchema from '../../monika-config-schema.json'
 import { validateProbes } from './validation'
+import { isSymonModeFrom } from '.'
 
 export const validateConfig = async (
   configuration: Config
@@ -44,7 +46,10 @@ export const validateConfig = async (
     notifications,
     probes: validatedProbes,
   }
-  validateConfigWithJSONSchema(validatedConfig)
+
+  if (!isSymonModeFrom(getContext().flags)) {
+    validateConfigWithJSONSchema(validatedConfig)
+  }
 
   return validatedConfig
 }
@@ -66,7 +71,7 @@ async function validateSymon(symonConfig?: SymonConfig) {
   await schema.validateAsync(symonConfig)
 }
 
-function validateConfigWithJSONSchema(config: Partial<Config>) {
+function validateConfigWithJSONSchema(config: Config) {
   const ajv = new Ajv()
   const validate = ajv.compile(monikaConfigSchema)
   const isValid = validate(config)
