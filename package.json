@@ -46,7 +46,7 @@
     "start:prod": "npm run prepack && ./bin/run.js",
     "test": "npm run prepack && cross-env NODE_ENV=test nyc --reporter=lcov --reporter=text --extension .ts mocha --config .mocharc.json --forbid-only '{packages,src,test}/**/*.test.ts'",
     "cli-test": "bats test/bats/cli.bats",
-    "test:watch": "npm run clean && NODE_ENV=test mocha /Users/hari/code/symon/monika/src/components/config/get.test.ts",
+    "test:watch": "npm run clean && NODE_ENV=test mocha {packages,src,test}/**/*.test.ts --watch --watch-files {packages,src,test}/**/*",
     "prod_test": "npm run prod_test:bin && npm run prod_test:cli",
     "prod_test:bin": "mocha prod_test/binary-test.ts --timeout=60000",
     "prod_test:cli": "mocha prod_test/test.ts --timeout=60000",
