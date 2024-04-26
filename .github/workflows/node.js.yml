@@ -90,7 +90,10 @@ jobs:
           node-version: 20.x
       - run: npm ci
       - run: npm run build -w packages/notification
-      - run: npm test && npx codecov
+      - run: npm test
+      - uses: codecov/codecov-action@v4
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       - name: Cancel workflow on failure
         if: 'failure()'
         uses: 'andymckay/cancel-action@0.3'

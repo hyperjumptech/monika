@@ -29,7 +29,7 @@ import {
 } from '@hyperjumptech/monika-notification'
 import { format } from 'date-fns'
 
-import { getConfig } from '../components/config'
+import { getValidatedConfig } from '../components/config'
 import { saveNotificationLog } from '../components/logger/history'
 import {
   getMonikaInstance,
@@ -42,7 +42,7 @@ import { log } from '../utils/pino'
 import { publicIpAddress } from '../utils/public-ip'
 
 export function tlsChecker(): void {
-  const config = getConfig()
+  const config = getValidatedConfig()
   const hasDomain = (config?.certificate?.domains?.length || 0) > 0
 
   if (!hasDomain) {
@@ -71,7 +71,7 @@ export function tlsChecker(): void {
       sendErrorNotification({
         errorMessage: error.message,
         hostname,
-        notifications: notifications || [],
+        notifications,
       }).catch(console.error)
     })
   }

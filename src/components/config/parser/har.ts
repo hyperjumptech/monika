@@ -23,9 +23,9 @@
  **********************************************************************************/
 
 import Joi from 'joi'
-import { Config } from '../../interfaces/config'
-import { RequestConfig } from '../../interfaces/request'
-import { DEFAULT_INTERVAL } from './validation/validator/default-values'
+import type { Config } from '../../../interfaces/config'
+import type { RequestConfig } from '../../../interfaces/request'
+import { DEFAULT_INTERVAL } from '../validation/validator/default-values'
 
 const keyValValidator = Joi.array().items(
   Joi.object({ key: Joi.string(), value: Joi.string() })

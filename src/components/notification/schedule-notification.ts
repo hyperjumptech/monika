@@ -1,12 +1,12 @@
 import { schedule as scheduleCron } from 'node-cron'
 import type { ScheduledTask } from 'node-cron'
 import type { MonikaFlags } from '../../flag'
-import type { Config } from '../../interfaces/config'
+import type { ValidatedConfig } from '../../interfaces/config'
 import { getSummaryAndSendNotif } from '../../jobs/summary-notification'
 import { isSymonModeFrom } from '../config'
 
 type scheduleSummaryNotification = {
-  config: Pick<Config, 'status-notification'>
+  config: Pick<ValidatedConfig, 'status-notification'>
   flags: Pick<MonikaFlags, 'status-notification' | 'symonKey' | 'symonUrl'>
 }
 
@@ -34,11 +34,7 @@ export function scheduleSummaryNotification({
   // defaults to 6 AM
   // default value is not defined in flag configuration,
   // because the value can also come from config file
-  const DEFAULT_SCHEDULE_CRON_EXPRESSION = '0 6 * * *'
-  const schedule =
-    flags['status-notification'] ||
-    config['status-notification'] ||
-    DEFAULT_SCHEDULE_CRON_EXPRESSION
+  const schedule = flags['status-notification'] || config['status-notification']
 
   const scheduledStatusUpdateTask = scheduleCron(
     schedule,

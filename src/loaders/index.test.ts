@@ -22,17 +22,43 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import type { RequestOptions } from 'https'
+import type { Config } from '@oclif/core'
+import { expect } from '@oclif/test'
 
-type DomainWithOptions = {
-  domain: string
-  options?: RequestOptions
-}
+import { sanitizeFlags } from '../flag'
+import init from '.'
 
-export type Domain = string | DomainWithOptions
+describe('Loader', () => {
+  it('should enable auto update', async () => {
+    // arrange
+    const flags = sanitizeFlags({
+      'auto-update': 'minor',
+      prometheus: 3000,
+      stun: -1,
+      symonUrl: 'https://example.com',
+      symonKey: '1234',
+    })
+    const cliConfig = { arch: 'arm64' } as Config
 
-export interface Certificate {
-  domains: Domain[]
-  // The reminder is the number of days to send notification to user before the domain expires.
-  reminder?: number
-}
+    // assert
+    expect(init(flags, cliConfig)).to.eventually.throw()
+  })
+
+  it('should enable prometheus', async () => {
+    // arrange
+    const flags = sanitizeFlags({
+      prometheus: 3000,
+      stun: -1,
+      symonUrl: 'https://example.com',
+      symonKey: '1234',
+    })
+    const cliConfig = {} as Config
+
+    // act
+    await init(flags, cliConfig)
+
+    // assert
+    const resp = await fetch('http://localhost:3000/metrics')
+    expect(resp.status).eq(200)
+  })
+})

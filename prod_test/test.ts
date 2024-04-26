@@ -100,6 +100,187 @@ describe('Node CLI Testing', () => {
 
     await cleanup()
   })
+
+  it('should starts Monika with a JSON config from a URL', async () => {
+    // arrange
+    const { spawn, cleanup } = await prepareEnvironment()
+
+    // act
+    const { getStdout, waitForText } = await spawn(
+      'node',
+      `${monika} -r 1 -c https://raw.githubusercontent.com/hyperjumptech/monika/main/monika.example.json`
+    )
+
+    // assert
+    await waitForText('Starting Monika.')
+    const stdout = getStdout().join('\r\n')
+    expect(stdout).to.contain('Starting Monika. Probes: 1. Notifications: 1')
+
+    await cleanup()
+  })
+
+  it('should starts Monika with a YAML config from a URL', async () => {
+    // arrange
+    const { spawn, cleanup } = await prepareEnvironment()
+
+    // act
+    const { getStdout, waitForText } = await spawn(
+      'node',
+      `${monika} -r 1 -c https://raw.githubusercontent.com/hyperjumptech/monika/main/monika.example.yml`
+    )
+
+    // assert
+    await waitForText('Starting Monika.')
+    const stdout = getStdout().join('\r\n')
+    expect(stdout).to.contain('Starting Monika. Probes: 1. Notifications: 1')
+
+    await cleanup()
+  })
+
+  it('should starts Monika with a HAR file', async () => {
+    // arrange
+    const { spawn, cleanup } = await prepareEnvironment()
+
+    // act
+    const { getStdout, waitForText } = await spawn(
+      'node',
+      `${monika} -r 1 --har ./src/components/config/__tests__/form_encoded.har`
+    )
+
+    // assert
+    await waitForText('Starting Monika.')
+    const stdout = getStdout().join('\r\n')
+    expect(stdout).to.contain('Starting Monika. Probes: 1. Notifications: 1')
+
+    await cleanup()
+  })
+
+  it('should starts Monika with an Insomnia file', async () => {
+    // arrange
+    const { spawn, cleanup } = await prepareEnvironment()
+
+    // act
+    const { getStdout, waitForText } = await spawn(
+      'node',
+      `${monika} -r 1 --insomnia ./src/components/config/__tests__/petstore.insomnia.yaml`
+    )
+
+    // assert
+    await waitForText('Starting Monika.')
+    const stdout = getStdout().join('\r\n')
+    expect(stdout).to.contain('Starting Monika. Probes: 18. Notifications: 1')
+
+    await cleanup()
+  })
+
+  it('should starts Monika with a Postman file', async () => {
+    // arrange
+    const { spawn, cleanup } = await prepareEnvironment()
+
+    // act
+    const { getStdout, waitForText } = await spawn(
+      'node',
+      `${monika} -r 1 --postman ./src/components/config/__tests__/mock_files/grouped-postman_collection-v2.1.json`
+    )
+
+    // assert
+    await waitForText('Starting Monika.')
+    const stdout = getStdout().join('\r\n')
+    expect(stdout).to.contain('Starting Monika. Probes: 2. Notifications: 1')
+
+    await cleanup()
+  })
+
+  it('should starts Monika with a Sitemap file', async () => {
+    // arrange
+    const { spawn, cleanup } = await prepareEnvironment()
+
+    // act
+    const { getStdout, waitForText } = await spawn(
+      'node',
+      `${monika} -r 1 --sitemap ./src/components/config/__tests__/sitemap.xml`
+    )
+
+    // assert
+    await waitForText('Starting Monika.')
+    const stdout = getStdout().join('\r\n')
+    expect(stdout).to.contain('Starting Monika. Probes: 2. Notifications: 1')
+
+    await cleanup()
+  })
+
+  it('should starts Monika with a text file', async () => {
+    // arrange
+    const { spawn, cleanup } = await prepareEnvironment()
+
+    // act
+    const { getStdout, waitForText } = await spawn(
+      'node',
+      `${monika} -r 1 --text ./src/components/config/__tests__/textfile`
+    )
+
+    // assert
+    await waitForText('Starting Monika.')
+    const stdout = getStdout().join('\r\n')
+    expect(stdout).to.contain('Starting Monika. Probes: 2. Notifications: 1')
+
+    await cleanup()
+  })
+
+  it('should overwrites native config', async () => {
+    // arrange
+    const { spawn, cleanup } = await prepareEnvironment()
+
+    // act
+    const { getStdout, waitForText } = await spawn(
+      'node',
+      `${monika} -r 1 -c ./monika.example.yml --text ./src/components/config/__tests__/textfile`
+    )
+
+    // assert
+    await waitForText('Starting Monika.')
+    const stdout = getStdout().join('\r\n')
+    expect(stdout).to.contain('Starting Monika. Probes: 2. Notifications: 1')
+
+    await cleanup()
+  })
+
+  it('should runs with multiple config', async () => {
+    // arrange
+    const { spawn, cleanup } = await prepareEnvironment()
+
+    // act
+    const { getStdout, waitForText } = await spawn(
+      'node',
+      `${monika} -r 1 -c ./monika.example.json ./monika.example.yml`
+    )
+
+    // assert
+    await waitForText('Starting Monika.')
+    const stdout = getStdout().join('\r\n')
+    expect(stdout).to.contain('Starting Monika. Probes: 1. Notifications: 1')
+
+    await cleanup()
+  })
+
+  it('should not run if no probes in the config', async () => {
+    // arrange
+    const { spawn, cleanup } = await prepareEnvironment()
+
+    // act
+    const { getStderr, waitForText } = await spawn(
+      'node',
+      `${monika} -r 1 -c ./test/testConfigs/noProbes.yml`
+    )
+
+    // assert
+    await waitForText('Monika configuration is invalid')
+    const stdout = getStderr().join('\r\n')
+    expect(stdout).to.contain('Monika configuration is invalid')
+
+    await cleanup()
+  })
+
   it('Detect config file changes successfully', async () => {
     // arrange
     const { spawn, cleanup, writeFile } = await prepareEnvironment()

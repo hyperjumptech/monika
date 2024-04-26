@@ -25,10 +25,14 @@
 import { Command, Errors } from '@oclif/core'
 import pEvent from 'p-event'
 
-import type { Config } from '../interfaces/config'
+import type { ValidatedConfig } from '../interfaces/config'
 import type { Probe } from '../interfaces/probe'
 
-import { getConfig, isSymonModeFrom } from '../components/config'
+import {
+  getValidatedConfig,
+  isSymonModeFrom,
+  initConfig,
+} from '../components/config'
 import { createConfig } from '../components/config/create'
 import { sortProbes } from '../components/config/sort'
 import { printAllLogs } from '../components/logger'
@@ -113,9 +117,12 @@ export default class Monika extends Command {
         return
       }
 
-      await initLoaders(flags, this.config)
-
       const isSymonMode = isSymonModeFrom(flags)
+      if (!isSymonMode) {
+        await initConfig()
+      }
+
+      await initLoaders(flags, this.config)
       await logRunningInfo({ isSymonMode, isVerbose: flags.verbose })
 
       if (isSymonMode) {
@@ -126,7 +133,7 @@ export default class Monika extends Command {
       let isFirstRun = true
 
       for (;;) {
-        const config = getConfig()
+        const config = getValidatedConfig()
         const probes = getProbes({ config, flags })
 
         // emit the sanitized probe
@@ -142,7 +149,7 @@ export default class Monika extends Command {
 
         const controller = new AbortController()
         const { signal } = controller
-        const notifications = config.notifications || []
+        const { notifications } = config
         startProbing({
           notifications,
           probes,
@@ -169,7 +176,7 @@ export default class Monika extends Command {
     } catch (error: unknown) {
       this.error((error as Error)?.message, { exit: 1 })
     } finally {
-      await closeLog()
+      closeLog()
     }
   }
 }
@@ -195,7 +202,7 @@ async function logRunningInfo({ isVerbose, isSymonMode }: RunningInfoParams) {
 }
 
 type GetProbesParams = {
-  config: Config
+  config: ValidatedConfig
   flags: MonikaFlags
 }
 
@@ -207,7 +214,7 @@ function getProbes({ config, flags }: GetProbesParams): Probe[] {
   )
 }
 
-function deprecationHandler(config: Config): Config {
+function deprecationHandler(config: ValidatedConfig): ValidatedConfig {
   const showDeprecateMsg: Record<'query', boolean> = {
     query: false,
   }

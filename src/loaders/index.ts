@@ -22,8 +22,9 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import type { Config as IConfig } from '@oclif/core'
-import { isSymonModeFrom, setupConfig } from '../components/config'
+import type { Config } from '@oclif/core'
+import { isSymonModeFrom } from '../components/config'
+import { watchConfigChanges } from '../components/config/watcher'
 import { openLogfile } from '../components/logger/history'
 import { getContext } from '../context'
 import events from '../events'
@@ -45,7 +46,7 @@ import '../events/subscribers/probe'
 
 export default async function init(
   flags: MonikaFlags,
-  cliConfig: IConfig
+  cliConfig: Config
 ): Promise<void> {
   await openLogfile()
   // check if connected to STUN Server and getting the public IP in the same time
@@ -61,8 +62,7 @@ export default async function init(
   }
 
   if (!isSymonModeFrom(flags)) {
-    await setupConfig(flags)
-
+    watchConfigChanges()
     // check TLS when Monika starts
     tlsChecker()
 

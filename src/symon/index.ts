@@ -30,7 +30,6 @@ import { hostname } from 'os'
 import path from 'path'
 import Piscina from 'piscina'
 
-import type { Config } from '../interfaces/config'
 import type { Probe } from '../interfaces/probe'
 import type { ValidatedResponse } from '../plugins/validate-response'
 
@@ -415,9 +414,8 @@ export default class SymonClient {
   private async fetchProbesAndUpdateConfig() {
     // Fetch the probes
     const { hash, probes } = await this.fetchProbes()
-    const newConfig: Config = { probes, version: hash }
 
-    await setConfig(newConfig)
+    await updateConfig({ probes, version: hash })
     log.info('[Symon] Get probes succeed')
   }
 
@@ -514,16 +512,4 @@ async function applyProbeChanges(probeChanges: ProbeChange[]) {
       }
     })
   )
-}
-
-async function setConfig(newConfig: Config) {
-  if (
-    !newConfig.version ||
-    getContext().config?.version === newConfig.version
-  ) {
-    return
-  }
-
-  log.info('[Symon] Config changes. Reloading Monika')
-  await updateConfig(newConfig)
 }

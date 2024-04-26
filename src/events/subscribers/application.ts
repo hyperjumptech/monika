@@ -22,8 +22,8 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { hostname } from 'os'
-import { getConfig } from '../../components/config'
+import { hostname } from 'node:os'
+import { getValidatedConfig } from '../../components/config'
 import { sendNotifications } from '@hyperjumptech/monika-notification'
 import { getMessageForTerminate } from '../../components/notification/alert-message'
 import { getContext } from '../../context'
@@ -32,15 +32,12 @@ import { getEventEmitter } from '../../utils/events'
 import getIp from '../../utils/ip'
 import { log } from '../../utils/pino'
 
-const eventEmitter = getEventEmitter()
-
-eventEmitter.on(events.application.terminated, async () => {
+getEventEmitter().on(events.application.terminated, async () => {
   if (!getContext().isTest) {
     const message = await getMessageForTerminate(hostname(), getIp())
-    const config = getConfig()
 
-    sendNotifications(config.notifications ?? [], message).catch((error) =>
-      log.error(error)
+    sendNotifications(getValidatedConfig().notifications, message).catch(
+      (error) => log.error(error)
     )
   }
 })

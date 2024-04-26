@@ -77,7 +77,7 @@ describe('monika', () => {
     )
     .it('detects valid remote config', (ctx) => {
       expect(ctx.stdout).to.contain(
-        'Starting Monika. Probes: 1. Notifications: 0'
+        'Starting Monika. Probes: 1. Notifications: 1'
       )
     })
 

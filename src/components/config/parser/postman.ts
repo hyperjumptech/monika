@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import Joi from 'joi'
-import type { Config } from '../../interfaces/config'
+import type { Config } from '../../../interfaces/config'
 
 type CollectionVersion = 'v2.0' | 'v2.1'
 

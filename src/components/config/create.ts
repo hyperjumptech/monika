@@ -6,10 +6,10 @@ import { type } from 'node:os'
 import { ux } from '@oclif/core'
 import yml from 'js-yaml'
 
-import { addDefaultNotifications } from './get'
-import { parseConfig } from './parse'
 import { getContext } from '../../context'
 import { log } from '../../utils/pino'
+import { addDefaultNotifications } from './get'
+import { type ConfigType, parseByType } from './parser/parse'
 
 export async function createConfig(): Promise<void> {
   const { flags } = getContext()
@@ -30,12 +30,11 @@ export async function createConfig(): Promise<void> {
     throw new Error(`Couldn't found the ${path} file.`)
   }
 
-  const parse = await parseConfig(path, type, flags)
-  const file = flags.output || 'monika.yml'
+  const { force, output } = flags
 
-  if (existsSync(file) && !flags.force) {
+  if (existsSync(output) && !force) {
     const answer = await ux.ux.prompt(
-      `\n${file} file is already exists. Overwrite (Y/n)?`
+      `\n${output} file is already exists. Overwrite (Y/n)?`
     )
 
     if (answer.toLowerCase() !== 'y') {
@@ -46,11 +45,12 @@ export async function createConfig(): Promise<void> {
     }
   }
 
+  const parse = await parseByType(path, type)
   const data = yml.dump(addDefaultNotifications(parse))
-  await writeFile(file, data, {
+  await writeFile(output, data, {
     encoding: 'utf8',
   })
-  log.info(`${file} file has been created.`)
+  log.info(`${output} file has been created.`)
 }
 
 function open(url: string) {
@@ -80,7 +80,7 @@ function open(url: string) {
 
 type PathAndType = {
   path: string
-  type: string
+  type: ConfigType
 }
 
 function getPathAndType(): PathAndType {
