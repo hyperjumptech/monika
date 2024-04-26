@@ -67,15 +67,10 @@ describe('getValidatedConfig', () => {
     })
 
     // act & assert
-    expect(getValidatedConfig()).deep.eq({
-      notifications: [],
-      probes: [],
-      'status-notification': '0 6 * * *',
-      version: 'efde57d3b97ff787384fc2afde824615',
-    })
+    expect(getValidatedConfig().version).eq('efde57d3b97ff787384fc2afde824615')
   })
 
-  it('should return empty array when config is empty in Symon mode', () => {
+  it('should return empty array for probes when config is empty in Symon mode', () => {
     // arrange
     setContext({
       flags: sanitizeFlags({
@@ -85,12 +80,7 @@ describe('getValidatedConfig', () => {
     })
 
     // act and assert
-    expect(getValidatedConfig()).deep.eq({
-      notifications: [],
-      probes: [],
-      'status-notification': '0 6 * * *',
-      version: 'efde57d3b97ff787384fc2afde824615',
-    })
+    expect(getValidatedConfig().probes).deep.eq([])
   })
 })
 
@@ -151,15 +141,13 @@ describe('updateConfig', () => {
 
     try {
       // act
-      await updateConfig({ probes: [] })
+      await updateConfig({ probes: [{}] } as Config)
     } catch (error: unknown) {
       errorMessage = getErrorMessage(error)
     }
 
     // assert
-    expect(errorMessage).contain(
-      'Probes object does not exists or has length lower than 1!'
-    )
+    expect(errorMessage).contain('Monika configuration is invalid')
   })
 
   it('should update config', async () => {

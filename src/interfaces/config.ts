@@ -25,7 +25,6 @@
 import type { RequestOptions } from 'node:https'
 import type { Notification } from '@hyperjumptech/monika-notification'
 import type { Probe } from './probe'
-import type { DBLimit } from './data'
 
 type DomainWithOptions = {
   domain: string
@@ -34,10 +33,16 @@ type DomainWithOptions = {
 
 export type Domain = string | DomainWithOptions
 
-type Certificate = {
+export type Certificate = {
   domains: Domain[]
   // The reminder is the number of days to send notification to user before the domain expires.
   reminder?: number
+}
+
+type DbLimit = {
+  max_db_size: number
+  deleted_data: number
+  cron_schedule: string
 }
 
 export type SymonConfig = {
@@ -52,7 +57,7 @@ export type SymonConfig = {
 export type Config = {
   probes: Probe[]
   certificate?: Certificate
-  db_limit?: DBLimit
+  db_limit?: DbLimit
   notifications?: Notification[]
   'status-notification'?: string
   symon?: SymonConfig
@@ -60,11 +65,11 @@ export type Config = {
 }
 
 export type ValidatedConfig = {
-  probes: Probe[]
-  notifications: Notification[]
   'status-notification': string
-  version: string
-  certificate?: Certificate
-  db_limit?: DBLimit
+  certificate?: Required<Certificate>
+  db_limit?: DbLimit
+  notifications: Notification[]
+  probes: Probe[]
   symon?: SymonConfig
+  version: string
 }
