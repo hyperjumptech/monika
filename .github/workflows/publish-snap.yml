@@ -51,7 +51,7 @@ jobs:
         name: Rename tarball in dist/ directory
       - run: tar -zvxf dist/monika.tar.gz -C dist/
         name: Extract tarball into dist/ directory
-      - run: cp -r packages/notification/lib/* dist/monika/packages/notification/
+      - run: cp -vr packages/notification/lib/* dist/monika/packages/notification/
         name: Copy built notification into dist/ directory
       - uses: snapcore/action-build@v1
         id: snapcraft

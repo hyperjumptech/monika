@@ -25,7 +25,7 @@ apps:
 parts:
   monika:
     plugin: dump
-    source: .dist/monika
+    source: .dist/monika/
     override-pull: |
       sudo apt-get install -y jq curl
       CLI_VERSION=$(curl https://api.github.com/repos/hyperjumptech/monika/releases/latest -s | jq .tag_name -r)
