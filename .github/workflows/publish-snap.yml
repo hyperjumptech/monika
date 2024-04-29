@@ -33,7 +33,7 @@ jobs:
         name: Run production test
   build:
     runs-on: ubuntu-latest
-    needs: test
+    # needs: test
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -45,20 +45,20 @@ jobs:
         name: Build workspaces
       - run: npm ci
         name: Install dependencies
-      - run: sed -i 's#packages/notification/hyperjumptech-monika-notification#../../packages/notification/hyperjumptech-monika-notification#g' package.json
-        name: Change monika notification package path
       - run: npm run pack-tarballs
         name: Pack as tarball
-      - run: mv dist/monika*.tar.gz .
-        name: Move the tarball from dist folder to root
-      - run: mv monika*.tar.gz monika.tar.gz
-        name: Rename tarball
+      - run: mv dist/monika*.tar.gz dist/monika.tar.gz
+        name: Rename tarball in dist/ directory
+      - run: tar -zvxf dist/monika.tar.gz -C dist/
+        name: Extract tarball into dist/ directory
+      - run: cp -r packages/notification/lib/* dist/monika/packages/notification/
+        name: Copy built notification into dist/ directory
       - uses: snapcore/action-build@v1
         id: snapcraft
         name: Build Snap package
-      - uses: snapcore/action-publish@v1
-        env:
-          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.STORE_LOGIN }}
-        with:
-          snap: ${{ steps.snapcraft.outputs.snap }}
-          release: edge
+      # - uses: snapcore/action-publish@v1
+      #   env:
+      #     SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.STORE_LOGIN }}
+      #   with:
+      #     snap: ${{ steps.snapcraft.outputs.snap }}
+      #     release: edge
