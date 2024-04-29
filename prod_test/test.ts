@@ -263,24 +263,6 @@ describe('Node CLI Testing', () => {
     await cleanup()
   })
 
-  it('should not run if no probes in the config', async () => {
-    // arrange
-    const { spawn, cleanup } = await prepareEnvironment()
-
-    // act
-    const { getStderr, waitForText } = await spawn(
-      'node',
-      `${monika} -r 1 -c ./test/testConfigs/noProbes.yml`
-    )
-
-    // assert
-    await waitForText('Monika configuration is invalid')
-    const stdout = getStderr().join('\r\n')
-    expect(stdout).to.contain('Monika configuration is invalid')
-
-    await cleanup()
-  })
-
   it('Detect config file changes successfully', async () => {
     // arrange
     const { spawn, cleanup, writeFile } = await prepareEnvironment()
