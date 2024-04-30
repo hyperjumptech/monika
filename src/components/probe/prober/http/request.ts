@@ -88,7 +88,6 @@ export async function httpRequest({
 
   const startTime = Date.now()
   try {
-    // is this a request for ping?
     if (newReq.ping === true) {
       return icmpRequest({ host: renderedURL })
     }

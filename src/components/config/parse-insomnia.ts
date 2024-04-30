@@ -25,7 +25,6 @@
 import type { Config } from '../../interfaces/config'
 import yml from 'js-yaml'
 import { compile as compileTemplate } from 'handlebars'
-import type { AxiosRequestHeaders, Method } from 'axios'
 import Joi from 'joi'
 
 const envValidator = Joi.object({
@@ -143,20 +142,18 @@ function mapInsomniaToConfig(data: unknown): Config {
   return { probes }
 }
 
-function mapInsomniaRequestToConfig(req: unknown) {
+export function mapInsomniaRequestToConfig(req: unknown) {
   const { value: res } = resourceValidator.validate(req, { allowUnknown: true })
   // eslint-disable-next-line camelcase
   const url = compileTemplate(res.url)({ base_url: baseUrl })
   const authorization = getAuthorizationHeader(res)
-  let headers: AxiosRequestHeaders | undefined
-  if (authorization)
-    headers = {
-      authorization,
-    }
+
+  let headers: Headers | undefined
+  if (authorization) headers = new Headers({ Authorization: authorization })
   if (res.headers) {
-    if (headers === undefined) headers = {}
+    if (headers === undefined) headers = new Headers()
     for (const h of res.headers) {
-      headers[h.name] = h.value
+      headers.append(h.name, h.value)
     }
   }
 
@@ -167,7 +164,7 @@ function mapInsomniaRequestToConfig(req: unknown) {
     requests: [
       {
         url,
-        method: (res?.method ?? 'GET') as Method,
+        method: res?.method ?? 'GET',
         body: JSON.parse(res.body?.text ?? '{}'),
         timeout: 10_000,
         headers,
@@ -178,7 +175,7 @@ function mapInsomniaRequestToConfig(req: unknown) {
   }
 }
 
-function getAuthorizationHeader(data: unknown): string | undefined {
+export function getAuthorizationHeader(data: unknown): string | undefined {
   const { value: res } = resourceValidator.validate(data, {
     allowUnknown: true,
   })
