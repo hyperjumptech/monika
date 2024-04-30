@@ -158,9 +158,9 @@ export function mapInsomniaRequestToConfig(
   // let headers: Headers | undefined
   if (authorization) headers = { authorization }
   if (res.headers) {
-    if (headers === undefined) headers = {}
+    if (headers === undefined) headers = new Headers()
     for (const h of res.headers) {
-      headers[h.name] = h.value
+      headers.append(h.name, h.value)
     }
   }
 
