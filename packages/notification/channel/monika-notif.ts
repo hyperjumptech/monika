@@ -27,7 +27,7 @@ import type { NotificationMessage } from '.'
 import { sendHttpRequest } from '../utils/http'
 
 export type MonikaAlertNotifDataBody = {
-  type: 'incident' | 'recovery'
+  type: 'incident' | 'recovery' | 'incident-symon' | 'recovery-symon'
   alert: string
   url: string
   time: string
