@@ -26,8 +26,8 @@ import Joi from 'joi'
 import type { NotificationMessage } from '.'
 import { sendHttpRequest } from '../utils/http'
 
-type MonikaAlertNotifDataBody = {
-  type: 'incident' | 'recovery'
+export type MonikaAlertNotifDataBody = {
+  type: 'incident' | 'recovery' | 'incident-symon' | 'recovery-symon'
   alert: string
   url: string
   time: string
@@ -58,7 +58,7 @@ type MonikaNotifDataBody =
   | MonikaStartAndTerminationNotifDataBody
   | MonikaStatusUpdateNotifDataBody
 
-type NotificationData = {
+export type NotificationData = {
   url: string
 }
 
@@ -72,6 +72,21 @@ export const send = async (
 ): Promise<void> => {
   const content = getContent(message)
 
+  if (!content) {
+    throw new Error('Unknown notification type')
+  }
+
+  await sendHttpRequest({
+    method: 'POST',
+    url,
+    data: content,
+  })
+}
+
+export const sendWithCustomContent = async (
+  { url }: NotificationData,
+  content: MonikaAlertNotifDataBody
+): Promise<void> => {
   if (!content) {
     throw new Error('Unknown notification type')
   }
