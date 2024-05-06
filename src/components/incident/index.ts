@@ -46,8 +46,8 @@ export function addIncident(
 export function removeIncident({
   probeID,
   probeRequestURL,
-}: Pick<Incident, 'probeID'> &
-  Partial<Pick<Incident, 'probeRequestURL'>>): void {
+}: Partial<Pick<Incident, 'probeRequestURL'>> &
+  Pick<Incident, 'probeID'>): void {
   const newIncidents = getIncidents().filter((incident) => {
     if (!probeRequestURL) {
       return probeID !== incident.probeID

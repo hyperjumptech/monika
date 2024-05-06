@@ -205,9 +205,6 @@ describe('probingHTTP', () => {
             headers.get('content-type') !== 'text/plain' ||
             body !== 'multiline string\nexample'
           ) {
-            console.error(headers.get('content-type'))
-            console.error(body)
-
             return new HttpResponse(null, {
               status: 400,
             })
@@ -248,9 +245,6 @@ describe('probingHTTP', () => {
             headers.get('content-type') !== 'text/yaml' ||
             body !== 'username: john@example.com\npassword: secret\n'
           ) {
-            console.error(headers.get('content-type'))
-            console.error(body)
-
             return new HttpResponse(null, {
               status: 400,
             })
@@ -291,9 +285,6 @@ describe('probingHTTP', () => {
             headers.get('content-type') !== 'application/xml' ||
             !body.includes('john@example.com')
           ) {
-            console.error(headers.get('content-type'))
-            console.error(JSON.stringify(body))
-
             return new HttpResponse(null, {
               status: 400,
             })
@@ -426,9 +417,6 @@ describe('probingHTTP', () => {
             headers.get('content-type') !== 'text/plain' ||
             body !== 'multiline string\nexample'
           ) {
-            console.error(headers.get('content-type'))
-            console.error(body)
-
             return new HttpResponse(null, {
               status: 400,
             })
