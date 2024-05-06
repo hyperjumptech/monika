@@ -157,9 +157,7 @@ describe('Prometheus collector', () => {
   describe('Collect triggered allert metrics', () => {
     it('should not throw', () => {
       // arrange
-      const probeResult: Omit<ProbeResult, 'response'> & {
-        alertQuery: string
-      } = {
+      const probeResult = {
         probe: {
           id: '',
           name: '',
@@ -189,9 +187,7 @@ describe('Prometheus collector', () => {
 
     it('should not throw with empty request', () => {
       // arrange
-      const probeResult: Omit<ProbeResult, 'response'> & {
-        alertQuery: string
-      } = {
+      const probeResult = {
         probe: {
           id: '',
           name: '',
@@ -227,9 +223,9 @@ describe('Prometheus collector', () => {
         },
         requestIndex: 0,
         alertQuery: '',
-      } as Omit<ProbeResult, 'response'> & {
+      } as {
         alertQuery: string
-      }
+      } & Omit<ProbeResult, 'response'>
 
       // act
       const prometheusCollector = new PrometheusCollector()
