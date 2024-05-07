@@ -22,19 +22,20 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios, { AxiosRequestHeaders, AxiosResponse } from 'axios'
-import http from 'http'
-import https from 'https'
+import type { AxiosRequestHeaders, AxiosResponse } from 'axios'
+import axios from 'axios'
+import http from 'node:http'
+import https from 'node:https'
 import { Agent, type HeadersInit } from 'undici'
 
-type HttpRequestParams = Omit<RequestInit, 'headers'> & {
+type HttpRequestParams = {
   url: string
   maxRedirects?: number
   headers?: HeadersInit
   timeout?: number
   allowUnauthorizedSsl?: boolean
   responseType?: 'stream'
-}
+} & Omit<RequestInit, 'headers'>
 
 // Keep the agents alive to reduce the overhead of DNS queries and creating TCP connection.
 // More information here: https://rakshanshetty.in/nodejs-http-keep-alive/
