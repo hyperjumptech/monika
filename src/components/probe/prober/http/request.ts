@@ -93,7 +93,7 @@ export async function httpRequest({
     // is this a request for ping?
     if (newReq.ping === true) {
       log.warn(
-        `Probe ID ${id}: Request with "ping: true" is deprecated, please migrate your ping configuration based on this guide https://monika.hyperjump.tech/guides/probes#ping-request`
+        `Probe ${id}: Request with "ping: true" is deprecated, please migrate to standalone probe https://monika.hyperjump.tech/guides/probes#ping-request`
       )
       return icmpRequest({ host: renderedURL })
     }
