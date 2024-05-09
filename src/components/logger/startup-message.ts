@@ -98,7 +98,7 @@ function generateStartupMessage({
     startupMessage += generateNotificationMessage(notifications)
   }
 
-  if (probes.some((p) => p.ping)) {
+  if (probes.some((p) => p.requests?.some((r) => r.ping))) {
     startupMessage += generateDeprecatedPingMessage()
   }
 

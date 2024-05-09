@@ -246,6 +246,9 @@
         "type": "object",
         "additionalProperties": false,
         "required": ["url"],
+        "patternProperties": {
+          "ping": { "type": "boolean" }
+        },
         "properties": {
           "id": {
             "title": "Id",
