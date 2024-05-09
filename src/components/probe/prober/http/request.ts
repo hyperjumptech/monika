@@ -65,7 +65,6 @@ export async function httpRequest({
 }: probingParams): Promise<ProbeRequestResponse> {
   // Compile URL using handlebars to render URLs that uses previous responses data
   const {
-    id,
     method,
     url,
     headers,
@@ -93,7 +92,7 @@ export async function httpRequest({
     // is this a request for ping?
     if (newReq.ping === true) {
       log.warn(
-        `Probe ${id}: Request with "ping: true" is deprecated, please migrate to standalone probe https://monika.hyperjump.tech/guides/probes#ping-request`
+        `PING ${renderedURL}: Requests with "ping: true" is deprecated, please migrate to standalone probe https://monika.hyperjump.tech/guides/probes#ping-request`
       )
       return icmpRequest({ host: renderedURL })
     }
