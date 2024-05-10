@@ -21,17 +21,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  *
  * SOFTWARE.                                                                      *
  **********************************************************************************/
-import * as cron from 'node-cron'
+
+import { schedule } from 'node-cron'
 import { tlsChecker } from '../jobs/tls-check'
 import { checkDBSize } from '../jobs/check-database'
-import { getConfig } from '../components/config'
+import { getValidatedConfig } from '../components/config'
+import { getErrorMessage } from '../utils/catch-error-handler'
+import { log } from '../utils/pino'
 
 export function jobsLoader() {
-  const config = getConfig()
   // schedule TLS checker every day at 00:00
-  cron.schedule('0 0 * * *', tlsChecker)
+  schedule('0 0 * * *', tlsChecker)
   // schedule database size check
+  const config = getValidatedConfig()
   if (config?.db_limit && config?.db_limit.cron_schedule) {
-    cron.schedule(config.db_limit.cron_schedule, checkDBSize)
+    schedule(config.db_limit.cron_schedule, () =>
+      checkDBSize().catch((error) => log.error(getErrorMessage(error)))
+    )
   }
 }

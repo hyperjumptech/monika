@@ -22,16 +22,43 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-export interface SymonConfig {
-  id: string
-  url: string
-  key: string
-  projectID: string
-  organizationID: string
-  interval?: number
-}
+import type { Config } from '@oclif/core'
+import { expect } from '@oclif/test'
 
-export type SymonResponse = {
-  result: string
-  message: string
-}
+import { sanitizeFlags } from '../flag'
+import init from '.'
+
+describe('Loader', () => {
+  it('should enable auto update', async () => {
+    // arrange
+    const flags = sanitizeFlags({
+      'auto-update': 'minor',
+      prometheus: 3000,
+      stun: -1,
+      symonUrl: 'https://example.com',
+      symonKey: '1234',
+    })
+    const cliConfig = { arch: 'arm64' } as Config
+
+    // assert
+    expect(init(flags, cliConfig)).to.eventually.throw()
+  })
+
+  it('should enable prometheus', async () => {
+    // arrange
+    const flags = sanitizeFlags({
+      prometheus: 3000,
+      stun: -1,
+      symonUrl: 'https://example.com',
+      symonKey: '1234',
+    })
+    const cliConfig = {} as Config
+
+    // act
+    await init(flags, cliConfig)
+
+    // assert
+    const resp = await fetch('http://localhost:3000/metrics')
+    expect(resp.status).eq(200)
+  })
+})

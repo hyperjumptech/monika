@@ -1,7 +1,7 @@
 {
   "name": "@hyperjumptech/monika",
   "description": "Synthetic monitoring made easy",
-  "version": "1.19.2",
+  "version": "1.20.1",
   "license": "MIT",
   "author": "@hyperjumptech",
   "main": "lib/index.js",
@@ -44,7 +44,7 @@
     "prepack": "npm run clean && tsc -b && oclif manifest",
     "start": "npm run prepack && ./bin/dev.js",
     "start:prod": "npm run prepack && ./bin/run.js",
-    "test": "npm run prepack && cross-env NODE_ENV=test nyc --reporter=lcov --reporter=text --extension .ts mocha --config .mocharc.json --forbid-only \"{packages,src,test,workers}/**/*.test.ts\" --exclude test/cli.test.ts",
+    "test": "npm run prepack && cross-env NODE_ENV=test nyc --reporter=lcov --reporter=text --extension .ts mocha --config .mocharc.json --forbid-only '{packages,src,test}/**/*.test.ts'",
     "cli-test": "bats test/bats/cli.bats",
     "test:watch": "npm run clean && NODE_ENV=test mocha {packages,src,test}/**/*.test.ts --watch --watch-files {packages,src,test}/**/*",
     "prod_test": "npm run prod_test:bin && npm run prod_test:cli",
@@ -58,7 +58,7 @@
   },
   "dependencies": {
     "@faker-js/faker": "^7.4.0",
-    "@hyperjumptech/monika-notification": "^1.17.0",
+    "@hyperjumptech/monika-notification": "^1.18.0",
     "@oclif/core": "3.16.0",
     "@oclif/plugin-help": "^6.0.9",
     "@oclif/plugin-version": "^2.0.11",

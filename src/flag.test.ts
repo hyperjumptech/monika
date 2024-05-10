@@ -22,17 +22,15 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import type { RequestOptions } from 'https'
+import { expect } from '@oclif/test'
+import { monikaFlagsDefaultValue, sanitizeFlags } from './flag'
 
-type DomainWithOptions = {
-  domain: string
-  options?: RequestOptions
-}
+describe('Flag', () => {
+  it('should fill flags with the default value', () => {
+    // act
+    const sanitizedFlags = sanitizeFlags({})
 
-export type Domain = string | DomainWithOptions
-
-export interface Certificate {
-  domains: Domain[]
-  // The reminder is the number of days to send notification to user before the domain expires.
-  reminder?: number
-}
+    // assert
+    expect(sanitizedFlags).deep.eq(monikaFlagsDefaultValue)
+  })
+})

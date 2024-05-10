@@ -22,20 +22,54 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Certificate } from './certificate'
+import type { RequestOptions } from 'node:https'
 import type { Notification } from '@hyperjumptech/monika-notification'
-import { Probe } from './probe'
-import { SymonConfig } from '../components/reporter'
-import type { DBLimit } from './data'
+import type { Probe } from './probe'
 
-export interface Config {
-  certificate?: Certificate
+type DomainWithOptions = {
+  domain: string
+  options?: RequestOptions
+}
+
+export type Domain = string | DomainWithOptions
+
+export type Certificate = {
+  domains: Domain[]
+  // The reminder is the number of days to send notification to user before the domain expires.
+  reminder?: number
+}
+
+type DbLimit = {
+  max_db_size: number
+  deleted_data: number
+  cron_schedule: string
+}
+
+export type SymonConfig = {
+  id: string
+  url: string
+  key: string
+  projectID: string
+  organizationID: string
   interval?: number
-  notifications?: Notification[]
+}
+
+export type Config = {
   probes: Probe[]
+  certificate?: Certificate
+  db_limit?: DbLimit
+  notifications?: Notification[]
   'status-notification'?: string
   symon?: SymonConfig
   version?: string
+}
 
-  db_limit?: DBLimit
+export type ValidatedConfig = {
+  'status-notification': string
+  certificate?: Required<Certificate>
+  db_limit?: DbLimit
+  notifications: Notification[]
+  probes: Probe[]
+  symon?: SymonConfig
+  version: string
 }

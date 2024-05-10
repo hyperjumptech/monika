@@ -22,38 +22,38 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import path from 'path'
-import fs from 'fs'
-import { getConfig } from '../components/config'
+import { resolve } from 'node:path'
+import { stat } from 'node:fs/promises'
+import { getValidatedConfig } from '../components/config'
 import {
   deleteFromAlerts,
   deleteFromNotifications,
   deleteFromProbeRequests,
 } from '../components/logger/history'
-import { Config } from '../interfaces/config'
-const dbPath = path.resolve(process.cwd(), 'monika-logs.db')
+import type { ValidatedConfig } from '../interfaces/config'
 
-export function checkDBSize(): void {
-  const config = getConfig()
-  deleteData(config)
+const dbPath = resolve(process.cwd(), 'monika-logs.db')
+
+export async function checkDBSize() {
+  await deleteData(getValidatedConfig())
 }
 
-async function deleteData(config: Config) {
-  const { db_limit: DBLimit } = config
-  const stats = fs.statSync(dbPath)
+async function deleteData(config: ValidatedConfig) {
+  const { db_limit: dbLimit } = config
 
-  if (!DBLimit?.max_db_size) {
+  if (!dbLimit?.max_db_size || !dbLimit.deleted_data) {
     return
   }
 
-  if (!DBLimit.deleted_data) {
-    return
-  }
+  const { deleted_data: deletedData, max_db_size: maxDbSize } = dbLimit
+  const { size } = await stat(dbPath)
 
-  if (stats.size > DBLimit.max_db_size) {
-    const probeRes = await deleteFromProbeRequests(DBLimit.deleted_data)
-    await deleteFromNotifications(probeRes.probeIds)
-    await deleteFromAlerts(probeRes.probeRequestIds)
+  if (size > maxDbSize) {
+    const { probeRequestIds, probeIds } = await deleteFromProbeRequests(
+      deletedData
+    )
+    await deleteFromNotifications(probeIds)
+    await deleteFromAlerts(probeRequestIds)
 
     deleteData(config) // recursive until reached expected file size
   }

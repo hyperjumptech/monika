@@ -24,14 +24,14 @@
 
 import { Agent, type HeadersInit } from 'undici'
 
-type HttpRequestParams = Omit<RequestInit, 'headers'> & {
+type HttpRequestParams = {
   url: string
   maxRedirects?: number
   headers?: HeadersInit
   timeout?: number
   allowUnauthorizedSsl?: boolean
   responseType?: 'stream'
-}
+} & Omit<RequestInit, 'headers'>
 
 export const DEFAULT_TIMEOUT = 10_000
 

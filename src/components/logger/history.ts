@@ -30,7 +30,6 @@ import { ProbeRequestResponse } from '../../interfaces/request'
 import { Probe } from '../../interfaces/probe'
 import type { Notification } from '@hyperjumptech/monika-notification'
 import { log } from '../../utils/pino'
-import { getConfig } from '../config'
 import { getErrorMessage } from '../../utils/catch-error-handler'
 const sqlite3 = verboseSQLite()
 const dbPath = path.resolve(process.cwd(), 'monika-logs.db')
@@ -84,7 +83,6 @@ export type DeleteProbeRes = {
 }
 
 type Summary = {
-  numberOfProbes: number
   numberOfIncidents: number
   numberOfRecoveries: number
   numberOfSentNotifications: number
@@ -558,10 +556,7 @@ export async function getSummary(): Promise<Summary> {
     0
   )
 
-  const config = getConfig()
-
   return {
-    numberOfProbes: config?.probes?.length || 0,
     numberOfIncidents,
     numberOfRecoveries,
     numberOfSentNotifications,

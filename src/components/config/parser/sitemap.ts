@@ -22,14 +22,14 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import type { Config } from '../../interfaces/config'
 import { XMLParser } from 'fast-xml-parser'
-import { getContext } from '../../context'
-import { monikaFlagsDefaultValue } from '../../flag'
-import type { MonikaFlags } from '../../flag'
-import type { Probe, ProbeAlert } from '../../interfaces/probe'
-import type { RequestConfig } from '../../interfaces/request'
 import Joi from 'joi'
+
+import type { Config } from '../../../interfaces/config'
+import { getContext } from '../../../context'
+import { monikaFlagsDefaultValue } from '../../../flag'
+import type { Probe, ProbeAlert } from '../../../interfaces/probe'
+import type { RequestConfig } from '../../../interfaces/request'
 
 const sitemapValidator = Joi.object({
   config: Joi.object({
@@ -137,15 +137,12 @@ const generateProbesFromXmlOneProbe = (parseResult: unknown) => {
   return probe ? [probe] : []
 }
 
-export const parseConfigFromSitemap = (
-  configString: string,
-  flags?: MonikaFlags
-): Config => {
+export const parseConfigFromSitemap = (configString: string): Config => {
   try {
     const parser = new XMLParser({ ignoreAttributes: false })
     const xmlObj = parser.parse(configString)
     let probes = generateProbesFromXml(xmlObj)
-    if (flags && flags['one-probe']) {
+    if (getContext().flags['one-probe']) {
       probes = generateProbesFromXmlOneProbe(xmlObj)
     }
 

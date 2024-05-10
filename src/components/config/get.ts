@@ -22,124 +22,92 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import type { MonikaFlags } from '../../flag'
+import { getContext } from '../../context'
 import type { Config } from '../../interfaces/config'
 import { log } from '../../utils/pino'
-import { parseConfig } from './parse'
-import { validateConfigWithSchema } from './validation'
-import { validateConfig } from './validate'
+import { parseByType } from './parser/parse'
 
-export type ConfigType =
-  | 'monika'
-  | 'har'
-  | 'insomnia'
-  | 'postman'
-  | 'sitemap'
-  | 'text'
-
-export async function getConfigFrom(flags: MonikaFlags): Promise<Config> {
-  const defaultConfigs = await parseDefaultConfig(flags)
-
-  const nonDefaultConfig = setDefaultNotifications(
-    defaultConfigs,
-    await getNonDefaultFlags(flags)
+export async function getRawConfig(): Promise<Config> {
+  const nativeConfig = await parseNativeConfig()
+  const nonNativeConfig = await parseNonNativeConfig()
+  const config = mergeConfigs(
+    nonNativeConfig ? [...nativeConfig, nonNativeConfig] : nativeConfig
   )
+  const hasNotification =
+    config.notifications !== undefined && config.notifications.length > 0
 
-  return mergeConfigs(defaultConfigs, nonDefaultConfig)
+  if (!hasNotification) {
+    log.info('Notifications not found, using desktop as default.')
+    return addDefaultNotifications(config)
+  }
+
+  return config
 }
 
 // mergeConfigs merges configs by overwriting each other
-// with initial value taken from nonDefaultConfig
-export function mergeConfigs(
-  defaultConfigs: Partial<Config>[],
-  nonDefaultConfig: Partial<Config>
-): Config {
-  if (defaultConfigs.length === 0 && nonDefaultConfig !== undefined) {
-    return nonDefaultConfig as Config
-  }
+// with initial value taken from nonNativeConfig
+function mergeConfigs(configs: Config[]): Config {
+  let mergedConfig = configs[0]
 
-  // eslint-disable-next-line unicorn/no-array-reduce
-  const mergedConfig = defaultConfigs.reduce(
-    (prev, current) => ({
-      ...prev,
-      ...current,
-      notifications: current.notifications || prev.notifications,
-      probes: current.probes || prev.probes,
-    }),
-    nonDefaultConfig || {}
-  )
+  for (const config of configs.splice(1)) {
+    const hasNotification =
+      config.notifications && config.notifications.length > 0
+    const hasProbe = config.probes && config.probes.length > 0
 
-  return mergedConfig as Config
-}
-
-export function addDefaultNotifications(
-  config: Partial<Config>
-): Partial<Config> {
-  log.info('Notifications not found, using desktop as default...')
-  return {
-    ...config,
-    notifications: [{ id: 'default', type: 'desktop', data: undefined }],
-  }
-}
-
-async function parseDefaultConfig(
-  flags: MonikaFlags
-): Promise<Partial<Config>[]> {
-  return Promise.all(
-    flags.config.map((source) => parseConfigType(source, 'monika', flags))
-  )
-}
-
-async function parseConfigType(
-  source: string,
-  configType: ConfigType,
-  flags: MonikaFlags
-): Promise<Partial<Config>> {
-  const parsed = await parseConfig(source, configType, flags)
-
-  // ensure that the parsed config meets our formatting
-  const validatedConfig = await validateConfig(parsed)
-
-  if (configType !== 'har') {
-    const isValidConfig = validateConfigWithSchema(validatedConfig)
-    if (!isValidConfig.valid) {
-      throw new Error(isValidConfig.message)
+    mergedConfig = {
+      ...mergedConfig,
+      ...config,
+      notifications: hasNotification
+        ? config.notifications
+        : mergedConfig.notifications,
+      probes: hasProbe ? config.probes : mergedConfig.probes,
     }
   }
 
-  return validatedConfig
+  return mergedConfig
 }
 
-async function getNonDefaultFlags(
-  flags: MonikaFlags
-): Promise<Partial<Config>> {
-  let result = {}
+export function addDefaultNotifications(config: Config): Config {
+  return {
+    ...config,
+    notifications: [{ id: 'default', type: 'desktop' }],
+  }
+}
+
+async function parseNativeConfig(): Promise<Config[]> {
+  const { flags } = getContext()
+
+  return Promise.all(
+    flags.config.map((source) => parseByType(source, 'monika'))
+  )
+}
+
+async function parseNonNativeConfig(): Promise<Config | undefined> {
+  const { flags } = getContext()
+  const hasNonNativeConfig =
+    flags.har || flags.insomnia || flags.postman || flags.sitemap || flags.text
+
+  if (!hasNonNativeConfig) {
+    return
+  }
 
   if (flags.har) {
-    result = await parseConfigType(flags.har, 'har', flags)
-  } else if (flags.postman) {
-    result = await parseConfigType(flags.postman, 'postman', flags)
-  } else if (flags.insomnia) {
-    result = await parseConfigType(flags.insomnia, 'insomnia', flags)
-  } else if (flags.sitemap) {
-    result = await parseConfigType(flags.sitemap, 'sitemap', flags)
-  } else if (flags.text) {
-    result = await parseConfigType(flags.text, 'text', flags)
+    return parseByType(flags.har, 'har')
   }
 
-  return result
-}
-
-function setDefaultNotifications(
-  defaultConfigs: Partial<Config>[],
-  nonDefaultConfig: Partial<Config>
-): Partial<Config> {
-  const hasDefaultConfig = defaultConfigs.length > 0
-  const hasNonDefaultConfig = Object.keys(nonDefaultConfig).length > 0
-
-  if (!hasDefaultConfig && hasNonDefaultConfig) {
-    return addDefaultNotifications(nonDefaultConfig)
+  if (flags.postman) {
+    return parseByType(flags.postman, 'postman')
   }
 
-  return nonDefaultConfig
+  if (flags.insomnia) {
+    return parseByType(flags.insomnia, 'insomnia')
+  }
+
+  if (flags.sitemap) {
+    return parseByType(flags.sitemap, 'sitemap')
+  }
+
+  if (flags.text) {
+    return parseByType(flags.text, 'text')
+  }
 }

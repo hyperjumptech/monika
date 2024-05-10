@@ -215,7 +215,7 @@ export class PrometheusCollector {
   }
 
   collectTriggeredAlert(
-    probeResult: Omit<ProbeResult, 'response'> & { alertQuery: string }
+    probeResult: { alertQuery: string } & Omit<ProbeResult, 'response'>
   ): void {
     if (!prometheusCustomCollector) {
       throw new Error('Prometheus collector is not registered')

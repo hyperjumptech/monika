@@ -29,7 +29,7 @@ import {
 } from '@hyperjumptech/monika-notification'
 import { format } from 'date-fns'
 
-import { getConfig } from '../components/config'
+import { getValidatedConfig } from '../components/config'
 import { saveNotificationLog } from '../components/logger/history'
 import {
   getMonikaInstance,
@@ -37,42 +37,44 @@ import {
 } from '../components/notification/alert-message'
 import { checkTLS, getHostname } from '../components/tls-checker'
 import { getContext } from '../context'
+import { getErrorMessage } from '../utils/catch-error-handler'
 import getIp from '../utils/ip'
 import { log } from '../utils/pino'
 import { publicIpAddress } from '../utils/public-ip'
 
 export function tlsChecker(): void {
-  const config = getConfig()
-  const hasDomain = (config?.certificate?.domains?.length || 0) > 0
+  const { certificate, notifications } = getValidatedConfig()
+
+  if (!certificate) {
+    return
+  }
+
+  const hasDomain = certificate.domains.length > 0
 
   if (!hasDomain) {
     return
   }
 
-  const { certificate } = config
-  const defaultExpiryReminder = 30
+  const { domains, reminder } = certificate
+  const hasNotification = notifications.length > 0
 
-  for (const domain of certificate?.domains || []) {
+  for (const domain of domains) {
     const hostname = getHostname(domain)
-    const reminder = certificate?.reminder ?? defaultExpiryReminder
-
     log.info(`Running TLS check for ${hostname} every day at 00:00`)
 
     checkTLS(domain, reminder).catch((error) => {
-      log.error(error.message)
-
-      const { notifications } = config
-      const hasNotification = (notifications?.length || 0) > 0
+      const errorMessage = getErrorMessage(error)
+      log.error(errorMessage)
 
       if (!hasNotification) {
         return
       }
 
       sendErrorNotification({
-        errorMessage: error.message,
+        errorMessage,
         hostname,
-        notifications: notifications || [],
-      }).catch(console.error)
+        notifications,
+      }).catch((error) => log.error(getErrorMessage(error)))
     })
   }
 }

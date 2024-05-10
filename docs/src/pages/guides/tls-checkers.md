@@ -6,10 +6,6 @@ title: TLS Checkers
 You can check TLS validity and set the threshold to send notification before the expiry time.
 
 ```yaml
-probes:
-  - id: 'Example'
-    requests:
-      - url: http://example.com
 certificate:
   domains:
     - example.com

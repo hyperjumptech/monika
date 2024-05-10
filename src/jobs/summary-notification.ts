@@ -21,19 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  *
  * SOFTWARE.                                                                      *
  **********************************************************************************/
-import { hostname } from 'os'
-import format from 'date-fns/format'
-import { getConfig } from '../components/config'
-import { getSummary } from '../components/logger/history'
+
+import fs from 'node:fs'
+import { hostname } from 'node:os'
 import { sendNotifications } from '@hyperjumptech/monika-notification'
-import {
-  getOSName,
-  getMonikaInstance,
-} from '../components/notification/alert-message'
-import { getContext } from '../context'
-import getIp from '../utils/ip'
-import { log } from '../utils/pino'
-import { publicIpAddress } from '../utils/public-ip'
+import format from 'date-fns/format'
+
+import { getValidatedConfig } from '../components/config'
+import { getSummary } from '../components/logger/history'
 import {
   maxResponseTime,
   minResponseTime,
@@ -42,16 +37,19 @@ import {
   resetlogs,
   getLogLifeTimeInHour,
 } from '../components/logger/response-time-log'
-import fs from 'fs'
-import type { Config as IConfig } from '@oclif/core'
+import {
+  getOSName,
+  getMonikaInstance,
+} from '../components/notification/alert-message'
+import { getContext } from '../context'
 import events from '../events'
-import { Config } from '../interfaces/config'
-
+import type { ValidatedConfig } from '../interfaces/config'
 import { getEventEmitter } from '../utils/events'
-import type { Notification } from '@hyperjumptech/monika-notification'
-import type { Probe } from '../interfaces/probe'
 import { getErrorMessage } from '../utils/catch-error-handler'
-import { readFile } from '../utils/read-file'
+import getIp from '../utils/ip'
+import { log } from '../utils/pino'
+import { publicIpAddress } from '../utils/public-ip'
+
 const eventEmitter = getEventEmitter()
 
 type TweetMessage = {
@@ -62,8 +60,8 @@ type TweetMessage = {
 }
 
 export async function getSummaryAndSendNotif(): Promise<void> {
-  const config = getConfig()
-  const { notifications } = config
+  const config = getValidatedConfig()
+  const { notifications, probes } = config
 
   if (!notifications) return
 
@@ -75,13 +73,10 @@ export async function getSummaryAndSendNotif(): Promise<void> {
       getOSName(),
       getMonikaInstance(privateIpAddress),
     ])
-    const {
-      numberOfIncidents,
-      numberOfProbes,
-      numberOfRecoveries,
-      numberOfSentNotifications,
-    } = summary
+    const { numberOfIncidents, numberOfRecoveries, numberOfSentNotifications } =
+      summary
     const responseTimelogLifeTimeInHour = getLogLifeTimeInHour()
+    const numberOfProbes = probes.length
     const tweetMessage = createTweetMessage({
       averageResponseTime,
       numberOfIncidents,
@@ -118,6 +113,7 @@ ${tweetMessage}
         averageResponseTime,
         responseTimelogLifeTimeInHour,
         version: userAgent,
+        numberOfProbes,
         ...summary,
       },
     }).catch((error) => log.error(`Summary notification: ${error.message}`))
@@ -130,43 +126,17 @@ ${tweetMessage}
   }
 }
 
-interface PidObject {
-  monikaPid: number
-  monikaConfigFile: string
-  monikaStartTime: Date
-  monikaProbes: Probe
-  monikaNotifs: Notification
-}
-
-/**
- * readsPidFile reads a local monika.pid file and returns the information in it
- * @returns {object} PidObject is returned
- */
-async function readPidFile(): Promise<PidObject> {
-  const fileContent = await readFile('monika.pid', 'utf8')
-  const json = JSON.parse(fileContent)
-  return {
-    monikaPid: json.monikaPid,
-    monikaConfigFile: json.monikaConfigFile,
-    monikaStartTime: json.monikaStartTime,
-    monikaProbes: json.monikaProbes,
-    monikaNotifs: json.monikaNotifs,
-  }
-}
-
-/**
- * savePidFile saves a monika.pid file with some useful information
- * @param {string} configFile is the configuration file used
- * @param {obj} config is a Config object
- * @returns void
- */
-export function savePidFile(configFile: string[], config: Config): void {
+// savePidFile saves a monika.pid file with some useful information
+export function savePidFile(
+  configFile: string[],
+  { notifications, probes }: ValidatedConfig
+): void {
   const data = JSON.stringify({
     monikaStartTime: new Date(),
     monikaConfigFile: configFile,
     monikaPid: process.pid,
-    monikaProbes: config.probes ? config.probes.length : '0',
-    monikaNotifs: config.notifications ? config.notifications.length : '0',
+    monikaProbes: probes.length,
+    monikaNotifs: notifications.length,
   })
 
   fs.writeFile('monika.pid', data, (err) => {
@@ -184,61 +154,6 @@ eventEmitter.on(events.application.terminated, async () => {
     }
   })
 })
-
-/**
- * getDaysHours breaks down the date into days  hours minute string
- * @param {Date} startTime is the start time
- * @returns {string} text of the date to print
- */
-function getDaysHours(startTime: Date): string {
-  let duration = Math.abs((Date.now() - new Date(startTime).getTime()) / 1000)
-  const numDays = Math.floor(duration / 86_400)
-  duration -= numDays * 86_400 // get the remaining hours
-
-  const numHours = Math.floor(duration / 3600) % 24
-  duration -= numHours * 3600 // get the remaining minutes
-
-  const numMinutes = Math.floor(duration / 60) % 60
-
-  const numSeconds = Math.floor(duration - numMinutes * 60)
-
-  return `${numDays} days, ${numHours} hours, ${numMinutes} minutes, ${numSeconds} seconds`
-}
-
-/**
- * printSummary gathers and print some stats
- * @param {object} cliConfig is oclif config structure
- * @returns Promise<void>
- */
-export async function printSummary(cliConfig: IConfig): Promise<void> {
-  try {
-    const pidObject = await readPidFile()
-    const summary = await getSummary()
-
-    const uptime = getDaysHours(pidObject.monikaStartTime)
-
-    const host = `${hostname()} (${[publicIpAddress, getIp()]
-      .filter(Boolean)
-      .join('/')})`
-
-    log.info(`Monika Summary \n
-    Monika process id \t\t: ${pidObject.monikaPid}
-    Active config file \t\t: ${pidObject.monikaConfigFile}
-    Probes set \t\t\t: ${pidObject.monikaProbes}
-    Notifications set \t\t: ${pidObject.monikaNotifs}
-    Number of incidents \t: ${summary.numberOfIncidents} in last 24hr
-    Number of recoveries \t: ${summary.numberOfRecoveries} in last 24hr
-    Number of notifications \t: ${summary.numberOfSentNotifications} in last 24h
-
-    Up time \t: ${uptime}
-    Running on \t: ${host}
-    App version : ${cliConfig.userAgent}
-
-    `)
-  } catch (error: unknown) {
-    log.error(`Summary notification: ${getErrorMessage(error)}`)
-  }
-}
 
 function createTweetMessage({
   averageResponseTime,

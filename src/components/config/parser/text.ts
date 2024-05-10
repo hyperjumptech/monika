@@ -46,11 +46,11 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { getContext } from '../../context'
-import type { Config } from '../../interfaces/config'
-import { monikaFlagsDefaultValue } from '../../flag'
-import type { Probe, ProbeAlert } from '../../interfaces/probe'
-import { isValidURL } from '../../utils/is-valid-url'
+import { getContext } from '../../../context'
+import type { Config } from '../../../interfaces/config'
+import { monikaFlagsDefaultValue } from '../../../flag'
+import type { Probe, ProbeAlert } from '../../../interfaces/probe'
+import { isValidURL } from '../../../utils/is-valid-url'
 
 export const parseConfigFromText = (configString: string): Config => {
   let probes: Probe[] = []

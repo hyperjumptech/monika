@@ -22,37 +22,27 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import path from 'node:path'
 import { expect, test } from '@oclif/test'
-import path from 'path'
-import chai from 'chai'
+import { use } from 'chai'
 import spies from 'chai-spies'
+import { stub, type SinonStub } from 'sinon'
 import cmd from '../src/commands/monika'
-import sinon from 'sinon'
 import * as IpUtil from '../src/utils/public-ip'
 
 const { resolve } = path
 
-chai.use(spies)
+use(spies)
 
 describe('monika', () => {
-  let getPublicIPStub: sinon.SinonStub
-  let getPublicNetworkInfoStub: sinon.SinonStub
+  let getPublicIPStub: SinonStub
+
   beforeEach(() => {
-    getPublicIPStub = sinon.stub(IpUtil, 'getPublicIp' as never)
-    getPublicNetworkInfoStub = sinon
-      .stub(IpUtil, 'getPublicNetworkInfo' as never)
-      .callsFake(async () => ({
-        country: '',
-        city: '',
-        hostname: '',
-        isp: '',
-        privateIp: '',
-        publicIp: '',
-      }))
+    getPublicIPStub = stub(IpUtil, 'getPublicIp')
   })
+
   afterEach(() => {
     getPublicIPStub.restore()
-    getPublicNetworkInfoStub.restore()
   })
 
   test
@@ -77,7 +67,7 @@ describe('monika', () => {
     )
     .it('detects valid remote config', (ctx) => {
       expect(ctx.stdout).to.contain(
-        'Starting Monika. Probes: 1. Notifications: 0'
+        'Starting Monika. Probes: 1. Notifications: 1'
       )
     })
 
@@ -94,9 +84,9 @@ describe('monika', () => {
     })
     .it('runs with config with invalid notification type')
 
-  // Probes Test`
+  // Probes Test
   test
-    .stderr()
+    .stdout()
     .do(() =>
       cmd.run([
         '--verbose',
@@ -104,12 +94,9 @@ describe('monika', () => {
         resolve('./test/testConfigs/probes/noProbes.yml'),
       ])
     )
-    .catch((error) => {
-      expect(error.message).to.contain(
-        'Probes object does not exists or has length lower than 1!'
-      )
+    .it('runs with config without probes', ({ stdout }) => {
+      expect(stdout).to.contain('Starting Monika.')
     })
-    .it('runs with config without probes')
 
   test
     .stdout()

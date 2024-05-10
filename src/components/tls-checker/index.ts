@@ -22,9 +22,9 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import type { RequestOptions } from 'https'
+import type { RequestOptions } from 'node:https'
 import sslChecker from 'ssl-checker'
-import type { Domain } from '../../interfaces/certificate'
+import type { Domain } from '../../interfaces/config'
 
 export async function checkTLS(
   domain: Domain,

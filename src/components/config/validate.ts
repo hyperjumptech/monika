@@ -22,24 +22,63 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import type { Config } from '../../interfaces/config'
-import { validateProbes, validateSymonConfig } from './validation'
 import { validateNotification } from '@hyperjumptech/monika-notification'
+import Ajv from 'ajv'
+import Joi from 'joi'
+
+import { getContext } from '../../context'
+import type { Config, SymonConfig } from '../../interfaces/config'
+import monikaConfigSchema from '../../monika-config-schema.json'
+import { validateProbes } from './validation'
+import { isSymonModeFrom } from '.'
 
 export const validateConfig = async (
-  configuration: Partial<Config>
+  configuration: Config
 ): Promise<Config> => {
   const { notifications = [], probes = [], symon } = configuration
-  const symonConfigError = validateSymonConfig(symon)
-
-  if (symonConfigError) {
-    throw new Error(`Monika configuration: symon ${symonConfigError}`)
-  }
-
   const [validatedProbes] = await Promise.all([
     validateProbes(probes),
     validateNotification(notifications),
+    validateSymon(symon),
   ])
+  const validatedConfig = {
+    ...configuration,
+    notifications,
+    probes: validatedProbes,
+  }
 
-  return { ...configuration, probes: validatedProbes }
+  if (!isSymonModeFrom(getContext().flags)) {
+    validateConfigWithJSONSchema(validatedConfig)
+  }
+
+  return validatedConfig
+}
+
+async function validateSymon(symonConfig?: SymonConfig) {
+  if (!symonConfig) {
+    return
+  }
+
+  const schema = Joi.object({
+    id: Joi.string().required(),
+    url: Joi.string().uri().required(),
+    key: Joi.string().required(),
+    projectID: Joi.string().required(),
+    organizationID: Joi.string().required(),
+    interval: Joi.number(),
+  })
+
+  await schema.validateAsync(symonConfig)
+}
+
+function validateConfigWithJSONSchema(config: Config) {
+  const ajv = new Ajv()
+  const validate = ajv.compile(monikaConfigSchema)
+  const isValid = validate(config)
+
+  if (!isValid) {
+    throw new Error(
+      `${validate.errors?.[0].instancePath} ${validate.errors?.[0].message}`
+    )
+  }
 }

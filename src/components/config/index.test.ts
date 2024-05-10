@@ -22,24 +22,37 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import { readFile, rename } from 'node:fs/promises'
+import { existsSync } from 'node:fs'
 import { expect } from '@oclif/test'
-import { getConfig, isSymonModeFrom, updateConfig } from '.'
-import { getContext, resetContext, setContext } from '../../context'
-import type { Config } from '../../interfaces/config'
-import events from '../../events'
-import { md5Hash } from '../../utils/hash'
-import { getEventEmitter } from '../../utils/events'
-import type { MonikaFlags } from '../../flag'
-import { validateProbes } from './validation'
-import { getErrorMessage } from '../../utils/catch-error-handler'
+import chai from 'chai'
+import spies from 'chai-spies'
+import { HttpResponse, http } from 'msw'
+import { setupServer } from 'msw/node'
 
-describe('getConfig', () => {
+import { getContext, resetContext, setContext } from '../../context'
+import events from '../../events'
+import type { Config } from '../../interfaces/config'
+import { sanitizeFlags } from '../../flag'
+import { getErrorMessage } from '../../utils/catch-error-handler'
+import { getEventEmitter } from '../../utils/events'
+import { log } from '../../utils/pino'
+import { sanitizeConfig } from './sanitize'
+import {
+  getValidatedConfig,
+  isSymonModeFrom,
+  initConfig,
+  updateConfig,
+} from '.'
+import { validateProbes } from './validation'
+
+describe('getValidatedConfig', () => {
   beforeEach(() => {
     resetContext()
   })
 
   it('should throw error when config is empty', () => {
-    expect(() => getConfig()).to.throw(
+    expect(() => getValidatedConfig()).to.throw(
       'Configuration setup has not been run yet'
     )
   })
@@ -47,27 +60,27 @@ describe('getConfig', () => {
   it('should not throw error when config is empty in symon mode', () => {
     // arrange
     setContext({
-      flags: {
+      flags: sanitizeFlags({
         symonKey: 'bDF8j',
         symonUrl: 'https://example.com',
-      } as MonikaFlags,
+      }),
     })
 
     // act & assert
-    expect(getConfig()).deep.eq({ probes: [] })
+    expect(getValidatedConfig().version).eq('efde57d3b97ff787384fc2afde824615')
   })
 
-  it('should return empty array when config is empty in Symon mode', () => {
+  it('should return empty array for probes when config is empty in Symon mode', () => {
     // arrange
     setContext({
-      flags: {
+      flags: sanitizeFlags({
         symonKey: 'bDF8j',
         symonUrl: 'https://example.com',
-      } as MonikaFlags,
+      }),
     })
 
     // act and assert
-    expect(getConfig()).deep.eq({ probes: [] })
+    expect(getValidatedConfig().probes).deep.eq([])
   })
 })
 
@@ -128,21 +141,20 @@ describe('updateConfig', () => {
 
     try {
       // act
-      await updateConfig({ probes: [] })
+      await updateConfig({ probes: [{}] } as Config)
     } catch (error: unknown) {
       errorMessage = getErrorMessage(error)
     }
 
     // assert
-    expect(errorMessage).contain(
-      'Probes object does not exists or has length lower than 1!'
-    )
+    expect(errorMessage).contain('Monika configuration is invalid')
   })
 
   it('should update config', async () => {
     // arrange
-    const config: Config = {
-      probes: [
+    const config = {
+      notifications: [],
+      probes: await validateProbes([
         {
           id: '1',
           name: '',
@@ -157,11 +169,7 @@ describe('updateConfig', () => {
           ],
           alerts: [],
         },
-      ],
-    }
-    const validatedProbes = {
-      ...config,
-      probes: await validateProbes(config.probes),
+      ]),
     }
     let configFromEmitter = ''
     const eventEmitter = getEventEmitter()
@@ -173,10 +181,7 @@ describe('updateConfig', () => {
     await updateConfig(config)
 
     // assert
-    expect(getContext().config).to.deep.eq({
-      ...validatedProbes,
-      version: md5Hash(validatedProbes),
-    })
+    expect(getContext().config).to.deep.eq(sanitizeConfig(config))
     expect(configFromEmitter).not.eq('')
   })
 
@@ -214,5 +219,92 @@ describe('updateConfig', () => {
     // assert
     expect(configFromEmitter).eq('')
     eventEmitter.removeListener(events.config.updated, eventListener)
+  })
+})
+
+describe('Setup Config', () => {
+  const server = setupServer()
+  chai.use(spies)
+  let logMessages: string[] = []
+
+  before(() => {
+    server.listen({ onUnhandledRequest: 'bypass' })
+  })
+
+  beforeEach(async () => {
+    if (existsSync('monika.yml')) {
+      await rename('monika.yml', 'monika_backup.yml')
+    }
+
+    setContext({
+      ...getContext(),
+      flags: { ...getContext().flags, config: [] },
+    })
+
+    chai.spy.on(log, 'info', (message: string) => {
+      logMessages.push(message)
+    })
+  })
+
+  afterEach(async () => {
+    server.resetHandlers()
+    if (existsSync('monika_backup.yml')) {
+      await rename('monika_backup.yml', 'monika.yml')
+    }
+
+    chai.spy.restore()
+    logMessages = []
+  })
+
+  after(() => {
+    server.close()
+  })
+
+  it('should create example config if config does not exist', async () => {
+    // act
+    await initConfig()
+
+    // assert
+    expect(existsSync('monika.yml')).eq(true)
+  })
+
+  it('should create local example config if the url is unreachable', async () => {
+    // arrange
+    server.use(
+      http.get(
+        'https://raw.githubusercontent.com/hyperjumptech/monika/main/monika.example.yml',
+        () => HttpResponse.error()
+      )
+    )
+
+    // act
+    await initConfig()
+
+    // assert
+    expect(existsSync('monika.yml')).eq(true)
+    expect(await readFile('monika.yml', { encoding: 'utf8' })).include(
+      'http://example.com'
+    )
+  })
+
+  it('log config changes info', async () => {
+    // arrange
+    server.use(
+      http.get(
+        'https://raw.githubusercontent.com/hyperjumptech/monika/main/monika.example.yml',
+        () => HttpResponse.error()
+      )
+    )
+    setContext({ config: sanitizeConfig({ probes: [], version: '0.0.1' }) })
+
+    // act
+    await initConfig()
+
+    // assert
+    expect(
+      logMessages.find(
+        (message) => message === 'Config changes. Updating config...'
+      )
+    ).not.undefined
   })
 })

@@ -105,7 +105,7 @@ type NotificationChannel<T = object, U = object> = {
 export type Notification = {
   id: string
   type: string
-  data: object | undefined
+  data?: object
 }
 
 export const channels: Record<string, NotificationChannel> = {

@@ -44,7 +44,7 @@ import { removeIncident } from '../components/incident'
 import { getOSName } from '../components/notification/alert-message'
 import { getContext } from '../context'
 import events from '../events'
-import { SYMON_API_VERSION, symonAPIVersion, type MonikaFlags } from '../flag'
+import { SYMON_API_VERSION, type MonikaFlags } from '../flag'
 import { getEventEmitter } from '../utils/events'
 import { sendHttpRequestFetch } from '../utils/http'
 import getIp from '../utils/ip'
@@ -173,26 +173,19 @@ export default class SymonClient {
   private reportTimeout: NodeJS.Timeout | undefined
   private url: string
 
+  private apiVersion: string
+
   constructor({
-    'symon-api-version': apiVersion = SYMON_API_VERSION.v1,
+    'symon-api-version': apiVersion,
     symonKey = '',
     symonLocationId = '',
     symonMonikaId = '',
-    symonReportInterval = 10_000,
-    symonReportLimit = 100,
+    symonReportInterval,
+    symonReportLimit,
     symonUrl = '',
   }: SymonClientParams) {
     this.apiKey = symonKey
     this.url = symonUrl
-
-    // this.httpClient = axios.create({
-    //   baseURL: `${this.url}/api/${apiVersion}/monika`,
-    //   headers: {
-    //     'x-api-key': this.apiKey,
-    //   },
-    //   timeout: DEFAULT_TIMEOUT,
-    // })
-
     this.locationId = symonLocationId
     this.monikaId = symonMonikaId
     this.isMultiNode = apiVersion === SYMON_API_VERSION.v2
@@ -205,6 +198,7 @@ export default class SymonClient {
       idleTimeout: this.reportProbesInterval,
       maxQueue: 1,
     })
+    this.apiVersion = apiVersion
   }
 
   async initiate(): Promise<void> {
@@ -241,7 +235,7 @@ export default class SymonClient {
   async sendStatus({ isOnline }: { isOnline: boolean }): Promise<void> {
     await sendHttpRequestFetch({
       method: 'POST',
-      url: `${this.url}/api/${symonAPIVersion}/monika/status`,
+      url: `${this.url}/api/${this.apiVersion}/monika/status`,
       headers: {
         'x-api-key': this.apiKey,
       },
@@ -311,7 +305,7 @@ export default class SymonClient {
 
     try {
       const resp = await sendHttpRequestFetch({
-        url: `${this.url}/api/${symonAPIVersion}/monika/events`,
+        url: `${this.url}/api/${this.apiVersion}/monika/events`,
         method: 'POST',
         body: JSON.stringify({
           monikaId: this.monikaId,
@@ -380,7 +374,7 @@ export default class SymonClient {
     const params = this.probeChangesCheckedAt ?? new Date()
     const encodedQuery = encodeURIComponent(params.toISOString())
     const response = await sendHttpRequestFetch({
-      url: `${this.url}/api/${symonAPIVersion}/${this.monikaId}/probe-changes?since=${encodedQuery}`,
+      url: `${this.url}/api/${this.apiVersion}/${this.monikaId}/probe-changes?since=${encodedQuery}`,
       method: 'GET',
     })
 
@@ -395,7 +389,7 @@ export default class SymonClient {
 
   private async fetchProbes() {
     const resp = await sendHttpRequestFetch({
-      url: `${this.url}/api/${symonAPIVersion}/${this.monikaId}/probes`,
+      url: `${this.url}/api/${this.apiVersion}/${this.monikaId}/probes`,
       method: 'GET',
       headers: {
         ...(getContext().config?.version
@@ -445,7 +439,7 @@ export default class SymonClient {
     }
 
     const resp = await sendHttpRequestFetch({
-      url: `${this.url}/api/${symonAPIVersion}/monika/client-handshake`,
+      url: `${this.url}/api/${this.apiVersion}/monika/client-handshake`,
       method: 'POST',
       body: JSON.stringify(handshakeData),
       headers: {
@@ -480,7 +474,7 @@ export default class SymonClient {
     updatedAt: Date
   }> {
     const resp = await sendHttpRequestFetch({
-      url: `${this.url}/api/${symonAPIVersion}/monika/probe-assignments/total`,
+      url: `${this.url}/api/${this.apiVersion}/${this.monikaId}/probe-assignments/total`,
       method: 'GET',
       headers: {
         'x-api-key': this.apiKey,

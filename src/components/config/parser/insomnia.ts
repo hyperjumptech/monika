@@ -22,7 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import type { Config } from '../../interfaces/config'
+import type { Config } from '../../../interfaces/config'
 import yml from 'js-yaml'
 import { compile as compileTemplate } from 'handlebars'
 import Joi from 'joi'
@@ -68,10 +68,7 @@ const insomniaValidator = Joi.object({
 let baseUrl = ''
 let environmentVariables: object | undefined
 
-export default function parseInsomnia(
-  configString: string,
-  format: string
-): Config {
+export function parseInsomnia(configString: string, format: string): Config {
   const parseResult =
     format === 'yaml' || format === 'yml'
       ? yml.load(configString, { json: true })
