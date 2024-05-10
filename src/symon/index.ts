@@ -22,7 +22,6 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios, { AxiosInstance } from 'axios'
 import { ExponentialBackoff, handleAll, retry } from 'cockatiel'
 import { EventEmitter } from 'events'
 import mac from 'macaddress'
@@ -30,7 +29,6 @@ import { hostname } from 'os'
 import path from 'path'
 import Piscina from 'piscina'
 
-import type { Config } from '../interfaces/config'
 import type { Probe } from '../interfaces/probe'
 import type { ValidatedResponse } from '../plugins/validate-response'
 
@@ -46,9 +44,9 @@ import { removeIncident } from '../components/incident'
 import { getOSName } from '../components/notification/alert-message'
 import { getContext } from '../context'
 import events from '../events'
-import { SYMON_API_VERSION, type MonikaFlags } from '../flag'
+import { SYMON_API_VERSION, symonAPIVersion, type MonikaFlags } from '../flag'
 import { getEventEmitter } from '../utils/events'
-import { DEFAULT_TIMEOUT } from '../utils/http'
+import { sendHttpRequestFetch } from '../utils/http'
 import getIp from '../utils/ip'
 import { log } from '../utils/pino'
 import { removeProbeState, syncProbeStateFrom } from '../utils/probe-state'
@@ -160,7 +158,9 @@ export default class SymonClient {
   private apiKey: string
   private probeChangesInterval: NodeJS.Timeout | undefined
   private probeAssignmentChangesInterval: NodeJS.Timeout | undefined
-  private httpClient: AxiosInstance
+
+  // private httpClient: AxiosInstance
+
   private locationId: string
   private monikaId: string
   private isMultiNode: boolean
@@ -184,13 +184,15 @@ export default class SymonClient {
   }: SymonClientParams) {
     this.apiKey = symonKey
     this.url = symonUrl
-    this.httpClient = axios.create({
-      baseURL: `${this.url}/api/${apiVersion}/monika`,
-      headers: {
-        'x-api-key': this.apiKey,
-      },
-      timeout: DEFAULT_TIMEOUT,
-    })
+
+    // this.httpClient = axios.create({
+    //   baseURL: `${this.url}/api/${apiVersion}/monika`,
+    //   headers: {
+    //     'x-api-key': this.apiKey,
+    //   },
+    //   timeout: DEFAULT_TIMEOUT,
+    // })
+
     this.locationId = symonLocationId
     this.monikaId = symonMonikaId
     this.isMultiNode = apiVersion === SYMON_API_VERSION.v2
@@ -237,13 +239,16 @@ export default class SymonClient {
   }
 
   async sendStatus({ isOnline }: { isOnline: boolean }): Promise<void> {
-    await this.httpClient({
-      data: {
+    await sendHttpRequestFetch({
+      method: 'POST',
+      url: `${this.url}/api/${symonAPIVersion}/monika/status`,
+      headers: {
+        'x-api-key': this.apiKey,
+      },
+      body: JSON.stringify({
         monikaId: this.monikaId,
         status: isOnline,
-      },
-      method: 'POST',
-      url: '/status',
+      }),
     })
   }
 
@@ -297,49 +302,59 @@ export default class SymonClient {
     }
   }
 
-  private willSendEventListener({
+  private async willSendEventListener({
     probeState,
     validation,
     alertId,
   }: NotificationEvent) {
     const { data, headers, responseTime, status, error } = validation.response
 
-    this.httpClient
-      .post('/events', {
-        monikaId: this.monikaId,
-        alertId,
-        event: probeState === 'DOWN' ? 'incident' : 'recovery',
-        response: {
-          body: data,
-          headers: typeof headers === 'object' ? headers : {},
-          size:
-            typeof headers === 'object' ? headers['content-length'] : undefined,
-          status, // status is http status code
-          time: responseTime,
-          error,
-        },
+    try {
+      const resp = await sendHttpRequestFetch({
+        url: `${this.url}/api/${symonAPIVersion}/monika/events`,
+        method: 'POST',
+        body: JSON.stringify({
+          monikaId: this.monikaId,
+          alertId,
+          event: probeState === 'DOWN' ? 'incident' : 'recovery',
+          response: {
+            body: data,
+            headers: typeof headers === 'object' ? headers : {},
+            size:
+              typeof headers === 'object'
+                ? headers['content-length']
+                : undefined,
+            status, // status is http status code
+            time: responseTime,
+            error,
+          },
+        }),
       })
-      .then(() => {
-        log.info(
-          `[Symon] Send ${
-            probeState === 'DOWN' ? 'incident' : 'recovery'
-          } event for Alert ID: ${alertId} succeed`
-        )
-      })
-      .catch((error) => {
-        log.error(
-          `[Symon] Send ${
-            probeState === 'DOWN' ? 'incident' : 'recovery'
-          } event for Alert ID: ${alertId} failed.  ${(error as Error).message}`
-        )
-      })
+
+      if (!resp.ok) {
+        log.error('[Symon] Sending event failed. ' + resp.statusText)
+        return
+      }
+
+      log.info(
+        `[Symon] Send ${
+          probeState === 'DOWN' ? 'incident' : 'recovery'
+        } event for Alert ID: ${alertId} succeed`
+      )
+    } catch (error: unknown) {
+      log.error(
+        `[Symon] Send ${
+          probeState === 'DOWN' ? 'incident' : 'recovery'
+        } event for Alert ID: ${alertId} failed.  ${(error as Error).message}`
+      )
+    }
   }
 
   private async report(): Promise<void> {
     // Create a task data object
     const taskData = {
       apiKey: this.apiKey,
-      httpClient: this.httpClient,
+      // httpClient: this.httpClient,
       monikaId: this.monikaId,
       probeIds: getProbes().map(({ id }) => id),
       reportProbesLimit: this.reportProbesLimit,
@@ -362,62 +377,49 @@ export default class SymonClient {
   }
 
   private async probeChanges(): Promise<ProbeChange[]> {
-    const response = await this.httpClient.get<{ data: ProbeChange[] }>(
-      `/${this.monikaId}/probe-changes`,
-      {
-        params: { since: this.probeChangesCheckedAt },
-      }
-    )
+    const params = this.probeChangesCheckedAt ?? new Date()
+    const encodedQuery = encodeURIComponent(params.toISOString())
+    const response = await sendHttpRequestFetch({
+      url: `${this.url}/api/${symonAPIVersion}/${this.monikaId}/probe-changes?since=${encodedQuery}`,
+      method: 'GET',
+    })
 
-    return response.data.data
+    if (!response.ok) {
+      log.error('[Symon] Fetch probe changes failed. ' + response.statusText)
+      return []
+    }
+
+    const data = (await response.json()) as { data: ProbeChange[] }
+    return data.data
   }
 
   private async fetchProbes() {
-    const TIMEOUT = 30_000
+    const resp = await sendHttpRequestFetch({
+      url: `${this.url}/api/${symonAPIVersion}/${this.monikaId}/probes`,
+      method: 'GET',
+      headers: {
+        ...(getContext().config?.version
+          ? { 'If-None-Match': getContext().config?.version }
+          : {}),
+      },
+    })
 
-    return this.httpClient
-      .get<{ data: Probe[] }>(`/${this.monikaId}/probes`, {
-        timeout: TIMEOUT,
-        headers: {
-          ...(getContext().config?.version
-            ? { 'If-None-Match': getContext().config?.version }
-            : {}),
-        },
-        validateStatus(status) {
-          return [200, 304].includes(status)
-        },
-      })
-      .then(async (res) => {
-        if (!res.data.data) {
-          return {
-            probes: getProbes(),
-            hash: res.headers.etag,
-          }
-        }
+    if (!resp.ok) {
+      log.error('[Symon] Fetch probe failed. ' + resp.statusText)
+      return { probes: getProbes(), hash: '' }
+    }
 
-        return { probes: res.data.data, hash: res.headers.etag }
-      })
-      .catch((error) => {
-        if (error.isAxiosError) {
-          if (error.response) {
-            throw new Error(error.response.data.message)
-          }
+    const listprobes = (await resp.json()) as { data: Probe[] }
+    const etag = resp.headers.get('etag')
 
-          if (error.request) {
-            throw new Error('Failed to get probes from Symon')
-          }
-        }
-
-        throw error
-      })
+    return { probes: listprobes.data, hash: etag }
   }
 
   private async fetchProbesAndUpdateConfig() {
     // Fetch the probes
     const { hash, probes } = await this.fetchProbes()
-    const newConfig: Config = { probes, version: hash }
 
-    await setConfig(newConfig)
+    await updateConfig({ probes, version: hash ?? undefined }) // Add nullish coalescing operator to handle null value
     log.info('[Symon] Get probes succeed')
   }
 
@@ -442,9 +444,17 @@ export default class SymonClient {
       }
     }
 
-    return this.httpClient
-      .post('/client-handshake', handshakeData)
-      .then((res) => res.data?.data.monikaId)
+    const resp = await sendHttpRequestFetch({
+      url: `${this.url}/api/${symonAPIVersion}/monika/client-handshake`,
+      method: 'POST',
+      body: JSON.stringify(handshakeData),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+
+    const id = (await resp.json()) as { data: { monikaId: string } }
+    return id.data.monikaId
   }
 
   private async fetchAndApplyProbeAssignmentChanges(): Promise<void> {
@@ -469,11 +479,23 @@ export default class SymonClient {
     total: number
     updatedAt: Date
   }> {
-    const response = await this.httpClient.get<{
-      data: { total: number; updatedAt: Date }
-    }>(`/${this.monikaId}/probe-assignments/total`)
+    const resp = await sendHttpRequestFetch({
+      url: `${this.url}/api/${symonAPIVersion}/monika/probe-assignments/total`,
+      method: 'GET',
+      headers: {
+        'x-api-key': this.apiKey,
+      },
+    })
 
-    return response.data.data
+    if (!resp.ok) {
+      log.error(
+        '[Symon] Fetch probe assignment total failed. ' + resp.statusText
+      )
+      return { total: 0, updatedAt: new Date() }
+    }
+
+    const data = (await resp.json()) as { total: number; updatedAt: Date }
+    return data
   }
 }
 
@@ -514,16 +536,4 @@ async function applyProbeChanges(probeChanges: ProbeChange[]) {
       }
     })
   )
-}
-
-async function setConfig(newConfig: Config) {
-  if (
-    !newConfig.version ||
-    getContext().config?.version === newConfig.version
-  ) {
-    return
-  }
-
-  log.info('[Symon] Config changes. Reloading Monika')
-  await updateConfig(newConfig)
 }
