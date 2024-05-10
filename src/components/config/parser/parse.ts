@@ -28,7 +28,7 @@ import isUrl from 'is-url'
 import yml from 'js-yaml'
 
 import type { Config } from '../../../interfaces/config'
-import { sendHttpRequest } from '../../../utils/http'
+import { sendHttpRequestFetch } from '../../../utils/http'
 import { parseHarFile } from './har'
 import { parseInsomnia } from './insomnia'
 import { parseConfigFromPostman } from './postman'
@@ -85,10 +85,15 @@ async function getConfigFileFromUrl(url: string) {
   return config
 }
 
-async function fetchConfigFile(url: string) {
+async function fetchConfigFile(url: string): Promise<string> {
   try {
-    const { data } = await sendHttpRequest({ url })
+    const resp = await sendHttpRequestFetch({ url, method: 'GET' })
 
+    if (!resp.ok) {
+      throw new Error(`The configuration file in ${url} is unreachable.`)
+    }
+
+    const data = await resp.text()
     return data
   } catch {
     throw new Error(`The configuration file in ${url} is unreachable.`)
