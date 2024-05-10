@@ -34,7 +34,7 @@ probes:
 #   description: requesting icmp ping
 #   interval: 10
 #   ping:
-#     - url: http://google.com
+#     - uri: http://google.com
 
 # Configuration example for sending Multiple requests
 # Requests could be define in array to run for multiple requests
