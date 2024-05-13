@@ -98,6 +98,10 @@ function generateStartupMessage({
     startupMessage += generateNotificationMessage(notifications)
   }
 
+  if (probes.some((p) => p.requests?.some((r) => r.ping))) {
+    startupMessage += generateDeprecatedPingMessage()
+  }
+
   return startupMessage
 }
 
@@ -106,6 +110,21 @@ function generateEmptyNotificationMessage(): string {
   Please refer to the Monika documentations on how to how to configure notifications (e.g., Telegram, Slack, Desktop notification, etc.) at https://monika.hyperjump.tech/guides/notifications.`
 
   return boxen(chalk.yellow(NO_NOTIFICATIONS_MESSAGE), {
+    padding: 1,
+    margin: {
+      top: 2,
+      right: 1,
+      bottom: 2,
+      left: 1,
+    },
+    borderStyle: 'bold',
+    borderColor: 'yellow',
+  })
+}
+
+function generateDeprecatedPingMessage(): string {
+  const message = `We are deprecating probe requests with flag "ping: true", please migrate to standalone probe https://monika.hyperjump.tech/guides/probes#ping-request`
+  return boxen(chalk.yellow(message), {
     padding: 1,
     margin: {
       top: 2,
