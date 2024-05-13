@@ -89,6 +89,9 @@ export async function httpRequest({
   const startTime = Date.now()
   try {
     if (newReq.ping === true) {
+      log.warn(
+        `PING ${renderedURL}: Requests with "ping: true" is deprecated, please migrate to standalone probe https://monika.hyperjump.tech/guides/probes#ping-request`
+      )
       return icmpRequest({ host: renderedURL })
     }
 
