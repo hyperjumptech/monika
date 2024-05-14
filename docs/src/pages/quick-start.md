@@ -91,6 +91,17 @@ When using remote configuration file, you can use the `--config-interval` to tel
 monika -c https://raw.githubusercontent.com/hyperjumptech/monika/main/config_sample/config.desktop.example.yml --config-interval 10
 ```
 
+## Run Monika on Docker
+
+```bash
+docker run --name monika \
+    --net=host \
+    -d hyperjump/monika:latest \
+    monika -c https://domain.com/path/to/your/configuration.yml
+```
+
+**On Apple Silicon chip**, you need to pass `--platform linux/amd64` to docker.
+
 Congratulations, you have successfully run Monika in your machine!
 
 ## Next Step

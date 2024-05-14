@@ -3,13 +3,21 @@ id: run-monika-in-docker
 title: Run Monika in Docker
 ---
 
-Monika is available as a docker image. You can find the image in the docker hub as `hyperjump/monika`, or pull the image with the following command:
+Monika is available as a docker image. You can find the image in the docker hub as `hyperjump/monika`, or pull the image with the following command
 
 ```bash
 docker pull hyperjump/monika
 ```
 
-Once you've pulled the latest image, you can run it using:
+## Running Monika on Apple Silicon
+
+Monika docker image only supports amd64 architecture, you have to pass `--platform linux/amd64` when using `hyperjump/monika` docker image
+
+```bash
+docker pull --platform linux/amd64 hyperjump/monika
+```
+
+Once you've pulled the latest image, you can run it using
 
 ```bash
 # Run Monika in foreground
@@ -17,6 +25,10 @@ docker run --name monika --net=host -it hyperjump/monika:latest
 
 # Or, if you prefer to run Monika in the background
 docker run --name monika --net=host --detach hyperjump/monika:latest
+
+# On Apple Silicon chip, pass --platform linux/amd64
+docker run --name monika --net=host --platform linux/amd64 -it hyperjump/monika:latest
+docker run --name monika --net=host --platform linux/amd64 --detach hyperjump/monika:latest
 ```
 
 In the example above, we create a container from the hyperjump/monika base image naming it with`--name monika`, indicate we'll use the host machine's network configuration with `--net=host` and let it run in the backround using the `--detach` switch (or interactively with `-it`).
@@ -42,6 +54,13 @@ docker run --name monika_interactive \
     -d hyperjump/monika:latest \
     monika -c /config/myConfig.yml --prometheus 3001
 
+# On Apple Silicon
+docker run --name monika_interactive \
+    --net=host \
+    --platform linux/amd64 \
+    -v ${PWD}/config:/config \
+    -d hyperjump/monika:latest \
+    monika -c /config/myConfig.yml --prometheus 3001
 ```
 
 ## Troubleshooting
