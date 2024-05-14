@@ -75,7 +75,6 @@ export async function icmpRequest(
 
     return processICMPRequestResult(icmpResp)
   } catch (error: unknown) {
-    console.error('icmp got error:', error)
     baseResponse.data = ''
     baseResponse.error = getErrorMessage(error)
   }

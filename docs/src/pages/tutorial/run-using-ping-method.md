@@ -24,23 +24,15 @@ probes:
     name: ping_test
     description: requesting icmp ping
     interval: 10
-    requests:
-      - url: https://google.com
-        ping: true
-      - method: GET
-        url: https://reqres.in/api/users
-    alerts:
-      - query: response.status != 200
-        message: Status code is not 200
-      - query: response.time > 2000
-        message: Request took more than 2 seconds
+    ping:
+      - uri: google.com
 ```
 
 Let me explain this configuration a little bit:
 
 - This configuration uses Desktop notifications
-- This probe configuration will do two requests: **Hit google.com using PING**. After PING success, it will **hit** [**https://reqres.in/api/users**](https://reqres.in/api/users) **using the GET method**. If by chance the first request fails, it will not proceed to the next request.
-- This probe configuration will alert you if the status code is not 200, or the request took longer than two seconds
+- This probe configuration will **hit google.com using PING**
+- This probe configuration will alert you if ping request is not successful (200), or the request took longer than two seconds
 
 Save the configuration above as `monika.yaml` in your local machine and run `monika -c monika.yaml` command in your terminal inside the directory where you saved the configuration file.
 

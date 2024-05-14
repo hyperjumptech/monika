@@ -33,12 +33,8 @@ probes:
 #   name: ping_test
 #   description: requesting icmp ping
 #   interval: 10
-#   requests:
-#     - url: http://google.com
-#       ping: true
-#   alerts:
-#     - assertion: response.status == 500
-#       message: response status message
+#   ping:
+#     - uri: http://google.com
 
 # Configuration example for sending Multiple requests
 # Requests could be define in array to run for multiple requests
