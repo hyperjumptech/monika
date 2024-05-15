@@ -100,7 +100,7 @@ docker run --name monika \
     monika -c https://domain.com/path/to/your/configuration.yml
 ```
 
-**On Apple Silicon chip**, you need to pass `--platform linux/amd64` to docker.
+**On ARM / Apple Silicon chip**, you need to pass `--platform linux/amd64` to docker.
 
 Congratulations, you have successfully run Monika in your machine!
 

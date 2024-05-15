@@ -9,7 +9,7 @@ Monika is available as a docker image. You can find the image in the docker hub 
 docker pull hyperjump/monika
 ```
 
-## Running Monika on Apple Silicon
+## Running Monika on ARM / Apple Silicon
 
 Monika docker image only supports amd64 architecture, you have to pass `--platform linux/amd64` when using `hyperjump/monika` docker image
 
@@ -26,7 +26,7 @@ docker run --name monika --net=host -it hyperjump/monika:latest
 # Or, if you prefer to run Monika in the background
 docker run --name monika --net=host --detach hyperjump/monika:latest
 
-# On Apple Silicon chip, pass --platform linux/amd64
+# On ARM / Apple Silicon chip, pass --platform linux/amd64
 docker run --name monika --net=host --platform linux/amd64 -it hyperjump/monika:latest
 docker run --name monika --net=host --platform linux/amd64 --detach hyperjump/monika:latest
 ```
@@ -54,7 +54,7 @@ docker run --name monika_interactive \
     -d hyperjump/monika:latest \
     monika -c /config/myConfig.yml --prometheus 3001
 
-# On Apple Silicon
+# On ARM / Apple Silicon
 docker run --name monika_interactive \
     --net=host \
     --platform linux/amd64 \
