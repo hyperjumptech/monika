@@ -67,7 +67,6 @@ export const parseConfigFromText = (configString: string): Config => {
               url,
               method: 'GET',
               timeout: 10_000,
-              body: {} as JSON,
               followRedirects: getContext().flags['follow-redirects'],
             },
           ],

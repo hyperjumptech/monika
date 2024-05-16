@@ -537,6 +537,34 @@ describe('probingHTTP', () => {
       // assert
       expect(res.status).to.eq(302)
     })
+
+    it('should send no body', async () => {
+      // arrange
+      let body
+      server.use(
+        http.get('https://example.com', async ({ request }) => {
+          body = request.body
+
+          return new HttpResponse(null, {
+            status: 200,
+          })
+        })
+      )
+      const request = {
+        url: 'https://example.com',
+        body: null,
+      } as RequestConfig
+
+      // act
+      const res = await httpRequest({
+        requestConfig: request,
+        responses: [],
+      })
+
+      // assert
+      expect(res.status).to.eq(200)
+      expect(body).to.eq(null)
+    })
   })
 
   describe('Unit test', () => {
