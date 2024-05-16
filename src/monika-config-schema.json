@@ -246,6 +246,9 @@
         "type": "object",
         "additionalProperties": false,
         "required": ["url"],
+        "patternProperties": {
+          "ping": { "type": "boolean" }
+        },
         "properties": {
           "id": {
             "title": "Id",
@@ -295,11 +298,6 @@
           },
           "alerts": {
             "$ref": "#/definitions/alerts"
-          },
-          "ping": {
-            "title": "Ping",
-            "type": "boolean",
-            "description": "If defined and to true, the request is an ICMP ping"
           },
           "allowUnauthorized": {
             "title": "AllowUnauthorized",
