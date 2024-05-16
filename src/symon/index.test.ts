@@ -206,7 +206,7 @@ describe('Symon initiate', () => {
         })
       ),
       http.get('http://localhost:4000/api/v1/monika/1234/probes', () => {
-        throw new Error('Failed')
+        throw new Error('Failed to get probes from Symon')
       })
     )
 
