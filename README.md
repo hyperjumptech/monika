@@ -13,7 +13,7 @@ You can find many ways to install Monika and how to start monitoring from the [Q
 ## Contributing
 
 Monika is a Node.js application written in TypeScript using the [oclif framework](https://oclif.io/).  
-It was developed on **node v18 (LTS)**, and **npm v9**.
+It was developed on **node 20 (LTS)**, and **npm v10**.
 
 To start developing, clone this repository, then install the dependencies:
 
