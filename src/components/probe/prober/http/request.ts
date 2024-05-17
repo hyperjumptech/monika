@@ -27,7 +27,7 @@ import FormData from 'form-data'
 import Joi from 'joi'
 // eslint-disable-next-line no-restricted-imports
 import * as qs from 'querystring'
-import { errors as undiciErrors } from 'undici'
+import { type BodyInit, errors as undiciErrors } from 'undici'
 import YAML from 'yaml'
 import {
   type ProbeRequestResponse,
@@ -72,17 +72,17 @@ export async function httpRequest({
     ping,
     allowUnauthorized,
     followRedirects,
+    signal,
   } = requestConfig
-  const newReq = { method, headers, timeout, body, ping }
+  const newReq = { method, headers, timeout, body, ping, signal }
   const renderURL = Handlebars.compile(url)
   const renderedURL = renderURL({ responses })
-  newReq.headers = compileHeaders(headers, body, responses as never)
   // compile body needs to modify headers if necessary
-  const { headers: newHeaders, body: newBody } = compileBody(
-    newReq.headers,
+  const { headers: newHeaders, body: newBody } = compileBody({
+    responses,
     body,
-    responses
-  )
+    headers: compileHeaders({ headers, responses, body }),
+  })
   newReq.headers = newHeaders
   newReq.body = newBody
 
@@ -132,11 +132,13 @@ export async function httpRequest({
   }
 }
 
-function compileHeaders(
-  headers: object | undefined,
-  body: string | object,
-  responses: never
-) {
+type ChainingRequest = {
+  responses: Array<ProbeRequestResponse>
+  body?: BodyInit
+  headers?: object
+}
+
+function compileHeaders({ headers, responses, body }: ChainingRequest) {
   // return as-is if falsy
   if (!headers) return headers
   // Compile headers using handlebars to render URLs that uses previous responses data.
@@ -176,18 +178,18 @@ function compileHeaders(
   return newHeaders
 }
 
-function compileBody(
-  headers: object | undefined,
-  body: object | string,
-  responses: ProbeRequestResponse[]
-): {
-  headers: object | undefined
-  body: object | string
-} {
+function compileBody({
+  responses,
+  body,
+  headers,
+}: ChainingRequest): Pick<ChainingRequest, 'body' | 'headers'> {
   // return as-is if falsy
   if (!body) return { headers, body }
   let newHeaders = headers
-  let newBody = generateRequestChainingBody(body, responses)
+  let newBody: BodyInit | undefined = generateRequestChainingBody(
+    body,
+    responses
+  )
 
   if (newHeaders) {
     const contentTypeKey = Object.keys(newHeaders || {}).find(
@@ -230,7 +232,7 @@ async function probeHttpFetch({
     method: string | undefined
     headers: Headers | undefined
     timeout: number
-    body: string | object
+    body?: BodyInit
     ping: boolean | undefined
   }
 }): Promise<ProbeRequestResponse> {
@@ -279,7 +281,7 @@ async function probeHttpFetch({
 export function generateRequestChainingBody(
   body: object | string,
   responses: ProbeRequestResponse[]
-): object | string {
+): BodyInit {
   const isString = typeof body === 'string'
   const template = Handlebars.compile(isString ? body : JSON.stringify(body))
   const renderedBody = template({ responses })
@@ -288,9 +290,13 @@ export function generateRequestChainingBody(
 }
 
 function transformContentByType(
-  content: object | string,
+  content?: BodyInit,
   contentType?: string | number | boolean
 ) {
+  if (!content) {
+    return { content, contentType }
+  }
+
   switch (contentType) {
     case 'application/json': {
       return { content: JSON.stringify(content), contentType }
@@ -305,9 +311,8 @@ function transformContentByType(
 
     case 'multipart/form-data': {
       const form = new FormData()
-
       for (const contentKey of Object.keys(content)) {
-        form.append(contentKey, (content as Record<string, never>)[contentKey])
+        form.append(contentKey, (content as any)[contentKey])
       }
 
       return { content: form, contentType: form.getHeaders()['content-type'] }

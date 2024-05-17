@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.20.2] - 2024-05-16
+
+### Fixed
+
+- Fix: #1255 fix notification not included in snap binary (#1281)
+- Fix: Monika sends null request body as string null (#1293)
+
+### Changed
+
+- Docs: #1260 deprecate ping request (#1288)
+- Docs: #1289 add docker guide for apple silicon (#1290)
+
 ## [1.20.1] - 2024-05-06
 
 ### Fixed

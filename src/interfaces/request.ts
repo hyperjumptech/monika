@@ -56,11 +56,10 @@ export interface ProbeRequestResponse<T = unknown> {
 }
 
 // ProbeRequest is used to define the requests that is being made.
-export interface RequestConfig extends Omit<RequestInit, 'headers' | 'body'> {
+export interface RequestConfig extends Omit<RequestInit, 'headers'> {
   id?: string
   saveBody?: boolean // save response body to db?
   url: string
-  body: object | string
   followRedirects: number
   timeout: number // request timeout
   alerts?: ProbeAlert[]
