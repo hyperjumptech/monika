@@ -93,7 +93,7 @@ async function fetchConfigFile(url: string): Promise<string> {
       throw new Error(`The configuration file in ${url} is unreachable.`)
     }
 
-    const data = await resp.text()
+    const data = (await resp.json()) as string
     return data
   } catch {
     throw new Error(`The configuration file in ${url} is unreachable.`)
