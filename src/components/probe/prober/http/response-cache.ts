@@ -71,6 +71,7 @@ function ensureCacheTtl() {
 }
 
 function put(key: string, value: ProbeRequestResponse) {
+  if (getContext().isTest) return
   const expireAt = Date.now() + DEFAULT_TIME_TO_LIVE
   responseCache.set(key, { expireAt, response: value })
   // after put into cache, ensure total cache size is under limit
