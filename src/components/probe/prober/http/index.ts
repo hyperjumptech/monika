@@ -22,6 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import { createHash } from 'node:crypto'
 import { BaseProber, NotificationType, type ProbeParams } from '..'
 import { getContext } from '../../../../context'
 import events from '../../../../events'
@@ -40,6 +41,7 @@ import { addIncident } from '../../../incident'
 import { saveProbeRequestLog } from '../../../logger/history'
 import { logResponseTime } from '../../../logger/response-time-log'
 import { httpRequest } from './request'
+import { getCache, putCache } from './response-cache'
 
 type ProbeResultMessageParams = {
   request: RequestConfig
@@ -53,13 +55,41 @@ export class HTTPProber extends BaseProber {
     const responses: ProbeRequestResponse[] = []
 
     for (const requestConfig of requests) {
-      responses.push(
+      // current request may be attempting to retry because of triggered alert
+      // if this is NOT first attempt, do real http request
+      if (incidentRetryAttempt > 0) {
+        responses.push(
+          // eslint-disable-next-line no-await-in-loop
+          await httpRequest({
+            requestConfig: { ...requestConfig, signal },
+            responses,
+          })
+        )
+
+        // immediately process next request
+        continue
+      }
+
+      // if this is first attempt, use cache where possible
+      const hashRequest = createHash('SHA1')
+        .update(JSON.stringify(requestConfig))
+        .digest('hex')
+
+      const cache = getCache(hashRequest)
+      let response: ProbeRequestResponse
+      if (cache) {
+        response = cache
+      } else {
         // eslint-disable-next-line no-await-in-loop
-        await httpRequest({
+        response = await httpRequest({
           requestConfig: { ...requestConfig, signal },
           responses,
         })
-      )
+
+        putCache(hashRequest, response)
+      }
+
+      responses.push(response)
     }
 
     const hasFailedRequest = responses.find(
