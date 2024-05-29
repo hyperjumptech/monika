@@ -111,7 +111,11 @@ export async function httpRequest({
         JSON.stringify({
           maxRedirects: followRedirects,
           renderedURL,
-          requestParams: { ...newReq, headers: requestHeaders },
+          requestParams: {
+            ...newReq,
+            signal: undefined,
+            headers: requestHeaders,
+          },
           allowUnauthorized,
         })
       )
