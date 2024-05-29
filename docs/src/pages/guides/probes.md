@@ -77,7 +77,7 @@ Details of the field are given in the table below.
 
 ### Good to know
 
-To reduce network usage, HTTP responses are cached with 30s time-to-live by default.
+To reduce network usage, HTTP responses are cached with 30s time-to-live by default. This cache is then reused for requests with identical HTTP request config, e.g. headers, method, url.
 
 ## Request Body
 
