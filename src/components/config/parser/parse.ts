@@ -93,7 +93,7 @@ async function fetchConfigFile(url: string): Promise<string> {
       throw new Error(`The configuration file in ${url} is unreachable.`)
     }
 
-    const data = (await resp.json()) as string
+    const data = (await resp.text()) as string // make no assumption on fetched file, so return text().
     return data
   } catch {
     throw new Error(`The configuration file in ${url} is unreachable.`)
@@ -112,9 +112,14 @@ function parseConfigByExt({
   source,
 }: ParseConfigByExtParams) {
   const isYaml = ['.yaml', '.yml'].includes(extension)
+  const isJSON = ['.json'].includes(extension)
 
   if (isYaml) {
     return yml.load(config, { json: true }) as Config
+  }
+
+  if (isJSON) {
+    return JSON.parse(config)
   }
 
   return isUrl(source) ? config : JSON.parse(config)
