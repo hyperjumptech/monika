@@ -27,7 +27,7 @@ import stun from 'stun'
 import { hostname } from 'os'
 import getIp from './ip'
 import { sendPing } from './ping'
-import { sendHttpRequest } from './http'
+import { sendHttpRequestFetch } from './http'
 import { getContext } from '../context'
 import { isSymonModeFrom } from '../components/config'
 
@@ -66,10 +66,16 @@ async function pokeStun(): Promise<string> {
 
 async function fetchPublicNetworkInfo(): Promise<PublicNetwork> {
   const publicIp = await pokeStun()
-  const response = await sendHttpRequest({
+
+  const resp = await sendHttpRequestFetch({
     url: `http://ip-api.com/json/${publicIp}`,
   })
-  const { country, city, isp } = response.data
+
+  const { country, city, isp } = (await resp.json()) as {
+    country: string
+    city: string
+    isp: string
+  }
 
   return {
     country,

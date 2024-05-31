@@ -25,7 +25,6 @@
 import type { Config } from '../../../interfaces/config'
 import yml from 'js-yaml'
 import { compile as compileTemplate } from 'handlebars'
-import type { AxiosRequestHeaders, Method } from 'axios'
 import Joi from 'joi'
 
 const envValidator = Joi.object({
@@ -110,10 +109,14 @@ export function parseInsomnia(configString: string, format: string): Config {
     ? `${env?.scheme?.[0] ?? 'http'}://${env?.host}${env?.base_path}`
     : ''
 
-  return mapInsomniaToConfig(data)
+  return mapInsomniaToConfig(data, environmentVariables, baseUrl)
 }
 
-function mapInsomniaToConfig(data: unknown): Config {
+function mapInsomniaToConfig(
+  data: unknown,
+  env: object | undefined,
+  baseUrl: string
+): Config {
   const res = Joi.array()
     .items(resourceValidator)
     .validate(data, { allowUnknown: true }).value
@@ -134,22 +137,26 @@ function mapInsomniaToConfig(data: unknown): Config {
   )
 
   const probes = insomniaRequests.map((probe: unknown) =>
-    mapInsomniaRequestToConfig(probe)
+    mapInsomniaRequestToConfig(probe, env, baseUrl)
   )
-
   return { probes }
 }
 
-function mapInsomniaRequestToConfig(req: unknown) {
+export function mapInsomniaRequestToConfig(
+  req: unknown,
+  env: object | undefined,
+  baseUrl: string
+) {
   const { value: res } = resourceValidator.validate(req, { allowUnknown: true })
+
   // eslint-disable-next-line camelcase
   const url = compileTemplate(res.url)({ base_url: baseUrl })
-  const authorization = getAuthorizationHeader(res)
-  let headers: AxiosRequestHeaders | undefined
-  if (authorization)
-    headers = {
-      authorization,
-    }
+  const authorization = getAuthorizationHeader(res, env)
+
+  let headers: Record<string, string> = {}
+
+  // let headers: Headers | undefined
+  if (authorization) headers = { authorization }
   if (res.headers) {
     if (headers === undefined) headers = {}
     for (const h of res.headers) {
@@ -164,7 +171,7 @@ function mapInsomniaRequestToConfig(req: unknown) {
     requests: [
       {
         url,
-        method: (res?.method ?? 'GET') as Method,
+        method: res?.method ?? 'GET',
         body: JSON.parse(res.body?.text ?? '{}'),
         timeout: 10_000,
         headers,
@@ -175,11 +182,15 @@ function mapInsomniaRequestToConfig(req: unknown) {
   }
 }
 
-function getAuthorizationHeader(data: unknown): string | undefined {
+export function getAuthorizationHeader(
+  data: unknown,
+  env: object | undefined
+): string | undefined {
   const { value: res } = resourceValidator.validate(data, {
     allowUnknown: true,
   })
   let authorization: string | undefined
+
   if (
     res.authentication?.type === 'bearer' &&
     (res.authentication?.disabled ?? false) === false
@@ -188,7 +199,7 @@ function getAuthorizationHeader(data: unknown): string | undefined {
     authTemplate = authTemplate?.replace('_.', '')
     authorization = `${
       res.authentication?.prefix ?? 'bearer'
-    } ${compileTemplate(authTemplate)(environmentVariables ?? {})}`
+    } ${compileTemplate(authTemplate)(env ?? {})}`
   }
 
   return authorization

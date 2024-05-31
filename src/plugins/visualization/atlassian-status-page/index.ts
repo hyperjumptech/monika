@@ -22,7 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios, { AxiosError } from 'axios'
+import { sendHttpRequestFetch } from '../../../utils/http'
 import http from 'http'
 import https from 'https'
 import Joi from 'joi'
@@ -63,11 +63,11 @@ export function validateConfig(statusPageConfig: StatuspageConfig): string {
 export class AtlassianStatusPageAPI {
   private statusPageBaseURL = 'https://api.statuspage.io'
   private pageID = ''
-  private axiosConfig = {}
+  private requestParams = {}
 
   constructor(apiKey: string, pageID: string) {
     this.pageID = pageID
-    this.axiosConfig = {
+    this.requestParams = {
       // 10 sec timeout
       timeout: 10_000,
       // keepAlive pools and reuses TCP connections, so it's faster
@@ -123,25 +123,25 @@ export class AtlassianStatusPageAPI {
     }
 
     try {
-      const resp = await axios.post(
-        `${this.statusPageBaseURL}/v1/pages/${this.pageID}/incidents`,
-        data,
-        this.axiosConfig
-      )
+      const tempResp = await sendHttpRequestFetch({
+        url: `${this.statusPageBaseURL}/v1/pages/${this.pageID}/incidents`,
+        body: JSON.stringify(data),
+        method: 'POST',
+        ...this.requestParams,
+      })
+
+      if (tempResp.ok === false) {
+        throw new Error(`Error accessing status page: ${tempResp.statusText}`)
+      }
+
+      const resp = (await tempResp.json()) as { data: { id: string } }
 
       const incidentID = resp?.data?.id
       await insertIncidentToDatabase({ incidentID, probeID, status, url })
 
       return incidentID
     } catch (error: unknown) {
-      const axiosError = error instanceof AxiosError ? error : new AxiosError()
-      throw new Error(
-        `${axiosError?.message}${
-          axiosError?.response?.data
-            ? `. ${axiosError?.response?.data?.message}`
-            : ''
-        }`
-      )
+      throw new Error((error as Error).message)
     }
   }
 
@@ -167,20 +167,18 @@ export class AtlassianStatusPageAPI {
     const { incident_id: incidentID } = incident
 
     try {
-      await axios.patch(
-        `${this.statusPageBaseURL}/v1/pages/${this.pageID}/incidents/${incidentID}`,
-        data,
-        this.axiosConfig
-      )
+      const resp = await sendHttpRequestFetch({
+        url: `${this.statusPageBaseURL}/v1/pages/${this.pageID}/incidents/${incidentID}`,
+        body: JSON.stringify(data),
+        method: 'PATCH',
+        ...this.requestParams,
+      })
+
+      if (resp.ok === false) {
+        throw new Error(`Error accessing status page: ${resp.statusText}`)
+      }
     } catch (error: unknown) {
-      const axiosError = error instanceof AxiosError ? error : new AxiosError()
-      throw new Error(
-        `${axiosError?.message}${
-          axiosError?.response?.data
-            ? `. ${axiosError?.response?.data?.message}`
-            : ''
-        }`
-      )
+      throw new Error((error as Error).message)
     }
 
     await updateIncidentToDatabase({ incidentID, status })

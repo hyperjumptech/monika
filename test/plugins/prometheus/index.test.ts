@@ -25,7 +25,8 @@
 import { expect, test } from '@oclif/test'
 import path from 'path'
 import cmd from '../../../src/commands/monika'
-import axios, { AxiosError } from 'axios'
+
+import { sendHttpRequestFetch } from '../../../src/utils/http'
 
 const { resolve } = path
 
@@ -45,8 +46,10 @@ describe('Prometheus plugin', () => {
       )
       .it('runs Prometheus metric server', async (ctx) => {
         // act
-        const res = await axios.get('http://localhost:4444/metrics')
-
+        const res = await sendHttpRequestFetch({
+          url: 'http://localhost:4444/metrics',
+          method: 'GET',
+        })
         // assert
         expect(ctx.stdout).to.contain('Starting Monika.')
         expect(res.status).to.equal(200)
@@ -75,12 +78,17 @@ describe('Prometheus plugin', () => {
       .it('runs Prometheus metric server but return 405', async () => {
         try {
           // act
-          await axios.post('http://localhost:4446/metrics')
-        } catch (error: unknown) {
-          const statusCode =
-            error instanceof AxiosError ? error.response?.status : -1
+
+          const resp = await sendHttpRequestFetch({
+            url: 'http://localhost:4446/metrics',
+            method: 'POST',
+          })
           // assert
-          expect(statusCode).to.equal(405)
+          expect(resp.status).to.equal(405)
+        } catch (error: unknown) {
+          // assert
+          expect(error).to.be.undefined
+          console.error('Error:', error)
         }
 
         // eslint-disable-next-line unicorn/no-process-exit, n/no-process-exit
