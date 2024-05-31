@@ -59,12 +59,14 @@ function ensureCacheSize() {
 // this will delete already expired cache entries
 function ensureCacheTtl() {
   const now = Date.now()
+  // iterate over cache entries
+  // since we use map, the order of entries are based on insertion order
   for (const [key, { expireAt }] of responseCache.entries()) {
     if (expireAt <= now) {
       responseCache.delete(key)
     } else {
       // next items have valid time-to-live
-      // break out of loop to save time
+      // iteration is not necessary anymore
       break
     }
   }
