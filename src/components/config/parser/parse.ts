@@ -95,7 +95,8 @@ async function fetchConfigFile(url: string): Promise<string> {
 
     const data = (await resp.text()) as string // make no assumption on fetched file, so return text().
     return data
-  } catch {
+  } catch (error: unknown) {
+    console.error('fetch error:', (error as Error).message)
     throw new Error(`The configuration file in ${url} is unreachable.`)
   }
 }

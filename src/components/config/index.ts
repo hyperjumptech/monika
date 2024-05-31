@@ -36,7 +36,7 @@ import { getProbes, setProbes } from './probe'
 import { sanitizeConfig } from './sanitize'
 import { validateConfig } from './validate'
 
-export async function initConfig() {
+export async function initConfig(): Promise<void> {
   const { flags } = getContext()
   const hasConfig =
     flags.config.length > 0 ||
