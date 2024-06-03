@@ -338,7 +338,9 @@ monika --ignoreInvalidTLS
 
 ## TTL Cache
 
-Time-to-live for in-memory (HTTP) cache entries in minutes. Defaults to 5 minutes. Setting to 0 means disabling this cache.
+Time-to-live for in-memory (HTTP) cache entries in minutes. Defaults to 5 minutes. Setting to 0 means disabling this cache. This cache is used for requests with identical HTTP request config, e.g. headers, method, url.
+
+Only usable for probes which does not have [chaining requests.](https://hyperjumptech.github.io/monika/guides/examples#requests-chaining)
 
 ```bash
 # Set TTL cache for HTTP to 5 minutes
@@ -351,6 +353,14 @@ Like your app to be more chatty and honest revealing all its internal details? U
 
 ```bash
 monika --verbose
+```
+
+## Verbose Cache
+
+Show (HTTP) cache hit / miss messages to log
+
+```bash
+monika --verbose-cache
 ```
 
 ## Version

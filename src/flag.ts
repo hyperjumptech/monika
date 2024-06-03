@@ -70,6 +70,7 @@ export type MonikaFlags = {
   text?: string
   'ttl-cache': number
   verbose: boolean
+  'verbose-cache': boolean
 }
 
 const DEFAULT_CONFIG_INTERVAL_SECONDS = 900
@@ -101,6 +102,7 @@ export const monikaFlagsDefaultValue: MonikaFlags = {
   symonReportLimit: 100,
   'ttl-cache': 5,
   verbose: false,
+  'verbose-cache': false,
 }
 
 function getDefaultConfig(): Array<string> {
@@ -279,12 +281,16 @@ export const flags = {
     exclusive: ['postman', 'insomnia', 'sitemap', 'har'],
   }),
   'ttl-cache': Flags.integer({
-    description: `Time-to-live for in-memory (HTTP) cache entries in minutes. Defaults to ${monikaFlagsDefaultValue['ttl-cache']} minutes.`,
+    description: `Time-to-live for in-memory (HTTP) cache entries in minutes. Defaults to ${monikaFlagsDefaultValue['ttl-cache']} minutes`,
     default: monikaFlagsDefaultValue['ttl-cache'],
   }),
   verbose: Flags.boolean({
     default: monikaFlagsDefaultValue.verbose,
     description: 'Show verbose log messages',
+  }),
+  'verbose-cache': Flags.boolean({
+    default: monikaFlagsDefaultValue.verbose,
+    description: 'Show cache hit / miss messages to log',
   }),
   version: Flags.version({ char: 'v' }),
 }
