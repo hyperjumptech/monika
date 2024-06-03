@@ -77,7 +77,9 @@ Details of the field are given in the table below.
 
 ### Good to know
 
-To reduce network usage, HTTP responses are cached with 30s time-to-live by default. This cache is then reused for requests with identical HTTP request config, e.g. headers, method, url.
+To reduce network usage, HTTP responses are cached with 5 time-to-live by default. This cache is then reused for requests with identical HTTP request config, e.g. headers, method, url.
+
+This cache is usable for probes which does not have [chaining requests.](https://hyperjumptech.github.io/monika/guides/examples#requests-chaining)
 
 ## Request Body
 

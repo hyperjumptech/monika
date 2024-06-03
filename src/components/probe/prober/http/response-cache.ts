@@ -23,67 +23,33 @@
  **********************************************************************************/
 
 import { getContext } from '../../../../context'
-import { ProbeRequestResponse } from 'src/interfaces/request'
+import { ProbeRequestResponse, RequestConfig } from 'src/interfaces/request'
 import { log } from '../../../../utils/pino'
-import { serialize } from 'v8'
-/**
- * Simple implementation for caching Monika HTTP responses.
- * With default total cache size limited to 50 MB.
- * And default time-to-live for each cache entries is 30s.
- *
- * About cache size 50 MB limit :
- * Assuming a typical web page response is around 500 KB
- * This cache can fit around 100 entries of web pages
- * A typical response with empty body is around 300 bytes of headers
- * That means, this cache can fit around 160K entries of empty body responses
- */
-const DEFAULT_CACHE_LIMIT = 50_000_000 // 50 MB in bytes
-const DEFAULT_TIME_TO_LIVE = 30_000 // 30s in ms
-const responseCache = new Map<
-  string,
-  { expireAt: number; response: ProbeRequestResponse }
->()
+import TTLCache from '@isaacs/ttlcache'
+import { createHash } from 'crypto'
 
-// ensureCacheSize ensures total size of cache is under DEFAULT_CACHE_LIMIT
-function ensureCacheSize() {
-  const totalCacheSize = serialize(responseCache).byteLength
-  const firstKey = responseCache.keys().next().value
-  if (totalCacheSize > DEFAULT_CACHE_LIMIT && firstKey) {
-    responseCache.delete(firstKey)
-    // recursive until cache size is under limit
-    ensureCacheSize()
+const ttlCache = new TTLCache({ ttl: getContext().flags['ttl-cache'] * 60_000 })
+const cacheHash = new Map<RequestConfig, string>()
+
+function getOrCreateHash(config: RequestConfig) {
+  let hash = cacheHash.get(config)
+  if (!hash) {
+    hash = createHash('SHA1').update(JSON.stringify(config)).digest('hex')
   }
+
+  return hash
 }
 
-// ensureCacheTtl ensures cache entries are within valid time-to-live
-// this will delete already expired cache entries
-function ensureCacheTtl() {
-  const now = Date.now()
-  // iterate over cache entries
-  // since we use map, the order of entries are based on insertion order
-  for (const [key, { expireAt }] of responseCache.entries()) {
-    if (expireAt <= now) {
-      responseCache.delete(key)
-    } else {
-      // next items have valid time-to-live
-      // iteration is not necessary anymore
-      break
-    }
-  }
-}
-
-function put(key: string, value: ProbeRequestResponse) {
+function put(config: RequestConfig, value: ProbeRequestResponse) {
   if (getContext().isTest) return
-  const expireAt = Date.now() + DEFAULT_TIME_TO_LIVE
-  responseCache.set(key, { expireAt, response: value })
-  // after put into cache, ensure total cache size is under limit
-  ensureCacheSize()
+  const hash = getOrCreateHash(config)
+  ttlCache.set(hash, value)
 }
 
-function get(key: string) {
-  // remove expired entries before actually getting cache
-  ensureCacheTtl()
-  const response = responseCache.get(key)?.response
+function get(config: RequestConfig): ProbeRequestResponse | undefined {
+  if (getContext().isTest) return undefined
+  const key = getOrCreateHash(config)
+  const response = ttlCache.get(key)
   const isVerbose = getContext().flags.verbose
   const shortHash = key.slice(Math.max(0, key.length - 7))
   if (isVerbose && response) {
@@ -94,7 +60,7 @@ function get(key: string) {
     log.info(`${time} - [${shortHash}] Cache MISS`)
   }
 
-  return response
+  return response as ProbeRequestResponse | undefined
 }
 
-export { responseCache, put as putCache, get as getCache }
+export { put as putCache, get as getCache }

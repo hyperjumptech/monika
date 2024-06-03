@@ -41,8 +41,6 @@ import { sendHttpRequest, sendHttpRequestFetch } from '../../../../utils/http'
 import { log } from '../../../../utils/pino'
 import { AxiosError } from 'axios'
 import { getErrorMessage } from '../../../../utils/catch-error-handler'
-import { createHash } from 'crypto'
-import { getCache, putCache } from './response-cache'
 
 // Register Handlebars helpers
 registerFakes(Handlebars)
@@ -50,7 +48,6 @@ registerFakes(Handlebars)
 type probingParams = {
   requestConfig: Omit<RequestConfig, 'saveBody' | 'alert'> // is a config object
   responses: Array<ProbeRequestResponse> // an array of previous responses
-  isRetrying?: boolean
 }
 
 const UndiciErrorValidator = Joi.object({
@@ -65,7 +62,6 @@ const UndiciErrorValidator = Joi.object({
 export async function httpRequest({
   requestConfig,
   responses,
-  isRetrying = false,
 }: probingParams): Promise<ProbeRequestResponse> {
   // Compile URL using handlebars to render URLs that uses previous responses data
   const {
@@ -106,28 +102,6 @@ export async function httpRequest({
       requestHeaders.set(key, value)
     }
 
-    const hashRequest = createHash('SHA1')
-      .update(
-        JSON.stringify({
-          maxRedirects: followRedirects,
-          renderedURL,
-          requestParams: {
-            ...newReq,
-            signal: undefined,
-            headers: requestHeaders,
-          },
-          allowUnauthorized,
-        })
-      )
-      .digest('hex')
-
-    // this request may be attempting to retry triggered by alerts
-    // use cache only if this not a retry
-    if (!isRetrying) {
-      const cache = getCache(hashRequest)
-      if (cache) return cache
-    }
-
     // Do the request using compiled URL and compiled headers (if exists)
     const response = await (getContext().flags['native-fetch']
       ? probeHttpFetch({
@@ -145,7 +119,6 @@ export async function httpRequest({
           allowUnauthorized,
         }))
 
-    putCache(hashRequest, response)
     return response
   } catch (error: unknown) {
     const responseTime = Date.now() - startTime

@@ -67,6 +67,7 @@ export type MonikaFlags = {
   symonGetProbesIntervalMs: number
   symonUrl?: string
   text?: string
+  'ttl-cache': number
   ignoreInvalidTLS: boolean
   verbose: boolean
 }
@@ -98,6 +99,7 @@ export const monikaFlagsDefaultValue: MonikaFlags = {
   symonGetProbesIntervalMs: 60_000,
   symonReportInterval: DEFAULT_SYMON_REPORT_INTERVAL_MS,
   symonReportLimit: 100,
+  'ttl-cache': 5,
   verbose: false,
 }
 
@@ -275,6 +277,10 @@ export const flags = {
   text: Flags.string({
     description: 'Run Monika using a Simple text file',
     exclusive: ['postman', 'insomnia', 'sitemap', 'har'],
+  }),
+  'ttl-cache': Flags.integer({
+    description: `Time-to-live for in-memory (HTTP) cache entries in minutes. Defaults to ${monikaFlagsDefaultValue['ttl-cache']} minutes.`,
+    default: monikaFlagsDefaultValue['ttl-cache'],
   }),
   verbose: Flags.boolean({
     default: monikaFlagsDefaultValue.verbose,

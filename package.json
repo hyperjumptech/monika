@@ -59,6 +59,7 @@
   "dependencies": {
     "@faker-js/faker": "^7.4.0",
     "@hyperjumptech/monika-notification": "^1.18.0",
+    "@isaacs/ttlcache": "^1.4.1",
     "@oclif/core": "3.16.0",
     "@oclif/plugin-help": "^6.0.9",
     "@oclif/plugin-version": "^2.0.11",
