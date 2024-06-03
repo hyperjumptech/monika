@@ -28,7 +28,10 @@ import { log } from '../../../../utils/pino'
 import TTLCache from '@isaacs/ttlcache'
 import { createHash } from 'crypto'
 
-const ttlCache = new TTLCache({ ttl: getContext().flags['ttl-cache'] * 60_000 })
+const ttlCache =
+  getContext().flags['ttl-cache'] > 0
+    ? new TTLCache({ ttl: getContext().flags['ttl-cache'] * 60_000 })
+    : undefined
 const cacheHash = new Map<RequestConfig, string>()
 
 function getOrCreateHash(config: RequestConfig) {
@@ -41,13 +44,13 @@ function getOrCreateHash(config: RequestConfig) {
 }
 
 function put(config: RequestConfig, value: ProbeRequestResponse) {
-  if (getContext().isTest) return
+  if (!ttlCache || getContext().isTest) return
   const hash = getOrCreateHash(config)
   ttlCache.set(hash, value)
 }
 
 function get(config: RequestConfig): ProbeRequestResponse | undefined {
-  if (getContext().isTest) return undefined
+  if (!ttlCache || getContext().isTest) return undefined
   const key = getOrCreateHash(config)
   const response = ttlCache.get(key)
   const isVerbose = getContext().flags.verbose

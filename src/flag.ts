@@ -44,6 +44,7 @@ export type MonikaFlags = {
   force: boolean
   har?: string
   id?: string
+  ignoreInvalidTLS: boolean
   insomnia?: string
   'keep-verbose-logs': boolean
   logs: boolean
@@ -68,7 +69,6 @@ export type MonikaFlags = {
   symonUrl?: string
   text?: string
   'ttl-cache': number
-  ignoreInvalidTLS: boolean
   verbose: boolean
 }
 

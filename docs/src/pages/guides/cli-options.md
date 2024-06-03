@@ -336,6 +336,15 @@ If there is a probe with request(s) that uses HTTPS, Monika will show an error i
 monika --ignoreInvalidTLS
 ```
 
+## TTL Cache
+
+Time-to-live for in-memory (HTTP) cache entries in minutes. Defaults to 5 minutes. Setting to 0 means disabling this cache.
+
+```bash
+# Set TTL cache for HTTP to 5 minutes
+monika --ttl-cache 5
+```
+
 ## Verbose
 
 Like your app to be more chatty and honest revealing all its internal details? Use the `--verbose` flag.
