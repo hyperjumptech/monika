@@ -40,6 +40,7 @@ import { addIncident } from '../../../incident'
 import { saveProbeRequestLog } from '../../../logger/history'
 import { logResponseTime } from '../../../logger/response-time-log'
 import { httpRequest } from './request'
+import { getCache, putCache } from './response-cache'
 
 type ProbeResultMessageParams = {
   request: RequestConfig
@@ -52,14 +53,26 @@ export class HTTPProber extends BaseProber {
     // sending multiple http requests for request chaining
     const responses: ProbeRequestResponse[] = []
 
-    for (const requestConfig of requests) {
-      responses.push(
-        // eslint-disable-next-line no-await-in-loop
-        await httpRequest({
-          requestConfig: { ...requestConfig, signal },
-          responses,
-        })
-      )
+    // do http request
+    // force fresh request if :
+    // - probe has chaining requests, OR
+    // - this is a retrying attempt
+    if (requests.length > 1 || incidentRetryAttempt > 0) {
+      for (const requestConfig of requests) {
+        responses.push(
+          // eslint-disable-next-line no-await-in-loop
+          await this.doRequest(requestConfig, signal, responses)
+        )
+      }
+    }
+    // use cached response when possible
+    // or fallback to fresh request if cache expired
+    else {
+      const responseCache = getCache(requests[0])
+      const response =
+        responseCache || (await this.doRequest(requests[0], signal, responses))
+      if (!responseCache) putCache(requests[0], response)
+      responses.push(response)
     }
 
     const hasFailedRequest = responses.find(
@@ -163,6 +176,17 @@ export class HTTPProber extends BaseProber {
         })
       }
     }
+  }
+
+  private doRequest(
+    config: RequestConfig,
+    signal: AbortSignal | undefined,
+    responses: ProbeRequestResponse[]
+  ) {
+    return httpRequest({
+      requestConfig: { ...config, signal },
+      responses,
+    })
   }
 
   generateVerboseStartupMessage(): string {

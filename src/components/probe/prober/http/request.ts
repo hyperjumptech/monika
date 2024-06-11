@@ -103,23 +103,23 @@ export async function httpRequest({
     }
 
     // Do the request using compiled URL and compiled headers (if exists)
-    if (getContext().flags['native-fetch']) {
-      return await probeHttpFetch({
-        startTime,
-        maxRedirects: followRedirects,
-        renderedURL,
-        requestParams: { ...newReq, headers: requestHeaders },
-        allowUnauthorized,
-      })
-    }
+    const response = await (getContext().flags['native-fetch']
+      ? probeHttpFetch({
+          startTime,
+          maxRedirects: followRedirects,
+          renderedURL,
+          requestParams: { ...newReq, headers: requestHeaders },
+          allowUnauthorized,
+        })
+      : probeHttpAxios({
+          startTime,
+          maxRedirects: followRedirects,
+          renderedURL,
+          requestParams: { ...newReq, headers: requestHeaders },
+          allowUnauthorized,
+        }))
 
-    return await probeHttpAxios({
-      startTime,
-      maxRedirects: followRedirects,
-      renderedURL,
-      requestParams: { ...newReq, headers: requestHeaders },
-      allowUnauthorized,
-    })
+    return response
   } catch (error: unknown) {
     const responseTime = Date.now() - startTime
 
@@ -372,7 +372,7 @@ function transformContentByType(
     case 'multipart/form-data': {
       const form = new FormData()
       for (const contentKey of Object.keys(content)) {
-        form.append(contentKey, (content as any)[contentKey])
+        form.append(contentKey, (content as never)[contentKey])
       }
 
       return { content: form, contentType: form.getHeaders()['content-type'] }

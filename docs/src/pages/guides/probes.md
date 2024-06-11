@@ -75,6 +75,12 @@ Details of the field are given in the table below.
 | allowUnauthorized (optional) | (boolean), If set to true, will make https agent to not check for ssl certificate validity                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | followRedirects (optional)   | The request follows redirects as many times as specified here. If unspecified, it will fallback to the value set by the [follow redirects flag](https://monika.hyperjump.tech/guides/cli-options#follow-redirects)                                                                                                                                                                                                                                                                                                                                                                                |
 
+### Good to know
+
+To reduce network usage, HTTP responses are cached with 5 time-to-live by default. This cache is then reused for requests with identical HTTP request config, e.g. headers, method, url.
+
+This cache is usable for probes which does not have [chaining requests.](https://hyperjumptech.github.io/monika/guides/examples#requests-chaining)
+
 ## Request Body
 
 By default, the request body will be treated as-is. If the request header's `Content-Type` is set to `application/x-www-form-urlencoded`, it will be serialized into URL-safe string in UTF-8 encoding. Body payloads will vary on the specific probes being requested. For HTTP requests, the body and headers are defined like this:
