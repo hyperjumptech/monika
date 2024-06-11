@@ -357,7 +357,9 @@ monika --verbose
 
 ## Verbose Cache
 
-Show (HTTP) cache hit / miss messages to log
+Show (HTTP) cache hit / miss messages to log.
+
+This will only show for probes which does not have [chaining requests.](https://hyperjumptech.github.io/monika/guides/examples#requests-chaining)
 
 ```bash
 monika --verbose-cache
