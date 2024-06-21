@@ -101,8 +101,7 @@ export const monikaFlagsDefaultValue: MonikaFlags = {
   symonGetProbesIntervalMs: 60_000,
   symonReportInterval: DEFAULT_SYMON_REPORT_INTERVAL_MS,
   symonReportLimit: 100,
-  'user-agent':
-    'Monika Synthetic Monitoring Bot Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36',
+  'user-agent': `monika/${process.env.npm_package_version}`,
   'ttl-cache': 0,
   verbose: false,
   'verbose-cache': false,
@@ -291,7 +290,7 @@ export const flags = {
   'user-agent': Flags.string({
     default: monikaFlagsDefaultValue['user-agent'],
     description:
-      'User agent to use for probing, defaults to Monika Synthetic Monitoring Bot Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36',
+      'User agent to use for probing, defaults to monika/{current Monika version}',
   }),
   verbose: Flags.boolean({
     default: monikaFlagsDefaultValue.verbose,

@@ -349,11 +349,11 @@ monika --ttl-cache 5
 
 ## User Agent
 
-The --user-agent flag in the Monika command allows you to set a custom user agent string for HTTP requests. This string is used to identify the browser, operating system, and device making the request. Setting a custom user agent can help simulate different browsing environments or bypass certain server restrictions. Defaults to "Monika Synthetic Monitoring Bot Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+The --user-agent flag in the Monika command allows you to set a custom user agent string for HTTP requests. This string is used to identify the browser, operating system, and device making the request. Setting a custom user agent can help simulate different browsing environments or bypass certain server restrictions. Defaults to "monika/{current Monika version}"
 
 ```bash
 # Set TTL cache for HTTP to 5 minutes
-monika --user-agent " Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+monika --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
 ```
 
 ## Verbose
