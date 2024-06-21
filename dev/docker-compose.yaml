@@ -2,7 +2,7 @@ services:
   httpbin:
     image: kennethreitz/httpbin
     ports:
-      - 3000:80
+      - 3002:80
   mariadb:
     image: mariadb:11
     container_name: monika_mariadb

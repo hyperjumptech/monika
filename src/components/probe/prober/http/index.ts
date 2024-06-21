@@ -40,7 +40,7 @@ import { addIncident } from '../../../incident'
 import { saveProbeRequestLog } from '../../../logger/history'
 import { logResponseTime } from '../../../logger/response-time-log'
 import { httpRequest } from './request'
-import { getCache, putCache } from './response-cache'
+import { get as getCache, put as putCache } from './response-cache'
 
 type ProbeResultMessageParams = {
   request: RequestConfig
@@ -57,17 +57,20 @@ export class HTTPProber extends BaseProber {
     // force fresh request if :
     // - probe has chaining requests, OR
     // - this is a retrying attempt
-    if (requests.length > 1 || incidentRetryAttempt > 0) {
+    if (
+      requests.length > 1 ||
+      incidentRetryAttempt > 0 ||
+      !getContext().flags['ttl-cache']
+    ) {
       for (const requestConfig of requests) {
         responses.push(
           // eslint-disable-next-line no-await-in-loop
           await this.doRequest(requestConfig, signal, responses)
         )
       }
-    }
-    // use cached response when possible
-    // or fallback to fresh request if cache expired
-    else {
+    } else {
+      // use cached response when possible
+      // or fallback to fresh request if cache expired
       const responseCache = getCache(requests[0])
       const response =
         responseCache || (await this.doRequest(requests[0], signal, responses))

@@ -338,7 +338,7 @@ monika --ignoreInvalidTLS
 
 ## TTL Cache
 
-Time-to-live for in-memory (HTTP) cache entries in minutes. Defaults to 5 minutes. Setting to 0 means disabling this cache. This cache is used for requests with identical HTTP request config, e.g. headers, method, url.
+Enable time-to-live for in-memory (HTTP) cache entries in minutes. This cache is used for requests with identical HTTP request config, e.g. headers, method, url.
 
 Only usable for probes which does not have [chaining requests.](https://hyperjumptech.github.io/monika/guides/examples#requests-chaining)
 
