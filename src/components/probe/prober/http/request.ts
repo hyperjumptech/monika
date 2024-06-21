@@ -612,14 +612,6 @@ function getErrorStatusWithExplanation(error: unknown): {
       }
     }
 
-    case 'CERT_HAS_EXPIRED': {
-      return {
-        status: 18,
-        description:
-          "CERT_HAS_EXPIRED: The website's SSL/TLS certificates has expired.",
-      }
-    }
-
     case 'UNABLE_TO_VERIFY_LEAF_SIGNATURE': {
       return {
         status: 27,
