@@ -54,21 +54,6 @@ const UndiciErrorValidator = Joi.object({
   cause: Joi.object({ name: Joi.string(), code: Joi.string() }),
 })
 
-// normalizeHeaders will return headers, with key lowercased
-const normalizeHeaders = (h: object | undefined) => {
-  if (!h) return
-
-  const normalizedHeaders = {}
-  for (const key in h) {
-    if (key) {
-      normalizedHeaders[key.toLocaleLowerCase() as keyof typeof h] =
-        h[key as keyof typeof h]
-    }
-  }
-
-  return normalizedHeaders
-}
-
 /**
  * probing() is the heart of monika requests generation
  * @param {obj} parameter as input object
@@ -93,21 +78,12 @@ export async function httpRequest({
   const newReq = { method, headers, timeout, body, ping, signal }
   const renderURL = Handlebars.compile(url)
   const renderedURL = renderURL({ responses })
-  const normalizedHeaders = normalizeHeaders(headers)
-
-  // change the user agent
-  const headersWithUA = {
-    ...normalizedHeaders,
-    'user-agent':
-      normalizedHeaders?.['user-agent' as keyof typeof headers] ??
-      getContext().flags['user-agent'],
-  }
 
   // compile body needs to modify headers if necessary
   const { headers: newHeaders, body: newBody } = compileBody({
     responses,
     body,
-    headers: compileHeaders({ headers: headersWithUA, responses, body }),
+    headers: compileHeaders({ headers, responses, body }),
   })
   newReq.headers = newHeaders
   newReq.body = newBody
@@ -226,7 +202,18 @@ function compileBody({
   headers,
 }: ChainingRequest): Pick<ChainingRequest, 'body' | 'headers'> {
   // return as-is if falsy
-  if (!body) return { headers, body }
+  if (!body) {
+    return {
+      headers: {
+        ...headers,
+        'user-agent':
+          headers?.['user-agent' as keyof typeof headers] ??
+          getContext().flags['user-agent'],
+      },
+      body,
+    }
+  }
+
   let newHeaders = headers
   let newBody: BodyInit | undefined = generateRequestChainingBody(
     body,
@@ -234,6 +221,7 @@ function compileBody({
   )
 
   if (newHeaders) {
+    // handle content-type headers
     const contentTypeKey = Object.keys(newHeaders || {}).find(
       (hk) => hk.toLocaleLowerCase() === 'content-type'
     )
@@ -254,6 +242,22 @@ function compileBody({
           }
         : undefined
     }
+  }
+
+  // handle content-type headers
+  const userAgentKey = Object.keys(newHeaders || {}).find(
+    (hk) => hk.toLocaleLowerCase() === 'user-agent'
+  )
+
+  if (newHeaders && userAgentKey) {
+    delete newHeaders[userAgentKey as never]
+  }
+
+  newHeaders = {
+    ...(newHeaders as object),
+    'user-agent':
+      newHeaders?.['user-agent' as keyof typeof headers] ??
+      getContext().flags['user-agent'],
   }
 
   return { headers: newHeaders, body: newBody }
