@@ -22,48 +22,56 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { getContext } from '../../../../context'
-import { ProbeRequestResponse, RequestConfig } from 'src/interfaces/request'
-import { log } from '../../../../utils/pino'
 import TTLCache from '@isaacs/ttlcache'
 import { createHash } from 'crypto'
+import { getContext } from '../../../../context'
+import type {
+  ProbeRequestResponse,
+  RequestConfig,
+} from '../../../../interfaces/request'
+import { log } from '../../../../utils/pino'
 
 const ttlCache = new TTLCache()
 const cacheHash = new Map<RequestConfig, string>()
 
-function getOrCreateHash(config: RequestConfig) {
-  let hash = cacheHash.get(config)
-  if (!hash) {
-    hash = createHash('SHA1').update(JSON.stringify(config)).digest('hex')
-  }
-
-  return hash
-}
-
-function put(config: RequestConfig, value: ProbeRequestResponse) {
-  if (!getContext().flags['ttl-cache'] || getContext().isTest) return
+export function put(config: RequestConfig, value: ProbeRequestResponse) {
   const hash = getOrCreateHash(config)
   // manually set time-to-live for each cache entry
   // moved from "new TTLCache()" initialization above because corresponding flag is not yet parsed
-  const ttl = getContext().flags['ttl-cache'] * 60_000
+  const minutes = 60_000
+  const ttl = getContext().flags['ttl-cache'] * minutes
   ttlCache.set(hash, value, { ttl })
 }
 
-function get(config: RequestConfig): ProbeRequestResponse | undefined {
-  if (!getContext().flags['ttl-cache'] || getContext().isTest) return undefined
+export function get(config: RequestConfig) {
   const key = getOrCreateHash(config)
-  const response = ttlCache.get(key)
-  const isVerbose = getContext().flags['verbose-cache']
-  const shortHash = key.slice(Math.max(0, key.length - 7))
-  if (isVerbose && response) {
-    const time = new Date().toISOString()
-    log.info(`${time} - [${shortHash}] Cache HIT`)
-  } else if (isVerbose) {
-    const time = new Date().toISOString()
-    log.info(`${time} - [${shortHash}] Cache MISS`)
+  const response = ttlCache.get<ProbeRequestResponse | undefined>(key)
+
+  if (getContext().flags['verbose-cache']) {
+    logVerbose({ response, key })
   }
 
-  return response as ProbeRequestResponse | undefined
+  return response
 }
 
-export { put as putCache, get as getCache }
+function getOrCreateHash(config: RequestConfig) {
+  const hash = cacheHash.get(config)
+  if (hash) {
+    return hash
+  }
+
+  return createHash('SHA1').update(JSON.stringify(config)).digest('hex')
+}
+
+type LogVerbose = {
+  response: unknown
+  key: string
+}
+
+function logVerbose({ response, key }: LogVerbose) {
+  const time = new Date().toISOString()
+  const shortHash = key.slice(Math.max(0, key.length - 7))
+  const message = response ? 'Cache HIT' : 'Cache MISS'
+
+  log.info(`${time} - [${shortHash}] ${message}`)
+}
