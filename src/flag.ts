@@ -69,6 +69,7 @@ export type MonikaFlags = {
   symonUrl?: string
   text?: string
   'ttl-cache': number
+  'user-agent': string
   verbose: boolean
   'verbose-cache': boolean
 }
@@ -100,6 +101,8 @@ export const monikaFlagsDefaultValue: MonikaFlags = {
   symonGetProbesIntervalMs: 60_000,
   symonReportInterval: DEFAULT_SYMON_REPORT_INTERVAL_MS,
   symonReportLimit: 100,
+  'user-agent':
+    'Monika Synthetic Monitoring Bot Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36',
   'ttl-cache': 0,
   verbose: false,
   'verbose-cache': false,
@@ -284,6 +287,11 @@ export const flags = {
     description:
       'Enables time-to-live for in-memory (HTTP) cache entries in minutes',
     default: monikaFlagsDefaultValue['ttl-cache'],
+  }),
+  'user-agent': Flags.string({
+    default: monikaFlagsDefaultValue['user-agent'],
+    description:
+      'User agent to use for probing, defaults to Monika Synthetic Monitoring Bot Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36',
   }),
   verbose: Flags.boolean({
     default: monikaFlagsDefaultValue.verbose,
