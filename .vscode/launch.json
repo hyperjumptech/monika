@@ -1,0 +1,41 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch via NPM",
+      "request": "launch",
+      "runtimeArgs": ["run-script", "debug"],
+      "runtimeExecutable": "npm ",
+      "skipFiles": ["<node_internals>/**"],
+      "type": "node",
+      "args": ["-h"]
+    },
+    {
+      "name": "Launch Simon Mode",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm start -- --symonUrl=http://localhost:3000 --symonKey=d6b9ef1c-7d44-4ffc-aa02-446821d4d616 --symonLocationId=6f8a6285-9c45-4d6b-a656-7c3c9446beee"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch with Args",
+      "skipFiles": ["<node_internals>/**"],
+      "program": "${workspaceFolder}/lib/index.js",
+      "preLaunchTask": "tsc: build - tsconfig.json",
+      "outFiles": ["${workspaceFolder}/lib/**/*.js"],
+      "args": ["-c", "/home/budhi/project/monika/test.yaml", "-s", "-1"],
+      "sourceMaps": true
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "testing testing",
+      "program": "${workspaceFolder}/bin/dev.js",
+      "args": ["-h"]
+    }
+  ]
+}

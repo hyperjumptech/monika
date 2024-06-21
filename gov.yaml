@@ -1,0 +1,41 @@
+probes:
+  - id: 'kemenperin.go.id'
+    name: 'kemenperin.go.id website'
+    requests:
+      - url: https://kemenperin.go.id/
+    alerts:
+      - assertion: response.status != 200
+        message: kemenperin.go.id website
+
+  - id: 'kkp.go.id'
+    name: 'kkp.go.id website'
+    requests:
+      - url: https://kkp.go.id
+    alerts:
+      - assertion: response.status != 200
+        message: kkp.go.id website
+
+  - id: 'kemenag.go.id'
+    name: 'kemenag.go.id website'
+    requests:
+      - url: https://kemenag.go.id/
+    alerts:
+      - assertion: response.status != 200
+        message: kemenag.go.id website
+
+  - id: 'pu.go.id'
+    name: 'pu.go.id website'
+    requests:
+      - url: https://pu.go.id/
+    alerts:
+      - assertion: response.status != 200
+        message: pu.go.id website
+
+notifications:
+  - id: desktop
+    type: desktop
+
+  - id: teams-001
+    type: teams
+    data:
+      url: https://hyperjump.webhook.office.com/webhookb2/006c847c-21b9-4ac2-85d4-454a722471d9@9def1f60-dd5b-4bb2-ba50-ecbd7a895ce2/IncomingWebhook/751e1056e0904257804c1b38b8903dd7/748ef655-7fd5-4525-9b26-7cdcf4fab8d8
