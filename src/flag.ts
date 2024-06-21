@@ -100,7 +100,7 @@ export const monikaFlagsDefaultValue: MonikaFlags = {
   symonGetProbesIntervalMs: 60_000,
   symonReportInterval: DEFAULT_SYMON_REPORT_INTERVAL_MS,
   symonReportLimit: 100,
-  'ttl-cache': 5,
+  'ttl-cache': 0,
   verbose: false,
   'verbose-cache': false,
 }
@@ -281,7 +281,8 @@ export const flags = {
     exclusive: ['postman', 'insomnia', 'sitemap', 'har'],
   }),
   'ttl-cache': Flags.integer({
-    description: `Time-to-live for in-memory (HTTP) cache entries in minutes. Defaults to ${monikaFlagsDefaultValue['ttl-cache']} minutes`,
+    description:
+      'Enables time-to-live for in-memory (HTTP) cache entries in minutes',
     default: monikaFlagsDefaultValue['ttl-cache'],
   }),
   verbose: Flags.boolean({
