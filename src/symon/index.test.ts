@@ -66,6 +66,7 @@ const config: Config = {
     },
   ],
 }
+const myIP = '192.168.1.1' // hardcode so not dependent on getIp()
 const server = setupServer(
   http.get('http://ip-api.com/json/192.168.1.1', () =>
     HttpResponse.json({
@@ -129,6 +130,7 @@ describe('Symon initiate', () => {
   })
 
   it('should send handshake data on initiate', async () => {
+    // arrange
     setContext({
       userAgent: 'v1.5.0',
       flags: sanitizeFlags({
@@ -143,10 +145,9 @@ describe('Symon initiate', () => {
         'http://localhost:4000/api/v1/monika/client-handshake',
         async ({ request }) => {
           body = await request.json()
-
           return HttpResponse.json({
             statusCode: 'ok',
-            message: 'Successfully handshaked with Symon',
+            message: 'Successful handshake with Symon',
             data: {
               monikaId: '1234',
             },
@@ -164,7 +165,7 @@ describe('Symon initiate', () => {
     await symon.initiate()
     await symon.stop()
 
-    expect(body.publicIp).equals('192.168.1.1')
+    expect(body.publicIp).equals(myIP)
     expect(body.pid).greaterThan(0)
     expect(body.macAddress).length.greaterThan(0)
     expect(body.isp).equals('hyperjump')
@@ -207,6 +208,10 @@ describe('Symon initiate', () => {
       ),
       http.get('http://localhost:4000/api/v1/monika/1234/probes', () => {
         throw new Error('Failed to get probes from Symon')
+        // new HttpResponse(null, {
+        //   status: 500,
+        //   statusText: 'Failed to get probes from Symon',
+        // })
       })
     )
 

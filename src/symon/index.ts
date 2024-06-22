@@ -159,8 +159,6 @@ export default class SymonClient {
   private probeChangesInterval: NodeJS.Timeout | undefined
   private probeAssignmentChangesInterval: NodeJS.Timeout | undefined
 
-  // private httpClient: AxiosInstance
-
   private locationId: string
   private monikaId: string
   private isMultiNode: boolean
@@ -374,7 +372,7 @@ export default class SymonClient {
     const params = this.probeChangesCheckedAt ?? new Date()
     const encodedQuery = encodeURIComponent(params.toISOString())
     const response = await sendHttpRequestFetch({
-      url: `${this.url}/api/${this.apiVersion}/${this.monikaId}/probe-changes?since=${encodedQuery}`,
+      url: `${this.url}/api/${this.apiVersion}/monika/${this.monikaId}/probe-changes?since=${encodedQuery}`,
       method: 'GET',
     })
 
@@ -389,18 +387,19 @@ export default class SymonClient {
 
   private async fetchProbes() {
     const resp = await sendHttpRequestFetch({
-      url: `${this.url}/api/${this.apiVersion}/${this.monikaId}/probes`,
+      url: `${this.url}/api/${this.apiVersion}/monika/${this.monikaId}/probes`,
       method: 'GET',
       headers: {
         ...(getContext().config?.version
           ? { 'If-None-Match': getContext().config?.version }
           : {}),
+        'x-api-key': this.apiKey,
       },
     })
 
     if (!resp.ok) {
       log.error('[Symon] Fetch probe failed. ' + resp.statusText)
-      return { probes: getProbes(), hash: '' }
+      throw new Error('Failed to get probes from Symon')
     }
 
     const listprobes = (await resp.json()) as { data: Probe[] }
@@ -444,6 +443,7 @@ export default class SymonClient {
       body: JSON.stringify(handshakeData),
       headers: {
         'Content-Type': 'application/json',
+        'x-api-key': this.apiKey,
       },
     })
 
