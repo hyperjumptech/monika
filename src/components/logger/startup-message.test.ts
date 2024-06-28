@@ -56,7 +56,7 @@ const defaultConfig: ValidatedConfig = {
       ],
     },
   ],
-  notifications: [{ id: 'UVIsL', type: 'desktop' }],
+  notifications: [{ id: 'UVIsL', type: 'desktop', data: undefined }],
   'status-notification': '',
   version: '1',
 }
@@ -378,7 +378,7 @@ describe('Startup message', () => {
         logStartupMessage({
           config: {
             ...defaultConfig,
-            notifications: [{ id: 'UVIsL', type: 'desktop' }],
+            notifications: [{ id: 'UVIsL', type: 'desktop', data: undefined }],
           },
           flags: sanitizeFlags({
             config: [],

@@ -70,7 +70,7 @@ function mergeConfigs(configs: Config[]): Config {
 export function addDefaultNotifications(config: Config): Config {
   return {
     ...config,
-    notifications: [{ id: 'default', type: 'desktop' }],
+    notifications: [{ id: 'default', type: 'desktop', data: undefined }],
   }
 }
 
