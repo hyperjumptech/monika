@@ -208,6 +208,7 @@ function compileBody({
         ...headers,
         'user-agent':
           headers?.['user-agent' as keyof typeof headers] ??
+          getContext().flags['user-agent'] ??
           getContext().userAgent.split(' ')[0], // This will get the monika/x.x.x
       },
       body,
@@ -257,6 +258,7 @@ function compileBody({
     ...(newHeaders as object),
     'user-agent':
       newHeaders?.['user-agent' as keyof typeof headers] ??
+      getContext().flags['user-agent'] ??
       getContext().userAgent.split(' ')[0], // This will get the monika/x.x.x
   }
 

@@ -69,7 +69,7 @@ export type MonikaFlags = {
   symonUrl?: string
   text?: string
   'ttl-cache': number
-  'user-agent': string
+  'user-agent'?: string
   verbose: boolean
   'verbose-cache': boolean
 }
@@ -101,7 +101,7 @@ export const monikaFlagsDefaultValue: MonikaFlags = {
   symonGetProbesIntervalMs: 60_000,
   symonReportInterval: DEFAULT_SYMON_REPORT_INTERVAL_MS,
   symonReportLimit: 100,
-  'user-agent': '',
+  'user-agent': undefined,
   'ttl-cache': 0,
   verbose: false,
   'verbose-cache': false,
