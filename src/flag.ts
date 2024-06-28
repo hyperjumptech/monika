@@ -101,7 +101,7 @@ export const monikaFlagsDefaultValue: MonikaFlags = {
   symonGetProbesIntervalMs: 60_000,
   symonReportInterval: DEFAULT_SYMON_REPORT_INTERVAL_MS,
   symonReportLimit: 100,
-  'user-agent': `monika/${process.env.npm_package_version}`,
+  'user-agent': '',
   'ttl-cache': 0,
   verbose: false,
   'verbose-cache': false,
