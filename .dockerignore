@@ -1,4 +1,5 @@
 node_modules
+packages/notification/node_modules
 .nyc_output
 .github
 .vscode
