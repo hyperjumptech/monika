@@ -27,12 +27,12 @@ jobs:
           - os: Linux
             platform: linux
             runs_on: ubuntu-latest
-          - os: Windows
-            platform: windows
-            runs_on: windows-latest
-          - os: MacOS
-            platform: macos
-            runs_on: macos-latest
+          # - os: Windows
+          #   platform: windows
+          #   runs_on: windows-latest
+          # - os: MacOS
+          #   platform: macos
+          #   runs_on: macos-latest
 
     steps:
       - uses: actions/checkout@v4
