@@ -27,12 +27,15 @@ jobs:
           - os: Linux
             platform: linux
             runs_on: ubuntu-latest
+            flags: --platform=linux/amd64
           - os: Windows
             platform: windows
-            runs_on: windows-latest
-          # - os: MacOS
-          #   platform: macos
-          #   runs_on: macos-latest
+            runs_on: ubuntu-latest
+            flags: --platform=linux/amd64
+          - os: MacOS (Apple Silicon)
+            platform: macos
+            runs_on: ubuntu-latest
+            flags: --platform=linux/arm64
 
     steps:
       - uses: actions/checkout@v4
@@ -40,4 +43,4 @@ jobs:
         uses: docker/setup-buildx-action@v3
       - name: Build the image
         run: |
-          docker buildx build -t hyperjump/monika:${{ matrix.platform }} .
+          docker buildx build ${{ matrix.flags }} -t hyperjump/monika:${{ matrix.platform }} .
