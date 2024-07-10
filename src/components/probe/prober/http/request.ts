@@ -301,9 +301,14 @@ async function probeHttpClient({
     }
   }
 
-  const responseBody = (
-    (response.headers as HttpClientHeaderList).get('Content-Type') as string
-  )?.includes('application/json')
+  let contentType = (response.headers as HttpClientHeaderList).get(
+    'Content-Type'
+  )
+  if (!contentType) {
+    contentType = (response.headers as HttpClientHeaderList).get('content-type')
+  }
+
+  const responseBody = (contentType as string)?.startsWith('application/json')
     ? await response.json()
     : await response.text()
 
