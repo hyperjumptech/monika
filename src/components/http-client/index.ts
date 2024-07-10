@@ -75,20 +75,13 @@ export class HttpClientResponse {
     return this._fetchResponse.type
   }
 
-  // get url: string
-  // readonly redirected: boolean
-
-  // readonly bodyUsed: boolean
-
-  // readonly arrayBuffer: () => Promise<ArrayBuffer>
-  // readonly blob: () => Promise<Blob>
-  // readonly formData: () => Promise<FormData>
-
   json(): Promise<unknown> {
+    if (this._data) return Promise.resolve(this._data)
     return this._fetchResponse.json()
   }
 
   text(): Promise<string> {
+    if (this._data) return Promise.resolve(this._data as string)
     return this._fetchResponse.text()
   }
 
@@ -154,7 +147,9 @@ export const httpClient = async (
   if (!isStreamResponseType) {
     try {
       data = await fetchResponse.json()
-    } catch {}
+    } catch {
+      data = await fetchResponse.text()
+    }
   }
 
   return new HttpClientResponse(fetchResponse, isStreamResponseType, data)
