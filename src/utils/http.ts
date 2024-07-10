@@ -22,117 +22,70 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import type { AxiosRequestHeaders, AxiosResponse } from 'axios'
-import axios from 'axios'
-import http from 'node:http'
-import https from 'node:https'
-import { Agent, type HeadersInit } from 'undici'
+import { httpClient, HttpClientResponse } from '../components/http-client'
+import {
+  HttpClientHeaders,
+  HttpClientRequestOptions,
+  HttpClientHeaderList,
+} from '../interfaces/http-client'
 
 type HttpRequestParams = {
   url: string
   maxRedirects?: number
-  headers?: HeadersInit
+  headers?: HttpClientHeaders
   timeout?: number
   allowUnauthorizedSsl?: boolean
   responseType?: 'stream'
-} & Omit<RequestInit, 'headers'>
+} & Omit<HttpClientRequestOptions, 'headers'>
 
-// Keep the agents alive to reduce the overhead of DNS queries and creating TCP connection.
-// More information here: https://rakshanshetty.in/nodejs-http-keep-alive/
-const httpAgent = new http.Agent({ keepAlive: true })
-const httpsAgent = new https.Agent({ keepAlive: true })
 export const DEFAULT_TIMEOUT = 10_000
-
-// Create an instance of axios here so it will be reused instead of creating a new one all the time.
-const axiosInstance = axios.create()
 
 export async function sendHttpRequest(
   config: HttpRequestParams
-): Promise<AxiosResponse> {
-  const { allowUnauthorizedSsl, body, headers, timeout, ...options } = config
-
-  return axiosInstance.request({
-    ...options,
-    data: body,
-    headers: convertHeadersToAxios(headers),
-    timeout: timeout ?? DEFAULT_TIMEOUT, // Ensure default timeout if not filled.
-    httpAgent,
-    httpsAgent: allowUnauthorizedSsl
-      ? new https.Agent({ keepAlive: true, rejectUnauthorized: true })
-      : httpsAgent,
-  })
-}
-
-function convertHeadersToAxios(headersInit: HeadersInit | undefined) {
-  const headers: AxiosRequestHeaders = {}
-
-  if (headersInit instanceof Headers) {
-    // If headersInit is a Headers object
-    for (const [key, value] of headersInit.entries()) {
-      headers[key] = value
-    }
-
-    return headers
-  }
-
-  if (typeof headersInit === 'object') {
-    // If headersInit is a plain object
-    for (const [key, value] of Object.entries(headersInit)) {
-      headers[key] = value as never
-    }
-
-    return headers
-  }
-
-  return headers
-}
-
-export async function sendHttpRequestFetch(
-  config: HttpRequestParams
-): Promise<Response> {
+): Promise<HttpClientResponse> {
   const { maxRedirects, timeout, url } = config
   const controller = new AbortController()
   const { signal } = controller
   const timeoutId = setTimeout(() => {
     controller.abort()
   }, timeout || DEFAULT_TIMEOUT)
-  const fetcher = compileFetch(config, signal)
+  const fetcher = compileHttpClient(config, signal)
   return fetchRedirect(url, maxRedirects, fetcher).then((response) => {
     clearTimeout(timeoutId)
     return response
   })
 }
 
-function compileFetch(
+function compileHttpClient(
   config: HttpRequestParams,
   signal: AbortSignal
-): (url: string) => Promise<Response> {
-  const { allowUnauthorizedSsl, body, headers, method } = config
+): (url: string) => Promise<HttpClientResponse> {
+  const { allowUnauthorizedSsl, body, headers, method, responseType } = config
 
   return (url) =>
-    fetch(url, {
-      body: body === '' ? undefined : body,
-      redirect: 'manual',
-      dispatcher: new Agent({
-        connect: {
-          rejectUnauthorized: !allowUnauthorizedSsl,
-        },
-      }),
-      headers,
-      keepalive: true,
-      method,
-      signal,
-    })
+    httpClient(
+      url,
+      {
+        body: body === '' ? undefined : body,
+        redirect: 'manual',
+        allowUnauthorizedSsl,
+        headers,
+        keepalive: true,
+        method,
+        signal,
+      },
+      responseType === 'stream'
+    )
 }
 
 // fetchRedirect handles HTTP status code 3xx returned by fetcher
 async function fetchRedirect(
   url: string,
   maxRedirects: number | undefined,
-  fetcher: (url: string) => Promise<Response>
+  fetcher: (url: string) => Promise<HttpClientResponse>
 ) {
   let redirected = 0
-  let currentResponse: Response
+  let currentResponse: HttpClientResponse
   let nextUrl = url
 
   // do HTTP fetch request at least once
@@ -148,16 +101,17 @@ async function fetchRedirect(
     // location header could either be full url, relative path, or absolute path
     // e.g. "https://something.tld", "new/path", "/new/path", respectively
     // refer to : RFC-7231 https://datatracker.ietf.org/doc/html/rfc7231#section-7.1.2
-    const newLocation = currentResponse.headers.get('location') || ''
+    const newLocation =
+      (currentResponse.headers as HttpClientHeaderList).get('location') || ''
     // try-catch to evaluate if redirect location is a url
     try {
       // when it is valid url, immediately set nextUrl from location header
       nextUrl = new URL(
-        currentResponse.headers.get('location') || ''
+        (currentResponse.headers as HttpClientHeaderList).get('location') || ''
       ).toString()
     } catch {
       // new redirect location is relative / absolute url
-      const newEndpoint = newLocation.startsWith('/')
+      const newEndpoint = (newLocation as string).startsWith('/')
         ? newLocation
         : `/${newLocation}`
       // parse nextUrl to Node.js URL to get protocol and host

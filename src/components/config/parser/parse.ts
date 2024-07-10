@@ -50,7 +50,7 @@ export async function parseByType(
   const config = isUrl(source)
     ? await getConfigFileFromUrl(source)
     : await readFile(source, { encoding: 'utf8' })
-  const isEmpty = config.length === 0
+  const isEmpty = (config as string).length === 0
 
   if (isEmpty) {
     throw new Error(`Failed to read ${source}, the file is empty.`)
@@ -58,15 +58,15 @@ export async function parseByType(
 
   const extension = path.extname(source)
 
-  if (type === 'har') return parseHarFile(config)
-  if (type === 'text') return parseConfigFromText(config)
-  if (type === 'postman') return parseConfigFromPostman(config)
-  if (type === 'sitemap') return parseConfigFromSitemap(config)
+  if (type === 'har') return parseHarFile(config as string)
+  if (type === 'text') return parseConfigFromText(config as string)
+  if (type === 'postman') return parseConfigFromPostman(config as string)
+  if (type === 'sitemap') return parseConfigFromSitemap(config as string)
   if (type === 'insomnia')
-    return parseInsomnia(config, extension.replace('.', ''))
+    return parseInsomnia(config as string, extension.replace('.', ''))
 
   return parseConfigByExt({
-    config,
+    config: config as string,
     extension,
     source,
   })
@@ -74,7 +74,7 @@ export async function parseByType(
 
 async function getConfigFileFromUrl(url: string) {
   const config = await fetchConfigFile(url)
-  const isEmpty = config.length === 0
+  const isEmpty = (config as string).length === 0
 
   if (isEmpty) {
     throw new Error(

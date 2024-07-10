@@ -25,8 +25,9 @@
 import type { Config } from '../../../interfaces/config'
 import yml from 'js-yaml'
 import { compile as compileTemplate } from 'handlebars'
-import { Method, HttpClientHeaders } from '../../http-client'
+
 import Joi from 'joi'
+import { Method } from '../../../interfaces/http-client'
 
 const envValidator = Joi.object({
   scheme: Joi.array().items(Joi.string()),
@@ -145,13 +146,14 @@ function mapInsomniaRequestToConfig(req: unknown) {
   // eslint-disable-next-line camelcase
   const url = compileTemplate(res.url)({ base_url: baseUrl })
   const authorization = getAuthorizationHeader(res)
-  let headers: HttpClientHeaders | undefined
+  let headers: { [key: string]: unknown } | undefined
   if (authorization)
     headers = {
       authorization,
     }
   if (res.headers) {
     if (headers === undefined) headers = {}
+
     for (const h of res.headers) {
       headers[h.name] = h.value
     }
