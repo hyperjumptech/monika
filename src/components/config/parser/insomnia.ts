@@ -153,14 +153,14 @@ export function mapInsomniaRequestToConfig(
   const url = compileTemplate(res.url)({ base_url: baseUrl })
   const authorization = getAuthorizationHeader(res, env)
 
-  let headers: Record<string, string> = {}
+  let headers: Record<string, string> | undefined
 
   // let headers: Headers | undefined
   if (authorization) headers = { authorization }
   if (res.headers) {
-    if (headers === undefined) headers = new Headers()
+    if (headers === undefined) headers = {}
     for (const h of res.headers) {
-      headers.append(h.name, h.value)
+      headers[h.name] = h.value
     }
   }
 
