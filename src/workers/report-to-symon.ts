@@ -22,11 +22,10 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios from 'axios'
 import path from 'path'
 import { open } from 'sqlite'
 import { verbose } from 'sqlite3'
-
+import { sendHttpRequestFetch } from '../utils/http'
 import {
   UnreportedNotificationsLog,
   UnreportedRequestsLog,
@@ -61,20 +60,20 @@ export default async (stringifiedData: string) => {
     } else {
       // Hit the Symon API for receiving Monika report
       // With the compressed requests and notifications data
-      await axios({
-        data: {
+      await sendHttpRequestFetch({
+        url: `${url}/api/v1/monika/report`,
+        method: 'POST',
+        body: JSON.stringify({
           data: {
             notifications,
             requests,
           },
           monikaId,
-        },
+        }),
         headers: {
           'Content-Type': 'application/json',
           'x-api-key': apiKey,
         },
-        method: 'POST',
-        url: `${url}/api/v1/monika/report`,
       })
 
       log.info(
