@@ -24,11 +24,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: Linux
-            platform: linux
-            runs_on: ubuntu-latest
-            flags: --platform=linux/amd64
-          - os: Windows
+          - os: Linux, Windows and MacOS x64
             platform: windows
             runs_on: ubuntu-latest
             flags: --platform=linux/amd64
