@@ -35,7 +35,7 @@ import { generateRequestChainingBody, httpRequest } from './request'
 
 const server = setupServer()
 
-describe.only('probingHTTP', () => {
+describe('probingHTTP', () => {
   describe('httpRequest function', () => {
     before(() => {
       server.listen()
@@ -447,7 +447,7 @@ describe.only('probingHTTP', () => {
       expect(res.status).to.eq(200)
     })
 
-    it.only('should follow redirect', async () => {
+    it('should follow redirect', async () => {
       // arrange
       server.use(
         http.get(
