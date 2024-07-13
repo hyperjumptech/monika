@@ -19,9 +19,11 @@
     "bin": "monika",
     "default": "monika",
     "dirname": "monika",
-    "commands": "./lib/commands",
+    "commands": {
+      "strategy": "single",
+      "target": "./lib/commands/monika.js"
+    },
     "plugins": [
-      "@oclif/plugin-version",
       "@oclif/plugin-help"
     ]
   },
@@ -63,7 +65,6 @@
     "@oclif/core": "^3.27.0",
     "@oclif/plugin-help": "^6.2.5",
     "@oclif/plugin-plugins": "^5.3.4",
-    "@oclif/plugin-version": "^2.0.11",
     "@sendgrid/mail": "^7.4.2",
     "@types/pg": "^8.10.9",
     "ajv": "^8.11.0",
