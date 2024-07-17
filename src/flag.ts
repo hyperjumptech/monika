@@ -72,6 +72,7 @@ export type MonikaFlags = {
   'user-agent'?: string
   verbose: boolean
   'verbose-cache': boolean
+  version: boolean
 }
 
 const DEFAULT_CONFIG_INTERVAL_SECONDS = 900
@@ -105,6 +106,7 @@ export const monikaFlagsDefaultValue: MonikaFlags = {
   'ttl-cache': 0,
   verbose: false,
   'verbose-cache': false,
+  version: false,
 }
 
 function getDefaultConfig(): Array<string> {
@@ -300,7 +302,7 @@ export const flags = {
     default: monikaFlagsDefaultValue.verbose,
     description: 'Show cache hit / miss messages to log',
   }),
-  version: Flags.version({ char: 'v' }),
+  version: Flags.boolean({ char: 'v', description: 'show CLI version' }),
 }
 
 export function sanitizeFlags(flags: Partial<MonikaFlags>): MonikaFlags {
