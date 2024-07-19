@@ -480,6 +480,7 @@ describe('probingHTTP', () => {
       )
       const request = {
         url: 'https://example.com/redirect-1',
+        followRedirects: 2,
       } as RequestConfig
 
       // act
