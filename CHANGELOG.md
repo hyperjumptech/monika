@@ -9,8 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-Feat: #1285 implement cache http response (#1296)
-Feat: Add custom user agent for Monika (#1300)
+Feat: Implement http response cache (#1296)
+Feat: Add custom user agent (#1300)
 
 ### Fixed
 
