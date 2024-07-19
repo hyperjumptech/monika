@@ -22,25 +22,138 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-export type HttpClientHeaders = Record<string, string | number | boolean>
-export type Method =
-  | 'get'
-  | 'GET'
-  | 'delete'
-  | 'DELETE'
-  | 'head'
-  | 'HEAD'
-  | 'options'
-  | 'OPTIONS'
-  | 'post'
-  | 'POST'
-  | 'put'
-  | 'PUT'
-  | 'patch'
-  | 'PATCH'
-  | 'purge'
-  | 'PURGE'
-  | 'link'
-  | 'LINK'
-  | 'unlink'
-  | 'UNLINK'
+import { ReadableStream } from 'node:stream/web'
+import {
+  HttpClientHeaderList,
+  HttpClientHeaders,
+  HttpClientResponseType,
+  HttpClientRequestOptions,
+} from '../../interfaces/http-client'
+import { Agent, type HeadersInit } from 'undici'
+
+export class HttpClientResponse {
+  _fetchResponse: Response
+  _headers: HttpClientHeaderList | null = null
+  _isStreamResponseType: boolean
+  _data: unknown
+
+  constructor(
+    fetchResponse: Response,
+    isStreamResponseType: boolean,
+    data?: unknown
+  ) {
+    this._fetchResponse = fetchResponse
+    this._isStreamResponseType = isStreamResponseType
+    this._data = data
+  }
+
+  get headers(): HttpClientHeaders {
+    if (!this._headers) {
+      this._headers = new HttpClientHeaderList()
+
+      for (const [k, v] of this._fetchResponse.headers.entries()) {
+        this._headers!.set(k, v)
+      }
+    }
+
+    return this._headers
+  }
+
+  get ok(): boolean {
+    return this._fetchResponse.ok
+  }
+
+  get status(): number {
+    return this._fetchResponse.status
+  }
+
+  get statusText(): string {
+    return this._fetchResponse.statusText
+  }
+
+  get type(): HttpClientResponseType {
+    return this._fetchResponse.type
+  }
+
+  // get url: string
+  // readonly redirected: boolean
+
+  // readonly bodyUsed: boolean
+
+  // readonly arrayBuffer: () => Promise<ArrayBuffer>
+  // readonly blob: () => Promise<Blob>
+  // readonly formData: () => Promise<FormData>
+
+  json(): Promise<unknown> {
+    return this._fetchResponse.json()
+  }
+
+  text(): Promise<string> {
+    return this._fetchResponse.text()
+  }
+
+  // static error (): Response;
+
+  get data(): ReadableStream | unknown {
+    if (this._isStreamResponseType) {
+      const reader = this._fetchResponse.body?.getReader()
+      return new ReadableStream({
+        start(controller) {
+          return pump()
+
+          function pump() {
+            if (!reader) return
+
+            return reader
+              .read()
+              .then(({ done, value }: { done: any; value?: any }): any => {
+                // When no more data needs to be consumed, close the stream
+                if (done) {
+                  controller.close()
+                  return
+                }
+
+                // Enqueue the next data chunk into our target stream
+                controller.enqueue(value)
+                return pump()
+              })
+          }
+        },
+      })
+    }
+
+    return this._data
+  }
+}
+
+export const httpClient = async (
+  url: string,
+  requestOptions: HttpClientRequestOptions,
+  isStreamResponseType: boolean = false
+): Promise<HttpClientResponse> => {
+  const fetchResponse = await fetch(url, {
+    body: requestOptions.body === '' ? undefined : requestOptions.body,
+    redirect: requestOptions.redirect,
+    dispatcher:
+      requestOptions.allowUnauthorizedSsl === undefined
+        ? undefined
+        : new Agent({
+            connect: {
+              rejectUnauthorized: !requestOptions.allowUnauthorizedSsl,
+              keepAlive: requestOptions.keepAlive,
+            },
+          }),
+
+    headers: requestOptions.headers as HeadersInit,
+    keepalive: requestOptions.keepAlive,
+    method: requestOptions.method,
+    signal: requestOptions.signal,
+  })
+
+  let data
+  if (!isStreamResponseType) {
+    data = await fetchResponse.json()
+  }
+
+  return new HttpClientResponse(fetchResponse, isStreamResponseType, data)
+}

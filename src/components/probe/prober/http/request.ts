@@ -37,10 +37,15 @@ import {
 import { getContext } from '../../../../context'
 import { icmpRequest } from '../icmp/request'
 import registerFakes from '../../../../utils/fakes'
-import { sendHttpRequest, sendHttpRequestFetch } from '../../../../utils/http'
+import { sendHttpRequest } from '../../../../utils/http'
 import { log } from '../../../../utils/pino'
 import { AxiosError } from 'axios'
 import { getErrorMessage } from '../../../../utils/catch-error-handler'
+import {
+  HttpClientHeaderList,
+  HttpClientHeaders,
+  HttpClientBody,
+} from '../../../../interfaces/http-client'
 
 // Register Handlebars helpers
 registerFakes(Handlebars)
@@ -98,27 +103,19 @@ export async function httpRequest({
       return icmpRequest({ host: renderedURL })
     }
 
-    const requestHeaders = new Headers()
+    const requestHeaders = new HttpClientHeaderList()
     for (const [key, value] of Object.entries(newReq.headers || {})) {
       requestHeaders.set(key, value)
     }
 
     // Do the request using compiled URL and compiled headers (if exists)
-    const response = await (getContext().flags['native-fetch']
-      ? probeHttpFetch({
-          startTime,
-          maxRedirects: followRedirects,
-          renderedURL,
-          requestParams: { ...newReq, headers: requestHeaders },
-          allowUnauthorized,
-        })
-      : probeHttpAxios({
-          startTime,
-          maxRedirects: followRedirects,
-          renderedURL,
-          requestParams: { ...newReq, headers: requestHeaders },
-          allowUnauthorized,
-        }))
+    const response = await probeHttpClient({
+      startTime,
+      maxRedirects: followRedirects,
+      renderedURL,
+      requestParams: { ...newReq, headers: requestHeaders },
+      allowUnauthorized,
+    })
 
     return response
   } catch (error: unknown) {
@@ -265,7 +262,7 @@ function compileBody({
   return { headers: newHeaders, body: newBody }
 }
 
-async function probeHttpFetch({
+async function probeHttpClient({
   startTime,
   renderedURL,
   requestParams,
@@ -278,9 +275,9 @@ async function probeHttpFetch({
   maxRedirects: number
   requestParams: {
     method: string | undefined
-    headers: Headers | undefined
+    headers: HttpClientHeaders | undefined
     timeout: number
-    body?: BodyInit
+    body?: HttpClientBody
     ping: boolean | undefined
   }
 }): Promise<ProbeRequestResponse> {
@@ -288,7 +285,7 @@ async function probeHttpFetch({
     log.info(`Probing ${renderedURL} with Node.js fetch`)
   }
 
-  const response = await sendHttpRequestFetch({
+  const response = await sendHttpRequest({
     ...requestParams,
     allowUnauthorizedSsl: allowUnauthorized,
     keepalive: true,
@@ -309,9 +306,9 @@ async function probeHttpFetch({
     }
   }
 
-  const responseBody = response.headers
-    .get('Content-Type')
-    ?.includes('application/json')
+  const responseBody = (
+    (response.headers as HttpClientHeaderList).get('Content-Type') as string
+  )?.includes('application/json')
     ? await response.json()
     : await response.text()
 
@@ -321,49 +318,6 @@ async function probeHttpFetch({
     body: responseBody,
     status: response.status,
     headers: responseHeaders || '',
-    responseTime,
-    result: probeRequestResult.success,
-  }
-}
-
-type ProbeHTTPAxiosParams = {
-  startTime: number
-  renderedURL: string
-  allowUnauthorized: boolean | undefined
-  maxRedirects: number
-  requestParams: {
-    method: string | undefined
-    headers: Headers | undefined
-    timeout: number
-    body?: BodyInit
-    ping: boolean | undefined
-  }
-}
-
-async function probeHttpAxios({
-  startTime,
-  renderedURL,
-  requestParams,
-  allowUnauthorized,
-  maxRedirects,
-}: ProbeHTTPAxiosParams): Promise<ProbeRequestResponse> {
-  const resp = await sendHttpRequest({
-    ...requestParams,
-    allowUnauthorizedSsl: allowUnauthorized,
-    keepalive: true,
-    url: renderedURL,
-    maxRedirects,
-  })
-
-  const responseTime = Date.now() - startTime
-  const { data, headers, status } = resp
-
-  return {
-    requestType: 'HTTP',
-    data,
-    body: data,
-    status,
-    headers,
     responseTime,
     result: probeRequestResult.success,
   }

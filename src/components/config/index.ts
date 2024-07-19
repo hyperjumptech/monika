@@ -62,14 +62,14 @@ async function createExampleConfigFile() {
 
   try {
     const resp = await sendHttpRequest({ url })
-    await writeFile(outputFilePath, resp.data, { encoding: 'utf8' })
+    await writeFile(outputFilePath, resp.data as string, { encoding: 'utf8' })
   } catch {
     const ymlConfig = `
     probes:
     - id: '1'
       requests:
         - url: http://example.com
-    
+
     db_limit:
       max_db_size: 1000000000
       deleted_data: 1
