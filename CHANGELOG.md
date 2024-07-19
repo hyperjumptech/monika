@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.21.0] - 2024-07-19
+
+### Added
+
+Feat: #1285 implement cache http response (#1296)
+Feat: Add custom user agent for Monika (#1300)
+
+### Fixed
+
+Fix: Handle CERT_HAS_EXPIRED_ERROR (#1299)
+Fix: Docker build fails on some OS (#1304)
+Fix: Handle ERR_TLS_CERT_ALTNAME_INVALID and improve overall error descriptions (#1309)
+
+### Changed
+
+Chore: Update oclif to v4.14.0 (#1311)
+
 ## [1.20.2] - 2024-05-16
 
 ### Fixed
