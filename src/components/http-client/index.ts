@@ -150,9 +150,11 @@ export const httpClient = async (
     signal: requestOptions.signal,
   })
 
-  let data
+  let data: unknown = ''
   if (!isStreamResponseType) {
-    data = await fetchResponse.json()
+    try {
+      data = await fetchResponse.json()
+    } catch {}
   }
 
   return new HttpClientResponse(fetchResponse, isStreamResponseType, data)
