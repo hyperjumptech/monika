@@ -93,6 +93,7 @@ async function fetchRedirect(
   do {
     // eslint-disable-next-line no-await-in-loop
     currentResponse = await fetcher(nextUrl)
+
     // check for HTTP status code 3xx
     const shouldRedirect =
       currentResponse.status >= 300 && currentResponse.status < 400
