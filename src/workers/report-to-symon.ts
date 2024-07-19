@@ -22,7 +22,6 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios from 'axios'
 import path from 'path'
 import { open } from 'sqlite'
 import { verbose } from 'sqlite3'
@@ -35,6 +34,7 @@ import {
   getUnreportedLogs,
 } from '../components/logger/history'
 import { log } from '../utils/pino'
+import { httpClient } from 'src/components/http-client'
 const dbPath = path.resolve(process.cwd(), 'monika-logs.db')
 
 export default async (stringifiedData: string) => {
@@ -61,20 +61,19 @@ export default async (stringifiedData: string) => {
     } else {
       // Hit the Symon API for receiving Monika report
       // With the compressed requests and notifications data
-      await axios({
-        data: {
+      await httpClient(`${url}/api/v1/monika/report`, {
+        body: JSON.stringify({
           data: {
             notifications,
             requests,
           },
           monikaId,
-        },
+        }),
         headers: {
           'Content-Type': 'application/json',
           'x-api-key': apiKey,
         },
         method: 'POST',
-        url: `${url}/api/v1/monika/report`,
       })
 
       log.info(
