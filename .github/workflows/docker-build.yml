@@ -1,5 +1,11 @@
-# This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+# This workflow will test building the Docker image for Monika.
+# For Intel based MacOS, Linux, and Windows, it will build the image for using linux/amd64 platfrom
+# For Apple Silicon, it will build the image for using linux/arm64 platfrom
+# There is a reason why we cannot build the image for MacOS and Windows using windows-latest or macos-latest.
+# Read more about it here:
+# https://github.com/docker/setup-buildx-action/issues/292
+# https://github.com/moby/buildkit/issues/616
+# https://github.com/docker/setup-qemu-action/discussions/137
 
 name: Docker Build Test
 
