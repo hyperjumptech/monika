@@ -477,67 +477,63 @@ function getErrorStatusWithExplanation(error: unknown): {
       return {
         status: 599,
         description:
-          'ECONNABORTED: The connection was unexpectedly terminated, often due to server issues, network problems, or timeouts.',
+          'ECONNABORTED: The connection was unexpectedly terminated, often due to server issues, network problems, or timeouts. Please check the server status or network connectivity and try again.',
       }
     } // https://httpstatuses.com/599
 
     case 'ENOTFOUND': {
-      // not found, the abyss never returned a statusCode
-      // assign some unique errResponseCode for decoding later.
       return {
         status: 0,
         description:
-          "ENOTFOUND: The monitored website or server couldn't be found, similar to entering an incorrect web address or encountering a temporary network/server issue.",
+          "ENOTFOUND: The monitored website or server couldn't be found, similar to entering an incorrect web address or encountering a temporary network/server issue. Verify the URL and ensure the server is accessible.",
       }
     }
 
     case 'ECONNRESET': {
-      // connection reset from target, assign some unique number responsecCode
       return {
         status: 1,
         description:
-          'ECONNRESET: The connection to a server was unexpectedly reset, often pointing to issues on the server side or network interruptions.',
+          'ECONNRESET: The connection to a server was unexpectedly reset, often pointing to issues on the server side or network interruptions. Check the server status and network connection, and retry the request.',
       }
     }
 
     case 'ECONNREFUSED': {
-      // got rejected, again
       return {
         status: 2,
         description:
-          'ECONNREFUSED: Attempted to connect to a server, but the server declined the connection.',
+          'ECONNREFUSED: Attempted to connect to a server, but the server declined the connection. Ensure the server is running and accepting connections.',
       }
     }
 
     case 'ERR_FR_TOO_MANY_REDIRECTS': {
-      // redirect higher than set in maxRedirects
       return {
         status: 3,
         description:
-          'ERR_FR_TOO_MANY_REDIRECTS: Webpage is stuck in a loop of continuously redirecting.',
+          'ERR_FR_TOO_MANY_REDIRECTS: Webpage is stuck in a loop of continuously redirecting. Review the redirection rules and fix any redirect loops.',
       }
     }
 
-    // cover all possible axios connection issues
     case 'ERR_BAD_OPTION_VALUE': {
       return {
         status: 4,
         description:
-          'ERR_BAD_OPTION_VALUE: Invalid or inappropriate value is provided for an option.',
+          'ERR_BAD_OPTION_VALUE: Invalid or inappropriate value is provided for an option. Check and correct the option values being passed.',
       }
     }
 
     case 'ERR_BAD_OPTION': {
       return {
         status: 5,
-        description: 'ERR_BAD_OPTION: Invalid or inappropriate option is used.',
+        description:
+          'ERR_BAD_OPTION: Invalid or inappropriate option is used. Verify the options being used and correct them.',
       }
     }
 
     case 'ETIMEDOUT': {
       return {
         status: 6,
-        description: 'ETIMEDOUT: Connection attempt has timed out.',
+        description:
+          'ETIMEDOUT: Connection attempt has timed out. Try increasing the timeout value or check the server response time.',
       }
     }
 
@@ -545,7 +541,7 @@ function getErrorStatusWithExplanation(error: unknown): {
       return {
         status: 7,
         description:
-          'ERR_NETWORK: Signals a general network-related issue such as poor connectivity, DNS issues, or firewall restrictions.',
+          'ERR_NETWORK: Signals a general network-related issue such as poor connectivity, DNS issues, or firewall restrictions. Verify network connectivity and DNS settings, and ensure no firewall is blocking the connection.',
       }
     }
 
@@ -553,7 +549,7 @@ function getErrorStatusWithExplanation(error: unknown): {
       return {
         status: 8,
         description:
-          'ERR_DEPRECATED: Feature, method, or functionality used in the code is outdated or no longer supported.',
+          'ERR_DEPRECATED: Feature, method, or functionality used in the code is outdated or no longer supported. Update the code to use supported features or methods.',
       }
     }
 
@@ -561,7 +557,7 @@ function getErrorStatusWithExplanation(error: unknown): {
       return {
         status: 9,
         description:
-          'ERR_BAD_RESPONSE: Server provides a response that cannot be understood or is considered invalid.',
+          'ERR_BAD_RESPONSE: Server provides a response that cannot be understood or is considered invalid. Ensure the server is providing a valid response.',
       }
     }
 
@@ -569,7 +565,7 @@ function getErrorStatusWithExplanation(error: unknown): {
       return {
         status: 11,
         description:
-          "ERR_BAD_REQUEST:  Client's request to the server is malformed or invalid.",
+          "ERR_BAD_REQUEST: Client's request to the server is malformed or invalid. Review and correct the request parameters being sent to the server.",
       }
     }
 
@@ -577,14 +573,15 @@ function getErrorStatusWithExplanation(error: unknown): {
       return {
         status: 12,
         description:
-          'ERR_CANCELED: Request or operation is canceled before it completes.',
+          'ERR_CANCELED: Request or operation is canceled before it completes. Check if the cancellation was intended or adjust the request flow.',
       }
     }
 
     case 'ERR_NOT_SUPPORT': {
       return {
         status: 13,
-        description: 'ERR_NOT_SUPPORT: Feature or operation is not supported.',
+        description:
+          'ERR_NOT_SUPPORT: Feature or operation is not supported. Use an alternative feature or operation that is supported.',
       }
     }
 
@@ -592,21 +589,23 @@ function getErrorStatusWithExplanation(error: unknown): {
       return {
         status: 14,
         description:
-          'ERR_INVALID_URL: URL is not formatted correctly or is not a valid web address.',
+          'ERR_INVALID_URL: URL is not formatted correctly or is not a valid web address. Verify and correct the URL being used.',
       }
     }
 
     case 'EAI_AGAIN': {
       return {
         status: 15,
-        description: 'EAI_AGAIN: Temporary failure in resolving a domain name.',
+        description:
+          'EAI_AGAIN: Temporary failure in resolving a domain name. Retry the request after some time or check DNS settings.',
       }
     }
 
     case 'EHOSTUNREACH': {
       return {
         status: 16,
-        description: 'EHOSTUNREACH: The host is unreachable.',
+        description:
+          'EHOSTUNREACH: The host is unreachable. Verify the network connection and ensure the host is accessible.',
       }
     }
 
@@ -614,7 +613,7 @@ function getErrorStatusWithExplanation(error: unknown): {
       return {
         status: 17,
         description:
-          "EPROTO: There are issues with the website's SSL/TLS certificates, incompatible protocols, or other SSL-related problems.",
+          "EPROTO: There are issues with the website's SSL/TLS certificates, incompatible protocols, or other SSL-related problems. Verify the SSL/TLS certificates and ensure compatible protocols are used.",
       }
     }
 
@@ -622,7 +621,7 @@ function getErrorStatusWithExplanation(error: unknown): {
       return {
         status: 18,
         description:
-          "CERT_HAS_EXPIRED: The website's SSL/TLS certificates has expired.",
+          "CERT_HAS_EXPIRED: The website's SSL/TLS certificates has expired. Renew the SSL/TLS certificates to resolve the issue.",
       }
     }
 
@@ -630,7 +629,14 @@ function getErrorStatusWithExplanation(error: unknown): {
       return {
         status: 27,
         description:
-          'ELEAFSIGNATURE: Unable to verify the first / leaf certificate.',
+          'ELEAFSIGNATURE: Unable to verify the first/leaf certificate. Check the certificate chain and ensure all certificates are valid.',
+      }
+    }
+
+    case 'ERR_TLS_CERT_ALTNAME_INVALID': {
+      return {
+        status: 28,
+        description: `ERR_TLS_CERT_ALTNAME_INVALID: Invalid certificate altname. Verify the certificate's subject alternative names and correct any issues.`,
       }
     }
 
