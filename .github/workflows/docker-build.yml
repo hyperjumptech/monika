@@ -1,0 +1,50 @@
+# This workflow will test building the Docker image for Monika.
+# For Intel based MacOS, Linux, and Windows, it will build the image for using linux/amd64 platfrom
+# For Apple Silicon, it will build the image for using linux/arm64 platfrom
+# There is a reason why we cannot build the image for MacOS and Windows using windows-latest or macos-latest.
+# Read more about it here:
+# https://github.com/docker/setup-buildx-action/issues/292
+# https://github.com/moby/buildkit/issues/616
+# https://github.com/docker/setup-qemu-action/discussions/137
+
+name: Docker Build Test
+
+on:
+  workflow_dispatch: null
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  issues: read
+  pull-requests: read
+  actions: write
+
+jobs:
+  build:
+    name: Build for ${{ matrix.os }}
+    runs-on: ${{ matrix.runs_on }}
+    strategy:
+      matrix:
+        include:
+          - os: Linux, Windows and MacOS x64
+            platform: windows
+            runs_on: ubuntu-latest
+            flags: --platform=linux/amd64
+          - os: MacOS (Apple Silicon)
+            platform: macos
+            runs_on: ubuntu-latest
+            flags: --platform=linux/arm64
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Docker Setup QEMU
+        uses: docker/setup-qemu-action@v3.1.0
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build the image
+        run: |
+          docker buildx build ${{ matrix.flags }} -t hyperjump/monika:${{ matrix.platform }} .
