@@ -289,7 +289,9 @@ async function probeHttpClient({
     body:
       typeof requestParams.body === 'string'
         ? requestParams.body
-        : JSON.stringify(requestParams.body),
+        : requestParams.body
+        ? JSON.stringify(requestParams.body)
+        : null,
   })
 
   const responseTime = Date.now() - startTime
