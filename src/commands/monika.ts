@@ -97,6 +97,11 @@ export default class Monika extends Command {
     setContext({ flags, userAgent: this.config.userAgent })
 
     try {
+      if (flags.version) {
+        this.log(this.config.userAgent)
+        this.exit(0)
+      }
+
       if (flags['create-config']) {
         await createConfig()
         return
