@@ -26,6 +26,7 @@ import type { ValidatedConfig } from '../interfaces/config'
 import type { ProbeAlert } from '../interfaces/probe'
 
 import { type MonikaFlags, monikaFlagsDefaultValue } from '../flag'
+import { ProbeRequestResponse } from 'src/interfaces/request'
 
 export type Incident = {
   probeID: string
@@ -34,6 +35,7 @@ export type Incident = {
   createdAt: Date
 }
 
+type ProbeID = string
 type Context = {
   // userAgent example: @hyperjumptech/monika/1.2.3 linux-x64 node-14.17.0
   userAgent: string
@@ -41,6 +43,10 @@ type Context = {
   isTest: boolean
   config?: Omit<ValidatedConfig, 'probes'>
   flags: MonikaFlags
+  probeResultCache: {
+    iterationId: number
+    cache: Map<Set<ProbeID>, ProbeRequestResponse | undefined>
+  }
 }
 
 type NewContext = Partial<Context>
@@ -50,6 +56,7 @@ const initialContext: Context = {
   incidents: [],
   isTest: process.env.NODE_ENV === 'test',
   flags: monikaFlagsDefaultValue,
+  probeResultCache: { iterationId: 0, cache: new Map() },
 }
 
 let context: Context = initialContext
