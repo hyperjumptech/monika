@@ -1,7 +1,7 @@
 {
   "name": "@hyperjumptech/monika",
   "description": "Synthetic monitoring made easy",
-  "version": "1.20.2",
+  "version": "1.21.0",
   "license": "MIT",
   "author": "@hyperjumptech",
   "main": "lib/index.js",
@@ -56,7 +56,7 @@
     "format": "prettier --write .",
     "check-format": "prettier --check .",
     "pkg": "npm run prepack && pkg . --compress brotli",
-    "pack-tarballs": "oclif pack tarballs --targets=linux-x64 --no-xz"
+    "pack-tarballs": "npm run prepack && oclif pack tarballs --targets=linux-x64 --no-xz"
   },
   "dependencies": {
     "@faker-js/faker": "^7.4.0",
