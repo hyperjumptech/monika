@@ -22,7 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import type { Config } from '@oclif/core'
+import type { Config } from '@oclif/core/config'
 import { isSymonModeFrom } from '../components/config'
 import { watchConfigChanges } from '../components/config/watcher'
 import { openLogfile } from '../components/logger/history'

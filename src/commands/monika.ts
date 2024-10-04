@@ -22,7 +22,8 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Command, Errors } from '@oclif/core'
+import { Command } from '@oclif/core/command'
+import { ExitError, handle } from '@oclif/core/errors'
 import pEvent from 'p-event'
 
 import type { ValidatedConfig } from '../interfaces/config'
@@ -76,8 +77,8 @@ export default class Monika extends Command {
       await symonClient.sendStatus({ isOnline: false })
     }
 
-    if (error instanceof Errors.ExitError) {
-      return Errors.handle(error)
+    if (error instanceof ExitError) {
+      return handle(error)
     }
 
     if (error.message.includes('EEXIT: 0')) {

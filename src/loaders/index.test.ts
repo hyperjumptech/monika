@@ -22,7 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import type { Config } from '@oclif/core'
+import type { Config } from '@oclif/core/config'
 import { expect } from '@oclif/test'
 
 import { sanitizeFlags } from '../flag'

@@ -3,7 +3,7 @@ import { existsSync } from 'node:fs'
 import { writeFile } from 'node:fs/promises'
 import { type } from 'node:os'
 
-import { ux } from '@oclif/core'
+import { confirm } from '@inquirer/prompts'
 import yml from 'js-yaml'
 
 import { getContext } from '../../context'
@@ -33,11 +33,11 @@ export async function createConfig(): Promise<void> {
   const { force, output } = flags
 
   if (existsSync(output) && !force) {
-    const answer = await ux.ux.prompt(
-      `\n${output} file is already exists. Overwrite (Y/n)?`
-    )
+    const answer = await confirm({
+      message: `\n${output} file is already exists. Overwrite?`,
+    })
 
-    if (answer.toLowerCase() !== 'y') {
+    if (!answer) {
       log.warn(
         'Command cancelled. You can use the -o flag to specify an output file or --force to overwrite without prompting.'
       )
