@@ -26,12 +26,12 @@ import type { AxiosRequestHeaders, AxiosResponse } from 'axios'
 import axios from 'axios'
 import http from 'node:http'
 import https from 'node:https'
-import { Agent } from 'undici'
+import { Agent, type HeadersInit } from 'undici'
 
 type HttpRequestParams = {
   url: string
   maxRedirects?: number
-  headers?: Headers
+  headers?: HeadersInit
   timeout?: number
   allowUnauthorizedSsl?: boolean
   responseType?: 'stream'
@@ -49,14 +49,12 @@ const axiosInstance = axios.create()
 export async function sendHttpRequest(
   config: HttpRequestParams
 ): Promise<AxiosResponse> {
-  const { allowUnauthorizedSsl, body, headers, timeout, signal, ...options } =
-    config
+  const { allowUnauthorizedSsl, body, headers, timeout, ...options } = config
 
   return axiosInstance.request({
     ...options,
     data: body,
     headers: convertHeadersToAxios(headers),
-    signal: signal as AbortSignal | undefined,
     timeout: timeout ?? DEFAULT_TIMEOUT, // Ensure default timeout if not filled.
     httpAgent,
     httpsAgent: allowUnauthorizedSsl
@@ -65,7 +63,7 @@ export async function sendHttpRequest(
   })
 }
 
-function convertHeadersToAxios(headersInit: Headers | undefined) {
+function convertHeadersToAxios(headersInit: HeadersInit | undefined) {
   const headers: AxiosRequestHeaders = {}
 
   if (headersInit instanceof Headers) {
