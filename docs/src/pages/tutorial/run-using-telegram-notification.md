@@ -20,9 +20,13 @@ Now the next step is to create a group for the Monika notifications. Create a gr
 
 ![](https://miro.medium.com/max/1400/1*jI767UEJfnefsev7JDILOQ.png)
 
-Now that we have our bot API key and set our bot to be a group administrator, all we need to do is to get the group ID. Invite a new bot to the group called **@RawDataBot** into your group to get the group ID.
+Now that we have our bot API key and set our bot to be a group administrator, all we need to do is to get the group ID. Invite one of the following bots into your group to obtain the group ID:
 
-![](https://miro.medium.com/max/762/1*FlZ_WX2zPPqmvpQNY9GWmA.png)
+- [getmyid_bot](https://t.me/getmyid_bot)
+- [getidsbot](https://t.me/getidsbot)
+- [RawDataBot](https://t.me/RawDataBot)
+
+![](https://miro.medium.com/v2/resize:fit:640/format:webp/1*uN_ddeb5OT649Jrf0WXm6A.png)
 
 After you have successfully invited the Telegram Bot Raw, you will see the group ID. **Save the group ID to somewhere else** and don’t forget to **kick the Telegram Bot Raw from your group**. Now that we have the group ID and bot token, it’s time to integrate it with Monika.
 
@@ -56,6 +60,6 @@ Let me explain a little bit about this configuration:
 
 Now that we have our configuration ready, it’s time to run it with Monika. Go to the directory where you saved the Monika configuration, and run Monika straight away using `monika -c monika.yml`
 
-![](https://miro.medium.com/max/986/1*WBjJn0hXpNSJ942PpnfZig.png)
+![](https://miro.medium.com/v2/resize:fit:720/format:webp/1*J9rZkMtxWu_g3mNNX15m8A.png)
 
 Congratulations! Now that you have successfully integrated Monika with Telegram, you will be notified if your website is slow or down.
