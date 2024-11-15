@@ -59,7 +59,7 @@ function compileFetch(
 
   return (url) =>
     fetch(url, {
-      body: body === '' ? undefined : body,
+      body: body === 'null' ? undefined : body,
       redirect: 'manual',
       dispatcher: new Agent({
         connect: {
