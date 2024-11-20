@@ -28,7 +28,7 @@ import isUrl from 'is-url'
 import yml from 'js-yaml'
 
 import type { Config } from '../../../interfaces/config'
-import { sendHttpRequest } from '../../../utils/http'
+import { sendHttpRequestFetch } from '../../../utils/http'
 import { parseHarFile } from './har'
 import { parseInsomnia } from './insomnia'
 import { parseConfigFromPostman } from './postman'
@@ -85,12 +85,18 @@ async function getConfigFileFromUrl(url: string) {
   return config
 }
 
-async function fetchConfigFile(url: string) {
+async function fetchConfigFile(url: string): Promise<string> {
   try {
-    const { data } = await sendHttpRequest({ url })
+    const resp = await sendHttpRequestFetch({ url, method: 'GET' })
 
+    if (!resp.ok) {
+      throw new Error(`The configuration file in ${url} is unreachable.`)
+    }
+
+    const data = (await resp.text()) as string // make no assumption on fetched file, so return text().
     return data
-  } catch {
+  } catch (error: unknown) {
+    console.error('fetch error:', (error as Error).message)
     throw new Error(`The configuration file in ${url} is unreachable.`)
   }
 }
@@ -107,9 +113,14 @@ function parseConfigByExt({
   source,
 }: ParseConfigByExtParams) {
   const isYaml = ['.yaml', '.yml'].includes(extension)
+  const isJSON = ['.json'].includes(extension)
 
   if (isYaml) {
     return yml.load(config, { json: true }) as Config
+  }
+
+  if (isJSON) {
+    return JSON.parse(config)
   }
 
   return isUrl(source) ? config : JSON.parse(config)

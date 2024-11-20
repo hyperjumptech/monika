@@ -22,10 +22,6 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import type { AxiosRequestHeaders, AxiosResponse } from 'axios'
-import axios from 'axios'
-import http from 'node:http'
-import https from 'node:https'
 import { Agent, type HeadersInit } from 'undici'
 
 type HttpRequestParams = {
@@ -37,55 +33,7 @@ type HttpRequestParams = {
   responseType?: 'stream'
 } & Omit<RequestInit, 'headers'>
 
-// Keep the agents alive to reduce the overhead of DNS queries and creating TCP connection.
-// More information here: https://rakshanshetty.in/nodejs-http-keep-alive/
-const httpAgent = new http.Agent({ keepAlive: true })
-const httpsAgent = new https.Agent({ keepAlive: true })
 export const DEFAULT_TIMEOUT = 10_000
-
-// Create an instance of axios here so it will be reused instead of creating a new one all the time.
-const axiosInstance = axios.create()
-
-export async function sendHttpRequest(
-  config: HttpRequestParams
-): Promise<AxiosResponse> {
-  const { allowUnauthorizedSsl, body, headers, timeout, ...options } = config
-
-  return axiosInstance.request({
-    ...options,
-    data: body,
-    headers: convertHeadersToAxios(headers),
-    timeout: timeout ?? DEFAULT_TIMEOUT, // Ensure default timeout if not filled.
-    httpAgent,
-    httpsAgent: allowUnauthorizedSsl
-      ? new https.Agent({ keepAlive: true, rejectUnauthorized: true })
-      : httpsAgent,
-  })
-}
-
-function convertHeadersToAxios(headersInit: HeadersInit | undefined) {
-  const headers: AxiosRequestHeaders = {}
-
-  if (headersInit instanceof Headers) {
-    // If headersInit is a Headers object
-    for (const [key, value] of headersInit.entries()) {
-      headers[key] = value
-    }
-
-    return headers
-  }
-
-  if (typeof headersInit === 'object') {
-    // If headersInit is a plain object
-    for (const [key, value] of Object.entries(headersInit)) {
-      headers[key] = value as never
-    }
-
-    return headers
-  }
-
-  return headers
-}
 
 export async function sendHttpRequestFetch(
   config: HttpRequestParams
@@ -111,7 +59,7 @@ function compileFetch(
 
   return (url) =>
     fetch(url, {
-      body: body === '' ? undefined : body,
+      body: body === 'null' ? undefined : body,
       redirect: 'manual',
       dispatcher: new Agent({
         connect: {

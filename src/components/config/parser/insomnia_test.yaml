@@ -1,0 +1,62 @@
+{
+  _type: 'export',
+  __export_format: 4,
+  __export_date: '2024-04-16T12:55:23.577Z',
+  __export_source: 'insomnia.desktop.app:v2023.5.8',
+  resources:
+    [
+      {
+        _id: 'req_5ae8f9fea8b9496db25e9c19a6d7783e',
+        parentId: 'fld_d68c7a6657c14354807fce49c34f3bdd',
+        modified: 1708668487313,
+        created: 1708668309457,
+        url: 'http://localhost:3000/api/v1/monika',
+        name: 'Send Report',
+        description: '',
+        method: 'POST',
+        body:
+          {
+            mimeType: 'application/json',
+            text: "{\n\t\"monikaId\": \"8d992f11-c6e8-48d2-bc84-750ff2242b88\",\n\t\"data\": {\n\t\t\"notifications\": \"\",\n\t\t\"requests\": \"\"\n\t}\n}",
+          },
+        parameters: [],
+        headers:
+          [
+            { name: 'Content-Type', value: 'application/json' },
+            {
+              name: 'User-Agent',
+              value: 'insomnia/2023.5.8',
+              id: 'pair_2c39a294777648bdb5e253492b6b2b7f',
+            },
+            {
+              id: 'pair_3e9d9fb53b3142278f81855a1dfe3caf',
+              name: 'x-api-key',
+              value: 'd6b9ef1c-7d44-4ffc-aa02-446821d4d616',
+              description: '',
+            },
+          ],
+        authentication: {},
+        metaSortKey: -1708668309457,
+        isPrivate: false,
+        settingStoreCookies: true,
+        settingSendCookies: true,
+        settingDisableRenderRequestBody: false,
+        settingEncodeUrl: true,
+        settingRebuildPath: true,
+        settingFollowRedirects: 'global',
+        _type: 'request',
+      },
+      {
+        _id: 'fld_d68c7a6657c14354807fce49c34f3bdd',
+        parentId: 'wrk_489cc6eaf693423a95da99025886a1c7',
+        modified: 1708668270651,
+        created: 1708668270651,
+        name: 'symon',
+        description: '',
+        environment: {},
+        environmentPropertyOrder: null,
+        metaSortKey: -1708668270651,
+        _type: 'request_group',
+      },
+    ],
+}

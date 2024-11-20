@@ -29,14 +29,14 @@ import type { Config, ValidatedConfig } from '../../interfaces/config'
 import { getContext, setContext } from '../../context'
 import type { MonikaFlags } from '../../flag'
 import { getEventEmitter } from '../../utils/events'
-import { sendHttpRequest } from '../..//utils/http'
+import { sendHttpRequestFetch } from '../../utils/http'
 import { log } from '../../utils/pino'
 import { getRawConfig } from './get'
 import { getProbes, setProbes } from './probe'
 import { sanitizeConfig } from './sanitize'
 import { validateConfig } from './validate'
 
-export async function initConfig() {
+export async function initConfig(): Promise<void> {
   const { flags } = getContext()
   const hasConfig =
     flags.config.length > 0 ||
@@ -61,8 +61,9 @@ async function createExampleConfigFile() {
     'https://raw.githubusercontent.com/hyperjumptech/monika/main/monika.example.yml'
 
   try {
-    const resp = await sendHttpRequest({ url })
-    await writeFile(outputFilePath, resp.data, { encoding: 'utf8' })
+    const resp = await sendHttpRequestFetch({ url })
+    const temp = await resp.text()
+    await writeFile(outputFilePath, temp, { encoding: 'utf8' })
   } catch {
     const ymlConfig = `
     probes:
