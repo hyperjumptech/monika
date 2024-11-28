@@ -6,9 +6,9 @@ import os from 'node:os'
 import { expect } from '@oclif/test'
 import { type SinonStub, stub } from 'sinon'
 
-import { getContext, resetContext, setContext } from '../../context'
-import { getErrorMessage } from '../../utils/catch-error-handler'
-import { createConfig } from './create'
+import { getContext, resetContext, setContext } from '../../context/index.js'
+import { getErrorMessage } from '../../utils/catch-error-handler.js'
+import { createConfig } from './create.js'
 
 describe('Create config', () => {
   describe('Open Monika config generator', () => {

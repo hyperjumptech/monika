@@ -22,7 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import * as Handlebars from 'handlebars'
+import Handlebars from 'handlebars'
 import FormData from 'form-data'
 import Joi from 'joi'
 // eslint-disable-next-line no-restricted-imports
@@ -42,7 +42,7 @@ import {
   sendHttpRequestFetch,
 } from '../../../../utils/http.js'
 import { log } from '../../../../utils/pino.js'
-import { AxiosError } from 'axios'
+import axios from 'axios'
 import { getErrorMessage } from '../../../../utils/catch-error-handler.js'
 
 // Register Handlebars helpers
@@ -127,7 +127,7 @@ export async function httpRequest({
   } catch (error: unknown) {
     const responseTime = Date.now() - startTime
 
-    if (error instanceof AxiosError) {
+    if (axios.default.isAxiosError(error)) {
       return handleAxiosError(responseTime, error)
     }
 
@@ -427,7 +427,7 @@ function transformContentByType(
 
 function handleAxiosError(
   responseTime: number,
-  error: AxiosError
+  error: axios.AxiosError
 ): ProbeRequestResponse {
   // The request was made and the server responded with a status code
   // 400, 500 get here
@@ -471,11 +471,13 @@ function handleAxiosError(
 
 // suppress switch-case complexity since this is dead-simple mapping to error code
 // eslint-disable-next-line complexity
-function getErrorStatusWithExplanation(error: unknown): {
+function getErrorStatusWithExplanation(error: axios.AxiosError): {
   status: number
   description: string
 } {
-  switch ((error as AxiosError).code) {
+  const errorCode = error?.code || ''
+
+  switch (errorCode) {
     case 'ECONNABORTED': {
       return {
         status: 599,
@@ -644,19 +646,17 @@ function getErrorStatusWithExplanation(error: unknown): {
     }
 
     default: {
-      if (error instanceof AxiosError) {
+      if (axios.default.isAxiosError(error)) {
         log.error(
           `Error code 99: Unhandled error while probing ${error.request.url}, got ${error.code} ${error.stack} `
         )
       } else {
-        log.error(
-          `Error code 99: Unhandled error, got ${(error as AxiosError).stack}`
-        )
+        log.error(`Error code 99: Unhandled error, got ${error}`)
       }
 
       return {
         status: 99,
-        description: `Error code 99: ${(error as AxiosError).stack}`,
+        description: `Error code 99: ${getErrorMessage(error)}`,
       }
     } // in the event an unlikely unknown error, send here
   }

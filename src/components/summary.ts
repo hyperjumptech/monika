@@ -2,12 +2,12 @@ import { readFile } from 'node:fs/promises'
 import { hostname } from 'node:os'
 import type { Notification } from '@hyperjumptech/monika-notification'
 
-import { getContext } from '../context'
-import type { Probe } from '../interfaces/probe'
-import getIp from '../utils/ip'
-import { log } from '../utils/pino'
-import { publicIpAddress } from '../utils/public-ip'
-import { getSummary, openLogfile } from './logger/history'
+import { getContext } from '../context/index.js'
+import type { Probe } from '../interfaces/probe.js'
+import getIp from '../utils/ip.js'
+import { log } from '../utils/pino.js'
+import { publicIpAddress } from '../utils/public-ip.js'
+import { getSummary, openLogfile } from './logger/history.js'
 
 // printSummary gathers and print some stats
 export async function printSummary(): Promise<void> {

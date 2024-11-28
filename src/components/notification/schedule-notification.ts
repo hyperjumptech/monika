@@ -1,9 +1,11 @@
-import { schedule as scheduleCron } from 'node-cron'
+import cron from 'node-cron'
 import type { ScheduledTask } from 'node-cron'
 import type { MonikaFlags } from '../../flag.js'
 import type { ValidatedConfig } from '../../interfaces/config.js'
 import { getSummaryAndSendNotif } from '../../jobs/summary-notification.js'
 import { isSymonModeFrom } from '../config/index.js'
+
+const { schedule: scheduleCron } = cron
 
 type scheduleSummaryNotification = {
   config: Pick<ValidatedConfig, 'status-notification'>

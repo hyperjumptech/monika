@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import chai, { expect } from 'chai'
-import * as auth from './authorization'
+import * as auth from './authorization.js'
 
 describe('utils authorization tests', () => {
   it('should return basic authorization', async () => {

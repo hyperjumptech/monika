@@ -27,8 +27,8 @@ import { expect, test } from '@oclif/test'
 import { use } from 'chai'
 import spies from 'chai-spies'
 import { stub, type SinonStub } from 'sinon'
-import cmd from '../src/commands/monika'
-import * as IpUtil from '../src/utils/public-ip'
+import cmd from '../src/commands/monika.js'
+import * as IpUtil from '../src/utils/public-ip.js'
 
 const { resolve } = path
 

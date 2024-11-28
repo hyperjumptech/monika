@@ -25,7 +25,7 @@
 import chai, { expect } from 'chai'
 import spies from 'chai-spies'
 
-import { validateNotification } from '../../validator/notification'
+import { validateNotification } from '../../validator/notification.js'
 
 chai.use(spies)
 

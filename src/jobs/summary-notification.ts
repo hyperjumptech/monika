@@ -25,7 +25,7 @@
 import fs from 'node:fs'
 import { hostname } from 'node:os'
 import { sendNotifications } from '@hyperjumptech/monika-notification'
-import format from 'date-fns/format'
+import { format } from 'date-fns'
 
 import { getValidatedConfig } from '../components/config/index.js'
 import { getSummary } from '../components/logger/history.js'

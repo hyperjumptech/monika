@@ -41,8 +41,8 @@ import { jobsLoader } from './jobs.js'
 import { enableAutoUpdate } from '../plugins/updater/index.js'
 
 // import the subscriber file to activate the event emitter subscribers
-import '../events/subscribers/application'
-import '../events/subscribers/probe'
+import '../events/subscribers/application.js'
+import '../events/subscribers/probe.js'
 
 export default async function init(
   flags: MonikaFlags,

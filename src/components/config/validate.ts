@@ -24,11 +24,12 @@
 
 import { validateNotification } from '@hyperjumptech/monika-notification'
 import { Ajv } from 'ajv'
+import { readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
 import Joi from 'joi'
 
 import { getContext } from '../../context/index.js'
 import type { Config, SymonConfig } from '../../interfaces/config.js'
-import monikaConfigSchema from '../../monika-config-schema.json'
 import { validateProbes } from './validation/index.js'
 import { isSymonModeFrom } from './index.js'
 
@@ -72,8 +73,13 @@ async function validateSymon(symonConfig?: SymonConfig) {
 }
 
 function validateConfigWithJSONSchema(config: Config) {
+  const monikaConfigSchema = readFileSync(
+    fileURLToPath(new URL('../../monika-config-schema.json', import.meta.url)),
+    'utf8'
+  )
+
   const ajv = new Ajv()
-  const validate = ajv.compile(monikaConfigSchema)
+  const validate = ajv.compile(JSON.parse(monikaConfigSchema))
   const isValid = validate(config)
 
   if (!isValid) {

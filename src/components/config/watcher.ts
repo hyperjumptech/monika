@@ -1,12 +1,12 @@
 import { watch } from 'chokidar'
 import isUrl from 'is-url'
 
-import { getContext } from '../../context'
-import { getErrorMessage } from '../../utils/catch-error-handler'
-import { log } from '../../utils/pino'
-import { getRawConfig } from './get'
-import { parseByType } from './parser/parse'
-import { updateConfig } from '.'
+import { getContext } from '../../context/index.js'
+import { getErrorMessage } from '../../utils/catch-error-handler.js'
+import { log } from '../../utils/pino.js'
+import { getRawConfig } from './get.js'
+import { parseByType } from './parser/parse.js'
+import { updateConfig } from './index.js'
 
 type WatcherCancellation = {
   cancel: () => void

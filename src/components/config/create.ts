@@ -6,10 +6,10 @@ import { type } from 'node:os'
 import { ux } from '@oclif/core'
 import yml from 'js-yaml'
 
-import { getContext } from '../../context'
-import { log } from '../../utils/pino'
-import { addDefaultNotifications } from './get'
-import { type ConfigType, parseByType } from './parser/parse'
+import { getContext } from '../../context/index.js'
+import { log } from '../../utils/pino.js'
+import { addDefaultNotifications } from './get.js'
+import { type ConfigType, parseByType } from './parser/parse.js'
 
 export async function createConfig(): Promise<void> {
   const { flags } = getContext()
