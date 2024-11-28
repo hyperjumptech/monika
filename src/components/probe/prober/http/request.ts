@@ -33,14 +33,17 @@ import {
   type ProbeRequestResponse,
   type RequestConfig,
   probeRequestResult,
-} from '../../../../interfaces/request'
-import { getContext } from '../../../../context'
-import { icmpRequest } from '../icmp/request'
-import registerFakes from '../../../../utils/fakes'
-import { sendHttpRequest, sendHttpRequestFetch } from '../../../../utils/http'
-import { log } from '../../../../utils/pino'
+} from '../../../../interfaces/request.js'
+import { getContext } from '../../../../context/index.js'
+import { icmpRequest } from '../icmp/request.js'
+import registerFakes from '../../../../utils/fakes.js'
+import {
+  sendHttpRequest,
+  sendHttpRequestFetch,
+} from '../../../../utils/http.js'
+import { log } from '../../../../utils/pino.js'
 import { AxiosError } from 'axios'
-import { getErrorMessage } from '../../../../utils/catch-error-handler'
+import { getErrorMessage } from '../../../../utils/catch-error-handler.js'
 
 // Register Handlebars helpers
 registerFakes(Handlebars)

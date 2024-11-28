@@ -23,22 +23,22 @@
  **********************************************************************************/
 
 import type { Config } from '@oclif/core'
-import { isSymonModeFrom } from '../components/config'
-import { watchConfigChanges } from '../components/config/watcher'
-import { openLogfile } from '../components/logger/history'
-import { getContext } from '../context'
-import events from '../events'
-import type { MonikaFlags } from '../flag'
-import { tlsChecker } from '../jobs/tls-check'
-import type { Probe } from '../interfaces/probe'
-import { loopCheckSTUNServer } from '../looper'
+import { isSymonModeFrom } from '../components/config/index.js'
+import { watchConfigChanges } from '../components/config/watcher.js'
+import { openLogfile } from '../components/logger/history.js'
+import { getContext } from '../context/index.js'
+import events from '../events/index.js'
+import type { MonikaFlags } from '../flag.js'
+import { tlsChecker } from '../jobs/tls-check.js'
+import type { Probe } from '../interfaces/probe.js'
+import { loopCheckSTUNServer } from '../looper/index.js'
 import {
   PrometheusCollector,
   startPrometheusMetricsServer,
-} from '../plugins/metrics/prometheus'
-import { getEventEmitter } from '../utils/events'
-import { jobsLoader } from './jobs'
-import { enableAutoUpdate } from '../plugins/updater'
+} from '../plugins/metrics/prometheus/index.js'
+import { getEventEmitter } from '../utils/events.js'
+import { jobsLoader } from './jobs.js'
+import { enableAutoUpdate } from '../plugins/updater/index.js'
 
 // import the subscriber file to activate the event emitter subscribers
 import '../events/subscribers/application'

@@ -25,7 +25,7 @@
 import yaml from 'js-yaml'
 import fs from 'fs'
 import { expect } from 'chai'
-import Ajv from 'ajv'
+import { Ajv } from 'ajv'
 
 const ajv = new Ajv()
 const defaultConfig = yaml.load(fs.readFileSync('monika.example.yml', 'utf8'))

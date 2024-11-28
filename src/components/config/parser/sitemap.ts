@@ -25,11 +25,11 @@
 import { XMLParser } from 'fast-xml-parser'
 import Joi from 'joi'
 
-import type { Config } from '../../../interfaces/config'
-import { getContext } from '../../../context'
-import { monikaFlagsDefaultValue } from '../../../flag'
-import type { Probe, ProbeAlert } from '../../../interfaces/probe'
-import type { RequestConfig } from '../../../interfaces/request'
+import type { Config } from '../../../interfaces/config.js'
+import { getContext } from '../../../context/index.js'
+import { monikaFlagsDefaultValue } from '../../../flag.js'
+import type { Probe, ProbeAlert } from '../../../interfaces/probe.js'
+import type { RequestConfig } from '../../../interfaces/request.js'
 
 const sitemapValidator = Joi.object({
   config: Joi.object({

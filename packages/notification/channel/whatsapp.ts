@@ -23,9 +23,9 @@
  **********************************************************************************/
 
 import Joi from 'joi'
-import type { NotificationMessage } from '.'
-import { authorize } from '../utils/authorization'
-import { sendHttpRequest } from '../utils/http'
+import type { NotificationMessage } from './index.js'
+import { authorize } from '../utils/authorization.js'
+import { sendHttpRequest } from '../utils/http.js'
 
 type SendTextMessageParams = {
   recipient: string

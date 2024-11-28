@@ -22,5 +22,5 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-export { PrometheusCollector } from './collector'
-export { startPrometheusMetricsServer } from './publisher'
+export { PrometheusCollector } from './collector.js'
+export { startPrometheusMetricsServer } from './publisher.js'

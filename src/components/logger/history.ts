@@ -26,11 +26,11 @@ import path from 'path'
 import SQLite3, { verbose as verboseSQLite } from 'sqlite3'
 import { open, Database, ISqlite } from 'sqlite'
 
-import { ProbeRequestResponse } from '../../interfaces/request'
-import { Probe } from '../../interfaces/probe'
+import { ProbeRequestResponse } from '../../interfaces/request.js'
+import { Probe } from '../../interfaces/probe.js'
 import type { Notification } from '@hyperjumptech/monika-notification'
-import { log } from '../../utils/pino'
-import { getErrorMessage } from '../../utils/catch-error-handler'
+import { log } from '../../utils/pino.js'
+import { getErrorMessage } from '../../utils/catch-error-handler.js'
 const sqlite3 = verboseSQLite()
 const dbPath = path.resolve(process.cwd(), 'monika-logs.db')
 

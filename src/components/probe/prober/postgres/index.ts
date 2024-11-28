@@ -1,8 +1,10 @@
-import { parse } from 'pg-connection-string'
-import { BaseProber, type ProbeParams, type ProbeResult } from '..'
-import type { Postgres } from '../../../../interfaces/probe'
-import { probeRequestResult } from '../../../../interfaces/request'
-import { postgresRequest } from './request'
+import pgConnectionString from 'pg-connection-string'
+import { BaseProber, type ProbeParams, type ProbeResult } from '../index.js'
+import type { Postgres } from '../../../../interfaces/probe.js'
+import { probeRequestResult } from '../../../../interfaces/request.js'
+import { postgresRequest } from './request.js'
+
+const { parse } = pgConnectionString
 
 export class PostgresProber extends BaseProber {
   async probe({ incidentRetryAttempt }: ProbeParams): Promise<void> {

@@ -26,10 +26,10 @@ import { type DefaultBodyType, HttpResponse, http } from 'msw'
 import { setupServer } from 'msw/node'
 import { expect } from '@oclif/test'
 
-import type { ProberMetadata } from '.'
+import type { ProberMetadata } from './index.js'
 
-import { createProber } from './factory'
-import { getIncidents } from '../../incident'
+import { createProber } from './factory.js'
+import { getIncidents } from '../../incident/index.js'
 
 describe('Prober', () => {
   describe('Initial incident state', () => {

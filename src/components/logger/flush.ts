@@ -1,7 +1,7 @@
 import { ux } from '@oclif/core'
-import { getContext } from '../../context'
-import { log } from '../../utils/pino'
-import { flushAllLogs, openLogfile } from './history'
+import { getContext } from '../../context/index.js'
+import { log } from '../../utils/pino.js'
+import { flushAllLogs, openLogfile } from './history.js'
 
 export async function flush(): Promise<void> {
   if (!getContext().flags.force) {

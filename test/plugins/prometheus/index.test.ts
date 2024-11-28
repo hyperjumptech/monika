@@ -23,9 +23,9 @@
  **********************************************************************************/
 
 import { expect, test } from '@oclif/test'
+import axios from 'axios'
 import path from 'path'
-import cmd from '../../../src/commands/monika'
-import axios, { AxiosError } from 'axios'
+import cmd from '../../../src/commands/monika.js'
 
 const { resolve } = path
 
@@ -76,11 +76,9 @@ describe('Prometheus plugin', () => {
         try {
           // act
           await axios.post('http://localhost:4446/metrics')
-        } catch (error: unknown) {
-          const statusCode =
-            error instanceof AxiosError ? error.response?.status : -1
+        } catch (error) {
           // assert
-          expect(statusCode).to.equal(405)
+          expect(error.response?.status).to.equal(405)
         }
 
         // eslint-disable-next-line unicorn/no-process-exit, n/no-process-exit

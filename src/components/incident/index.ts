@@ -22,7 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { type Incident, getContext, setContext } from '../../context'
+import { type Incident, getContext, setContext } from '../../context/index.js'
 
 export function getIncidents() {
   return getContext().incidents

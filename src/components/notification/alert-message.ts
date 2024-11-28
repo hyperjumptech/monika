@@ -28,12 +28,12 @@ import { format, formatDistanceToNow } from 'date-fns'
 import * as Handlebars from 'handlebars'
 import getos from 'getos'
 import osName from 'os-name'
-import { getContext } from '../../context'
 import type { NotificationMessage } from '@hyperjumptech/monika-notification'
-import { ProbeRequestResponse } from '../../interfaces/request'
-import { ProbeAlert } from '../../interfaces/probe'
-import { getPublicNetworkInfo, publicIpAddress } from '../../utils/public-ip'
-import { getIncidents } from '../incident'
+import { getContext } from '../../context/index.js'
+import { getIncidents } from '../incident/index.js'
+import type { ProbeRequestResponse } from '../../interfaces/request.js'
+import type { ProbeAlert } from '../../interfaces/probe.js'
+import { publicIpAddress, getPublicNetworkInfo } from '../../utils/public-ip.js'
 
 const getLinuxDistro = promisify(getos)
 

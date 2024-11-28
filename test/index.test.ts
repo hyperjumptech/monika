@@ -125,7 +125,7 @@ describe('monika', () => {
         'Probe requests does not exists or has length lower than 1!'
       )
     })
-    .it('runs with config without probe request')
+    .it('runs with config without probe request.js')
 
   test
     .stdout()

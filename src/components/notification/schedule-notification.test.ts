@@ -2,7 +2,7 @@ import cron from 'node-cron'
 import sinon from 'sinon'
 import chai, { expect } from 'chai'
 import spies from 'chai-spies'
-import { scheduleSummaryNotification } from './schedule-notification'
+import { scheduleSummaryNotification } from './schedule-notification.js'
 
 chai.use(spies)
 

@@ -24,9 +24,9 @@
 
 import { test } from '@oclif/test'
 import { resolve } from 'node:path'
-import cmd from '../../src/commands/monika'
 import sinon from 'sinon'
-import * as IpUtil from '../../src/utils/public-ip'
+import cmd from '../../src/commands/monika.js'
+import * as IpUtil from '../../src/utils/public-ip.js'
 
 describe('Monika should hide ip unless verbose', () => {
   let getPublicIPStub: sinon.SinonStub

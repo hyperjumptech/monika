@@ -23,9 +23,9 @@
  **********************************************************************************/
 
 import { type SinonStub, assert, stub } from 'sinon'
-import { getContext, resetContext, setContext } from '../../context'
-import * as history from './history'
-import { flush } from './flush'
+import { getContext, resetContext, setContext } from '../../context/index.js'
+import * as history from './history.js'
+import { flush } from './flush.js'
 
 let flushAllLogsStub: SinonStub
 

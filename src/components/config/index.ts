@@ -24,17 +24,17 @@
 
 import { writeFile } from 'node:fs/promises'
 
-import events from '../../events'
-import type { Config, ValidatedConfig } from '../../interfaces/config'
-import { getContext, setContext } from '../../context'
-import type { MonikaFlags } from '../../flag'
-import { getEventEmitter } from '../../utils/events'
-import { sendHttpRequest } from '../..//utils/http'
-import { log } from '../../utils/pino'
-import { getRawConfig } from './get'
-import { getProbes, setProbes } from './probe'
-import { sanitizeConfig } from './sanitize'
-import { validateConfig } from './validate'
+import events from '../../events/index.js'
+import type { Config, ValidatedConfig } from '../../interfaces/config.js'
+import { getContext, setContext } from '../../context/index.js'
+import type { MonikaFlags } from '../../flag.js'
+import { getEventEmitter } from '../../utils/events.js'
+import { sendHttpRequest } from '../..//utils/http.js'
+import { log } from '../../utils/pino.js'
+import { getRawConfig } from './get.js'
+import { getProbes, setProbes } from './probe.js'
+import { sanitizeConfig } from './sanitize.js'
+import { validateConfig } from './validate.js'
 
 export async function initConfig() {
   const { flags } = getContext()

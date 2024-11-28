@@ -24,9 +24,9 @@
 
 import { expect } from '@oclif/test'
 import { format, subDays } from 'date-fns'
-import { resetContext, setContext } from '../../../context'
-import { getMessageForAlert } from '../alert-message'
-import { probeRequestResult } from '../../../interfaces/request'
+import { resetContext, setContext } from '../../../context/index.js'
+import { getMessageForAlert } from '../alert-message.js'
+import { probeRequestResult } from '../../../interfaces/request.js'
 
 afterEach(() => {
   resetContext()

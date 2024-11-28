@@ -26,7 +26,7 @@ import yaml from 'js-yaml'
 import fs from 'fs'
 import path from 'path'
 import { expect } from 'chai'
-import Ajv from 'ajv'
+import { Ajv } from 'ajv'
 
 const ajv = new Ajv()
 

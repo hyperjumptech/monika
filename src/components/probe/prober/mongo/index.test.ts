@@ -1,11 +1,11 @@
 import { expect } from '@oclif/test'
 import sinon from 'sinon'
-import { probeMongo } from '.'
+import { probeMongo } from './index.js'
 import {
   type ProbeRequestResponse,
   probeRequestResult,
-} from '../../../../interfaces/request'
-import * as request from './request'
+} from '../../../../interfaces/request.js'
+import * as request from './request.js'
 
 let mongoRequestStub: sinon.SinonStub
 

@@ -22,8 +22,8 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import type { ProbeAlert } from '../../interfaces/probe'
-import type { ProbeRequestResponse } from '../../interfaces/request'
+import type { ProbeAlert } from '../../interfaces/probe.js'
+import type { ProbeRequestResponse } from '../../interfaces/request.js'
 
 export interface ValidatedResponse {
   response: ProbeRequestResponse

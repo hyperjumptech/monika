@@ -23,8 +23,8 @@
  **********************************************************************************/
 
 import { expect } from 'chai'
-import { Config } from '../../../interfaces/config'
-import { parseConfigFromPostman } from '../parser/postman'
+import { Config } from '../../../interfaces/config.js'
+import { parseConfigFromPostman } from '../parser/postman.js'
 import basicCollectionV20 from './mock_files/basic-postman_collection-v2.0.json'
 import basicCollectionV21 from './mock_files/basic-postman_collection-v2.1.json'
 import groupedCollectionV20 from './mock_files/grouped-postman_collection-v2.0.json'

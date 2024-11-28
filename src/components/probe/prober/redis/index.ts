@@ -1,8 +1,8 @@
 import parse from 'url-parse'
-import { BaseProber, type ProbeParams, type ProbeResult } from '..'
-import type { Redis } from '../../../../interfaces/probe'
-import { probeRequestResult } from '../../../../interfaces/request'
-import { redisRequest } from './request'
+import { BaseProber, type ProbeParams, type ProbeResult } from '../index.js'
+import type { Redis } from '../../../../interfaces/probe.js'
+import { probeRequestResult } from '../../../../interfaces/request.js'
+import { redisRequest } from './request.js'
 
 export class RedisProber extends BaseProber {
   async probe({ incidentRetryAttempt }: ProbeParams): Promise<void> {
