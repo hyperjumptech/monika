@@ -24,13 +24,13 @@
 
 import { type SinonStub, assert, stub } from 'sinon'
 import { getContext, resetContext, setContext } from '../../context/index.js'
-import * as history from './history.js'
+import { stdExportMod } from './history.js'
 import { flush } from './flush.js'
 
 let flushAllLogsStub: SinonStub
 
 beforeEach(() => {
-  flushAllLogsStub = stub(history, 'flushAllLogs').resolves()
+  flushAllLogsStub = stub(stdExportMod, 'flushAllLogs').resolves()
 })
 
 afterEach(() => {

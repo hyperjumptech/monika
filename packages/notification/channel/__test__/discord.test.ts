@@ -22,18 +22,10 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import chai, { expect } from 'chai'
-import spies from 'chai-spies'
-
+import { expect } from 'chai'
 import { validateNotification } from '../../validator/notification.js'
 
-chai.use(spies)
-
 describe('notificationChecker - discordNotification', () => {
-  afterEach(() => {
-    chai.spy.restore()
-  })
-
   const notificationConfig = {
     id: 'discord',
     type: 'discord' as const,

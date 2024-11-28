@@ -571,3 +571,7 @@ export async function getSummary(): Promise<Summary> {
 export async function closeLog(): Promise<void> {
   await db?.close()
 }
+
+export const stdExportMod = {
+  flushAllLogs,
+}
