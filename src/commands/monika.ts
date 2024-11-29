@@ -52,6 +52,12 @@ import SymonClient from '../symon'
 import { getEventEmitter } from '../utils/events'
 import { log } from '../utils/pino'
 import { fetchAndCacheNetworkInfo } from '../utils/public-ip'
+import { initSentry } from '../plugins/sentry'
+import {
+  captureException,
+  close as closeSentry,
+  flush as flushSentry,
+} from '@sentry/node'
 
 const em = getEventEmitter()
 let symonClient: SymonClient
@@ -69,8 +75,24 @@ export default class Monika extends Command {
   static flags = flags
   static id = 'monika'
 
+  async init(): Promise<void> {
+    await super.init()
+
+    if (flags.sentryDSN) {
+      initSentry(getContext().flags.sentryDSN as string)
+    }
+  }
+
   async catch(error: Error): Promise<unknown> {
     super.catch(error)
+
+    if (flags.sentryDSN) {
+      captureException(error, {
+        tags: {
+          monikaVersion: this.config.version,
+        },
+      })
+    }
 
     if (symonClient) {
       await symonClient.sendStatus({ isOnline: false })
@@ -90,11 +112,23 @@ export default class Monika extends Command {
     throw error
   }
 
+  async finally(): Promise<void> {
+    if (flags.sentryDSN) {
+      await flushSentry(2000)
+      await closeSentry()
+    }
+  }
+
   async run(): Promise<void> {
     const cmd = await this.parse(Monika)
     const flags = sanitizeFlags(cmd.flags)
 
     setContext({ flags, userAgent: this.config.userAgent })
+
+    if (flags.sentryDSN) {
+      log.info('Sentry is enabled for error reporting')
+      initSentry(flags.sentryDSN)
+    }
 
     try {
       if (flags.version) {
@@ -176,6 +210,7 @@ export default class Monika extends Command {
         // block the loop until receives config updated event
         // eslint-disable-next-line no-await-in-loop
         await pEvent(em, events.config.updated)
+
         controller.abort('Monika configuration updated')
       }
     } catch (error: unknown) {
@@ -271,6 +306,8 @@ process.on('SIGINT', async () => {
     await symonClient.sendStatus({ isOnline: false })
     await symonClient.stop()
   }
+
+  await flushSentry(2000)
 
   em.emit(events.application.terminated)
 
