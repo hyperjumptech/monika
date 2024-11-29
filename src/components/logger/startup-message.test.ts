@@ -60,7 +60,6 @@ const defaultConfig: ValidatedConfig = {
     {
       id: 'UVIsL',
       type: 'desktop',
-      data: undefined,
     },
   ],
   'status-notification': '',
@@ -388,7 +387,6 @@ describe('Startup message', () => {
               {
                 id: 'UVIsL',
                 type: 'desktop',
-                data: undefined,
               },
             ],
           },

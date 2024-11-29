@@ -74,7 +74,6 @@ export function addDefaultNotifications(config: Config): Config {
       {
         id: 'default',
         type: 'desktop',
-        data: undefined,
       },
     ],
   }
