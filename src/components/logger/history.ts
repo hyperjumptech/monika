@@ -23,6 +23,7 @@
  **********************************************************************************/
 
 import path from 'path'
+import { fileURLToPath } from 'url'
 import SQLite3 from 'sqlite3'
 import { open, Database, ISqlite } from 'sqlite'
 
@@ -133,8 +134,10 @@ export function setDatabase(
 }
 
 async function migrate() {
+  const __filename = fileURLToPath(import.meta.url)
+  const __dirname = path.dirname(__filename)
+
   await database().migrate({
-    // eslint-disable-next-line unicorn/prefer-module
     migrationsPath: path.join(__dirname, '../../../db/migrations'),
   })
 }
@@ -369,6 +372,7 @@ export async function deleteNotificationLogs(
  * @returns Promise<void>
  */
 export async function flushAllLogs(): Promise<void> {
+  console.log('mashook: lala lala lala')
   const dropAtlassianStatusPageTableSQL =
     'DROP TABLE IF EXISTS atlassian_status_page_incidents;'
   const dropInstatusPageTableSQL =
@@ -572,6 +576,6 @@ export async function closeLog(): Promise<void> {
   await db?.close()
 }
 
-export const stdExportMod = {
+export const modBMethods = {
   flushAllLogs,
 }

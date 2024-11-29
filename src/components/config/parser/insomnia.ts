@@ -127,7 +127,7 @@ function mapInsomniaToConfig(data: unknown): Config {
       url: string
       body: { mimeType: string }
     }) =>
-      _type === 'request.js' &&
+      _type === 'request' &&
       url &&
       // skip binary upload requests
       body?.mimeType !== 'application/octet-stream'

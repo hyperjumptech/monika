@@ -1,7 +1,7 @@
 import { ux } from '@oclif/core'
 import { getContext } from '../../context/index.js'
 import { log } from '../../utils/pino.js'
-import { flushAllLogs, openLogfile } from './history.js'
+import { modBMethods, openLogfile } from './history.js'
 
 export async function flush(): Promise<void> {
   if (!getContext().flags.force) {
@@ -17,6 +17,10 @@ export async function flush(): Promise<void> {
   }
 
   await openLogfile()
-  await flushAllLogs()
+  await modBMethods.flushAllLogs()
   log.info('Records flushed, thank you.')
+}
+
+export const namespaceMethods = {
+  flush,
 }
