@@ -35,8 +35,6 @@ import { getRawConfig } from './get'
 import { getProbes, setProbes } from './probe'
 import { sanitizeConfig } from './sanitize'
 import { validateConfig } from './validate'
-import { identifyIdenticalProbes } from './identical-probes'
-import { ProbeRequestResponse } from 'src/interfaces/request'
 
 export async function initConfig() {
   const { flags } = getContext()
@@ -117,19 +115,8 @@ export async function updateConfig(config: Config): Promise<void> {
     log.info('Config changes. Updating config...')
   }
 
-  const identicalProbeIds = await identifyIdenticalProbes(sanitizedConfig)
-  const initialProbeCache: Map<
-    Set<string>,
-    ProbeRequestResponse | undefined
-  > = new Map()
-
-  for (const id of identicalProbeIds) {
-    initialProbeCache.set(id, undefined)
-  }
-
   setContext({
     config: sanitizedConfig,
-    probeResultCache: { iterationId: 0, cache: initialProbeCache },
   })
   setProbes(sanitizedConfig.probes)
   getEventEmitter().emit(events.config.updated)
