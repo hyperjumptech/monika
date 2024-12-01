@@ -92,7 +92,9 @@ async function runUpdater(config: IConfig, updateMode: UpdateMode) {
     url: 'https://registry.npmjs.org/@hyperjumptech/monika',
   })
 
-  const latestVersion = data['dist-tags'].latest
+  const latestVersion = (
+    (data as Record<string, unknown>)['dist-tags'] as Record<string, string>
+  ).latest
   if (latestVersion === currentVersion || config.debug) {
     const nextCheck = new Date(Date.now() + DEFAULT_UPDATE_CHECK * 1000)
     const date = format(nextCheck, 'yyyy-MM-dd HH:mm:ss XXX')
@@ -106,7 +108,7 @@ async function runUpdater(config: IConfig, updateMode: UpdateMode) {
   }
 
   const [currentMajor, currentMinor] = currentVersion.split('.')
-  const { time } = data
+  const { time } = data as Record<string, string>
   // versions: key-value data with semver as key and timestamp as value
   // sorted descending by timestamp
   const versions = Object.keys(time)
@@ -273,7 +275,7 @@ async function downloadMonika(
     responseType: 'stream',
   })
 
-  const { data: checksum }: { data: string } = await sendHttpRequest({
+  const { data: checksum }: { data: unknown } = await sendHttpRequest({
     url: `https://github.com/hyperjumptech/monika/releases/download/v${remoteVersion}/${filename}-CHECKSUM.txt`,
   })
 
@@ -289,7 +291,10 @@ async function downloadMonika(
 
     writer.on('close', () => {
       log.info(`Updater: verifying download`)
-      const hashRemote = checksum.slice(0, checksum.indexOf(' '))
+      const hashRemote = (checksum as string).slice(
+        0,
+        (checksum as string).indexOf(' ')
+      )
       const hashTarball = hasha.fromFileSync(targetPath, {
         algorithm: 'sha256',
       })

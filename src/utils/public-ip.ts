@@ -69,7 +69,7 @@ async function fetchPublicNetworkInfo(): Promise<PublicNetwork> {
   const response = await sendHttpRequest({
     url: `http://ip-api.com/json/${publicIp}`,
   })
-  const { country, city, isp } = response.data
+  const { country, city, isp } = response.data as Record<string, string>
 
   return {
     country,
