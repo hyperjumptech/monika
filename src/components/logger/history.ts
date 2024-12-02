@@ -576,6 +576,6 @@ export async function closeLog(): Promise<void> {
   await db?.close()
 }
 
-export const modBMethods = {
+export const moduleExports = {
   flushAllLogs,
 }

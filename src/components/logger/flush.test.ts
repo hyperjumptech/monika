@@ -22,35 +22,35 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import sinon from 'sinon'
+import sinon, { SinonStub } from 'sinon'
 import chai, { expect } from 'chai'
 import sinonChai from 'sinon-chai'
 chai.use(sinonChai)
 import { getContext, resetContext, setContext } from '../../context/index.js'
-import { modBMethods } from './history.js'
-import { namespaceMethods } from './flush.js'
+import { moduleExports } from './history.js'
+import { flush } from './flush.js'
+
+let flushAllLogsStub: SinonStub
 
 describe('Flush command', () => {
   describe('Force', () => {
-    beforeEach(function () {
-      this.externalDepSpy = sinon.spy(modBMethods, 'flushAllLogs')
-      console.log('this.externalDepSpy', this.externalDepSpy)
+    beforeEach(() => {
+      flushAllLogsStub = sinon.stub(moduleExports, 'flushAllLogs').resolves()
     })
 
-    afterEach(function () {
-      this.externalDepSpy.restore()
+    afterEach(() => {
+      flushAllLogsStub.restore()
     })
 
-    it('should flush records without asking for confirmation', async function () {
+    it('should flush records without asking for confirmation', async () => {
       // arrange
       setContext({ flags: { ...getContext().flags, force: true } })
 
       // act
-      await namespaceMethods.flush()
-      // await flush()
+      await flush()
 
       // assert
-      expect(this.externalDepSpy).called
+      expect(flushAllLogsStub).called
 
       resetContext()
     })
