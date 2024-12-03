@@ -47,7 +47,7 @@
     "prepack": "npm run clean && tsc -b && oclif manifest",
     "start": "npm run prepack && ./bin/dev.js",
     "start:prod": "npm run prepack && ./bin/run.js",
-    "test": "npm run prepack && cross-env NODE_ENV=test nyc --reporter=lcov --reporter=text --extension .ts mocha --config .mocharc.json --forbid-only 'src/components/logger/flush.test.ts'",
+    "test": "npm run prepack && cross-env NODE_ENV=test nyc --reporter=lcov --reporter=text --extension .ts mocha --config .mocharc.json --forbid-only '{packages,src,test}/**/*.test.ts'",
     "cli-test": "bats test/bats/cli.bats",
     "test:watch": "npm run clean && NODE_ENV=test mocha {packages,src,test}/**/*.test.ts --watch --watch-files {packages,src,test}/**/*",
     "prod_test": "npm run prod_test:bin && npm run prod_test:cli",

@@ -1,17 +1,17 @@
 import { expect } from '@oclif/test'
 import sinon from 'sinon'
-import { probeMariaDB } from './index.js'
+import { probeMariaDB } from './probe.js'
 import {
   type ProbeRequestResponse,
   probeRequestResult,
 } from '../../../../interfaces/request.js'
-import * as request from './request.js'
+import { moduleExports } from './request.js'
 
 let mariaDBRequestStub: sinon.SinonStub
 
 describe('Maria DB/MySQL Prober', () => {
   beforeEach(() => {
-    mariaDBRequestStub = sinon.stub(request, 'mariaRequest').callsFake(
+    mariaDBRequestStub = sinon.stub(moduleExports, 'mariaRequest').callsFake(
       async (_options): Promise<ProbeRequestResponse> => ({
         requestType: 'mariadb',
         data: '',
@@ -155,7 +155,7 @@ describe('Maria DB/MySQL Prober', () => {
   it('should return alert triggered', async () => {
     // arrange
     sinon.restore()
-    mariaDBRequestStub = sinon.stub(request, 'mariaRequest').callsFake(
+    mariaDBRequestStub = sinon.stub(moduleExports, 'mariaRequest').callsFake(
       async (_options): Promise<ProbeRequestResponse> => ({
         requestType: 'mariadb',
         data: '',

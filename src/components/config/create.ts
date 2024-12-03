@@ -109,6 +109,6 @@ function getPathAndType(): PathAndType {
   throw new Error('Unknown format')
 }
 
-export const stdExportMod = {
+export const moduleExports = {
   open,
 }

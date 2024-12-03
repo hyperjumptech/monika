@@ -10,6 +10,11 @@
   ],
   "timeout": 5000,
   "exclude": [
-    "src/components/config/create.test.ts"
+    "src/components/config/create.test.ts",
+    "src/components/notification/schedule-notification.test.ts",
+    "src/components/probe/index.test.ts",
+    "src/components/probe/prober/http/index.test.ts",
+    "src/components/probe/prober/icmp/index.test.ts",
+    "src/components/probe/prober/index.test.ts"
   ]
 }

@@ -26,32 +26,30 @@ import childProcess from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { rename, readFile, writeFile, rm } from 'node:fs/promises'
 import os from 'node:os'
-
-import { expect } from '@oclif/test'
-import { assert, type SinonStub, stub } from 'sinon'
+import sinon from 'sinon'
+import chai, { expect } from 'chai'
+import sinonChai from 'sinon-chai'
+chai.use(sinonChai)
 
 import { getContext, resetContext, setContext } from '../../context/index.js'
 import { getErrorMessage } from '../../utils/catch-error-handler.js'
-import { createConfig, stdExportMod } from './create.js'
-
-let osTypeStub: SinonStub
-let spawnSyncStub: SinonStub
-let openStub: SinonStub
-
-beforeEach(() => {
-  osTypeStub = stub(os, 'type')
-  spawnSyncStub = stub(childProcess, 'spawnSync')
-  openStub = stub(stdExportMod, 'open').returns()
-})
-
-afterEach(() => {
-  osTypeStub.restore()
-  spawnSyncStub.restore()
-  openStub.restore()
-})
+import { createConfig } from './create.js'
 
 describe('Create config', () => {
   describe('Open Monika config generator', () => {
+    let osTypeStub: sinon.SinonStub
+    let spawnSyncStub: sinon.SinonStub
+
+    beforeEach(() => {
+      osTypeStub = sinon.stub(os, 'type')
+      spawnSyncStub = sinon.stub(childProcess, 'spawnSync')
+    })
+
+    afterEach(() => {
+      osTypeStub.restore()
+      spawnSyncStub.restore()
+    })
+
     it('should open Monika config generator using MacOS', async () => {
       // arrange
       osTypeStub.returns('Darwin')
@@ -60,13 +58,11 @@ describe('Create config', () => {
       await createConfig()
 
       // assert
-      assert.calledOnce(openStub)
+      const command = spawnSyncStub.args[0][0]
+      const url = spawnSyncStub.args[0][1][0]
 
-      // const command = spawnSyncStub.args[0][0]
-      // const url = spawnSyncStub.args[0][1][0]
-
-      // expect(command).eq('open')
-      // expect(url).eq('https://hyperjumptech.github.io/monika-config-generator/')
+      expect(command).eq('open')
+      expect(url).eq('https://hyperjumptech.github.io/monika-config-generator/')
     })
 
     it('should open Monika config generator using Linux', async () => {

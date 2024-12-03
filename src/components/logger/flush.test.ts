@@ -22,7 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import sinon, { SinonStub } from 'sinon'
+import sinon from 'sinon'
 import chai, { expect } from 'chai'
 import sinonChai from 'sinon-chai'
 chai.use(sinonChai)
@@ -30,7 +30,7 @@ import { getContext, resetContext, setContext } from '../../context/index.js'
 import { moduleExports } from './history.js'
 import { flush } from './flush.js'
 
-let flushAllLogsStub: SinonStub
+let flushAllLogsStub: sinon.SinonStub
 
 describe('Flush command', () => {
   describe('Force', () => {

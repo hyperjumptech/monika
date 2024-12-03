@@ -94,3 +94,7 @@ async function checkConnection(params?: MariaParam) {
   await client.end()
   return true
 }
+
+export const moduleExports = {
+  mariaRequest,
+}
