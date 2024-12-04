@@ -127,3 +127,7 @@ async function sendTCP(tcpRequest: TCPRequest): Promise<Buffer | null> {
     })
   })
 }
+
+export const moduleExports = {
+  tcpRequest,
+}

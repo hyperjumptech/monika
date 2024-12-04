@@ -29,6 +29,7 @@ import mac from 'macaddress'
 import { hostname } from 'os'
 import path from 'path'
 import { Piscina } from 'piscina'
+import { fileURLToPath } from 'url'
 
 import type { Probe } from '../interfaces/probe.js'
 import type { ValidatedResponse } from '../plugins/validate-response/index.js'
@@ -195,10 +196,14 @@ export default class SymonClient {
     this.isMultiNode = apiVersion === SYMON_API_VERSION.v2
     this.reportProbesInterval = symonReportInterval
     this.reportProbesLimit = symonReportLimit
+
+    const __filename = fileURLToPath(import.meta.url)
+    const __dirname = path.dirname(__filename)
+
     this.worker = new Piscina.Piscina({
       concurrentTasksPerWorker: 1,
       // eslint-disable-next-line unicorn/prefer-module
-      filename: path.join(__dirname, '../../lib/workers/report-to-symon.js'),
+      filename: path.join(__dirname, '../../lib/workers/report-to-symon'),
       idleTimeout: this.reportProbesInterval,
       maxQueue: 1,
     })
