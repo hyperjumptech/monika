@@ -221,14 +221,21 @@ export async function getOSName(): Promise<string> {
   const isLinux = osPlatform === 'linux'
 
   if (isLinux) {
-    const linuxDistro = await getLinuxDistro()
+    try {
+      const linuxDistro = await getLinuxDistro()
 
-    // checking again due to inconsistency of getos module return type
-    if (linuxDistro.os !== 'linux') {
-      return linuxDistro.os
+      // Checking again due to inconsistency of getos module return type
+      if (linuxDistro.os !== 'linux') {
+        return linuxDistro.os
+      }
+
+      return `${linuxDistro?.dist || 'Unknown Linux Distribution'} - ${
+        linuxDistro?.release || 'Unknown Release'
+      }`.trim()
+    } catch (error: unknown) {
+      console.error('Cannot get Linux distribution:', (error as Error).message)
+      return 'Unknown Linux Distribution - Unknown Release'
     }
-
-    return `${linuxDistro?.dist} ${linuxDistro?.release}`
   }
 
   return osName()
