@@ -5,23 +5,25 @@ import {
   type ProbeRequestResponse,
   probeRequestResult,
 } from '../../../../interfaces/request.js'
-import * as request from './request.js'
+import { moduleExports } from './request.js'
 
 let postgresRequestStub: sinon.SinonStub
 
 describe('PostgreSQL Prober', () => {
   beforeEach(() => {
-    postgresRequestStub = sinon.stub(request, 'postgresRequest').callsFake(
-      async (_options): Promise<ProbeRequestResponse> => ({
-        requestType: 'postgres',
-        data: '',
-        body: '',
-        status: 200,
-        headers: '',
-        responseTime: 0,
-        result: probeRequestResult.failed,
-      })
-    )
+    postgresRequestStub = sinon
+      .stub(moduleExports, 'postgresRequest')
+      .callsFake(
+        async (_options): Promise<ProbeRequestResponse> => ({
+          requestType: 'postgres',
+          data: '',
+          body: '',
+          status: 200,
+          headers: '',
+          responseTime: 0,
+          result: probeRequestResult.failed,
+        })
+      )
   })
 
   afterEach(() => {
@@ -90,17 +92,19 @@ describe('PostgreSQL Prober', () => {
   it('should return alert triggered', async () => {
     // arrange
     sinon.restore()
-    postgresRequestStub = sinon.stub(request, 'postgresRequest').callsFake(
-      async (_options): Promise<ProbeRequestResponse> => ({
-        requestType: 'postgres',
-        data: '',
-        body: '',
-        status: 0,
-        headers: '',
-        responseTime: 0,
-        result: probeRequestResult.failed,
-      })
-    )
+    postgresRequestStub = sinon
+      .stub(moduleExports, 'postgresRequest')
+      .callsFake(
+        async (_options): Promise<ProbeRequestResponse> => ({
+          requestType: 'postgres',
+          data: '',
+          body: '',
+          status: 0,
+          headers: '',
+          responseTime: 0,
+          result: probeRequestResult.failed,
+        })
+      )
     const probeParams = {
       id: 'wTBPV',
       checkOrder: 1,
@@ -127,17 +131,19 @@ describe('PostgreSQL Prober', () => {
   it('should use postgresDB uri', async () => {
     // arrange
     sinon.restore()
-    postgresRequestStub = sinon.stub(request, 'postgresRequest').callsFake(
-      async (_options): Promise<ProbeRequestResponse> => ({
-        requestType: 'postgres',
-        data: '',
-        body: '',
-        status: 0,
-        headers: '',
-        responseTime: 0,
-        result: probeRequestResult.failed,
-      })
-    )
+    postgresRequestStub = sinon
+      .stub(moduleExports, 'postgresRequest')
+      .callsFake(
+        async (_options): Promise<ProbeRequestResponse> => ({
+          requestType: 'postgres',
+          data: '',
+          body: '',
+          status: 0,
+          headers: '',
+          responseTime: 0,
+          result: probeRequestResult.failed,
+        })
+      )
     const probeParams = {
       id: 'wTBPV',
       checkOrder: 1,

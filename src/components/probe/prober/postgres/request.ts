@@ -113,3 +113,7 @@ async function sendPsqlRequest(params: PostgresParam): Promise<PostgresResult> {
 
   return result
 }
+
+export const moduleExports = {
+  postgresRequest,
+}

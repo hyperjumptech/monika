@@ -151,3 +151,7 @@ async function sendMongoRequest(params: MongoRequest): Promise<MongoResult> {
 
   return result
 }
+
+export const moduleExports = {
+  mongoRequest,
+}

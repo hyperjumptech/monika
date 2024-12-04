@@ -2,7 +2,7 @@ import pgConnectionString from 'pg-connection-string'
 import { BaseProber, type ProbeParams, type ProbeResult } from '../index.js'
 import type { Postgres } from '../../../../interfaces/probe.js'
 import { probeRequestResult } from '../../../../interfaces/request.js'
-import { postgresRequest } from './request.js'
+import { moduleExports } from './request.js'
 
 const { parse } = pgConnectionString
 
@@ -75,7 +75,9 @@ export async function probePostgres({
   for await (const pg of postgres) {
     const postgresConnectionDetails = getPostgresConnectionDetails(pg)
     const { host, port } = postgresConnectionDetails
-    const requestResponse = await postgresRequest(postgresConnectionDetails)
+    const requestResponse = await moduleExports.postgresRequest(
+      postgresConnectionDetails
+    )
     const { body, responseTime, result } = requestResponse
     const isAlertTriggered = result !== probeRequestResult.success
     const timeNow = new Date().toISOString()
