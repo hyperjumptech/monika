@@ -5,13 +5,13 @@ import {
   type ProbeRequestResponse,
   probeRequestResult,
 } from '../../../../interfaces/request.js'
-import * as request from './request.js'
+import { moduleExports } from './request.js'
 
 let redisPingStub: sinon.SinonStub
 
 describe('Redis Prober', () => {
   beforeEach(() => {
-    redisPingStub = sinon.stub(request, 'redisRequest').callsFake(
+    redisPingStub = sinon.stub(moduleExports, 'redisRequest').callsFake(
       async (_options): Promise<ProbeRequestResponse> => ({
         requestType: 'redis',
         data: '',
@@ -99,7 +99,7 @@ describe('Redis Prober', () => {
   it('should return alert triggered', async () => {
     // arrange
     sinon.restore()
-    redisPingStub = sinon.stub(request, 'redisRequest').callsFake(
+    redisPingStub = sinon.stub(moduleExports, 'redisRequest').callsFake(
       async (_options): Promise<ProbeRequestResponse> => ({
         requestType: 'redis',
         data: '',

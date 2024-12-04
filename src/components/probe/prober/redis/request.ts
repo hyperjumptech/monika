@@ -117,3 +117,7 @@ async function sendRedisRequest(params: Redis): Promise<RedisResult> {
 
   return result
 }
+
+export const moduleExports = {
+  redisRequest,
+}
