@@ -125,3 +125,7 @@ export async function getPublicIp() {
     log.warn(`${time} STUN Server is temporarily unreachable. Check network.`)
   }
 }
+
+export const moduleExports = {
+  getPublicIp,
+}

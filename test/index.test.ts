@@ -28,7 +28,7 @@ import { use } from 'chai'
 import spies from 'chai-spies'
 import sinon from 'sinon'
 import cmd from '../src/commands/monika.js'
-import * as IpUtil from '../src/utils/public-ip.js'
+import { moduleExports } from '../src/utils/public-ip.js'
 
 const { resolve } = path
 
@@ -38,7 +38,7 @@ describe('monika', () => {
   let getPublicIPStub: sinon.SinonStub
 
   beforeEach(() => {
-    getPublicIPStub = sinon.stub(IpUtil, 'getPublicIp')
+    getPublicIPStub = sinon.stub(moduleExports, 'getPublicIp')
   })
 
   afterEach(() => {
