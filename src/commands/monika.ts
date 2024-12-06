@@ -24,7 +24,6 @@
 
 import { Command, Errors } from '@oclif/core'
 import pEvent from 'p-event'
-
 import type { ValidatedConfig } from '../interfaces/config'
 import type { Probe } from '../interfaces/probe'
 
@@ -77,21 +76,13 @@ export default class Monika extends Command {
 
   async init(): Promise<void> {
     await super.init()
-
-    if (flags.sentryDSN) {
-      initSentry(getContext().flags.sentryDSN as string)
-    }
   }
 
   async catch(error: Error): Promise<unknown> {
     super.catch(error)
 
-    if (flags.sentryDSN) {
-      captureException(error, {
-        tags: {
-          monikaVersion: this.config.version,
-        },
-      })
+    if (getContext().flags.sentryDSN !== undefined) {
+      captureException(error)
     }
 
     if (symonClient) {
@@ -113,7 +104,7 @@ export default class Monika extends Command {
   }
 
   async finally(): Promise<void> {
-    if (flags.sentryDSN) {
+    if (getContext().flags.sentryDSN !== undefined) {
       await flushSentry(2000)
       await closeSentry()
     }
@@ -124,11 +115,6 @@ export default class Monika extends Command {
     const flags = sanitizeFlags(cmd.flags)
 
     setContext({ flags, userAgent: this.config.userAgent })
-
-    if (flags.sentryDSN) {
-      log.info('Sentry is enabled for error reporting')
-      initSentry(flags.sentryDSN)
-    }
 
     try {
       if (flags.version) {
@@ -167,6 +153,14 @@ export default class Monika extends Command {
       if (isSymonMode) {
         symonClient = new SymonClient(flags)
         await symonClient.initiate()
+      }
+
+      if (flags.sentryDSN !== undefined) {
+        log.info('Sentry is enabled for error reporting')
+        initSentry({
+          dsn: flags.sentryDSN,
+          monikaVersion: this.config.version,
+        })
       }
 
       let isFirstRun = true
