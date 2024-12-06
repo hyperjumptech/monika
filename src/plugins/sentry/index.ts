@@ -42,7 +42,6 @@ export async function initSentry({
     dsn,
     integrations: [nodeProfilingIntegration()],
     tracesSampleRate: 1,
-    debug,
   })
 
   // Get current public IP
