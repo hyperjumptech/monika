@@ -1,15 +1,15 @@
-import { ux } from '@oclif/core'
+import { confirm } from '@inquirer/prompts'
 import { getContext } from '../../context'
 import { log } from '../../utils/pino'
 import { flushAllLogs, openLogfile } from './history'
 
 export async function flush(): Promise<void> {
   if (!getContext().flags.force) {
-    const answer = await ux.ux.prompt(
-      'Are you sure you want to flush all logs in monika-logs.db (Y/n)?'
-    )
+    const answer = await confirm({
+      message: 'Are you sure you want to flush all logs in monika-logs.db?',
+    })
 
-    if (answer !== 'Y') {
+    if (!answer) {
       log.info('Cancelled. Thank you.')
 
       return

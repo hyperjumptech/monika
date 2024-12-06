@@ -22,7 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Config as IConfig } from '@oclif/core'
+import type { Config } from '@oclif/core/config'
 import {
   createReadStream,
   createWriteStream,
@@ -47,7 +47,7 @@ const DEFAULT_UPDATE_CHECK = 86_400 // 24 hours
 type UpdateMode = 'major' | 'minor' | 'patch'
 
 export async function enableAutoUpdate(
-  config: IConfig,
+  config: Config,
   mode: string
 ): Promise<void> {
   const installation = installationType(process.argv)
@@ -85,7 +85,7 @@ export async function enableAutoUpdate(
  * @returns string of remote version to update
  * @returns undefined if no need to update
  */
-async function runUpdater(config: IConfig, updateMode: UpdateMode) {
+async function runUpdater(config: Config, updateMode: UpdateMode) {
   log.info('Updater: starting')
   const currentVersion = config.version
   const { data } = await sendHttpRequest({
@@ -93,7 +93,7 @@ async function runUpdater(config: IConfig, updateMode: UpdateMode) {
   })
 
   const latestVersion = data['dist-tags'].latest
-  if (latestVersion === currentVersion || config.debug) {
+  if (latestVersion === currentVersion) {
     const nextCheck = new Date(Date.now() + DEFAULT_UPDATE_CHECK * 1000)
     const date = format(nextCheck, 'yyyy-MM-dd HH:mm:ss XXX')
     log.info(`Updater: already running latest version, next check at ${date}.`)
@@ -147,7 +147,7 @@ async function runUpdater(config: IConfig, updateMode: UpdateMode) {
   }
 }
 
-async function updateMonika(config: IConfig, remoteVersion: string) {
+async function updateMonika(config: Config, remoteVersion: string) {
   log.info(`Updater: updating monika to v${remoteVersion}`)
   const installation = installationType(process.argv)
   if (installation === 'npm') {
@@ -223,7 +223,7 @@ async function extractArchive(
  * @param source source file path to move
  * @returns void
  */
-async function moveExtractedFiles(config: IConfig, source: string) {
+async function moveExtractedFiles(config: Config, source: string) {
   const commandPath = process.argv[0]
   const commandRealPath = await realpath(commandPath)
   const commandsDirs = commandRealPath.split('/')
@@ -261,7 +261,7 @@ async function moveExtractedFiles(config: IConfig, source: string) {
  * @returns downloaded file path
  */
 async function downloadMonika(
-  config: IConfig,
+  config: Config,
   remoteVersion: string
 ): Promise<string> {
   const platformName = getPlatform(config)
@@ -341,7 +341,7 @@ function installationType(commands: string[]): 'npm' | 'oclif-pack' | 'binary' {
   )
 }
 
-function getPlatform(config: IConfig): string {
+function getPlatform(config: Config): string {
   const { platform } = config
   switch (platform) {
     case 'darwin': {
