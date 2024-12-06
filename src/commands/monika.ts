@@ -24,7 +24,6 @@
 
 import { Command, Errors } from '@oclif/core'
 import pEvent from 'p-event'
-
 import type { ValidatedConfig } from '../interfaces/config'
 import type { Probe } from '../interfaces/probe'
 
@@ -52,6 +51,12 @@ import SymonClient from '../symon'
 import { getEventEmitter } from '../utils/events'
 import { log } from '../utils/pino'
 import { fetchAndCacheNetworkInfo } from '../utils/public-ip'
+import { initSentry } from '../plugins/sentry'
+import {
+  captureException,
+  close as closeSentry,
+  flush as flushSentry,
+} from '@sentry/node'
 
 const em = getEventEmitter()
 let symonClient: SymonClient
@@ -72,6 +77,10 @@ export default class Monika extends Command {
   async catch(error: Error): Promise<unknown> {
     super.catch(error)
 
+    if (getContext().flags.sentryDSN !== undefined) {
+      captureException(error)
+    }
+
     if (symonClient) {
       await symonClient.sendStatus({ isOnline: false })
     }
@@ -88,6 +97,13 @@ export default class Monika extends Command {
     }
 
     throw error
+  }
+
+  async finally(): Promise<void> {
+    if (getContext().flags.sentryDSN !== undefined) {
+      await flushSentry(2000)
+      await closeSentry()
+    }
   }
 
   async run(): Promise<void> {
@@ -135,6 +151,14 @@ export default class Monika extends Command {
         await symonClient.initiate()
       }
 
+      if (flags.sentryDSN !== undefined) {
+        log.info('Sentry is enabled for error reporting')
+        initSentry({
+          dsn: flags.sentryDSN,
+          monikaVersion: this.config.version,
+        })
+      }
+
       let isFirstRun = true
 
       for (;;) {
@@ -176,6 +200,7 @@ export default class Monika extends Command {
         // block the loop until receives config updated event
         // eslint-disable-next-line no-await-in-loop
         await pEvent(em, events.config.updated)
+
         controller.abort('Monika configuration updated')
       }
     } catch (error: unknown) {
@@ -271,6 +296,8 @@ process.on('SIGINT', async () => {
     await symonClient.sendStatus({ isOnline: false })
     await symonClient.stop()
   }
+
+  await flushSentry(2000)
 
   em.emit(events.application.terminated)
 
