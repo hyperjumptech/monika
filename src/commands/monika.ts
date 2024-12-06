@@ -74,10 +74,6 @@ export default class Monika extends Command {
   static flags = flags
   static id = 'monika'
 
-  async init(): Promise<void> {
-    await super.init()
-  }
-
   async catch(error: Error): Promise<unknown> {
     super.catch(error)
 
