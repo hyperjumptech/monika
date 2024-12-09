@@ -71,8 +71,7 @@ export async function httpRequest({
     timeout,
     body,
     ping,
-    allowUnauthorized = requestConfig.allowUnauthorized ??
-      getContext().flags.ignoreInvalidTLS,
+    allowUnauthorized,
     followRedirects,
     signal,
   } = requestConfig
