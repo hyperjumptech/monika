@@ -59,6 +59,7 @@ export type MonikaFlags = {
   'status-notification'?: string
   stun: number
   summary: boolean
+  sentryDSN?: string
   'symon-api-version': SYMON_API_VERSION
   symonKey?: string
   symonLocationId?: string
@@ -228,6 +229,9 @@ export const flags = {
   retryMaxDelayMs: Flags.integer({
     default: monikaFlagsDefaultValue.retryMaxDelayMs,
     description: `Maximum backoff retry delay, in milliseconds. Defaults to ${monikaFlagsDefaultValue.retryMaxDelayMs}ms.`,
+  }),
+  sentryDSN: Flags.string({
+    description: 'DSN for Sentry',
   }),
   sitemap: Flags.string({
     description: 'Run Monika using a Sitemap xml file.',

@@ -66,6 +66,8 @@
     "@oclif/plugin-help": "^6.2.5",
     "@oclif/plugin-plugins": "^5.3.4",
     "@sendgrid/mail": "^7.4.2",
+    "@sentry/node": "^8.41.0",
+    "@sentry/profiling-node": "^8.41.0",
     "@types/pg": "^8.10.9",
     "ajv": "^8.11.0",
     "axios": "0.27.2",
