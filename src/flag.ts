@@ -34,6 +34,7 @@ export enum SYMON_API_VERSION {
 
 export type MonikaFlags = {
   'auto-update'?: string
+  'compact-probes'?: boolean
   config: string[]
   'config-filename': string
   'config-interval': number
@@ -80,6 +81,7 @@ const DEFAULT_CONFIG_INTERVAL_SECONDS = 900
 const DEFAULT_SYMON_REPORT_INTERVAL_MS = 10_000
 
 export const monikaFlagsDefaultValue: MonikaFlags = {
+  'compact-probes': false,
   config: getDefaultConfig(),
   'config-filename': 'monika.yml',
   'config-interval': DEFAULT_CONFIG_INTERVAL_SECONDS,
@@ -125,6 +127,11 @@ export const flags = {
   'auto-update': Flags.string({
     description:
       'Enable auto-update for Monika. Available options: major, minor, patch. This will make Monika terminate itself on successful update but does not restart',
+  }),
+  'compact-probes': Flags.boolean({
+    default: monikaFlagsDefaultValue['compact-probes'],
+    description:
+      'Compact probes with the same request configuration. This will not merge probes with request chaining.',
   }),
   config: Flags.string({
     char: 'c',
