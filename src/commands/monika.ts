@@ -57,7 +57,6 @@ import {
   close as closeSentry,
   flush as flushSentry,
 } from '@sentry/node'
-import { compactProbes } from '../components/config/compact-config'
 
 const em = getEventEmitter()
 let symonClient: SymonClient
@@ -164,7 +163,7 @@ export default class Monika extends Command {
 
       for (;;) {
         const config = getValidatedConfig()
-        const probes = compactProbes(getProbes({ config, flags }))
+        const probes = getProbes({ config, flags })
 
         // emit the sanitized probe
         em.emit(events.config.sanitized, probes)

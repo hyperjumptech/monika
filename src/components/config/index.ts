@@ -35,6 +35,7 @@ import { getRawConfig } from './get'
 import { getProbes, setProbes } from './probe'
 import { sanitizeConfig } from './sanitize'
 import { validateConfig } from './validate'
+import { compactProbes } from './compact-config'
 
 export async function initConfig() {
   const { flags } = getContext()
@@ -118,7 +119,13 @@ export async function updateConfig(config: Config): Promise<void> {
   setContext({
     config: sanitizedConfig,
   })
-  setProbes(sanitizedConfig.probes)
+
+  let { probes } = sanitizedConfig
+  if (getContext().flags['compact-probes']) {
+    probes = compactProbes(probes)
+  }
+
+  setProbes(probes)
   getEventEmitter().emit(events.config.updated)
 }
 

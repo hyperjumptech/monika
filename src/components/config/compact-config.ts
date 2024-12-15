@@ -23,35 +23,303 @@
  **********************************************************************************/
 
 import lodash from 'lodash'
-import type { Probe } from '../../interfaces/probe'
+import type { Probe, ProbeAlert } from '../../interfaces/probe'
+import { randomUUID } from 'node:crypto'
+import { log } from '../../utils/pino'
+
+let decompactedProbes: Probe[] = []
 
 export function compactProbes(probes: Probe[]): Probe[] {
-  const identicalProbeIds = identifyIdenticalProbes(probes)
-  if (identicalProbeIds.length === 0) {
-    return probes
+  if (probes.length === 0) {
+    return []
   }
 
-  const nonIdenticalProbes = probes.filter(
-    (probe) => !identicalProbeIds.some((set) => set.has(probe.id))
-  )
+  decompactedProbes = probes
+  const identicalProbeIds = identifyIdenticalProbes(probes)
+  for (const set of identicalProbeIds) {
+    const identicalProbeIdsArray = [...set]
+    log.info(
+      `Found identical probes, following probes IDs will be compacted on runtime: ${identicalProbeIdsArray.join(
+        ', '
+      )}`
+    )
+  }
+
+  if (identicalProbeIds.length === 0) {
+    return probes.map((probe) => {
+      const mergedProbeAlerts = mergeProbeAlerts([probe])
+      mergedProbeAlerts.id = probe.id
+      delete mergedProbeAlerts.jointId
+      return mergedProbeAlerts
+    })
+  }
+
+  const nonIdenticalProbes = probes
+    .filter((probe) => !identicalProbeIds.some((set) => set.has(probe.id)))
+    .map((probe) => mergeProbeAlerts([probe]))
 
   const mergedProbes = identicalProbeIds.map<Probe>((set) => {
     const identicalProbes = probes.filter((probe) => set.has(probe.id))
-    return mergeProbes(identicalProbes)
+    return mergeProbeAlerts(identicalProbes)
   })
 
   return [...nonIdenticalProbes, ...mergedProbes]
 }
 
-function mergeProbes(probes: Probe[]): Probe {
-  const mergedIds = probes.map((probe) => probe.id).join('|')
-  const mergedAlerts = probes.flatMap((probe) => probe.alerts ?? [])
-  let probe = probes[0]
-  for (const p of probes.slice(1)) {
-    probe = { ...probe, ...p, alerts: mergedAlerts, id: mergedIds }
+export function getDecompactedProbesById(probeId: string): Probe | undefined {
+  return decompactedProbes.find((probe) => probe.id === probeId)
+}
+
+function mergeProbeAlerts(probes: Probe[]): Probe {
+  const mergedAlerts = probes.flatMap((probe) => probe.alerts)
+  let mergedProbe: Probe = {
+    ...mergeInnerAlerts(probes[0], probes[0]),
+    alerts: deduplicateAlerts(mergedAlerts),
   }
 
-  return probe
+  for (const p of probes.slice(1)) {
+    mergedProbe = mergeInnerAlerts(p, mergedProbe)
+  }
+
+  return {
+    ...mergedProbe,
+    id: randomUUID(),
+    jointId: probes.map((probe) => probe.id),
+  }
+}
+
+// merge corresponding alerts from the probes
+function mergeInnerAlerts(newProbe: Probe, destination: Probe): Probe {
+  destination = mergeHttpAlerts(newProbe, destination)
+  destination = mergeSocketAlerts(newProbe, destination)
+  destination = mergeRedisAlerts(newProbe, destination)
+  destination = mergeMongoAlerts(newProbe, destination)
+  destination = mergeMariaDbAlerts(newProbe, destination)
+  destination = mergeMysqlAlerts(newProbe, destination)
+  destination = mergePostgresAlerts(newProbe, destination)
+  destination = mergePingAlerts(newProbe, destination)
+
+  return destination
+}
+
+function deduplicateAlerts(alerts: ProbeAlert[]): ProbeAlert[] {
+  if (alerts.filter((a) => a !== undefined).length === 0) {
+    return []
+  }
+
+  const deduplicatedAlerts: ProbeAlert[] = [alerts[0]]
+  for (const alert of alerts.slice(1)) {
+    // Check if the alert is already in the deduplicatedAlerts
+    const isAlertExist = deduplicatedAlerts.some((a) => {
+      const firstPayload: Partial<ProbeAlert> = lodash.cloneDeep(a)
+      const secondPayload: Partial<ProbeAlert> = lodash.cloneDeep(alert)
+      if (firstPayload?.id) {
+        delete firstPayload.id
+      }
+
+      if (secondPayload?.id) {
+        delete secondPayload.id
+      }
+
+      return lodash.isEqual(firstPayload, secondPayload)
+    })
+
+    if (alert !== undefined && !isAlertExist) {
+      deduplicatedAlerts.push(alert)
+    }
+  }
+
+  return deduplicatedAlerts
+}
+
+function mergeHttpAlerts(newProbe: Probe, destination: Probe): Probe {
+  if (
+    destination.requests &&
+    (newProbe.requests?.every((r) => r.alerts?.length) ||
+      destination.requests.every((r) => r.alerts?.length))
+  ) {
+    const mergedRequestAlerts: ProbeAlert[] = [
+      ...(destination.requests?.flatMap((r) => r.alerts) || []),
+      ...(newProbe?.requests?.flatMap((r) => r.alerts) || []),
+    ] as ProbeAlert[]
+
+    return {
+      ...destination,
+      requests: [
+        ...(destination?.requests?.map((r) => ({
+          ...r,
+          alerts: deduplicateAlerts(mergedRequestAlerts),
+        })) || []),
+      ],
+    }
+  }
+
+  return destination
+}
+
+function mergeSocketAlerts(newProbe: Probe, destination: Probe): Probe {
+  if (
+    destination.socket &&
+    (newProbe.socket?.alerts?.length || destination.socket?.alerts?.length)
+  ) {
+    const mergedSocketAlerts: ProbeAlert[] = [
+      ...(destination.socket?.alerts || []),
+      ...(newProbe.socket?.alerts || []),
+    ]
+    return {
+      ...destination,
+      socket: {
+        ...destination.socket,
+        alerts: deduplicateAlerts(mergedSocketAlerts),
+      },
+    }
+  }
+
+  return destination
+}
+
+function mergeRedisAlerts(newProbe: Probe, destination: Probe): Probe {
+  if (
+    destination.redis &&
+    (newProbe.redis?.every((r) => r.alerts?.length) ||
+      destination.redis.every((r) => r.alerts?.length))
+  ) {
+    const mergedRedisAlerts: ProbeAlert[] = [
+      ...(destination.redis?.flatMap((r) => r.alerts) || []),
+      ...(newProbe.redis?.flatMap((r) => r.alerts) || []),
+    ] as ProbeAlert[]
+    return {
+      ...destination,
+      redis: [
+        ...(destination.redis?.map((r) => ({
+          ...r,
+          alerts: deduplicateAlerts(mergedRedisAlerts),
+        })) || []),
+      ],
+    }
+  }
+
+  return destination
+}
+
+function mergeMongoAlerts(newProbe: Probe, destination: Probe): Probe {
+  if (
+    destination.mongo &&
+    (destination.mongo.every((r) => r.alerts?.length) ||
+      newProbe.mongo?.every((r) => r.alerts?.length))
+  ) {
+    const mergedMongoAlerts: ProbeAlert[] = [
+      ...(destination.mongo?.flatMap((r) => r.alerts) || []),
+      ...(newProbe.mongo?.flatMap((r) => r.alerts) || []),
+    ] as ProbeAlert[]
+    return {
+      ...destination,
+      mongo: [
+        ...(destination.mongo?.map((r) => ({
+          ...r,
+          alerts: deduplicateAlerts(mergedMongoAlerts),
+        })) || []),
+      ],
+    }
+  }
+
+  return destination
+}
+
+function mergeMariaDbAlerts(newProbe: Probe, destination: Probe): Probe {
+  if (
+    destination.mariadb &&
+    (destination.mariadb.every((r) => r.alerts?.length) ||
+      newProbe.mariadb?.every((r) => r.alerts?.length))
+  ) {
+    const mergedMariadbAlerts: ProbeAlert[] = [
+      ...(destination.mariadb?.flatMap((r) => r.alerts) || []),
+      ...(newProbe.mariadb?.flatMap((r) => r.alerts) || []),
+    ] as ProbeAlert[]
+    return {
+      ...destination,
+      mariadb: [
+        ...(destination.mariadb?.map((r) => ({
+          ...r,
+          alerts: deduplicateAlerts(mergedMariadbAlerts),
+        })) || []),
+      ],
+    }
+  }
+
+  return destination
+}
+
+function mergeMysqlAlerts(newProbe: Probe, destination: Probe): Probe {
+  if (
+    destination.mysql &&
+    (destination.mysql.every((r) => r.alerts?.length) ||
+      newProbe.mysql?.every((r) => r.alerts?.length))
+  ) {
+    const mergedMysqlAlerts: ProbeAlert[] = [
+      ...(destination.mysql?.flatMap((r) => r.alerts) || []),
+      ...(newProbe.mysql?.flatMap((r) => r.alerts) || []),
+    ] as ProbeAlert[]
+    return {
+      ...destination,
+      mysql: [
+        ...(destination.mysql?.map((r) => ({
+          ...r,
+          alerts: deduplicateAlerts(mergedMysqlAlerts),
+        })) || []),
+      ],
+    }
+  }
+
+  return destination
+}
+
+function mergePostgresAlerts(newProbe: Probe, destination: Probe): Probe {
+  if (
+    destination.postgres &&
+    (destination.postgres.every((r) => r.alerts?.length) ||
+      newProbe.postgres?.every((r) => r.alerts?.length))
+  ) {
+    const mergedPostgresAlerts: ProbeAlert[] = [
+      ...(destination.postgres?.flatMap((r) => r.alerts) || []),
+      ...(newProbe.postgres?.flatMap((r) => r.alerts) || []),
+    ] as ProbeAlert[]
+    return {
+      ...destination,
+      postgres: [
+        ...(destination.postgres?.map((r) => ({
+          ...r,
+          alerts: deduplicateAlerts(mergedPostgresAlerts),
+        })) || []),
+      ],
+    }
+  }
+
+  return destination
+}
+
+function mergePingAlerts(newProbe: Probe, destination: Probe): Probe {
+  if (
+    destination.ping &&
+    (destination.ping.every((r) => r.alerts?.length) ||
+      newProbe.ping?.every((r) => r.alerts?.length))
+  ) {
+    const mergedPingAlerts: ProbeAlert[] = [
+      ...(destination.ping?.flatMap((r) => r.alerts) || []),
+      ...(newProbe.ping?.flatMap((r) => r.alerts) || []),
+    ] as ProbeAlert[]
+    return {
+      ...destination,
+      ping: [
+        ...(destination.ping?.map((r) => ({
+          ...r,
+          alerts: deduplicateAlerts(mergedPingAlerts),
+        })) || []),
+      ],
+    }
+  }
+
+  return destination
 }
 
 // Function to identify identical probes based on specific fields
@@ -78,6 +346,12 @@ function identifyIdenticalProbes(probes: Probe[]): Set<string>[] {
   ]
 }
 
+/**
+ * internalIdentification is a helper function to identify identical probes based on specific fields
+ * @param fieldIdentifiers identifiers to determine if probes are identical
+ * @param probes array of probes
+ * @returns array of sets of identical probe IDs
+ */
 // suppress double loop complexity
 // eslint-disable-next-line complexity
 function internalIdentification(
@@ -87,24 +361,41 @@ function internalIdentification(
   const identicalProbeIds: Set<string>[] = []
 
   for (const outerProbe of probes) {
+    // skip probes with multiple probe types
+    const isChainingMultipleProbeTypes =
+      [
+        outerProbe.requests,
+        outerProbe.socket,
+        outerProbe.redis,
+        outerProbe.mongo,
+        outerProbe.mariadb,
+        outerProbe.mysql,
+        outerProbe.postgres,
+        outerProbe.ping,
+      ].filter((probe) => probe !== undefined).length > 1
+
+    if (isChainingMultipleProbeTypes) {
+      continue
+    }
+
     // skip probes with request chaining
     const isChainingHttp = outerProbe.requests && outerProbe.requests.length > 1
-    const isRedisChaining = outerProbe.redis && outerProbe.redis.length > 1
-    const isMongoChaining = outerProbe.mongo && outerProbe.mongo.length > 1
-    const isMariaDbChaining =
+    const isChainingRedis = outerProbe.redis && outerProbe.redis.length > 1
+    const isChainingMongo = outerProbe.mongo && outerProbe.mongo.length > 1
+    const isChainingMariaDb =
       outerProbe.mariadb && outerProbe.mariadb.length > 1
-    const isMysqlChaining = outerProbe.mysql && outerProbe.mysql.length > 1
-    const isPostgresChaining =
+    const isChainingMysql = outerProbe.mysql && outerProbe.mysql.length > 1
+    const isChainingPostgres =
       outerProbe.postgres && outerProbe.postgres.length > 1
-    const isPingChaining = outerProbe.ping && outerProbe.ping.length > 1
+    const isChainingPing = outerProbe.ping && outerProbe.ping.length > 1
     if (
       isChainingHttp ||
-      isRedisChaining ||
-      isMongoChaining ||
-      isMariaDbChaining ||
-      isMysqlChaining ||
-      isPostgresChaining ||
-      isPingChaining
+      isChainingRedis ||
+      isChainingMongo ||
+      isChainingMariaDb ||
+      isChainingMysql ||
+      isChainingPostgres ||
+      isChainingPing
     ) {
       continue
     }
@@ -115,7 +406,14 @@ function internalIdentification(
       continue
     }
 
-    const currentProbeValues = fieldIdentifiers.map((key) => outerProbe[key])
+    // get the values of the fields to be used for comparison
+    const currentProbeValues = stripNameAndAlerts(outerProbe, fieldIdentifiers)
+
+    // skip if there are undefined values from identifiers
+    if (currentProbeValues.includes(undefined)) {
+      continue
+    }
+
     const identicalProbeIdsSet = new Set<string>()
     for (const innerProbe of probes) {
       // skip if innerProbe has the same ID as the current probe
@@ -123,10 +421,13 @@ function internalIdentification(
         continue
       }
 
-      const innerProbeFieldValues = fieldIdentifiers.map(
-        (key) => innerProbe[key]
+      // get the values of the fields to be used for comparison
+      const innerProbeFieldValues = stripNameAndAlerts(
+        innerProbe,
+        fieldIdentifiers
       )
 
+      // compare the values of the fields using deep equality
       if (lodash.isEqual(currentProbeValues, innerProbeFieldValues)) {
         identicalProbeIdsSet.add(outerProbe.id)
         identicalProbeIdsSet.add(innerProbe.id)
@@ -140,4 +441,39 @@ function internalIdentification(
 
   // Return the set of identical probe IDs
   return identicalProbeIds
+}
+
+function stripNameAndAlerts(probe: Probe, fieldIdentifiers: (keyof Probe)[]) {
+  const strippedProbe = fieldIdentifiers.map((key) => {
+    // clone the value to prevent mutation
+    let value = lodash.cloneDeep(probe[key])
+    if (value !== undefined) {
+      value = deleteNameFromProbe(value) as never
+      value = deleteAlertsFromProbe(value) as never
+    }
+
+    return value
+  })
+
+  return strippedProbe
+}
+
+function deleteNameFromProbe(values: unknown): unknown {
+  if (typeof values === 'object' && values !== null && 'name' in values) {
+    delete values.name
+  }
+
+  return values
+}
+
+function deleteAlertsFromProbe(values: unknown): unknown {
+  if (Array.isArray(values)) {
+    return values.map((value) => deleteAlertsFromProbe(value))
+  }
+
+  if (typeof values === 'object' && values !== null && 'alerts' in values) {
+    delete values.alerts
+  }
+
+  return values
 }
