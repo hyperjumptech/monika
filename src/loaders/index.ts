@@ -82,6 +82,7 @@ function initPrometheus(prometheusPort: number) {
     decrementProbeRunningTotal,
     incrementProbeRunningTotal,
     resetProbeRunningTotal,
+    collectProbeStatus,
   } = new PrometheusCollector()
 
   // collect prometheus metrics
@@ -93,6 +94,7 @@ function initPrometheus(prometheusPort: number) {
   eventEmitter.on(events.probe.ran, incrementProbeRunningTotal)
   eventEmitter.on(events.probe.finished, decrementProbeRunningTotal)
   eventEmitter.on(events.config.updated, resetProbeRunningTotal)
+  eventEmitter.on(events.probe.status.changed, collectProbeStatus)
 
   startPrometheusMetricsServer(prometheusPort)
 }

@@ -159,6 +159,12 @@ export class HTTPProber extends BaseProber {
         response,
       })
 
+      getEventEmitter().emit(events.probe.status.changed, {
+        probe: this.probeConfig,
+        requestIndex,
+        status: 'up',
+      })
+
       this.logMessage(
         true,
         getProbeResultMessage({
@@ -225,6 +231,13 @@ export class HTTPProber extends BaseProber {
       response,
     }
     const alertId = getAlertID(url, validation, probeID)
+
+    console.log(this.probeConfig)
+    getEventEmitter().emit(events.probe.status.changed, {
+      probe: this.probeConfig,
+      requestIndex,
+      status: 'down',
+    })
 
     getEventEmitter().emit(events.probe.alert.triggered, {
       probe: this.probeConfig,

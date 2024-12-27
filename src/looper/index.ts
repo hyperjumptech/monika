@@ -69,7 +69,7 @@ export function sanitizeProbe(isSymonMode: boolean, probe: Probe): Probe {
     ...probe,
     incidentThreshold: incidentThreshold || DEFAULT_INCIDENT_THRESHOLD,
     recoveryThreshold: recoveryThreshold || DEFAULT_RECOVERY_THRESHOLD,
-    alerts: isSymonMode ? [] : addFailedRequestAssertions(alerts),
+    alerts: addFailedRequestAssertions(alerts),
   }
 }
 
