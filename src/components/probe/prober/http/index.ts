@@ -232,7 +232,6 @@ export class HTTPProber extends BaseProber {
     }
     const alertId = getAlertID(url, validation, probeID)
 
-    console.log(this.probeConfig)
     getEventEmitter().emit(events.probe.status.changed, {
       probe: this.probeConfig,
       requestIndex,
