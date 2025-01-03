@@ -47,6 +47,8 @@ type PrometheusCustomCollector = {
   probesRunningTotal: Gauge<'id'>
   probesRunning: Gauge<string>
   probesTotal: Gauge<string>
+  notificationsTriggered: Counter<'type' | 'status'>
+  notificationsTriggeredTotal: Counter<string>
 }
 
 type ProbeResult = {
@@ -65,16 +67,16 @@ export class PrometheusCollector {
     // register metric collector
     const alertsTriggered = new Counter({
       name: 'monika_alerts_triggered',
-      help: 'Indicates the count of alerts triggered by a probe',
+      help: 'Indicates the count of alerts triggered',
       labelNames: ['id', 'name', 'url', 'method', 'alertQuery'] as const,
     })
     const alertsTriggeredTotal = new Counter({
       name: 'monika_alerts_triggered_total',
-      help: 'Indicates the count of total alert triggered of all probes',
+      help: 'Indicates the cumulative count of alerts triggered',
     })
     const probesRunning = new Gauge({
       name: 'monika_probes_running',
-      help: 'Indicates whether a Monika probe is actively running checks (1 = RUNNING) or idle (0 = IDLE).',
+      help: 'Indicates whether a a probe is running (1) or idle (0)',
       labelNames: ['id'] as const,
     })
     const probesRunningTotal = new Gauge({
@@ -83,7 +85,7 @@ export class PrometheusCollector {
     })
     const probesStatus = new Gauge({
       name: 'monika_probes_status',
-      help: 'Indicates the current status of the probe: 0 = DOWN (unreachable), 1 = UP (reachable).',
+      help: 'Indicates whether a probe is healthy (1) or is having an incident (0)',
       labelNames: ['id', 'name', 'url', 'method'] as const,
     })
     const probesTotal = new Gauge({
@@ -116,8 +118,17 @@ export class PrometheusCollector {
     })
     const statusCode = new Gauge({
       name: 'monika_request_status_code_info',
-      help: 'Indicates the HTTP status code of the probe request',
+      help: "Indicates the HTTP status code of the probe requests' response(s)",
       labelNames: ['id', 'name', 'url', 'method'] as const,
+    })
+    const notificationsTriggered = new Counter({
+      name: 'monika_notifications_triggered',
+      help: 'Indicates the count of notifications triggered',
+      labelNames: ['type', 'status'] as const,
+    })
+    const notificationsTriggeredTotal = new Counter({
+      name: 'monika_notifications_triggered_total',
+      help: 'Indicates the cumulative count of notifications triggered',
     })
 
     // register and collect default Node.js metrics
@@ -133,6 +144,8 @@ export class PrometheusCollector {
       responseSize,
       responseTime,
       statusCode,
+      notificationsTriggered,
+      notificationsTriggeredTotal,
     }
   }
 
@@ -242,7 +255,7 @@ export class PrometheusCollector {
       name,
       url,
       method: method ?? 'GET',
-      alertQuery,
+      alertQuery: JSON.stringify(alertQuery),
     }
     const { alertsTriggered, alertsTriggeredTotal } = prometheusCustomCollector
 
@@ -276,5 +289,24 @@ export class PrometheusCollector {
 
     prometheusCustomCollector.probesRunning.reset()
     prometheusCustomCollector.probesRunningTotal.reset()
+  }
+
+  collectNotificationSentMetrics({
+    type,
+    status,
+  }: {
+    type: string
+    status: 'success' | 'failed'
+  }) {
+    if (!prometheusCustomCollector) {
+      throw new Error('Prometheus collector is not registered')
+    }
+
+    const { notificationsTriggered, notificationsTriggeredTotal } =
+      prometheusCustomCollector
+
+    // collect metrics
+    notificationsTriggered.labels({ type, status }).inc()
+    notificationsTriggeredTotal.inc()
   }
 }

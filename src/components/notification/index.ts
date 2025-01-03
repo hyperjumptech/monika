@@ -22,11 +22,13 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import { getEventEmitter } from '../../utils/events'
 import { ValidatedResponse } from '../../plugins/validate-response'
 import getIp from '../../utils/ip'
 import { getMessageForAlert } from './alert-message'
 import { sendNotifications } from '@hyperjumptech/monika-notification'
 import type { Notification } from '@hyperjumptech/monika-notification'
+import events from '../../events'
 
 type SendAlertsProps = {
   probeID: string
@@ -54,5 +56,11 @@ export async function sendAlerts({
     response: validation.response,
   })
 
-  return sendNotifications(notifications, message)
+  const results = await sendNotifications(notifications, message)
+  for (const result of results) {
+    getEventEmitter().emit(events.notifications.sent, {
+      type: result.type,
+      status: result.success ? 'success' : 'failed',
+    })
+  }
 }

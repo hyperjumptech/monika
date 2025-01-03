@@ -241,7 +241,7 @@ export class HTTPProber extends BaseProber {
     getEventEmitter().emit(events.probe.alert.triggered, {
       probe: this.probeConfig,
       requestIndex,
-      alertQuery: '',
+      alertQuery: triggeredAlert,
     })
 
     addIncident({
