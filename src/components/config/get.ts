@@ -94,7 +94,7 @@ export const FAILED_REQUEST_ASSERTION = {
 function addDefaultAlerts(config: Config) {
   return {
     ...config,
-    probes: config.probes.map((probe) => ({
+    probes: config.probes?.map((probe) => ({
       ...probe,
       alerts: [
         ...(probe.alerts || []),
