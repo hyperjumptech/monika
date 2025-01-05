@@ -79,7 +79,8 @@ export const FAILED_REQUEST_ASSERTION = {
 }
 
 function addFailedRequestAssertions(assertions: ProbeAlert[]) {
-  // create uuid seed from FAILED_REQUEST_ASSERTION to make the id deterministic
+  // create uuid seed from FAILED_REQUEST_ASSERTION
+  // to make the id deterministic, consistent, and testable
   const idSeed = Buffer.from(JSON.stringify(FAILED_REQUEST_ASSERTION))
   return [
     ...assertions,
