@@ -187,7 +187,12 @@ export class HTTPProber extends BaseProber {
     responses: ProbeRequestResponse[]
   ) {
     return httpRequest({
-      requestConfig: { ...config, signal },
+      requestConfig: {
+        ...config,
+        allowUnauthorized:
+          config.allowUnauthorized ?? getContext().flags.ignoreInvalidTLS,
+        signal,
+      },
       responses,
     })
   }

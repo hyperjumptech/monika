@@ -52,6 +52,12 @@ import SymonClient from '../symon/index.js'
 import { getEventEmitter } from '../utils/events.js'
 import { log } from '../utils/pino.js'
 import { fetchAndCacheNetworkInfo } from '../utils/public-ip.js'
+import { initSentry } from '../plugins/sentry/index.js'
+import {
+  captureException,
+  close as closeSentry,
+  flush as flushSentry,
+} from '@sentry/node'
 
 const em = getEventEmitter()
 let symonClient: SymonClient
@@ -72,6 +78,10 @@ export default class Monika extends Command {
   async catch(error: Error): Promise<unknown> {
     super.catch(error)
 
+    if (getContext().flags.sentryDSN !== undefined) {
+      captureException(error)
+    }
+
     if (symonClient) {
       await symonClient.sendStatus({ isOnline: false })
     }
@@ -88,6 +98,13 @@ export default class Monika extends Command {
     }
 
     throw error
+  }
+
+  async finally(): Promise<void> {
+    if (getContext().flags.sentryDSN !== undefined) {
+      await flushSentry(2000)
+      await closeSentry()
+    }
   }
 
   async run(): Promise<void> {
@@ -135,6 +152,14 @@ export default class Monika extends Command {
         await symonClient.initiate()
       }
 
+      if (flags.sentryDSN !== undefined) {
+        log.info('Sentry is enabled for error reporting')
+        initSentry({
+          dsn: flags.sentryDSN,
+          monikaVersion: this.config.version,
+        })
+      }
+
       let isFirstRun = true
 
       for (;;) {
@@ -176,6 +201,7 @@ export default class Monika extends Command {
         // block the loop until receives config updated event
         // eslint-disable-next-line no-await-in-loop
         await pEvent(em, events.config.updated)
+
         controller.abort('Monika configuration updated')
       }
     } catch (error: unknown) {
@@ -271,6 +297,8 @@ process.on('SIGINT', async () => {
     await symonClient.sendStatus({ isOnline: false })
     await symonClient.stop()
   }
+
+  await flushSentry(2000)
 
   em.emit(events.application.terminated)
 
