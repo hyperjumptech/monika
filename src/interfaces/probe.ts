@@ -88,6 +88,7 @@ export type Ping = {
 
 export interface Probe {
   id: string
+  jointId?: string[]
   name: string
   description?: string
   interval: number
