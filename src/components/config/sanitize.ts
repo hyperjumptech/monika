@@ -4,14 +4,19 @@ import type {
   Config,
   ValidatedConfig,
 } from '../../interfaces/config'
+import { sanitizeProbe } from '../../looper'
+import { isSymonModeFrom } from '.'
+import { getContext } from '../../context'
 
 const DEFAULT_TLS_EXPIRY_REMINDER_DAYS = 30
 const DEFAULT_STATUS_NOTIFICATION = '0 6 * * *'
 
 export function sanitizeConfig(config: Config): ValidatedConfig {
-  const { certificate, notifications = [], version } = config
-  const sanitizedConfigWithoutVersion = {
+  const isSymonMode = isSymonModeFrom(getContext().flags)
+  const { certificate, notifications = [], version, probes } = config
+  const sanitizedConfigWithoutVersion: Omit<ValidatedConfig, 'version'> = {
     ...config,
+    probes: probes.map((probe) => sanitizeProbe(isSymonMode, probe)),
     certificate: sanitizeCertificate(certificate),
     notifications,
     'status-notification':
