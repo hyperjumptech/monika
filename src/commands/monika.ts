@@ -170,11 +170,14 @@ export default class Monika extends Command {
         // save some data into files for later
         savePidFile(flags.config, config)
         deprecationHandler(config)
-        logStartupMessage({
-          config,
-          flags,
-          isFirstRun,
-        })
+
+        if (flags['skip-start-message'] === false) {
+          logStartupMessage({
+            config,
+            flags,
+            isFirstRun,
+          })
+        }
 
         const controller = new AbortController()
         const { signal } = controller
@@ -192,6 +195,7 @@ export default class Monika extends Command {
         sendMonikaStartMessage(notifications).catch((error) =>
           log.error(error.message)
         )
+
         // schedule status update notification
         scheduleSummaryNotification({ config, flags })
 

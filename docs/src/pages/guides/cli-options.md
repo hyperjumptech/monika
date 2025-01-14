@@ -299,6 +299,14 @@ By default Monika will follow redirects 21 times. You can set the value of `--fo
 monika --follow-redirects 0 # disable following redirects
 ```
 
+## SKIP
+
+For applications where a startup message is not desired, you can skip monika startup message using `--skip-startup-message`.
+
+```bash
+monika --skip-startup-message
+```
+
 ## STUN
 
 By default monika will continuously check the [STUN](https://en.wikipedia.org/wiki/STUN) server every 20 second intervals. Continuously STUN checking ensures that connectivity to the outside world is guaranteed. When STUN checking fails, Monika assumes the network is down and probing will be paused.
