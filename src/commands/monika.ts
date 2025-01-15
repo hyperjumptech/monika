@@ -144,7 +144,9 @@ export default class Monika extends Command {
       }
 
       await initLoaders(flags, this.config)
-      await logRunningInfo({ isSymonMode, isVerbose: flags.verbose })
+      if (flags['skip-start-message'] === false) {
+        await logRunningInfo({ isSymonMode, isVerbose: flags.verbose })
+      }
 
       if (isSymonMode) {
         symonClient = new SymonClient(flags)
@@ -171,13 +173,11 @@ export default class Monika extends Command {
         savePidFile(flags.config, config)
         deprecationHandler(config)
 
-        if (flags['skip-start-message'] === false) {
-          logStartupMessage({
-            config,
-            flags,
-            isFirstRun,
-          })
-        }
+        logStartupMessage({
+          config,
+          flags,
+          isFirstRun,
+        })
 
         const controller = new AbortController()
         const { signal } = controller
