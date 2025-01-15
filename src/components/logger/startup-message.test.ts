@@ -522,7 +522,7 @@ describe('Startup message', () => {
     })
   })
 
-  describe.only('Skip startup test', () => {
+  describe('Skip startup test', () => {
     it('should show startup message', () => {
       // act
       logStartupMessage({
