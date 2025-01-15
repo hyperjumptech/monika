@@ -39,7 +39,12 @@ type LogStartupMessage = {
   config: ValidatedConfig
   flags: Pick<
     MonikaFlags,
-    'config' | 'symonKey' | 'symonUrl' | 'verbose' | 'native-fetch'
+    | 'config'
+    | 'symonKey'
+    | 'symonUrl'
+    | 'verbose'
+    | 'native-fetch'
+    | 'skip-start-message'
   >
   isFirstRun: boolean
 }
@@ -49,6 +54,11 @@ export function logStartupMessage({
   flags,
   isFirstRun,
 }: LogStartupMessage): void {
+  if (flags['skip-start-message'] === true) {
+    // if skipping, wont have any message
+    return
+  }
+
   if (isSymonModeFrom(flags)) {
     log.info('Running in Symon mode')
     return
@@ -81,6 +91,11 @@ function generateStartupMessage({
   const hasNotification = notificationTotal > 0
 
   let startupMessage = ''
+
+  if (flags['skip-start-message'] === true) {
+    // if skipping, wont have any message
+    return ''
+  }
 
   // warn if config is empty
   if (!hasNotification) {
