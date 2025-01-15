@@ -33,8 +33,8 @@ import {
   deleteNotificationLogs,
   deleteRequestLogs,
   getUnreportedLogs,
-} from '../components/logger/history'
-import { log } from '../utils/pino'
+} from '../components/logger/history.js'
+import { log } from '../utils/pino.js'
 const dbPath = path.resolve(process.cwd(), 'monika-logs.db')
 
 export default async (stringifiedData: string) => {
@@ -61,7 +61,7 @@ export default async (stringifiedData: string) => {
     } else {
       // Hit the Symon API for receiving Monika report
       // With the compressed requests and notifications data
-      await axios({
+      await axios.default({
         data: {
           data: {
             notifications,

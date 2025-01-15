@@ -4,12 +4,12 @@ import { expect } from 'chai'
 import { HttpResponse, http } from 'msw'
 import { setupServer } from 'msw/node'
 
-import { resetContext, setContext } from '../../context'
-import { sanitizeFlags } from '../../flag'
-import type { Config } from '../../interfaces/config'
-import type { Probe } from '../../interfaces/probe'
-import { getProbes } from './probe'
-import { watchConfigChanges } from './watcher'
+import { resetContext, setContext } from '../../context/index.js'
+import { sanitizeFlags } from '../../flag.js'
+import type { Config } from '../../interfaces/config.js'
+import type { Probe } from '../../interfaces/probe.js'
+import { getProbes } from './probe.js'
+import { watchConfigChanges } from './watcher.js'
 
 describe('Config watcher', () => {
   const config: Config = {

@@ -26,9 +26,9 @@ import { expect } from 'chai'
 import { type DefaultBodyType, HttpResponse, http } from 'msw'
 import { setupServer } from 'msw/node'
 
-import { validateNotification } from '../../validator/notification'
-import { send } from '../webhook'
-import type { NotificationMessage } from '..'
+import { validateNotification } from '../../validator/notification.js'
+import { send } from '../webhook.js'
+import type { NotificationMessage } from '../index.js'
 
 describe('notificationChecker - webhookNotification', () => {
   const notificationConfig = {

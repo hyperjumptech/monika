@@ -1,8 +1,8 @@
 import * as mongodbURI from 'mongodb-uri'
-import { BaseProber, type ProbeParams, type ProbeResult } from '..'
-import { probeRequestResult } from '../../../../interfaces/request'
-import type { Mongo } from '../../../../interfaces/probe'
-import { mongoRequest } from './request'
+import { BaseProber, type ProbeParams, type ProbeResult } from '../index.js'
+import { probeRequestResult } from '../../../../interfaces/request.js'
+import type { Mongo } from '../../../../interfaces/probe.js'
+import { mongoRequest } from './request.js'
 
 export class MongoProber extends BaseProber {
   async probe({ incidentRetryAttempt }: ProbeParams): Promise<void> {

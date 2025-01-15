@@ -24,7 +24,7 @@
 
 import { expect } from '@oclif/test'
 
-import type { Probe } from '../../interfaces/probe'
+import type { Probe } from '../../interfaces/probe.js'
 
 import {
   addProbe,
@@ -33,13 +33,13 @@ import {
   getProbes,
   setProbes,
   updateProbe,
-} from './probe'
+} from './probe.js'
 
 const probe: Probe = {
   alerts: [],
   id: 'xVUcW',
   interval: 10,
-  name: 'Sample Probe',
+  name: 'Sample probe.js',
 }
 
 describe('Probe cache', () => {
@@ -48,7 +48,7 @@ describe('Probe cache', () => {
       deleteProbe(id)
     }
   })
-  it('should add a probe', () => {
+  it('should add a probe.js', () => {
     // act
     addProbe(probe)
 
@@ -56,10 +56,10 @@ describe('Probe cache', () => {
     expect(findProbe(probe.id)).eq(probe)
   })
 
-  it('should update a probe', () => {
+  it('should update a probe.js', () => {
     // arrange
     addProbe(probe)
-    const updatedName = 'Updated Probe'
+    const updatedName = 'Updated probe.js'
 
     // act
     const isUpdated = updateProbe(probe.id, { ...probe, name: updatedName })
@@ -69,9 +69,9 @@ describe('Probe cache', () => {
     expect(findProbe(probe.id)?.name).eq(updatedName)
   })
 
-  it('should not update a nonexistent probe', () => {
+  it('should not update a nonexistent probe.js', () => {
     // arrange
-    const updatedName = 'Updated Probe'
+    const updatedName = 'Updated probe.js'
 
     // act
     const isUpdated = updateProbe('9WpFB', { ...probe, name: updatedName })
@@ -92,7 +92,7 @@ describe('Probe cache', () => {
     expect(probes.length).eq(1)
   })
 
-  it('should not remove a nonexistent probe', () => {
+  it('should not remove a nonexistent probe.js', () => {
     // arrange
     addProbe(probe)
 
@@ -104,7 +104,7 @@ describe('Probe cache', () => {
     expect(getProbes().length).eq(1)
   })
 
-  it('should remove a probe', () => {
+  it('should remove a probe.js', () => {
     // arrange
     addProbe(probe)
 

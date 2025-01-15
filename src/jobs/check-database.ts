@@ -24,13 +24,13 @@
 
 import { resolve } from 'node:path'
 import { stat } from 'node:fs/promises'
-import { getValidatedConfig } from '../components/config'
+import { getValidatedConfig } from '../components/config/index.js'
 import {
   deleteFromAlerts,
   deleteFromNotifications,
   deleteFromProbeRequests,
-} from '../components/logger/history'
-import type { ValidatedConfig } from '../interfaces/config'
+} from '../components/logger/history.js'
+import type { ValidatedConfig } from '../interfaces/config.js'
 
 const dbPath = resolve(process.cwd(), 'monika-logs.db')
 

@@ -26,8 +26,8 @@ import chai, { expect } from 'chai'
 import spies from 'chai-spies'
 import chaiAsPromised from 'chai-as-promised'
 
-import * as smtp from '../smtp'
-import { validateNotification } from '../../validator/notification'
+import * as smtp from '../smtp.js'
+import { validateNotification } from '../../validator/notification.js'
 
 chai.use(spies)
 chai.use(chaiAsPromised)

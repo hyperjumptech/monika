@@ -47,8 +47,8 @@
  **********************************************************************************/
 
 import Joi from 'joi'
-import type { NotificationMessage } from '.'
-import { sendHttpRequest } from '../utils/http'
+import type { NotificationMessage } from './index.js'
+import { sendHttpRequest } from '../utils/http.js'
 
 type PagerDutyConfig = {
   key: string

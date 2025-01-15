@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import { expect } from 'chai'
-import { sanitizeExpression } from '../../src/utils/expression-parser'
+import { sanitizeExpression } from '../../src/utils/expression-parser.js'
 
 describe('sanitizeExpression', () => {
   it('sanitize "response.status == 500" expression', () => {

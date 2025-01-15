@@ -22,14 +22,14 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { HTTPProber } from './http'
-import { MongoProber } from './mongo'
-import { MariaDBProber } from './mariadb'
-import { PingProber } from './icmp'
-import { PostgresProber } from './postgres'
-import { RedisProber } from './redis'
-import { SocketProber } from './socket'
-import type { Prober, ProberMetadata } from '.'
+import { HTTPProber } from './http/index.js'
+import { MongoProber } from './mongo/index.js'
+import { MariaDBProber } from './mariadb/index.js'
+import { PingProber } from './icmp/index.js'
+import { PostgresProber } from './postgres/index.js'
+import { RedisProber } from './redis/index.js'
+import { SocketProber } from './socket/index.js'
+import type { Prober, ProberMetadata } from './index.js'
 
 export function createProbers(probeMetadata: ProberMetadata): Prober[] {
   const { probeConfig } = probeMetadata

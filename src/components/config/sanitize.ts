@@ -3,7 +3,7 @@ import type {
   Certificate,
   Config,
   ValidatedConfig,
-} from '../../interfaces/config'
+} from '../../interfaces/config.js'
 
 const DEFAULT_TLS_EXPIRY_REMINDER_DAYS = 30
 const DEFAULT_STATUS_NOTIFICATION = '0 6 * * *'

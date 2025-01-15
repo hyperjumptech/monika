@@ -24,19 +24,19 @@
 
 import joi from 'joi'
 import { v4 as uuid } from 'uuid'
-import type { Probe, ProbeAlert } from '../../../../interfaces/probe'
-import { isSymonModeFrom } from '../..'
-import { getContext } from '../../../../context'
-import { FAILED_REQUEST_ASSERTION } from '../../../../looper'
-import { compileExpression } from '../../../../utils/expression-parser'
-import { isValidURL } from '../../../../utils/is-valid-url'
-import { log } from '../../../../utils/pino'
+import type { Probe, ProbeAlert } from '../../../../interfaces/probe.js'
+import { isSymonModeFrom } from '../../index.js'
+import { getContext } from '../../../../context/index.js'
+import { FAILED_REQUEST_ASSERTION } from '../../../../looper/index.js'
+import { compileExpression } from '../../../../utils/expression-parser.js'
+import { isValidURL } from '../../../../utils/is-valid-url.js'
+import { log } from '../../../../utils/pino.js'
 import {
   DEFAULT_INCIDENT_THRESHOLD,
   DEFAULT_INTERVAL,
   DEFAULT_RECOVERY_THRESHOLD,
-} from './default-values'
-import { getErrorMessage } from '../../../../utils/catch-error-handler'
+} from './default-values.js'
+import { getErrorMessage } from '../../../../utils/catch-error-handler.js'
 
 const ALERT_QUERY = 'status-not-2xx'
 const RESPONSE_TIME_PREFIX = 'response-time-greater-than-'

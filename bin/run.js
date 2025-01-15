@@ -1,3 +1,5 @@
 #!/usr/bin/env node
 
-require('../lib').run().catch(require('@oclif/core/handle'))
+import {execute} from '@oclif/core'
+
+await execute({dir: import.meta.url})
