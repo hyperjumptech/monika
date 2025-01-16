@@ -34,7 +34,8 @@ export async function checkTLS(
   const hostname = getHostname(domain)
   const requestOptions = getRequestOptions(domain)
 
-  const { valid, validTo, daysRemaining } = await sslChecker.default(
+  // @ts-expect-error: sslChecker.default is not a function
+  const { valid, validTo, daysRemaining } = await sslChecker(
     hostname,
     requestOptions
   )
