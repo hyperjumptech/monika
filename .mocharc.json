@@ -16,8 +16,6 @@
     "src/components/probe/prober/http/index.test.ts",
     "src/components/probe/prober/icmp/index.test.ts",
     "src/components/probe/prober/index.test.ts",
-    "src/components/probe/prober/mongo/index.test.ts",
-    "src/components/tls-checker/index.test.ts",
     "test/components/notification.test.ts"
   ]
 }

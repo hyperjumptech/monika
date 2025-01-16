@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import { MongoClient } from 'mongodb'
-import * as mongodbURI from 'mongodb-uri'
+import mongodbURI from 'mongodb-uri'
 import { probeRequestResult } from '../../../../interfaces/request.js'
 import type { ProbeRequestResponse } from '../../../../interfaces/request.js'
 import { differenceInMilliseconds } from 'date-fns'
