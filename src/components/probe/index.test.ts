@@ -29,15 +29,17 @@ import sinon from 'sinon'
 import mariadb from 'mariadb'
 import { MongoClient, type Db } from 'mongodb'
 import net from 'net'
-import { Pool } from 'pg'
+import pg from 'pg'
 import * as redis from 'redis'
-import { doProbe } from '.'
-import { initializeProbeStates } from '../../utils/probe-state'
-import type { Probe } from '../../interfaces/probe'
-import { getContext, resetContext, setContext } from '../../context'
-import type { MonikaFlags } from '../../flag'
-import { FAILED_REQUEST_ASSERTION } from '../../looper'
-import { closeLog, openLogfile } from '../logger/history'
+import { doProbe } from './index.js'
+import { initializeProbeStates } from '../../utils/probe-state.js'
+import type { Probe } from '../../interfaces/probe.js'
+import { getContext, resetContext, setContext } from '../../context/index.js'
+import type { MonikaFlags } from '../../flag.js'
+import { FAILED_REQUEST_ASSERTION } from '../../looper/index.js'
+import { closeLog, openLogfile } from '../logger/history.js'
+
+const { Pool } = pg
 
 let notificationAlert: Record<
   string,
@@ -82,7 +84,7 @@ describe('Base Probe processing', () => {
     await closeLog()
   })
 
-  describe('Non HTTP Probe', () => {
+  describe('Non HTTP probe.js', () => {
     it('should probe MariaDB', async () => {
       // arrange
       const requestStub = sinon.stub(mariadb, 'createConnection').callsFake(
@@ -130,7 +132,7 @@ describe('Base Probe processing', () => {
       sinon.assert.calledOnce(requestStub)
     })
 
-    it('should send incident notification for MariaDB probe', async () => {
+    it('should send incident notification for MariaDB probe.js', async () => {
       // arrange
       const probe = {
         id: '1c8QrZ',
@@ -188,7 +190,7 @@ describe('Base Probe processing', () => {
       )
     }).timeout(10_000)
 
-    it('should send recovery notification for MariaDB probe', async () => {
+    it('should send recovery notification for MariaDB probe.js', async () => {
       // simulate the incindent first by throwing on first call
       // then simulate recovery on second call
       const requestStub = sinon.stub(mariadb, 'createConnection')

@@ -2,6 +2,10 @@
   "name": "@hyperjumptech/monika-notification",
   "version": "1.18.0",
   "description": "notification package for monika",
+  "type": "module",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {

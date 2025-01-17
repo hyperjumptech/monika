@@ -24,11 +24,11 @@
 
 import FormData from 'form-data'
 import Joi from 'joi'
-import type { NotificationMessage } from '.'
+import type { NotificationMessage } from './index.js'
 import Mailgen from 'mailgen'
 
-import { getSender } from '../utils/default-sender'
-import { sendHttpRequest } from '../utils/http'
+import { getSender } from '../utils/default-sender.js'
+import { sendHttpRequest } from '../utils/http.js'
 
 export type NotificationData = {
   apiKey: string

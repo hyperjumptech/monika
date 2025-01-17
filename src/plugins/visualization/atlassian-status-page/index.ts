@@ -22,15 +22,16 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios, { AxiosError } from 'axios'
+import axios from 'axios'
 import http from 'http'
 import https from 'https'
 import Joi from 'joi'
+
 import {
   findIncident,
   insertIncident as insertIncidentToDatabase,
   updateIncident as updateIncidentToDatabase,
-} from './database'
+} from './database.js'
 
 type NotifyIncident = {
   probeID: string
@@ -123,7 +124,7 @@ export class AtlassianStatusPageAPI {
     }
 
     try {
-      const resp = await axios.post(
+      const resp = await axios.default.post(
         `${this.statusPageBaseURL}/v1/pages/${this.pageID}/incidents`,
         data,
         this.axiosConfig
@@ -134,7 +135,8 @@ export class AtlassianStatusPageAPI {
 
       return incidentID
     } catch (error: unknown) {
-      const axiosError = error instanceof AxiosError ? error : new AxiosError()
+      const axiosError =
+        error instanceof axios.AxiosError ? error : new axios.AxiosError()
       throw new Error(
         `${axiosError?.message}${
           axiosError?.response?.data
@@ -167,13 +169,14 @@ export class AtlassianStatusPageAPI {
     const { incident_id: incidentID } = incident
 
     try {
-      await axios.patch(
+      await axios.default.patch(
         `${this.statusPageBaseURL}/v1/pages/${this.pageID}/incidents/${incidentID}`,
         data,
         this.axiosConfig
       )
     } catch (error: unknown) {
-      const axiosError = error instanceof AxiosError ? error : new AxiosError()
+      const axiosError =
+        error instanceof axios.AxiosError ? error : new axios.AxiosError()
       throw new Error(
         `${axiosError?.message}${
           axiosError?.response?.data

@@ -26,22 +26,22 @@ import type { Notification } from '@hyperjumptech/monika-notification'
 
 import { v4 as uuid } from 'uuid'
 
-import type { Probe, ProbeAlert } from '../interfaces/probe'
+import type { Probe, ProbeAlert } from '../interfaces/probe.js'
 
-import { getProbes } from '../components/config/probe'
-import { doProbe } from '../components/probe'
-import { getContext } from '../context'
-import { log } from '../utils/pino'
+import { getProbes } from '../components/config/probe.js'
+import { doProbe } from '../components/probe/index.js'
+import { getContext } from '../context/index.js'
+import { log } from '../utils/pino.js'
 import {
   getProbeContext,
   getProbeState,
   initializeProbeStates,
-} from '../utils/probe-state'
-import { getPublicIp, isConnectedToSTUNServer } from '../utils/public-ip'
+} from '../utils/probe-state.js'
+import { getPublicIp, isConnectedToSTUNServer } from '../utils/public-ip.js'
 import {
   DEFAULT_INCIDENT_THRESHOLD,
   DEFAULT_RECOVERY_THRESHOLD,
-} from '../components/config/validation/validator/default-values'
+} from '../components/config/validation/validator/default-values.js'
 
 let checkSTUNinterval: NodeJS.Timeout
 

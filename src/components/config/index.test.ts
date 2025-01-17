@@ -30,21 +30,21 @@ import spies from 'chai-spies'
 import { HttpResponse, http } from 'msw'
 import { setupServer } from 'msw/node'
 
-import { getContext, resetContext, setContext } from '../../context'
-import events from '../../events'
-import type { Config } from '../../interfaces/config'
-import { sanitizeFlags } from '../../flag'
-import { getErrorMessage } from '../../utils/catch-error-handler'
-import { getEventEmitter } from '../../utils/events'
-import { log } from '../../utils/pino'
-import { sanitizeConfig } from './sanitize'
+import { getContext, resetContext, setContext } from '../../context/index.js'
+import events from '../../events/index.js'
+import type { Config } from '../../interfaces/config.js'
+import { sanitizeFlags } from '../../flag.js'
+import { getErrorMessage } from '../../utils/catch-error-handler.js'
+import { getEventEmitter } from '../../utils/events.js'
+import { log } from '../../utils/pino.js'
+import { sanitizeConfig } from './sanitize.js'
 import {
   getValidatedConfig,
   isSymonModeFrom,
   initConfig,
   updateConfig,
-} from '.'
-import { validateProbes } from './validation'
+} from './index.js'
+import { validateProbes } from './validation/index.js'
 
 describe('getValidatedConfig', () => {
   beforeEach(() => {

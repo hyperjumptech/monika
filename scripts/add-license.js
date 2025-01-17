@@ -1,4 +1,4 @@
-const fs = require('fs')
+import fs from 'node:fs'
 
 const LICENSE = `/**********************************************************************************
 * MIT License                                                                    *
@@ -25,7 +25,7 @@ const LICENSE = `/**************************************************************
 **********************************************************************************/`
 
 const [filename] = process.argv.slice(2)
-const content = fs.readFileSync(filename, 'utf-8')
+const content = fs.readFileSync(filename, 'utf8')
 if (
   (filename.endsWith('ts') || filename.endsWith('js')) &&
   !content.includes('Copyright (c) 2021 Hyperjump Technology')

@@ -22,4 +22,4 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-export { validateProbes } from './validator/probe'
+export { validateProbes } from './validator/probe.js'

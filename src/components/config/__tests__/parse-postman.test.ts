@@ -23,13 +23,30 @@
  **********************************************************************************/
 
 import { expect } from 'chai'
-import { Config } from '../../../interfaces/config'
-import { parseConfigFromPostman } from '../parser/postman'
-import basicCollectionV20 from './mock_files/basic-postman_collection-v2.0.json'
-import basicCollectionV21 from './mock_files/basic-postman_collection-v2.1.json'
-import groupedCollectionV20 from './mock_files/grouped-postman_collection-v2.0.json'
-import groupedCollectionV21 from './mock_files/grouped-postman_collection-v2.1.json'
-import unsupportedCollection from './mock_files/postman_collection-unsupported.json'
+import { Config } from '../../../interfaces/config.js'
+import { parseConfigFromPostman } from '../parser/postman.js'
+import fs from 'fs'
+
+const basicCollectionV20 = fs.readFileSync(
+  'src/components/config/__tests__/mock_files/basic-postman_collection-v2.0.json',
+  'utf8'
+)
+const basicCollectionV21 = fs.readFileSync(
+  'src/components/config/__tests__/mock_files/basic-postman_collection-v2.1.json',
+  'utf8'
+)
+const groupedCollectionV20 = fs.readFileSync(
+  'src/components/config/__tests__/mock_files/grouped-postman_collection-v2.0.json',
+  'utf8'
+)
+const groupedCollectionV21 = fs.readFileSync(
+  'src/components/config/__tests__/mock_files/grouped-postman_collection-v2.1.json',
+  'utf8'
+)
+const unsupportedCollection = fs.readFileSync(
+  'src/components/config/__tests__/mock_files/postman_collection-unsupported.json',
+  'utf8'
+)
 
 describe('parseConfigFromPostman', () => {
   it('throws invalid JSON format', () => {
@@ -44,7 +61,7 @@ describe('parseConfigFromPostman', () => {
 
   it('throws unsupported collection version', () => {
     try {
-      const collectionStr = JSON.stringify(unsupportedCollection)
+      const collectionStr = unsupportedCollection
 
       parseConfigFromPostman(collectionStr)
     } catch (error: unknown) {
@@ -58,12 +75,13 @@ describe('parseConfigFromPostman', () => {
 
   describe('basic Postman collection', () => {
     it('[v2.0] - should converted to Monika config', () => {
-      const collectionStr = JSON.stringify(basicCollectionV20)
+      const collectionStr = basicCollectionV20
+      const collectionJson = JSON.parse(collectionStr)
       const config: Config = parseConfigFromPostman(collectionStr)
 
       expect(config.probes.length).to.equals(5)
 
-      for (const [index, item] of basicCollectionV20.item.entries()) {
+      for (const [index, item] of collectionJson.item.entries()) {
         expect(item.name).to.equals(config.probes[index].name)
 
         for (const req of config.probes[index].requests || []) {
@@ -106,12 +124,13 @@ describe('parseConfigFromPostman', () => {
     })
 
     it('[v2.1] - should converted to Monika config', () => {
-      const collectionStr = JSON.stringify(basicCollectionV21)
+      const collectionStr = basicCollectionV21
+      const collectionJson = JSON.parse(collectionStr)
       const config: Config = parseConfigFromPostman(collectionStr)
 
       expect(config.probes.length).to.equals(5)
 
-      for (const [index, item] of basicCollectionV21.item.entries()) {
+      for (const [index, item] of collectionJson.item.entries()) {
         expect(item.name).to.equals(config.probes[index].name)
 
         for (const req of config.probes[index].requests || []) {
@@ -156,12 +175,13 @@ describe('parseConfigFromPostman', () => {
 
   describe('grouped Postman collection', () => {
     it('[v2.0] - should converted to Monika config', () => {
-      const collectionStr = JSON.stringify(groupedCollectionV20)
+      const collectionStr = groupedCollectionV20
+      const collectionJson = JSON.parse(collectionStr)
       const config: Config = parseConfigFromPostman(collectionStr)
 
       expect(config.probes.length).to.equals(2)
 
-      for (const [index, item] of groupedCollectionV20.item.entries()) {
+      for (const [index, item] of collectionJson.item.entries()) {
         expect(item.name).to.equals(config.probes[index].name)
 
         for (const [rIndex, req] of (
@@ -207,12 +227,13 @@ describe('parseConfigFromPostman', () => {
     })
 
     it('[v2.1] - should converted to Monika config', () => {
-      const collectionStr = JSON.stringify(groupedCollectionV21)
+      const collectionStr = groupedCollectionV21
+      const collectionJson = JSON.parse(collectionStr)
       const config: Config = parseConfigFromPostman(collectionStr)
 
       expect(config.probes.length).to.equals(2)
 
-      for (const [index, item] of groupedCollectionV21.item.entries()) {
+      for (const [index, item] of collectionJson.item.entries()) {
         expect(item.name).to.equals(config.probes[index].name)
 
         for (const [rIndex, req] of (

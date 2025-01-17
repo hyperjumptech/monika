@@ -22,7 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { RequestConfig } from './request'
+import { RequestConfig } from './request.js'
 
 export interface ProbeAlert {
   query?: string

@@ -26,9 +26,9 @@ import {
   channels,
   type Notification,
   type NotificationMessage,
-} from './channel'
-import { getErrorMessage } from './utils/catch-error-handler'
-import { type InputSender, updateSender } from './utils/default-sender'
+} from './channel/index.js'
+import { getErrorMessage } from './utils/catch-error-handler.js'
+import { type InputSender, updateSender } from './utils/default-sender.js'
 
 async function sendNotifications(
   notifications: Notification[],
@@ -61,5 +61,5 @@ async function sendNotifications(
 
 export { sendNotifications }
 
-export { channels, Notification, NotificationMessage } from './channel'
-export { validateNotification } from './validator/notification'
+export { channels, Notification, NotificationMessage } from './channel/index.js'
+export { validateNotification } from './validator/notification.js'
