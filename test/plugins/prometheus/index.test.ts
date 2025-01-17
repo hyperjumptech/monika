@@ -78,13 +78,10 @@ describe('Prometheus plugin', () => {
         } catch (error: unknown) {
           // assert
           if (error instanceof Error) {
-            console.error('Error message:', error.message)
-
             // Narrowing the error further to check for HTTP status
             const statusMatch = error.message.match(/HTTP error: (\d+)/)
             if (statusMatch) {
               const status = Number.parseInt(statusMatch[1], 10)
-              console.error('HTTP Status Code:', status)
               expect(status).to.equal(405)
             }
           }

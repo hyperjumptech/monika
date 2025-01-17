@@ -39,7 +39,7 @@ const probe: Probe = {
   alerts: [],
   id: 'xVUcW',
   interval: 10,
-  name: 'Sample probe.js',
+  name: 'Sample Probe',
 }
 
 describe('Probe cache', () => {
@@ -48,7 +48,7 @@ describe('Probe cache', () => {
       deleteProbe(id)
     }
   })
-  it('should add a probe.js', () => {
+  it('should add a probe', () => {
     // act
     addProbe(probe)
 
@@ -56,10 +56,10 @@ describe('Probe cache', () => {
     expect(findProbe(probe.id)).eq(probe)
   })
 
-  it('should update a probe.js', () => {
+  it('should update a probe', () => {
     // arrange
     addProbe(probe)
-    const updatedName = 'Updated probe.js'
+    const updatedName = 'Updated probe'
 
     // act
     const isUpdated = updateProbe(probe.id, { ...probe, name: updatedName })
@@ -69,9 +69,9 @@ describe('Probe cache', () => {
     expect(findProbe(probe.id)?.name).eq(updatedName)
   })
 
-  it('should not update a nonexistent probe.js', () => {
+  it('should not update a nonexistent probe', () => {
     // arrange
-    const updatedName = 'Updated probe.js'
+    const updatedName = 'Updated probe'
 
     // act
     const isUpdated = updateProbe('9WpFB', { ...probe, name: updatedName })
@@ -92,7 +92,7 @@ describe('Probe cache', () => {
     expect(probes.length).eq(1)
   })
 
-  it('should not remove a nonexistent probe.js', () => {
+  it('should not remove a nonexistent probe', () => {
     // arrange
     addProbe(probe)
 
@@ -104,7 +104,7 @@ describe('Probe cache', () => {
     expect(getProbes().length).eq(1)
   })
 
-  it('should remove a probe.js', () => {
+  it('should remove a probe', () => {
     // arrange
     addProbe(probe)
 

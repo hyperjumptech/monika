@@ -373,7 +373,6 @@ export async function deleteNotificationLogs(
  * @returns Promise<void>
  */
 export async function flushAllLogs(): Promise<void> {
-  console.log('mashook: lala lala lala')
   const dropAtlassianStatusPageTableSQL =
     'DROP TABLE IF EXISTS atlassian_status_page_incidents;'
   const dropInstatusPageTableSQL =

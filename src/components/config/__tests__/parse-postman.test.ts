@@ -49,7 +49,7 @@ const unsupportedCollection = fs.readFileSync(
 )
 
 describe('parseConfigFromPostman', () => {
-  xit('throws invalid JSON format', () => {
+  it('throws invalid JSON format', () => {
     try {
       parseConfigFromPostman('../fetch.ts')
     } catch (error: unknown) {
@@ -59,7 +59,7 @@ describe('parseConfigFromPostman', () => {
     }
   })
 
-  xit('throws unsupported collection version', () => {
+  it('throws unsupported collection version', () => {
     try {
       const collectionStr = unsupportedCollection
 
@@ -74,7 +74,7 @@ describe('parseConfigFromPostman', () => {
   })
 
   describe('basic Postman collection', () => {
-    xit('[v2.0] - should converted to Monika config', () => {
+    it('[v2.0] - should converted to Monika config', () => {
       const collectionStr = basicCollectionV20
       const collectionJson = JSON.parse(collectionStr)
       const config: Config = parseConfigFromPostman(collectionStr)
@@ -123,7 +123,7 @@ describe('parseConfigFromPostman', () => {
       }
     })
 
-    xit('[v2.1] - should converted to Monika config', () => {
+    it('[v2.1] - should converted to Monika config', () => {
       const collectionStr = basicCollectionV21
       const collectionJson = JSON.parse(collectionStr)
       const config: Config = parseConfigFromPostman(collectionStr)
@@ -174,7 +174,7 @@ describe('parseConfigFromPostman', () => {
   })
 
   describe('grouped Postman collection', () => {
-    xit('[v2.0] - should converted to Monika config', () => {
+    it('[v2.0] - should converted to Monika config', () => {
       const collectionStr = groupedCollectionV20
       const collectionJson = JSON.parse(collectionStr)
       const config: Config = parseConfigFromPostman(collectionStr)
@@ -226,7 +226,7 @@ describe('parseConfigFromPostman', () => {
       }
     })
 
-    xit('[v2.1] - should converted to Monika config', () => {
+    it('[v2.1] - should converted to Monika config', () => {
       const collectionStr = groupedCollectionV21
       const collectionJson = JSON.parse(collectionStr)
       const config: Config = parseConfigFromPostman(collectionStr)

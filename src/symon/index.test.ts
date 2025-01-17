@@ -285,11 +285,11 @@ describe('Symon initiate', () => {
     })
   }).timeout(15_000)
 
-  it('should add a new probe.js', async () => {
+  it('should add a new probe', async () => {
     // arrange
     const newProbe: Probe = {
       id: '3',
-      name: 'New probe.js',
+      name: 'New Probe',
       interval: 2,
       requests: [
         {
@@ -346,7 +346,7 @@ describe('Symon initiate', () => {
     await symon.stop()
   }).timeout(15_000)
 
-  it('should update a probe.js', async () => {
+  it('should update a probe', async () => {
     // arrange
     server.use(
       http.get('http://localhost:4000/api/v1/monika/1234/probe-changes', () =>
@@ -401,7 +401,7 @@ describe('Symon initiate', () => {
     await symon.stop()
   }).timeout(15_000)
 
-  it('should delete a probe.js', async () => {
+  it('should delete a probe', async () => {
     // arrange
     server.use(
       http.get('http://localhost:4000/api/v1/monika/1234/probe-changes', () =>
