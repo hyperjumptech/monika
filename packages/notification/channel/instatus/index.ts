@@ -27,7 +27,6 @@ import type { AxiosRequestConfig } from 'axios'
 import http from 'http'
 import https from 'https'
 import Joi from 'joi'
-import { getErrorMessage } from '../../utils/catch-error-handler.js'
 import {
   findIncident,
   insertIncident as insertIncidentToDatabase,
@@ -140,7 +139,15 @@ async function createIncident(
 
     await insertIncidentToDatabase({ incidentID, probeID, status, url })
   } catch (error: unknown) {
-    throw new Error(getErrorMessage(error))
+    const axiosError =
+      error instanceof axios.AxiosError ? error : new axios.AxiosError()
+    throw new Error(
+      `${axiosError?.message}${
+        axiosError?.response?.data
+          ? `. ${axiosError?.response?.data?.message}`
+          : ''
+      }`
+    )
   }
 }
 
@@ -185,7 +192,15 @@ async function updateIncident(
       getAxiosConfig(apiKey)
     )
   } catch (error: unknown) {
-    throw new Error(getErrorMessage(error))
+    const axiosError =
+      error instanceof axios.AxiosError ? error : new axios.AxiosError()
+    throw new Error(
+      `${axiosError.message}${
+        axiosError?.response?.data
+          ? `. ${axiosError?.response?.data?.message}`
+          : ''
+      }`
+    )
   }
 
   await updateIncidentToDatabase({ incidentID, status })
