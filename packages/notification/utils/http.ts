@@ -34,7 +34,7 @@ const httpsAgent = new https.Agent({ keepAlive: true })
 export const DEFAULT_TIMEOUT = 10_000
 
 // Create an instance of axios here so it will be reused instead of creating a new one all the time.
-const axiosInstance = axios.default.create()
+const axiosInstance = axios.create()
 
 export async function sendHttpRequest(
   config: AxiosRequestConfig

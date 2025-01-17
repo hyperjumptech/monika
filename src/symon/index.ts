@@ -184,7 +184,7 @@ export default class SymonClient {
   }: SymonClientParams) {
     this.apiKey = symonKey
     this.url = symonUrl
-    this.httpClient = axios.default.create({
+    this.httpClient = axios.create({
       baseURL: `${this.url}/api/${apiVersion}/monika`,
       headers: {
         'x-api-key': this.apiKey,

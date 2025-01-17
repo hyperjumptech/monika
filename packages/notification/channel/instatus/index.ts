@@ -134,7 +134,7 @@ async function createIncident(
       statuses,
     }
     const { apiKey, pageID } = instatusConfig
-    const incidentID = await axios.default
+    const incidentID = await axios
       .post(`${BASE_URL}/v1/${pageID}/incidents/`, data, getAxiosConfig(apiKey))
       .then((res) => res?.data?.id)
 
@@ -179,7 +179,7 @@ async function updateIncident(
   try {
     const { apiKey, pageID } = instatusConfig
 
-    await axios.default.patch(
+    await axios.patch(
       `${BASE_URL}/v1/${pageID}/incidents/${incidentID}`,
       data,
       getAxiosConfig(apiKey)
@@ -195,7 +195,7 @@ async function getComponents({
   apiKey,
   pageID,
 }: InstatusConfig): Promise<Component[]> {
-  const componentsResponse = await axios.default.get(
+  const componentsResponse = await axios.get(
     `${BASE_URL}/v1/${pageID}/components`,
     getAxiosConfig(apiKey)
   )

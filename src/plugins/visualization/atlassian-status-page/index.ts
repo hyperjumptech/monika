@@ -125,7 +125,7 @@ export class AtlassianStatusPageAPI {
     }
 
     try {
-      const resp = await axios.default.post(
+      const resp = await axios.post(
         `${this.statusPageBaseURL}/v1/pages/${this.pageID}/incidents`,
         data,
         this.axiosConfig
@@ -162,7 +162,7 @@ export class AtlassianStatusPageAPI {
     const { incident_id: incidentID } = incident
 
     try {
-      await axios.default.patch(
+      await axios.patch(
         `${this.statusPageBaseURL}/v1/pages/${this.pageID}/incidents/${incidentID}`,
         data,
         this.axiosConfig
