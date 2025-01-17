@@ -61,7 +61,7 @@ export default async (stringifiedData: string) => {
     } else {
       // Hit the Symon API for receiving Monika report
       // With the compressed requests and notifications data
-      await axios({
+      await axios.default({
         data: {
           data: {
             notifications,

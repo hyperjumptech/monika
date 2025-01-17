@@ -42,7 +42,7 @@ import {
   sendHttpRequestFetch,
 } from '../../../../utils/http.js'
 import { log } from '../../../../utils/pino.js'
-import axios, { AxiosError } from 'axios'
+import axios from 'axios'
 import { getErrorMessage } from '../../../../utils/catch-error-handler.js'
 
 // Register Handlebars helpers
@@ -127,7 +127,7 @@ export async function httpRequest({
   } catch (error: unknown) {
     const responseTime = Date.now() - startTime
 
-    if (axios.isAxiosError(error)) {
+    if (axios.default.isAxiosError(error)) {
       return handleAxiosError(responseTime, error)
     }
 
@@ -427,7 +427,7 @@ function transformContentByType(
 
 function handleAxiosError(
   responseTime: number,
-  error: AxiosError
+  error: axios.AxiosError
 ): ProbeRequestResponse {
   // The request was made and the server responded with a status code
   // 400, 500 get here
@@ -471,7 +471,7 @@ function handleAxiosError(
 
 // suppress switch-case complexity since this is dead-simple mapping to error code
 // eslint-disable-next-line complexity
-function getErrorStatusWithExplanation(error: AxiosError): {
+function getErrorStatusWithExplanation(error: axios.AxiosError): {
   status: number
   description: string
 } {
@@ -646,7 +646,7 @@ function getErrorStatusWithExplanation(error: AxiosError): {
     }
 
     default: {
-      if (axios.isAxiosError(error)) {
+      if (axios.default.isAxiosError(error)) {
         log.error(
           `Error code 99: Unhandled error while probing ${error.request.url}, got ${error.code} ${error.stack} `
         )
