@@ -146,6 +146,7 @@
     "chai": "^4.3.4",
     "chai-spies": "^1.0.0",
     "cross-env": "^7.0.3",
+    "esbuild": "^0.24.2",
     "eslint": "^8.51.0",
     "eslint-config-oclif": "^5.1.1",
     "eslint-config-oclif-typescript": "^3.1.3",
