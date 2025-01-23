@@ -192,9 +192,12 @@ export default class Monika extends Command {
           break
         }
 
-        sendMonikaStartMessage(notifications).catch((error) =>
-          log.error(error.message)
-        )
+        if (flags['skip-start-message'] === false) {
+          // if skipping, skip also startup notification
+          sendMonikaStartMessage(notifications).catch((error) =>
+            log.error(error.message)
+          )
+        }
 
         // schedule status update notification
         scheduleSummaryNotification({ config, flags })

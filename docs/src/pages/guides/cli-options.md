@@ -309,10 +309,10 @@ monika --follow-redirects 0 # disable following redirects
 
 ## SKIP
 
-For applications where a startup message is not desired, you can skip monika startup message using `--skip-startup-message`.
+For applications where a startup message or startup notification is not desired, you can skip monika startup message using `--skip-start-message`.
 
 ```bash
-monika --skip-startup-message
+monika --skip-start-message
 ```
 
 ## STUN
