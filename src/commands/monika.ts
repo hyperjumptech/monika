@@ -25,7 +25,6 @@
 import { Command, Errors } from '@oclif/core'
 import pEvent from 'p-event'
 import type { ValidatedConfig } from '../interfaces/config'
-import type { Probe } from '../interfaces/probe'
 
 import {
   getValidatedConfig,
@@ -33,7 +32,6 @@ import {
   initConfig,
 } from '../components/config'
 import { createConfig } from '../components/config/create'
-import { sortProbes } from '../components/config/sort'
 import { printAllLogs } from '../components/logger'
 import { flush } from '../components/logger/flush'
 import { closeLog } from '../components/logger/history'
@@ -43,10 +41,10 @@ import { sendMonikaStartMessage } from '../components/notification/start-message
 import { printSummary } from '../components/summary'
 import { getContext, setContext } from '../context'
 import events from '../events'
-import { type MonikaFlags, sanitizeFlags, flags } from '../flag'
+import { sanitizeFlags, flags } from '../flag'
 import { savePidFile } from '../jobs/summary-notification'
 import initLoaders from '../loaders'
-import { sanitizeProbe, startProbing } from '../looper'
+import { startProbing } from '../looper'
 import SymonClient from '../symon'
 import { getEventEmitter } from '../utils/events'
 import { log } from '../utils/pino'
@@ -57,6 +55,7 @@ import {
   close as closeSentry,
   flush as flushSentry,
 } from '@sentry/node'
+import { getProbes } from '../components/config/probe'
 
 const em = getEventEmitter()
 let symonClient: SymonClient
@@ -165,7 +164,7 @@ export default class Monika extends Command {
 
       for (;;) {
         const config = getValidatedConfig()
-        const probes = getProbes({ config, flags })
+        const probes = getProbes()
 
         // emit the sanitized probe
         em.emit(events.config.sanitized, probes)
@@ -236,19 +235,6 @@ async function logRunningInfo({ isVerbose, isSymonMode }: RunningInfoParams) {
   } catch (error) {
     log.warn(`Failed to obtain location/ISP info. Got: ${error}`)
   }
-}
-
-type GetProbesParams = {
-  config: ValidatedConfig
-  flags: MonikaFlags
-}
-
-function getProbes({ config, flags }: GetProbesParams): Probe[] {
-  const sortedProbes = sortProbes(config.probes, flags.id)
-
-  return sortedProbes.map((probe: Probe) =>
-    sanitizeProbe(isSymonModeFrom(flags), probe)
-  )
 }
 
 function deprecationHandler(config: ValidatedConfig): ValidatedConfig {
