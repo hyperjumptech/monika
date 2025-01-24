@@ -144,7 +144,9 @@ export default class Monika extends Command {
       }
 
       await initLoaders(flags, this.config)
-      await logRunningInfo({ isSymonMode, isVerbose: flags.verbose })
+      if (flags['skip-start-message'] === false) {
+        await logRunningInfo({ isSymonMode, isVerbose: flags.verbose })
+      }
 
       if (isSymonMode) {
         symonClient = new SymonClient(flags)
@@ -170,6 +172,7 @@ export default class Monika extends Command {
         // save some data into files for later
         savePidFile(flags.config, config)
         deprecationHandler(config)
+
         logStartupMessage({
           config,
           flags,
@@ -189,9 +192,13 @@ export default class Monika extends Command {
           break
         }
 
-        sendMonikaStartMessage(notifications).catch((error) =>
-          log.error(error.message)
-        )
+        if (flags['skip-start-message'] === false) {
+          // if skipping, skip also startup notification
+          sendMonikaStartMessage(notifications).catch((error) =>
+            log.error(error.message)
+          )
+        }
+
         // schedule status update notification
         scheduleSummaryNotification({ config, flags })
 
