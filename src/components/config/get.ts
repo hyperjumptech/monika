@@ -22,7 +22,6 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { randomUUID } from 'node:crypto'
 import { getContext } from '../../context'
 import type { Config } from '../../interfaces/config'
 import { log } from '../../utils/pino'
@@ -42,10 +41,7 @@ export async function getRawConfig(): Promise<Config> {
     return addDefaultNotifications(config)
   }
 
-  // Add default alerts for Probe not Accessible
-  const finalizedConfig = addDefaultAlerts(config)
-
-  return finalizedConfig
+  return config
 }
 
 // mergeConfigs merges configs by overwriting each other
@@ -84,27 +80,6 @@ async function parseNativeConfig(): Promise<Config[]> {
   return Promise.all(
     flags.config.map((source) => parseByType(source, 'monika'))
   )
-}
-
-export const FAILED_REQUEST_ASSERTION = {
-  assertion: '',
-  message: 'Probe not accessible',
-}
-
-function addDefaultAlerts(config: Config) {
-  return {
-    ...config,
-    probes: config.probes?.map((probe) => ({
-      ...probe,
-      alerts: [
-        ...(probe.alerts || []),
-        {
-          id: randomUUID(),
-          ...FAILED_REQUEST_ASSERTION,
-        },
-      ],
-    })),
-  }
 }
 
 async function parseNonNativeConfig(): Promise<Config | undefined> {
