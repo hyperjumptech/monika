@@ -31,6 +31,7 @@ import { Probe } from '../../interfaces/probe'
 import type { Notification } from '@hyperjumptech/monika-notification'
 import { log } from '../../utils/pino'
 import { getErrorMessage } from '../../utils/catch-error-handler'
+import { getDecompactedProbesById } from '../config/compact-config'
 const sqlite3 = verboseSQLite()
 const dbPath = path.resolve(process.cwd(), 'monika-logs.db')
 
@@ -413,6 +414,30 @@ export async function saveProbeRequestLog({
   alertQueries?: string[]
   error?: string
 }): Promise<void> {
+  if (probe.jointId?.length) {
+    const probes =
+      (probe.jointId
+        ?.map((id) => getDecompactedProbesById(id))
+        ?.filter(Boolean) as Probe[]) || []
+
+    await Promise.allSettled(
+      probes.map((originalProbe) =>
+        saveProbeRequestLog({
+          probe: originalProbe,
+          requestIndex,
+          probeRes,
+          alertQueries:
+            (originalProbe.alerts
+              ?.map((alert) => alert.query)
+              .filter(Boolean) as string[]) || [],
+          error: errorResp,
+        })
+      )
+    )
+
+    return
+  }
+
   const insertProbeRequestSQL = `
     INSERT INTO probe_requests (
         created_at,
