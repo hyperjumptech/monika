@@ -259,6 +259,8 @@ Monika exposes [Prometheus default metrics](https://prometheus.io/docs/instrumen
 | `monika_notifications_triggered`       | Counter   | Indicates the count of notifications triggered                        | `type`, `status`                                      |
 | `monika_notifications_triggered_total` | Counter   | Indicates the cumulative count of notifications triggered             | -                                                     |
 
+Aside from the above metrics, Monika also exposes [Prometheus default metrics](https://prometheus.io/docs/instrumenting/writing_clientlibs/#standard-and-runtime-collectors) and [Node.js specific metrics](https://github.com/siimon/prom-client/tree/master/lib/metrics)
+
 ## Repeat
 
 By default monika will continuously loop through all your probes in the configuration. To loop for a specific number of repeats use the `-r` or `--repeat` flags followed by a number. For example to repeat only 3 times type the command below:
