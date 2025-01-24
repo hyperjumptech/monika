@@ -308,3 +308,98 @@ describe('Setup Config', () => {
     ).not.undefined
   })
 })
+
+describe('sanitizeConfig', () => {
+  beforeEach(() => {
+    resetContext()
+  })
+
+  it('should sanitize probes in normal mode', () => {
+    // arrange
+    const config = {
+      probes: [
+        {
+          id: '1',
+          name: 'Test probe',
+          interval: 1000,
+          requests: [
+            {
+              url: 'https://example.com',
+              body: '',
+              followRedirects: 21,
+              timeout: 1000,
+            },
+          ],
+          alerts: [],
+        },
+      ],
+    }
+
+    // act
+    const result = sanitizeConfig(config)
+
+    // assert
+    expect(result.probes[0].alerts).to.have.lengthOf(1)
+    expect(result.probes[0].alerts[0]).to.include({
+      assertion: '',
+      message: 'Probe not accessible',
+    })
+  })
+
+  it('should sanitize probes in Symon mode', () => {
+    // arrange
+    setContext({
+      flags: sanitizeFlags({
+        symonKey: 'test-key',
+        symonUrl: 'https://example.com',
+      }),
+    })
+    const config = {
+      probes: [
+        {
+          id: '1',
+          name: 'Test probe',
+          interval: 30_000,
+          requests: [
+            {
+              url: 'https://example.com',
+              body: '',
+              followRedirects: 21,
+              timeout: 1000,
+            },
+          ],
+          alerts: [],
+        },
+      ],
+    }
+
+    // act
+    const result = sanitizeConfig(config)
+
+    // assert
+    expect(result.probes[0].alerts).to.have.lengthOf(0)
+    expect(result.probes[0].id).to.equal('1')
+    expect(result.probes[0].interval).to.equal(30_000)
+  })
+
+  it('should preserve existing config properties', () => {
+    // arrange
+    const config: Config = {
+      version: '1.0.0',
+      notifications: [{ id: 'test-1', type: 'smtp' }],
+      certificate: {
+        domains: ['example.com'],
+        reminder: 15,
+      },
+      probes: [],
+    }
+
+    // act
+    const result = sanitizeConfig(config)
+
+    // assert
+    expect(result.version).to.equal('1.0.0')
+    expect(result.notifications).to.deep.equal([{ id: 'test-1', type: 'smtp' }])
+    expect(result.certificate?.reminder).to.equal(15)
+  })
+})

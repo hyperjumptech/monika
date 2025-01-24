@@ -26,7 +26,6 @@ import { Command, Errors } from '@oclif/core'
 import pEvent from 'p-event'
 
 import type { ValidatedConfig } from '../interfaces/config.js'
-import type { Probe } from '../interfaces/probe.js'
 
 import {
   getValidatedConfig,
@@ -34,7 +33,6 @@ import {
   initConfig,
 } from '../components/config/index.js'
 import { createConfig } from '../components/config/create.js'
-import { sortProbes } from '../components/config/sort.js'
 import { printAllLogs } from '../components/logger/index.js'
 import { flush } from '../components/logger/flush.js'
 import { closeLog } from '../components/logger/history.js'
@@ -44,10 +42,10 @@ import { sendMonikaStartMessage } from '../components/notification/start-message
 import { printSummary } from '../components/summary.js'
 import { getContext, setContext } from '../context/index.js'
 import events from '../events/index.js'
-import { type MonikaFlags, sanitizeFlags, flags } from '../flag.js'
+import { sanitizeFlags, flags } from '../flag.js'
 import { savePidFile } from '../jobs/summary-notification.js'
 import initLoaders from '../loaders/index.js'
-import { sanitizeProbe, startProbing } from '../looper/index.js'
+import { startProbing } from '../looper/index.js'
 import SymonClient from '../symon/index.js'
 import { getEventEmitter } from '../utils/events.js'
 import { log } from '../utils/pino.js'
@@ -58,6 +56,7 @@ import {
   close as closeSentry,
   flush as flushSentry,
 } from '@sentry/node'
+import { getProbes } from '../components/config/probe.js'
 
 const em = getEventEmitter()
 let symonClient: SymonClient
@@ -145,7 +144,9 @@ export default class Monika extends Command {
       }
 
       await initLoaders(flags, this.config)
-      await logRunningInfo({ isSymonMode, isVerbose: flags.verbose })
+      if (flags['skip-start-message'] === false) {
+        await logRunningInfo({ isSymonMode, isVerbose: flags.verbose })
+      }
 
       if (isSymonMode) {
         symonClient = new SymonClient(flags)
@@ -164,13 +165,14 @@ export default class Monika extends Command {
 
       for (;;) {
         const config = getValidatedConfig()
-        const probes = getProbes({ config, flags })
+        const probes = getProbes()
 
         // emit the sanitized probe
         em.emit(events.config.sanitized, probes)
         // save some data into files for later
         savePidFile(flags.config, config)
         deprecationHandler(config)
+
         logStartupMessage({
           config,
           flags,
@@ -190,9 +192,13 @@ export default class Monika extends Command {
           break
         }
 
-        sendMonikaStartMessage(notifications).catch((error) =>
-          log.error(error.message)
-        )
+        if (flags['skip-start-message'] === false) {
+          // if skipping, skip also startup notification
+          sendMonikaStartMessage(notifications).catch((error) =>
+            log.error(error.message)
+          )
+        }
+
         // schedule status update notification
         scheduleSummaryNotification({ config, flags })
 
@@ -230,19 +236,6 @@ async function logRunningInfo({ isVerbose, isSymonMode }: RunningInfoParams) {
   } catch (error) {
     log.warn(`Failed to obtain location/ISP info. Got: ${error}`)
   }
-}
-
-type GetProbesParams = {
-  config: ValidatedConfig
-  flags: MonikaFlags
-}
-
-function getProbes({ config, flags }: GetProbesParams): Probe[] {
-  const sortedProbes = sortProbes(config.probes, flags.id)
-
-  return sortedProbes.map((probe: Probe) =>
-    sanitizeProbe(isSymonModeFrom(flags), probe)
-  )
 }
 
 function deprecationHandler(config: ValidatedConfig): ValidatedConfig {
