@@ -48,6 +48,14 @@ For example, assuming you have a file named `only-notif.yml` whose content `{"no
 monika -c foo-monitoring.yml only-notif.yml
 ```
 
+## Compact probes
+
+Given multiple probes with the identical payload request / socket / db connection configuration, Monika can optionally compact them for you. This aims to do the probing for said identical probes once. With retained alerts configuration.
+
+```bash
+monika -c config-with-identical-probes.yml --compact-probes
+```
+
 ## Auto-update
 
 Monika supports automatic update with `--auto-update major|minor|patch`. Where `major|minor|patch` refers to [semantic versioning (semver) specification](https://semver.org/). By default, the updater will check for a new Monika version every 24 hours.
