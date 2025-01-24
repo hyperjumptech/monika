@@ -521,4 +521,41 @@ describe('Startup message', () => {
       expect(logMessage).include('config file')
     })
   })
+
+  describe('Skip startup test', () => {
+    it('should show startup message', () => {
+      // act
+      logStartupMessage({
+        config: defaultConfig,
+        flags: sanitizeFlags({
+          config: ['./test/testConfigs/simple-1p-1n.yaml'],
+          symonKey: '',
+          symonUrl: '',
+          verbose: false,
+        }),
+        isFirstRun: false,
+      })
+
+      // assert
+      expect(logMessage).include('Using config file:')
+    })
+
+    it('should not startup message', () => {
+      // act
+      logStartupMessage({
+        config: defaultConfig,
+        flags: sanitizeFlags({
+          'skip-start-message': true,
+          config: ['./test/testConfigs/simple-1p-1n.yaml'],
+          symonKey: '',
+          symonUrl: '',
+          verbose: false,
+        }),
+        isFirstRun: false,
+      })
+
+      // assert
+      expect(logMessage).not.include('Using config file:')
+    })
+  })
 })

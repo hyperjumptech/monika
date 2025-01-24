@@ -57,6 +57,7 @@ export type MonikaFlags = {
   retryInitialDelayMs: number
   retryMaxDelayMs: number
   sitemap?: string
+  'skip-start-message'?: boolean
   'status-notification'?: string
   stun: number
   summary: boolean
@@ -98,8 +99,8 @@ export const monikaFlagsDefaultValue: MonikaFlags = {
   repeat: 0,
   retryInitialDelayMs: 2000,
   retryMaxDelayMs: 30_000,
-  // default is 20s interval lookup
-  stun: 20,
+  'skip-start-message': false,
+  stun: 20, // default is 20s interval lookup
   summary: false,
   'symon-api-version': SYMON_API_VERSION.v1,
   symonGetProbesIntervalMs: 60_000,
@@ -243,6 +244,9 @@ export const flags = {
   sitemap: Flags.string({
     description: 'Run Monika using a Sitemap xml file.',
     exclusive: ['har', 'insomnia', 'postman', 'text'],
+  }),
+  'skip-start-message': Flags.boolean({
+    description: 'Skip Monika startup message',
   }),
   'status-notification': Flags.string({
     description: 'Cron syntax for status notification schedule',
