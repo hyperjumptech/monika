@@ -25,7 +25,7 @@
 import { hostname, platform } from 'os'
 import { promisify } from 'util'
 import { format, formatDistanceToNow } from 'date-fns'
-import * as Handlebars from 'handlebars'
+import Handlebars from 'handlebars'
 import getos from 'getos'
 import osName from 'os-name'
 import type { NotificationMessage } from '@hyperjumptech/monika-notification'
