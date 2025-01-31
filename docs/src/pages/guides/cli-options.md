@@ -253,13 +253,21 @@ Then you can scrape the metrics from `http://localhost:3001/metrics`.
 
 Monika exposes [Prometheus default metrics](https://prometheus.io/docs/instrumenting/writing_clientlibs/#standard-and-runtime-collectors), [Node.js specific metrics](https://github.com/siimon/prom-client/tree/master/lib/metrics), and Monika probe metrics below.
 
-| Metric Name                            | Type      | Purpose                                      | Label                                       |
-| -------------------------------------- | --------- | -------------------------------------------- | ------------------------------------------- |
-| `monika_probes_total`                  | Gauge     | Collect total probe                          | -                                           |
-| `monika_request_status_code_info`      | Gauge     | Collect HTTP status code                     | `id`, `name`, `url`, `method`               |
-| `monika_request_response_time_seconds` | Histogram | Collect duration of probe request in seconds | `id`, `name`, `url`, `method`, `statusCode` |
-| `monika_request_response_size_bytes`   | Gauge     | Collect size of response size in bytes       | `id`, `name`, `url`, `method`, `statusCode` |
-| `monika_alert_total`                   | Counter   | Collect total alert triggered                | `id`, `name`, `url`, `method`, `alertQuery` |
+| Metric Name                            | Type      | Purpose                                                                                                                                                                             | Labels                                                |
+| -------------------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| `monika_alerts_triggered`              | Counter   | Indicates the count of incident alerts triggered                                                                                                                                    | `id`, `name`, `url`, `method`, `alertQuery`           |
+| `monika_alerts_triggered_total`        | Counter   | Indicates the cumulative count of incident alerts triggered                                                                                                                         | -                                                     |
+| `monika_probes_running`                | Gauge     | Indicates whether a probe is running (1) or idle (0). Running means the probe is currently sending requests, while idle means the probe is waiting for the next request to be sent. |
+| `monika_probes_running_total`          | Gauge     | Indicates the total count of probes that are currently running. Running means the probe is currently sending requests.                                                              | -                                                     |
+| `monika_probes_status`                 | Gauge     | Indicates whether a probe is healthy (1) or is having an incident (0)                                                                                                               | `id`, `name`, `url`, `method`                         |
+| `monika_probes_total`                  | Gauge     | Total count of all probes configured                                                                                                                                                | -                                                     |
+| `monika_request_response_size_bytes`   | Gauge     | Indicates the size of probe request's response in bytes                                                                                                                             | `id`, `name`, `url`, `method`, `statusCode`, `result` |
+| `monika_request_response_time_seconds` | Histogram | Indicates the duration of the probe request in seconds                                                                                                                              | `id`, `name`, `url`, `method`, `statusCode`, `result` |
+| `monika_request_status_code_info`      | Gauge     | Indicates the HTTP status code of the probe requests' response(s)                                                                                                                   | `id`, `name`, `url`, `method`                         |
+| `monika_notifications_triggered`       | Counter   | Indicates the count of notifications triggered                                                                                                                                      | `type`, `status`                                      |
+| `monika_notifications_triggered_total` | Counter   | Indicates the cumulative count of notifications triggered                                                                                                                           | -                                                     |
+
+Aside from the above metrics, Monika also exposes [Prometheus default metrics](https://prometheus.io/docs/instrumenting/writing_clientlibs/#standard-and-runtime-collectors) and [Node.js specific metrics](https://github.com/siimon/prom-client/tree/master/lib/metrics)
 
 ## Repeat
 
