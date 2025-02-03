@@ -35,16 +35,20 @@ import type { ProbeRequestResponse } from '../../../interfaces/request.js'
 
 type PrometheusCustomCollector = {
   statusCode: Gauge<'id' | 'name' | 'url' | 'method'>
-  probeResult: Gauge<'id' | 'name' | 'url' | 'method'>
-  probeRunningTotal: Gauge<'id'>
   responseTime: Histogram<
     'id' | 'name' | 'url' | 'method' | 'statusCode' | 'result'
   >
   responseSize: Gauge<
     'id' | 'name' | 'url' | 'method' | 'statusCode' | 'result'
   >
-  alertTriggeredTotal: Counter<'id' | 'name' | 'url' | 'method' | 'alertQuery'>
+  alertsTriggered: Counter<'id' | 'name' | 'url' | 'method' | 'alertQuery'>
+  alertsTriggeredTotal: Counter<string>
+  probesStatus: Gauge<'id' | 'name' | 'url' | 'method'>
+  probesRunningTotal: Gauge<'id'>
+  probesRunning: Gauge<string>
   probesTotal: Gauge<string>
+  notificationsTriggered: Counter<'type' | 'status'>
+  notificationsTriggeredTotal: Counter<string>
 }
 
 type ProbeResult = {
@@ -61,99 +65,88 @@ export class PrometheusCollector {
     register.clear()
 
     // register metric collector
-    const statusCode = new Gauge({
-      name: 'monika_request_status_code_info',
-      help: 'HTTP status code',
-      labelNames: ['id', 'name', 'url', 'method'] as const,
-    })
-    const probeResult = new Gauge({
-      name: 'monika_probe_result',
-      help: 'Probe result: -1=unknown, 0=failed, 1=success',
-      labelNames: ['id', 'name', 'url', 'method'] as const,
-    })
-    const responseTime = new Histogram({
-      name: 'monika_request_response_time_seconds',
-      help: 'Duration of probe request in seconds',
-      labelNames: [
-        'id',
-        'name',
-        'url',
-        'method',
-        'statusCode',
-        'result',
-      ] as const,
-    })
-    const responseSize = new Gauge({
-      name: 'monika_request_response_size_bytes',
-      help: 'Size of response size in bytes',
-      labelNames: [
-        'id',
-        'name',
-        'url',
-        'method',
-        'statusCode',
-        'result',
-      ] as const,
-    })
-    const alertTriggeredTotal = new Counter({
-      name: 'monika_alert_total',
-      help: 'Total alert triggered',
+    const alertsTriggered = new Counter({
+      name: 'monika_alerts_triggered',
+      help: 'Indicates the count of alerts triggered',
       labelNames: ['id', 'name', 'url', 'method', 'alertQuery'] as const,
     })
-    const probeRunningTotal = new Gauge({
-      name: 'monika_probe_running_total',
-      help: 'Total of probe running',
+    const alertsTriggeredTotal = new Counter({
+      name: 'monika_alerts_triggered_total',
+      help: 'Indicates the cumulative count of alerts triggered',
+    })
+    const probesRunning = new Gauge({
+      name: 'monika_probes_running',
+      help: 'Indicates whether a a probe is running (1) or idle (0)',
       labelNames: ['id'] as const,
+    })
+    const probesRunningTotal = new Gauge({
+      name: 'monika_probes_running_total',
+      help: 'Indicates the total count of probes that are currently running checks',
+    })
+    const probesStatus = new Gauge({
+      name: 'monika_probes_status',
+      help: 'Indicates whether a probe is healthy (1) or is having an incident (0)',
+      labelNames: ['id', 'name', 'url', 'method'] as const,
     })
     const probesTotal = new Gauge({
       name: 'monika_probes_total',
-      help: 'Total of all probe.js',
+      help: 'Total count of all probes configured',
+    })
+    const responseSize = new Gauge({
+      name: 'monika_request_response_size_bytes',
+      help: "Indicates the size of probe request's response size in bytes",
+      labelNames: [
+        'id',
+        'name',
+        'url',
+        'method',
+        'statusCode',
+        'result',
+      ] as const,
+    })
+    const responseTime = new Histogram({
+      name: 'monika_request_response_time_seconds',
+      help: 'Indicates the duration of the probe request in seconds',
+      labelNames: [
+        'id',
+        'name',
+        'url',
+        'method',
+        'statusCode',
+        'result',
+      ] as const,
+    })
+    const statusCode = new Gauge({
+      name: 'monika_request_status_code_info',
+      help: "Indicates the HTTP status code of the probe requests' response(s)",
+      labelNames: ['id', 'name', 'url', 'method'] as const,
+    })
+    const notificationsTriggered = new Counter({
+      name: 'monika_notifications_triggered',
+      help: 'Indicates the count of notifications triggered',
+      labelNames: ['type', 'status'] as const,
+    })
+    const notificationsTriggeredTotal = new Counter({
+      name: 'monika_notifications_triggered_total',
+      help: 'Indicates the cumulative count of notifications triggered',
     })
 
     // register and collect default Node.js metrics
     collectDefaultMetrics({ register })
 
     prometheusCustomCollector = {
-      statusCode,
-      probeResult,
-      responseTime,
-      responseSize,
-      alertTriggeredTotal,
-      probeRunningTotal,
+      alertsTriggered,
+      alertsTriggeredTotal,
+      probesRunningTotal,
+      probesRunning,
+      probesStatus,
       probesTotal,
+      responseSize,
+      responseTime,
+      statusCode,
+      notificationsTriggered,
+      notificationsTriggeredTotal,
     }
-  }
-
-  collectProbeTotal(total: number): void {
-    if (!prometheusCustomCollector) {
-      throw new Error('Prometheus collector is not registered')
-    }
-
-    prometheusCustomCollector.probesTotal.set(total)
-  }
-
-  decrementProbeRunningTotal(id: string) {
-    if (!prometheusCustomCollector) {
-      throw new Error('Prometheus collector is not registered')
-    }
-
-    prometheusCustomCollector.probeRunningTotal.labels(id).dec()
-  }
-
-  incrementProbeRunningTotal(id: string) {
-    if (!prometheusCustomCollector) {
-      throw new Error('Prometheus collector is not registered')
-    }
-
-    prometheusCustomCollector.probeRunningTotal.labels(id).inc()
-  }
-
-  resetProbeRunningTotal() {
-    if (!prometheusCustomCollector) {
-      throw new Error('Prometheus collector is not registered')
-    }
-
-    prometheusCustomCollector.probeRunningTotal.reset()
   }
 
   collectProbeRequestMetrics(probeResult: ProbeResult): void {
@@ -188,7 +181,6 @@ export class PrometheusCollector {
     }
     const {
       statusCode,
-      probeResult: probeResultCollector,
       responseTime: resposeTimeCollector,
       responseSize,
     } = prometheusCustomCollector
@@ -202,16 +194,44 @@ export class PrometheusCollector {
         method: method ?? 'GET',
       })
       .set(status)
-    probeResultCollector
-      ?.labels({
-        id,
-        name,
-        url,
-        method: method ?? 'GET',
-      })
-      .set(result)
     resposeTimeCollector?.labels(labels).observe(responseTimeInSecond)
     responseSize?.labels(labels).set(responseSizeBytes || 0)
+  }
+
+  collectProbeStatus(
+    probeResult: { status: 'up' | 'down' } & Omit<ProbeResult, 'response'>
+  ): void {
+    if (!prometheusCustomCollector) {
+      throw new Error('Prometheus collector is not registered')
+    }
+
+    const { probe, requestIndex, status } = probeResult
+    const { id, name, requests } = probe
+
+    if (!requests || requests.length === 0) {
+      return
+    }
+
+    const request = requests[requestIndex]
+    const { method, url } = request
+    const labels = {
+      id,
+      name,
+      url,
+      method: method ?? 'GET',
+    }
+    const { probesStatus } = prometheusCustomCollector
+
+    // collect metrics
+    probesStatus?.labels(labels).set(status === 'up' ? 1 : 0)
+  }
+
+  collectProbeTotal(total: number): void {
+    if (!prometheusCustomCollector) {
+      throw new Error('Prometheus collector is not registered')
+    }
+
+    prometheusCustomCollector.probesTotal.set(total)
   }
 
   collectTriggeredAlert(
@@ -235,11 +255,58 @@ export class PrometheusCollector {
       name,
       url,
       method: method ?? 'GET',
-      alertQuery,
+      alertQuery: JSON.stringify(alertQuery),
     }
-    const { alertTriggeredTotal } = prometheusCustomCollector
+    const { alertsTriggered, alertsTriggeredTotal } = prometheusCustomCollector
 
     // collect metrics
-    alertTriggeredTotal?.labels(labels).inc()
+    alertsTriggered?.labels(labels).inc()
+    alertsTriggeredTotal?.inc()
+  }
+
+  decrementProbeRunningTotal(id: string) {
+    if (!prometheusCustomCollector) {
+      throw new Error('Prometheus collector is not registered')
+    }
+
+    prometheusCustomCollector.probesRunning.labels(id).dec()
+    prometheusCustomCollector.probesRunningTotal.dec()
+  }
+
+  incrementProbeRunningTotal(id: string) {
+    if (!prometheusCustomCollector) {
+      throw new Error('Prometheus collector is not registered')
+    }
+
+    prometheusCustomCollector.probesRunning.labels(id).inc()
+    prometheusCustomCollector.probesRunningTotal.inc()
+  }
+
+  resetProbeRunningTotal() {
+    if (!prometheusCustomCollector) {
+      throw new Error('Prometheus collector is not registered')
+    }
+
+    prometheusCustomCollector.probesRunning.reset()
+    prometheusCustomCollector.probesRunningTotal.reset()
+  }
+
+  collectNotificationSentMetrics({
+    type,
+    status,
+  }: {
+    type: string
+    status: 'success' | 'failed'
+  }) {
+    if (!prometheusCustomCollector) {
+      throw new Error('Prometheus collector is not registered')
+    }
+
+    const { notificationsTriggered, notificationsTriggeredTotal } =
+      prometheusCustomCollector
+
+    // collect metrics
+    notificationsTriggered.labels({ type, status }).inc()
+    notificationsTriggeredTotal.inc()
   }
 }

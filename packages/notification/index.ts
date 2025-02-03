@@ -34,29 +34,33 @@ async function sendNotifications(
   notifications: Notification[],
   message: NotificationMessage,
   sender?: InputSender
-): Promise<void> {
+): Promise<{ type: string; success: boolean }[]> {
   if (sender) {
     updateSender(sender)
   }
 
-  await Promise.all(
+  // Map notifications to an array of results
+  const results = await Promise.all(
     notifications.map(async ({ data, type }) => {
       const channel = channels[type]
-
       try {
         if (!channel) {
           throw new Error('Notification channel is not available')
         }
 
         await channel.send(data, message)
+        return { type, success: true }
       } catch (error: unknown) {
-        const message = getErrorMessage(error)
-        throw new Error(
-          `Failed to send message using ${type}, please check your ${type} notification config.\nMessage: ${message}`
+        const errorMessage = getErrorMessage(error)
+        console.error(
+          `Failed to send message using ${type}, please check your ${type} notification config.\nMessage: ${errorMessage}`
         )
+        return { type, success: false }
       }
     })
   )
+
+  return results
 }
 
 export { sendNotifications }

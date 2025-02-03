@@ -137,6 +137,7 @@ export abstract class BaseProber implements Prober {
 
       // this probe is definitely in incident state because of fail assertion, so send notification, etc.
       this.handleFailedProbe(probeResults)
+
       return
     }
 
@@ -150,6 +151,11 @@ export abstract class BaseProber implements Prober {
         probe: this.probeConfig,
         requestIndex: index,
         response: requestResponse,
+      })
+      getEventEmitter().emit(events.probe.status.changed, {
+        probe: this.probeConfig,
+        requestIndex: index,
+        status: 'up',
       })
       logResponseTime(requestResponse.responseTime)
 

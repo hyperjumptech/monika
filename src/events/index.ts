@@ -34,6 +34,9 @@ export default {
     sanitized: 'CONFIG_SANITIZED',
     updated: 'CONFIG_UPDATED',
   },
+  notifications: {
+    sent: 'NOTIFICATIONS_SENT',
+  },
   probe: {
     alert: {
       triggered: 'PROBE_ALERT_TRIGGERED',
@@ -45,6 +48,9 @@ export default {
     finished: 'PROBE_FINISHED',
     notification: {
       willSend: 'PROBE_NOTIFICATION_WILL_SEND',
+    },
+    status: {
+      changed: 'PROBE_STATUS_CHANGED',
     },
   },
 }

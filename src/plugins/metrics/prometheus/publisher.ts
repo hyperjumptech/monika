@@ -45,7 +45,10 @@ export function startPrometheusMetricsServer(port: number): void {
     try {
       const prometheusMetrics = await register.metrics()
 
-      res.status(200).end(prometheusMetrics)
+      res
+        .status(200)
+        .header('Content-Type', register.contentType)
+        .end(prometheusMetrics)
     } catch (error: unknown) {
       res.status(500).json({ message: getErrorMessage(error) })
     }
