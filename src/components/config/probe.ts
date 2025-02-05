@@ -1,4 +1,4 @@
-import type { Probe } from '../../interfaces/probe'
+import type { Probe } from '../../interfaces/probe.js'
 
 const probes: Map<string, Probe> = new Map()
 

@@ -3,10 +3,10 @@ import type {
   Certificate,
   Config,
   ValidatedConfig,
-} from '../../interfaces/config'
-import { sanitizeProbe } from '../../looper'
-import { isSymonModeFrom } from '.'
-import { getContext } from '../../context'
+} from '../../interfaces/config.js'
+import { sanitizeProbe } from '../../looper/index.js'
+import { isSymonModeFrom } from './index.js'
+import { getContext } from '../../context/index.js'
 
 const DEFAULT_TLS_EXPIRY_REMINDER_DAYS = 30
 const DEFAULT_STATUS_NOTIFICATION = '0 6 * * *'

@@ -25,11 +25,11 @@
 import { init, setTags } from '@sentry/node'
 import stun from 'stun'
 import { nodeProfilingIntegration } from '@sentry/profiling-node'
-import { sendPing } from '../../utils/ping'
-import { sendHttpRequest } from '../../utils/http'
+import { sendPing } from '../../utils/ping.js'
+import { sendHttpRequest } from '../../utils/http.js'
 import { hostname } from 'os'
-import getIp from '../../utils/ip'
-import { getContext } from '../../context'
+import getIp from '../../utils/ip.js'
+import { getContext } from '../../context/index.js'
 
 export async function initSentry({
   dsn,

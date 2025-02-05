@@ -1,23 +1,48 @@
+/**********************************************************************************
+ * MIT License                                                                    *
+ *                                                                                *
+ * Copyright (c) 2021 Hyperjump Technology                                        *
+ *                                                                                *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy   *
+ * of this software and associated documentation files (the "Software"), to deal  *
+ * in the Software without restriction, including without limitation the rights   *
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell      *
+ * copies of the Software, and to permit persons to whom the Software is          *
+ * furnished to do so, subject to the following conditions:                       *
+ *                                                                                *
+ * The above copyright notice and this permission notice shall be included in all *
+ * copies or substantial portions of the Software.                                *
+ *                                                                                *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR     *
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,       *
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE    *
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER         *
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,  *
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  *
+ * SOFTWARE.                                                                      *
+ **********************************************************************************/
+
 import childProcess from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { rename, readFile, writeFile, rm } from 'node:fs/promises'
 import os from 'node:os'
+import sinon from 'sinon'
+import chai, { expect } from 'chai'
+import sinonChai from 'sinon-chai'
+chai.use(sinonChai)
 
-import { expect } from '@oclif/test'
-import { type SinonStub, stub } from 'sinon'
-
-import { getContext, resetContext, setContext } from '../../context'
-import { getErrorMessage } from '../../utils/catch-error-handler'
-import { createConfig } from './create'
+import { getContext, resetContext, setContext } from '../../context/index.js'
+import { getErrorMessage } from '../../utils/catch-error-handler.js'
+import { createConfig } from './create.js'
 
 describe('Create config', () => {
   describe('Open Monika config generator', () => {
-    let osTypeStub: SinonStub
-    let spawnSyncStub: SinonStub
+    let osTypeStub: sinon.SinonStub
+    let spawnSyncStub: sinon.SinonStub
 
     beforeEach(() => {
-      osTypeStub = stub(os, 'type')
-      spawnSyncStub = stub(childProcess, 'spawnSync')
+      osTypeStub = sinon.stub(os, 'type')
+      spawnSyncStub = sinon.stub(childProcess, 'spawnSync')
     })
 
     afterEach(() => {

@@ -25,8 +25,8 @@
 import express, { Request, Response, NextFunction } from 'express'
 import helmet from 'helmet'
 import { register } from 'prom-client'
-import { log } from '../../../utils/pino'
-import { getErrorMessage } from '../../../utils/catch-error-handler'
+import { log } from '../../../utils/pino.js'
+import { getErrorMessage } from '../../../utils/catch-error-handler.js'
 
 export function startPrometheusMetricsServer(port: number): void {
   const app = express()

@@ -23,8 +23,8 @@
  **********************************************************************************/
 
 import { expect } from 'chai'
-import * as Handlebars from 'handlebars'
-import registerFakes from '../../src/utils/fakes'
+import Handlebars from 'handlebars'
+import registerFakes from '../../src/utils/fakes.js'
 
 describe('Fake data', () => {
   registerFakes(Handlebars)

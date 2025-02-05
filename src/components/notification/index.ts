@@ -22,13 +22,13 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { getEventEmitter } from '../../utils/events'
-import { ValidatedResponse } from '../../plugins/validate-response'
-import getIp from '../../utils/ip'
-import { getMessageForAlert } from './alert-message'
+import { ValidatedResponse } from '../../plugins/validate-response/index.js'
+import getIp from '../../utils/ip.js'
+import { getMessageForAlert } from './alert-message.js'
+import { getEventEmitter } from '../../utils/events.js'
 import { sendNotifications } from '@hyperjumptech/monika-notification'
 import type { Notification } from '@hyperjumptech/monika-notification'
-import events from '../../events'
+import events from '../../events/index.js'
 
 type SendAlertsProps = {
   probeID: string

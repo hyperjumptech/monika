@@ -24,9 +24,9 @@
 
 import { expect } from '@oclif/test'
 
-import { getContext, setContext } from '../../context'
-import type { Probe } from '../../interfaces/probe'
-import { validateProbes } from './validation'
+import { getContext, setContext } from '../../context/index.js'
+import type { Probe } from '../../interfaces/probe.js'
+import { validateProbes } from './validation/index.js'
 
 describe('Configuration validation', () => {
   it('should use default follow redirect from flag', async () => {

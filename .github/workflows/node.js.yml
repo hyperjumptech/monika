@@ -73,8 +73,8 @@ jobs:
       - run: npm ci
       - run: npm run build -w packages/notification
       - run: npm pack
-      - run: npm run pkg -- -t node18-linux-x64
-        name: Pack the binary using vercel/pkg
+      - run: make dist/monika
+        name: Pack the binary
       - run: ./dist/monika -v
         name: Test to make sure printing the version succeeds
       - name: Cancel workflow on failure
