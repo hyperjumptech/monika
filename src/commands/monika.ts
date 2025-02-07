@@ -24,38 +24,39 @@
 
 import { Command, Errors } from '@oclif/core'
 import pEvent from 'p-event'
-import type { ValidatedConfig } from '../interfaces/config'
+
+import type { ValidatedConfig } from '../interfaces/config.js'
 
 import {
   getValidatedConfig,
   isSymonModeFrom,
   initConfig,
-} from '../components/config'
-import { createConfig } from '../components/config/create'
-import { printAllLogs } from '../components/logger'
-import { flush } from '../components/logger/flush'
-import { closeLog } from '../components/logger/history'
-import { logStartupMessage } from '../components/logger/startup-message'
-import { scheduleSummaryNotification } from '../components/notification/schedule-notification'
-import { sendMonikaStartMessage } from '../components/notification/start-message'
-import { printSummary } from '../components/summary'
-import { getContext, setContext } from '../context'
-import events from '../events'
-import { sanitizeFlags, flags } from '../flag'
-import { savePidFile } from '../jobs/summary-notification'
-import initLoaders from '../loaders'
-import { startProbing } from '../looper'
-import SymonClient from '../symon'
-import { getEventEmitter } from '../utils/events'
-import { log } from '../utils/pino'
-import { fetchAndCacheNetworkInfo } from '../utils/public-ip'
-import { initSentry } from '../plugins/sentry'
+} from '../components/config/index.js'
+import { createConfig } from '../components/config/create.js'
+import { printAllLogs } from '../components/logger/index.js'
+import { flush } from '../components/logger/flush.js'
+import { closeLog } from '../components/logger/history.js'
+import { logStartupMessage } from '../components/logger/startup-message.js'
+import { scheduleSummaryNotification } from '../components/notification/schedule-notification.js'
+import { sendMonikaStartMessage } from '../components/notification/start-message.js'
+import { printSummary } from '../components/summary.js'
+import { getContext, setContext } from '../context/index.js'
+import events from '../events/index.js'
+import { sanitizeFlags, flags } from '../flag.js'
+import { savePidFile } from '../jobs/summary-notification.js'
+import initLoaders from '../loaders/index.js'
+import { startProbing } from '../looper/index.js'
+import SymonClient from '../symon/index.js'
+import { getEventEmitter } from '../utils/events.js'
+import { log } from '../utils/pino.js'
+import { fetchAndCacheNetworkInfo } from '../utils/public-ip.js'
+import { initSentry } from '../plugins/sentry/index.js'
 import {
   captureException,
   close as closeSentry,
   flush as flushSentry,
 } from '@sentry/node'
-import { getProbes } from '../components/config/probe'
+import { getProbes } from '../components/config/probe.js'
 
 const em = getEventEmitter()
 let symonClient: SymonClient

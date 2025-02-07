@@ -22,7 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { database } from '../../../components/logger/history'
+import { database } from '../../../components/logger/history.js'
 
 type Incident = {
   id: string

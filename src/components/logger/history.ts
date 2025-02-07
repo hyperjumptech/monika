@@ -23,16 +23,18 @@
  **********************************************************************************/
 
 import path from 'path'
-import SQLite3, { verbose as verboseSQLite } from 'sqlite3'
+import { fileURLToPath } from 'url'
+import SQLite3 from 'sqlite3'
 import { open, Database, ISqlite } from 'sqlite'
 
-import { ProbeRequestResponse } from '../../interfaces/request'
-import { Probe } from '../../interfaces/probe'
+import { ProbeRequestResponse } from '../../interfaces/request.js'
+import { Probe } from '../../interfaces/probe.js'
 import type { Notification } from '@hyperjumptech/monika-notification'
-import { log } from '../../utils/pino'
-import { getErrorMessage } from '../../utils/catch-error-handler'
-import { getDecompactedProbesById } from '../config/compact-config'
-const sqlite3 = verboseSQLite()
+import { log } from '../../utils/pino.js'
+import { getErrorMessage } from '../../utils/catch-error-handler.js'
+import { getDecompactedProbesById } from '../config/compact-config.js'
+
+const sqlite3 = SQLite3.verbose()
 const dbPath = path.resolve(process.cwd(), 'monika-logs.db')
 
 type RequestsLog = {
@@ -133,8 +135,10 @@ export function setDatabase(
 }
 
 async function migrate() {
+  const __filename = fileURLToPath(import.meta.url)
+  const __dirname = path.dirname(__filename)
+
   await database().migrate({
-    // eslint-disable-next-line unicorn/prefer-module
     migrationsPath: path.join(__dirname, '../../../db/migrations'),
   })
 }
@@ -594,4 +598,8 @@ export async function getSummary(): Promise<Summary> {
  */
 export async function closeLog(): Promise<void> {
   await db?.close()
+}
+
+export const moduleExports = {
+  flushAllLogs,
 }

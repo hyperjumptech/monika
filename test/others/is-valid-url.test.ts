@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import { expect } from '@oclif/test'
-import { isValidURL } from '../../src/utils/is-valid-url'
+import { isValidURL } from '../../src/utils/is-valid-url.js'
 
 describe('check if URL is valid', () => {
   it('should return true if URL using http protocol', () => {

@@ -22,20 +22,20 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { schedule } from 'node-cron'
-import { tlsChecker } from '../jobs/tls-check'
-import { checkDBSize } from '../jobs/check-database'
-import { getValidatedConfig } from '../components/config'
-import { getErrorMessage } from '../utils/catch-error-handler'
-import { log } from '../utils/pino'
+import cron from 'node-cron'
+import { tlsChecker } from '../jobs/tls-check.js'
+import { checkDBSize } from '../jobs/check-database.js'
+import { getValidatedConfig } from '../components/config/index.js'
+import { getErrorMessage } from '../utils/catch-error-handler.js'
+import { log } from '../utils/pino.js'
 
 export function jobsLoader() {
   // schedule TLS checker every day at 00:00
-  schedule('0 0 * * *', tlsChecker)
+  cron.schedule('0 0 * * *', tlsChecker)
   // schedule database size check
   const config = getValidatedConfig()
   if (config?.db_limit && config?.db_limit.cron_schedule) {
-    schedule(config.db_limit.cron_schedule, () =>
+    cron.schedule(config.db_limit.cron_schedule, () =>
       checkDBSize().catch((error) => log.error(getErrorMessage(error)))
     )
   }

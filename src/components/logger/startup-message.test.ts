@@ -24,11 +24,11 @@
 
 import chai, { expect } from 'chai'
 import spies from 'chai-spies'
-import { sanitizeConfig } from '../config/sanitize'
-import { sanitizeFlags } from '../../flag'
-import type { ValidatedConfig } from '../../interfaces/config'
-import { log } from '../../utils/pino'
-import { logStartupMessage } from './startup-message'
+import { sanitizeConfig } from '../config/sanitize.js'
+import { sanitizeFlags } from '../../flag.js'
+import type { ValidatedConfig } from '../../interfaces/config.js'
+import { log } from '../../utils/pino.js'
+import { logStartupMessage } from './startup-message.js'
 
 chai.use(spies)
 
@@ -56,7 +56,12 @@ const defaultConfig: ValidatedConfig = {
       ],
     },
   ],
-  notifications: [{ id: 'UVIsL', type: 'desktop' }],
+  notifications: [
+    {
+      id: 'UVIsL',
+      type: 'desktop',
+    },
+  ],
   'status-notification': '',
   version: '1',
 }
@@ -378,7 +383,12 @@ describe('Startup message', () => {
         logStartupMessage({
           config: {
             ...defaultConfig,
-            notifications: [{ id: 'UVIsL', type: 'desktop' }],
+            notifications: [
+              {
+                id: 'UVIsL',
+                type: 'desktop',
+              },
+            ],
           },
           flags: sanitizeFlags({
             config: [],

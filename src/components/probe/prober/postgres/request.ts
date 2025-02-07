@@ -22,11 +22,14 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Pool, PoolClient } from 'pg'
-import type { ProbeRequestResponse } from '../../../../interfaces/request'
-import { probeRequestResult } from '../../../../interfaces/request'
+import pg from 'pg'
+import type { PoolClient } from 'pg'
+import type { ProbeRequestResponse } from '../../../../interfaces/request.js'
+import { probeRequestResult } from '../../../../interfaces/request.js'
 import { differenceInMilliseconds } from 'date-fns'
-import { getErrorMessage } from '../../../../utils/catch-error-handler'
+import { getErrorMessage } from '../../../../utils/catch-error-handler.js'
+
+const { Pool } = pg
 
 export type PostgresParam = {
   host: string // Host address of the psql db
@@ -109,4 +112,8 @@ async function sendPsqlRequest(params: PostgresParam): Promise<PostgresResult> {
   }
 
   return result
+}
+
+export const moduleExports = {
+  postgresRequest,
 }
