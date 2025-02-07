@@ -56,7 +56,6 @@
     "version": "oclif readme && git add README.md",
     "format": "prettier --write .",
     "check-format": "prettier --check .",
-    "pkg": "npm run prepack && pkg . --compress brotli",
     "pack-tarballs": "npm run prepack && oclif pack tarballs --targets=linux-x64 --no-xz"
   },
   "dependencies": {
@@ -157,7 +156,6 @@
     "mocha": "^10.3.0",
     "msw": "^2.2.3",
     "oclif": "^4.14.0",
-    "pkg": "^5.8.1",
     "prettier": "2.5.1",
     "sinon": "^9.2.4",
     "sinon-chai": "^3.5.0",
@@ -194,33 +192,6 @@
       "eslint --cache"
     ],
     "*.{ts,js,css,md}": "prettier --write"
-  },
-  "pkg": {
-    "scripts": [
-      "./lib/**/*.js",
-      "./node_modules/thread-stream/lib/worker.js",
-      "./node_modules/pino/lib/worker.js"
-    ],
-    "assets": [
-      "db/migrations/*.sql",
-      "node_modules/sqlite3/lib/binding/**/*"
-    ],
-    "targets": [
-      "node20-linux-x64",
-      "node20-macos-x64",
-      "node20-win-x64"
-    ],
-    "patches": {
-      "./node_modules/thread-stream/lib/worker.js": [
-        "fn = (await realImport(workerData.filename)).default",
-        "fn = realRequire(workerData.filename.replace('file://', ''))"
-      ],
-      "./node_modules/pino/lib/worker.js": [
-        "fn = (await realImport(toLoad)).default",
-        "fn = realRequire(t.target)"
-      ]
-    },
-    "outputPath": "dist"
   },
   "volta": {
     "node": "20.11.0"
