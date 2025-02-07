@@ -46,7 +46,7 @@ describe('probe-state', () => {
     clock.restore()
   })
 
-  describe('Initial probe.js', () => {
+  describe('Initial probe', () => {
     it('should set initial state', () => {
       // arrange
       const probes: Probe[] = [

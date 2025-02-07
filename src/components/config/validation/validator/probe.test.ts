@@ -51,7 +51,7 @@ describe('Probe validation', () => {
       expect(validatedProbes[0].requests?.[0].method).eq('GET')
     })
 
-    it('should set default alerts for HTTP probe.js', async () => {
+    it('should set default alerts for HTTP probe', async () => {
       // arrange
       const probe = {
         id: 'Example',
@@ -144,7 +144,7 @@ describe('Probe validation', () => {
       expect(validatedProbes[0].name).eq('monika_Example')
     })
 
-    it('should set default alerts for non HTTP probe.js', async () => {
+    it('should set default alerts for non HTTP probe', async () => {
       // arrange
       const probe = {
         id: 'Example',

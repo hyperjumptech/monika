@@ -84,7 +84,7 @@ describe('Base Probe processing', () => {
     await closeLog()
   })
 
-  describe('Non HTTP probe.js', () => {
+  describe('Non HTTP probe', () => {
     it('should probe MariaDB', async () => {
       // arrange
       const requestStub = sinon.stub(mariadb, 'createConnection').callsFake(
@@ -132,7 +132,7 @@ describe('Base Probe processing', () => {
       sinon.assert.calledOnce(requestStub)
     })
 
-    it('should send incident notification for MariaDB probe.js', async () => {
+    it('should send incident notification for MariaDB probe', async () => {
       // arrange
       const probe = {
         id: '1c8QrZ',
@@ -190,7 +190,7 @@ describe('Base Probe processing', () => {
       )
     }).timeout(10_000)
 
-    it('should send recovery notification for MariaDB probe.js', async () => {
+    it('should send recovery notification for MariaDB probe', async () => {
       // simulate the incindent first by throwing on first call
       // then simulate recovery on second call
       const requestStub = sinon.stub(mariadb, 'createConnection')

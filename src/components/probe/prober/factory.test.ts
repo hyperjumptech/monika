@@ -116,7 +116,7 @@ describe('Prober factory', () => {
       // arrange
       const probe = {
         id: '1',
-        description: 'MySQL probe.js',
+        description: 'MySQL probe',
         interval: 1,
         mariadb: [
           {
@@ -182,7 +182,7 @@ describe('Prober factory', () => {
       // arrange
       const probe = {
         id: '1',
-        description: 'PostgreSQL probe.js',
+        description: 'PostgreSQL probe',
         interval: 1,
         postgres: [
           {
@@ -237,7 +237,7 @@ describe('Prober factory', () => {
       // arrange
       const probe = {
         id: '1',
-        description: 'Redis probe.js',
+        description: 'Redis probe',
         interval: 1,
         redis: [
           {

@@ -30,7 +30,7 @@ import type { Probe } from '../interfaces/probe.js'
 import { resetContext, setContext } from '../context/index.js'
 import { sanitizeProbe } from './index.js'
 
-describe('Sanitize probe.js', () => {
+describe('Sanitize probe', () => {
   it('should remove alerts on Symon mode', () => {
     // arrange
     setContext({

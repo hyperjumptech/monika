@@ -172,7 +172,7 @@ describe('HTTP Probe processing', () => {
     expect(urlRequestTotal).eq(1)
   })
 
-  it('should run the probe.js', async () => {
+  it('should run the probe', async () => {
     // arrange
     const uniqueProbes: Probe[] = Array.from({ length: 5 }).map((_, index) => ({
       ...probes[0],
