@@ -1,8 +1,8 @@
-![](https://raw.githubusercontent.com/hyperjumptech/monika/main/docs/public/monika.svg)
+# ![Monika Logo](https://raw.githubusercontent.com/hyperjumptech/monika/main/docs/public/monika.svg)
 
 [![Build Status](https://github.com/hyperjumptech/monika/workflows/Node.js%20CI/badge.svg?event=push&branch=main)](https://github.com/hyperjumptech/monika/actions) [![codecov](https://codecov.io/gh/hyperjumptech/monika/branch/main/graph/badge.svg?token=O3WVT7DP6F)](https://codecov.io/gh/hyperjumptech/monika) [![npm-version](https://img.shields.io/npm/v/@hyperjumptech/monika)](https://www.npmjs.com/package/@hyperjumptech/monika) [![npm](https://img.shields.io/npm/dt/@hyperjumptech/monika?label=NPM%20Downloads)](https://www.npmjs.com/package/@hyperjumptech/monika) [![Docker](https://img.shields.io/docker/pulls/hyperjump/monika)](https://hub.docker.com/r/hyperjump/monika)
 
-# About
+## About
 
 Monika is a command line application for synthetic monitoring. The name Monika stands for "**Moni**toring Ber**ka**la", which means "periodic monitoring" in the Indonesian language.
 
@@ -180,7 +180,7 @@ For detailed information, you can click on any of the specific docs below:
 - [Installations](https://monika.hyperjump.tech/quick-start#installation)
 - [How it works](https://hyperjumptech.github.io/monika/guides/probes)
 
-<a href="https://www.producthunt.com/posts/monika-2?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-monika&#0045;2" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=332404&theme=light" alt="Monika - Open&#0032;source&#0032;and&#0032;free&#0032;HTTP&#0032;monitoring&#0032;tool | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
+[![Monika - Open source and free HTTP monitoring tool | Product Hunt](https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=332404&theme=light)](https://www.producthunt.com/posts/monika-2?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-monika-2)
 
 ## License
 
