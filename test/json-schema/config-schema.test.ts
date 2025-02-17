@@ -25,13 +25,13 @@
 import yaml from 'js-yaml'
 import fs from 'fs'
 import { expect } from 'chai'
-import Ajv from 'ajv'
+import { Ajv } from 'ajv'
 
 const ajv = new Ajv()
 const defaultConfig = yaml.load(fs.readFileSync('monika.example.yml', 'utf8'))
-import mySchema from '../../src/monika-config-schema.json'
+const mySchema = fs.readFileSync('src/monika-config-schema.json', 'utf8')
 
-const validate = ajv.compile(mySchema)
+const validate = ajv.compile(JSON.parse(mySchema))
 
 describe('json schema validation tests', () => {
   it('should return all ok for our sample config', () => {

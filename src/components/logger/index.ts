@@ -23,8 +23,8 @@
  **********************************************************************************/
 
 import chalk from 'chalk'
-import { log } from '../../utils/pino'
-import { getAllLogs, openLogfile } from './history'
+import { log } from '../../utils/pino.js'
+import { getAllLogs, openLogfile } from './history.js'
 
 // printAllLogs dumps the content of monika-logs.db onto the screen
 export async function printAllLogs(): Promise<void> {

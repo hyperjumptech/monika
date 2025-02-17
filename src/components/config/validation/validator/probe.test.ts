@@ -24,12 +24,16 @@
 
 import { expect } from '@oclif/test'
 
-import type { Probe } from '../../../../interfaces/probe'
+import type { Probe } from '../../../../interfaces/probe.js'
 
-import { FAILED_REQUEST_ASSERTION } from '../../../../looper'
-import { validateProbes } from './probe'
-import { getContext, resetContext, setContext } from '../../../../context'
-import type { MonikaFlags } from '../../../../flag'
+import { FAILED_REQUEST_ASSERTION } from '../../../../looper/index.js'
+import { validateProbes } from './probe.js'
+import {
+  getContext,
+  resetContext,
+  setContext,
+} from '../../../../context/index.js'
+import type { MonikaFlags } from '../../../../flag.js'
 
 describe('Probe validation', () => {
   describe('Probe sanitization', () => {

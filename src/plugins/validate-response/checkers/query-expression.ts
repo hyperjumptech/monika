@@ -22,8 +22,8 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { compileExpression } from '../../../utils/expression-parser'
-import { ProbeRequestResponse } from '../../../interfaces/request'
+import { compileExpression } from '../../../utils/expression-parser.js'
+import { ProbeRequestResponse } from '../../../interfaces/request.js'
 
 /**
  * queryExpression runs a query against probe results

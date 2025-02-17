@@ -23,14 +23,14 @@
  **********************************************************************************/
 
 import { hostname } from 'node:os'
-import { getValidatedConfig } from '../../components/config'
+import { getValidatedConfig } from '../../components/config/index.js'
 import { sendNotifications } from '@hyperjumptech/monika-notification'
-import { getMessageForTerminate } from '../../components/notification/alert-message'
-import { getContext } from '../../context'
-import events from '../../events'
-import { getEventEmitter } from '../../utils/events'
-import getIp from '../../utils/ip'
-import { log } from '../../utils/pino'
+import { getMessageForTerminate } from '../../components/notification/alert-message.js'
+import { getContext } from '../../context/index.js'
+import events from '../../events/index.js'
+import { getEventEmitter } from '../../utils/events.js'
+import getIp from '../../utils/ip.js'
+import { log } from '../../utils/pino.js'
 
 getEventEmitter().on(events.application.terminated, async () => {
   if (!getContext().isTest) {

@@ -25,14 +25,14 @@
 import { expect } from 'chai'
 import sinon from 'sinon'
 
-import type { Probe } from '../interfaces/probe'
+import type { Probe } from '../interfaces/probe.js'
 import {
   getProbeContext,
   getProbeState,
   initializeProbeStates,
   setProbeFinish,
   setProbeRunning,
-} from './probe-state'
+} from './probe-state.js'
 
 describe('probe-state', () => {
   const timeNow = new Date()

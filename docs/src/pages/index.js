@@ -485,7 +485,7 @@ export default function IndexPage() {
             </div>
             <div className="container11">
               <FeatureCard
-                text="Get Monika using the popular package manager: Homebrew (macOS), Snap (Linux), or Chocolatey (Windows)"
+                text="Get Monika using the popular package manager"
                 title="2. Install"
                 title3="npm i -g @hyperjumptech/monika"
                 image_src="/playground_assets/downloading-400w.png"
