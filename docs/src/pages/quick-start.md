@@ -66,6 +66,6 @@ Congratulations, you have successfully run Monika in your machine!
 
 ## Next Step
 
-Now it's time to [write your own configuration file](https://monika.hyperjump.tech/guides/configuration-file). You can use [VSCode with YAML extension for the auto completion feature](https://medium.com/hyperjump-tech/creating-monika-configuration-from-scratch-using-autocomplete-in-visual-studio-code-d7bc86c1d36a) or you can also use the[ Monika Config Generator web app](https://monika-config.hyperjump.tech/) if you prefer using Graphical User Interface (GUI).
+Now it's time to [write your own configuration file](https://monika.hyperjump.tech/guides/configuration-file). You can use [VSCode with YAML extension for the auto completion feature](https://medium.com/hyperjump-tech/creating-monika-configuration-from-scratch-using-autocomplete-in-visual-studio-code-d7bc86c1d36a) or you can also use the[Monika Config Generator web app](https://monika-config.hyperjump.tech/) if you prefer using Graphical User Interface (GUI).
 
 For advanced configuration such as configuring [notifications](https://monika.hyperjump.tech/guides/notifications), [probes](https://monika.hyperjump.tech/guides/probes), and [alerts](https://monika.hyperjump.tech/guides/alerts), you can find them on the sidebar menu.
