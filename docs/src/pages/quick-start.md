@@ -9,7 +9,7 @@ There are many ways to install Monika. However, currently only x64 architecture 
 
 ## Minimum Requirements
 
-Monika is engineered to be light on resources. Monika has been successfully run on Digital Ocean's smallest droplet with 0.5GB RAM, 1 vCPU and 10GB of HD space as an example. Howver, your RAM requirements may vary and increase with increasing number of probes.
+Monika is designed to be lightweight. It has successfully run on Digital Ocean's smallest droplet (0.5GB RAM, 1 vCPU, and 10GB storage). However, RAM requirements may vary and increase with the number of probes.
 
 ### Windows
 
