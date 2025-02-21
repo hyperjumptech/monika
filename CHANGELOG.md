@@ -19,7 +19,7 @@ Fix: Failed request assertion not found (#1340)
 
 ### Changed
 
-Chore: Ipgrade notification package version (#1346)
+Chore: Upgrade notification package version (#1346)
 Docs: Add doc minimums (#1347)
 
 ## [1.21.2] - 2024-12-13
