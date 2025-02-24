@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.22.0] - 2025-02-24
+
+### Added
+
+Feat: Add capability to compact identical probes (#1337)
+Feat: Skip startup message (#1342)
+Feat: Improve Prometheus Metrics (#1338)
+
+### Fixed
+
+Fix: Failed request assertion not found (#1340)
+
+### Changed
+
+Chore: Upgrade notification package version (#1346)
+Docs: Add doc minimums (#1347)
+
 ## [1.21.2] - 2024-12-13
 
 ### Added
