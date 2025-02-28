@@ -22,10 +22,6 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import type { AxiosRequestHeaders, AxiosResponse } from 'axios'
-import axios from 'axios'
-import http from 'node:http'
-import https from 'node:https'
 import { Agent, type HeadersInit } from 'undici'
 
 type HttpRequestParams = {
@@ -37,68 +33,19 @@ type HttpRequestParams = {
   responseType?: 'stream'
 } & Omit<RequestInit, 'headers'>
 
-// Keep the agents alive to reduce the overhead of DNS queries and creating TCP connection.
-// More information here: https://rakshanshetty.in/nodejs-http-keep-alive/
-const httpAgent = new http.Agent({ keepAlive: true })
-const httpsAgent = new https.Agent({ keepAlive: true })
-const insecureHttpsAgent = new https.Agent({
-  keepAlive: true,
-  rejectUnauthorized: false,
-})
 export const DEFAULT_TIMEOUT = 10_000
-
-// Create an instance of axios here so it will be reused instead of creating a new one all the time.
-const axiosInstance = axios.create()
 
 export async function sendHttpRequest(
   config: HttpRequestParams
-): Promise<AxiosResponse> {
-  const { allowUnauthorizedSsl, body, headers, timeout, ...options } = config
-
-  return axiosInstance.request({
-    ...options,
-    data: body,
-    headers: convertHeadersToAxios(headers),
-    timeout: timeout ?? DEFAULT_TIMEOUT, // Ensure default timeout if not filled.
-    httpAgent,
-    httpsAgent: allowUnauthorizedSsl ? insecureHttpsAgent : httpsAgent,
-  })
-}
-
-function convertHeadersToAxios(headersInit: HeadersInit | undefined) {
-  const headers: AxiosRequestHeaders = {}
-
-  if (headersInit instanceof Headers) {
-    // If headersInit is a Headers object
-    for (const [key, value] of headersInit.entries()) {
-      headers[key] = value
-    }
-
-    return headers
-  }
-
-  if (typeof headersInit === 'object') {
-    // If headersInit is a plain object
-    for (const [key, value] of Object.entries(headersInit)) {
-      headers[key] = value as never
-    }
-
-    return headers
-  }
-
-  return headers
-}
-
-export async function sendHttpRequestFetch(
-  config: HttpRequestParams
 ): Promise<Response> {
-  const { maxRedirects, timeout, url } = config
+  const { maxRedirects = 5, timeout, url } = config
   const controller = new AbortController()
   const { signal } = controller
   const timeoutId = setTimeout(() => {
     controller.abort()
   }, timeout || DEFAULT_TIMEOUT)
   const fetcher = compileFetch(config, signal)
+
   return fetchRedirect(url, maxRedirects, fetcher).then((response) => {
     clearTimeout(timeoutId)
     return response
@@ -130,7 +77,7 @@ function compileFetch(
 // fetchRedirect handles HTTP status code 3xx returned by fetcher
 async function fetchRedirect(
   url: string,
-  maxRedirects: number | undefined,
+  maxRedirects: number,
   fetcher: (url: string) => Promise<Response>
 ) {
   let redirected = 0
@@ -170,7 +117,7 @@ async function fetchRedirect(
 
     // increment redirected value for while loop
     redirected++
-  } while (redirected <= (maxRedirects || 0))
+  } while (redirected <= maxRedirects)
 
   return currentResponse
 }

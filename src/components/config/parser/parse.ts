@@ -68,7 +68,6 @@ export async function parseByType(
   return parseConfigByExt({
     config,
     extension,
-    source,
   })
 }
 
@@ -87,9 +86,12 @@ async function getConfigFileFromUrl(url: string) {
 
 async function fetchConfigFile(url: string) {
   try {
-    const { data } = await sendHttpRequest({ url })
+    const resp = await sendHttpRequest({ url })
+    if (!resp.ok) {
+      throw new Error(`The configuration file in ${url} is unreachable.`)
+    }
 
-    return data
+    return await resp.text()
   } catch {
     throw new Error(`The configuration file in ${url} is unreachable.`)
   }
@@ -98,19 +100,14 @@ async function fetchConfigFile(url: string) {
 type ParseConfigByExtParams = {
   config: string
   extension: string
-  source: string
 }
 
-function parseConfigByExt({
-  config,
-  extension,
-  source,
-}: ParseConfigByExtParams) {
+function parseConfigByExt({ config, extension }: ParseConfigByExtParams) {
   const isYaml = ['.yaml', '.yml'].includes(extension)
 
   if (isYaml) {
     return yml.load(config, { json: true }) as Config
   }
 
-  return isUrl(source) ? config : JSON.parse(config)
+  return JSON.parse(config)
 }

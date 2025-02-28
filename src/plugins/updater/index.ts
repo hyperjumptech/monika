@@ -88,9 +88,12 @@ export async function enableAutoUpdate(
 async function runUpdater(config: IConfig, updateMode: UpdateMode) {
   log.info('Updater: starting')
   const currentVersion = config.version
-  const { data } = await sendHttpRequest({
+  const data = (await sendHttpRequest({
     url: 'https://registry.npmjs.org/@hyperjumptech/monika',
-  })
+  }).then((resp) => resp.json())) as {
+    'dist-tags': { latest: string }
+    time: string
+  }
 
   const latestVersion = data['dist-tags'].latest
   if (latestVersion === currentVersion || config.debug) {
@@ -268,20 +271,19 @@ async function downloadMonika(
   const filename = `monika-v${remoteVersion}-${platformName}-x64`
   const downloadUri = `https://github.com/hyperjumptech/monika/releases/download/v${remoteVersion}/${filename}.zip`
   log.info(`Updater: download from ${downloadUri}`)
-  const { data: downloadStream } = await sendHttpRequest({
+  const { downloadStream } = (await sendHttpRequest({
     url: downloadUri,
     responseType: 'stream',
-  })
+  }).then((resp) => resp.json())) as { downloadStream: Stream }
 
-  const { data: checksum }: { data: string } = await sendHttpRequest({
+  const { checksum } = (await sendHttpRequest({
     url: `https://github.com/hyperjumptech/monika/releases/download/v${remoteVersion}/${filename}-CHECKSUM.txt`,
-  })
+  }).then((resp) => resp.json())) as { checksum: string }
 
   return new Promise((resolve, reject) => {
     const targetPath = `${os.tmpdir()}/${filename}`
     const writer = createWriteStream(targetPath)
-    const stream = downloadStream as Stream
-    stream.pipe(writer)
+    downloadStream.pipe(writer)
     writer.on('error', (err) => {
       writer.close()
       reject(err)

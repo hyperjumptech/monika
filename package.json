@@ -70,7 +70,6 @@
     "@sentry/profiling-node": "^8.41.0",
     "@types/pg": "^8.10.9",
     "ajv": "^8.11.0",
-    "axios": "0.27.2",
     "boxen": "^5.0.0",
     "chalk": "^4.1.2",
     "chokidar": "^3.5.1",

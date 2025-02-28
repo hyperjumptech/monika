@@ -22,7 +22,6 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios, { AxiosInstance } from 'axios'
 import { ExponentialBackoff, handleAll, retry } from 'cockatiel'
 import { EventEmitter } from 'events'
 import mac from 'macaddress'
@@ -47,7 +46,7 @@ import { getContext } from '../context'
 import events from '../events'
 import { SYMON_API_VERSION, type MonikaFlags } from '../flag'
 import { getEventEmitter } from '../utils/events'
-import { DEFAULT_TIMEOUT } from '../utils/http'
+import { DEFAULT_TIMEOUT, sendHttpRequest } from '../utils/http'
 import getIp from '../utils/ip'
 import { log } from '../utils/pino'
 import { removeProbeState, syncProbeStateFrom } from '../utils/probe-state'
@@ -159,7 +158,7 @@ export default class SymonClient {
   private apiKey: string
   private probeChangesInterval: NodeJS.Timeout | undefined
   private probeAssignmentChangesInterval: NodeJS.Timeout | undefined
-  private httpClient: AxiosInstance
+  private baseUrl: string
   private locationId: string
   private monikaId: string
   private isMultiNode: boolean
@@ -183,13 +182,7 @@ export default class SymonClient {
   }: SymonClientParams) {
     this.apiKey = symonKey
     this.url = symonUrl
-    this.httpClient = axios.create({
-      baseURL: `${this.url}/api/${apiVersion}/monika`,
-      headers: {
-        'x-api-key': this.apiKey,
-      },
-      timeout: DEFAULT_TIMEOUT,
-    })
+    this.baseUrl = `${this.url}/api/${apiVersion}/monika`
     this.locationId = symonLocationId
     this.monikaId = symonMonikaId
     this.isMultiNode = apiVersion === SYMON_API_VERSION.v2
@@ -236,13 +229,17 @@ export default class SymonClient {
   }
 
   async sendStatus({ isOnline }: { isOnline: boolean }): Promise<void> {
-    await this.httpClient({
-      data: {
+    await sendHttpRequest({
+      url: `${this.baseUrl}/status`,
+      method: 'POST',
+      body: JSON.stringify({
         monikaId: this.monikaId,
         status: isOnline,
+      }),
+      headers: {
+        'x-api-key': this.apiKey,
       },
-      method: 'POST',
-      url: '/status',
+      timeout: DEFAULT_TIMEOUT,
     })
   }
 
@@ -302,9 +299,10 @@ export default class SymonClient {
     alertId,
   }: NotificationEvent) {
     const { data, headers, responseTime, status, error } = validation.response
-
-    this.httpClient
-      .post('/events', {
+    sendHttpRequest({
+      url: `${this.baseUrl}/events`,
+      method: 'POST',
+      body: JSON.stringify({
         monikaId: this.monikaId,
         alertId,
         event: probeState === 'DOWN' ? 'incident' : 'recovery',
@@ -317,7 +315,12 @@ export default class SymonClient {
           time: responseTime,
           error,
         },
-      })
+      }),
+      headers: {
+        'x-api-key': this.apiKey,
+      },
+      timeout: DEFAULT_TIMEOUT,
+    })
       .then(() => {
         log.info(
           `[Symon] Send ${
@@ -338,7 +341,6 @@ export default class SymonClient {
     // Create a task data object
     const taskData = {
       apiKey: this.apiKey,
-      httpClient: this.httpClient,
       monikaId: this.monikaId,
       probeIds: getProbes().map(({ id }) => id),
       reportProbesLimit: this.reportProbesLimit,
@@ -361,54 +363,45 @@ export default class SymonClient {
   }
 
   private async probeChanges(): Promise<ProbeChange[]> {
-    const response = await this.httpClient.get<{ data: ProbeChange[] }>(
-      `/${this.monikaId}/probe-changes`,
-      {
-        params: { since: this.probeChangesCheckedAt },
-      }
-    )
+    const { data } = (await sendHttpRequest({
+      url: `${this.baseUrl}/${this.monikaId}/probe-changes?since=${this.probeChangesCheckedAt}`,
+      headers: {
+        'x-api-key': this.apiKey,
+      },
+      timeout: DEFAULT_TIMEOUT,
+    }).then((resp) => resp.json())) as { data: ProbeChange[] }
 
-    return response.data.data
+    return data
   }
 
   private async fetchProbes() {
     const TIMEOUT = 30_000
 
-    return this.httpClient
-      .get<{ data: Probe[] }>(`/${this.monikaId}/probes`, {
-        timeout: TIMEOUT,
-        headers: {
-          ...(getContext().config?.version
-            ? { 'If-None-Match': getContext().config?.version }
-            : {}),
-        },
-        validateStatus(status) {
-          return [200, 304].includes(status)
-        },
-      })
-      .then(async (res) => {
-        if (!res.data.data) {
-          return {
-            probes: getProbes(),
-            hash: res.headers.etag,
-          }
+    return sendHttpRequest({
+      url: `${this.baseUrl}/${this.monikaId}/probes`,
+      headers: {
+        'x-api-key': this.apiKey,
+        ...(getContext().config?.version
+          ? { 'If-None-Match': getContext().config?.version }
+          : {}),
+      },
+      timeout: TIMEOUT,
+    }).then(async (res) => {
+      if (![200, 304].includes(res.status)) {
+        throw new Error('Failed to get probes from Symon')
+      }
+
+      const { data } = (await res.json()) as { data: Probe[] }
+      const hash = res.headers.get('etag') || ''
+      if (!data) {
+        return {
+          probes: getProbes(),
+          hash,
         }
+      }
 
-        return { probes: res.data.data, hash: res.headers.etag }
-      })
-      .catch((error) => {
-        if (error.isAxiosError) {
-          if (error.response) {
-            throw new Error(error.response.data.message)
-          }
-
-          if (error.request) {
-            throw new Error('Failed to get probes from Symon')
-          }
-        }
-
-        throw error
-      })
+      return { probes: data, hash }
+    })
   }
 
   private async fetchProbesAndUpdateConfig() {
@@ -440,9 +433,19 @@ export default class SymonClient {
       }
     }
 
-    return this.httpClient
-      .post('/client-handshake', handshakeData)
-      .then((res) => res.data?.data.monikaId)
+    const {
+      data: { monikaId },
+    } = (await sendHttpRequest({
+      url: `${this.baseUrl}/client-handshake`,
+      method: 'POST',
+      body: JSON.stringify(handshakeData),
+      headers: {
+        'x-api-key': this.apiKey,
+      },
+      timeout: DEFAULT_TIMEOUT,
+    }).then((res) => res.json())) as { data: { monikaId: string } }
+
+    return monikaId
   }
 
   private async fetchAndApplyProbeAssignmentChanges(): Promise<void> {
@@ -467,11 +470,17 @@ export default class SymonClient {
     total: number
     updatedAt: Date
   }> {
-    const response = await this.httpClient.get<{
+    const { data } = (await sendHttpRequest({
+      url: `${this.baseUrl}/${this.monikaId}/probe-assignments/total`,
+      headers: {
+        'x-api-key': this.apiKey,
+      },
+      timeout: DEFAULT_TIMEOUT,
+    }).then((res) => res.json())) as {
       data: { total: number; updatedAt: Date }
-    }>(`/${this.monikaId}/probe-assignments/total`)
+    }
 
-    return response.data.data
+    return data
   }
 }
 
