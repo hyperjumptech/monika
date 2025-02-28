@@ -41,6 +41,10 @@ type HttpRequestParams = {
 // More information here: https://rakshanshetty.in/nodejs-http-keep-alive/
 const httpAgent = new http.Agent({ keepAlive: true })
 const httpsAgent = new https.Agent({ keepAlive: true })
+const insecureHttpsAgent = new https.Agent({
+  keepAlive: true,
+  rejectUnauthorized: false,
+})
 export const DEFAULT_TIMEOUT = 10_000
 
 // Create an instance of axios here so it will be reused instead of creating a new one all the time.
@@ -57,9 +61,7 @@ export async function sendHttpRequest(
     headers: convertHeadersToAxios(headers),
     timeout: timeout ?? DEFAULT_TIMEOUT, // Ensure default timeout if not filled.
     httpAgent,
-    httpsAgent: allowUnauthorizedSsl
-      ? new https.Agent({ keepAlive: true, rejectUnauthorized: true })
-      : httpsAgent,
+    httpsAgent: allowUnauthorizedSsl ? insecureHttpsAgent : httpsAgent,
   })
 }
 

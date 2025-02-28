@@ -22,41 +22,63 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import express, { Request, Response, NextFunction } from 'express'
-import helmet from 'helmet'
-import { register } from 'prom-client'
-import { log } from '../../../utils/pino'
-import { getErrorMessage } from '../../../utils/catch-error-handler'
+import { init, setTags } from '@sentry/node'
+import stun from 'stun'
+import { nodeProfilingIntegration } from '@sentry/profiling-node'
+import { sendPing } from '../../utils/ping'
+import { sendHttpRequest } from '../../utils/http'
+import { hostname } from 'os'
+import getIp from '../../utils/ip'
+import { getContext } from '../../context'
 
-export function startPrometheusMetricsServer(port: number): void {
-  const app = express()
-
-  // security middleware
-  app.use(helmet())
-  app.use((req: Request, res: Response, next: NextFunction) => {
-    if (req.method !== 'GET') {
-      return res.status(405).end()
-    }
-
-    next()
+export async function initSentry({
+  dsn,
+  monikaVersion,
+}: {
+  dsn?: string
+  monikaVersion: string
+}): Promise<void> {
+  init({
+    dsn,
+    integrations: [nodeProfilingIntegration()],
+    tracesSampleRate: 1,
   })
 
-  app.get('/metrics', async (_: Request, res: Response) => {
-    try {
-      const prometheusMetrics = await register.metrics()
+  // Get current public IP
+  let publicIp
+  const connection = await sendPing('stun.l.google.com')
+  if (connection.alive) {
+    const response = await stun.request('stun.l.google.com:19302')
+    publicIp = response?.getXorAddress()?.address
+  }
 
-      res
-        .status(200)
-        .header('Content-Type', register.contentType)
-        .end(prometheusMetrics)
-    } catch (error: unknown) {
-      res.status(500).json({ message: getErrorMessage(error) })
-    }
+  const response = await sendHttpRequest({
+    url: `http://ip-api.com/json/${publicIp}`,
   })
+  const { country, city, isp } = response.data
 
-  app.listen(port, () => {
-    log.info(
-      `You can scrape Prometheus metrics from http://localhost:${port}/metrics`
-    )
-  })
+  const tags: {
+    country: string
+    city: string
+    hostname: string
+    isp: string
+    privateIp: string
+    publicIp: string
+    monikaVersion: string
+    symonMonikaId?: string
+  } = {
+    country,
+    city,
+    hostname: hostname(),
+    isp,
+    privateIp: getIp(),
+    publicIp,
+    monikaVersion,
+  }
+
+  if (getContext().flags.symonMonikaId) {
+    tags.symonMonikaId = getContext().flags.symonMonikaId
+  }
+
+  setTags(tags)
 }

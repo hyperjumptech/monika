@@ -25,9 +25,7 @@
 import { Command } from '@oclif/core/command'
 import { ExitError, handle } from '@oclif/core/errors'
 import pEvent from 'p-event'
-
 import type { ValidatedConfig } from '../interfaces/config'
-import type { Probe } from '../interfaces/probe'
 
 import {
   getValidatedConfig,
@@ -35,7 +33,6 @@ import {
   initConfig,
 } from '../components/config'
 import { createConfig } from '../components/config/create'
-import { sortProbes } from '../components/config/sort'
 import { printAllLogs } from '../components/logger'
 import { flush } from '../components/logger/flush'
 import { closeLog } from '../components/logger/history'
@@ -45,14 +42,21 @@ import { sendMonikaStartMessage } from '../components/notification/start-message
 import { printSummary } from '../components/summary'
 import { getContext, setContext } from '../context'
 import events from '../events'
-import { type MonikaFlags, sanitizeFlags, flags } from '../flag'
+import { sanitizeFlags, flags } from '../flag'
 import { savePidFile } from '../jobs/summary-notification'
 import initLoaders from '../loaders'
-import { sanitizeProbe, startProbing } from '../looper'
+import { startProbing } from '../looper'
 import SymonClient from '../symon'
 import { getEventEmitter } from '../utils/events'
 import { log } from '../utils/pino'
 import { fetchAndCacheNetworkInfo } from '../utils/public-ip'
+import { initSentry } from '../plugins/sentry'
+import {
+  captureException,
+  close as closeSentry,
+  flush as flushSentry,
+} from '@sentry/node'
+import { getProbes } from '../components/config/probe'
 
 const em = getEventEmitter()
 let symonClient: SymonClient
@@ -73,6 +77,10 @@ export default class Monika extends Command {
   async catch(error: Error): Promise<unknown> {
     super.catch(error)
 
+    if (getContext().flags.sentryDSN !== undefined) {
+      captureException(error)
+    }
+
     if (symonClient) {
       await symonClient.sendStatus({ isOnline: false })
     }
@@ -89,6 +97,13 @@ export default class Monika extends Command {
     }
 
     throw error
+  }
+
+  async finally(): Promise<void> {
+    if (getContext().flags.sentryDSN !== undefined) {
+      await flushSentry(2000)
+      await closeSentry()
+    }
   }
 
   async run(): Promise<void> {
@@ -129,24 +144,35 @@ export default class Monika extends Command {
       }
 
       await initLoaders(flags, this.config)
-      await logRunningInfo({ isSymonMode, isVerbose: flags.verbose })
+      if (flags['skip-start-message'] === false) {
+        await logRunningInfo({ isSymonMode, isVerbose: flags.verbose })
+      }
 
       if (isSymonMode) {
         symonClient = new SymonClient(flags)
         await symonClient.initiate()
       }
 
+      if (flags.sentryDSN !== undefined) {
+        log.info('Sentry is enabled for error reporting')
+        initSentry({
+          dsn: flags.sentryDSN,
+          monikaVersion: this.config.version,
+        })
+      }
+
       let isFirstRun = true
 
       for (;;) {
         const config = getValidatedConfig()
-        const probes = getProbes({ config, flags })
+        const probes = getProbes()
 
         // emit the sanitized probe
         em.emit(events.config.sanitized, probes)
         // save some data into files for later
         savePidFile(flags.config, config)
         deprecationHandler(config)
+
         logStartupMessage({
           config,
           flags,
@@ -166,9 +192,13 @@ export default class Monika extends Command {
           break
         }
 
-        sendMonikaStartMessage(notifications).catch((error) =>
-          log.error(error.message)
-        )
+        if (flags['skip-start-message'] === false) {
+          // if skipping, skip also startup notification
+          sendMonikaStartMessage(notifications).catch((error) =>
+            log.error(error.message)
+          )
+        }
+
         // schedule status update notification
         scheduleSummaryNotification({ config, flags })
 
@@ -177,6 +207,7 @@ export default class Monika extends Command {
         // block the loop until receives config updated event
         // eslint-disable-next-line no-await-in-loop
         await pEvent(em, events.config.updated)
+
         controller.abort('Monika configuration updated')
       }
     } catch (error: unknown) {
@@ -205,19 +236,6 @@ async function logRunningInfo({ isVerbose, isSymonMode }: RunningInfoParams) {
   } catch (error) {
     log.warn(`Failed to obtain location/ISP info. Got: ${error}`)
   }
-}
-
-type GetProbesParams = {
-  config: ValidatedConfig
-  flags: MonikaFlags
-}
-
-function getProbes({ config, flags }: GetProbesParams): Probe[] {
-  const sortedProbes = sortProbes(config.probes, flags.id)
-
-  return sortedProbes.map((probe: Probe) =>
-    sanitizeProbe(isSymonModeFrom(flags), probe)
-  )
 }
 
 function deprecationHandler(config: ValidatedConfig): ValidatedConfig {
@@ -272,6 +290,8 @@ process.on('SIGINT', async () => {
     await symonClient.sendStatus({ isOnline: false })
     await symonClient.stop()
   }
+
+  await flushSentry(2000)
 
   em.emit(events.application.terminated)
 

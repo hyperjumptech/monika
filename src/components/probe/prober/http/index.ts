@@ -159,6 +159,12 @@ export class HTTPProber extends BaseProber {
         response,
       })
 
+      getEventEmitter().emit(events.probe.status.changed, {
+        probe: this.probeConfig,
+        requestIndex,
+        status: 'up',
+      })
+
       this.logMessage(
         true,
         getProbeResultMessage({
@@ -187,7 +193,12 @@ export class HTTPProber extends BaseProber {
     responses: ProbeRequestResponse[]
   ) {
     return httpRequest({
-      requestConfig: { ...config, signal },
+      requestConfig: {
+        ...config,
+        allowUnauthorized:
+          config.allowUnauthorized ?? getContext().flags.ignoreInvalidTLS,
+        signal,
+      },
       responses,
     })
   }
@@ -221,10 +232,16 @@ export class HTTPProber extends BaseProber {
     }
     const alertId = getAlertID(url, validation, probeID)
 
+    getEventEmitter().emit(events.probe.status.changed, {
+      probe: this.probeConfig,
+      requestIndex,
+      status: 'down',
+    })
+
     getEventEmitter().emit(events.probe.alert.triggered, {
       probe: this.probeConfig,
       requestIndex,
-      alertQuery: '',
+      alertQuery: triggeredAlert,
     })
 
     addIncident({

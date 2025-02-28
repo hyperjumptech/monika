@@ -34,6 +34,7 @@ export enum SYMON_API_VERSION {
 
 export type MonikaFlags = {
   'auto-update'?: string
+  'compact-probes'?: boolean
   config: string[]
   'config-filename': string
   'config-interval': number
@@ -56,9 +57,11 @@ export type MonikaFlags = {
   retryInitialDelayMs: number
   retryMaxDelayMs: number
   sitemap?: string
+  'skip-start-message'?: boolean
   'status-notification'?: string
   stun: number
   summary: boolean
+  sentryDSN?: string
   'symon-api-version': SYMON_API_VERSION
   symonKey?: string
   symonLocationId?: string
@@ -79,6 +82,7 @@ const DEFAULT_CONFIG_INTERVAL_SECONDS = 900
 const DEFAULT_SYMON_REPORT_INTERVAL_MS = 10_000
 
 export const monikaFlagsDefaultValue: MonikaFlags = {
+  'compact-probes': false,
   config: getDefaultConfig(),
   'config-filename': 'monika.yml',
   'config-interval': DEFAULT_CONFIG_INTERVAL_SECONDS,
@@ -95,8 +99,8 @@ export const monikaFlagsDefaultValue: MonikaFlags = {
   repeat: 0,
   retryInitialDelayMs: 2000,
   retryMaxDelayMs: 30_000,
-  // default is 20s interval lookup
-  stun: 20,
+  'skip-start-message': false,
+  stun: 20, // default is 20s interval lookup
   summary: false,
   'symon-api-version': SYMON_API_VERSION.v1,
   symonGetProbesIntervalMs: 60_000,
@@ -124,6 +128,11 @@ export const flags = {
   'auto-update': string({
     description:
       'Enable auto-update for Monika. Available options: major, minor, patch. This will make Monika terminate itself on successful update but does not restart',
+  }),
+  'compact-probes': boolean({
+    default: monikaFlagsDefaultValue['compact-probes'],
+    description:
+      'Compact probes with the same request configuration. This will not merge probes with request chaining.',
   }),
   config: string({
     char: 'c',
@@ -229,9 +238,15 @@ export const flags = {
     default: monikaFlagsDefaultValue.retryMaxDelayMs,
     description: `Maximum backoff retry delay, in milliseconds. Defaults to ${monikaFlagsDefaultValue.retryMaxDelayMs}ms.`,
   }),
+  sentryDSN: string({
+    description: 'DSN for Sentry',
+  }),
   sitemap: string({
     description: 'Run Monika using a Sitemap xml file.',
     exclusive: ['har', 'insomnia', 'postman', 'text'],
+  }),
+  'skip-start-message': boolean({
+    description: 'Skip Monika startup message',
   }),
   'status-notification': string({
     description: 'Cron syntax for status notification schedule',
