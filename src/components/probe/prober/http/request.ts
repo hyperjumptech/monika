@@ -268,7 +268,7 @@ async function probeHttpFetch({
   }
 }): Promise<ProbeRequestResponse> {
   if (getContext().flags.verbose) {
-    log.info(`Probing ${renderedURL} with Node.js fetch`)
+    log.info(`Probing ${renderedURL}`)
   }
 
   const response = await sendHttpRequest({

@@ -22,7 +22,15 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import { rename } from 'fs/promises'
+import { spawn } from 'node:child_process'
+import { pipeline } from 'node:stream/promises'
+import { Readable } from 'node:stream'
+import * as os from 'node:os'
+import { setInterval } from 'node:timers'
+
 import { Config as IConfig } from '@oclif/core'
+import { format } from 'date-fns'
 import {
   createReadStream,
   createWriteStream,
@@ -33,15 +41,12 @@ import {
   mkdirs,
   move,
 } from 'fs-extra'
-import { Stream } from 'stream'
-import * as os from 'os'
-import { setInterval } from 'timers'
-import { log } from '../../utils/pino'
-import { format } from 'date-fns'
-import { spawn } from 'child_process'
-import * as unzipper from 'unzipper'
 import hasha from 'hasha'
+import * as unzipper from 'unzipper'
+
+import { log } from '../../utils/pino'
 import { sendHttpRequest } from '../../utils/http'
+import { open } from 'node:fs/promises'
 
 const DEFAULT_UPDATE_CHECK = 86_400 // 24 hours
 type UpdateMode = 'major' | 'minor' | 'patch'
@@ -78,6 +83,11 @@ export async function enableAutoUpdate(
   throw new TypeError(`Invalid auto-update ${mode}`)
 }
 
+type NpmRegistryResponse = {
+  'dist-tags': { latest: string }
+  time: string
+}
+
 /**
  * runUpdater compares current running version to recent released version from npm
  * @param config oclif config
@@ -90,10 +100,7 @@ async function runUpdater(config: IConfig, updateMode: UpdateMode) {
   const currentVersion = config.version
   const data = (await sendHttpRequest({
     url: 'https://registry.npmjs.org/@hyperjumptech/monika',
-  }).then((resp) => resp.json())) as {
-    'dist-tags': { latest: string }
-    time: string
-  }
+  }).then((resp) => resp.json())) as NpmRegistryResponse
 
   const latestVersion = data['dist-tags'].latest
   if (latestVersion === currentVersion || config.debug) {
@@ -267,48 +274,76 @@ async function downloadMonika(
   config: IConfig,
   remoteVersion: string
 ): Promise<string> {
-  const platformName = getPlatform(config)
-  const filename = `monika-v${remoteVersion}-${platformName}-x64`
-  const downloadUri = `https://github.com/hyperjumptech/monika/releases/download/v${remoteVersion}/${filename}.zip`
-  log.info(`Updater: download from ${downloadUri}`)
-  const { downloadStream } = (await sendHttpRequest({
-    url: downloadUri,
-    responseType: 'stream',
-  }).then((resp) => resp.json())) as { downloadStream: Stream }
+  const filename = `monika-v${remoteVersion}-${getPlatform(config)}-x64`
+  const url = `https://github.com/hyperjumptech/monika/releases/download/v${remoteVersion}/${filename}.zip`
+  const actualChecksum = await getChecksumFromFile({ url })
+  const expectedChecksum = await getChecksumFromText(
+    `https://github.com/hyperjumptech/monika/releases/download/v${remoteVersion}/${filename}-CHECKSUM.txt`
+  )
+  if (actualChecksum !== expectedChecksum) {
+    throw new Error(
+      `Updater: checksum mismatch. Got ${actualChecksum}, expected ${expectedChecksum}.`
+    )
+  }
 
-  const { checksum } = (await sendHttpRequest({
-    url: `https://github.com/hyperjumptech/monika/releases/download/v${remoteVersion}/${filename}-CHECKSUM.txt`,
-  }).then((resp) => resp.json())) as { checksum: string }
+  log.info('Updater: checksum matches')
+  const outputPath = `${os.tmpdir()}/${filename}`
+  await downloadBinary({ outputPath, url })
 
-  return new Promise((resolve, reject) => {
-    const targetPath = `${os.tmpdir()}/${filename}`
-    const writer = createWriteStream(targetPath)
-    downloadStream.pipe(writer)
-    writer.on('error', (err) => {
-      writer.close()
-      reject(err)
-    })
+  return outputPath
+}
 
-    writer.on('close', () => {
-      log.info(`Updater: verifying download`)
-      const hashRemote = checksum.slice(0, checksum.indexOf(' '))
-      const hashTarball = hasha.fromFileSync(targetPath, {
-        algorithm: 'sha256',
-      })
+async function getChecksumFromText(url: string): Promise<string> {
+  const response = await fetch(url)
+  if (!response.ok) {
+    throw new Error(`Failed to fetch checksum: ${response.statusText}`)
+  }
 
-      if (hashRemote !== hashTarball) {
-        reject(
-          new TypeError(
-            `Updater: checksum mismatch. Got ${hashTarball}, expected ${hashRemote}.`
-          )
-        )
-        return
-      }
+  const parseResponse = await response.text()
 
-      log.info(`Updater: checksum matches`)
-      resolve(targetPath)
-    })
+  return parseResponse.split(/\s+/)[0]
+}
+
+type ChecksumFromFileOptions = {
+  url: string
+  algorithm?: string
+}
+
+async function getChecksumFromFile({
+  url,
+  algorithm = 'sha256',
+}: ChecksumFromFileOptions): Promise<string> {
+  const response = await fetch(url)
+  if (!response.body) {
+    throw new Error(`Failed to fetch ${url}: Response body is null`)
+  }
+
+  return hasha.fromStream(Readable.fromWeb(response.body), {
+    algorithm,
   })
+}
+
+type DownloadOptions = { url: string; outputPath: string }
+
+async function downloadBinary({
+  url,
+  outputPath,
+}: DownloadOptions): Promise<void> {
+  const response = await fetch(url)
+  if (!response.body) {
+    throw new Error(`Failed to fetch ${url}: Response body is null`)
+  }
+
+  const tempPath = `${outputPath}.tmp`
+  const writeStream = await open(tempPath, 'w')
+
+  await pipeline(
+    Readable.fromWeb(response.body),
+    writeStream.createWriteStream()
+  )
+  await writeStream.close()
+
+  await rename(tempPath, outputPath)
 }
 
 function installationType(commands: string[]): 'npm' | 'oclif-pack' | 'binary' {

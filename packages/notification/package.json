@@ -1,6 +1,6 @@
 {
   "name": "@hyperjumptech/monika-notification",
-  "version": "1.18.1",
+  "version": "1.18.2",
   "description": "notification package for monika",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -21,27 +21,27 @@
   },
   "homepage": "https://github.com/hyperjumptech/monika#readme",
   "dependencies": {
-    "@sendgrid/mail": "^7.4.2",
-    "axios": "^0.27.2",
-    "chai": "^4.3.4",
-    "chai-as-promised": "^7.1.1",
-    "chai-spies": "^1.0.0",
-    "date-fns": "^2.23.0",
-    "form-data": "^4.0.0",
-    "joi": "^17.4.0",
-    "mailgen": "^2.0.15",
-    "msw": "^2.2.3",
-    "nodemailer": "6.9.4",
-    "pino": "8.14.1",
+    "@sendgrid/mail": "7.7.0",
+    "axios": "0.27.2",
+    "date-fns": "2.30.0",
+    "form-data": "4.0.2",
+    "joi": "17.13.3",
+    "mailgen": "2.0.29",
+    "msw": "2.7.3",
+    "nodemailer": "6.10.0",
+    "pino": "8.21.0",
     "sqlite": "4.2.1",
-    "sqlite3": "5.1.6"
+    "sqlite3": "5.1.7"
   },
   "devDependencies": {
     "@types/chai": "^4.3.5",
     "@types/chai-as-promised": "^7.1.5",
-    "@types/chai-spies": "^1.0.3",
-    "@types/nodemailer": "^6.4.9",
-    "tslib": "^2.6.1",
-    "typescript": "^5.1.6"
+    "@types/chai-spies": "^1.0.6",
+    "@types/nodemailer": "^6.4.17",
+    "chai": "^4.5.0",
+    "chai-as-promised": "^7.1.2",
+    "chai-spies": "^1.1.0",
+    "tslib": "^2.8.1",
+    "typescript": "^5.8.2"
   }
 }

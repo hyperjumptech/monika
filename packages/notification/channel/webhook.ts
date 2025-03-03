@@ -54,6 +54,9 @@ export const send = async (
         alert: alertQuery,
       },
     },
+    headers: {
+      'Content-Type': 'application/json',
+    },
   })
 }
 

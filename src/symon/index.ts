@@ -238,6 +238,7 @@ export default class SymonClient {
       }),
       headers: {
         'x-api-key': this.apiKey,
+        'Content-Type': 'application/json',
       },
       timeout: DEFAULT_TIMEOUT,
     })
@@ -318,6 +319,7 @@ export default class SymonClient {
       }),
       headers: {
         'x-api-key': this.apiKey,
+        'Content-Type': 'application/json',
       },
       timeout: DEFAULT_TIMEOUT,
     })
@@ -388,7 +390,14 @@ export default class SymonClient {
       timeout: TIMEOUT,
     }).then(async (res) => {
       if (![200, 304].includes(res.status)) {
-        throw new Error('Failed to get probes from Symon')
+        const errorText = (
+          (await res
+            .json()
+            .catch(() => ({ message: 'Failed to get probes from Symon' }))) as {
+            message: string
+          }
+        ).message
+        throw new Error(errorText)
       }
 
       const { data } = (await res.json()) as { data: Probe[] }
@@ -441,6 +450,7 @@ export default class SymonClient {
       body: JSON.stringify(handshakeData),
       headers: {
         'x-api-key': this.apiKey,
+        'Content-Type': 'application/json',
       },
       timeout: DEFAULT_TIMEOUT,
     }).then((res) => res.json())) as { data: { monikaId: string } }

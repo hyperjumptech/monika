@@ -45,6 +45,7 @@ export type StatuspageNotification = {
   type: 'statuspage'
   data: StatuspageConfig
 }
+type CreateIncidentResponse = { id: string }
 
 export const slug = 'statuspage'
 export const validator = Joi.object({
@@ -120,8 +121,8 @@ export class AtlassianStatusPageAPI {
       ...this.httpRequestConfig,
       url: `${this.statusPageBaseURL}/v1/pages/${this.pageID}/incidents`,
       body: JSON.stringify(data),
-    }).then((resp) => resp.json())) as { id: string }
-    const incidentID = resp?.id
+    }).then((resp) => resp.json())) as CreateIncidentResponse
+    const incidentID = resp.id
     await insertIncidentToDatabase({ incidentID, probeID, status, url })
 
     return incidentID
