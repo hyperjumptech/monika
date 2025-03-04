@@ -62,8 +62,12 @@ async function createExampleConfigFile() {
     'https://raw.githubusercontent.com/hyperjumptech/monika/main/monika.example.yml'
 
   try {
-    const resp = await sendHttpRequest({ url })
-    await writeFile(outputFilePath, resp.data, { encoding: 'utf8' })
+    const resp = (await sendHttpRequest({ url }).then((resp) =>
+      resp.text()
+    )) as string
+    await writeFile(outputFilePath, resp, {
+      encoding: 'utf8',
+    })
   } catch {
     const ymlConfig = `
     probes:

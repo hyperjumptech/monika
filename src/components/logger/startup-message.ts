@@ -39,12 +39,7 @@ type LogStartupMessage = {
   config: ValidatedConfig
   flags: Pick<
     MonikaFlags,
-    | 'config'
-    | 'symonKey'
-    | 'symonUrl'
-    | 'verbose'
-    | 'native-fetch'
-    | 'skip-start-message'
+    'config' | 'symonKey' | 'symonUrl' | 'verbose' | 'skip-start-message'
   >
   isFirstRun: boolean
 }

@@ -64,12 +64,17 @@ async function pokeStun(): Promise<string> {
   throw new Error('stun inaccessible') // could not connect to STUN server
 }
 
-async function fetchPublicNetworkInfo(): Promise<PublicNetwork> {
+type IpApiResponse = {
+  city: string
+  country: string
+  isp: string
+}
+
+export async function fetchPublicNetworkInfo(): Promise<PublicNetwork> {
   const publicIp = await pokeStun()
-  const response = await sendHttpRequest({
+  const { country, city, isp } = (await sendHttpRequest({
     url: `http://ip-api.com/json/${publicIp}`,
-  })
-  const { country, city, isp } = response.data
+  }).then((resp) => resp.json())) as IpApiResponse
 
   return {
     country,

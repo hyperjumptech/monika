@@ -314,55 +314,6 @@ describe('probingHTTP', () => {
       expect(res.status).to.eq(200)
     })
 
-    it('Should handle HTTP redirect with axios', async () => {
-      // arrange
-      setContext({
-        ...getContext(),
-        flags: {
-          ...getContext().flags,
-          'follow-redirects': 3,
-        },
-      })
-      server.use(
-        http.get(
-          'https://example.com/get',
-          () => new HttpResponse(null, { status: 200 })
-        ),
-        http.get(
-          'https://example.com/redirect/:nredirect',
-          async ({ params }) => {
-            const { nredirect } = params
-            const castRedirect = Number(nredirect)
-            return new HttpResponse(null, {
-              status: 302,
-              headers: [
-                [
-                  'Location',
-                  castRedirect === 1
-                    ? 'https://example.com/get'
-                    : `https://example.com/redirect/${castRedirect - 1}`,
-                ],
-              ],
-            })
-          }
-        )
-      )
-
-      const requestConfig: RequestConfig = {
-        url: 'https://example.com/redirect/3',
-        method: 'GET',
-        body: '',
-        timeout: 10_000,
-        followRedirects: 3,
-      }
-
-      const res = await httpRequest({
-        requestConfig,
-        responses: [],
-      })
-
-      expect(res.status).to.eq(200)
-    })
     it('Should handle HTTP redirect with fetch', async () => {
       // arrange
       server.use(

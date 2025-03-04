@@ -80,6 +80,9 @@ export const send = async (
     method: 'POST',
     url,
     data: content,
+    headers: {
+      'Content-Type': 'application/json',
+    },
   })
 }
 
@@ -95,6 +98,9 @@ export const sendWithCustomContent = async (
     method: 'POST',
     url,
     data: content,
+    headers: {
+      'Content-Type': 'application/json',
+    },
   })
 }
 

@@ -63,7 +63,7 @@ export interface RequestConfig extends Omit<RequestInit, 'headers'> {
   followRedirects: number
   timeout: number // request timeout
   alerts?: ProbeAlert[]
-  headers?: object
+  headers?: Record<string, any>
   ping?: boolean // is this request for a ping?
   allowUnauthorized?: boolean // ignore ssl cert?
 }

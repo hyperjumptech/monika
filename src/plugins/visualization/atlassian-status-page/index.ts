@@ -22,10 +22,8 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios, { AxiosError } from 'axios'
-import http from 'http'
-import https from 'https'
 import Joi from 'joi'
+import { sendHttpRequest } from '../../../utils/http'
 import {
   findIncident,
   insertIncident as insertIncidentToDatabase,
@@ -47,6 +45,7 @@ export type StatuspageNotification = {
   type: 'statuspage'
   data: StatuspageConfig
 }
+type CreateIncidentResponse = { id: string }
 
 export const slug = 'statuspage'
 export const validator = Joi.object({
@@ -63,16 +62,13 @@ export function validateConfig(statusPageConfig: StatuspageConfig): string {
 export class AtlassianStatusPageAPI {
   private statusPageBaseURL = 'https://api.statuspage.io'
   private pageID = ''
-  private axiosConfig = {}
+  private httpRequestConfig = {}
 
   constructor(apiKey: string, pageID: string) {
     this.pageID = pageID
-    this.axiosConfig = {
+    this.httpRequestConfig = {
       // 10 sec timeout
       timeout: 10_000,
-      // keepAlive pools and reuses TCP connections, so it's faster
-      httpAgent: new http.Agent({ keepAlive: true }),
-      httpsAgent: new https.Agent({ keepAlive: true }),
       // follow up to 10 HTTP 3xx redirects
       maxRedirects: 10,
       headers: {
@@ -121,28 +117,15 @@ export class AtlassianStatusPageAPI {
         status,
       },
     }
+    const resp = (await sendHttpRequest({
+      ...this.httpRequestConfig,
+      url: `${this.statusPageBaseURL}/v1/pages/${this.pageID}/incidents`,
+      body: JSON.stringify(data),
+    }).then((resp) => resp.json())) as CreateIncidentResponse
+    const incidentID = resp.id
+    await insertIncidentToDatabase({ incidentID, probeID, status, url })
 
-    try {
-      const resp = await axios.post(
-        `${this.statusPageBaseURL}/v1/pages/${this.pageID}/incidents`,
-        data,
-        this.axiosConfig
-      )
-
-      const incidentID = resp?.data?.id
-      await insertIncidentToDatabase({ incidentID, probeID, status, url })
-
-      return incidentID
-    } catch (error: unknown) {
-      const axiosError = error instanceof AxiosError ? error : new AxiosError()
-      throw new Error(
-        `${axiosError?.message}${
-          axiosError?.response?.data
-            ? `. ${axiosError?.response?.data?.message}`
-            : ''
-        }`
-      )
-    }
+    return incidentID
   }
 
   private async updateIncident({ probeID, url }: Incident): Promise<string> {
@@ -165,23 +148,12 @@ export class AtlassianStatusPageAPI {
     }
 
     const { incident_id: incidentID } = incident
-
-    try {
-      await axios.patch(
-        `${this.statusPageBaseURL}/v1/pages/${this.pageID}/incidents/${incidentID}`,
-        data,
-        this.axiosConfig
-      )
-    } catch (error: unknown) {
-      const axiosError = error instanceof AxiosError ? error : new AxiosError()
-      throw new Error(
-        `${axiosError?.message}${
-          axiosError?.response?.data
-            ? `. ${axiosError?.response?.data?.message}`
-            : ''
-        }`
-      )
-    }
+    await sendHttpRequest({
+      ...this.httpRequestConfig,
+      url: `${this.statusPageBaseURL}/v1/pages/${this.pageID}/incidents/${incidentID}`,
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    })
 
     await updateIncidentToDatabase({ incidentID, status })
 
