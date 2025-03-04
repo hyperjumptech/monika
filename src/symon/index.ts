@@ -366,7 +366,11 @@ export default class SymonClient {
 
   private async probeChanges(): Promise<ProbeChange[]> {
     const { data } = (await sendHttpRequest({
-      url: `${this.baseUrl}/${this.monikaId}/probe-changes?since=${this.probeChangesCheckedAt}`,
+      url: `${this.baseUrl}/${
+        this.monikaId
+      }/probe-changes?since=${encodeURIComponent(
+        this.probeChangesCheckedAt?.toString() || ''
+      )}`,
       headers: {
         'x-api-key': this.apiKey,
       },
@@ -409,12 +413,37 @@ export default class SymonClient {
         }
       }
 
-      return { probes: data, hash }
+      return {
+        probes: data.map((datum) => {
+          if (!datum?.requests) {
+            return datum
+          }
+
+          return {
+            ...datum,
+            requests: datum.requests.map((request) => {
+              if (
+                request?.headers?.['Content-Type'] &&
+                request.headers['Content-Type'] === 'application/json' &&
+                request?.body
+              ) {
+                if (typeof request.body !== 'string') {
+                  return request
+                }
+
+                return { ...request, body: JSON.parse(request.body) }
+              }
+
+              return request
+            }),
+          }
+        }),
+        hash,
+      }
     })
   }
 
   private async fetchProbesAndUpdateConfig() {
-    // Fetch the probes
     const { hash, probes } = await this.fetchProbes()
 
     await updateConfig({ probes, version: hash })

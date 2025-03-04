@@ -248,13 +248,7 @@ function compileBody({
   return { headers: newHeaders, body: newBody }
 }
 
-async function probeHttpFetch({
-  startTime,
-  renderedURL,
-  requestParams,
-  allowUnauthorized,
-  maxRedirects,
-}: {
+type ProbeHttpFetchParameters = {
   startTime: number
   renderedURL: string
   allowUnauthorized: boolean | undefined
@@ -264,24 +258,34 @@ async function probeHttpFetch({
     headers: Headers | undefined
     timeout: number
     body?: BodyInit
-    ping: boolean | undefined
   }
-}): Promise<ProbeRequestResponse> {
+}
+
+async function probeHttpFetch({
+  startTime,
+  renderedURL,
+  requestParams,
+  allowUnauthorized,
+  maxRedirects,
+}: ProbeHttpFetchParameters): Promise<ProbeRequestResponse> {
   if (getContext().flags.verbose) {
     log.info(`Probing ${renderedURL}`)
   }
 
+  const { headers, method, timeout, body } = requestParams
   const response = await sendHttpRequest({
-    ...requestParams,
     allowUnauthorizedSsl: allowUnauthorized,
-    keepalive: true,
-    url: renderedURL,
-    maxRedirects,
-    body: requestParams.body
-      ? typeof requestParams.body === 'string'
-        ? requestParams.body
-        : JSON.stringify(requestParams.body)
+    body: body
+      ? typeof body === 'string'
+        ? body
+        : JSON.stringify(body)
       : undefined,
+    headers,
+    keepalive: true,
+    maxRedirects,
+    method,
+    timeout,
+    url: renderedURL,
   })
 
   const responseTime = Date.now() - startTime

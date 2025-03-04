@@ -22,23 +22,27 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { Agent, type HeadersInit } from 'undici'
+import { Agent } from 'undici'
+import { getContext } from './../context'
 
 type HttpRequestParams = {
   url: string
   maxRedirects?: number
-  headers?: HeadersInit
   timeout?: number
   allowUnauthorizedSsl?: boolean
   responseType?: 'stream'
-} & Omit<RequestInit, 'headers'>
+} & RequestInit
 
 export const DEFAULT_TIMEOUT = 10_000
 
 export async function sendHttpRequest(
   config: HttpRequestParams
 ): Promise<Response> {
-  const { maxRedirects = 5, timeout, url } = config
+  const {
+    maxRedirects = getContext().flags['follow-redirects'],
+    timeout,
+    url,
+  } = config
   const controller = new AbortController()
   const { signal } = controller
   const timeoutId = setTimeout(() => {
@@ -60,7 +64,7 @@ function compileFetch(
 
   return (url) =>
     fetch(url, {
-      body: body === '' ? undefined : body,
+      body,
       redirect: 'manual',
       dispatcher: new Agent({
         connect: {
