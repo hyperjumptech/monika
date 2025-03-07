@@ -39,7 +39,6 @@ export type MonikaFlags = {
   'config-filename': string
   'config-interval': number
   'create-config': boolean
-  'native-fetch': boolean
   flush: boolean
   'follow-redirects': number
   force: boolean
@@ -93,7 +92,6 @@ export const monikaFlagsDefaultValue: MonikaFlags = {
   ignoreInvalidTLS: false,
   'keep-verbose-logs': false,
   logs: false,
-  'native-fetch': false,
   'one-probe': false,
   output: 'monika.yml',
   repeat: 0,
@@ -200,11 +198,6 @@ export const flags = {
     char: 'l', // prints the (l)ogs
     description: 'Print all logs.',
     default: monikaFlagsDefaultValue.logs,
-  }),
-  'native-fetch': Flags.boolean({
-    default: monikaFlagsDefaultValue['native-fetch'],
-    description:
-      'Use native fetch Node.js API instead of Axios for HTTP client',
   }),
   'one-probe': Flags.boolean({
     dependsOn: ['sitemap'],

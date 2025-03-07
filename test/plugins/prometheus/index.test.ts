@@ -44,11 +44,11 @@ describe('Prometheus plugin', () => {
       )
       .it('runs Prometheus metric server', async (ctx) => {
         // act
-        const res = await fetch('http://localhost:4444/metrics')
+        const { status } = await fetch('http://localhost:4444/metrics')
 
         // assert
         expect(ctx.stdout).to.contain('Starting Monika.')
-        expect(res.status).to.equal(200)
+        expect(status).to.equal(200)
       })
   })
 

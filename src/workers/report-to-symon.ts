@@ -22,7 +22,6 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import axios from 'axios'
 import path from 'path'
 import { open } from 'sqlite'
 import pkg from 'sqlite3'
@@ -62,20 +61,19 @@ export default async (stringifiedData: string) => {
     } else {
       // Hit the Symon API for receiving Monika report
       // With the compressed requests and notifications data
-      await axios.default({
-        data: {
+      await fetch(`${url}/api/v1/monika/report`, {
+        body: JSON.stringify({
           data: {
             notifications,
             requests,
           },
           monikaId,
-        },
+        }),
         headers: {
           'Content-Type': 'application/json',
           'x-api-key': apiKey,
         },
         method: 'POST',
-        url: `${url}/api/v1/monika/report`,
       })
 
       log.info(

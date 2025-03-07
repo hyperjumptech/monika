@@ -25,7 +25,6 @@
 import type { Config } from '../../../interfaces/config.js'
 import yml from 'js-yaml'
 import handlebars from 'handlebars'
-import type { AxiosRequestHeaders, Method } from 'axios'
 import Joi from 'joi'
 
 const envValidator = Joi.object({
@@ -145,7 +144,7 @@ function mapInsomniaRequestToConfig(req: unknown) {
   // eslint-disable-next-line camelcase
   const url = handlebars.compile(res.url)({ base_url: baseUrl })
   const authorization = getAuthorizationHeader(res)
-  let headers: AxiosRequestHeaders | undefined
+  let headers: Record<string, any> | undefined
   if (authorization)
     headers = {
       authorization,
@@ -164,7 +163,7 @@ function mapInsomniaRequestToConfig(req: unknown) {
     requests: [
       {
         url,
-        method: (res?.method ?? 'GET') as Method,
+        method: res?.method ?? 'GET',
         body: JSON.parse(res.body?.text ?? '{}'),
         timeout: 10_000,
         headers,
