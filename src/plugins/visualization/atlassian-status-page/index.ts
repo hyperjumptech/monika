@@ -23,12 +23,12 @@
  **********************************************************************************/
 
 import Joi from 'joi'
-import { sendHttpRequest } from '../../../utils/http'
+import { sendHttpRequest } from '../../../utils/http.js'
 import {
   findIncident,
   insertIncident as insertIncidentToDatabase,
   updateIncident as updateIncidentToDatabase,
-} from './database'
+} from './database.js'
 
 type NotifyIncident = {
   probeID: string

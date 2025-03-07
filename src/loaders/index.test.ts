@@ -25,8 +25,8 @@
 import type { Config } from '@oclif/core'
 import { expect } from '@oclif/test'
 
-import { sanitizeFlags } from '../flag'
-import init from '.'
+import { sanitizeFlags } from '../flag.js'
+import init from './index.js'
 
 describe('Loader', () => {
   it('should enable auto update', async () => {

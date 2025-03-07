@@ -22,10 +22,10 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import type { Ping } from '../../../../interfaces/probe'
-import { BaseProber, type ProbeParams, type ProbeResult } from '..'
-import { icmpRequest } from './request'
-import { probeRequestResult } from '../../../../interfaces/request'
+import type { Ping } from '../../../../interfaces/probe.js'
+import { BaseProber, type ProbeParams, type ProbeResult } from '../index.js'
+import { icmpRequest } from './request.js'
+import { probeRequestResult } from '../../../../interfaces/request.js'
 
 export class PingProber extends BaseProber {
   async probe({ incidentRetryAttempt }: ProbeParams): Promise<void> {

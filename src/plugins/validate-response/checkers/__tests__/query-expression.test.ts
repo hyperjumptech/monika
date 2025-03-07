@@ -23,8 +23,8 @@
  **********************************************************************************/
 
 import { expect } from '@oclif/test'
-import queryExpression from '../query-expression'
-import { probeRequestResult } from '../../../../interfaces/request'
+import queryExpression from '../query-expression.js'
+import { probeRequestResult } from '../../../../interfaces/request.js'
 
 describe('queryExpression', () => {
   it('should handle response time query', () => {

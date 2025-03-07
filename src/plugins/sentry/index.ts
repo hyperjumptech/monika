@@ -25,8 +25,8 @@
 import { init, setTags } from '@sentry/node'
 import { nodeProfilingIntegration } from '@sentry/profiling-node'
 
-import { getContext } from '../../context'
-import { fetchPublicNetworkInfo } from '../../utils/public-ip'
+import { getContext } from '../../context/index.js'
+import { fetchPublicNetworkInfo } from '../../utils/public-ip.js'
 
 type InitSentryParameters = {
   dsn?: string

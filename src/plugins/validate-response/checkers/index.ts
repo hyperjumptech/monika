@@ -22,9 +22,9 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import type { ProbeAlert } from '../../../interfaces/probe'
-import type { ProbeRequestResponse } from '../../../interfaces/request'
-import queryExpression from './query-expression'
+import type { ProbeAlert } from '../../../interfaces/probe.js'
+import type { ProbeRequestResponse } from '../../../interfaces/request.js'
+import queryExpression from './query-expression.js'
 
 // responseChecker checks some result and returns boolean if alert requered
 const responseChecker = (

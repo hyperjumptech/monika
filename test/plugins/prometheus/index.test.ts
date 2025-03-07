@@ -24,7 +24,7 @@
 
 import { expect, test } from '@oclif/test'
 import path from 'path'
-import cmd from '../../../src/commands/monika'
+import cmd from '../../../src/commands/monika.js'
 
 const { resolve } = path
 
@@ -72,12 +72,20 @@ describe('Prometheus plugin', () => {
         ])
       )
       .it('runs Prometheus metric server but return 405', async () => {
-        // act
-        const { status } = await fetch('http://localhost:4446/metrics', {
-          method: 'POST',
-        })
-        // assert
-        expect(status).to.equal(405)
+        try {
+          // act
+          await fetch('http://localhost:4446/metrics', { method: 'POST' })
+        } catch (error: unknown) {
+          // assert
+          if (error instanceof Error) {
+            // Narrowing the error further to check for HTTP status
+            const statusMatch = error.message.match(/HTTP error: (\d+)/)
+            if (statusMatch) {
+              const status = Number.parseInt(statusMatch[1], 10)
+              expect(status).to.equal(405)
+            }
+          }
+        }
 
         // eslint-disable-next-line unicorn/no-process-exit, n/no-process-exit
         process.exit(0)

@@ -25,8 +25,8 @@
 import { expect } from 'chai'
 import { type DefaultBodyType, HttpResponse, http } from 'msw'
 import { setupServer } from 'msw/node'
-import type { NotificationMessage } from '../../channel'
-import { send, validator } from '../pagerduty'
+import type { NotificationMessage } from '../../channel/index.js'
+import { send, validator } from '../pagerduty.js'
 
 describe('PagerDuty notification', () => {
   describe('validate configuration', () => {

@@ -7,7 +7,7 @@ This tutorial will show you how to integrate Monika with Ping Method to get your
 
 ## Installing Monika
 
-Install Monika via `npm install -g @hyperjumptech/monika` or if you don’t have NPM in your system, you can [download the prebuilt binary from our release page](https://github.com/hyperjumptech/monika/releases). After installing Monika, run `monika -v` to verify your Monika installation.
+Install Monika via `npm install -g @hyperjumptech/monika`. After installing Monika, run `monika -v` to verify your Monika installation.
 
 ![](https://miro.medium.com/proxy/1*NCa_JT4SdiaDPPdHgIzq2Q.png)
 

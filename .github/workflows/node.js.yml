@@ -62,24 +62,6 @@ jobs:
       - name: Cancel workflow on failure
         if: 'failure()'
         uses: 'andymckay/cancel-action@0.3'
-  prod_test_binary:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js 20.x
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20.x
-      - run: npm ci
-      - run: npm run build -w packages/notification
-      - run: npm pack
-      - run: npm run pkg -- -t node18-linux-x64
-        name: Pack the binary using vercel/pkg
-      - run: ./dist/monika -v
-        name: Test to make sure printing the version succeeds
-      - name: Cancel workflow on failure
-        if: 'failure()'
-        uses: 'andymckay/cancel-action@0.3'
   test:
     runs-on: ubuntu-latest
     steps:

@@ -22,10 +22,10 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { getContext } from '../../context'
-import type { Config } from '../../interfaces/config'
-import { log } from '../../utils/pino'
-import { parseByType } from './parser/parse'
+import { getContext } from '../../context/index.js'
+import type { Config } from '../../interfaces/config.js'
+import { log } from '../../utils/pino.js'
+import { parseByType } from './parser/parse.js'
 
 export async function getRawConfig(): Promise<Config> {
   const nativeConfig = await parseNativeConfig()
@@ -70,7 +70,12 @@ function mergeConfigs(configs: Config[]): Config {
 export function addDefaultNotifications(config: Config): Config {
   return {
     ...config,
-    notifications: [{ id: 'default', type: 'desktop' }],
+    notifications: [
+      {
+        id: 'default',
+        type: 'desktop',
+      },
+    ],
   }
 }
 

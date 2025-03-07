@@ -25,7 +25,7 @@
 import { execSync, spawnSync } from 'child_process'
 import Joi from 'joi'
 import { type as osType } from 'os'
-import type { NotificationMessage } from '.'
+import type { NotificationMessage } from './index.js'
 
 export const validator = Joi.object()
 

@@ -23,8 +23,8 @@
  **********************************************************************************/
 
 import { expect } from 'chai'
-import { compactProbes, getDecompactedProbesById } from './compact-config'
-import type { Probe } from '../../interfaces/probe'
+import { compactProbes, getDecompactedProbesById } from './compact-config.js'
+import type { Probe } from '../../interfaces/probe.js'
 
 describe('Probe Compaction', () => {
   describe('compactProbes', () => {

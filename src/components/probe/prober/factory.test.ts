@@ -23,8 +23,8 @@
  **********************************************************************************/
 
 import { expect } from 'chai'
-import { Probe } from '../../../interfaces/probe'
-import { createProber } from './factory'
+import { Probe } from '../../../interfaces/probe.js'
+import { createProber } from './factory.js'
 
 describe('Prober factory', () => {
   describe('Prober verbose startup message', () => {

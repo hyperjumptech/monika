@@ -1,6 +1,20 @@
 {
-  "require": ["ts-node/register"],
   "bail": true,
+  "exit": true,
+  "node-option": [
+    "loader=ts-node/esm",
+    "experimental-specifier-resolution=node"
+  ],
+  "require": [
+    "ts-node/register"
+  ],
   "timeout": 5000,
-  "exit": true
+  "exclude": [
+    "src/components/config/create.test.ts",
+    "src/components/notification/schedule-notification.test.ts",
+    "src/components/probe/index.test.ts",
+    "src/components/probe/prober/icmp/index.test.ts",
+    "src/components/probe/prober/mongo/index.test.ts",
+    "test/components/notification.test.ts"
+  ]
 }

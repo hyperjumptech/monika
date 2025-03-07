@@ -22,7 +22,7 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import * as Handlebars from 'handlebars'
+import Handlebars from 'handlebars'
 import FormData from 'form-data'
 import Joi from 'joi'
 // eslint-disable-next-line no-restricted-imports
@@ -33,13 +33,13 @@ import {
   type ProbeRequestResponse,
   type RequestConfig,
   probeRequestResult,
-} from '../../../../interfaces/request'
-import { getContext } from '../../../../context'
-import { icmpRequest } from '../icmp/request'
-import registerFakes from '../../../../utils/fakes'
-import { sendHttpRequest } from '../../../../utils/http'
-import { log } from '../../../../utils/pino'
-import { getErrorMessage } from '../../../../utils/catch-error-handler'
+} from '../../../../interfaces/request.js'
+import { getContext } from '../../../../context/index.js'
+import { icmpRequest } from '../icmp/request.js'
+import registerFakes from '../../../../utils/fakes.js'
+import { sendHttpRequest } from '../../../../utils/http.js'
+import { log } from '../../../../utils/pino.js'
+import { getErrorMessage } from '../../../../utils/catch-error-handler.js'
 
 // Register Handlebars helpers
 registerFakes(Handlebars)

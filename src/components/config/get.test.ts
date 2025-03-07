@@ -23,9 +23,9 @@
  **********************************************************************************/
 
 import { expect } from '@oclif/test'
-import { getContext, resetContext, setContext } from '../../context'
-import type { Config } from '../../interfaces/config'
-import { addDefaultNotifications, getRawConfig } from './get'
+import { getContext, resetContext, setContext } from '../../context/index.js'
+import type { Config } from '../../interfaces/config.js'
+import { addDefaultNotifications, getRawConfig } from './get.js'
 
 describe('Add default notification', () => {
   beforeEach(() => {

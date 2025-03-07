@@ -22,8 +22,8 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
+import { getContext } from 'src/context/index.js'
 import { Agent } from 'undici'
-import { getContext } from './../context'
 
 type HttpRequestParams = {
   url: string

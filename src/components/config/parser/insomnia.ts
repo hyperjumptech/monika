@@ -22,9 +22,9 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import type { Config } from '../../../interfaces/config'
+import type { Config } from '../../../interfaces/config.js'
 import yml from 'js-yaml'
-import { compile as compileTemplate } from 'handlebars'
+import handlebars from 'handlebars'
 import Joi from 'joi'
 
 const envValidator = Joi.object({
@@ -142,7 +142,7 @@ function mapInsomniaToConfig(data: unknown): Config {
 function mapInsomniaRequestToConfig(req: unknown) {
   const { value: res } = resourceValidator.validate(req, { allowUnknown: true })
   // eslint-disable-next-line camelcase
-  const url = compileTemplate(res.url)({ base_url: baseUrl })
+  const url = handlebars.compile(res.url)({ base_url: baseUrl })
   const authorization = getAuthorizationHeader(res)
   let headers: Record<string, any> | undefined
   if (authorization)
@@ -187,7 +187,7 @@ function getAuthorizationHeader(data: unknown): string | undefined {
     authTemplate = authTemplate?.replace('_.', '')
     authorization = `${
       res.authentication?.prefix ?? 'bearer'
-    } ${compileTemplate(authTemplate)(environmentVariables ?? {})}`
+    } ${handlebars.compile(authTemplate)(environmentVariables ?? {})}`
   }
 
   return authorization

@@ -26,8 +26,8 @@ import * as nodemailer from 'nodemailer'
 import Mailgen from 'mailgen'
 import Joi from 'joi'
 
-import { getSender } from '../utils/default-sender'
-import type { NotificationMessage } from '.'
+import { getSender } from '../utils/default-sender.js'
+import type { NotificationMessage } from './index.js'
 
 type NotificationData = {
   hostname: string

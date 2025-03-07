@@ -29,9 +29,9 @@ import {
   Histogram,
   Counter,
 } from 'prom-client'
-import type { Probe } from '../../../interfaces/probe'
-import { probeRequestResult } from '../../../interfaces/request'
-import type { ProbeRequestResponse } from '../../../interfaces/request'
+import type { Probe } from '../../../interfaces/probe.js'
+import { probeRequestResult } from '../../../interfaces/request.js'
+import type { ProbeRequestResponse } from '../../../interfaces/request.js'
 
 type PrometheusCustomCollector = {
   statusCode: Gauge<'id' | 'name' | 'url' | 'method'>

@@ -23,9 +23,9 @@
  **********************************************************************************/
 
 import lodash from 'lodash'
-import type { Probe, ProbeAlert } from '../../interfaces/probe'
+import type { Probe, ProbeAlert } from '../../interfaces/probe.js'
 import { randomUUID } from 'node:crypto'
-import { log } from '../../utils/pino'
+import { log } from '../../utils/pino.js'
 
 let decompactedProbes: Probe[] = []
 

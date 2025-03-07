@@ -22,8 +22,8 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { channels, type Notification } from '../channel'
-import { getErrorMessage } from '../utils/catch-error-handler'
+import { channels, type Notification } from '../channel/index.js'
+import { getErrorMessage } from '../utils/catch-error-handler.js'
 
 export const validateNotification = async (
   notifications: Notification[]

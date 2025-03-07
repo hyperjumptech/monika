@@ -23,8 +23,8 @@
  **********************************************************************************/
 
 import { networkInterfaces } from 'os'
-import { getContext } from '../context'
-import { isSymonModeFrom } from '../components/config'
+import { getContext } from '../context/index.js'
+import { isSymonModeFrom } from '../components/config/index.js'
 
 export default function getIp(): string {
   let address = ''

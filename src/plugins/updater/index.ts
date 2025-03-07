@@ -44,8 +44,8 @@ import {
 import hasha from 'hasha'
 import * as unzipper from 'unzipper'
 
-import { log } from '../../utils/pino'
-import { sendHttpRequest } from '../../utils/http'
+import { log } from '../../utils/pino.js'
+import { sendHttpRequest } from '../../utils/http.js'
 import { open } from 'node:fs/promises'
 
 const DEFAULT_UPDATE_CHECK = 86_400 // 24 hours

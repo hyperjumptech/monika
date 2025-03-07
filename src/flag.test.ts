@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import { expect } from '@oclif/test'
-import { monikaFlagsDefaultValue, sanitizeFlags } from './flag'
+import { monikaFlagsDefaultValue, sanitizeFlags } from './flag.js'
 
 describe('Flag', () => {
   it('should fill flags with the default value', () => {
