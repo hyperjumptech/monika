@@ -529,6 +529,18 @@ function handleUndiciError(
     }
   }
 
+  if (error.code === 'CERT_HAS_EXPIRED') {
+    return {
+      data: '',
+      body: '',
+      status: 18,
+      headers: '',
+      responseTime,
+      result: probeRequestResult.failed,
+      error: 'CERT_HAS_EXPIRED',
+    }
+  }
+
   return {
     data: '',
     body: '',
