@@ -22,8 +22,8 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { rename } from 'fs/promises'
 import { spawn } from 'node:child_process'
+import { open, rename } from 'node:fs/promises'
 import { pipeline } from 'node:stream/promises'
 import { Readable } from 'node:stream'
 import * as os from 'node:os'
@@ -31,7 +31,8 @@ import { setInterval } from 'node:timers'
 
 import { Config as IConfig } from '@oclif/core'
 import { format } from 'date-fns'
-import {
+import fsExtra from 'fs-extra'
+const {
   createReadStream,
   createWriteStream,
   readdir,
@@ -40,13 +41,12 @@ import {
   remove,
   mkdirs,
   move,
-} from 'fs-extra'
+} = fsExtra
 import hasha from 'hasha'
 import * as unzipper from 'unzipper'
 
 import { log } from '../../utils/pino.js'
 import { sendHttpRequest } from '../../utils/http.js'
-import { open } from 'node:fs/promises'
 
 const DEFAULT_UPDATE_CHECK = 86_400 // 24 hours
 type UpdateMode = 'major' | 'minor' | 'patch'
