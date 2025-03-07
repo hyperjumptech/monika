@@ -25,7 +25,7 @@
 import axios from 'axios'
 import path from 'path'
 import { open } from 'sqlite'
-import { verbose } from 'sqlite3'
+import pkg from 'sqlite3'
 
 import {
   UnreportedNotificationsLog,
@@ -36,6 +36,7 @@ import {
 } from '../components/logger/history.js'
 import { log } from '../utils/pino.js'
 const dbPath = path.resolve(process.cwd(), 'monika-logs.db')
+const { verbose } = pkg
 
 export default async (stringifiedData: string) => {
   try {

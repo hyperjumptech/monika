@@ -202,8 +202,7 @@ export default class SymonClient {
 
     this.worker = new Piscina.Piscina({
       concurrentTasksPerWorker: 1,
-      // eslint-disable-next-line unicorn/prefer-module
-      filename: path.join(__dirname, '../../lib/workers/report-to-symon'),
+      filename: path.join(__dirname, '../../lib/workers/report-to-symon.js'),
       idleTimeout: this.reportProbesInterval,
       maxQueue: 1,
     })
