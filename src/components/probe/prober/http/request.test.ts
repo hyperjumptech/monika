@@ -26,12 +26,16 @@ import { expect } from '@oclif/test'
 import { HttpResponse, http } from 'msw'
 import { setupServer } from 'msw/node'
 
-import { getContext, resetContext, setContext } from '../../../../context'
+import {
+  getContext,
+  resetContext,
+  setContext,
+} from '../../../../context/index.js'
 import type {
   ProbeRequestResponse,
   RequestConfig,
-} from '../../../../interfaces/request'
-import { generateRequestChainingBody, httpRequest } from './request'
+} from '../../../../interfaces/request.js'
+import { generateRequestChainingBody, httpRequest } from './request.js'
 
 const server = setupServer()
 

@@ -23,33 +23,36 @@
  **********************************************************************************/
 
 import type { Notification } from '@hyperjumptech/monika-notification'
-import { getContext, type Incident } from '../../../context'
-import events from '../../../events'
-import type { Probe, ProbeAlert } from '../../../interfaces/probe'
+import { getContext, type Incident } from '../../../context/index.js'
+import events from '../../../events/index.js'
+import type { Probe, ProbeAlert } from '../../../interfaces/probe.js'
 import {
   probeRequestResult,
   type ProbeRequestResponse,
   type RequestConfig,
-} from '../../../interfaces/request'
-import { FAILED_REQUEST_ASSERTION } from '../../../looper'
-import type { ValidatedResponse } from '../../../plugins/validate-response'
-import { getAlertID } from '../../../utils/alert-id'
-import { getEventEmitter } from '../../../utils/events'
-import { log } from '../../../utils/pino'
-import { isSymonModeFrom } from '../../config'
+} from '../../../interfaces/request.js'
+import { FAILED_REQUEST_ASSERTION } from '../../../looper/index.js'
+import type { ValidatedResponse } from '../../../plugins/validate-response/index.js'
+import { getAlertID } from '../../../utils/alert-id.js'
+import { getEventEmitter } from '../../../utils/events.js'
+import { log } from '../../../utils/pino.js'
+import { isSymonModeFrom } from '../../config/index.js'
 import {
   DEFAULT_INCIDENT_THRESHOLD,
   DEFAULT_RECOVERY_THRESHOLD,
-} from '../../config/validation/validator/default-values'
+} from '../../config/validation/validator/default-values.js'
 import {
   addIncident,
   findIncident,
   getIncidents,
   removeIncident,
-} from '../../incident'
-import { saveNotificationLog, saveProbeRequestLog } from '../../logger/history'
-import { logResponseTime } from '../../logger/response-time-log'
-import { sendAlerts } from '../../notification'
+} from '../../incident/index.js'
+import {
+  saveNotificationLog,
+  saveProbeRequestLog,
+} from '../../logger/history.js'
+import { logResponseTime } from '../../logger/response-time-log.js'
+import { sendAlerts } from '../../notification/index.js'
 
 export type ProbeResult = {
   isAlertTriggered: boolean

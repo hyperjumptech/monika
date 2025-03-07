@@ -22,9 +22,9 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import type { ValidatedResponse } from '../plugins/validate-response'
+import type { ValidatedResponse } from '../plugins/validate-response/index.js'
 
-import { findProbe } from '../components/config/probe'
+import { findProbe } from '../components/config/probe.js'
 
 export function getAlertID(
   url: string,

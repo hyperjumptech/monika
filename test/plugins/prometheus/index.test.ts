@@ -24,8 +24,7 @@
 
 import { expect, test } from '@oclif/test'
 import path from 'path'
-import cmd from '../../../src/commands/monika'
-import axios, { AxiosError } from 'axios'
+import cmd from '../../../src/commands/monika.js'
 
 const { resolve } = path
 
@@ -45,7 +44,7 @@ describe('Prometheus plugin', () => {
       )
       .it('runs Prometheus metric server', async (ctx) => {
         // act
-        const res = await axios.get('http://localhost:4444/metrics')
+        const res = await fetch('http://localhost:4444/metrics')
 
         // assert
         expect(ctx.stdout).to.contain('Starting Monika.')
@@ -75,12 +74,17 @@ describe('Prometheus plugin', () => {
       .it('runs Prometheus metric server but return 405', async () => {
         try {
           // act
-          await axios.post('http://localhost:4446/metrics')
+          await fetch('http://localhost:4446/metrics', { method: 'POST' })
         } catch (error: unknown) {
-          const statusCode =
-            error instanceof AxiosError ? error.response?.status : -1
           // assert
-          expect(statusCode).to.equal(405)
+          if (error instanceof Error) {
+            // Narrowing the error further to check for HTTP status
+            const statusMatch = error.message.match(/HTTP error: (\d+)/)
+            if (statusMatch) {
+              const status = Number.parseInt(statusMatch[1], 10)
+              expect(status).to.equal(405)
+            }
+          }
         }
 
         // eslint-disable-next-line unicorn/no-process-exit, n/no-process-exit

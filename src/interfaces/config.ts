@@ -24,7 +24,7 @@
 
 import type { RequestOptions } from 'node:https'
 import type { Notification } from '@hyperjumptech/monika-notification'
-import type { Probe } from './probe'
+import type { Probe } from './probe.js'
 
 type DomainWithOptions = {
   domain: string

@@ -24,20 +24,20 @@
 
 import { ExponentialBackoff, retry, handleAll } from 'cockatiel'
 import { differenceInSeconds } from 'date-fns'
-import { getContext } from '../../context'
+import { getContext } from '../../context/index.js'
 import type { Notification } from '@hyperjumptech/monika-notification'
-import type { Probe } from '../../interfaces/probe'
+import type { Probe } from '../../interfaces/probe.js'
 import {
   getProbeContext,
   getProbeState,
   setProbeFinish,
   setProbeRunning,
-} from '../../utils/probe-state'
-import { createProbers } from './prober/factory'
+} from '../../utils/probe-state.js'
+import { createProbers } from './prober/factory.js'
 import {
   DEFAULT_INCIDENT_THRESHOLD,
   DEFAULT_RECOVERY_THRESHOLD,
-} from '../config/validation/validator/default-values'
+} from '../config/validation/validator/default-values.js'
 
 type doProbeParams = {
   probe: Probe // probe contains all the probes

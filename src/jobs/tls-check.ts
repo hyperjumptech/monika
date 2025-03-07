@@ -29,18 +29,18 @@ import {
 } from '@hyperjumptech/monika-notification'
 import { format } from 'date-fns'
 
-import { getValidatedConfig } from '../components/config'
-import { saveNotificationLog } from '../components/logger/history'
+import { getValidatedConfig } from '../components/config/index.js'
+import { saveNotificationLog } from '../components/logger/history.js'
 import {
   getMonikaInstance,
   getOSName,
-} from '../components/notification/alert-message'
-import { checkTLS, getHostname } from '../components/tls-checker'
-import { getContext } from '../context'
-import { getErrorMessage } from '../utils/catch-error-handler'
-import getIp from '../utils/ip'
-import { log } from '../utils/pino'
-import { publicIpAddress } from '../utils/public-ip'
+} from '../components/notification/alert-message.js'
+import { checkTLS, getHostname } from '../components/tls-checker/index.js'
+import { getContext } from '../context/index.js'
+import { getErrorMessage } from '../utils/catch-error-handler.js'
+import getIp from '../utils/ip.js'
+import { log } from '../utils/pino.js'
+import { publicIpAddress } from '../utils/public-ip.js'
 
 export function tlsChecker(): void {
   const { certificate, notifications } = getValidatedConfig()

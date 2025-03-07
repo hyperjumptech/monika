@@ -26,19 +26,23 @@ import { expect } from '@oclif/test'
 import { type DefaultBodyType, HttpResponse, http } from 'msw'
 import { setupServer } from 'msw/node'
 
-import type { Config } from '../interfaces/config'
-import type { Probe } from '../interfaces/probe'
+import type { Config } from '../interfaces/config.js'
+import type { Probe } from '../interfaces/probe.js'
 
-import SymonClient from '.'
-import { getContext, resetContext, setContext } from '../context'
-import { deleteProbe, findProbe, getProbes } from '../components/config/probe'
-import { validateProbes } from '../components/config/validation'
-import { addIncident, findIncident } from '../components/incident'
-import events from '../events'
-import { sanitizeFlags } from '../flag'
-import { getEventEmitter } from '../utils/events'
-import { getErrorMessage } from '../utils/catch-error-handler'
-import { getProbeState, initializeProbeStates } from '../utils/probe-state'
+import SymonClient from './index.js'
+import { getContext, resetContext, setContext } from '../context/index.js'
+import {
+  deleteProbe,
+  findProbe,
+  getProbes,
+} from '../components/config/probe.js'
+import { validateProbes } from '../components/config/validation/index.js'
+import { addIncident, findIncident } from '../components/incident/index.js'
+import events from '../events/index.js'
+import { sanitizeFlags } from '../flag.js'
+import { getEventEmitter } from '../utils/events.js'
+import { getErrorMessage } from '../utils/catch-error-handler.js'
+import { getProbeState, initializeProbeStates } from '../utils/probe-state.js'
 
 const config: Config = {
   version: 'f7c35f9f873da44bca433427b4d30fc5',

@@ -26,13 +26,13 @@ import yaml from 'js-yaml'
 import fs from 'fs'
 import path from 'path'
 import { expect } from 'chai'
-import Ajv from 'ajv'
+import { Ajv } from 'ajv'
 
 const ajv = new Ajv()
 
-import mySchema from '../../src/monika-config-schema.json'
+const mySchema = fs.readFileSync('src/monika-config-schema.json', 'utf8')
 
-const validate = ajv.compile(mySchema)
+const validate = ajv.compile(JSON.parse(mySchema))
 
 const getAllFiles = function (dirPath: string, arrayOfFiles: string[]) {
   const files = fs.readdirSync(dirPath)

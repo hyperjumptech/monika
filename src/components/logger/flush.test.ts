@@ -22,23 +22,26 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import { type SinonStub, assert, stub } from 'sinon'
-import { getContext, resetContext, setContext } from '../../context'
-import * as history from './history'
-import { flush } from './flush'
+import sinon from 'sinon'
+import chai, { expect } from 'chai'
+import sinonChai from 'sinon-chai'
+chai.use(sinonChai)
+import { getContext, resetContext, setContext } from '../../context/index.js'
+import { moduleExports } from './history.js'
+import { flush } from './flush.js'
 
-let flushAllLogsStub: SinonStub
-
-beforeEach(() => {
-  flushAllLogsStub = stub(history, 'flushAllLogs').resolves()
-})
-
-afterEach(() => {
-  flushAllLogsStub.restore()
-})
+let flushAllLogsStub: sinon.SinonStub
 
 describe('Flush command', () => {
   describe('Force', () => {
+    beforeEach(() => {
+      flushAllLogsStub = sinon.stub(moduleExports, 'flushAllLogs').resolves()
+    })
+
+    afterEach(() => {
+      flushAllLogsStub.restore()
+    })
+
     it('should flush records without asking for confirmation', async () => {
       // arrange
       setContext({ flags: { ...getContext().flags, force: true } })
@@ -47,7 +50,7 @@ describe('Flush command', () => {
       await flush()
 
       // assert
-      assert.calledOnce(flushAllLogsStub)
+      expect(flushAllLogsStub).called
 
       resetContext()
     })

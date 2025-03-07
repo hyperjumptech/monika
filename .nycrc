@@ -1,0 +1,22 @@
+{
+    "all": false,
+    "include": [
+        "src/**/*.ts",
+        "packages/**/*.ts"
+    ],
+    "exclude": [
+        "node_modules",
+        "lib",
+        "packages/notification/lib",
+        "custom_types",
+        "**/*.test.ts"
+    ],
+    "output": "coverage",
+    "reporter": [
+        "html",
+        "text"
+    ],
+    "extension": [
+        ".ts"
+    ]
+}

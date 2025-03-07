@@ -23,8 +23,8 @@
  **********************************************************************************/
 
 import Joi from 'joi'
-import { sendHttpRequest } from '../utils/http'
-import type { NotificationMessage } from '.'
+import { sendHttpRequest } from '../utils/http.js'
+import type { NotificationMessage } from './index.js'
 
 export type NotificationData = {
   url: string

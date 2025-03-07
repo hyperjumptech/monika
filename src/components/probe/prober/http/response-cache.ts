@@ -24,12 +24,12 @@
 
 import TTLCache from '@isaacs/ttlcache'
 import { createHash } from 'crypto'
-import { getContext } from '../../../../context'
+import { getContext } from '../../../../context/index.js'
 import type {
   ProbeRequestResponse,
   RequestConfig,
-} from '../../../../interfaces/request'
-import { log } from '../../../../utils/pino'
+} from '../../../../interfaces/request.js'
+import { log } from '../../../../utils/pino.js'
 
 const ttlCache = new TTLCache()
 const cacheHash = new Map<RequestConfig, string>()

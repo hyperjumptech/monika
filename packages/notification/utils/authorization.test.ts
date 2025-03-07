@@ -22,27 +22,23 @@
  * SOFTWARE.                                                                      *
  **********************************************************************************/
 
-import chai, { expect } from 'chai'
-import * as auth from './authorization'
+import { expect } from 'chai'
+import * as auth from './authorization.js'
 
 describe('utils authorization tests', () => {
   it('should return basic authorization', async () => {
-    chai.spy.on(auth, 'authBasic', () => Promise.resolve('basic token'))
     const token = auth.authorize({
       type: 'basic',
       username: 'someusername',
       password: 'somepassword',
     })
 
-    expect(auth.authBasic).to.have.been.called()
-    expect(token).not.undefined
+    expect(token).eq('Basic c29tZXVzZXJuYW1lOnNvbWVwYXNzd29yZA==')
   })
 
   it('should return bearer authorization', async () => {
-    chai.spy.on(auth, 'authBearer', () => Promise.resolve('bearer token'))
     const token = auth.authorize({ type: 'bearer', token: 'token' })
 
-    expect(auth.authBearer).to.have.been.called()
-    expect(token).not.undefined
+    expect(token).eq('Bearer token')
   })
 })

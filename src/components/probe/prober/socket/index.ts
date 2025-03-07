@@ -1,7 +1,7 @@
-import { BaseProber, type ProbeParams, type ProbeResult } from '..'
-import { probeRequestResult } from '../../../../interfaces/request'
-import type { Socket } from '../../../../interfaces/probe'
-import { tcpRequest } from './request'
+import { BaseProber, type ProbeParams, type ProbeResult } from '../index.js'
+import { probeRequestResult } from '../../../../interfaces/request.js'
+import type { Socket } from '../../../../interfaces/probe.js'
+import { moduleExports } from './request.js'
 
 export class SocketProber extends BaseProber {
   async probe({ incidentRetryAttempt }: ProbeParams): Promise<void> {
@@ -56,7 +56,7 @@ export async function probeSocket({
 }: ProbeSocketParams): Promise<ProbeResult[]> {
   const { data, host, port } = socket
   const url = `${host}:${port}`
-  const requestResponse = await tcpRequest({ host, port, data })
+  const requestResponse = await moduleExports.tcpRequest({ host, port, data })
   const { body, responseTime, result } = requestResponse
   const isAlertTriggered = result !== probeRequestResult.success
   const timeNow = new Date().toISOString()

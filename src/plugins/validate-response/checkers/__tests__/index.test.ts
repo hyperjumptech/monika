@@ -23,9 +23,9 @@
  **********************************************************************************/
 
 import { expect } from '@oclif/test'
-import responseChecker from '..'
-import type { ProbeRequestResponse } from '../../../../interfaces/request'
-import type { ProbeAlert } from '../../../../interfaces/probe'
+import responseChecker from '../index.js'
+import type { ProbeRequestResponse } from '../../../../interfaces/request.js'
+import type { ProbeAlert } from '../../../../interfaces/probe.js'
 
 describe('responseChecker', () => {
   describe('status-not-2xx', () => {

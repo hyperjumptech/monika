@@ -24,8 +24,8 @@
 
 import { expect } from '@oclif/test'
 import { assert } from 'chai'
-import type { Probe } from '../../interfaces/probe'
-import { sortProbes } from './sort'
+import type { Probe } from '../../interfaces/probe.js'
+import { sortProbes } from './sort.js'
 
 // arrange
 const probes: Probe[] = [

@@ -23,7 +23,7 @@
  **********************************************************************************/
 
 import { expect } from '@oclif/test'
-import { addIncident, removeIncident, getIncidents } from '.'
+import { addIncident, removeIncident, getIncidents } from './index.js'
 
 describe('Incident', () => {
   it('allow identical urls but different probeID', () => {

@@ -25,10 +25,10 @@
 import fs from 'node:fs'
 import { hostname } from 'node:os'
 import { sendNotifications } from '@hyperjumptech/monika-notification'
-import format from 'date-fns/format'
+import { format } from 'date-fns'
 
-import { getValidatedConfig } from '../components/config'
-import { getSummary } from '../components/logger/history'
+import { getValidatedConfig } from '../components/config/index.js'
+import { getSummary } from '../components/logger/history.js'
 import {
   maxResponseTime,
   minResponseTime,
@@ -36,19 +36,19 @@ import {
   checkIs24HourHasPassed,
   resetlogs,
   getLogLifeTimeInHour,
-} from '../components/logger/response-time-log'
+} from '../components/logger/response-time-log.js'
 import {
   getOSName,
   getMonikaInstance,
-} from '../components/notification/alert-message'
-import { getContext } from '../context'
-import events from '../events'
-import type { ValidatedConfig } from '../interfaces/config'
-import { getEventEmitter } from '../utils/events'
-import { getErrorMessage } from '../utils/catch-error-handler'
-import getIp from '../utils/ip'
-import { log } from '../utils/pino'
-import { publicIpAddress } from '../utils/public-ip'
+} from '../components/notification/alert-message.js'
+import { getContext } from '../context/index.js'
+import events from '../events/index.js'
+import type { ValidatedConfig } from '../interfaces/config.js'
+import { getEventEmitter } from '../utils/events.js'
+import { getErrorMessage } from '../utils/catch-error-handler.js'
+import getIp from '../utils/ip.js'
+import { log } from '../utils/pino.js'
+import { publicIpAddress } from '../utils/public-ip.js'
 
 const eventEmitter = getEventEmitter()
 

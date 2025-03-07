@@ -26,19 +26,19 @@ import path from 'node:path'
 import { expect, test } from '@oclif/test'
 import { use } from 'chai'
 import spies from 'chai-spies'
-import { stub, type SinonStub } from 'sinon'
-import cmd from '../src/commands/monika'
-import * as IpUtil from '../src/utils/public-ip'
+import sinon from 'sinon'
+import cmd from '../src/commands/monika.js'
+import { moduleExports } from '../src/utils/public-ip.js'
 
 const { resolve } = path
 
 use(spies)
 
 describe('monika', () => {
-  let getPublicIPStub: SinonStub
+  let getPublicIPStub: sinon.SinonStub
 
   beforeEach(() => {
-    getPublicIPStub = stub(IpUtil, 'getPublicIp')
+    getPublicIPStub = sinon.stub(moduleExports, 'getPublicIp')
   })
 
   afterEach(() => {
@@ -125,7 +125,7 @@ describe('monika', () => {
         'Probe requests does not exists or has length lower than 1!'
       )
     })
-    .it('runs with config without probe request')
+    .it('runs with config without probe request.js')
 
   test
     .stdout()

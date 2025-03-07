@@ -24,7 +24,7 @@
 
 import { expect } from '@oclif/test'
 
-import type { Probe } from '../../interfaces/probe'
+import type { Probe } from '../../interfaces/probe.js'
 
 import {
   addProbe,
@@ -33,7 +33,7 @@ import {
   getProbes,
   setProbes,
   updateProbe,
-} from './probe'
+} from './probe.js'
 
 const probe: Probe = {
   alerts: [],
@@ -59,7 +59,7 @@ describe('Probe cache', () => {
   it('should update a probe', () => {
     // arrange
     addProbe(probe)
-    const updatedName = 'Updated Probe'
+    const updatedName = 'Updated probe'
 
     // act
     const isUpdated = updateProbe(probe.id, { ...probe, name: updatedName })
@@ -71,7 +71,7 @@ describe('Probe cache', () => {
 
   it('should not update a nonexistent probe', () => {
     // arrange
-    const updatedName = 'Updated Probe'
+    const updatedName = 'Updated probe'
 
     // act
     const isUpdated = updateProbe('9WpFB', { ...probe, name: updatedName })
