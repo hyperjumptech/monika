@@ -482,7 +482,7 @@ function handleUndiciError(
       response: {
         status: 28,
         error: `ERR_TLS_CERT_ALTNAME_INVALID: ${
-          error.message.split('Error: ')[1]
+          (error as { reason: string } & undiciErrors.UndiciError).reason
         }`,
       },
     },
