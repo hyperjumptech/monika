@@ -371,176 +371,147 @@ function handleUndiciError(
   responseTime: number,
   error: undiciErrors.UndiciError
 ): ProbeRequestResponse {
-  if (
-    error instanceof undiciErrors.BodyTimeoutError ||
-    error instanceof undiciErrors.ConnectTimeoutError ||
-    error instanceof undiciErrors.HeadersTimeoutError
-  ) {
+  // Define a mapping of error types to their corresponding responses
+  const errorMap = [
+    {
+      condition:
+        error instanceof undiciErrors.BodyTimeoutError ||
+        error instanceof undiciErrors.ConnectTimeoutError ||
+        error instanceof undiciErrors.HeadersTimeoutError,
+      response: {
+        status: 6,
+        error: 'ETIMEDOUT: Connection attempt has timed out.',
+      },
+    },
+    {
+      condition: error instanceof undiciErrors.RequestAbortedError,
+      response: {
+        status: 599,
+        error:
+          'ECONNABORTED: The connection was unexpectedly terminated, often due to server issues, network problems, or timeouts.',
+      },
+    },
+    {
+      condition:
+        error instanceof undiciErrors.HeadersOverflowError ||
+        error instanceof undiciErrors.ResponseExceededMaxSizeError,
+      response: {
+        status: 18,
+        error: 'ECONNOVERFLOW: Header / response max size exceeded.',
+      },
+    },
+    {
+      condition: error instanceof undiciErrors.ResponseStatusCodeError,
+      response: {
+        status: 19,
+        error: 'ERESPONSESTATUSCODE: HTTP status code returns >= 400.',
+      },
+    },
+    {
+      condition: error instanceof undiciErrors.InvalidArgumentError,
+      response: {
+        status: 20,
+        error: 'EINVALIDARGUMENT: Invalid HTTP arguments.',
+      },
+    },
+    {
+      condition: error instanceof undiciErrors.InvalidReturnValueError,
+      response: {
+        status: 21,
+        error: 'EINVALIDRETURN: Unexpected HTTP response to handle.',
+      },
+    },
+    {
+      condition:
+        error instanceof undiciErrors.ClientClosedError ||
+        error instanceof undiciErrors.ClientDestroyedError ||
+        error instanceof undiciErrors.SocketError,
+      response: {
+        status: 22,
+        error: 'ECONNCLOSED: HTTP client closed unexpectedly.',
+      },
+    },
+    {
+      condition: error instanceof undiciErrors.NotSupportedError,
+      response: {
+        status: 23,
+        error: 'ESUPPORT: Unsupported HTTP functionality.',
+      },
+    },
+    {
+      condition:
+        error instanceof undiciErrors.RequestContentLengthMismatchError ||
+        error instanceof undiciErrors.ResponseContentLengthMismatchError,
+      response: {
+        status: 24,
+        error:
+          'ECONTENTLENGTH: Request / response content length mismatch with Content-Length header value.',
+      },
+    },
+    {
+      condition: error instanceof undiciErrors.BalancedPoolMissingUpstreamError,
+      response: {
+        status: 25,
+        error: 'EMISSINGPOOL: Missing HTTP client pool.',
+      },
+    },
+    {
+      condition: error instanceof undiciErrors.InformationalError,
+      response: {
+        status: 26,
+        error: `EINFORMATIONAL: ${error.message}.`,
+      },
+    },
+    {
+      condition: error.code === 'CERT_HAS_EXPIRED',
+      response: {
+        status: 18,
+        error: 'CERT_HAS_EXPIRED: SSL certificate of the website has expired.',
+      },
+    },
+    {
+      condition: error.code === 'DEPTH_ZERO_SELF_SIGNED_CERT',
+      response: {
+        status: 27,
+        error:
+          'DEPTH_ZERO_SELF_SIGNED_CERT: Website is using a self-signed certificate',
+      },
+    },
+    {
+      condition: error.code === 'ERR_TLS_CERT_ALTNAME_INVALID',
+      response: {
+        status: 28,
+        error: `ERR_TLS_CERT_ALTNAME_INVALID: ${
+          error.message.split('Error: ')[1]
+        }`,
+      },
+    },
+    {
+      condition: error.code === 'SELF_SIGNED_CERT_IN_CHAIN',
+      response: {
+        status: 27,
+        error:
+          'SELF_SIGNED_CERT_IN_CHAIN: Website is using a self-signed certificate in certificate chain.',
+      },
+    },
+  ]
+
+  // Find the matching error response
+  const matchedError = errorMap.find((entry) => entry.condition)
+
+  // Return the matched response or a default response
+  if (matchedError) {
     return {
       data: '',
       body: '',
-      status: 6,
       headers: '',
       responseTime,
       result: probeRequestResult.failed,
-      error: 'ETIMEDOUT: Connection attempt has timed out.',
+      ...matchedError.response,
     }
   }
 
-  if (error instanceof undiciErrors.RequestAbortedError) {
-    // https://httpstatuses.com/599
-    return {
-      data: '',
-      body: '',
-      status: 599,
-      headers: '',
-      responseTime,
-      result: probeRequestResult.failed,
-      error:
-        'ECONNABORTED: The connection was unexpectedly terminated, often due to server issues, network problems, or timeouts.',
-    }
-  }
-
-  // fetch's client maxResponseSize and maxHeaderSize is set, limit exceeded
-  if (
-    error instanceof undiciErrors.HeadersOverflowError ||
-    error instanceof undiciErrors.ResponseExceededMaxSizeError
-  ) {
-    return {
-      data: '',
-      body: '',
-      status: 18,
-      headers: '',
-      responseTime,
-      result: probeRequestResult.failed,
-      error: 'ECONNOVERFLOW: Header / response max size exceeded.',
-    }
-  }
-
-  // fetch throwOnError is set to true, got HTTP status code >= 400
-  if (error instanceof undiciErrors.ResponseStatusCodeError) {
-    return {
-      data: '',
-      body: '',
-      status: 19,
-      headers: '',
-      responseTime,
-      result: probeRequestResult.failed,
-      error: 'ERESPONSESTATUSCODE: HTTP status code returns >= 400.',
-    }
-  }
-
-  // invalid fetch argument passed
-  if (error instanceof undiciErrors.InvalidArgumentError) {
-    return {
-      data: '',
-      body: '',
-      status: 20,
-      headers: '',
-      responseTime,
-      result: probeRequestResult.failed,
-      error: 'EINVALIDARGUMENT: Invalid HTTP arguments.',
-    }
-  }
-
-  // fetch failed to handle return value
-  if (error instanceof undiciErrors.InvalidReturnValueError) {
-    return {
-      data: '',
-      body: '',
-      status: 21,
-      headers: '',
-      responseTime,
-      result: probeRequestResult.failed,
-      error: 'EINVALIDRETURN: Unexpected HTTP response to handle.',
-    }
-  }
-
-  if (
-    error instanceof undiciErrors.ClientClosedError ||
-    error instanceof undiciErrors.ClientDestroyedError ||
-    error instanceof undiciErrors.SocketError
-  ) {
-    return {
-      data: '',
-      body: '',
-      status: 22,
-      headers: '',
-      responseTime,
-      result: probeRequestResult.failed,
-      error: 'ECONNCLOSED: HTTP client closed unexpectedly.',
-    }
-  }
-
-  if (error instanceof undiciErrors.NotSupportedError) {
-    return {
-      data: '',
-      body: '',
-      status: 23,
-      headers: '',
-      responseTime,
-      result: probeRequestResult.failed,
-      error: 'ESUPPORT: Unsupported HTTP functionality.',
-    }
-  }
-
-  if (
-    error instanceof undiciErrors.RequestContentLengthMismatchError ||
-    error instanceof undiciErrors.ResponseContentLengthMismatchError
-  ) {
-    return {
-      data: '',
-      body: '',
-      status: 24,
-      headers: '',
-      responseTime,
-      result: probeRequestResult.failed,
-      error:
-        'ECONTENTLENGTH: Request / response content length mismatch with Content-Length header value.',
-    }
-  }
-
-  // inline docs in Undici state that this would never happen,
-  // but they declare and throw this condition anyway
-  if (error instanceof undiciErrors.BalancedPoolMissingUpstreamError) {
-    return {
-      data: '',
-      body: '',
-      status: 25,
-      headers: '',
-      responseTime,
-      result: probeRequestResult.failed,
-      error: `EMISSINGPOOL: Missing HTTP client pool.`,
-    }
-  }
-
-  // expected error from fetch, but exact reason is in the message string
-  // error messages are unpredictable
-  // reference https://github.com/search?q=repo:nodejs/undici+new+InformationalError(&type=code
-  if (error instanceof undiciErrors.InformationalError) {
-    return {
-      data: '',
-      body: '',
-      status: 26,
-      headers: '',
-      responseTime,
-      result: probeRequestResult.failed,
-      error: `EINFORMATIONAL: ${error.message}.`,
-    }
-  }
-
-  if (error.code === 'CERT_HAS_EXPIRED') {
-    return {
-      data: '',
-      body: '',
-      status: 18,
-      headers: '',
-      responseTime,
-      result: probeRequestResult.failed,
-      error: 'CERT_HAS_EXPIRED',
-    }
-  }
-
+  // Default response for unmatched errors
   return {
     data: '',
     body: '',
