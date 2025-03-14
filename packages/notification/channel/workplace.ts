@@ -45,6 +45,7 @@ export const send = async (
     baseURL: 'https://graph.workplace.com',
     headers: {
       Authorization: `Bearer ${access_token}`,
+      'Content-Type': 'application/json',
     },
     method: 'POST',
     url: '/me/messages',

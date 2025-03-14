@@ -60,6 +60,9 @@ export const send = async (
     method: 'POST',
     url,
     data: content,
+    headers: {
+      'Content-Type': 'application/json',
+    },
   })
 }
 
