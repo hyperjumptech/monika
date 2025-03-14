@@ -1,6 +1,6 @@
 {
   "name": "@hyperjumptech/monika-notification",
-  "version": "1.18.2",
+  "version": "1.18.3",
   "description": "notification package for monika",
   "type": "module",
   "engines": {
@@ -32,6 +32,7 @@
     "chai-spies": "^1.0.0",
     "date-fns": "^2.23.0",
     "form-data": "^4.0.0",
+    "getos": "^3.2.1",
     "joi": "^17.4.0",
     "mailgen": "^2.0.15",
     "msw": "^2.2.3",
