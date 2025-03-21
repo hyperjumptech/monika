@@ -445,7 +445,7 @@ function handleUndiciError(
       response: {
         status: 24,
         error:
-          'ECONTENTLENGTH: Request / response content length mismatch with Content-Length header value.',
+          'ECONTENTLENGTH: Request or response content length mismatch with Content-Length header value.',
       },
     },
     {
