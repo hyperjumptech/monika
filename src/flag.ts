@@ -136,7 +136,7 @@ export const flags = {
     char: 'c',
     default: monikaFlagsDefaultValue.config,
     description:
-      'JSON configuration filename or URL. If none is supplied, will look for monika.yml in the current directory',
+      'Monika configuration YAML file or URL. If none is supplied, will look for monika.yml in the current directory',
     env: 'MONIKA_JSON_CONFIG',
     multiple: true,
   }),
