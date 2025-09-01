@@ -51,7 +51,7 @@ let publicNetworkInfo: PublicNetwork | undefined
 async function pokeStun(): Promise<string> {
   // for testing, bypass ping/stun server... apparently ping cannot run in github actions
   // reference: https://github.com/actions/virtual-environments/issues/1519
-  if (getContext().isTest) {
+  if (getContext().isTest || getContext().flags.stun === -1) {
     return '192.168.1.1' // adding for specific asserts in other tests
   }
 

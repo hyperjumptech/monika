@@ -95,7 +95,7 @@ function addFailedRequestAssertions(assertions: ProbeAlert[]) {
 
 export async function loopCheckSTUNServer(interval: number): Promise<unknown> {
   // if stun is disabled, no need to create interval
-  if (interval === -1) return
+  if (interval === DISABLE_STUN) return
 
   // if interval = 0 get ip once and exit. No need to setup interval.
   if (interval === 0 || getContext().isTest) {
