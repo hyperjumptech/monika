@@ -605,7 +605,7 @@ export default function IndexPage() {
             <div className="container19">
               <ArticleCard
                 text="TLS certificate reminder"
-                text1="With Monika, you don’t have to worry about expiring TLS certificates anymore. Not that only you have prevented your TLS certificate from being expired, you also monitored your website performance. Hitting two birds with one stone."
+                text1="With Monika, you don’t have to worry about expiring TLS certificates anymore. Not that only you have prevented your TLS certificate from being expired, you also monitored your website performance. Accomplishing two things at once."
                 text3="Read more"
                 image_src="/playground_assets/0_rkxf1wgagwy5ofi--200h.jpg"
                 link_text="https://medium.com/hyperjump-tech/forgot-to-renew-the-tls-certificates-monika-will-remind-you-from-now-on-188407c484ba"
