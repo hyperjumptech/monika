@@ -27,6 +27,7 @@ import type { ArraySchema, ObjectSchema } from 'joi'
 import * as dingtalk from './dingtalk.js'
 import * as discord from './discord.js'
 import * as desktop from './desktop.js'
+import * as flowtriq from './flowtriq.js'
 import * as googlechat from './googlechat.js'
 import * as gotify from './gotify.js'
 import * as instatus from './instatus/index.js'
@@ -112,6 +113,7 @@ export const channels: Record<string, NotificationChannel> = {
   dingtalk: dingtalk as NotificationChannel<object>,
   discord: discord as NotificationChannel<object>,
   desktop: desktop as NotificationChannel<unknown>,
+  flowtriq: flowtriq as NotificationChannel<object>,
   'google-chat': googlechat as NotificationChannel<object>,
   gotify: gotify as NotificationChannel<object>,
   instatus: instatus as NotificationChannel<object>,
